@@ -109,30 +109,30 @@ export function MindMap({
           startOnLoad: false,
           securityLevel: 'strict',
           // 'base' is the only built-in theme that honours themeVariables, so we
-          // can paint the mindmap in the site's blue-forward palette instead of
+          // can paint the mindmap in the site's orange palette instead of
           // mermaid's default greys. Tokens mirror src/styles/global.css @theme.
           theme: 'base',
           themeVariables: {
             fontFamily:
               "'Lexend Variable','Inter Variable',ui-sans-serif,system-ui,sans-serif",
-            primaryColor: '#dbeafe', // brand-100 — node fill
-            primaryBorderColor: '#2563eb', // brand-600 — node border
-            primaryTextColor: '#0f172a', // ink-900 — node text
-            lineColor: '#60a5fa', // brand-400 — connectors
-            // Keep the per-branch section colours on a single blue ramp so the
+            primaryColor: '#ffedd5', // brand-100 — node fill
+            primaryBorderColor: '#ea580c', // brand-600 — node border
+            primaryTextColor: '#1c1917', // ink-900 — node text
+            lineColor: '#fb923c', // brand-400 — connectors
+            // Keep the per-branch section colours on a single orange ramp so the
             // diagram reads as one family rather than mermaid's rainbow.
-            cScale0: '#eff6ff', // brand-50
-            cScale1: '#dbeafe', // brand-100
-            cScale2: '#bfdbfe', // brand-200
-            cScale3: '#93c5fd', // brand-300
-            cScale4: '#60a5fa', // brand-400
-            cScale5: '#3b82f6', // brand-500
-            cScale6: '#2563eb', // brand-600
-            cScale7: '#1d4ed8', // brand-700
-            cScaleLabel0: '#0f172a',
-            cScaleLabel1: '#0f172a',
-            cScaleLabel2: '#0f172a',
-            cScaleLabel3: '#0f172a',
+            cScale0: '#fff7ed', // brand-50
+            cScale1: '#ffedd5', // brand-100
+            cScale2: '#fed7aa', // brand-200
+            cScale3: '#fdba74', // brand-300
+            cScale4: '#fb923c', // brand-400
+            cScale5: '#f97316', // brand-500
+            cScale6: '#ea580c', // brand-600
+            cScale7: '#c2410c', // brand-700
+            cScaleLabel0: '#1c1917',
+            cScaleLabel1: '#1c1917',
+            cScaleLabel2: '#1c1917',
+            cScaleLabel3: '#1c1917',
             cScaleLabel4: '#ffffff',
             cScaleLabel5: '#ffffff',
             cScaleLabel6: '#ffffff',

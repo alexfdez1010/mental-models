@@ -1,15 +1,15 @@
-# Lessons Template — Design System
+# Mental Models — Design System
 
-The visual language for the template: a calm, **blue-forward, light-first**
-learning surface. Everything below maps to tokens defined once in
+The visual language for the site: a bold, **orange, brutalist, light-first**
+learning surface — hard black offset shadows, sharp edges, warm neutrals and
+high-contrast type. Everything below maps to tokens defined once in
 [`src/styles/global.css`](src/styles/global.css) (the Tailwind v4 `@theme`
 block). Reference them with Tailwind utilities — never hard-code hex values.
 
-> **This palette is the default, not a constraint.** The blue-forward theme
-> below is what the template ships with; it is fully **re-themeable per subject**
-> by editing the `@theme` block in [`src/styles/global.css`](src/styles/global.css)
-> (the `brand-*` / `accent-*` ramps and `themeColor` in `src/lib/site.ts`). The
-> `bootstrap-topic` skill can do this for you when you adopt the template. The
+> **This palette is re-themeable.** The orange brutalist theme below is what the
+> site ships with; it can be re-themed by editing the `@theme` block in
+> [`src/styles/global.css`](src/styles/global.css) (the `brand-*` / `accent-*`
+> ramps, the shadow/radius tokens, and `themeColor` in `src/lib/site.ts`). The
 > structure, tokens, accessibility rules and component contracts below are
 > subject-agnostic and stay the same whatever accent you choose — keep this file
 > in sync with the tokens if you re-theme.
@@ -18,14 +18,16 @@ block). Reference them with Tailwind utilities — never hard-code hex values.
 
 ## Philosophy
 
-- **Blue is the brand.** Blue carries identity, action and focus; sky-blue
-  accents add lift in gradients and highlights. Color is used purposefully,
-  not decoratively.
-- **Light first.** Surfaces are near-white with a faint blue tint; ink is a
-  cool, slightly blue-tinted neutral. High contrast for body text, generous
-  whitespace, soft blue-tinted shadows instead of hard borders.
-- **Quiet motion.** Subtle fade/float animations that always respect
-  `prefers-reduced-motion`.
+- **Orange is the brand.** A hot orange carries identity, action and focus; an
+  amber accent adds energy in gradients and highlights. Color is loud on
+  purpose — this is a confident, dynamic surface, not a calm one.
+- **Brutalist, not soft.** Edges are sharp (small radii), elevation is a **hard
+  black offset shadow** with no blur, and contrast is high. Structure reads as
+  solid blocks rather than floating cards.
+- **Light first, warm.** Surfaces are near-white with a faint warm tint; ink is
+  a warm stone neutral that bottoms out at a near-black for headings.
+- **Motion with snap.** Fade/float animations stay, always respecting
+  `prefers-reduced-motion`, but the resting look is bold and grounded.
 - **Readable above all.** Display type for headings, a humanist sans for body,
   measured line length for long-form lessons.
 
@@ -37,57 +39,57 @@ block). Reference them with Tailwind utilities — never hard-code hex values.
 
 Generated as `bg-*`, `text-*`, `border-*`, `ring-*`, `from-*`/`to-*`, etc.
 
-**Brand (blue) — primary action & identity**
+**Brand (orange) — primary action & identity**
 
 | Token | Hex | Typical use |
 | --- | --- | --- |
-| `brand-50` | `#eff6ff` | tints, subtle fills |
-| `brand-100` | `#dbeafe` | selection bg, chips |
-| `brand-200` | `#bfdbfe` | hover tints |
-| `brand-300` | `#93c5fd` | gradient stops |
-| `brand-400` | `#60a5fa` | gradient stops, glows |
-| `brand-500` | `#3b82f6` | **primary**, focus ring |
-| `brand-600` | `#2563eb` | **primary-strong**, default buttons, links |
-| `brand-700` | `#1d4ed8` | link hover, active nav |
-| `brand-800` | `#1e40af` | deep gradient stops |
-| `brand-900` | `#1e3a8a` | strongest blue |
-| `brand-950` | `#172554` | rare, max contrast |
+| `brand-50` | `#fff7ed` | tints, subtle fills |
+| `brand-100` | `#ffedd5` | selection bg, chips |
+| `brand-200` | `#fed7aa` | hover tints |
+| `brand-300` | `#fdba74` | gradient stops |
+| `brand-400` | `#fb923c` | gradient stops, glows |
+| `brand-500` | `#f97316` | **primary**, focus ring |
+| `brand-600` | `#ea580c` | **primary-strong**, default buttons, links |
+| `brand-700` | `#c2410c` | link hover, active nav |
+| `brand-800` | `#9a3412` | deep gradient stops |
+| `brand-900` | `#7c2d12` | strongest orange |
+| `brand-950` | `#431407` | rare, max contrast |
 
-**Accent (sky) — highlights & gradients**
+**Accent (amber) — highlights & gradients**
 
 | Token | Hex |
 | --- | --- |
-| `accent-300` | `#7dd3fc` |
-| `accent-400` | `#38bdf8` |
-| `accent-500` | `#0ea5e9` |
-| `accent-600` | `#0284c7` |
+| `accent-300` | `#fcd34d` |
+| `accent-400` | `#fbbf24` |
+| `accent-500` | `#f59e0b` |
+| `accent-600` | `#d97706` |
 
-**Ink — text & cool neutrals**
+**Ink — text & warm neutrals**
 
 | Token | Hex | Use |
 | --- | --- | --- |
-| `ink-50` | `#f8fafc` | — |
-| `ink-100` | `#f1f5f9` | dark-surface text |
-| `ink-200` | `#e2e8f0` | borders, dividers |
-| `ink-300` | `#cbd5e1` | disabled borders |
-| `ink-400` | `#94a3b8` | placeholder |
-| `ink-500` | `#64748b` | muted labels |
-| `ink-600` | `#475569` | secondary text |
-| `ink-700` | `#334155` | **body text** |
-| `ink-800` | `#1e293b` | headings |
-| `ink-900` | `#0f172a` | **strong headings** |
+| `ink-50` | `#fafaf9` | — |
+| `ink-100` | `#f5f5f4` | dark-surface text |
+| `ink-200` | `#e7e5e4` | borders, dividers |
+| `ink-300` | `#d6d3d1` | disabled borders |
+| `ink-400` | `#a8a29e` | placeholder |
+| `ink-500` | `#78716c` | muted labels |
+| `ink-600` | `#57534e` | secondary text |
+| `ink-700` | `#44403c` | **body text** |
+| `ink-800` | `#292524` | headings |
+| `ink-900` | `#1c1917` | **strong headings — brutalist near-black** |
 
-**Surfaces (light-first)**
+**Surfaces (light-first, warm)**
 
 | Token | Hex | Use |
 | --- | --- | --- |
 | `surface` | `#ffffff` | cards |
-| `surface-muted` | `#f6f9ff` | page background (blue-tinted white) |
-| `surface-sunken` | `#eef4ff` | wells, inline code, hover wells |
+| `surface-muted` | `#fffaf4` | page background (warm white) |
+| `surface-sunken` | `#fff1e0` | wells, inline code, hover wells |
 
 Use as `bg-surface`, `bg-surface-muted`, `bg-surface-sunken`.
 
-**Semantic states**: `success` `#16a34a`, `warning` `#d97706`,
+**Semantic states**: `success` `#15803d`, `warning` `#b45309`,
 `danger` `#dc2626` (e.g. `text-success`, `bg-danger`).
 
 ### Typography
@@ -106,15 +108,18 @@ Headings (`h1`–`h4`) automatically use `font-display`, `ink-900`,
 
 | Token | Value | Utility |
 | --- | --- | --- |
-| `rounded-card` | `1rem` | cards, panels, code blocks |
+| `rounded-card` | `0.25rem` | cards, panels, code blocks (sharp, brutalist) |
 | `rounded-pill` | `999px` | nav links, chips, buttons, toggles |
 
-### Shadows (soft, blue-tinted)
+### Shadows (brutalist — hard black offset, no blur)
 
-| Token | Use |
-| --- | --- |
-| `shadow-soft` | resting cards, chips |
-| `shadow-lift` | hover/elevated state |
+| Token | Value | Use |
+| --- | --- | --- |
+| `shadow-soft` | `3px 3px 0 0 #1c1917` | resting cards, chips |
+| `shadow-lift` | `6px 6px 0 0 #1c1917` | hover/elevated state |
+
+The offset grows on hover (`soft` → `lift`) for a tactile "lift off the page"
+brutalist feel. The shadow is solid near-black — no blur, no tint.
 
 ### Animations
 
@@ -283,8 +288,8 @@ chart/animation islands as their own files and add them to the barrel — see th
   icons, text and `aria-live` announcements; options are real `<input>`s so
   keyboard and screen-reader semantics are native.
 - **Contrast.** Body text (`ink-700`) and headings (`ink-900`) on light
-  surfaces meet WCAG AA. On the blue OG cards, text is white/`accent-300` on
-  deep blue for strong contrast.
+  surfaces meet WCAG AA. On the orange OG cards, text is white/`accent-300` on
+  deep orange (`brand-800`/`brand-900`) for strong contrast.
 - **Meaningful structure.** Lead with semantic HTML; headings use
   `text-wrap: balance` for tidy wrapping.
 
@@ -293,6 +298,6 @@ chart/animation islands as their own files and add them to the barrel — see th
 ## Open Graph cards
 
 Social share images reuse these exact tokens — see the card template at
-`src/pages/og/_OgCard.astro` (blue `brand→accent` gradient, `font-display`
+`src/pages/og/_OgCard.astro` (orange `brand→accent` gradient, `font-display`
 title, `font-mono` domain, `shadow-lift` logo chip). The generation pipeline
 is documented in the [README](README.md#-seo--open-graph).

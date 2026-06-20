@@ -10,20 +10,20 @@
  * (`.env` / Vercel) and `astro.config.mjs`, not here.
  */
 export const SITE = {
-  name: 'Lessons',
-  /** Used in <title> templates: "Page Title — Lessons". */
+  name: 'Mental Models',
+  /** Used in <title> templates: "Page Title — Mental Models". */
   titleTemplate: (page?: string) =>
-    page ? `${page} — Lessons` : 'Lessons — From zero to expert, visually',
+    page ? `${page} — Mental Models` : 'Mental Models — Think better, from zero to expert',
   description:
-    'Free, interactive, animated lessons that take you from zero knowledge to complete expert — read, visualize, and test yourself with built-in exercises. In English and Spanish.',
+    'Free, interactive, animated lessons on mental models — the thinking tools great decision-makers use. Build a latticework from zero to expert: read, visualize, and test yourself with built-in exercises. In English and Spanish.',
   /** Fallback locale for og:locale / html lang. */
   locale: 'en_US',
   lang: 'en',
   /** Default share image when a page has none. Generated into /public/og. */
   defaultOgImage: '/og/default.png',
-  twitter: '@lessons',
-  author: 'Lessons',
-  themeColor: '#2563eb',
+  twitter: '@mentalmodels',
+  author: 'Mental Models',
+  themeColor: '#ea580c',
 } as const;
 
 /**

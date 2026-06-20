@@ -1,22 +1,23 @@
-# 📚 Lessons Template
+# 🧠 Mental Models
 
-> A **topic-agnostic, bilingual (English 🇬🇧 / Spanish 🇪🇸), zero-to-expert** interactive
-> lessons template. Pick any subject, run one setup skill, and you have an animated,
-> exercise-rich learning site that takes a reader from **zero knowledge to complete expert**.
+> A **bilingual (English 🇬🇧 / Spanish 🇪🇸), zero-to-expert** interactive site that teaches
+> **mental models** — the cross-disciplinary thinking tools great decision-makers use.
+> Animated, exercise-rich lessons build a **latticework** from "what is a model?" all the
+> way to combining many models into a single expert judgment.
 
-🎨 **Design:** light-first, re-themeable per subject — see **[DESIGN.md](DESIGN.md)**
+🎨 **Design:** orange, brutalist, light-first — see **[DESIGN.md](DESIGN.md)**
 
-🤝 **Status:** ✅ **Ready to fork** — clone it, bootstrap your topic, start teaching.
+📖 **What it teaches:** the subject, mission and scope live in **[`TOPIC.md`](TOPIC.md)**.
 
 ---
 
 ## ✨ Overview
 
-**Lessons Template** is the reusable skeleton behind a zero-to-expert education site —
-without any subject baked in. You bring the subject; the template brings the structure:
-a slug-based catalog ordered into a learning path, MDX content authored in two languages,
-a kit of reusable interactive React islands, SEO/Open-Graph generation, and an autonomous
-cron builder that keeps writing courses for you.
+**Mental Models** is a zero-to-expert education site about the cross-disciplinary thinking
+tools — built on a reusable, topic-agnostic skeleton. The structure: a slug-based catalog
+ordered into a learning path (the latticework), MDX content authored in two languages, a kit
+of reusable interactive React islands, SEO/Open-Graph generation, and an autonomous cron
+builder that keeps writing courses. The subject lives in one file — [`TOPIC.md`](TOPIC.md).
 
 What you get out of the box:
 
@@ -30,40 +31,25 @@ What you get out of the box:
 - 🤖 **Autonomous builder** — an optional cron job that researches, writes, validates and commits the next course.
 - ⚡ **Static & fast** — Astro static output deployed on Vercel.
 
-The template ships a tiny placeholder example topic — **"Getting Started"** (2 lessons,
-en + es) — so it builds and renders out of the box. The `bootstrap-topic` skill removes it
-when you adopt the template.
+The catalog is seeded with a build queue of the most important models (see
+`src/lib/upcoming.ts`) — they render as "Coming soon" nodes on the dependency graph until
+the authoring chain (or the cron builder) writes them. Author the next one with the
+`new-lesson` skill.
 
 ---
 
 ## 🚀 Quickstart
 
-The **first** thing you do is bootstrap the template to your subject. Everything — the
-catalog, the cron builder, every authoring skill — reads the subject from a single source
-of truth, so this one step adapts the whole site.
-
 ```sh
-git clone <your-fork-url> my-lessons && cd my-lessons
+git clone <your-fork-url> mental-models && cd mental-models
 bun install
 bunx playwright install chromium   # one-time: needed for OG image generation
-```
-
-Then, **in Claude Code, run the `bootstrap-topic` skill**:
-
-```text
-/bootstrap-topic        # or: "bootstrap the template for <subject>"
-```
-
-It interactively sets your **subject, mission, scope, tag taxonomy and voice**, re-brands
-`site.ts`/README/config, optionally **re-themes the design accent**, seeds the build queue,
-**removes the placeholder "Getting Started" example**, and then **deletes itself** (it is a
-one-time setup). See [Agents & skills](#-agents--skills).
-
-Finally, run the dev server:
-
-```sh
 bun run dev                        # → http://localhost:4321
 ```
+
+The subject is already set up (see [`TOPIC.md`](TOPIC.md)). To write the next course, run
+the **`new-lesson`** skill in Claude Code — it chains research → copy → animations →
+exercises → translation. See [Agents & skills](#-agents--skills).
 
 ---
 
@@ -173,8 +159,6 @@ assistant:
 
 - 🟣 `CLAUDE.md` — project guide for Claude Code (also exposed as `Agents.md`, a symlink).
 - 🧠 `.claude/skills/` — Claude Code skills:
-  - `bootstrap-topic` — **one-time** setup that adapts the template to your subject, then
-    deletes itself (run this first — see [Quickstart](#-quickstart)).
   - `research-topic` → `new-lesson` → (`lesson-copy`, `lesson-animations`,
     `exercise-components`, `translate-lesson`) — the end-to-end authoring chain.
 - 💎 `.agents/skills/` — the same skills exposed for agent-agnostic tooling

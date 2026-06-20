@@ -73,42 +73,118 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   {
-    slug: 'core-concepts',
-    icon: '🧩',
+    slug: 'what-are-mental-models',
+    icon: '🧱',
     difficulty: 'beginner',
     order: 1,
     accent: 'brand',
     title: {
-      en: 'Core Concepts',
-      es: 'Conceptos Básicos',
+      en: 'What Are Mental Models?',
+      es: '¿Qué Son los Modelos Mentales?',
     },
     description: {
-      en: 'The foundational vocabulary and ideas of the subject — the second step after Getting Started.',
-      es: 'El vocabulario y las ideas fundamentales de la materia — el segundo paso tras Primeros Pasos.',
+      en: 'The root of the whole site. What a mental model is, why a latticework beats memorized facts, and the base models everything builds on: the map is not the territory and circle of competence.',
+      es: 'La raíz de todo el sitio. Qué es un modelo mental, por qué una red de modelos supera a los datos memorizados y los modelos base sobre los que se construye todo: el mapa no es el territorio y el círculo de competencia.',
     },
-    dependencies: ['getting-started'],
-    tags: ['getting-started'],
+    dependencies: [],
+    tags: ['foundations', 'problem-solving'],
     buildNotes:
-      'EXAMPLE ENTRY — replace with your subject. The first real course after the intro: define the core vocabulary every later course depends on, one ## section per concept, with an analogy, a worked example, a common misconception, and a recap Quiz + MindMap.',
+      'THE foundational course — assume zero background. Sections: (1) what a model is — a compressed map of how something works; analogy of a subway map vs. the real city. (2) "The map is not the territory" — every model omits detail; when the omission bites. (3) The latticework — why many models beat one; Munger’s "man with a hammer" / law of the instrument. (4) Circle of competence — knowing the edge of what you understand. Each model: analogy, precise definition, one worked example, a failure mode, and a "when to reach for it" note. Build a MindMap of the latticework and an interactive SVG of map-vs-territory (a detailed coastline simplified at increasing zoom). Recap Quiz + MindMap. en + es twin.',
   },
   {
-    slug: 'going-deeper',
-    icon: '🪜',
-    difficulty: 'intermediate',
+    slug: 'first-principles-thinking',
+    icon: '🔬',
+    difficulty: 'beginner',
     order: 2,
     accent: 'accent',
     title: {
-      en: 'Going Deeper',
-      es: 'Profundizando',
+      en: 'First-Principles Thinking',
+      es: 'Pensar desde Primeros Principios',
     },
     description: {
-      en: 'Builds on the core concepts toward real, applied understanding.',
-      es: 'Construye sobre los conceptos básicos hacia una comprensión real y aplicada.',
+      en: 'Reason up from what you know is true instead of by analogy. Boil a problem down to its irreducible facts, then rebuild — the engine behind every breakthrough.',
+      es: 'Razona desde lo que sabes que es cierto en lugar de por analogía. Reduce un problema a sus hechos irreducibles y reconstruye: el motor de todo avance.',
     },
-    dependencies: ['core-concepts'],
-    tags: ['getting-started'],
+    dependencies: ['what-are-mental-models'],
+    tags: ['problem-solving', 'foundations'],
     buildNotes:
-      'EXAMPLE ENTRY — replace with your subject. The intermediate rung: assume Core Concepts is complete and push into applied, slightly rigorous territory with at least one teaching animation island.',
+      'Reasoning from first principles vs. reasoning by analogy. Sections: the Socratic "why" ladder; separating assumptions from facts; rebuilding a solution from the irreducible parts. Worked example: the cost of a battery pack broken into raw-material cost (the classic first-principles deconstruction). Contrast a by-analogy answer with a first-principles answer side-by-side in a table. Pitfall: it is slow — when analogy is good enough. Build an interactive "decompose then rebuild" island. Recap Quiz. en + es twin.',
+  },
+  {
+    slug: 'inversion',
+    icon: '🔃',
+    difficulty: 'beginner',
+    order: 3,
+    accent: 'brand',
+    title: {
+      en: 'Inversion: Think Backwards',
+      es: 'Inversión: Pensar al Revés',
+    },
+    description: {
+      en: '“Invert, always invert.” Instead of asking how to succeed, ask how to fail — then avoid that. One of the most powerful and underused thinking tools.',
+      es: '«Invierte, siempre invierte.» En vez de preguntar cómo triunfar, pregunta cómo fracasar, y evítalo. Una de las herramientas de pensamiento más potentes e infrautilizadas.',
+    },
+    dependencies: ['what-are-mental-models'],
+    tags: ['decision-making', 'problem-solving'],
+    buildNotes:
+      'Inversion (Jacobi’s "invert, always invert", via Munger). Sections: solving forward vs. backward; the "how would I guarantee failure?" pre-mortem; avoiding stupidity beats seeking brilliance. Worked examples: planning a project by listing every way it could fail; "how to make a team miserable" inverted into management advice. Pitfall: inversion finds what to avoid, not always what to do. Build a "forward goal ↔ inverted anti-goal" flip island. Recap Quiz. en + es twin.',
+  },
+  {
+    slug: 'second-order-thinking',
+    icon: '🌊',
+    difficulty: 'intermediate',
+    order: 4,
+    accent: 'accent',
+    title: {
+      en: 'Second-Order Thinking',
+      es: 'Pensamiento de Segundo Orden',
+    },
+    description: {
+      en: '“And then what?” Trace the consequences of the consequences. First-order answers are easy and usually wrong; the edge is in the ripple effects.',
+      es: '«¿Y luego qué?» Sigue las consecuencias de las consecuencias. Las respuestas de primer orden son fáciles y casi siempre erróneas; la ventaja está en los efectos en cascada.',
+    },
+    dependencies: ['inversion', 'first-principles-thinking'],
+    tags: ['decision-making', 'systems-thinking'],
+    buildNotes:
+      'Second- and higher-order effects. Sections: first-order vs. second-order consequences; the "and then what?" chain; how incentives and feedback create non-obvious downstream effects. Worked examples: price caps → shortages; a sugar tax → reformulation/substitution; a hire that fixes today but blocks promotion paths. Connect to opportunity cost and feedback loops. Build an interactive consequence-tree island (expand effects N levels deep). Pitfall: paralysis from over-forecasting. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'opportunity-cost',
+    icon: '⚖️',
+    difficulty: 'intermediate',
+    order: 5,
+    accent: 'brand',
+    title: {
+      en: 'Opportunity Cost & Trade-offs',
+      es: 'Coste de Oportunidad y Disyuntivas',
+    },
+    description: {
+      en: 'The real cost of anything is the best thing you gave up to get it. The single idea that turns every choice into a comparison.',
+      es: 'El coste real de algo es lo mejor que renunciaste a cambio. La idea que convierte cada elección en una comparación.',
+    },
+    dependencies: ['what-are-mental-models'],
+    tags: ['decision-making', 'economics'],
+    buildNotes:
+      'Opportunity cost and trade-offs. Sections: cost = the next-best forgone alternative (not the sticker price); time/attention/capital are scarce; "compared to what?" as a default question; trade-offs vs. false either/ors. Worked examples with real numbers: a job offer vs. its alternative; holding cash vs. investing; one feature vs. another on a roadmap. Use a comparison table throughout. Build an interactive "choose A vs. B → what you forgo" island. Pitfall: ignoring non-monetary costs. Recap Quiz. en + es twin.',
+  },
+  {
+    slug: 'thinking-in-probabilities',
+    icon: '🎲',
+    difficulty: 'intermediate',
+    order: 6,
+    accent: 'accent',
+    title: {
+      en: 'Thinking in Probabilities',
+      es: 'Pensar en Probabilidades',
+    },
+    description: {
+      en: 'Swap true/false for odds. Base rates, expected value, and the habit of asking “how likely?” instead of “is it possible?”',
+      es: 'Cambia verdadero/falso por probabilidades. Tasas base, valor esperado y el hábito de preguntar «¿qué probabilidad hay?» en vez de «¿es posible?».',
+    },
+    dependencies: ['what-are-mental-models'],
+    tags: ['probability', 'decision-making'],
+    buildNotes:
+      'Foundations of probabilistic thinking. Sections: possibility vs. probability; base rates (the outside view) and the base-rate fallacy; expected value = Σ(probability × payoff) with worked numeric examples; thinking in ranges not point estimates. Use KaTeX for the EV formula and at least one worked table. Build an interactive EV calculator / base-rate visualizer island (e.g. a dot grid showing a base rate). Pitfall: confusing a good decision with a good outcome. Recap Quiz. en + es twin. This sets up the advanced Probability & Uncertainty path (Bayesian updating, fat tails).',
   },
 ];
 
