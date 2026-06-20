@@ -104,22 +104,50 @@ Headings (`h1`–`h4`) automatically use `font-display`, `ink-900`,
 `-0.02em` tracking and `text-wrap: balance` via the base layer. Body inherits
 `font-sans` + `ink-700`. Fonts are self-hosted via `@fontsource-variable`.
 
+### Border (the brutalist edge)
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `edge` | `#1c1917` | the hard near-black edge on every block: `border-edge`, `bg-edge`, `text-edge` |
+
+Every solid block wears a **2px `edge` border** matched to the shadow color, so
+the block and its shadow read as one object cut out of the page.
+
 ### Radii
 
 | Token | Value | Utility |
 | --- | --- | --- |
-| `rounded-card` | `0.25rem` | cards, panels, code blocks (sharp, brutalist) |
+| `rounded-card` | `0.35rem` | cards, panels, code blocks (sharp, brutalist) |
 | `rounded-pill` | `999px` | nav links, chips, buttons, toggles |
 
-### Shadows (brutalist — hard black offset, no blur)
+### Shadows (brutalist — hard offset, no blur, edge-colored)
+
+A four-step ladder; the offset grows as a block lifts.
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `shadow-soft` | `3px 3px 0 0 #1c1917` | resting cards, chips |
-| `shadow-lift` | `6px 6px 0 0 #1c1917` | hover/elevated state |
+| `shadow-xs` | `2px 2px 0 0 #1c1917` | chips, pills, inputs, inline badges |
+| `shadow-soft` | `4px 4px 0 0 #1c1917` | resting cards, buttons |
+| `shadow-lift` | `7px 7px 0 0 #1c1917` | hover / elevated state |
+| `shadow-pop` | `11px 11px 0 0 #1c1917` | hero card, CTA, focal blocks |
 
-The offset grows on hover (`soft` → `lift`) for a tactile "lift off the page"
-brutalist feel. The shadow is solid near-black — no blur, no tint.
+The shadow is solid near-black — no blur, no tint.
+
+### Brutalist building-block classes
+
+Prefer these over re-typing the border + shadow recipe. Compose with Tailwind
+utilities for color/padding/layout (see `@layer components` in `global.css`).
+
+| Class | What it is |
+| --- | --- |
+| `.brutal` | 2px `edge` border + `rounded-card` + `shadow-soft` — the default card/panel/well |
+| `.brutal-lg` | same edge, `shadow-pop` — hero / focal / CTA blocks |
+| `.brutal-interactive` | add to a **clickable** `.brutal`/`.brutal-lg`: hover slides up-left (shadow grows), active slams down into the shadow (pressed flat). Don't pair with `hover:-translate-*`/`hover:shadow-*`. |
+| `.brutal-btn` | pill button — flat fill, hard edge, `shadow-soft`, same press physics. Pair with `bg-* text-*` (e.g. `brutal-btn bg-brand-600 text-white px-7 py-3`). |
+| `.brutal-chip` | small flat pill/tag/filter — `shadow-xs`, slight hover lift. Pair with `bg-*`/`text-*`. |
+
+All transforms are transitions only (never reflow) and are neutralised by the
+global `prefers-reduced-motion` rule.
 
 ### Animations
 
