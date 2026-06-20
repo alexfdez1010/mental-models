@@ -96,7 +96,7 @@ export function Callout({ variant = 'info', title, label, children, className }:
     <div
       role="note"
       className={cx(
-        'flex gap-3 rounded-card border p-4 shadow-soft',
+        'brutal flex gap-3 p-4',
         s.container,
         className,
       )}

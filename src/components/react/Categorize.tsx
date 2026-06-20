@@ -122,7 +122,7 @@ export function Categorize({
   return (
     <div
       className={cx(
-        'my-6 rounded-card border border-ink-200 bg-surface p-5 shadow-soft sm:p-6',
+        'brutal my-6 bg-surface p-5 sm:p-6',
         className,
       )}
     >
@@ -143,10 +143,9 @@ export function Categorize({
             <li
               key={`${groupId}-item-${i}`}
               className={cx(
-                'flex flex-col gap-2 rounded-card border px-4 py-3 transition sm:flex-row sm:items-center sm:justify-between',
+                'brutal flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between',
                 isRight && 'border-[color:var(--color-success)] bg-[color:var(--color-success)]/10',
                 isWrong && 'border-[color:var(--color-danger)] bg-[color:var(--color-danger)]/10',
-                !checked && 'border-ink-200',
               )}
             >
               <span className="text-sm font-medium text-ink-900">
@@ -173,11 +172,11 @@ export function Categorize({
                       disabled={checked}
                       onClick={() => assign(i, b)}
                       className={cx(
-                        'rounded-pill border px-3 py-1 text-xs font-semibold transition',
+                        'brutal-chip px-3 py-1 text-xs font-semibold',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
                         selected
-                          ? 'border-brand-500 bg-brand-600 text-white'
-                          : 'border-ink-200 bg-surface text-ink-600 hover:border-brand-300 hover:bg-brand-50',
+                          ? 'bg-brand-600 text-white'
+                          : 'bg-surface text-ink-600 hover:bg-brand-50',
                         checked && 'cursor-default',
                       )}
                     >
@@ -198,7 +197,7 @@ export function Categorize({
             onClick={check}
             disabled={!allAssigned}
             className={cx(
-              'inline-flex items-center rounded-pill bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-soft transition-colors duration-200',
+              'brutal-btn bg-brand-600 px-5 py-2 text-sm text-white',
               'hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-brand-600',
             )}
@@ -209,7 +208,7 @@ export function Categorize({
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center rounded-pill border border-ink-200 bg-surface px-5 py-2 text-sm font-semibold text-ink-700 transition-colors duration-200 hover:border-brand-300 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            className="brutal-btn bg-surface px-5 py-2 text-sm text-ink-700 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           >
             {retryLabel}
           </button>
@@ -232,7 +231,7 @@ export function Categorize({
       </div>
 
       {checked && explanation && (
-        <div className="mt-4 rounded-card border border-brand-200 bg-brand-50/70 p-4 text-sm leading-relaxed text-ink-700 animate-fade-up">
+        <div className="brutal mt-4 bg-brand-50/70 p-4 text-sm leading-relaxed text-ink-700 animate-fade-up">
           <p className="mb-1 font-display text-xs font-semibold uppercase tracking-wide text-brand-700">
             {explanationLabel}
           </p>

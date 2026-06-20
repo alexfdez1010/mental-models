@@ -189,7 +189,7 @@ export function Quiz({
     <section
       aria-label={title ?? 'Quiz'}
       className={cx(
-        'rounded-card border border-ink-200 bg-surface-muted p-5 shadow-soft sm:p-6',
+        'brutal-lg bg-surface-muted p-5 sm:p-6',
         className,
       )}
     >
@@ -222,7 +222,7 @@ export function Quiz({
       </div>
 
       {finished ? (
-        <div className="rounded-card border border-brand-200 bg-surface p-6 text-center shadow-soft animate-fade-up">
+        <div className="brutal bg-surface p-6 text-center animate-fade-up">
           <p className="font-display text-sm font-semibold uppercase tracking-wide text-brand-600">
             {completeTitleLabel}
           </p>
@@ -239,7 +239,7 @@ export function Quiz({
           <button
             type="button"
             onClick={restart}
-            className="mt-5 inline-flex items-center rounded-pill bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-soft transition-colors duration-200 hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            className="brutal-btn mt-5 bg-brand-600 px-5 py-2 text-sm text-white hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           >
             {restartLabel}
           </button>
@@ -265,9 +265,9 @@ export function Quiz({
               onClick={goBack}
               disabled={current === 0}
               className={cx(
-                'inline-flex items-center rounded-pill border border-ink-200 bg-surface px-4 py-2 text-sm font-semibold text-ink-700 transition-colors duration-200',
-                'hover:border-brand-300 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
-                'disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-ink-200 disabled:hover:bg-surface',
+                'brutal-btn bg-surface px-4 py-2 text-sm text-ink-700',
+                'hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
+                'disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-surface',
               )}
             >
               {backLabel}
@@ -277,7 +277,7 @@ export function Quiz({
               onClick={goNext}
               disabled={!answeredCurrent}
               className={cx(
-                'inline-flex items-center rounded-pill bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-soft transition-colors duration-200',
+                'brutal-btn bg-brand-600 px-5 py-2 text-sm text-white',
                 'hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
                 'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-brand-600',
               )}

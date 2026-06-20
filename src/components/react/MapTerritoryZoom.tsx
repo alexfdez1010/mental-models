@@ -163,7 +163,7 @@ export function MapTerritoryZoom({
   return (
     <figure
       className={cx(
-        'my-6 rounded-card border border-ink-200 bg-surface p-5 shadow-soft sm:p-6',
+        'brutal my-6 bg-surface p-5 sm:p-6',
         className,
       )}
     >

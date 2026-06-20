@@ -233,7 +233,7 @@ export function FinalExam({
     <section
       aria-label={title ?? 'Final exam'}
       className={cx(
-        'rounded-card border border-ink-200 bg-surface-muted p-5 shadow-soft sm:p-6',
+        'brutal-lg bg-surface-muted p-5 sm:p-6',
         className,
       )}
     >
@@ -265,7 +265,7 @@ export function FinalExam({
       </div>
 
       {finished ? (
-        <div className="rounded-card border border-brand-200 bg-surface p-6 text-center shadow-soft animate-fade-up">
+        <div className="brutal bg-surface p-6 text-center animate-fade-up">
           <p
             className={cx(
               'font-display text-sm font-semibold uppercase tracking-wide',
@@ -290,7 +290,7 @@ export function FinalExam({
                 <li
                   key={i}
                   className={cx(
-                    'flex items-start gap-3 rounded-card border px-4 py-3 text-sm',
+                    'brutal flex items-start gap-3 px-4 py-3 text-sm',
                     ok
                       ? 'border-[color:var(--color-success)]/40 bg-[color:var(--color-success)]/5'
                       : 'border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/5',
@@ -337,22 +337,21 @@ export function FinalExam({
                 <label
                   key={o.id}
                   className={cx(
-                    'group flex cursor-pointer items-center gap-3 rounded-card border px-4 py-3 text-sm transition-all duration-200 motion-reduce:transition-none',
+                    'brutal group flex cursor-pointer items-center gap-3 px-4 py-3 text-sm',
                     'focus-within:ring-2 focus-within:ring-brand-500 focus-within:ring-offset-1',
-                    !isLocked && 'hover:-translate-y-px',
                     isLocked && 'cursor-default',
                     st === 'neutral' &&
                       picked &&
-                      'border-brand-400 bg-brand-50 text-ink-900 shadow-soft',
+                      'border-brand-400 bg-brand-50 text-ink-900',
                     st === 'neutral' &&
                       !picked &&
-                      'border-ink-200 bg-surface text-ink-700 hover:border-brand-300 hover:bg-brand-50/60',
+                      'bg-surface text-ink-700 hover:bg-brand-50/60',
                     st === 'correct' &&
                       'border-[color:var(--color-success)] bg-[color:var(--color-success)]/10 text-ink-900',
                     st === 'wrong' &&
                       'border-[color:var(--color-danger)] bg-[color:var(--color-danger)]/10 text-ink-900',
                     st === 'missed' &&
-                      'border-2 border-dashed border-[color:var(--color-success)] bg-surface text-ink-700',
+                      'border-dashed border-[color:var(--color-success)] bg-surface text-ink-700',
                   )}
                 >
                   <input
@@ -398,7 +397,7 @@ export function FinalExam({
           </div>
 
           {isLocked && q.explanation && (
-            <div className="mt-3 rounded-card border border-brand-200 bg-brand-50/70 p-4 text-sm leading-relaxed text-ink-700 animate-fade-up">
+            <div className="brutal mt-3 bg-brand-50/70 p-4 text-sm leading-relaxed text-ink-700 animate-fade-up">
               <p className="mb-1 font-display text-xs font-semibold uppercase tracking-wide text-brand-700">
                 {explanationLabel}
               </p>
@@ -413,7 +412,7 @@ export function FinalExam({
                 onClick={submit}
                 disabled={selected.size === 0}
                 className={cx(
-                  'inline-flex items-center rounded-pill bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-soft transition-colors duration-200',
+                  'brutal-btn bg-brand-600 px-5 py-2 text-sm text-white',
                   'hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
                   'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-brand-600',
                 )}
@@ -425,7 +424,7 @@ export function FinalExam({
                 type="button"
                 onClick={advance}
                 className={cx(
-                  'inline-flex items-center rounded-pill bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-soft transition-colors duration-200',
+                  'brutal-btn bg-brand-600 px-5 py-2 text-sm text-white',
                   'hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
                 )}
               >

@@ -297,10 +297,10 @@ function FilterChip({ active, onClick, activeClass, children }: FilterChipProps)
       aria-pressed={active}
       onClick={onClick}
       className={cx(
-        'inline-flex items-center gap-1.5 rounded-pill border px-3 py-1.5 text-sm font-medium shadow-soft transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+        'brutal-chip inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300',
         active
-          ? (activeClass ?? 'border-brand-500 bg-brand-600 text-white')
-          : 'border-ink-200 bg-surface text-ink-600 hover:-translate-y-px hover:border-brand-300 hover:text-brand-700',
+          ? (activeClass ?? 'bg-brand-600 text-white')
+          : 'bg-surface text-ink-600 hover:text-brand-700',
       )}
     >
       {active ? (
@@ -480,7 +480,7 @@ export function CourseGraph({
     <figure className={cx('not-prose', className)}>
       {/* Filter bar — multi-select level + roadmap-tag chips, persisted in the
           URL (?level=a,b&tag=x,y) so any filtered view is shareable as a link. */}
-      <div className="mb-10 flex flex-col gap-3 rounded-card border border-ink-100 bg-surface p-4 shadow-soft sm:p-5">
+      <div className="brutal mb-10 flex flex-col gap-3 bg-surface p-4 sm:p-5">
         <div role="group" aria-label={levelLabel} className="flex flex-wrap items-center gap-2">
           <span className="mr-1 min-w-14 text-xs font-semibold uppercase tracking-wider text-ink-400">
             {levelLabel}
@@ -566,7 +566,10 @@ export function CourseGraph({
             <li key={layer} className="m-0 p-0">
               <ul className="flex list-none flex-wrap items-stretch justify-evenly gap-x-6 gap-y-4 p-0 sm:gap-x-12">
                 {row.map((n) => {
-                  const tint = n.accent === 'accent' ? 'bg-accent-50' : 'bg-brand-50';
+                  const tint =
+                    n.accent === 'accent'
+                      ? 'border-2 border-edge bg-accent-100'
+                      : 'border-2 border-edge bg-brand-100';
                   const tintText =
                     n.accent === 'accent' ? 'group-hover:text-accent-700' : 'group-hover:text-brand-700';
                   // Difficulty drives the card's colored left edge + tier tint.
@@ -588,7 +591,7 @@ export function CourseGraph({
                           title={`${n.title} · ${comingSoonLabel}`}
                           aria-label={`${n.title} · ${comingSoonLabel}`}
                           className={cx(
-                            'relative flex h-full w-28 max-w-[40vw] flex-col rounded-card border border-dashed border-ink-200 p-2.5 opacity-70 shadow-soft sm:w-44 sm:max-w-[80vw] sm:p-3',
+                            'brutal relative flex h-full w-28 max-w-[40vw] flex-col border-dashed p-2.5 opacity-70 sm:w-44 sm:max-w-[80vw] sm:p-3',
                             edge,
                           )}
                         >
@@ -633,7 +636,7 @@ export function CourseGraph({
                         href={n.href}
                         title={`${n.title} · ${prog.completed}/${prog.total} ${lessonsLabel}${isDone ? ` · ${finishedLabel}` : ''}`}
                         className={cx(
-                          'group relative flex h-full w-28 max-w-[40vw] flex-col rounded-card border border-ink-200 p-2.5 shadow-soft transition-all hover:-translate-y-1 hover:border-brand-300 hover:shadow-lift motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-44 sm:max-w-[80vw] sm:p-3',
+                          'brutal brutal-interactive group relative flex h-full w-28 max-w-[40vw] flex-col p-2.5 sm:w-44 sm:max-w-[80vw] sm:p-3',
                           edge,
                           isDone && 'ring-2 ring-brand-400 ring-offset-1',
                         )}

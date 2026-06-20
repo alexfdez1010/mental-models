@@ -120,7 +120,7 @@ export function ProgressTransfer({
   return (
     <section
       className={cx(
-        'rounded-card border border-ink-200 bg-surface p-5 shadow-soft sm:p-6',
+        'brutal bg-surface p-5 sm:p-6',
         className,
       )}
     >
@@ -137,7 +137,7 @@ export function ProgressTransfer({
           <button
             type="button"
             onClick={handleExport}
-            className="inline-flex items-center gap-2 rounded-pill bg-brand-600 px-5 py-2.5 font-display text-sm font-semibold text-white shadow-soft transition-all hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="brutal-btn inline-flex items-center gap-2 bg-brand-600 px-5 py-2.5 font-display text-sm text-white hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
           >
             {/* Download arrow into tray. */}
             <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -148,7 +148,7 @@ export function ProgressTransfer({
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="inline-flex items-center gap-2 rounded-pill border border-brand-200 bg-surface px-5 py-2.5 font-display text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+            className="brutal-btn inline-flex items-center gap-2 bg-surface px-5 py-2.5 font-display text-sm text-brand-700 hover:bg-brand-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
           >
             {/* Upload arrow out of tray. */}
             <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

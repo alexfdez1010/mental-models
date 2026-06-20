@@ -122,7 +122,7 @@ export function MatchConcepts({
   return (
     <div
       className={cx(
-        'my-6 rounded-card border border-ink-100 bg-surface p-5 shadow-soft',
+        'brutal my-6 bg-surface p-5',
         className,
       )}
     >
@@ -148,13 +148,12 @@ export function MatchConcepts({
                   disabled={checked}
                   aria-pressed={isActive}
                   className={cx(
-                    'flex w-full flex-col gap-1 rounded-card border px-4 py-2.5 text-left text-sm transition',
+                    'brutal flex w-full flex-col gap-1 px-4 py-2.5 text-left text-sm',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
-                    !checked && 'hover:border-brand-300 hover:bg-brand-50',
+                    !checked && 'brutal-interactive hover:bg-brand-50',
                     isActive && !checked && 'border-brand-400 bg-brand-50 ring-2 ring-brand-300',
                     showCorrect && 'border-success-400 bg-success-50',
                     showWrong && 'border-danger-400 bg-danger-50',
-                    !isActive && !showCorrect && !showWrong && 'border-ink-100',
                   )}
                 >
                   <span className="font-semibold text-ink-900">{pair.term}</span>
@@ -183,11 +182,11 @@ export function MatchConcepts({
                   onClick={() => assignDefinition(defIndex)}
                   disabled={checked || activeTerm === null}
                   className={cx(
-                    'w-full rounded-card border px-4 py-2.5 text-left text-sm transition',
+                    'brutal w-full px-4 py-2.5 text-left text-sm',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
                     'disabled:cursor-not-allowed',
-                    activeTerm !== null && !checked && 'hover:border-brand-300 hover:bg-brand-50',
-                    isUsed ? 'border-brand-200 bg-brand-50/50 text-ink-500' : 'border-ink-100 text-ink-700',
+                    activeTerm !== null && !checked && 'brutal-interactive hover:bg-brand-50',
+                    isUsed ? 'bg-brand-50/50 text-ink-500' : 'text-ink-700',
                   )}
                 >
                   {pairs[defIndex].definition}
@@ -204,7 +203,7 @@ export function MatchConcepts({
           onClick={check}
           disabled={!allAssigned}
           className={cx(
-            'mt-4 rounded-pill bg-brand-600 px-5 py-2 text-sm font-semibold text-white transition',
+            'brutal-btn mt-4 bg-brand-600 px-5 py-2 text-sm text-white',
             'hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
             'disabled:cursor-not-allowed disabled:opacity-50',
           )}
@@ -228,8 +227,8 @@ export function MatchConcepts({
             type="button"
             onClick={reset}
             className={cx(
-              'mt-3 rounded-pill border border-ink-200 px-4 py-1.5 text-sm font-medium text-ink-700 transition',
-              'hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+              'brutal-btn mt-3 bg-surface px-4 py-1.5 text-sm text-ink-700',
+              'hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
             )}
           >
             {retryLabel}

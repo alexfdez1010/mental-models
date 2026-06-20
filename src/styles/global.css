@@ -66,13 +66,20 @@
   --font-display: 'Lexend Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
 
-  /* ---- Radii (brutalist — sharp edges) -------------------------------- */
-  --radius-card: 0.25rem;
+  /* ---- Edge: the brutalist border color (matches the shadow) ---------- */
+  --color-edge: #1c1917; /* near-black hard edge on every block */
+
+  /* ---- Radii (brutalist — sharp, just shy of square) ------------------ */
+  --radius-card: 0.35rem;
   --radius-pill: 999px;
 
-  /* ---- Shadows (brutalist — hard black offset, no blur) --------------- */
-  --shadow-soft: 3px 3px 0 0 #1c1917;
-  --shadow-lift: 6px 6px 0 0 #1c1917;
+  /* ---- Shadows (brutalist — hard offset, zero blur, edge-colored) -----
+     A four-step ladder. Offset grows on lift; matched to --color-edge so a
+     block and its shadow read as one solid object cut out of the page. */
+  --shadow-xs: 2px 2px 0 0 #1c1917; /* chips, pills, inputs */
+  --shadow-soft: 4px 4px 0 0 #1c1917; /* resting cards, buttons */
+  --shadow-lift: 7px 7px 0 0 #1c1917; /* hover / elevated */
+  --shadow-pop: 11px 11px 0 0 #1c1917; /* hero card, CTA, marquee accents */
 
   /* ---- Animations ------------------------------------------------------ */
   --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -180,6 +187,97 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* ==========================================================================
+   Brutalist building blocks
+   The site's signature look: a thick near-black edge + a hard, edge-colored
+   offset shadow, so every panel reads as a solid block cut out of the page.
+   Interactive variants lift toward the light on hover and physically press
+   down on click. Compose with Tailwind utilities for color/padding/layout:
+     <a class="brutal brutal-interactive bg-surface p-6">…</a>
+     <button class="brutal-btn bg-brand-600 text-white px-7 py-3">…</button>
+   All transforms are transitions only — they never reflow layout, and the
+   global reduced-motion rule already neutralises them.
+   ========================================================================== */
+@layer components {
+  /* Resting block: thick edge + hard shadow. The default surface for cards,
+     panels, wells and media. Color/padding come from utilities. */
+  .brutal {
+    border: 2px solid var(--color-edge);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+  }
+  /* Heavier block for hero / focal surfaces. */
+  .brutal-lg {
+    border: 2px solid var(--color-edge);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-pop);
+  }
+  /* Tactile behaviour for anything clickable wearing .brutal/.brutal-lg.
+     Hover: slide up-left, shadow grows. Active: slam down-right into the
+     shadow's spot so the block looks pressed flat against the page. */
+  .brutal-interactive {
+    transition:
+      transform 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .brutal-interactive:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: var(--shadow-lift);
+  }
+  .brutal-interactive:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-xs);
+  }
+
+  /* Buttons — flat fill, hard edge, hard shadow, same press physics.
+     Pair with a color utility set (bg-* + text-*). */
+  .brutal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px solid var(--color-edge);
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    box-shadow: var(--shadow-soft);
+    transition:
+      transform 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.15s ease;
+  }
+  .brutal-btn:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: var(--shadow-lift);
+  }
+  .brutal-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-xs);
+  }
+
+  /* Small flat chip/pill: thinner shadow, still a hard edge. For tags,
+     filters, marquee course chips, metadata badges. */
+  .brutal-chip {
+    border: 2px solid var(--color-edge);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-xs);
+    transition:
+      transform 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+  a.brutal-chip:hover,
+  button.brutal-chip:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-soft);
+  }
+  a.brutal-chip:active,
+  button.brutal-chip:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
   }
 }
 

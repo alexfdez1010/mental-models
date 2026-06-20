@@ -156,7 +156,7 @@ export function MindMap({
   return (
     <figure
       className={cx(
-        'my-6 rounded-card border border-ink-100 bg-surface p-5 shadow-soft',
+        'brutal my-6 bg-surface p-5',
         className,
       )}
     >

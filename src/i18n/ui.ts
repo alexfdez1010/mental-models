@@ -16,7 +16,7 @@ export type Lang = keyof typeof languages;
 
 export const ui = {
   en: {
-    'brand.title': 'Lessons',
+    'brand.title': 'Mental Models',
     'home.seoTitle': 'From zero to expert, visually',
     'nav.catalog': 'Catalog',
     'nav.upcoming': 'Coming Soon',
@@ -67,7 +67,7 @@ export const ui = {
     'progress.count': '{n} lessons finished on this device.',
     'progress.imported': 'Imported — {n} new lessons added.',
     'progress.noNew': 'Already up to date — nothing new to import.',
-    'progress.error': "Couldn't read that file. Make sure it's a Lessons progress export.",
+    'progress.error': "Couldn't read that file. Make sure it's a Mental Models progress export.",
     'quiz.check': 'Check',
     'quiz.retry': 'Try again',
     'quiz.next': 'Next',
@@ -86,7 +86,7 @@ export const ui = {
     'roadmap.courses': 'courses',
   },
   es: {
-    'brand.title': 'Lecciones',
+    'brand.title': 'Modelos Mentales',
     'home.seoTitle': 'De cero a experto, de forma visual',
     'nav.catalog': 'Catálogo',
     'nav.upcoming': 'Próximamente',
@@ -137,7 +137,7 @@ export const ui = {
     'progress.count': '{n} lecciones terminadas en este dispositivo.',
     'progress.imported': 'Importado — {n} lecciones nuevas añadidas.',
     'progress.noNew': 'Ya está al día — no hay nada nuevo que importar.',
-    'progress.error': 'No se pudo leer el archivo. Asegúrate de que es una exportación de progreso de Lessons.',
+    'progress.error': 'No se pudo leer el archivo. Asegúrate de que es una exportación de progreso de Modelos Mentales.',
     'quiz.check': 'Comprobar',
     'quiz.retry': 'Reintentar',
     'quiz.next': 'Siguiente',
