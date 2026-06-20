@@ -31,10 +31,10 @@
  *   • When fewer than 3 entries remain, APPEND the next harder topics (each one
  *     notch up) so the queue never empties.
  *
- * ── TEMPLATE NOTE ──────────────────────────────────────────────────────────
- * The two entries below are EXAMPLES for the placeholder "Getting Started"
- * topic. Replace them with the real build queue for your subject (see TOPIC.md).
- * The `bootstrap-topic` skill seeds this for you.
+ * ── Mental Models build queue ───────────────────────────────────────────────
+ * The zero-to-expert ladder of models still to build (see TOPIC.md). The first
+ * course, `what-are-mental-models`, has graduated and been removed. Lowest
+ * `order` is built next; keep the ramp monotone in difficulty.
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';

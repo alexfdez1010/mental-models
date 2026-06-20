@@ -206,6 +206,43 @@ Set **`PUBLIC_SITE_URL`** in the environment to drive canonical URLs, the sitema
 and absolute OG URLs (see `.env.example`). It defaults to the placeholder
 `https://lessons.example.com` — point it at your real domain.
 
+### 🔐 Deployment secrets (GitHub Actions)
+
+Production deploys run from **[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)**:
+GitHub builds the prebuilt output on a 16 GB runner (the hobby Vercel container
+SIGKILLs on this large static build) and ships it with `vercel deploy --prebuilt`.
+The workflow needs **three repository secrets**:
+
+| Secret | What it is | Where to find it |
+| --- | --- | --- |
+| `VERCEL_TOKEN` | Vercel access token | [vercel.com/account/tokens](https://vercel.com/account/tokens) → **Create Token** |
+| `VERCEL_ORG_ID` | Vercel org / team ID | Vercel **Project → Settings → General** (or run `vercel link`, then read `.vercel/project.json`) |
+| `VERCEL_PROJECT_ID` | Vercel project ID | same place as `VERCEL_ORG_ID` |
+
+**Add them via the GitHub UI** — Repo → **Settings → Secrets and variables → Actions**
+→ **New repository secret** → add each name + value.
+
+**Or via the `gh` CLI** (paste the value when prompted, never commit it):
+
+```sh
+gh secret set VERCEL_TOKEN
+gh secret set VERCEL_ORG_ID
+gh secret set VERCEL_PROJECT_ID
+
+gh secret list   # verify all three are present
+```
+
+The fastest way to get the org/project IDs: run `vercel link` once locally, then read
+them from the generated `.vercel/project.json` (`orgId` and `projectId`). After the
+secrets are set, every push to `main` (or a manual **Run workflow**) deploys to production.
+
+> ⚠️ Treat `VERCEL_TOKEN` as a password. Don't print it, commit it, or paste it into
+> the workflow YAML — keep it only in GitHub secrets. Rotate it at
+> [vercel.com/account/tokens](https://vercel.com/account/tokens) if it leaks.
+
+Also disable Vercel's own git build so it doesn't try (and fail) to build on push:
+set **Project → Settings → Git → Ignored Build Step** to `exit 0`.
+
 ---
 
 ## 📄 License
