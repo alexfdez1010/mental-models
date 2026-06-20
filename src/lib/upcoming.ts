@@ -73,25 +73,6 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   {
-    slug: 'what-are-mental-models',
-    icon: '🧱',
-    difficulty: 'beginner',
-    order: 1,
-    accent: 'brand',
-    title: {
-      en: 'What Are Mental Models?',
-      es: '¿Qué Son los Modelos Mentales?',
-    },
-    description: {
-      en: 'The root of the whole site. What a mental model is, why a latticework beats memorized facts, and the base models everything builds on: the map is not the territory and circle of competence.',
-      es: 'La raíz de todo el sitio. Qué es un modelo mental, por qué una red de modelos supera a los datos memorizados y los modelos base sobre los que se construye todo: el mapa no es el territorio y el círculo de competencia.',
-    },
-    dependencies: [],
-    tags: ['foundations', 'problem-solving'],
-    buildNotes:
-      'THE foundational course — assume zero background. Sections: (1) what a model is — a compressed map of how something works; analogy of a subway map vs. the real city. (2) "The map is not the territory" — every model omits detail; when the omission bites. (3) The latticework — why many models beat one; Munger’s "man with a hammer" / law of the instrument. (4) Circle of competence — knowing the edge of what you understand. Each model: analogy, precise definition, one worked example, a failure mode, and a "when to reach for it" note. Build a MindMap of the latticework and an interactive SVG of map-vs-territory (a detailed coastline simplified at increasing zoom). Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'first-principles-thinking',
     icon: '🔬',
     difficulty: 'beginner',

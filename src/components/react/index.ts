@@ -57,3 +57,6 @@ export type { ProgressTransferProps } from '@/components/react/ProgressTransfer'
 
 export { LessonComplete, default as LessonCompleteDefault } from '@/components/react/LessonComplete';
 export type { LessonCompleteProps } from '@/components/react/LessonComplete';
+
+export { MapTerritoryZoom, default as MapTerritoryZoomDefault } from '@/components/react/MapTerritoryZoom';
+export type { MapTerritoryZoomProps, MapTerritoryStep } from '@/components/react/MapTerritoryZoom';
