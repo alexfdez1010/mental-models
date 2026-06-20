@@ -1,0 +1,166 @@
+---
+title: "El kit de herramientas interactivo"
+description: "Un recorrido práctico por los componentes reutilizables que insertas en cualquier lección — avisos, preguntas, cuestionarios, rellenar huecos, revelados, emparejar y clasificar."
+topic: "es/getting-started"
+order: 2
+minutes: 7
+---
+
+import { Callout, MCQ, Quiz, Reveal, FillBlank, MatchConcepts, Categorize } from '@/components/react';
+
+Todos los componentes de abajo son **independientes de la materia** y viven en
+`@/components/react`. Importa los que necesites al principio de cualquier
+lección, añade una directiva `client:*` y pasa los textos visibles como props
+(para que la gemela en español solo reciba etiquetas en español). Aquí tienes
+todo el kit genérico, en acción.
+
+## Callout — resaltar algo
+
+Una caja de información con color. `variant` es `info` · `success` · `warning` ·
+`tip`.
+
+<Callout variant="tip" title="Pasa los textos como props">
+Mantén los componentes reutilizables e independientes del idioma. Todo lo que ve
+el lector — la pregunta, las etiquetas, la explicación — es una prop, nunca está
+incrustado dentro del componente.
+</Callout>
+
+## MCQ — una sola pregunta
+
+Opción múltiple con corrección instantánea. Marca la respuesta correcta con
+`correct: true` y escribe siempre una `explanation` — ahí ocurre el aprendizaje.
+
+<MCQ
+  client:visible
+  question="¿Qué hace que un componente sea seguro para reutilizar entre una lección en inglés y su gemela en español?"
+  options={[
+    { text: "Todo el texto visible se pasa como props", correct: true },
+    { text: "Incrusta cadenas en inglés y la gemela lo reimplementa", correct: false },
+    { text: "Detecta el idioma desde la URL internamente", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  explanation="Los componentes independientes del idioma reciben su texto visible como props, así la lección en y es comparten un componente y solo difieren en las cadenas que pasan."
+/>
+
+## FillBlank — hueco de opción única
+
+Marca los huecos con `{{correcta|señuelo|señuelo}}` — la primera opción es la
+correcta, el resto son señuelos, y el orden se baraja de forma determinista.
+
+<FillBlank
+  client:visible
+  question="Rellena cada hueco."
+  text="Un {{tema|lección|tag}} contiene muchas lecciones, ordenadas por su campo {{order|title|icon}}, y trae una fuente en inglés más una gemela en {{español|francés|alemán}}."
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  explanation="Un tema contiene lecciones ordenadas, y cada lección tiene una gemela es-ES en paridad."
+/>
+
+## Reveal — entrada al hacer scroll
+
+Envuelve contenido y lo hace aparecer con un fundido cuando entra en la vista (y
+lo muestra de inmediato si se reduce el movimiento).
+
+<Reveal client:visible>
+  <Callout variant="success" title="Me has encontrado">
+    Esta caja apareció con un fundido al hacer scroll. Usa `Reveal` para dosificar
+    una explicación larga — pero nunca para ocultar contenido esencial a quienes
+    no pueden ver la animación.
+  </Callout>
+</Reveal>
+
+## MatchConcepts — unir término → definición
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada archivo con lo que contiene."
+  pairs={[
+    { term: "TOPIC.md", definition: "La materia, la misión y el alcance de todo el sitio" },
+    { term: "src/lib/upcoming.ts", definition: "La cola de cursos planificados pero sin construir" },
+    { term: "src/content/topics/", definition: "La página MDX de inicio de cada curso" },
+    { term: "src/styles/global.css", definition: "Los tokens de diseño — colores, fuentes, radios" },
+  ]}
+  instructions="Elige un término y luego su definición."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  explanation="Cada cosa vive en exactamente un sitio, que es lo que mantiene la plantilla fácil de razonar."
+/>
+
+## Categorize — clasificar en grupos
+
+<Categorize
+  client:visible
+  question="Clasifica cada práctica según si mantiene las gemelas en/es en paridad."
+  buckets={["Mantiene la paridad", "Rompe la paridad"]}
+  items={[
+    { text: "Mismo slug y orden en ambas gemelas", bucket: "Mantiene la paridad" },
+    { text: "Traducir los textos visibles, no la estructura", bucket: "Mantiene la paridad" },
+    { text: "Añadir un componente a en pero no a es", bucket: "Rompe la paridad" },
+    { text: "Reordenar lecciones en solo un idioma", bucket: "Rompe la paridad" },
+  ]}
+  instructions="Coloca cada elemento en su grupo correcto."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  explanation="Paridad significa estructura idéntica (slugs, orden, componentes) y textos traducidos — nunca contenido distinto entre idiomas."
+/>
+
+## Quiz — un conjunto secuencial con puntuación
+
+`Quiz` encadena varias MCQ con una barra de progreso y una pantalla final de
+puntuación. Úsalo para repasar una lección entera.
+
+<Quiz
+  client:visible
+  title="Repaso"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  questions={[
+    {
+      question: "¿Dónde defines la materia que enseña el sitio?",
+      options: [
+        { text: "TOPIC.md", correct: true },
+        { text: "README.md", correct: false },
+        { text: "package.json", correct: false },
+      ],
+      explanation: "TOPIC.md es la única fuente de verdad de la materia; CLAUDE.md y el constructor de cron la leen.",
+    },
+    {
+      question: "¿Cómo aparece un curso planificado antes de escribirse?",
+      options: [
+        { text: "Como un nodo atenuado de 'Próximamente' desde src/lib/upcoming.ts", correct: true },
+        { text: "Como un archivo MDX vacío", correct: false },
+        { text: "No aparece — simplemente lo escribes", correct: false },
+      ],
+      explanation: "Las entradas de upcoming.ts se dibujan como nodos atenuados en el grafo del catálogo hasta que se convierten en temas reales.",
+    },
+    {
+      question: "¿Cuál es la regla para los componentes interactivos?",
+      options: [
+        { text: "Pasar todo el texto visible como props; respetar prefers-reduced-motion", correct: true },
+        { text: "Incrustar el inglés y duplicar para el español", correct: false },
+        { text: "Animar siempre, al margen de las preferencias de movimiento", correct: false },
+      ],
+      explanation: "Reutilizable, independiente del idioma y accesible — las tres reglas que sigue cada isla.",
+    },
+  ]}
+/>
+
+<Callout variant="info" title="Ese es el kit">
+Hay unas pocas piezas estructurales más (el grafo del catálogo, el botón de
+lección completada, la isla de examen final) ya conectadas por ti. Para
+profundizar en construir *nuevas* islas de animación específicas de la materia,
+mira las skills `lesson-animations` y `exercise-components`. ¿Listo? Ejecuta
+**`bootstrap-topic`** para que este sitio trate de tu materia.
+</Callout>

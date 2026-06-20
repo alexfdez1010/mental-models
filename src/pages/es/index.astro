@@ -1,0 +1,545 @@
+---
+/**
+ * Home (Español) — una landing pura: vende el proyecto y lleva al catálogo.
+ * Los temas/lecciones viven en /es/catalog.
+ * Gemelo en inglés: src/pages/index.astro.
+ *
+ * Esta página es **independiente de la materia y dirigida por datos**: los
+ * recuentos, la marquesina, las rutas y la cola de construcción salen del
+ * contenido y de lib, así que se adapta a cualquier materia sin editarla.
+ *
+ * Orden narrativo (una escalera de conversión, no una lista de funciones):
+ * promesa (hero) → por qué funciona (banda de valor) → el camino (escalera
+ * cero→experto) → prueba de amplitud (marquesina) → método → rutas curadas →
+ * próximamente → CTA final.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { Reveal } from '@/components/react';
+import { SITE } from '@/lib/site';
+import { useTranslations, localizePath, alternates as alternatesFor } from '@/i18n/utils';
+import { getTopics, getLessons } from '@/lib/content';
+import { getRoadmapSummaries, roadmapHref } from '@/lib/roadmaps';
+import { getDifficultyLabels } from '@/lib/catalog';
+import { upcomingCourses } from '@/lib/upcoming';
+
+const lang = 'es' as const;
+const t = useTranslations(lang);
+
+// Recuentos en vivo desde el catálogo — nunca a mano.
+const topics = await getTopics(lang);
+const lessons = await getLessons(lang);
+const courseCount = topics.length;
+const lessonCount = lessons.length;
+const totalMinutes = lessons.reduce((sum, l) => sum + (l.entry.data.minutes ?? 0), 0);
+const totalHours = Math.round(totalMinutes / 60);
+
+const alts = alternatesFor(Astro.url).map((a) => ({ lang: a.lang, href: a.path }));
+const catalogHref = localizePath('/catalog', lang);
+
+// Cada URL de lección — la usa un manejador de clic para que "sorpréndeme"
+// caiga en una lección aleatoria nueva en cada clic (no fijada al construir).
+const lessonHrefs = lessons.map((l) => localizePath(`/${l.topicSlug}/${l.lessonSlug}`, lang));
+
+// Punto de entrada destacado para el hero: la primera lección, si la hay.
+const firstLessonHref = lessonHrefs[0] ?? catalogHref;
+const featured = topics[0];
+
+const roadmaps = await getRoadmapSummaries(lang);
+const difficultyLabels = getDifficultyLabels(lang);
+
+// Los próximos cursos en la cola de construcción (desde @/lib/upcoming).
+const upcomingHref = localizePath('/upcoming', lang);
+const nextUp = [...upcomingCourses].sort((a, b) => a.order - b.order).slice(0, 3);
+
+// La escalera cero→experto, con recuentos de cursos en vivo por nivel.
+type Tier = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+const tierOrder: Tier[] = ['beginner', 'intermediate', 'advanced', 'expert'];
+const tierCount = (tier: Tier) => topics.filter((tp) => tp.entry.data.difficulty === tier).length;
+const ladder: { tier: Tier; blurb: string; offset: string }[] = [
+  {
+    tier: 'beginner',
+    blurb: 'Lo básico absoluto — sin dar nada por sabido, cada término se define al usarlo.',
+    offset: 'lg:mt-24',
+  },
+  {
+    tier: 'intermediate',
+    blurb: 'El vocabulario de trabajo y las ideas en las que se apoya el resto del camino.',
+    offset: 'lg:mt-16',
+  },
+  {
+    tier: 'advanced',
+    blurb: 'Profundidad real, asumiendo que ya tienes los peldaños anteriores.',
+    offset: 'lg:mt-8',
+  },
+  {
+    tier: 'expert',
+    blurb: 'El nivel más profundo y riguroso — nivel profesional, hasta el límite.',
+    offset: 'lg:mt-0',
+  },
+];
+
+// Filas de la marquesina — cada curso como chip clicable, en dos cintas.
+const chips = topics.map((tp) => ({
+  href: localizePath(`/${tp.slug}`, lang),
+  icon: tp.entry.data.icon,
+  title: tp.entry.data.title,
+}));
+const chipRowA = chips.filter((_, i) => i % 2 === 0);
+const chipRowB = chips.filter((_, i) => i % 2 === 1);
+
+const valueProps = [
+  {
+    no: '01',
+    title: 'Empiezas desde cero absoluto',
+    body: 'Sin dar por sabido ningún tecnicismo. El primer curso asume que nunca te has cruzado con la materia — y cada curso posterior solo se apoya en los anteriores.',
+  },
+  {
+    no: '02',
+    title: 'Lo toqueteas, no lo lees',
+    body: 'Controles, guías paso a paso y cuestionarios en cada lección. La idea se mueve cuando tú la mueves, que es la diferencia entre "leí eso" y "lo entiendo".',
+  },
+  {
+    no: '03',
+    title: 'No se queda en lo básico',
+    body: 'La mayoría de explicaciones se rinden justo tras lo básico. Estas siguen subiendo, hasta nivel experto, hasta que lo avanzado es solo lo que ya sabes.',
+  },
+];
+
+const method = [
+  {
+    no: '1',
+    title: 'Adivina antes de que te lo cuenten',
+    body: 'Las lecciones abren con una pregunta que aún no puedes responder. Comprometerte con una respuesta primero es lo que hace que la de verdad se quede — es el efecto test, y está en cada lección.',
+  },
+  {
+    no: '2',
+    title: 'Agarra la idea',
+    body: 'Cada concepto clave trae un control, una animación o una guía paso a paso. Aquí la idea no es un párrafo — es algo que doblas con tus propias manos.',
+  },
+  {
+    no: '3',
+    title: 'Demuestra que lo pillas',
+    body: 'Cuestionarios, emparejar conceptos, huecos por rellenar y preguntas trampa — variados a propósito, repartidos por la lección, nunca un muro de test al final.',
+  },
+  {
+    no: '4',
+    title: 'Aprueba el final',
+    body: 'Cada curso termina en un examen final con nota: un intento por pregunta, sin repetir, puntuación al acabar. El progreso se guarda en tu dispositivo — sin cuenta, nunca.',
+  },
+];
+
+const trust = ['Gratis para siempre', 'Sin cuenta', 'Sin anuncios', 'Código abierto', 'Español + English'];
+---
+
+<BaseLayout
+  title={t('home.seoTitle')}
+  description={SITE.description}
+  lang={lang}
+  alternates={alts}
+  mainClass="mx-auto w-full max-w-6xl px-4 sm:px-6"
+>
+  <!-- Hero — izquierda el pitch, derecha una tarjeta que te mete en una lección real -->
+  <section class="relative grid items-center gap-12 py-16 sm:py-20 lg:grid-cols-[1.05fr_1fr]">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <div
+        class="absolute -top-32 left-1/2 h-112 w-4xl -translate-x-1/2 rounded-full bg-brand-200/40 blur-3xl"
+      >
+      </div>
+      <div class="absolute -right-24 top-40 h-72 w-72 rounded-full bg-accent-300/30 blur-3xl">
+      </div>
+    </div>
+
+    <Reveal client:visible>
+      <div
+        class="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs uppercase tracking-widest text-ink-500"
+      >
+        <span><span class="font-bold text-ink-900">{courseCount}</span> cursos</span>
+        <span class="text-ink-300">/</span>
+        <span><span class="font-bold text-ink-900">{lessonCount}</span> lecciones</span>
+        {
+          totalHours > 0 && (
+            <>
+              <span class="text-ink-300">/</span>
+              <span>
+                <span class="font-bold text-ink-900">~{totalHours}h</span> de aprendizaje
+              </span>
+            </>
+          )
+        }
+        <span class="text-ink-300">/</span>
+        <span><span class="font-bold text-ink-900">0</span> requisitos previos</span>
+      </div>
+      <h1
+        class="mt-5 font-display text-4xl font-bold leading-[1.05] tracking-tight text-ink-900 sm:text-6xl"
+      >
+        Apréndelo como<br class="hidden sm:block" /> aprendiste a
+        <span class="relative whitespace-nowrap">
+          <span class="absolute inset-x-0 bottom-1 -z-10 h-3.5 bg-accent-300/50"></span>
+          montar en bici
+        </span>.
+      </h1>
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-ink-600">
+        No memorizando definiciones — agarrando la cosa y sintiendo cómo se mueve. Empiezas desde
+        cero; acabas experto, peldaño a peldaño de la escalera.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <a
+          href={catalogHref}
+          class="inline-flex items-center rounded-pill bg-brand-600 px-7 py-3 text-base font-semibold text-white shadow-lift transition-all hover:bg-brand-700 hover:shadow-soft"
+        >
+          {t('hero.cta.start')}
+        </a>
+        <a
+          href={catalogHref}
+          data-random-lesson
+          data-lessons={JSON.stringify(lessonHrefs)}
+          class="inline-flex items-center rounded-pill px-5 py-3 text-base font-semibold text-ink-700 underline decoration-ink-300 decoration-2 underline-offset-4 transition-colors hover:text-brand-700 hover:decoration-brand-400"
+        >
+          o sorpréndeme →
+        </a>
+      </div>
+      <ul class="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-ink-500">
+        {
+          trust.map((item) => (
+            <li class="inline-flex items-center gap-1.5">
+              <span aria-hidden="true" class="font-bold text-success">✓</span>
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </Reveal>
+
+    <Reveal client:visible delay={120} className="relative">
+      <span
+        class="absolute -top-3 left-5 z-10 -rotate-2 rounded-pill bg-ink-900 px-3 py-1 font-mono text-xs font-semibold text-white shadow-lift"
+      >
+        ↓ entra directo
+      </span>
+      <a
+        href={firstLessonHref}
+        class="group block rounded-card border border-ink-200 bg-surface p-6 shadow-lift transition-all hover:-translate-y-1 hover:border-brand-300 sm:p-8"
+      >
+        <div class="flex items-center gap-3">
+          <span class="grid h-12 w-12 place-items-center rounded-card bg-brand-50 text-2xl">
+            {featured?.entry.data.icon ?? '📘'}
+          </span>
+          <div>
+            <p class="font-mono text-xs uppercase tracking-widest text-ink-500">
+              Empieza aquí
+            </p>
+            <h2 class="font-display text-xl font-bold text-ink-900 group-hover:text-brand-700">
+              {featured?.entry.data.title ?? 'El catálogo'}
+            </h2>
+          </div>
+        </div>
+        <p class="mt-4 leading-relaxed text-ink-600">
+          {featured?.entry.data.description ?? 'Explora todos los cursos de la escalera de cero a experto.'}
+        </p>
+        <span
+          class="mt-5 inline-flex items-center gap-1 font-semibold text-brand-600 group-hover:text-brand-700"
+        >
+          Abrir la primera lección →
+        </span>
+      </a>
+    </Reveal>
+  </section>
+
+  <!-- Tres razones — banda editorial numerada -->
+  <Reveal client:visible as="section" className="border-y border-ink-200 py-12">
+    <div class="grid gap-x-10 gap-y-8 sm:grid-cols-3">
+      {
+        valueProps.map((v) => (
+          <div class="relative pl-1">
+            <div class="font-mono text-sm font-bold text-accent-500">{v.no}</div>
+            <h3 class="mt-2 font-display text-lg font-semibold text-ink-900">{v.title}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-ink-600">{v.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </Reveal>
+
+  <!-- La escalera — la promesa central: un camino continuo, de cero a experto -->
+  <Reveal client:visible as="section" className="pb-8 pt-16">
+    <div class="mb-12 max-w-2xl">
+      <span class="text-sm font-semibold uppercase tracking-wide text-accent-600">
+        Una escalera, sin huecos
+      </span>
+      <h2 class="mt-2 font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+        Cada curso se apoya en el de abajo.
+      </h2>
+      <p class="mt-3 text-lg leading-relaxed text-ink-600">
+        La mayoría de sitios te dan explicaciones sueltas. Esto es un único grafo de dependencias:
+        cada curso solo asume los anteriores, desde la primera idea hasta la profundidad experta.
+        Nunca se espera que sepas algo que no se te haya enseñado.
+      </p>
+    </div>
+
+    <ol class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        ladder.map((step, i) => (
+          <li
+            class={`flex flex-col rounded-card border border-ink-200 p-5 shadow-soft difficulty-edge-${step.tier} ${step.offset}`}
+          >
+            <div class="flex items-center justify-between">
+              <span class={`difficulty-badge difficulty-${step.tier}`}>
+                {difficultyLabels[step.tier]}
+              </span>
+              <span class="font-mono text-xs text-ink-400">
+                {i + 1}/{tierOrder.length}
+              </span>
+            </div>
+            <div class="mt-4 font-display text-4xl font-bold text-ink-900">
+              {tierCount(step.tier)}
+              <span class="ml-1 text-sm font-semibold text-ink-500">cursos</span>
+            </div>
+            <p class="mt-3 text-sm leading-relaxed text-ink-600">{step.blurb}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="mt-6 text-sm text-ink-500">
+      El mapa completo vive en el <a
+        href={catalogHref}
+        class="font-semibold text-brand-600 underline decoration-brand-300 underline-offset-2 hover:text-brand-700"
+        >catálogo</a
+      > — un grafo de dependencias real que puedes seguir curso a curso.
+    </p>
+  </Reveal>
+
+  <!-- Prueba de amplitud — cada curso, desfilando. Catálogo completo, sin teaser. -->
+  {
+    chips.length > 0 && (
+      <Reveal client:visible as="section" className="pb-8 pt-12">
+        <div class="mb-8 max-w-2xl">
+          <span class="text-sm font-semibold uppercase tracking-wide text-accent-600">
+            El mapa entero
+          </span>
+          <h2 class="mt-2 font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+            {courseCount} cursos. Estos son todos.
+          </h2>
+          <p class="mt-3 text-lg leading-relaxed text-ink-600">
+            De la primera idea a la parte profunda — cada chip de abajo es un curso completo que
+            puedes abrir ahora mismo.
+          </p>
+        </div>
+
+        <div class="group space-y-3">
+          {[
+            { row: chipRowA, anim: 'animate-marquee' },
+            { row: chipRowB, anim: 'animate-marquee-reverse' },
+          ].map(({ row, anim }) => (
+            <div class="overflow-hidden mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+              <div class={`flex w-max ${anim} group-hover:[animation-play-state:paused]`}>
+                {row.map((c) => (
+                  <a
+                    href={c.href}
+                    class="mr-3 inline-flex items-center gap-2 whitespace-nowrap rounded-pill border border-ink-200 bg-surface px-4 py-2 text-sm font-medium text-ink-700 shadow-soft transition-colors hover:border-brand-300 hover:text-brand-700"
+                  >
+                    <span aria-hidden="true">{c.icon}</span>
+                    {c.title}
+                  </a>
+                ))}
+                {row.map((c) => (
+                  <a
+                    href={c.href}
+                    aria-hidden="true"
+                    tabindex="-1"
+                    class="mr-3 inline-flex items-center gap-2 whitespace-nowrap rounded-pill border border-ink-200 bg-surface px-4 py-2 text-sm font-medium text-ink-700 shadow-soft transition-colors hover:border-brand-300 hover:text-brand-700"
+                  >
+                    <span aria-hidden="true">{c.icon}</span>
+                    {c.title}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+    )
+  }
+
+  <!-- Método — cómo enseña una sola lección -->
+  <Reveal client:visible as="section" className="pb-8 pt-12">
+    <div class="mb-10 max-w-2xl">
+      <span class="text-sm font-semibold uppercase tracking-wide text-accent-600">
+        Cómo funciona una lección
+      </span>
+      <h2 class="mt-2 font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+        Construido sobre cómo funciona la memoria de verdad.
+      </h2>
+      <p class="mt-3 text-lg leading-relaxed text-ink-600">
+        Leer parece aprender; casi nunca lo es. Cada lección aquí fuerza las tres cosas que sí
+        funcionan: predecir, interactuar, recordar.
+      </p>
+    </div>
+
+    <ol class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        method.map((m) => (
+          <li class="relative rounded-card border border-ink-200 bg-surface p-5 shadow-soft">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-pill bg-brand-600 font-mono text-sm font-bold text-white">
+              {m.no}
+            </span>
+            <h3 class="mt-3 font-display text-lg font-semibold text-ink-900">{m.title}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-ink-600">{m.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </Reveal>
+
+  <!-- Rutas de aprendizaje -->
+  {
+    roadmaps.length > 0 && (
+      <Reveal client:visible as="section" className="pb-8 pt-12">
+        <div class="mb-10 max-w-2xl">
+          <span class="text-sm font-semibold uppercase tracking-wide text-accent-600">
+            {t('roadmap.learningPaths')}
+          </span>
+          <h2 class="mt-2 font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+            Rutas curadas, no una lista gigante.
+          </h2>
+          <p class="mt-3 text-lg leading-relaxed text-ink-600">
+            Elige el área que te importa y sigue el grafo de principiante a experto — o salta directo
+            al curso que necesitas.
+          </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {roadmaps.map((r) => {
+            const href = roadmapHref(r.meta.tag, lang);
+            return (
+              <a
+                href={href}
+                class="group flex flex-col rounded-card border border-ink-200 bg-surface p-5 shadow-soft transition-all hover:-translate-y-1 hover:border-brand-300 hover:shadow-lift"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl">{r.meta.icon}</span>
+                  <h3 class="font-display text-lg font-semibold text-ink-900 group-hover:text-brand-700">
+                    {r.meta.title.es}
+                  </h3>
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-ink-600">{r.meta.description.es}</p>
+                <div class="mt-auto flex flex-wrap items-center gap-2 pt-3 text-xs font-medium text-ink-500">
+                  <span class="rounded-pill bg-brand-50 px-2.5 py-1 text-brand-700">
+                    {r.courseCount} {t('roadmap.courses')}
+                  </span>
+                  <span class="rounded-pill bg-ink-100 px-2.5 py-1">
+                    {difficultyLabels[r.minDifficulty as keyof typeof difficultyLabels]} →{' '}
+                    {difficultyLabels[r.maxDifficulty as keyof typeof difficultyLabels]}
+                  </span>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </Reveal>
+    )
+  }
+
+  <!-- Próximamente — lo siguiente en la cola de construcción (desde @/lib/upcoming) -->
+  {
+    nextUp.length > 0 && (
+      <Reveal client:visible as="section" className="pb-8 pt-12">
+        <div class="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div class="max-w-2xl">
+            <span class="text-sm font-semibold uppercase tracking-wide text-accent-600">
+              {t('upcoming.title')}
+            </span>
+            <h2 class="mt-2 font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+              La escalera sigue creciendo.
+            </h2>
+            <p class="mt-3 text-lg leading-relaxed text-ink-600">{t('upcoming.subtitle')}</p>
+          </div>
+          <a
+            href={upcomingHref}
+            class="inline-flex items-center gap-1 font-semibold text-brand-600 hover:text-brand-700"
+          >
+            {t('nav.upcoming')} →
+          </a>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          {nextUp.map((c) => {
+            const tint = c.accent === 'accent' ? 'bg-accent-50' : 'bg-brand-50';
+            return (
+              <article class="flex flex-col rounded-card border border-dashed border-ink-200 bg-surface p-5 shadow-soft">
+                <div class="flex items-center justify-between gap-3">
+                  <span class={`grid h-10 w-10 shrink-0 place-items-center rounded-card text-xl ${tint}`}>
+                    {c.icon}
+                  </span>
+                  <span class={`difficulty-badge difficulty-${c.difficulty}`}>
+                    {difficultyLabels[c.difficulty]}
+                  </span>
+                </div>
+                <h3 class="mt-3 font-display text-lg font-semibold leading-snug text-ink-900">
+                  {c.title.es}
+                </h3>
+                <p class="mt-1.5 flex-1 text-sm leading-relaxed text-ink-600">{c.description.es}</p>
+                <p class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
+                  <span aria-hidden="true">⏳</span>
+                  {t('catalog.comingSoon')}
+                </p>
+              </article>
+            );
+          })}
+        </div>
+      </Reveal>
+    )
+  }
+
+  <!-- CTA de cierre -->
+  <Reveal client:visible as="section" className="pb-20 pt-8">
+    <div
+      class="relative overflow-hidden rounded-card bg-linear-to-br from-brand-600 to-accent-500 px-8 py-14 text-center text-white shadow-lift sm:px-12"
+    >
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute -top-20 left-1/2 h-64 w-xl -translate-x-1/2 rounded-full bg-white/10 blur-3xl"
+      >
+      </div>
+      <h2 class="font-display text-2xl font-bold sm:text-3xl">Empieza en cero. Acaba experto.</h2>
+      <p class="mx-auto mt-3 max-w-xl text-brand-50">
+        {courseCount} cursos, {lessonCount} lecciones, una escalera — gratis, sin cuenta, en inglés y
+        español. Empezar lleva unos diez segundos.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href={catalogHref}
+          class="inline-flex items-center rounded-pill bg-white px-7 py-3 text-base font-semibold text-brand-700 shadow-soft transition-all hover:bg-brand-50"
+        >
+          {t('hero.cta.catalog')}
+        </a>
+        <a
+          href={catalogHref}
+          data-random-lesson
+          data-lessons={JSON.stringify(lessonHrefs)}
+          class="inline-flex items-center rounded-pill border border-white/40 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
+        >
+          o sorpréndeme →
+        </a>
+      </div>
+    </div>
+  </Reveal>
+
+  <script>
+    // Elige una lección aleatoria nueva en cada clic — no fijada al construir.
+    // Vuelve al href (catálogo) si falta el JSON.
+    document.querySelectorAll<HTMLAnchorElement>('a[data-random-lesson]').forEach((el) => {
+      let lessons: string[] = [];
+      try {
+        lessons = JSON.parse(el.dataset.lessons || '[]');
+      } catch {
+        lessons = [];
+      }
+      el.addEventListener('click', (e) => {
+        if (!lessons.length) return;
+        e.preventDefault();
+        const href = lessons[Math.floor(Math.random() * lessons.length)];
+        window.location.href = href;
+      });
+    });
+  </script>
+</BaseLayout>

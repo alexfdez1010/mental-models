@@ -1,0 +1,329 @@
+/* ==========================================================================
+   Lessons — Design System
+   Blue-forward, light-first. All design tokens live here as the single
+   source of truth. Tailwind v4 reads the @theme block to generate utilities
+   (bg-brand-500, text-ink-700, rounded-card, shadow-soft, font-display, ...).
+   See DESIGN.md for usage guidance.
+   ========================================================================== */
+
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/lexend';
+
+/* KaTeX styles for LaTeX math rendered from MDX ($…$, $$…$$). */
+@import 'katex/dist/katex.min.css';
+
+/* Official typography plugin — supplies all base markdown styling (tables,
+   lists, code, blockquotes, etc.) via the `prose` class. We theme it to our
+   design tokens below in `.prose-lesson`. */
+@plugin '@tailwindcss/typography';
+
+@theme {
+  /* ---- Brand: blue scale (primary action + accents) ------------------- */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6; /* primary */
+  --color-brand-600: #2563eb; /* primary-strong, default buttons */
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+
+  /* ---- Sky accent: lighter blue for highlights / gradients ------------ */
+  --color-accent-300: #7dd3fc;
+  --color-accent-400: #38bdf8;
+  --color-accent-500: #0ea5e9;
+  --color-accent-600: #0284c7;
+
+  /* ---- Ink: text + neutral scale (cool, slightly blue-tinted) --------- */
+  --color-ink-50: #f8fafc;
+  --color-ink-100: #f1f5f9;
+  --color-ink-200: #e2e8f0;
+  --color-ink-300: #cbd5e1;
+  --color-ink-400: #94a3b8;
+  --color-ink-500: #64748b;
+  --color-ink-600: #475569;
+  --color-ink-700: #334155; /* body text */
+  --color-ink-800: #1e293b; /* headings */
+  --color-ink-900: #0f172a; /* strong headings */
+
+  /* ---- Surfaces (light-first) ----------------------------------------- */
+  --color-surface: #ffffff; /* cards */
+  --color-surface-muted: #f6f9ff; /* page background, blue-tinted white */
+  --color-surface-sunken: #eef4ff; /* wells, code blocks */
+
+  /* ---- Semantic states ------------------------------------------------- */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  /* ---- Typography ------------------------------------------------------ */
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Lexend Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+  /* ---- Radii ----------------------------------------------------------- */
+  --radius-card: 1rem;
+  --radius-pill: 999px;
+
+  /* ---- Shadows (soft, blue-tinted) ------------------------------------ */
+  --shadow-soft: 0 1px 2px rgba(30, 58, 138, 0.04), 0 4px 16px rgba(30, 58, 138, 0.06);
+  --shadow-lift: 0 8px 30px rgba(30, 58, 138, 0.12);
+
+  /* ---- Animations ------------------------------------------------------ */
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-marquee: marquee 70s linear infinite;
+  --animate-marquee-reverse: marquee-reverse 80s linear infinite;
+}
+
+/* Active table-of-contents link, toggled by the scroll-spy script in
+   LessonLayout. Unlayered so it overrides the Tailwind utility classes on the
+   link, and self-contained so it never depends on Tailwind scanning the class
+   name out of an inline <script>. Makes the current section clearly visible. */
+.toc-link--active {
+  border-left-color: var(--color-brand-600);
+  border-left-width: 3px;
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-700);
+  font-weight: 600;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Course-chip marquee on the home page. Content is rendered twice, so a
+   -50% translate loops seamlessly; reduced-motion freezes it via the global
+   media rule, leaving a static row of chips. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-reverse {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ==========================================================================
+   Base layer
+   ========================================================================== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-surface-muted);
+    color: var(--color-ink-700);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink-900);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-200);
+    color: var(--color-brand-900);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Reusable component classes (kept minimal — prefer utilities in markup)
+   ========================================================================== */
+/* Long-form lesson prose. The MDX body carries `prose prose-lg prose-lesson`
+   (see LessonLayout): the typography plugin supplies ALL base markdown styling
+   — tables, lists, code, blockquotes, headings — and `.prose-lesson` re-skins it
+   to our design tokens. These live in @layer utilities so they outrank the
+   plugin's own utility-layer rules; at equal specificity, later source wins. */
+@layer utilities {
+  .prose-lesson {
+    max-width: 68ch;
+    /* Map the plugin's theme variables to our ink/brand/surface tokens. */
+    --tw-prose-body: var(--color-ink-700);
+    --tw-prose-headings: var(--color-ink-900);
+    --tw-prose-lead: var(--color-ink-600);
+    --tw-prose-links: var(--color-brand-600);
+    --tw-prose-bold: var(--color-ink-900);
+    --tw-prose-counters: var(--color-ink-500);
+    --tw-prose-bullets: var(--color-ink-300);
+    --tw-prose-hr: var(--color-ink-200);
+    --tw-prose-quotes: var(--color-ink-700);
+    --tw-prose-quote-borders: var(--color-brand-400);
+    --tw-prose-captions: var(--color-ink-500);
+    --tw-prose-code: var(--color-brand-700);
+    --tw-prose-pre-code: var(--color-ink-100);
+    --tw-prose-pre-bg: var(--color-ink-900);
+    --tw-prose-th-borders: var(--color-ink-200);
+    --tw-prose-td-borders: var(--color-ink-200);
+  }
+  .prose-lesson :is(h1, h2, h3, h4) {
+    font-family: var(--font-display);
+  }
+  /* Generous headroom above section headings (the spacing the user asked for). */
+  .prose-lesson :is(h2) {
+    margin-top: 2.6em;
+  }
+  .prose-lesson :is(h3) {
+    margin-top: 1.9em;
+  }
+  /* Interactive React islands need far more breathing room than prose runs.
+     astro-island is display:contents (no box), so spacing goes on its child —
+     the real card that participates in flow — not the island element. */
+  .prose-lesson > astro-island > * {
+    margin-top: 3.75em;
+    margin-bottom: 3.75em;
+  }
+  /* Presentational Callouts (no client directive) render as a bare div in the
+     prose flow with no typography margin, so stacked info/warning notes touch.
+     Give them their own breathing room; adjacent margins collapse to one gap. */
+  .prose-lesson > [role='note'] {
+    margin-top: 1.75em;
+    margin-bottom: 1.75em;
+  }
+  /* Inline code: drop the plugin's backtick quotes, use a token chip instead. */
+  .prose-lesson :where(:not(pre) > code)::before,
+  .prose-lesson :where(:not(pre) > code)::after {
+    content: none;
+  }
+  .prose-lesson :where(:not(pre) > code) {
+    background-color: var(--color-surface-sunken);
+    padding: 0.15em 0.4em;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  /* Tables: the plugin ships borderless, left-aligned cells with no top
+     padding on `th` (only padding-bottom) — so once a header tint is added the
+     heading text hugs the top edge and looks clipped. Re-skin to a rounded
+     card with centered, evenly-padded cells. */
+  .prose-lesson table {
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+  }
+  .prose-lesson :is(th, td) {
+    padding: 1em 1.5em;
+    text-align: center;
+    vertical-align: middle;
+  }
+  /* Header row tint + zebra striping the plugin leaves unstyled. */
+  .prose-lesson thead {
+    background-color: var(--color-surface-sunken);
+  }
+  .prose-lesson thead th {
+    color: var(--color-ink-900);
+    font-family: var(--font-display);
+  }
+  .prose-lesson tbody tr:nth-child(even) {
+    background-color: color-mix(in oklab, var(--color-surface-sunken) 45%, transparent);
+  }
+}
+
+/* Course difficulty badge — semantic level tints for the catalog graph.
+   Four tiers on the zero-to-expert path. Static class names so they
+   survive Tailwind's content scan (referenced as literals in CourseGraph). */
+@layer components {
+  .difficulty-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: var(--radius-pill);
+    padding: 0.15rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+  .difficulty-beginner {
+    background-color: #ecfdf5;
+    color: #047857;
+  }
+  .difficulty-intermediate {
+    background-color: #fffbeb;
+    color: #b45309;
+  }
+  .difficulty-advanced {
+    background-color: #fff1f2;
+    color: #be123c;
+  }
+  .difficulty-expert {
+    background-color: #f5f3ff;
+    color: #6d28d9;
+  }
+
+  /* Whole-card difficulty color coding for the compact catalog cards: a thick
+     colored left edge + a faint tier-tinted surface, so the zero-to-expert
+     ladder reads at a glance even without the badge. Static class names so
+     they survive Tailwind's content scan (referenced as literals in
+     CourseGraph). */
+  .difficulty-edge-beginner {
+    border-left: 4px solid #10b981;
+    background-color: #f6fefb;
+  }
+  .difficulty-edge-intermediate {
+    border-left: 4px solid #f59e0b;
+    background-color: #fffdf5;
+  }
+  .difficulty-edge-advanced {
+    border-left: 4px solid #f43f5e;
+    background-color: #fff7f8;
+  }
+  .difficulty-edge-expert {
+    border-left: 4px solid #8b5cf6;
+    background-color: #faf9ff;
+  }
+}

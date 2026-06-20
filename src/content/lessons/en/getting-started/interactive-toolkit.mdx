@@ -1,0 +1,140 @@
+---
+title: "The Interactive Toolkit"
+description: "A hands-on tour of the reusable components you drop into any lesson — callouts, questions, quizzes, fill-in-the-blank, reveals, matching, and sorting."
+topic: "en/getting-started"
+order: 2
+minutes: 7
+---
+
+import { Callout, MCQ, Quiz, Reveal, FillBlank, MatchConcepts, Categorize } from '@/components/react';
+
+Every component below is **topic-agnostic** and lives in `@/components/react`.
+Import the ones you need at the top of any lesson, add a `client:*` directive,
+and pass user-facing strings as props (so the Spanish twin just gets Spanish
+labels). Here's the whole generic kit, in action.
+
+## Callout — highlight something
+
+A colored info box. `variant` is `info` · `success` · `warning` · `tip`.
+
+<Callout variant="tip" title="Pass strings as props">
+Keep components reusable and locale-agnostic. Anything the reader sees — the
+question, the labels, the explanation — is a prop, never hard-coded inside the
+component.
+</Callout>
+
+## MCQ — a single question
+
+Multiple choice with instant grading. Mark the right answer with `correct: true`
+and always write an `explanation` — that's where the learning happens.
+
+<MCQ
+  client:visible
+  question="What makes a component safe to reuse across an English lesson and its Spanish twin?"
+  options={[
+    { text: "All user-facing text is passed in as props", correct: true },
+    { text: "It hard-codes English strings and the twin re-implements it", correct: false },
+    { text: "It detects the language from the URL internally", correct: false },
+  ]}
+  explanation="Locale-agnostic components take their visible text as props, so the en and es lessons share one component and only differ in the strings they pass."
+/>
+
+## FillBlank — pick-one cloze
+
+Mark blanks with `{{correct|distractor|distractor}}` — first choice is correct,
+the rest are decoys, and the order is shuffled deterministically.
+
+<FillBlank
+  client:visible
+  question="Fill each blank."
+  text="A {{topic|lesson|tag}} owns many lessons, ordered by their {{order|title|icon}} field, and ships an English source plus a {{Spanish|French|German}} twin."
+  explanation="A topic owns ordered lessons, and every lesson has an es-ES twin in parity."
+/>
+
+## Reveal — scroll-triggered entrance
+
+Wraps content and fades it in once when it scrolls into view (and shows it
+immediately under reduced motion).
+
+<Reveal client:visible>
+  <Callout variant="success" title="You found me">
+    This box faded in on scroll. Use `Reveal` to pace a long explanation — but
+    never to hide essential content from users who can't see the animation.
+  </Callout>
+</Reveal>
+
+## MatchConcepts — link term → definition
+
+<MatchConcepts
+  client:visible
+  question="Match each file to what it holds."
+  pairs={[
+    { term: "TOPIC.md", definition: "The subject, mission, and scope of the whole site" },
+    { term: "src/lib/upcoming.ts", definition: "The queue of planned-but-unbuilt courses" },
+    { term: "src/content/topics/", definition: "The MDX landing page for each course" },
+    { term: "src/styles/global.css", definition: "The design tokens — colors, fonts, radii" },
+  ]}
+  explanation="Each lives in exactly one place, which is what keeps the template easy to reason about."
+/>
+
+## Categorize — sort items into buckets
+
+<Categorize
+  client:visible
+  question="Sort each practice into whether it keeps the en/es twins in parity."
+  buckets={["Keeps parity", "Breaks parity"]}
+  items={[
+    { text: "Same slug and order in both twins", bucket: "Keeps parity" },
+    { text: "Translating the visible strings, not the structure", bucket: "Keeps parity" },
+    { text: "Adding a component to en but not es", bucket: "Breaks parity" },
+    { text: "Reordering lessons in only one locale", bucket: "Breaks parity" },
+  ]}
+  explanation="Parity means identical structure (slugs, order, components) and translated strings — never different content between locales."
+/>
+
+## Quiz — a sequential set with a score
+
+`Quiz` chains several MCQs with a progress bar and a final score screen. Use it
+to recap a whole lesson.
+
+<Quiz
+  client:visible
+  title="Recap"
+  questions={[
+    {
+      question: "Where do you define the subject the site teaches?",
+      options: [
+        { text: "TOPIC.md", correct: true },
+        { text: "README.md", correct: false },
+        { text: "package.json", correct: false },
+      ],
+      explanation: "TOPIC.md is the single source of truth for the subject; CLAUDE.md and the cron builder read it.",
+    },
+    {
+      question: "How does a planned course appear before it's written?",
+      options: [
+        { text: "As a dimmed 'Coming soon' node from src/lib/upcoming.ts", correct: true },
+        { text: "As an empty MDX file", correct: false },
+        { text: "It doesn't — you just write it", correct: false },
+      ],
+      explanation: "Entries in upcoming.ts render as dimmed nodes on the catalog graph until they graduate to real topics.",
+    },
+    {
+      question: "What's the rule for interactive components?",
+      options: [
+        { text: "Pass all visible text as props; respect prefers-reduced-motion", correct: true },
+        { text: "Hard-code English and duplicate for Spanish", correct: false },
+        { text: "Always animate, motion preferences aside", correct: false },
+      ],
+      explanation: "Reusable, locale-agnostic, accessible — the three rules every island follows.",
+    },
+  ]}
+/>
+
+<Callout variant="info" title="That's the kit">
+There are a few more structural pieces (the catalog graph, the per-lesson
+completion toggle, the final-exam island) wired in for you. To go deeper on
+building *new* subject-specific animation islands, see the `lesson-animations`
+and `exercise-components` skills. Ready? Run **`bootstrap-topic`** to make this
+site about your subject.
+</Callout>

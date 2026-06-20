@@ -1,0 +1,55 @@
+---
+/**
+ * Lesson page (English) — renders a single lesson's MDX body inside LessonLayout,
+ * with TOC headings, prev/next neighbors and hreflang alternates.
+ */
+import { render } from 'astro:content';
+import LessonLayout from '@/layouts/LessonLayout.astro';
+import {
+  getLessonEntry,
+  getTopicEntry,
+  getLessonNeighbors,
+  getLessons,
+  lessonPaths,
+  getAlternates,
+} from '@/lib/content';
+import { localizePath } from '@/i18n/utils';
+
+export async function getStaticPaths() {
+  return lessonPaths('en');
+}
+
+const lang = 'en' as const;
+const { topicSlug, lessonSlug } = Astro.props;
+
+const lesson = await getLessonEntry(lang, topicSlug, lessonSlug);
+if (!lesson) {
+  return Astro.redirect(localizePath('/catalog', lang));
+}
+
+const topic = await getTopicEntry(lang, topicSlug);
+const courseLessons = await getLessons(lang, topicSlug);
+const { Content, headings } = await render(lesson);
+const { prev, next } = await getLessonNeighbors(lang, topicSlug, lessonSlug);
+const alts = await getAlternates(`/${topicSlug}/${lessonSlug}`);
+---
+
+<LessonLayout
+  title={lesson.data.title}
+  description={lesson.data.description}
+  topicTitle={topic?.data.title ?? topicSlug}
+  topicSlug={topicSlug}
+  lessonSlug={lessonSlug}
+  courseLessonSlugs={courseLessons.map((entry) => entry.lessonSlug)}
+  lang={lang}
+  minutes={lesson.data.minutes}
+  updated={lesson.data.updated}
+  keywords={lesson.data.seo.keywords}
+  noindex={lesson.data.seo.noindex}
+  alternates={alts}
+  prev={prev}
+  next={next}
+  headings={headings}
+>
+  <Content />
+</LessonLayout>

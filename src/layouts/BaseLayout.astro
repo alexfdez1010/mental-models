@@ -1,0 +1,91 @@
+---
+/**
+ * BaseLayout.astro — the document shell for every page.
+ * Owns <head> (via Seo), the global stylesheet, site chrome (Header/Footer),
+ * the skip link, and a decorative blue page glow. Pass SEO props straight
+ * through; page-specific content goes in the default slot.
+ */
+import Seo from '@/components/seo/Seo.astro';
+import Header from '@/components/ui/Header.astro';
+import Footer from '@/components/ui/Footer.astro';
+import { getLangFromUrl, useTranslations, type Lang } from '@/i18n/utils';
+import { ogImagePath } from '@/lib/og';
+import Analytics from '@vercel/analytics/astro';
+import '@/styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  keywords?: string[];
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  publishedTime?: string;
+  modifiedTime?: string;
+  /** Active locale. Defaults to the locale parsed from the URL. */
+  lang?: Lang;
+  /** hreflang alternates: localized versions of this page. */
+  alternates?: { lang: string; href: string }[];
+  /** Extra classes applied to the <main> element. */
+  mainClass?: string;
+}
+
+const {
+  mainClass,
+  lang = getLangFromUrl(Astro.url),
+  alternates,
+  image,
+  ...rest
+} = Astro.props;
+
+const t = useTranslations(lang);
+
+const localeMap: Record<Lang, string> = { en: 'en-US', es: 'es-ES' };
+
+const seo = {
+  ...rest,
+  image: image ?? ogImagePath(Astro.url.pathname),
+  locale: localeMap[lang],
+  alternates,
+};
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="generator" content={Astro.generator} />
+    <Seo {...seo} />
+  </head>
+  <body class="min-h-screen">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-pill focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lift"
+    >
+      {t('nav.skip')}
+    </a>
+
+    <!-- Decorative blue glow, behind all content. -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none fixed inset-x-0 top-0 -z-10 h-120 overflow-hidden"
+    >
+      <div
+        class="absolute left-1/2 -top-55 h-130 w-205 -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,var(--color-brand-200),color-mix(in_oklab,var(--color-accent-300)_40%,transparent),transparent)] opacity-60 blur-2xl"
+      >
+      </div>
+    </div>
+
+    <Header lang={lang} alternates={alternates} />
+    <main id="main" class={mainClass}>
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <Analytics />
+  </body>
+</html>

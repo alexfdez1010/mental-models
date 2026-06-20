@@ -1,0 +1,97 @@
+---
+/**
+ * Seo.astro — every <head> meta tag a page needs for search + social.
+ * Renders: title, description, canonical, robots, Open Graph, Twitter card,
+ * theme-color, and an optional JSON-LD structured-data blob.
+ *
+ * Drop this inside <head> from BaseLayout; pages pass their own values.
+ */
+import { SITE } from '@/lib/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Path or absolute URL to the share image. Resolved against site origin. */
+  image?: string;
+  /** Page type for Open Graph. */
+  type?: 'website' | 'article';
+  keywords?: string[];
+  noindex?: boolean;
+  /** Article metadata (only used when type === 'article'). */
+  publishedTime?: string;
+  modifiedTime?: string;
+  /** Arbitrary JSON-LD object(s) injected as <script type="application/ld+json">. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** BCP47 locale of this page (og:locale, drives <html lang>). */
+  locale?: string;
+  /** hreflang alternates: localized versions of this page. */
+  alternates?: { lang: string; href: string }[];
+}
+
+const {
+  title,
+  description = SITE.description,
+  image = SITE.defaultOgImage,
+  type = 'website',
+  keywords = [],
+  noindex = false,
+  publishedTime,
+  modifiedTime,
+  jsonLd,
+  locale = SITE.locale,
+  alternates = [],
+} = Astro.props;
+
+const origin = Astro.site ?? Astro.url.origin;
+const hreflangs = alternates.map((a) => ({ lang: a.lang, href: new URL(a.href, origin).href }));
+
+const fullTitle = SITE.titleTemplate(title);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const ogImageURL = new URL(image, Astro.site ?? Astro.url.origin);
+const ldBlocks = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+
+<!-- Primary -->
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+{hreflangs.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+{
+  hreflangs.length > 0 && (
+    <link rel="alternate" hreflang="x-default" href={hreflangs[0].href} />
+  )
+}
+{keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
+<meta name="author" content={SITE.author} />
+<meta name="theme-color" content={SITE.themeColor} />
+{
+  noindex ? (
+    <meta name="robots" content="noindex, nofollow" />
+  ) : (
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+  )
+}
+
+<!-- Open Graph -->
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:type" content={type} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:image" content={ogImageURL} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content={locale} />
+{alternates.filter((a) => a.lang !== locale).map((a) => <meta property="og:locale:alternate" content={a.lang} />)}
+{type === 'article' && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+{type === 'article' && modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content={SITE.twitter} />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageURL} />
+
+<!-- Structured data -->
+{ldBlocks.map((block) => <script is:inline type="application/ld+json" set:html={JSON.stringify(block)} />)}

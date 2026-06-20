@@ -1,0 +1,97 @@
+---
+/**
+ * Coming Soon (English) — the build queue rendered from `@/lib/upcoming`.
+ * Adding a course needs no change here: append an entry to `upcomingCourses`
+ * and it appears, in build order, with its prerequisites resolved to titles.
+ * Once a course is built (its topic MDX exists), delete its upcoming entry and
+ * it graduates onto the live catalog automatically.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTopics } from '@/lib/content';
+import { upcomingCourses } from '@/lib/upcoming';
+import { getDifficultyLabels } from '@/lib/catalog';
+import { useTranslations, localizePath, alternates as alternatesFor } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+const difficultyLabels = getDifficultyLabels(lang);
+
+// Resolve dependency slugs to course titles — across both built topics and
+// other queued courses — so "Builds on" reads as real course names.
+const topics = await getTopics(lang);
+const titleBySlug = new Map<string, string>([
+  ...topics.map((tp) => [tp.slug, tp.entry.data.title] as const),
+  ...upcomingCourses.map((c) => [c.slug, c.title[lang]] as const),
+]);
+const depLabel = (slug: string) => titleBySlug.get(slug) ?? slug.replace(/-/g, ' ');
+
+const queue = [...upcomingCourses].sort((a, b) => a.order - b.order);
+
+const alts = alternatesFor(Astro.url).map((a) => ({ lang: a.lang, href: a.path }));
+---
+
+<BaseLayout
+  title={t('upcoming.title')}
+  description={t('upcoming.subtitle')}
+  lang={lang}
+  alternates={alts}
+  mainClass="mx-auto w-full max-w-5xl px-4 pb-20 pt-12 sm:px-6"
+>
+  <header class="max-w-2xl animate-fade-up">
+    <h1 class="font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+      {t('upcoming.title')}
+    </h1>
+    <p class="mt-3 text-lg leading-relaxed text-ink-600">{t('upcoming.subtitle')}</p>
+    <a
+      href={localizePath('/catalog', lang)}
+      class="mt-4 inline-block text-sm font-semibold text-brand-700 hover:text-brand-800"
+    >
+      {t('upcoming.catalogCta')}
+    </a>
+  </header>
+
+  {
+    queue.length === 0 ? (
+      <p class="mt-12 text-ink-500">{t('upcoming.empty')}</p>
+    ) : (
+      <ol class="mt-10 grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2">
+        {queue.map((c, i) => {
+          const tint = c.accent === 'accent' ? 'bg-accent-50' : 'bg-brand-50';
+          return (
+            <li class="m-0 p-0">
+              <article class="relative flex h-full flex-col rounded-card border border-dashed border-ink-200 bg-surface p-5 shadow-soft">
+                {i === 0 ? (
+                  <span class="absolute -top-2.5 left-5 rounded-pill bg-brand-600 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-white shadow-soft">
+                    {t('upcoming.nextUp')}
+                  </span>
+                ) : null}
+                <div class="flex items-center justify-between gap-3">
+                  <span class={`grid h-11 w-11 shrink-0 place-items-center rounded-card text-2xl ${tint}`}>
+                    {c.icon}
+                  </span>
+                  <span class={`difficulty-badge difficulty-${c.difficulty}`}>
+                    {difficultyLabels[c.difficulty]}
+                  </span>
+                </div>
+                <h2 class="mt-3 font-display text-lg font-semibold leading-snug text-ink-900">
+                  {c.title[lang]}
+                </h2>
+                <p class="mt-1.5 flex-1 text-sm leading-relaxed text-ink-600">{c.description[lang]}</p>
+                {c.dependencies && c.dependencies.length > 0 ? (
+                  <p class="mt-3 text-xs text-ink-500">
+                    <span class="font-semibold text-ink-600">{t('upcoming.buildsOn')}:</span>{' '}
+                    {c.dependencies.map(depLabel).join(' · ')}
+                  </p>
+                ) : null}
+                <p class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
+                  <span aria-hidden="true">⏳</span>
+                  {t('catalog.comingSoon')}
+                </p>
+              </article>
+            </li>
+          );
+        })}
+      </ol>
+    )
+  }
+</BaseLayout>

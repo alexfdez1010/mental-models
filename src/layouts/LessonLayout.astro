@@ -1,0 +1,264 @@
+---
+/**
+ * LessonLayout.astro — wraps a single rendered lesson.
+ * Renders breadcrumbs, an article header (title + meta), a two-column body
+ * with the prose on the left and a sticky table-of-contents on the right,
+ * and a prev/next pager. Builds Article/Course JSON-LD from props.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/ui/Breadcrumbs.astro';
+import { LessonComplete } from '@/components/react';
+import { SITE } from '@/lib/site';
+import { useTranslations, localizePath, type Lang } from '@/i18n/utils';
+
+interface Props {
+  title: string;
+  description: string;
+  topicTitle: string;
+  topicSlug: string;
+  lessonSlug: string;
+  courseLessonSlugs: string[];
+  lang: Lang;
+  minutes?: number;
+  updated?: Date;
+  image?: string;
+  keywords?: string[];
+  noindex?: boolean;
+  alternates?: { lang: string; href: string }[];
+  prev?: { title: string; href: string } | null;
+  next?: { title: string; href: string } | null;
+  /** Headings from Astro's MDX render. Only depth 2–3 are shown in the TOC. */
+  headings?: { depth: number; slug: string; text: string }[];
+}
+
+const {
+  title,
+  description,
+  topicTitle,
+  topicSlug,
+  lessonSlug,
+  courseLessonSlugs,
+  lang,
+  minutes,
+  updated,
+  image,
+  keywords,
+  noindex,
+  alternates,
+  prev,
+  next,
+  headings = [],
+} = Astro.props;
+
+const t = useTranslations(lang);
+
+const topicHref = localizePath(`/${topicSlug}`, lang);
+const lessonHref = localizePath(`/${topicSlug}/${lessonSlug}`, lang);
+
+const crumbs = [
+  { label: t('nav.home'), href: localizePath('/', lang) },
+  { label: topicTitle, href: topicHref },
+  { label: title },
+];
+
+const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+
+const dateFmt = new Intl.DateTimeFormat(lang, { dateStyle: 'medium' });
+const updatedLabel = updated ? dateFmt.format(updated) : undefined;
+
+const canonical = new URL(lessonHref, Astro.site ?? Astro.url.origin).href;
+
+// Article + breadcrumb structured data.
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description,
+    author: { '@type': 'Organization', name: SITE.author },
+    publisher: { '@type': 'Organization', name: SITE.name },
+    mainEntityOfPage: canonical,
+    ...(updated ? { dateModified: updated.toISOString() } : {}),
+    isPartOf: {
+      '@type': 'Course',
+      name: topicTitle,
+      url: new URL(topicHref, Astro.site ?? Astro.url.origin).href,
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.label,
+      ...(c.href ? { item: new URL(c.href, Astro.site ?? Astro.url.origin).href } : {}),
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  type="article"
+  lang={lang}
+  alternates={alternates}
+  image={image}
+  keywords={keywords}
+  noindex={noindex}
+  modifiedTime={updated?.toISOString()}
+  jsonLd={jsonLd}
+  mainClass="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-6"
+>
+  <Breadcrumbs items={crumbs} />
+
+  <!-- Article header -->
+  <header class="mt-6 max-w-3xl animate-fade-up">
+    <p class="text-sm font-medium text-brand-700">
+      <a href={topicHref} class="hover:underline">{topicTitle}</a>
+    </p>
+    <h1 class="mt-2 text-3xl font-bold leading-tight text-ink-900 sm:text-4xl">{title}</h1>
+    <p class="mt-3 text-lg leading-relaxed text-ink-600">{description}</p>
+
+    <div class="mt-5 flex flex-wrap items-center gap-3 text-sm text-ink-500">
+      {
+        minutes != null && (
+          <span class="inline-flex items-center gap-1.5 rounded-pill bg-surface-sunken px-3 py-1 font-medium text-brand-700">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            {minutes} {t('lesson.minutes')}
+          </span>
+        )
+      }
+      {updatedLabel && <span>{t('lesson.updated')} {updatedLabel}</span>}
+    </div>
+  </header>
+
+  <!-- Body + TOC -->
+  <div class="mt-14 gap-12 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem]">
+    <article class="prose prose-lg prose-lesson">
+      <slot />
+    </article>
+
+    {
+      toc.length > 0 && (
+        <aside class="hidden lg:block">
+          <nav aria-label={t('lesson.toc')} class="sticky top-24">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-400">
+              {t('lesson.toc')}
+            </p>
+            <ul class="space-y-2 border-l border-ink-200 text-sm">
+              {toc.map((h) => (
+                <li>
+                  <a
+                    href={`#${h.slug}`}
+                    data-toc-link={h.slug}
+                    class:list={[
+                      'block border-l-2 border-transparent py-1 pr-2 text-ink-500 transition-all hover:border-brand-400 hover:text-brand-700',
+                      h.depth === 3 ? 'pl-6' : 'pl-3',
+                    ]}
+                  >
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+      )
+    }
+  </div>
+
+  <!-- Per-lesson completion toggle (locale-agnostic, stored by bare slugs) -->
+  <LessonComplete
+    client:visible
+    topicSlug={topicSlug}
+    lessonSlug={lessonSlug}
+    courseLessonSlugs={courseLessonSlugs}
+    markLabel={t('lesson.markComplete')}
+    finishedLabel={t('lesson.complete')}
+    undoLabel={t('lesson.undoComplete')}
+  />
+
+  {
+    toc.length > 0 && (
+      <script>
+        // Scroll-spy: highlight the TOC link for the section currently in view.
+        const links = Array.from(
+          document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'),
+        );
+        const ACTIVE = ['toc-link--active'];
+        const byId = new Map(links.map((l) => [l.dataset.tocLink, l]));
+        const heads = links
+          .map((l) => document.getElementById(l.dataset.tocLink!))
+          .filter((el): el is HTMLElement => el !== null);
+
+        let current: HTMLAnchorElement | null = null;
+        const setActive = (slug: string | undefined) => {
+          const link = slug ? byId.get(slug) : undefined;
+          if (link === current) return;
+          current?.classList.remove(...ACTIVE);
+          link?.classList.add(...ACTIVE);
+          current = link ?? null;
+        };
+
+        const onScroll = () => {
+          // Last heading whose top has passed the spy line (120px from top).
+          let activeSlug: string | undefined;
+          for (const h of heads) {
+            if (h.getBoundingClientRect().top <= 120) activeSlug = h.id;
+            else break;
+          }
+          setActive(activeSlug ?? heads[0]?.id);
+        };
+
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+      </script>
+    )
+  }
+
+  <!-- Prev / next pager -->
+  {
+    (prev || next) && (
+      <nav
+        aria-label="Lesson navigation"
+        class="mt-16 grid gap-4 border-t border-ink-200 pt-8 sm:grid-cols-2"
+      >
+        {prev ? (
+          <a
+            href={prev.href}
+            class="group flex flex-col rounded-card border border-ink-200 bg-surface p-5 transition-all hover:border-brand-300 hover:shadow-lift"
+          >
+            <span class="text-xs font-medium uppercase tracking-wide text-ink-400">
+              ← {t('lesson.prev')}
+            </span>
+            <span class="mt-1 font-display font-semibold text-ink-800 group-hover:text-brand-700">
+              {prev.title}
+            </span>
+          </a>
+        ) : (
+          <span aria-hidden="true" class="hidden sm:block" />
+        )}
+        {next ? (
+          <a
+            href={next.href}
+            class="group flex flex-col rounded-card border border-ink-200 bg-surface p-5 text-right transition-all hover:border-brand-300 hover:shadow-lift"
+          >
+            <span class="text-xs font-medium uppercase tracking-wide text-ink-400">
+              {t('lesson.next')} →
+            </span>
+            <span class="mt-1 font-display font-semibold text-ink-800 group-hover:text-brand-700">
+              {next.title}
+            </span>
+          </a>
+        ) : (
+          <span aria-hidden="true" class="hidden sm:block" />
+        )}
+      </nav>
+    )
+  }
+</BaseLayout>

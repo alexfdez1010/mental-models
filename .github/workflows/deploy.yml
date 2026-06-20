@@ -1,0 +1,52 @@
+name: Deploy (Vercel prebuilt)
+
+# Why this exists: a large static build (many MDX pages × React islands) can need
+# more heap than Vercel's *hobby* build container provides (it SIGKILLs at the
+# container limit, or V8 dies with "Ineffective mark-compacts" if the heap cap is
+# set lower). So we build on a larger GitHub-hosted runner instead and ship the
+# prebuilt output to Vercel with `vercel deploy --prebuilt`. Disable Vercel's own
+# git build (commandForIgnoringBuildStep="exit 0") so it no longer tries — and
+# fails — to build on push.
+#
+# Required repo secrets:
+#   VERCEL_TOKEN      — a Vercel access token
+#   VERCEL_ORG_ID     — your Vercel org/team ID (Project Settings → General)
+#   VERCEL_PROJECT_ID — your Vercel project ID (Project Settings → General)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.12'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build (16 GB runner)
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy prebuilt to production
+        run: vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"

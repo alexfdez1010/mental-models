@@ -1,0 +1,132 @@
+---
+/**
+ * Header.astro — sticky translucent site chrome.
+ * Wordmark on the left, primary nav on the right. Active link styling is
+ * derived from the current pathname (no JS). Collapses gracefully on small
+ * screens to wordmark + Catalog.
+ */
+import {
+  getLangFromUrl,
+  useTranslations,
+  localizePath,
+  alternates as alternatesFor,
+  languages,
+  type Lang,
+} from '@/i18n/utils';
+
+interface Props {
+  lang?: Lang;
+  alternates?: { lang: string; href: string }[];
+}
+
+const { lang = getLangFromUrl(Astro.url), alternates } = Astro.props;
+const t = useTranslations(lang);
+
+const path = Astro.url.pathname;
+
+const links: { label: string; href: string }[] = [
+  { label: t('nav.catalog'), href: localizePath('/catalog', lang) },
+  { label: t('nav.upcoming'), href: localizePath('/upcoming', lang) },
+];
+
+const home = localizePath('/', lang);
+const catalogHref = localizePath('/catalog', lang);
+
+/** A link is active when the pathname matches or sits beneath its href. */
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+
+/** Locale toggle targets: equivalent page in each locale. */
+const langLinks = (
+  alternates ?? alternatesFor(Astro.url).map((a) => ({ lang: a.lang, href: a.path }))
+).map((a) => ({ ...a, lang: a.lang as Lang }));
+---
+
+<header
+  class="sticky top-0 z-50 w-full border-b border-ink-200 bg-surface/80 backdrop-blur supports-[backdrop-filter]:bg-surface/70"
+>
+  <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:h-16 sm:px-6">
+    <!-- Wordmark -->
+    <a
+      href={home}
+      class="group flex min-w-0 items-center gap-2 whitespace-nowrap font-display text-base font-semibold tracking-tight text-ink-900 sm:gap-2.5 sm:text-lg"
+    >
+      <img
+        src="/favicon.ico"
+        alt=""
+        aria-hidden="true"
+        width="32"
+        height="32"
+        class="h-7 w-7 shrink-0 rounded-[0.6rem] shadow-soft transition-transform duration-200 group-hover:scale-105 sm:h-8 sm:w-8"
+      />
+      <span class="truncate">{t('brand.title')}</span>
+    </a>
+
+    <!-- Nav -->
+    <nav aria-label="Primary" class="flex shrink-0 items-center gap-0.5 sm:gap-2">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+            class:list={[
+              'rounded-pill px-2.5 py-1.5 text-sm font-medium transition-colors sm:px-3',
+              isActive(link.href)
+                ? 'text-brand-700'
+                : 'text-ink-600 hover:bg-surface-sunken hover:text-ink-900',
+              // Hide secondary links on the smallest screens, keep Catalog.
+              link.href === catalogHref ? '' : 'hidden sm:inline-block',
+            ]}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+
+      <!-- Language switcher -->
+      <div
+        aria-label={t('lang.switch')}
+        role="group"
+        class="ml-0.5 flex items-center rounded-pill border border-ink-200 bg-surface-sunken/60 p-0.5 text-xs font-semibold sm:ml-1"
+      >
+        {
+          langLinks.map((l) => {
+            const current = l.lang === lang;
+            return (
+              <a
+                href={l.href}
+                lang={l.lang}
+                hreflang={l.lang}
+                aria-current={current ? 'true' : undefined}
+                title={languages[l.lang]}
+                class:list={[
+                  'rounded-pill px-2 py-0.5 uppercase tracking-wide transition-colors',
+                  current
+                    ? 'bg-surface text-brand-700 shadow-soft'
+                    : 'text-ink-500 hover:text-ink-900',
+                ]}
+              >
+                {l.lang}
+              </a>
+            );
+          })
+        }
+      </div>
+
+      <a
+        href="https://github.com/alexfdez1010/lessons"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t('nav.github')}
+        class="ml-0.5 grid h-9 w-9 place-items-center rounded-pill text-ink-600 transition-colors hover:bg-surface-sunken hover:text-ink-900 sm:ml-1"
+      >
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.36 9.36 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"
+          ></path>
+        </svg>
+      </a>
+    </nav>
+  </div>
+</header>
