@@ -73,25 +73,6 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   {
-    slug: 'inversion',
-    icon: '🔃',
-    difficulty: 'beginner',
-    order: 3,
-    accent: 'brand',
-    title: {
-      en: 'Inversion: Think Backwards',
-      es: 'Inversión: Pensar al Revés',
-    },
-    description: {
-      en: '“Invert, always invert.” Instead of asking how to succeed, ask how to fail — then avoid that. One of the most powerful and underused thinking tools.',
-      es: '«Invierte, siempre invierte.» En vez de preguntar cómo triunfar, pregunta cómo fracasar, y evítalo. Una de las herramientas de pensamiento más potentes e infrautilizadas.',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['decision-making', 'problem-solving'],
-    buildNotes:
-      'Inversion (Jacobi’s "invert, always invert", via Munger). Sections: solving forward vs. backward; the "how would I guarantee failure?" pre-mortem; avoiding stupidity beats seeking brilliance. Worked examples: planning a project by listing every way it could fail; "how to make a team miserable" inverted into management advice. Pitfall: inversion finds what to avoid, not always what to do. Build a "forward goal ↔ inverted anti-goal" flip island. Recap Quiz. en + es twin.',
-  },
-  {
     slug: 'second-order-thinking',
     icon: '🌊',
     difficulty: 'intermediate',

@@ -63,3 +63,6 @@ export type { MapTerritoryZoomProps, MapTerritoryStep } from '@/components/react
 
 export { FirstPrinciplesBuilder, default as FirstPrinciplesBuilderDefault } from '@/components/react/FirstPrinciplesBuilder';
 export type { FirstPrinciplesBuilderProps, FirstPrinciplesPart } from '@/components/react/FirstPrinciplesBuilder';
+
+export { InversionFlip, default as InversionFlipDefault } from '@/components/react/InversionFlip';
+export type { InversionFlipProps, InversionPair } from '@/components/react/InversionFlip';
