@@ -66,3 +66,6 @@ export type { FirstPrinciplesBuilderProps, FirstPrinciplesPart } from '@/compone
 
 export { InversionFlip, default as InversionFlipDefault } from '@/components/react/InversionFlip';
 export type { InversionFlipProps, InversionPair } from '@/components/react/InversionFlip';
+
+export { ConsequenceTree, default as ConsequenceTreeDefault } from '@/components/react/ConsequenceTree';
+export type { ConsequenceTreeProps, ConsequenceNode, ConsequenceValence } from '@/components/react/ConsequenceTree';

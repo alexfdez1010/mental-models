@@ -73,25 +73,6 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   {
-    slug: 'second-order-thinking',
-    icon: '🌊',
-    difficulty: 'intermediate',
-    order: 4,
-    accent: 'accent',
-    title: {
-      en: 'Second-Order Thinking',
-      es: 'Pensamiento de Segundo Orden',
-    },
-    description: {
-      en: '“And then what?” Trace the consequences of the consequences. First-order answers are easy and usually wrong; the edge is in the ripple effects.',
-      es: '«¿Y luego qué?» Sigue las consecuencias de las consecuencias. Las respuestas de primer orden son fáciles y casi siempre erróneas; la ventaja está en los efectos en cascada.',
-    },
-    dependencies: ['inversion', 'first-principles-thinking'],
-    tags: ['decision-making', 'systems-thinking'],
-    buildNotes:
-      'Second- and higher-order effects. Sections: first-order vs. second-order consequences; the "and then what?" chain; how incentives and feedback create non-obvious downstream effects. Worked examples: price caps → shortages; a sugar tax → reformulation/substitution; a hire that fixes today but blocks promotion paths. Connect to opportunity cost and feedback loops. Build an interactive consequence-tree island (expand effects N levels deep). Pitfall: paralysis from over-forecasting. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'opportunity-cost',
     icon: '⚖️',
     difficulty: 'intermediate',
@@ -128,6 +109,44 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['probability', 'decision-making'],
     buildNotes:
       'Foundations of probabilistic thinking. Sections: possibility vs. probability; base rates (the outside view) and the base-rate fallacy; expected value = Σ(probability × payoff) with worked numeric examples; thinking in ranges not point estimates. Use KaTeX for the EV formula and at least one worked table. Build an interactive EV calculator / base-rate visualizer island (e.g. a dot grid showing a base rate). Pitfall: confusing a good decision with a good outcome. Recap Quiz. en + es twin. This sets up the advanced Probability & Uncertainty path (Bayesian updating, fat tails).',
+  },
+  {
+    slug: 'feedback-loops',
+    icon: '🔄',
+    difficulty: 'advanced',
+    order: 7,
+    accent: 'accent',
+    title: {
+      en: 'Feedback Loops & Systems Thinking',
+      es: 'Bucles de Retroalimentación y Pensamiento Sistémico',
+    },
+    description: {
+      en: 'Why systems run away, settle down, or oscillate. Reinforcing loops amplify, balancing loops resist, and delays make both misbehave — the engine room beneath second-order effects.',
+      es: 'Por qué los sistemas se disparan, se estabilizan u oscilan. Los bucles reforzadores amplifican, los equilibradores resisten y los retardos descontrolan a ambos: la sala de máquinas bajo los efectos de segundo orden.',
+    },
+    dependencies: ['second-order-thinking'],
+    tags: ['systems-thinking', 'science-engineering'],
+    buildNotes:
+      'Systems & feedback, the advanced rung above second-order thinking. Sections: stocks vs. flows; reinforcing (amplifying) loops — compounding, viral growth, bank runs; balancing (stabilizing) loops — thermostats, predator–prey, market clearing; the role of delays (why loops overshoot and oscillate, e.g. the shower-temperature lag, the beer-game bullwhip); leverage points (where to push a system). Worked examples with simple stock-and-flow numbers and at least one oscillation traced over time. Build an interactive loop-simulator island (a stock with an adjustable reinforcing/balancing rate + delay slider, plotting the trajectory; respect prefers-reduced-motion). Connect explicitly to second-order thinking (loops are *why* downstream effects compound) and to incentives. Pitfall: assuming systems move linearly / ignoring delay. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'bayesian-updating',
+    icon: '🔁',
+    difficulty: 'advanced',
+    order: 8,
+    accent: 'brand',
+    title: {
+      en: 'Bayesian Updating',
+      es: 'Actualización Bayesiana',
+    },
+    description: {
+      en: 'Change your mind by degrees, not all at once. Start from a base rate, weigh the new evidence, and land on a calibrated new belief instead of overreacting to the latest headline.',
+      es: 'Cambia de opinión por grados, no de golpe. Parte de una tasa base, pondera la nueva evidencia y llega a una creencia nueva y calibrada en vez de sobrerreaccionar al último titular.',
+    },
+    dependencies: ['thinking-in-probabilities'],
+    tags: ['probability', 'decision-making'],
+    buildNotes:
+      'Bayesian updating — the advanced probability rung above Thinking in Probabilities. Sections: prior, likelihood, posterior in plain language; the base rate as your prior (links back to the base-rate fallacy); the canonical medical-test worked example (rare disease + imperfect test → surprisingly low posterior) done with real numbers and a natural-frequency tree; updating incrementally as evidence arrives; strength of evidence (likelihood ratios) vs. weight of the prior; why extraordinary claims need extraordinary evidence. Use KaTeX for Bayes’ theorem and at least one frequency table; build an interactive posterior-calculator / natural-frequency-grid island (sliders for base rate, true-positive, false-positive → live posterior). Connect to second-order thinking (a posterior is the input to the next decision) and calibration. Pitfall: ignoring the base rate; confusing P(evidence|hypothesis) with P(hypothesis|evidence). Recap Quiz + MindMap. en + es twin. Sets up fat tails and calibration on the expert tier.',
   },
 ];
 
