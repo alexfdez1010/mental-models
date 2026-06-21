@@ -73,25 +73,6 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   {
-    slug: 'first-principles-thinking',
-    icon: '🔬',
-    difficulty: 'beginner',
-    order: 2,
-    accent: 'accent',
-    title: {
-      en: 'First-Principles Thinking',
-      es: 'Pensar desde Primeros Principios',
-    },
-    description: {
-      en: 'Reason up from what you know is true instead of by analogy. Boil a problem down to its irreducible facts, then rebuild — the engine behind every breakthrough.',
-      es: 'Razona desde lo que sabes que es cierto en lugar de por analogía. Reduce un problema a sus hechos irreducibles y reconstruye: el motor de todo avance.',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['problem-solving', 'foundations'],
-    buildNotes:
-      'Reasoning from first principles vs. reasoning by analogy. Sections: the Socratic "why" ladder; separating assumptions from facts; rebuilding a solution from the irreducible parts. Worked example: the cost of a battery pack broken into raw-material cost (the classic first-principles deconstruction). Contrast a by-analogy answer with a first-principles answer side-by-side in a table. Pitfall: it is slow — when analogy is good enough. Build an interactive "decompose then rebuild" island. Recap Quiz. en + es twin.',
-  },
-  {
     slug: 'inversion',
     icon: '🔃',
     difficulty: 'beginner',

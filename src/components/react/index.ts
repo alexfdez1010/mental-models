@@ -60,3 +60,6 @@ export type { LessonCompleteProps } from '@/components/react/LessonComplete';
 
 export { MapTerritoryZoom, default as MapTerritoryZoomDefault } from '@/components/react/MapTerritoryZoom';
 export type { MapTerritoryZoomProps, MapTerritoryStep } from '@/components/react/MapTerritoryZoom';
+
+export { FirstPrinciplesBuilder, default as FirstPrinciplesBuilderDefault } from '@/components/react/FirstPrinciplesBuilder';
+export type { FirstPrinciplesBuilderProps, FirstPrinciplesPart } from '@/components/react/FirstPrinciplesBuilder';
