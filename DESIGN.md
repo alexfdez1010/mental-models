@@ -1,13 +1,14 @@
 # Mental Models — Design System
 
-The visual language for the site: a bold, **orange, brutalist, light-first**
-learning surface — hard black offset shadows, sharp edges, warm neutrals and
-high-contrast type. Everything below maps to tokens defined once in
+The visual language for the site: **quiet latticework** — refined, editorial,
+light-first minimalism. Warm paper surfaces, a characterful Fraunces serif for
+display, a single restrained amber accent, hairline edges and soft diffused
+shadows. Everything below maps to tokens defined once in
 [`src/styles/global.css`](src/styles/global.css) (the Tailwind v4 `@theme`
 block). Reference them with Tailwind utilities — never hard-code hex values.
 
-> **This palette is re-themeable.** The orange brutalist theme below is what the
-> site ships with; it can be re-themed by editing the `@theme` block in
+> **This palette is re-themeable.** The warm-amber minimalist theme below is what
+> the site ships with; it can be re-themed by editing the `@theme` block in
 > [`src/styles/global.css`](src/styles/global.css) (the `brand-*` / `accent-*`
 > ramps, the shadow/radius tokens, and `themeColor` in `src/lib/site.ts`). The
 > structure, tokens, accessibility rules and component contracts below are
@@ -18,17 +19,20 @@ block). Reference them with Tailwind utilities — never hard-code hex values.
 
 ## Philosophy
 
-- **Orange is the brand.** A hot orange carries identity, action and focus; an
-  amber accent adds energy in gradients and highlights. Color is loud on
-  purpose — this is a confident, dynamic surface, not a calm one.
-- **Brutalist, not soft.** Edges are sharp (small radii), elevation is a **hard
-  black offset shadow** with no blur, and contrast is high. Structure reads as
-  solid blocks rather than floating cards.
-- **Light first, warm.** Surfaces are near-white with a faint warm tint; ink is
-  a warm stone neutral that bottoms out at a near-black for headings.
-- **Motion with snap.** Fade/float animations stay, always respecting
-  `prefers-reduced-motion`, but the resting look is bold and grounded.
-- **Readable above all.** Display type for headings, a humanist sans for body,
+- **Restraint is the brand.** A muted amber carries identity, action and focus,
+  used *sparingly* against paper and ink. Color is quiet on purpose — most of the
+  page is calm warm neutral, with the accent reserved for the few marks that
+  matter. Mental clarity, not visual noise.
+- **Soft, not brutalist.** Edges are hairline (`1px`, low-contrast warm grey),
+  elevation is a **soft diffused shadow**, and corners are gently rounded.
+  Surfaces float quietly off the paper rather than slamming onto it.
+- **Light first, warm paper.** Surfaces are near-white with a faint warm tint;
+  ink is a warm stone neutral that bottoms out at a warm near-black for headings.
+- **Motion that breathes.** Fade/float/drift animations are slow and gentle,
+  always respecting `prefers-reduced-motion`. The hero carries a full-bleed
+  *latticework* — a drifting knowledge graph of connected ideas (Munger's
+  "latticework of mental models"), spanning the whole viewport width.
+- **Readable above all.** A serif display for headings, a humanist sans for body,
   measured line length for long-form lessons.
 
 ---
@@ -39,112 +43,118 @@ block). Reference them with Tailwind utilities — never hard-code hex values.
 
 Generated as `bg-*`, `text-*`, `border-*`, `ring-*`, `from-*`/`to-*`, etc.
 
-**Brand (orange) — primary action & identity**
+**Brand (muted amber) — primary action & identity (use sparingly)**
 
 | Token | Hex | Typical use |
 | --- | --- | --- |
-| `brand-50` | `#fff7ed` | tints, subtle fills |
-| `brand-100` | `#ffedd5` | selection bg, chips |
-| `brand-200` | `#fed7aa` | hover tints |
-| `brand-300` | `#fdba74` | gradient stops |
-| `brand-400` | `#fb923c` | gradient stops, glows |
-| `brand-500` | `#f97316` | **primary**, focus ring |
-| `brand-600` | `#ea580c` | **primary-strong**, default buttons, links |
-| `brand-700` | `#c2410c` | link hover, active nav |
-| `brand-800` | `#9a3412` | deep gradient stops |
-| `brand-900` | `#7c2d12` | strongest orange |
-| `brand-950` | `#431407` | rare, max contrast |
+| `brand-50` | `#fdf8f3` | tints, subtle fills |
+| `brand-100` | `#faf0e6` | selection bg, chips |
+| `brand-200` | `#f3dcc4` | hover tints, gradient stops |
+| `brand-300` | `#e9c19b` | gradient stops, glows |
+| `brand-400` | `#dca06a` | gradient stops, lattice strokes |
+| `brand-500` | `#cf8443` | **primary**, focus ring |
+| `brand-600` | `#b96c2c` | **primary-strong**, default buttons, links |
+| `brand-700` | `#985623` | link hover, active nav |
+| `brand-800` | `#79451f` | deep gradient stops |
+| `brand-900` | `#623a1d` | strongest amber |
+| `brand-950` | `#361d0e` | rare, max contrast |
 
-**Accent (amber) — highlights & gradients**
+**Accent (soft sun) — highlights & gradients**
 
 | Token | Hex |
 | --- | --- |
-| `accent-300` | `#fcd34d` |
-| `accent-400` | `#fbbf24` |
-| `accent-500` | `#f59e0b` |
-| `accent-600` | `#d97706` |
+| `accent-300` | `#f4d9a8` |
+| `accent-400` | `#ecc178` |
+| `accent-500` | `#e0a44c` |
+| `accent-600` | `#c5852f` |
 
 **Ink — text & warm neutrals**
 
 | Token | Hex | Use |
 | --- | --- | --- |
-| `ink-50` | `#fafaf9` | — |
-| `ink-100` | `#f5f5f4` | dark-surface text |
-| `ink-200` | `#e7e5e4` | borders, dividers |
-| `ink-300` | `#d6d3d1` | disabled borders |
-| `ink-400` | `#a8a29e` | placeholder |
-| `ink-500` | `#78716c` | muted labels |
-| `ink-600` | `#57534e` | secondary text |
-| `ink-700` | `#44403c` | **body text** |
-| `ink-800` | `#292524` | headings |
-| `ink-900` | `#1c1917` | **strong headings — brutalist near-black** |
+| `ink-50` | `#faf9f7` | — |
+| `ink-100` | `#f4f2ee` | dark-surface text |
+| `ink-200` | `#e8e4dd` | borders, dividers |
+| `ink-300` | `#d4cec4` | disabled borders, lattice dots |
+| `ink-400` | `#a8a097` | placeholder |
+| `ink-500` | `#786f66` | muted labels |
+| `ink-600` | `#564f48` | secondary text |
+| `ink-700` | `#3d3833` | **body text** |
+| `ink-800` | `#262220` | headings |
+| `ink-900` | `#1a1714` | **strong headings — warm near-black** |
 
-**Surfaces (light-first, warm)**
+**Surfaces (light-first, warm paper)**
 
 | Token | Hex | Use |
 | --- | --- | --- |
 | `surface` | `#ffffff` | cards |
-| `surface-muted` | `#fffaf4` | page background (warm white) |
-| `surface-sunken` | `#fff1e0` | wells, inline code, hover wells |
+| `surface-muted` | `#faf7f2` | page background (warm paper) |
+| `surface-sunken` | `#f4efe7` | wells, inline code, hover wells |
 
 Use as `bg-surface`, `bg-surface-muted`, `bg-surface-sunken`.
 
-**Semantic states**: `success` `#15803d`, `warning` `#b45309`,
-`danger` `#dc2626` (e.g. `text-success`, `bg-danger`).
+**Semantic states**: `success` `#2f7d4f`, `warning` `#b07a2a`,
+`danger` `#c0413a` (e.g. `text-success`, `bg-danger`).
 
 ### Typography
 
 | Token | Stack | Use |
 | --- | --- | --- |
 | `font-sans` | Inter Variable → system | body, UI |
-| `font-display` | Lexend Variable → Inter | headings, wordmark, hero |
+| `font-display` | Fraunces Variable → serif | headings, wordmark, hero (editorial serif) |
 | `font-mono` | SF Mono / JetBrains Mono | code, the domain on OG cards |
 
 Headings (`h1`–`h4`) automatically use `font-display`, `ink-900`,
-`-0.02em` tracking and `text-wrap: balance` via the base layer. Body inherits
-`font-sans` + `ink-700`. Fonts are self-hosted via `@fontsource-variable`.
+`-0.011em` tracking, optical sizing (`opsz`/`SOFT` axes) and `text-wrap: balance`
+via the base layer. Body inherits `font-sans` + `ink-700`. Fonts are self-hosted
+via `@fontsource-variable`.
 
-### Border (the brutalist edge)
+### Border (the hairline edge)
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `edge` | `#1c1917` | the hard near-black edge on every block: `border-edge`, `bg-edge`, `text-edge` |
+| `edge` | `#e8e4dd` | the quiet hairline on every block: `border-edge`, `bg-edge`, `text-edge` |
+| `edge-strong` | `#d4cec4` | slightly firmer divider / hover border |
 
-Every solid block wears a **2px `edge` border** matched to the shadow color, so
-the block and its shadow read as one object cut out of the page.
+Every solid block wears a **1px `edge` hairline**; on hover, interactive blocks
+firm up to `edge-strong`. Soft, low-contrast — the surface is defined by light,
+not a hard outline.
 
 ### Radii
 
 | Token | Value | Utility |
 | --- | --- | --- |
-| `rounded-card` | `0.35rem` | cards, panels, code blocks (sharp, brutalist) |
+| `rounded-card` | `0.875rem` | cards, panels, code blocks (gently rounded) |
 | `rounded-pill` | `999px` | nav links, chips, buttons, toggles |
 
-### Shadows (brutalist — hard offset, no blur, edge-colored)
+### Shadows (soft, diffused, warm)
 
-A four-step ladder; the offset grows as a block lifts.
+A four-step ladder; the surface lifts further off the paper as it rises.
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `shadow-xs` | `2px 2px 0 0 #1c1917` | chips, pills, inputs, inline badges |
-| `shadow-soft` | `4px 4px 0 0 #1c1917` | resting cards, buttons |
-| `shadow-lift` | `7px 7px 0 0 #1c1917` | hover / elevated state |
-| `shadow-pop` | `11px 11px 0 0 #1c1917` | hero card, CTA, focal blocks |
+| `shadow-xs` | `0 1px 2px rgba(26,23,20,.05)` | chips, pills, inputs, inline badges |
+| `shadow-soft` | `0 1px 2px /.04 + 0 6px 18px -10px /.16` | resting cards, buttons |
+| `shadow-lift` | `0 2px 6px /.05 + 0 16px 34px -14px /.22` | hover / elevated state |
+| `shadow-pop` | `0 4px 12px /.06 + 0 30px 60px -24px /.28` | hero card, CTA, focal blocks |
 
-The shadow is solid near-black — no blur, no tint.
+Shadows are soft and warm-tinted (warm near-black at low opacity) — diffuse, no
+hard edges.
 
-### Brutalist building-block classes
+### Building-block classes
 
 Prefer these over re-typing the border + shadow recipe. Compose with Tailwind
 utilities for color/padding/layout (see `@layer components` in `global.css`).
+The class names keep the legacy `.brutal*` prefix so every call site re-skins
+centrally, but the look is now soft minimalism, not brutalism.
 
 | Class | What it is |
 | --- | --- |
-| `.brutal` | 2px `edge` border + `rounded-card` + `shadow-soft` — the default card/panel/well |
-| `.brutal-lg` | same edge, `shadow-pop` — hero / focal / CTA blocks |
-| `.brutal-interactive` | add to a **clickable** `.brutal`/`.brutal-lg`: hover slides up-left (shadow grows), active slams down into the shadow (pressed flat). Don't pair with `hover:-translate-*`/`hover:shadow-*`. |
-| `.brutal-btn` | pill button — flat fill, hard edge, `shadow-soft`, same press physics. Pair with `bg-* text-*` (e.g. `brutal-btn bg-brand-600 text-white px-7 py-3`). |
-| `.brutal-chip` | small flat pill/tag/filter — `shadow-xs`, slight hover lift. Pair with `bg-*`/`text-*`. |
+| `.brutal` | 1px `edge` hairline + `rounded-card` + `shadow-soft` — the default card/panel/well |
+| `.brutal-lg` | same hairline, `shadow-pop` — hero / focal / CTA blocks |
+| `.brutal-interactive` | add to a **clickable** `.brutal`/`.brutal-lg`: hover rises gently (`translateY`, shadow blooms, edge firms), active settles back. Don't pair with `hover:-translate-*`/`hover:shadow-*`. |
+| `.brutal-btn` | pill button — clean fill, no hard edge, `shadow-soft` that blooms on hover. Pair with `bg-* text-*` (e.g. `brutal-btn bg-brand-600 text-white px-7 py-3`). |
+| `.brutal-chip` | small pill/tag/filter — hairline + `shadow-xs`, gentle hover lift. Pair with `bg-*`/`text-*`. |
 
 All transforms are transitions only (never reflow) and are neutralised by the
 global `prefers-reduced-motion` rule.
@@ -155,8 +165,10 @@ global `prefers-reduced-motion` rule.
 | --- | --- |
 | `animate-fade-up` | one-shot fade + 16px rise (`fade-up`, 0.6s ease-out) |
 | `animate-float` | gentle 6s vertical bob (decorative only) |
+| `animate-drift` | slow 24s parallax drift + faint scale — the hero latticework field |
 
-Both are gated globally by `prefers-reduced-motion: reduce` (see Accessibility).
+The hero latticework also uses a `.lattice-node` pulse (staggered opacity breathe).
+All are gated globally by `prefers-reduced-motion: reduce` (see Accessibility).
 
 ---
 
@@ -316,8 +328,8 @@ chart/animation islands as their own files and add them to the barrel — see th
   icons, text and `aria-live` announcements; options are real `<input>`s so
   keyboard and screen-reader semantics are native.
 - **Contrast.** Body text (`ink-700`) and headings (`ink-900`) on light
-  surfaces meet WCAG AA. On the orange OG cards, text is white/`accent-300` on
-  deep orange (`brand-800`/`brand-900`) for strong contrast.
+  surfaces meet WCAG AA. On the amber OG cards, text is white/`accent-300` on
+  deep amber (`brand-800`/`brand-900`) for strong contrast.
 - **Meaningful structure.** Lead with semantic HTML; headings use
   `text-wrap: balance` for tidy wrapping.
 
@@ -326,6 +338,6 @@ chart/animation islands as their own files and add them to the barrel — see th
 ## Open Graph cards
 
 Social share images reuse these exact tokens — see the card template at
-`src/pages/og/_OgCard.astro` (orange `brand→accent` gradient, `font-display`
+`src/pages/og/_OgCard.astro` (amber `brand→accent` gradient, `font-display`
 title, `font-mono` domain, `shadow-lift` logo chip). The generation pipeline
 is documented in the [README](README.md#-seo--open-graph).

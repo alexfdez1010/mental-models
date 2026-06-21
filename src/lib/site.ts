@@ -23,7 +23,7 @@ export const SITE = {
   defaultOgImage: '/og/default.png',
   twitter: '@mentalmodels',
   author: 'Mental Models',
-  themeColor: '#ea580c',
+  themeColor: '#b96c2c',
 } as const;
 
 /**
