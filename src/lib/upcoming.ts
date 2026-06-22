@@ -21,20 +21,31 @@
  *
  *   • Build strictly within the subject scope defined in TOPIC.md (and the
  *     mission in CLAUDE.md). One topic per run, en + es twin.
- *   • Go in order: build the lowest-`order` upcoming entry first. Never build
- *     something easier than the most recently built course (keep the ramp
- *     monotone).
+ *   • Go in order: build the lowest-`order` upcoming entry first. Use that
+ *     `order` as the authority on what is next — do NOT skip a beginner entry
+ *     just because a harder course already exists. Breadth across the tag
+ *     taxonomy (TOPIC.md) takes priority over a strictly monotone difficulty
+ *     ramp: the foundational models of every discipline (psychology, economics,
+ *     biology, systems, science, strategy) must be covered before climbing any
+ *     single tag to advanced/expert.
  *   • Use the entry's `buildNotes` as the build brief, its `dependencies`/`tags`
  *     for catalog wiring, and keep the same `slug` for the topic MDX so it
  *     graduates cleanly.
  *   • After building, REMOVE its entry here (the topic MDX is now the record).
- *   • When fewer than 3 entries remain, APPEND the next harder topics (each one
- *     notch up) so the queue never empties.
+ *   • When fewer than 3 entries remain, APPEND the next topics. Keep the queue
+ *     tag-diverse: do not let one roadmap tag (e.g. `probability`) accumulate
+ *     several queued courses while another (`biology-evolution`, `psychology`,
+ *     `economics`, `strategy`) has none. Fill the breadth, then deepen.
  *
  * ── Mental Models build queue ───────────────────────────────────────────────
  * The zero-to-expert ladder of models still to build (see TOPIC.md). The first
  * course, `what-are-mental-models`, has graduated and been removed. Lowest
- * `order` is built next; keep the ramp monotone in difficulty.
+ * `order` is built next. Orders 1–13 are a beginner→intermediate breadth pass
+ * that seeds every starved discipline (map vs. territory, incentives, supply &
+ * demand, natural selection, compounding, the razors, …) BEFORE the four
+ * advanced/expert probability/systems courses (orders 14–17). This deliberately
+ * front-loads foundational breadth so the build stops over-indexing on the
+ * decision-making / probability tags.
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -72,11 +83,263 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
+  // ── Beginner → intermediate breadth pass (orders 1–13) ────────────────────
+  // Seeds every starved discipline so the build covers the whole latticework
+  // before climbing any one tag. Interleaved by tag on purpose.
+  {
+    slug: 'map-vs-territory',
+    icon: '🗺️',
+    difficulty: 'beginner',
+    order: 1,
+    accent: 'brand',
+    title: {
+      en: 'The Map Is Not the Territory',
+      es: 'El Mapa No Es el Territorio',
+    },
+    description: {
+      en: 'Every model is a simplification of reality, not reality itself. Useful maps leave things out — so the skill is knowing where your map stops matching the ground.',
+      es: 'Todo modelo es una simplificación de la realidad, no la realidad misma. Los mapas útiles omiten cosas, así que la destreza está en saber dónde tu mapa deja de coincidir con el terreno.',
+    },
+    dependencies: ['what-are-mental-models'],
+    tags: ['foundations', 'problem-solving'],
+    buildNotes:
+      'The canonical foundational model — the one every other model depends on. Sections: what "the map is not the territory" means (Korzybski) and why all models are wrong-but-useful (Box); a map omits detail on purpose — the value IS the omission (a 1:1 map is useless); when a map drifts from the territory (outdated assumptions, edge cases, reification — mistaking the model for the thing); examples across domains (a subway map vs. real geography, a financial model vs. the business, a stereotype vs. a person, GDP vs. wellbeing); how to stay safe (hold maps loosely, check them against reality, keep several maps of the same terrain — links to the latticework idea). Build an interactive island that lets the learner zoom a stylized "map" in/out and see what detail each zoom level drops (respect prefers-reduced-motion). Connect forward to first principles (rebuild the map from the territory) and circle of competence (know which maps you actually hold). Pitfall: reification — treating the model as the truth. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'incentives',
+    icon: '🥕',
+    difficulty: 'beginner',
+    order: 2,
+    accent: 'accent',
+    title: {
+      en: 'Incentives: Follow the Reward',
+      es: 'Incentivos: Sigue la Recompensa',
+    },
+    description: {
+      en: '“Show me the incentive and I’ll show you the outcome.” People and systems drift toward whatever is rewarded — so to predict behavior, find the reward, not the stated intention.',
+      es: '«Enséñame el incentivo y te mostraré el resultado.» Las personas y los sistemas derivan hacia aquello que se recompensa, así que para predecir conductas busca la recompensa, no la intención declarada.',
+    },
+    dependencies: ['what-are-mental-models'],
+    tags: ['psychology', 'economics'],
+    buildNotes:
+      'The first psychology/economics model — Munger’s most-quoted lever. Sections: what an incentive is (anything that changes the payoff of a behavior); incentive-caused bias (people rationalize what pays them); the cobra effect / perverse incentives (rewarding the wrong proxy — the Hanoi rat-tail bounty, surgeons avoiding hard cases to protect their stats, sales quotas gaming); intrinsic vs. extrinsic incentives and crowding-out; "what gets measured gets managed" (Goodhart’s law in one line); designing good incentives (reward the outcome you actually want, not the easy proxy). Worked examples with a simple payoff table. Build an interactive island: a slider that changes a reward and shows the population shifting toward the gamed behavior (respect prefers-reduced-motion). Connect forward to second-order thinking (incentives create downstream effects), tragedy of the commons, and game theory. Pitfall: assuming people act on stated values rather than real payoffs. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'supply-and-demand',
+    icon: '⚖️',
+    difficulty: 'beginner',
+    order: 3,
+    accent: 'brand',
+    title: {
+      en: 'Supply & Demand',
+      es: 'Oferta y Demanda',
+    },
+    description: {
+      en: 'Prices are a conversation between how much exists and how much people want. Where the two curves cross sets the price — and shifting either one moves it in a predictable direction.',
+      es: 'Los precios son una conversación entre cuánto existe y cuánto se desea. Donde se cruzan las dos curvas se fija el precio, y mover cualquiera de ellas lo desplaza en una dirección predecible.',
+    },
+    dependencies: ['opportunity-cost'],
+    tags: ['economics'],
+    buildNotes:
+      'The core economics model. Sections: the demand curve (lower price → more wanted) and supply curve (higher price → more produced); equilibrium where they cross; what shifts a curve vs. moves along it (income, substitutes, input costs, tech, tastes) with worked before/after examples; shortages and surpluses when price is held off equilibrium (price ceilings → shortages/queues; price floors → surpluses); elasticity in plain language (how much quantity reacts to price — necessities vs. luxuries) with a couple of numbers; price as an information signal that coordinates strangers (links to incentives and emergence). Build an interactive supply/demand island: drag either curve and watch the equilibrium price/quantity move; toggle a price ceiling to reveal the shortage gap (respect prefers-reduced-motion). KaTeX optional for elasticity. Connect to opportunity cost (the curves are built from it), comparative advantage, and externalities/tragedy of the commons. Pitfall: confusing a shift of the curve with a movement along it; thinking price is set by cost alone. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'natural-selection',
+    icon: '🧬',
+    difficulty: 'beginner',
+    order: 4,
+    accent: 'accent',
+    title: {
+      en: 'Natural Selection',
+      es: 'Selección Natural',
+    },
+    description: {
+      en: 'Variation, selection, heredity — repeat. Any system where traits vary, some survive better, and survivors pass on their traits will design itself over time, no designer required.',
+      es: 'Variación, selección, herencia: repite. Cualquier sistema donde los rasgos varían, algunos sobreviven mejor y los supervivientes los transmiten se diseña a sí mismo con el tiempo, sin diseñador alguno.',
+    },
+    dependencies: ['what-are-mental-models'],
+    tags: ['biology-evolution'],
+    buildNotes:
+      'The first biology/evolution model — and a general-purpose algorithm, not just a fact about animals. Sections: the three-part recipe (variation + selection + heredity → cumulative adaptation) and why each ingredient is necessary; fitness = reproductive success in a given environment (not "strongest"); selection pressure and how a changing environment changes what "fit" means; the algorithm transferred out of biology (A/B testing, markets selecting firms, ideas/memes, machine-learning evolutionary search) — this is the transfer payoff; common misreadings (evolution is not goal-directed, not "for the good of the species", not a ladder of progress). Worked example: trace a trait’s frequency rising over a few generations with simple numbers. Build an interactive island: a population of varying dots under an adjustable selection pressure, watch the trait distribution shift each generation (respect prefers-reduced-motion). Connect forward to the Red Queen effect, emergence, and incentives (selection IS an incentive landscape). Pitfall: teleology — assuming evolution "wants" an outcome. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'compounding',
+    icon: '📈',
+    difficulty: 'beginner',
+    order: 5,
+    accent: 'brand',
+    title: {
+      en: 'Compounding',
+      es: 'Interés Compuesto',
+    },
+    description: {
+      en: 'Growth that feeds on its own output curves upward, slowly then suddenly. Small edges, repeated and left alone, end up dwarfing big one-off efforts.',
+      es: 'El crecimiento que se alimenta de su propio resultado se curva hacia arriba, despacio y luego de golpe. Las pequeñas ventajas, repetidas y sin interrumpir, acaban empequeñeciendo a los grandes esfuerzos puntuales.',
+    },
+    dependencies: ['what-are-mental-models'],
+    tags: ['science-engineering', 'economics'],
+    buildNotes:
+      'A foundational science/engineering + economics model with huge transfer. Sections: linear vs. exponential growth (add vs. multiply) and why human intuition is linear; the formula and the "slowly then suddenly" hockey stick; the rule of 72 for doubling time (worked example); what kills compounding (interruptions, withdrawals, drawdowns — one −50% year erases years of gains, ties to margin of safety and fat tails); compounding beyond money (skills, relationships, reputation, knowledge, technical debt as NEGATIVE compounding); time as the dominant variable (starting early beats contributing more). Worked tables comparing a small early edge vs. a big late effort. KaTeX for A=P(1+r)^t and the rule of 72. Build an interactive island: sliders for rate, time, and a one-off setback, plotting the curve and the final value (respect prefers-reduced-motion). Connect to feedback loops (compounding is a reinforcing loop) and second-order thinking. Pitfall: linear extrapolation; ignoring how a single big loss breaks the chain. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'occams-hanlons-razors',
+    icon: '🪒',
+    difficulty: 'beginner',
+    order: 6,
+    accent: 'accent',
+    title: {
+      en: 'Occam’s & Hanlon’s Razors',
+      es: 'Las Navajas de Occam y Hanlon',
+    },
+    description: {
+      en: 'Two cutting tools for trimming explanations: prefer the one needing the fewest assumptions, and don’t blame malice for what plain incompetence explains.',
+      es: 'Dos herramientas para podar explicaciones: prefiere la que exige menos supuestos y no atribuyas a la maldad lo que la simple incompetencia ya explica.',
+    },
+    dependencies: ['first-principles-thinking'],
+    tags: ['problem-solving', 'psychology'],
+    buildNotes:
+      'A problem-solving pair of heuristics for choosing among explanations. Sections: Occam’s razor (among competing explanations, prefer the one with the fewest assumptions — note it favors *simpler*, not *simplest at all costs*, and is a tie-breaker, not a proof); why fewer assumptions = fewer ways to be wrong (links to base rates / probability of conjunctions); Hanlon’s razor (never attribute to malice what is adequately explained by incompetence/carelessness) and why it’s a debiasing tool against the fundamental attribution error and conspiracy thinking; when each razor FAILS (Occam over-trims genuinely complex systems; Hanlon excuses real bad actors) — teach the limits explicitly. Worked examples: diagnosing a bug, a late friend, a market rumor. Build a small interactive island: a claim with two explanations, learner counts the assumptions each requires and the razor highlights the leaner one (respect prefers-reduced-motion). Connect to first principles, confirmation bias, and probability. Pitfall: treating a razor as proof rather than a prior. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'circle-of-competence',
+    icon: '⭕',
+    difficulty: 'beginner',
+    order: 7,
+    accent: 'brand',
+    title: {
+      en: 'Circle of Competence',
+      es: 'Círculo de Competencia',
+    },
+    description: {
+      en: 'Know the edge of what you actually understand. The size of the circle matters less than knowing where its boundary is — and staying honest about which side you’re on.',
+      es: 'Conoce el borde de lo que de verdad entiendes. El tamaño del círculo importa menos que saber dónde está su límite, y ser honesto sobre en qué lado estás.',
+    },
+    dependencies: ['map-vs-territory'],
+    tags: ['foundations', 'decision-making'],
+    buildNotes:
+      'A foundations/decision-making model about self-knowledge of expertise. Sections: what a circle of competence is (the domain where your maps are reliable) and why the boundary matters more than the area; the danger zone just outside the edge where confidence outruns skill (links to overconfidence bias and calibration); how to map your own circle honestly (track your forecasts, ask what you’d need to know, distinguish "I understand this" from "I’m familiar with this"); widening the circle deliberately vs. faking range; staying inside it under social pressure (Munger/Buffett "too hard" pile — it’s fine to pass). Worked examples across investing, hiring, medicine, and everyday choices. Build an interactive island: a circle the learner sizes per domain, with a glowing "boundary" band showing where risk spikes (respect prefers-reduced-motion). Connect to the map is not the territory (you only hold maps for some terrain), first principles, and calibration. Pitfall: confusing the *feeling* of competence with the real boundary. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'confirmation-bias',
+    icon: '🔎',
+    difficulty: 'intermediate',
+    order: 8,
+    accent: 'accent',
+    title: {
+      en: 'Confirmation Bias',
+      es: 'Sesgo de Confirmación',
+    },
+    description: {
+      en: 'We hunt for evidence that we’re right and look past what says we’re wrong. The mind defends its beliefs like a lawyer, not a scientist — unless you make it look for the disconfirming case.',
+      es: 'Buscamos pruebas de que tenemos razón y pasamos por alto lo que dice que no. La mente defiende sus creencias como un abogado, no como un científico, salvo que la obligues a buscar el caso que la refuta.',
+    },
+    dependencies: ['incentives'],
+    tags: ['psychology'],
+    buildNotes:
+      'The flagship cognitive-bias lesson on the psychology path. Sections: what confirmation bias is (seeking, interpreting, and remembering evidence that fits a prior belief); the three flavors — biased search, biased interpretation, biased memory; the classic demonstrations (Wason 2-4-6 rule-discovery task; people reading the same study and both sides feeling vindicated); why it’s adaptive-but-dangerous (cheap belief maintenance, social cohesion) and how it compounds in echo chambers / algorithmic feeds; the antidote — actively seek the disconfirming case, steelman the other side, pre-register what would change your mind, run the "consider the opposite" drill (links to inversion and Bayesian updating); related traps named briefly (myside bias, motivated reasoning). Worked example: the Wason task, run interactively. Build an interactive island that runs a mini Wason 2-4-6 test on the learner and reveals their confirmation pattern (respect prefers-reduced-motion). Connect to inversion, Occam/Hanlon, base rates, and calibration. Pitfall: believing you’re immune (bias blind spot). Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'margin-of-safety',
+    icon: '🛟',
+    difficulty: 'intermediate',
+    order: 9,
+    accent: 'brand',
+    title: {
+      en: 'Margin of Safety',
+      es: 'Margen de Seguridad',
+    },
+    description: {
+      en: 'Build the bridge to carry far more than it ever should. Leave a buffer between what you expect and what you can survive, because your estimates are wrong in ways you can’t see yet.',
+      es: 'Construye el puente para soportar mucho más de lo que debería. Deja un colchón entre lo que esperas y lo que puedes sobrevivir, porque tus estimaciones fallan de maneras que aún no ves.',
+    },
+    dependencies: ['second-order-thinking'],
+    tags: ['decision-making', 'science-engineering'],
+    buildNotes:
+      'An engineering model imported into decision-making. Sections: origin in structural engineering (rate a bridge for 5× the expected load) and the core idea (the buffer absorbs the errors you can’t foresee); margin of safety in investing (Graham — buy well below intrinsic value so being wrong still leaves you whole); the link to uncertainty (the wider your error bars, the bigger the margin needed — ties to calibration and fat tails); redundancy and fail-safes as margins (backups, spare capacity, slack); the cost of margin (efficiency vs. resilience trade-off — an over-optimized system has no slack and snaps). Worked examples with numbers: a load rating, a discounted purchase price, a runway/cash buffer. Build an interactive island: a load slider against a rated capacity bar showing the safety buffer shrinking toward failure (respect prefers-reduced-motion). Connect to inversion (avoid ruin), compounding (one big loss breaks the chain), expected value, and fat tails. Pitfall: optimizing away all slack; treating a point estimate as certain. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'comparative-advantage',
+    icon: '🔁',
+    difficulty: 'intermediate',
+    order: 10,
+    accent: 'accent',
+    title: {
+      en: 'Comparative Advantage',
+      es: 'Ventaja Comparativa',
+    },
+    description: {
+      en: 'Even if you’re better at everything, you can’t do everything. Specialize where your edge is largest, trade for the rest, and the whole pie grows — the most counter-intuitive result in economics.',
+      es: 'Aunque seas mejor en todo, no puedes hacerlo todo. Especialízate donde tu ventaja es mayor, intercambia el resto y el pastel entero crece: el resultado más contraintuitivo de la economía.',
+    },
+    dependencies: ['supply-and-demand', 'opportunity-cost'],
+    tags: ['economics', 'strategy'],
+    buildNotes:
+      'A counter-intuitive economics/strategy model built directly on opportunity cost. Sections: absolute vs. comparative advantage (being better at something vs. giving up the least to do it); the classic two-good worked example (e.g. a lawyer who also types faster than her assistant should still delegate typing) with the opportunity-cost numbers laid out in a table; why trade based on comparative advantage grows total output even when one party is better at everything (Ricardo); the same logic inside a team, a company, or your own time management (do your highest-edge work, delegate the rest); limits and caveats (transaction costs, transition pain, assumptions that break in the real world). Worked numeric table is the centerpiece. Build an interactive island: sliders for each party’s productivity in two goods, computing each one’s opportunity cost and highlighting who should specialize where, with total output before/after trade (respect prefers-reduced-motion). Connect to opportunity cost (its parent), supply & demand, and circle of competence. Pitfall: confusing absolute with comparative advantage. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'tragedy-of-the-commons',
+    icon: '🐄',
+    difficulty: 'intermediate',
+    order: 11,
+    accent: 'brand',
+    title: {
+      en: 'Tragedy of the Commons',
+      es: 'La Tragedia de los Comunes',
+    },
+    description: {
+      en: 'When a shared resource is free to take but costly to all, individually rational use adds up to collective ruin. Each gain is private; each cost is split — so the pasture gets stripped bare.',
+      es: 'Cuando un recurso compartido es gratis de tomar pero costoso para todos, el uso individualmente racional suma una ruina colectiva. Cada beneficio es privado; cada coste, repartido: así el pasto queda arrasado.',
+    },
+    dependencies: ['incentives', 'supply-and-demand'],
+    tags: ['economics', 'systems-thinking'],
+    buildNotes:
+      'An economics + systems model about misaligned shared incentives. Sections: the original parable (herders sharing a pasture — each adds one more cow because the gain is private and the overgrazing cost is shared) and the general structure (private benefit + socialized cost → over-exploitation); real cases (overfishing, antibiotic resistance, traffic congestion, groundwater, the atmosphere, spam); why it’s a structural trap, not a morality failure (each actor is behaving rationally — links to incentives and game theory’s prisoner’s dilemma); the cost is an *externality* (define it — a cost not borne by the decider); the ways out (Ostrom’s commons governance, property rights, regulation/quotas, taxes/Pigouvian pricing, social norms) and where each works. Worked example: a shared fishery collapsing over rounds with simple numbers. Build an interactive island: a shared resource depleting as each added "user" takes their rational share, with a toggle for a governance rule that saves it (respect prefers-reduced-motion). Connect to incentives, externalities, second-order thinking, and game theory. Pitfall: blaming individuals instead of the incentive structure. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'emergence',
+    icon: '🐜',
+    difficulty: 'intermediate',
+    order: 12,
+    accent: 'accent',
+    title: {
+      en: 'Emergence',
+      es: 'Emergencia',
+    },
+    description: {
+      en: 'The whole does things no part can. Simple agents following simple rules produce flocks, markets, minds and traffic jams — patterns that exist only at the level above the pieces.',
+      es: 'El todo hace cosas que ninguna parte puede. Agentes simples que siguen reglas simples producen bandadas, mercados, mentes y atascos: patrones que solo existen en el nivel superior a las piezas.',
+    },
+    dependencies: ['natural-selection'],
+    tags: ['systems-thinking', 'biology-evolution'],
+    buildNotes:
+      'A systems-thinking model bridging into biology. Sections: what emergence is (higher-level patterns/properties that arise from many interacting parts and can’t be read off any single part); the canonical examples (ant colonies with no boss, bird flocks from 3 local rules, consciousness from neurons, prices from traders, traffic jams that move backward, cities); micro-rules → macro-pattern (Schelling segregation, Conway’s Life in one line) and why you can’t predict the whole by studying one part (reductionism’s limit — ties to "the map is not the territory"); strong vs. weak emergence kept lightweight and honest; why this matters for action (you intervene at the level of the rules and interactions, not the individuals — links to leverage points and feedback loops). Build the centerpiece interactive island: a boids-style flock OR a Schelling grid where the learner tweaks a couple of local rules and watches the global pattern self-organize (respect prefers-reduced-motion — show static end states when reduced). Connect to natural selection (an emergent algorithm), feedback loops, incentives, and the tragedy of the commons. Pitfall: assuming a group behaves like a big individual; looking for a "controller" that isn’t there. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'game-theory-basics',
+    icon: '♟️',
+    difficulty: 'advanced',
+    order: 13,
+    accent: 'brand',
+    title: {
+      en: 'Game Theory: Thinking in Moves',
+      es: 'Teoría de Juegos: Pensar en Jugadas',
+    },
+    description: {
+      en: 'When your best move depends on theirs and theirs on yours, you need more than preference — you need strategy. Equilibria, dominant moves, and why rational players can still both lose.',
+      es: 'Cuando tu mejor jugada depende de la suya y la suya de la tuya, no basta con preferir: hace falta estrategia. Equilibrios, jugadas dominantes y por qué jugadores racionales pueden perder los dos.',
+    },
+    dependencies: ['incentives', 'second-order-thinking'],
+    tags: ['strategy', 'economics'],
+    buildNotes:
+      'The strategy path’s entry to interdependent decisions — advanced because it composes incentives + second-order thinking. Sections: what a "game" is (payoffs depend on others’ choices) and the payoff matrix; dominant strategies; Nash equilibrium in plain language (no one can improve by unilaterally changing) with a worked 2×2; the prisoner’s dilemma (rational individual choices → collectively worse outcome — ties directly to tragedy of the commons) and why cooperation is hard; repeated games and how repetition + reputation enable cooperation (tit-for-tat, Axelrod tournaments); other canonical games kept brief (stag hunt = coordination/trust, chicken = brinkmanship); zero-sum vs. positive-sum framing and the danger of treating positive-sum situations as zero-sum. Worked 2×2 payoff tables throughout. Build an interactive island: a 2×2 payoff matrix the learner fills, with the dominant strategies and Nash cell highlighted live, plus an iterated prisoner’s-dilemma toggle showing cooperation emerging over rounds (respect prefers-reduced-motion). Connect to incentives, tragedy of the commons, second-order thinking, and moats/competition. Pitfall: assuming one-shot logic in a repeated game; treating positive-sum as zero-sum. Recap Quiz + MindMap. en + es twin.',
+  },
+  // ── Advanced / expert probability + systems tier (orders 14–17) ───────────
+  // Built only after the breadth pass above seeds every discipline.
   {
     slug: 'feedback-loops',
     icon: '🔄',
     difficulty: 'advanced',
-    order: 7,
+    order: 14,
     accent: 'accent',
     title: {
       en: 'Feedback Loops & Systems Thinking',
@@ -95,7 +358,7 @@ export const upcomingCourses: UpcomingCourse[] = [
     slug: 'bayesian-updating',
     icon: '🔁',
     difficulty: 'advanced',
-    order: 8,
+    order: 15,
     accent: 'brand',
     title: {
       en: 'Bayesian Updating',
@@ -114,7 +377,7 @@ export const upcomingCourses: UpcomingCourse[] = [
     slug: 'fat-tails',
     icon: '🐘',
     difficulty: 'advanced',
-    order: 9,
+    order: 16,
     accent: 'accent',
     title: {
       en: 'Fat Tails & Black Swans',
@@ -133,7 +396,7 @@ export const upcomingCourses: UpcomingCourse[] = [
     slug: 'calibration-and-confidence',
     icon: '🎯',
     difficulty: 'expert',
-    order: 10,
+    order: 17,
     accent: 'brand',
     title: {
       en: 'Calibration: Knowing What You Know',
