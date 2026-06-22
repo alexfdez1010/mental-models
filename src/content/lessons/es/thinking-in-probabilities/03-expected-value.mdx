@@ -1,0 +1,290 @@
+---
+title: "El valor esperado: pesar la apuesta entera"
+description: "Cómo condensar todo un abanico de resultados y sus probabilidades en un único número que te dice si una apuesta merece la pena — y las tres situaciones en las que ese número miente con disimulo."
+topic: "es/thinking-in-probabilities"
+order: 4
+minutes: 9
+updated: 2026-06-22
+---
+
+import { MCQ, Quiz, Callout, ExpectedValueCalculator } from '@/components/react';
+
+Una máquina tragaperras sabe exactamente lo que hace, y también lo sabe el casino que la compró. La máquina devuelve *casi todo* el dinero que recibe — 92 céntimos por cada euro, pongamos — lo cual parece casi generoso hasta que reparas en que el casino se queda los otros 8 céntimos de *cada* euro, para siempre, a lo largo de millones de tiradas. Ninguna tirada concreta te cuenta esto. Una tirada es una moneda al aire con confeti: a veces ganas mucho, normalmente no ganas nada, y el ruido ahoga la tendencia. El casino no mira la tirada. Mira el *promedio*, y el promedio es una máquina de imprimir el 8% de todo lo que cruza la puerta.
+
+Ese promedio es el **valor esperado (expected value)**, y aprender a calcularlo es la diferencia entre ser el jugador y ser la banca. Hasta ahora este curso te ha enseñado a leer una probabilidad (lección 01) y a anclarla a su tasa base (lección 02). Ahora ponemos un *resultado* sobre cada desenlace y combinamos ambas cosas en un único veredicto: a lo largo de muchos intentos, ¿merece la pena esta apuesta?
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un boleto de lotería cuesta $2. Hay una probabilidad de 1 entre 10 millones de ganar $10,000,000, y en caso contrario no ganas nada. Antes de hacer ninguna cuenta — a lo largo de muchísimos boletos, ¿qué esperas que pase de media por boleto?"
+  options={[
+    { text: "Pierdes dinero de media — la minúscula posibilidad del bote no compensa los $2 que pagas cada vez", correct: true },
+    { text: "Quedas en tablas — un premio de $10M con una probabilidad de 1 entre 10M se cancela exactamente" },
+    { text: "Ganas un poco, porque el bote es enorme" },
+    { text: "Es imposible saberlo sin conocer la suerte que tienes" },
+  ]}
+  explanation="Aguanta la predicción — la demostraremos abajo. El titular «¡gana $10,000,000!» es vívido; el 1 entre 10 millones es abstracto; tu cerebro le da más peso al vívido. Pero el valor esperado pondera cada resultado por su probabilidad, y una vez que lo haces el bote encoge hasta $1 de valor por boleto mientras que el boleto cuesta $2. Repetido para siempre, eso es una sangría garantizada. La «suerte» no es más que el ruido alrededor de ese promedio."
+/>
+
+## La forma de una línea de valorar una apuesta
+
+Primero la analogía. Imagina que pudieras jugar una apuesta diez mil veces y luego repartir el total de las ganancias a partes iguales entre las diez mil jugadas. La parte por jugada con la que te marcharías — ese es el valor esperado de la apuesta. No es lo que pasa en *ninguna* tirada concreta (puede que ganes, puede que pierdas); es el promedio a largo plazo que *vale* cada tirada.
+
+Con precisión: el **valor esperado (expected value, EV)** de una decisión es la suma de los resultados de todos los desenlaces posibles, cada uno ponderado por la probabilidad de que ocurra. Su disciplina de origen es la probabilidad y la teoría de la decisión, y la fórmula es una sola línea:
+
+$$EV = \sum_i p_i \times x_i$$
+
+donde $x_i$ es el resultado del desenlace $i$ y $p_i$ es su probabilidad (un número entre 0 y 1, de modo que todos los $p_i$ sumen 1). Tomas cada resultado, lo multiplicas por lo probable que es, y sumas los productos. Esa es toda la operación. El $\times$ hace el trabajo de verdad: encoge los resultados que es poco probable que obtengas y protege los que probablemente sí.
+
+Un primer ejemplo diminuto. No pagas nada por tirar un dado justo de seis caras, y te pagan en euros igual al número que sale. Cada cara tiene probabilidad $1/6$. Vamos paso a paso:
+
+| Desenlace (tirada) | Resultado $x_i$ | Probabilidad $p_i$ | Aportación $p_i \times x_i$ |
+|---|---|---|---|
+| 1 | \$1 | 1/6 | \$0.167 |
+| 2 | \$2 | 1/6 | \$0.333 |
+| 3 | \$3 | 1/6 | \$0.500 |
+| 4 | \$4 | 1/6 | \$0.667 |
+| 5 | \$5 | 1/6 | \$0.833 |
+| 6 | \$6 | 1/6 | \$1.000 |
+| **EV** | | | **\$3.50** |
+
+El EV es \$3.50 — que *no es un resultado que puedas sacar nunca de verdad*. No hay ningún 3.5 en un dado. Eso es lo primero que hay que interiorizar: el valor esperado es un promedio, no una predicción. Ninguna tirada concreta paga \$3.50, y sin embargo \$3.50 es exactamente lo que vale cada tirada a largo plazo. Si alguien te cobrara \$3 por jugar a esto, deberías jugar todo el día; a \$4, deberías marcharte.
+
+Ahora gira esa misma máquina hacia la lotería del pretest. Los números están diseñados para parecer generosos y desangrarte de todos modos.
+
+<ExpectedValueCalculator client:visible
+  eyebrow="Valor esperado"
+  instructions="Arrastra cada probabilidad. El valor esperado es cada resultado ponderado por su probabilidad: míralo moverse."
+  probabilityLabel="Probabilidad"
+  payoffLabel="Resultado"
+  contributionLabel="Aportación"
+  totalProbLabel="Las probabilidades suman"
+  normalizeHint="Una distribución de probabilidad debe sumar 100% — ahora mismo suma {sum}."
+  evLabel="Valor esperado"
+  evHint="la suma de cada resultado ponderado por su probabilidad"
+  costLabel="Coste de jugar"
+  netLabel="Valor esperado neto"
+  worthVerdict="Con estos números la apuesta compensa: el valor esperado supera el coste, así que repetida muchas veces gana de media."
+  notWorthVerdict="Con estos números la apuesta pierde: el valor esperado no llega al coste, así que repetida muchas veces sangra dinero de media."
+  breakEvenVerdict="Esto es más o menos una moneda al aire en valor: el valor esperado apenas cubre el coste, así que la ventaja es insignificante."
+  resetLabel="Reiniciar probabilidades"
+  title="El boleto de lotería de $2"
+  scenario={{
+    prompt: "¿Deberías comprar el boleto?",
+    unit: "$",
+    unitPosition: "prefix",
+    cost: 2,
+    outcomes: [
+      { label: "Bote", payoff: 10000000, prob: 0.00001, note: "1 entre 10,000,000 — alrededor de un 0.00001% de probabilidad" },
+      { label: "Nada", payoff: 0, prob: 99.99999, note: "Prácticamente todos los boletos" },
+    ],
+  }}
+  caption="Sube la probabilidad del bote y mira cómo cambia el veredicto — pero fíjate en lo absurdamente lejos que tienes que empujarla. Con las probabilidades reales, un bote de $10M vale $1 de valor esperado, frente a un boleto de $2. Neto: −$1 por boleto, en cada boleto, para siempre." />
+
+Lee la columna de aportación. El resultado del bote es gigantesco — \$10,000,000 — pero multiplicado por su probabilidad ($0.0000001$) aporta apenas **\$1** a la suma. El desenlace «nada» aporta \$0. Así que el EV del boleto es \$1, y *cuesta* \$2. Valor esperado neto: **−\$1 por boleto.** Compra un boleto al día durante toda la vida y el promedio a largo plazo es que cada mañana prendes fuego a un euro. Por eso a la lotería a veces se la llama *un impuesto sobre quienes no saben (o no quieren) calcular el valor esperado* — el Estado te vende un vívido sueño de \$10M por \$2 y se embolsa \$1 de él, de media, cada vez.
+
+<Callout variant="tip" title="La apuesta entera, en un número">
+El valor esperado es lo que te permite comparar unos \$3 seguros con una apuesta salvaje en la *misma escala*. No juzgues una apuesta por su mejor caso («¡podría ganar \$10 millones!») ni por su peor caso («podría perder \$2») — júzgala por su promedio ponderado por probabilidad, el único número que ya contiene todo el abanico.
+</Callout>
+
+## El EV es lo que promediarías a lo largo de muchas repeticiones
+
+¿Por qué un único número nacido de una multiplicación debería decirte cómo actuar en una apuesta única, de una sola vez? Por la **ley de los grandes números**: a medida que repites una prueba aleatoria independiente más y más veces, el *promedio* de tus resultados reales converge al valor esperado. Una jugada es ruido puro — ganas o no, y el EV parece una abstracción. Pero apila las jugadas y el ruido se cancela mientras el EV se acumula.
+
+Imagina el juego del dado a \$3 la jugada. Tira una vez y puede que saques un \$1 (una pérdida de \$2) o un \$6 (una ganancia de \$3) — vaivenes salvajes. Pero tu resultado *promedio* por tirada avanza con paso firme hacia \$3.50:
+
+| Número de tiradas | Resultado promedio típico por tirada | Cuán lejos del EV (\$3.50) |
+|---|---|---|
+| 1 | entre \$1 y \$6 | hasta \$2.50 de desviación |
+| 10 | ~\$3.1 a \$3.9 | dentro de ~\$0.40 |
+| 1,000 | ~\$3.45 a \$3.55 | dentro de ~\$0.05 |
+| 1,000,000 | ~\$3.499 a \$3.501 | dentro de una fracción de céntimo |
+
+El casino vive en la fila de abajo. No le importa que *tú* puedas pegar un bote esta noche — a lo largo de sus millones de jugadas, su resultado promedio está clavado al EV, y él fijó el EV a su favor. El jugador vive en la fila de arriba, donde el ruido es lo bastante grande como para parecer un «sistema». El valor esperado es la promesa de que, con suficientes repeticiones, las matemáticas siempre se presentan a cobrar.
+
+## Apuestas de EV negativo frente a EV positivo
+
+Ordena cada apuesta por el signo de su valor esperado neto y obtienes una taxonomía limpia. Una apuesta de **EV positivo (positive-EV)** te paga por aceptarla (a largo plazo); una de **EV negativo (negative-EV)** te cobra por el privilegio. Todo el juego de apostar, invertir y asegurar de forma racional consiste en: acepta apuestas de EV positivo, rechaza las de EV negativo — con un asterisco importante al que llegaremos.
+
+| Apuesta | A grandes rasgos, cómo va el cálculo del EV | EV neto por jugada | Signo |
+|---|---|---|---|
+| Boleto de lotería estatal | \$10M × 0.0000001 = \$1 de valor, cuesta \$2 | **−\$1** | Negativo |
+| Ruleta de casino (\$1 a un número) | \$36 × (1/38) = \$0.947 de valor, cuesta \$1 | **−\$0.053** | Negativo |
+| Prima del seguro del hogar | pérdida evitada × prob minúscula ≈ \$700 de valor, cuesta \$1,000 | **−\$300** | Negativo (y lo compras de todos modos) |
+
+La lotería y el casino son obvios: todo su modelo de negocio es venderte apuestas de EV negativo disfrazadas de diversión. La ruleta paga \$36 por una apuesta de \$1 pero tiene 38 casillas, así que su EV es de unos 94.7 céntimos por euro — una ventaja de la casa del 5.3% que, por la ley de los grandes números, es tan fiable como la gravedad.
+
+El seguro es el caso interesante. La prima es *también* de EV negativo — así es como gana dinero la aseguradora; de media pagas más de lo que llegarás a cobrar. Y aun así contratarlo suele ser la jugada racional. ¿Por qué? Porque el EV no es lo único que te importa cuando un desenlace puede *arruinarte*. Un incendio en casa no es una molestia promedio de −\$300 que puedas encogerte de hombros a lo largo de muchas repeticiones — es una catástrofe única e irrepetible que puede dejarte en la calle. Pagas con gusto una prima pequeña, segura y de EV negativo para borrar una cola rara pero insuperable. Eso no es un fallo al calcular el EV; es reconocer que **no puedes «promediar» una pérdida de la que no te puedes recuperar** — un hilo del que tiraremos con fuerza en las lecciones sobre rangos y sobre decisión-frente-a-resultado.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una apuesta a la ruleta paga $36 por una puesta de $1, pero la rueda tiene 38 casillas igualmente probables. ¿Cuál es el valor esperado de una apuesta de $1, y qué significa?"
+  options={[
+    { text: "Unos $0.947 de valor por un coste de $1 → neto −$0.053 por apuesta; a lo largo de muchas apuestas pierdes alrededor del 5.3% de todo lo que apuestas", correct: true },
+    { text: "$36 — ese es el resultado, así que la apuesta es de EV enormemente positivo", correct: false },
+    { text: "$0 — la ruleta es un juego justo sin ventaja de la casa", correct: false },
+    { text: "−$1 — pierdes toda tu puesta en cada tirada", correct: false },
+  ]}
+  explanation="EV = $36 × (1/38) + $0 × (37/38) = $0.947. Pagas $1 para recibir $0.947 de valor esperado, un neto de −$0.053. Los $36 son el mejor caso, no el promedio; ponderarlo por su probabilidad de 1 entre 38 es justo el quid. A lo largo de miles de tiradas la ley de los grandes números garantiza que sangras unos 5.3 céntimos por euro apostado — la ventaja de la casa."
+/>
+
+## Apuestas asimétricas
+
+La mayoría de las veces los resultados y las probabilidades se compensan más o menos — los premios grandes son raros, los pequeños son comunes. Una **apuesta asimétrica (asymmetric bet)** rompe esa simetría a propósito: el lado malo es pequeño y *está acotado*, mientras que el lado bueno es enorme (o la imagen especular — una probabilidad minúscula de una pérdida catastrófica). Cuando la estructura está desequilibrada, un solo término de la suma del EV puede dominar todo lo demás, y la apuesta puede ser de EV enormemente positivo aunque *pierdas la mayoría de las veces*.
+
+Esta es la lógica detrás de un experimento barato, una apuesta de startup, una opción fuera de dinero, un correo en frío a la empresa de tus sueños. Lo más probable es que no consigas nada. Pero «probablemente nada» multiplicado por un coste pequeño y fijo es barato, mientras que «en raras ocasiones, una victoria enorme» multiplicado incluso por una probabilidad minúscula puede ser grande. Considera un experimento de \$500 con un 4% de probabilidad de devolver \$30,000 y en caso contrario devolver \$0 — en concreto, un pequeño test publicitario para una idea de producto.
+
+<ExpectedValueCalculator client:visible
+  eyebrow="Valor esperado"
+  instructions="Arrastra cada probabilidad. El valor esperado es cada resultado ponderado por su probabilidad: míralo moverse."
+  probabilityLabel="Probabilidad"
+  payoffLabel="Resultado"
+  contributionLabel="Aportación"
+  totalProbLabel="Las probabilidades suman"
+  normalizeHint="Una distribución de probabilidad debe sumar 100% — ahora mismo suma {sum}."
+  evLabel="Valor esperado"
+  evHint="la suma de cada resultado ponderado por su probabilidad"
+  costLabel="Coste de jugar"
+  netLabel="Valor esperado neto"
+  worthVerdict="Con estos números la apuesta compensa: el valor esperado supera el coste, así que repetida muchas veces gana de media."
+  notWorthVerdict="Con estos números la apuesta pierde: el valor esperado no llega al coste, así que repetida muchas veces sangra dinero de media."
+  breakEvenVerdict="Esto es más o menos una moneda al aire en valor: el valor esperado apenas cubre el coste, así que la ventaja es insignificante."
+  resetLabel="Reiniciar probabilidades"
+  title="Un experimento barato y asimétrico"
+  scenario={{
+    prompt: "¿Lanzas el test de $500?",
+    unit: "$",
+    unitPosition: "prefix",
+    cost: 500,
+    outcomes: [
+      { label: "Acierta — la idea funciona y escala", payoff: 30000, prob: 4, note: "4% — una posibilidad remota anclada en la tasa base, no una ilusión" },
+      { label: "Fracasa — lo aprendes, pierdes los $500", payoff: 0, prob: 96, note: "96% — el desenlace habitual de cualquier experimento" },
+    ],
+  }}
+  caption="Pierdes el 96% de las veces y, aun así, la apuesta es claramente positiva: $30,000 × 0.04 = $1,200 de valor esperado frente a un coste de $500 → neto +$700. El raro premio gigante carga con toda la suma." />
+
+Echa las cuentas: \$30,000 × 0.04 = **\$1,200** de valor esperado, menos el coste de \$500 = **neto +\$700 por experimento.** *Fracasarás* 24 de cada 25 veces — y aun así deberías aceptar esta apuesta siempre que puedas, porque la victoria de 1 entre 25 es lo bastante grande como para pagar todos los fracasos y de sobra. El truco está en que el lado malo está acotado en \$500 (no puedes perder más de lo que cuesta el test) mientras que el lado bueno es 60× eso.
+
+Dos conexiones hacen esto riguroso en lugar de romántico. Primero, las **tasas base** (lección 02): ese 4% está haciendo un trabajo enorme, y no puedes *desear* que sea mayor. Si tu tasa base real para «un test publicitario de una idea cualquiera acierta» es del 0.5%, el EV pasa a ser \$30,000 × 0.005 = \$150 frente a un coste de \$500 — neto **−\$350**, una *mala* apuesta. La probabilidad que metas tiene que venir de tasas base honestas, no del optimismo, o la asimetría se vuelve en tu contra. Segundo, el **coste de oportunidad**: los \$500 y el tiempo no son gratis — la comparación correcta es el EV neto de este experimento frente al EV neto de la mejor cosa que harías con el mismo dinero. Las apuestas asimétricas son potentes precisamente *porque* son baratas; eso es lo que mantiene bajo su coste de oportunidad.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Detecta la trampa. ¿Cuál de estas apuestas deberías aceptar, juzgando por el valor esperado?"
+  options={[
+    { text: "Una apuesta de $20 con un 10% de probabilidad de ganar $500 y un 90% de nada (EV $50 frente a coste $20 → neto +$30)", correct: true },
+    { text: "Una apuesta de $20 con un 90% de probabilidad de ganar $25 y un 10% de nada (EV $22.50 frente a coste $20 → neto +$2.50)", correct: false },
+    { text: "Una apuesta de $20 que paga $19 garantizados cada vez (un −$1 neto seguro)", correct: false },
+    { text: "Una apuesta de $20 con un 1% de probabilidad de ganar $1,500 y un 99% de nada (EV $15 frente a coste $20 → neto −$5)", correct: false },
+  ]}
+  explanation="Calcula cada una. Opción 1: 0.10 × $500 = $50, menos $20 = +$30 — el mejor EV neto, aunque solo ganes el 10% de las veces. La opción 2 gana casi siempre pero solo deja +$2.50 netos. La opción 3 es una pequeña pérdida segura. La opción 4 parece emocionante (¡$1,500!) pero 0.01 × $1,500 = $15 < $20, un neto −$5. Tanto la ganadora frecuente como el bote llamativo son peores que la apuesta de EV positivo rara pero grande. No juzgues por la frecuencia con que ganas — juzga por el resultado ponderado por probabilidad."
+/>
+
+## Dónde te miente el EV
+
+El valor esperado es el criterio por defecto correcto, y aun así te despista de tres maneras concretas. Conocerlas es lo que separa a un usuario reflexivo del EV de uno temerario.
+
+**1. Juegos de una sola vez en los que no sobrevives para «promediar».** El EV es una promesa sobre el *largo plazo*, canjeable solo si sigues en el juego para cobrarla. Si una apuesta tiene valor esperado positivo pero una posibilidad real de aniquilarte, puede que nunca llegues al largo plazo. La trampa clásica: una moneda al aire donde cara duplica todo tu patrimonio neto y cruz lo pierde por completo. El EV es positivo (ganas un 50% de tu riqueza de media por tirada), y sin embargo repítela y te arruinas con casi total certeza, porque una sola cruz acaba la secuencia para siempre. Este es el **problema de la ruina (ruin problem)**, y por eso un EV positivo es *necesario pero no suficiente*: nunca arriesgues lo que no te puedes permitir perder, ni siquiera con buenas probabilidades. La varianza — lo salvajemente que los desenlaces oscilan alrededor del EV — importa enormemente cuando el lado malo es mortal, aunque la fórmula del EV la ignore por completo.
+
+<Callout variant="warning" title="Un EV positivo no te salvará de la ruina">
+Una apuesta puede tener un valor esperado estupendo y *aun así* ser una idea terrible si perderla acaba el juego. El EV promedia a lo largo de muchas jugadas; la ruina significa que nunca vuelves a jugar. Antes de aceptar cualquier apuesta de EV positivo, hazte primero la pregunta de la supervivencia: *si el desenlace malo ocurre, ¿sigo en pie?* Si la respuesta honesta es no, el EV es irrelevante. Lo formalizaremos cuando hablemos de rangos y de la diferencia entre una buena decisión y un buen resultado.
+</Callout>
+
+**2. Probabilidades basura.** El EV es tan bueno como los $p_i$ y los $x_i$ que le metes. La aritmética es impecable y los datos de entrada a menudo son conjeturas. Lo vimos arriba: mueve la tasa de acierto del experimento del 4% al 0.5% y una apuesta de +\$700 se convierte en una de −\$350. Un EV de aspecto preciso calculado a partir de probabilidades inventadas es *más* peligroso que ningún número en absoluto, porque blanquea una conjetura convirtiéndola en una decisión. Ancla cada $p_i$ a una tasa base (lección 02) y trata con recelo cualquier EV de estimación puntual única — mejor calcularlo a lo largo de un *rango* de probabilidades plausibles, que es justo la próxima lección.
+
+**3. Apuestas únicas, no agregables.** El EV asume que los desenlaces son conmensurables — que puedes poner cada resultado en una única escala compartida y sumarlos. Algunas apuestas se niegan. El «resultado» de una decisión médica, un matrimonio, una oportunidad única en la vida no siempre es un número que puedas multiplicar, y no hay «muchas repeticiones» que promediar. Cuando lo que está en juego es único y los resultados no están de verdad en la misma escala, el número del EV es una metáfora en el mejor de los casos, y apoyarte en él como si fuera un saldo bancario es su propio modo de fallar.
+
+### Cuándo recurrir a él
+
+Recurre al valor esperado siempre que una decisión sea **repetida o agrupable** y sus resultados sean **cuantificables** en una escala compartida: fijar precios, apostar, asegurar, hacer test A/B, construir una cartera de apuestas, cualquier elección a la que te enfrentes muchas veces. En esos contextos el EV es la comparación correcta — ordena tus opciones por valor esperado neto, no por su mejor caso (que adula a la lotería) ni por su peor caso (que prohibiría todo riesgo asegurable). Luego añade encima la comprobación de la supervivencia: entre las opciones de EV positivo, prefiere aquellas cuyo lado malo puedas absorber. El EV elige *qué* apuestas merece la pena hacer; la pregunta de la ruina decide *cuánto* arriesgar en cada una.
+
+<Quiz
+  client:visible
+  title="Repaso — ¿pesas la apuesta entera?"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  correctCountLabel="correctas"
+  gateLabel="Comprueba tu respuesta para continuar."
+  perfectMessage="Puntuación perfecta, ¡bien hecho!"
+  goodMessage="Buen trabajo, repasa las que has fallado."
+  keepPracticingMessage="Sigue practicando, lo tienes."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: "¿Qué representa realmente el valor esperado de una apuesta?",
+      options: [
+        { text: "El resultado promedio a largo plazo por jugada — la suma del resultado de cada desenlace ponderado por su probabilidad", correct: true },
+        { text: "El desenlace individual más probable de una jugada", correct: false },
+        { text: "El mejor resultado posible que podrías ganar", correct: false },
+        { text: "Una cantidad garantizada que recibirás en cualquier intento", correct: false },
+      ],
+      explanation: "EV = Σ pᵢ × xᵢ — cada resultado escalado por lo probable que es, sumados. Es un promedio a largo plazo, a menudo un valor que ninguna jugada concreta puede siquiera producir (la tirada de dado de $3.50). No es el desenlace más probable, ni el mejor caso, ni una garantía.",
+    },
+    {
+      question: "Un boleto de lotería de $2 da una posibilidad de 1 entre 10 millones de ganar $10,000,000. ¿Por qué comprarlo es una decisión de EV negativo?",
+      options: [
+        { text: "El enorme resultado del bote, ponderado por su minúscula probabilidad, aporta solo $1 de valor esperado — menos que el coste de $2", correct: true },
+        { text: "Porque $10,000,000 no es en realidad un premio lo bastante grande", correct: false },
+        { text: "Porque las probabilidades de ganar son exactamente 50/50", correct: false },
+        { text: "Porque las loterías nunca pagan los botes que anuncian", correct: false },
+      ],
+      explanation: "$10,000,000 × 0.0000001 = $1 de valor esperado. El boleto cuesta $2, así que el EV neto es −$1 por boleto. El premio es real y enorme; es la ponderación por probabilidad lo que lo encoge por debajo del coste.",
+    },
+    {
+      question: "Un experimento cuesta $500, tiene un 4% de probabilidad de devolver $30,000 y en caso contrario devuelve $0. ¿Deberías lanzarlo?",
+      options: [
+        { text: "Sí — el EV es $30,000 × 0.04 = $1,200, un neto +$700, aunque fracasarás el 96% de las veces", correct: true },
+        { text: "No — pierdes el 96% de las veces, así que es claramente una mala apuesta", correct: false },
+        { text: "No — el resultado de $30,000 es irrelevante porque es poco probable", correct: false },
+        { text: "Solo si tienes garantizado ganar al menos una vez", correct: false },
+      ],
+      explanation: "Las apuestas asimétricas ganan raras veces pero pagan mucho. $30,000 × 0.04 = $1,200 de EV frente a un coste de $500 → neto +$700. Perder la mayoría de las veces está bien cuando la rara victoria cubre todas las pérdidas. El matiz: el 4% debe ser una tasa base real, y el lado malo de $500 debe ser uno que puedas absorber.",
+    },
+    {
+      question: "Una moneda al aire duplicaría todo tu patrimonio neto con cara y lo aniquilaría con cruz — una apuesta de EV positivo. ¿Por qué podrías rechazarla aun así?",
+      options: [
+        { text: "Conlleva una posibilidad real de ruina; una sola cruz acaba el juego, así que nunca sobrevives para cobrar el promedio a largo plazo", correct: true },
+        { text: "Porque duplicar tu dinero no es una recompensa lo bastante grande", correct: false },
+        { text: "Porque el valor esperado es en realidad negativo", correct: false },
+        { text: "Porque las monedas al aire siempre son exactamente justas y por eso suman cero", correct: false },
+      ],
+      explanation: "El EV es positivo (ganas de media), pero el EV solo rinde a lo largo de muchas repeticiones supervivibles. Repite esto y una sola cruz te arruina para siempre. Un EV positivo es necesario, no suficiente — nunca arriesgues lo que no te puedes permitir perder. La varianza y la ruina importan cuando el lado malo es mortal, aunque la fórmula del EV las ignore.",
+    },
+  ]}
+/>
+
+## El asidero para llevarte
+
+Ya tienes el único número que combina probabilidad y resultado: el **valor esperado**, la suma del resultado de cada desenlace ponderado por su probabilidad, igual a lo que vale cada jugada promediado a largo plazo. Lo has visto desenmascarar la lotería como un impuesto de −\$1, justificar una prima de seguro de EV negativo y bendecir una apuesta que pierdes el 96% de las veces. Y has visto sus tres puntos ciegos — la ruina, los datos de entrada basura y las apuestas únicas — por lo que «maximiza el EV» es un criterio por defecto, no un mandamiento.
+
+El mayor de esos puntos ciegos es que un único número de EV oculta el *abanico* del que fue promediado. Dos apuestas pueden compartir un EV de \$700 mientras una es casi segura y la otra es una moneda al aire entre la gloria y la ruina. A continuación, en **Pensar en rangos**, dejamos de condensar el abanico en un único número y empezamos a razonar sobre toda la distribución — mejor caso, peor caso y cuánto puede oscilar el desenlace — que es justo la pieza que falta y que te dice *cuánto* apostar, no solo *si* hacerlo.

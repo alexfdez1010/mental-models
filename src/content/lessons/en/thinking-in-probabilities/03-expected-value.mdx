@@ -1,0 +1,221 @@
+---
+title: "Expected Value: Weighing the Whole Bet"
+description: "How to collapse a whole spread of payoffs and their probabilities into one number that tells you whether a bet is worth taking — and the three situations where that number quietly lies."
+topic: "en/thinking-in-probabilities"
+order: 4
+minutes: 9
+updated: 2026-06-22
+---
+
+import { MCQ, Quiz, Callout, ExpectedValueCalculator } from '@/components/react';
+
+A slot machine knows exactly what it is doing, and so does the casino that bought it. The machine pays out *most* of the money it takes in — 92 cents on the dollar, say — which feels almost generous until you notice the casino keeps the other 8 cents on *every* dollar, forever, across millions of pulls. No single spin tells you this. A spin is a coin flip with confetti: sometimes you win big, usually you win nothing, and the noise drowns out the trend. The casino doesn't watch the spin. It watches the *average*, and the average is a machine for printing 8% of everything that walks in the door.
+
+That average is **expected value**, and learning to compute it is the difference between being the player and being the house. So far this course taught you to read a probability (lesson 01) and to anchor it to its base rate (lesson 02). Now we put a *payoff* on each outcome and combine the two into a single verdict: across many tries, is this bet worth it?
+
+<MCQ
+  client:visible
+  pretest
+  question="A lottery ticket costs $2. There's a 1-in-10-million chance of winning $10,000,000, and otherwise you win nothing. Before any arithmetic — over many, many tickets, what do you expect to happen on average per ticket?"
+  options={[
+    { text: "You lose money on average — the tiny chance of the jackpot isn't worth the $2 you pay every time", correct: true },
+    { text: "You break even — a $10M prize at 1-in-10M odds exactly cancels out" },
+    { text: "You profit slightly, because the jackpot is so enormous" },
+    { text: "It's impossible to say without knowing how lucky you are" },
+  ]}
+  explanation="Hold the prediction — we'll prove it below. The headline 'win $10,000,000!' is vivid; the 1-in-10-million is abstract; your brain weights the vivid one. But expected value weights each payoff by its probability, and once you do that the jackpot shrinks to $1 of value per ticket while the ticket costs $2. Repeated forever, that's a guaranteed bleed. 'Luck' is just the noise around that average."
+/>
+
+## The one-line way to value a gamble
+
+Here's the analogy first. Imagine you could play a bet ten thousand times and then split the total winnings evenly across all ten thousand plays. The per-play share you'd walk away with — that's the bet's expected value. It's not what happens on *any* single try (you might win, you might lose); it's the long-run average each try is *worth*.
+
+Precisely: the **expected value (EV)** of a decision is the sum of every possible outcome's payoff, each weighted by the probability that it happens. Its home discipline is probability and decision theory, and the formula is one line:
+
+$$EV = \sum_i p_i \times x_i$$
+
+where $x_i$ is the payoff of outcome $i$ and $p_i$ is its probability (a number between 0 and 1, so that all the $p_i$ sum to 1). You take each payoff, multiply it by how likely it is, and add up the results. That's the whole operation. The $\times$ is doing the real work: it shrinks payoffs you're unlikely to get and protects payoffs you probably will.
+
+A tiny first example. You pay nothing to roll a fair six-sided die, and you're paid in dollars equal to the number that comes up. Each face has probability $1/6$. Step through it:
+
+| Outcome (roll) | Payoff $x_i$ | Probability $p_i$ | Contribution $p_i \times x_i$ |
+|---|---|---|---|
+| 1 | \$1 | 1/6 | \$0.167 |
+| 2 | \$2 | 1/6 | \$0.333 |
+| 3 | \$3 | 1/6 | \$0.500 |
+| 4 | \$4 | 1/6 | \$0.667 |
+| 5 | \$5 | 1/6 | \$0.833 |
+| 6 | \$6 | 1/6 | \$1.000 |
+| **EV** | | | **\$3.50** |
+
+The EV is \$3.50 — which is *not a payoff you can ever actually roll*. There's no 3.5 on a die. That's the first thing to internalize: expected value is an average, not a prediction. No single roll pays \$3.50, yet \$3.50 is exactly what each roll is worth in the long run. If someone charged you \$3 to play this game, you should play all day; at \$4, you should walk away.
+
+Now turn the same machine on the lottery from the pretest. The numbers are designed to feel generous and to bleed you anyway.
+
+<ExpectedValueCalculator client:visible
+  title="The $2 lottery ticket"
+  scenario={{
+    prompt: "Should you buy the ticket?",
+    unit: "$",
+    unitPosition: "prefix",
+    cost: 2,
+    outcomes: [
+      { label: "Jackpot", payoff: 10000000, prob: 0.00001, note: "1 in 10,000,000 — about a 0.00001% chance" },
+      { label: "Nothing", payoff: 0, prob: 99.99999, note: "Virtually every ticket" },
+    ],
+  }}
+  caption="Drag the jackpot probability up and watch the verdict flip — but notice how absurdly far you have to push it. At the real odds, a $10M jackpot is worth $1 of expected value, against a $2 ticket. Net: −$1 per ticket, every ticket, forever." />
+
+Read the contribution column. The jackpot's payoff is gigantic — \$10,000,000 — but multiplied by its probability ($0.0000001$) it contributes just **\$1** to the sum. The "nothing" outcome contributes \$0. So the EV of the ticket is \$1, and it *costs* \$2. Net expected value: **−\$1 per ticket.** Buy a ticket a day for a lifetime and the long-run average is that you set fire to a dollar each morning. This is why a lottery is sometimes called *a tax on people who can't (or won't) compute expected value* — the state sells a vivid \$10M dream for \$2 and pockets \$1 of it, on average, every single time.
+
+<Callout variant="tip" title="The whole bet, in one number">
+Expected value is what lets you compare a sure \$3 against a wild gamble on the *same scale*. Don't judge a bet by its best case ("I could win \$10 million!") or its worst case ("I could lose \$2") — judge it by its probability-weighted average, the one number that already contains the whole spread.
+</Callout>
+
+## EV is what you'd average over many repeats
+
+Why should one number born from multiplication tell you how to act on a single, one-time bet? Because of the **law of large numbers**: as you repeat an independent random trial more and more times, the *average* of your actual results converges to the expected value. One play is pure noise — you win or you don't, and EV looks like an abstraction. But stack up the plays and the noise cancels while the EV accumulates.
+
+Picture the die game at \$3 a play. Roll once and you might get a \$1 (a \$2 loss) or a \$6 (a \$3 win) — wild swings. But your *average* payoff per roll marches steadily toward \$3.50:
+
+| Number of rolls | Typical average payoff per roll | How far from EV (\$3.50) |
+|---|---|---|
+| 1 | anywhere from \$1 to \$6 | up to \$2.50 off |
+| 10 | ~\$3.1 to \$3.9 | within ~\$0.40 |
+| 1,000 | ~\$3.45 to \$3.55 | within ~\$0.05 |
+| 1,000,000 | ~\$3.499 to \$3.501 | within a fraction of a cent |
+
+The casino lives in the bottom row. It doesn't care that *you* might hit a jackpot tonight — across its millions of plays, its average result is nailed to the EV, and it set the EV in its favor. The gambler lives in the top row, where the noise is big enough to feel like a "system." Expected value is the promise that, given enough repetitions, the math always shows up to collect.
+
+## Negative-EV vs positive-EV bets
+
+Sort every bet by the sign of its net expected value and you get a clean taxonomy. A **positive-EV** bet pays you to take it (over the long run); a **negative-EV** bet charges you for the privilege. The whole game of rational gambling, investing, and insuring is: take positive-EV bets, refuse negative-EV ones — with one important asterisk we'll get to.
+
+| Bet | Roughly how the EV math runs | Net EV per play | Sign |
+|---|---|---|---|
+| State lottery ticket | \$10M × 0.0000001 = \$1 of value, costs \$2 | **−\$1** | Negative |
+| Casino roulette (\$1 on a number) | \$36 × (1/38) = \$0.947 of value, costs \$1 | **−\$0.053** | Negative |
+| Home insurance premium | avoided loss × tiny prob ≈ \$700 of value, costs \$1,000 | **−\$300** | Negative (and you buy it anyway) |
+
+The lottery and the casino are obvious: their entire business model is selling you negative-EV bets dressed as fun. The roulette wheel pays \$36 on a \$1 bet but has 38 pockets, so its EV is about 94.7 cents per dollar — a 5.3% house edge that, by the law of large numbers, is as reliable as gravity.
+
+Insurance is the interesting one. The premium is *also* negative-EV — that's how the insurer makes money; on average you pay more than you'll ever collect. And yet buying it is often the rational move. Why? Because EV isn't the only thing you care about when an outcome can *ruin* you. A house fire isn't a −\$300 average annoyance you can shrug off over many repetitions — it's a single, un-repeatable catastrophe that can wipe you out. You happily pay a small, certain, negative-EV premium to delete a rare but unsurvivable tail. That's not a failure to compute EV; it's recognizing that **you don't get to "average out" a loss you can't come back from** — a thread we'll pull hard in the lessons on ranges and on decision-versus-outcome.
+
+<MCQ
+  client:visible
+  question="A roulette bet pays $36 on a $1 stake, but the wheel has 38 equally likely pockets. What is the expected value of a $1 bet, and what does it mean?"
+  options={[
+    { text: "About $0.947 of value for a $1 cost → net −$0.053 per bet; over many bets you lose about 5.3% of everything you wager", correct: true },
+    { text: "$36 — that's the payoff, so the bet is wildly positive-EV", correct: false },
+    { text: "$0 — roulette is a fair game with no house edge", correct: false },
+    { text: "−$1 — you lose your whole stake every single spin", correct: false },
+  ]}
+  explanation="EV = $36 × (1/38) + $0 × (37/38) = $0.947. You pay $1 to receive $0.947 of expected value, a net of −$0.053. The $36 is the best case, not the average; weighting it by its 1-in-38 probability is the whole point. Over thousands of spins the law of large numbers guarantees you bleed about 5.3 cents per dollar wagered — the house edge."
+/>
+
+## Asymmetric bets
+
+Most of the time payoffs and probabilities roughly trade off — big prizes are rare, small prizes are common. An **asymmetric bet** breaks that symmetry on purpose: the downside is small and *capped*, while the upside is enormous (or the mirror image — a tiny chance of a catastrophic loss). When the structure is lopsided, a single term in the EV sum can dominate everything else, and the bet can be wildly positive-EV even though you *lose most of the time*.
+
+This is the logic behind a cheap experiment, a startup bet, an out-of-the-money option, a cold email to a dream employer. You'll probably get nothing. But "probably nothing" multiplied by a small, fixed cost is cheap, while "rarely, an enormous win" multiplied even by a tiny probability can be large. Consider a \$500 experiment with a 4% chance of returning \$30,000 and otherwise returning \$0 — concretely, a small ad test for a product idea.
+
+<ExpectedValueCalculator client:visible
+  title="A cheap, asymmetric experiment"
+  scenario={{
+    prompt: "Run the $500 test?",
+    unit: "$",
+    unitPosition: "prefix",
+    cost: 500,
+    outcomes: [
+      { label: "It hits — the idea works and scales", payoff: 30000, prob: 4, note: "4% — a base-rate-grounded long shot, not wishful thinking" },
+      { label: "It flops — you learn it, lose the $500", payoff: 0, prob: 96, note: "96% — the usual outcome of any one experiment" },
+    ],
+  }}
+  caption="You lose 96% of the time, yet the bet is strongly positive: $30,000 × 0.04 = $1,200 of expected value against a $500 cost → net +$700. The rare giant payoff carries the whole sum." />
+
+Run the numbers: \$30,000 × 0.04 = **\$1,200** of expected value, minus the \$500 cost = **net +\$700 per experiment.** You will *fail* 24 times out of 25 — and you should still take this bet every chance you get, because the 1-in-25 win is large enough to pay for all the failures and then some. The trick is that the downside is capped at \$500 (you can't lose more than the test costs) while the upside is 60× that.
+
+Two connections make this rigorous rather than romantic. First, **base rates** (lesson 02): that 4% is doing enormous work, and you don't get to *wish* it higher. If your real base rate for "ad test for a random idea hits" is 0.5%, the EV becomes \$30,000 × 0.005 = \$150 against a \$500 cost — net **−\$350**, a *bad* bet. The probability you plug in must come from honest base rates, not optimism, or the asymmetry flips against you. Second, **opportunity cost**: the \$500 and the time aren't free — the right comparison is this experiment's net EV against the net EV of the best thing you'd do with the same money. Asymmetric bets are powerful precisely *because* they're cheap; that's what keeps their opportunity cost low.
+
+<MCQ
+  client:visible
+  question="Spot the trap. Which of these bets should you take, judging by expected value?"
+  options={[
+    { text: "A $20 bet with a 10% chance to win $500 and a 90% chance of nothing (EV $50 vs $20 cost → net +$30)", correct: true },
+    { text: "A $20 bet with a 90% chance to win $25 and a 10% chance of nothing (EV $22.50 vs $20 cost → net +$2.50)", correct: false },
+    { text: "A $20 bet that pays a guaranteed $19 every time (a certain −$1 net)", correct: false },
+    { text: "A $20 bet with a 1% chance to win $1,500 and 99% nothing (EV $15 vs $20 cost → net −$5)", correct: false },
+  ]}
+  explanation="Run each one. Option 1: 0.10 × $500 = $50, minus $20 = +$30 — the best net EV, even though you win only 10% of the time. Option 2 wins almost always but only nets +$2.50. Option 3 is a sure small loss. Option 4 looks exciting ($1,500!) but 0.01 × $1,500 = $15 < $20, a net −$5. The frequent-winner and the flashy-jackpot are both worse than the rare-but-large positive-EV bet. Don't judge by how often you win — judge by the probability-weighted payoff."
+/>
+
+## Where EV lies to you
+
+Expected value is the right default, and it still misleads in three specific ways. Knowing them is what separates a thoughtful EV user from a reckless one.
+
+**1. One-shot games where you can't survive to "average out."** EV is a promise about the *long run*, redeemable only if you're still in the game to collect. If a bet has a positive expected value but a real chance of wiping you out, you may never reach the long run. The classic trap: a coin flip where heads doubles your entire net worth and tails loses all of it. The EV is positive (you gain 50% of your wealth on average per flip), yet repeat it and you go broke with near-certainty, because a single tails ends the sequence forever. This is the **ruin problem**, and it's why a positive EV is *necessary but not sufficient*: never risk what you can't afford to lose, even at attractive odds. Variance — how wildly outcomes swing around the EV — matters enormously when the downside is fatal, even though the EV formula ignores it completely.
+
+<Callout variant="warning" title="Positive EV will not save you from ruin">
+A bet can have a great expected value and *still* be a terrible idea if losing it ends the game. EV averages over many plays; ruin means you never get to play again. Before taking any positive-EV bet, ask the survival question first: *if the bad outcome hits, am I still standing?* If the honest answer is no, the EV is irrelevant. We'll formalize this when we talk about ranges and the difference between a good decision and a good outcome.
+</Callout>
+
+**2. Garbage-in probabilities.** EV is only as good as the $p_i$ and $x_i$ you feed it. The arithmetic is flawless and the inputs are often guesses. We saw it above: nudge the experiment's hit rate from 4% to 0.5% and a +\$700 bet becomes a −\$350 one. A precise-looking EV computed from invented probabilities is *more* dangerous than no number at all, because it launders a guess into a decision. Anchor every $p_i$ to a base rate (lesson 02) and treat a single point-estimate EV with suspicion — better to compute it across a *range* of plausible probabilities, which is exactly the next lesson.
+
+**3. Un-aggregatable, unique stakes.** EV assumes outcomes are commensurable — that you can put every payoff on one shared scale and add them up. Some stakes refuse. The "payoff" of a medical decision, a marriage, a once-in-a-lifetime opportunity isn't always a number you can multiply, and there's no "many repetitions" to average over. When the stake is unique and the payoffs aren't truly on the same scale, the EV number is a metaphor at best, and leaning on it as if it were a bank balance is its own failure mode.
+
+### When to reach for it
+
+Reach for expected value whenever a decision is **repeated or poolable** and its payoffs are **quantifiable** on a shared scale: pricing, betting, insuring, A/B testing, building a portfolio of bets, any choice you'll face many times. In those settings EV is the correct comparison — rank your options by net expected value, not by their best case (which flatters the lottery) or their worst case (which would forbid every insurable risk). Then layer on the survival check: among the positive-EV options, prefer the ones whose downside you can absorb. EV chooses *which* bets are worth making; the ruin question decides *how much* to stake on each.
+
+<Quiz
+  client:visible
+  title="Recap — do you weigh the whole bet?"
+  questions={[
+    {
+      question: "What does the expected value of a bet actually represent?",
+      options: [
+        { text: "The long-run average payoff per play — the sum of each outcome's payoff weighted by its probability", correct: true },
+        { text: "The single most likely outcome of one play", correct: false },
+        { text: "The best possible payoff you could win", correct: false },
+        { text: "A guaranteed amount you'll receive on any given try", correct: false },
+      ],
+      explanation: "EV = Σ pᵢ × xᵢ — every payoff scaled by how likely it is, summed. It's a long-run average, often a value no single play can even produce (the $3.50 die roll). It is not the most likely outcome, the best case, or a guarantee.",
+    },
+    {
+      question: "A $2 lottery ticket gives a 1-in-10-million shot at $10,000,000. Why is buying it a negative-EV decision?",
+      options: [
+        { text: "The jackpot's huge payoff, weighted by its tiny probability, contributes only $1 of expected value — less than the $2 cost", correct: true },
+        { text: "Because $10,000,000 is not actually a large enough prize", correct: false },
+        { text: "Because the odds of winning are exactly 50/50", correct: false },
+        { text: "Because lotteries never pay out their advertised jackpots", correct: false },
+      ],
+      explanation: "$10,000,000 × 0.0000001 = $1 of expected value. The ticket costs $2, so the net EV is −$1 per ticket. The prize is real and enormous; it's the probability weighting that shrinks it below the cost.",
+    },
+    {
+      question: "An experiment costs $500, has a 4% chance of returning $30,000, and otherwise returns $0. Should you run it?",
+      options: [
+        { text: "Yes — EV is $30,000 × 0.04 = $1,200, a net +$700, even though you'll fail 96% of the time", correct: true },
+        { text: "No — you lose 96% of the time, so it's clearly a bad bet", correct: false },
+        { text: "No — the $30,000 payoff is irrelevant because it's unlikely", correct: false },
+        { text: "Only if you're guaranteed to win at least once", correct: false },
+      ],
+      explanation: "Asymmetric bets win rarely but pay big. $30,000 × 0.04 = $1,200 of EV against a $500 cost → net +$700. Losing most of the time is fine when the rare win covers all the losses. The catch: the 4% must be a real base rate, and the $500 downside must be one you can absorb.",
+    },
+    {
+      question: "A coin flip would double your entire net worth on heads and wipe it out on tails — a positive-EV bet. Why might you still refuse it?",
+      options: [
+        { text: "It carries a real chance of ruin; a single tails ends the game, so you never survive to collect the long-run average", correct: true },
+        { text: "Because doubling your money isn't a large enough reward", correct: false },
+        { text: "Because the expected value is actually negative", correct: false },
+        { text: "Because coin flips are always exactly fair and so net to zero", correct: false },
+      ],
+      explanation: "The EV is positive (you gain on average), but EV only pays off across many survivable repetitions. Repeat this and a single tails bankrupts you forever. Positive EV is necessary, not sufficient — never risk what you can't afford to lose. Variance and ruin matter when the downside is fatal, even though the EV formula ignores them.",
+    },
+  ]}
+/>
+
+## The handle to carry forward
+
+You now have the one number that combines probability and payoff: **expected value**, the sum of each outcome's payoff weighted by its chance, equal to what each play is worth averaged over the long run. You've seen it expose the lottery as a −\$1 tax, justify a negative-EV insurance premium, and bless a bet you lose 96% of the time. And you've seen its three blind spots — ruin, garbage inputs, and unique stakes — which is why "maximize EV" is a default, not a commandment.
+
+The biggest of those blind spots is that a single EV number hides the *spread* it was averaged from. Two bets can share an EV of \$700 while one is a near-sure thing and the other is a coin-flip between glory and ruin. Next, in **Thinking in Ranges**, we stop collapsing the spread to one number and start reasoning about the whole distribution — best case, worst case, and how much the outcome can swing — which is exactly the missing piece that tells you *how much* to bet, not just *whether* to.

@@ -72,3 +72,9 @@ export type { ConsequenceTreeProps, ConsequenceNode, ConsequenceValence } from '
 
 export { OpportunityCostChooser, default as OpportunityCostChooserDefault } from '@/components/react/OpportunityCostChooser';
 export type { OpportunityCostChooserProps, OpportunityCostScenario, OpportunityCostOption } from '@/components/react/OpportunityCostChooser';
+
+export { ExpectedValueCalculator, default as ExpectedValueCalculatorDefault } from '@/components/react/ExpectedValueCalculator';
+export type { ExpectedValueCalculatorProps, ExpectedValueScenario, ExpectedValueOutcome } from '@/components/react/ExpectedValueCalculator';
+
+export { BaseRateGrid, default as BaseRateGridDefault } from '@/components/react/BaseRateGrid';
+export type { BaseRateGridProps } from '@/components/react/BaseRateGrid';

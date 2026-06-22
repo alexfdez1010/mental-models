@@ -73,25 +73,6 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   {
-    slug: 'thinking-in-probabilities',
-    icon: '🎲',
-    difficulty: 'intermediate',
-    order: 6,
-    accent: 'accent',
-    title: {
-      en: 'Thinking in Probabilities',
-      es: 'Pensar en Probabilidades',
-    },
-    description: {
-      en: 'Swap true/false for odds. Base rates, expected value, and the habit of asking “how likely?” instead of “is it possible?”',
-      es: 'Cambia verdadero/falso por probabilidades. Tasas base, valor esperado y el hábito de preguntar «¿qué probabilidad hay?» en vez de «¿es posible?».',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['probability', 'decision-making'],
-    buildNotes:
-      'Foundations of probabilistic thinking. Sections: possibility vs. probability; base rates (the outside view) and the base-rate fallacy; expected value = Σ(probability × payoff) with worked numeric examples; thinking in ranges not point estimates. Use KaTeX for the EV formula and at least one worked table. Build an interactive EV calculator / base-rate visualizer island (e.g. a dot grid showing a base rate). Pitfall: confusing a good decision with a good outcome. Recap Quiz. en + es twin. This sets up the advanced Probability & Uncertainty path (Bayesian updating, fat tails).',
-  },
-  {
     slug: 'feedback-loops',
     icon: '🔄',
     difficulty: 'advanced',
@@ -128,6 +109,44 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['probability', 'decision-making'],
     buildNotes:
       'Bayesian updating — the advanced probability rung above Thinking in Probabilities. Sections: prior, likelihood, posterior in plain language; the base rate as your prior (links back to the base-rate fallacy); the canonical medical-test worked example (rare disease + imperfect test → surprisingly low posterior) done with real numbers and a natural-frequency tree; updating incrementally as evidence arrives; strength of evidence (likelihood ratios) vs. weight of the prior; why extraordinary claims need extraordinary evidence. Use KaTeX for Bayes’ theorem and at least one frequency table; build an interactive posterior-calculator / natural-frequency-grid island (sliders for base rate, true-positive, false-positive → live posterior). Connect to second-order thinking (a posterior is the input to the next decision) and calibration. Pitfall: ignoring the base rate; confusing P(evidence|hypothesis) with P(hypothesis|evidence). Recap Quiz + MindMap. en + es twin. Sets up fat tails and calibration on the expert tier.',
+  },
+  {
+    slug: 'fat-tails',
+    icon: '🐘',
+    difficulty: 'advanced',
+    order: 9,
+    accent: 'accent',
+    title: {
+      en: 'Fat Tails & Black Swans',
+      es: 'Colas Anchas y Cisnes Negros',
+    },
+    description: {
+      en: 'Some worlds are mild and some are wild. In fat-tailed domains the rare extreme dominates the average, the bell curve lies, and one outlier rewrites the whole record — so plan for the tail, not the typical.',
+      es: 'Hay mundos mansos y mundos salvajes. En los dominios de cola ancha lo extremo y raro domina la media, la campana de Gauss miente y un solo caso atípico reescribe todo el registro — así que planifica para la cola, no para lo típico.',
+    },
+    dependencies: ['thinking-in-probabilities'],
+    tags: ['probability', 'decision-making'],
+    buildNotes:
+      'Fat tails & black swans — the advanced rung extending Thinking in Probabilities into the extremes. Sections: Mediocristan vs. Extremistan (height/weight vs. wealth, book sales, pandemics) — where one sample can or cannot dominate the total; the normal/bell curve and why it under-counts extremes; power laws and the 80/20 family; why the mean and standard deviation mislead in fat-tailed data; black swans (rare, high-impact, rationalized after the fact) and the turkey problem; ergodicity / ruin in one line (never risk what you can’t recover from — links to margin of safety); practical consequences (sample size lies, backtests miss the crash, insurance vs. exposure). Use KaTeX for the power-law form and at least one comparison table. Build an interactive island contrasting a thin-tailed vs. fat-tailed distribution (slider for tail thickness → watch the max sample and the running average lurch), respecting prefers-reduced-motion. Connect to base rates and expected value (a tiny-probability, huge-payoff term can dominate the EV sum). Pitfall: using thin-tailed intuitions (averages, “it’s never happened”) in a fat-tailed world. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'calibration-and-confidence',
+    icon: '🎯',
+    difficulty: 'expert',
+    order: 10,
+    accent: 'brand',
+    title: {
+      en: 'Calibration: Knowing What You Know',
+      es: 'Calibración: saber lo que sabes',
+    },
+    description: {
+      en: 'A calibrated thinker’s 70% guesses come true about 70% of the time. Measure your overconfidence, widen your honest error bars, and turn vague hunches into probabilities you can be scored on.',
+      es: 'Las apuestas al 70% de quien está bien calibrado aciertan el 70% de las veces. Mide tu exceso de confianza, ensancha tus márgenes de error honestos y convierte corazonadas vagas en probabilidades que se pueden puntuar.',
+    },
+    dependencies: ['thinking-in-probabilities', 'bayesian-updating'],
+    tags: ['probability', 'decision-making', 'psychology'],
+    buildNotes:
+      'Calibration — the expert capstone of the probability path: not just estimating odds but being *right about how right you are*. Sections: what calibration means (of all the times you say 70%, ~70% should happen) and the calibration curve; overconfidence and the overprecision bias (90% confidence intervals that catch the truth far less than 90% of the time); proper scoring rules — the Brier score and log score — that reward honesty and punish bluffing, with a worked numeric example; confidence intervals / error bars as honest ranges (ties back to thinking in ranges); how to get calibrated (track predictions, give ranges, do calibration training, post-mortem your scores), referencing forecasting research (superforecasters) without overclaiming; resolution vs. calibration (being calibrated AND decisive). Use KaTeX for the Brier score; build an interactive calibration island (the learner assigns confidences to several true/false claims, then sees their calibration plotted and Brier score scored). Connect to Bayesian updating (calibrated priors), overconfidence bias (psychology), and margin of safety. Pitfall: confident ≠ correct; precision masquerading as accuracy. Recap Quiz + MindMap. en + es twin.',
   },
 ];
 

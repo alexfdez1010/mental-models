@@ -1,0 +1,238 @@
+---
+title: "Thinking in Ranges, Not Points"
+description: "A single-number estimate is a lie of confidence; replace it with a low/likely/high range, learn why the flaw of averages drowns people, and fix the overprecision that makes your '90% sure' wrong half the time."
+topic: "en/thinking-in-probabilities"
+order: 5
+minutes: 7
+updated: 2026-06-22
+---
+
+import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+
+Three lessons in, you can read a base rate, compute an expected value, and tell a possibility from a probability. Now we attack the most seductive habit left standing: the **point estimate** — the urge to answer "how long?" or "how much?" with a single, clean, confident number. "The project will take six weeks." "We'll do \$2M in revenue." "I'll be there in twenty minutes." Every one of those sentences is wrong in the same way: not because the number is bad, but because there's only *one* of it. The future doesn't come as a number. It comes as a spread, and pretending otherwise is the quiet mistake underneath a thousand blown deadlines and busted budgets.
+
+This lesson teaches you to think in **ranges** instead — and, just as importantly, to make those ranges honest, because the first ranges you produce will be far too narrow.
+
+<MCQ
+  client:visible
+  pretest
+  question="Your engineer says a feature will take exactly 6 weeks. Before any work starts, what's the single most important thing wrong with that estimate?"
+  options={[
+    { text: "It's a point estimate — one number with no spread — so it hides how uncertain the real timeline is and gives false confidence.", correct: true },
+    { text: "Six weeks is too long; good features ship in days.", correct: false },
+    { text: "Nothing — a precise single number is exactly what a good estimate looks like.", correct: false },
+    { text: "The engineer should have rounded it to a whole month for simplicity.", correct: false },
+  ]}
+  explanation="No penalty on a pretest. The problem isn't the value 6 — it's that there's only one value. A real timeline has a range: maybe 4 weeks if everything goes right, 6 if it's normal, 11 if integration bites. The lone number erases all of that and replaces it with confidence the engineer doesn't actually have. The rest of the lesson is about replacing the point with the range."
+/>
+
+## A single number is a lie of confidence
+
+Imagine two weather forecasts for tomorrow. The first says: **"12°C."** The second says: **"8 to 16°C, most likely around 12."** The first sounds more authoritative — it's crisp, it's decisive, it commits. And it's the worse forecast, because it quietly claims a precision the atmosphere never offered. The second tells you what you actually need to dress for: bring a layer, it might hit 8.
+
+A **point estimate** is a forecast collapsed to a single number. A **range** (more formally, a distribution) keeps the spread: a **low**, a **likely** (or central) value, and a **high**. The point estimate isn't just less informative — it's actively misleading, because the listener reads the false confidence right off the decimal. When you say "six weeks," your boss hears "six weeks, bank on it." When you say "four to eleven, probably six," your boss hears the truth: *this could slip, plan for it.*
+
+**The home discipline:** any time you're about to commit to a single number for something that hasn't happened yet, give three instead — low / likely / high. Not because three numbers are fancier, but because the gap between low and high *is the information*. A tight range says "I know this." A wide one says "I don't, and you should plan around that." Both are useful; the point estimate is the only one that lies.
+
+**Worked example.** You're estimating next quarter's sales for a new product.
+
+| Estimate style | What you say | What it communicates |
+|---|---|---|
+| Point | "\$500,000" | Bank on half a million. (False confidence.) |
+| Range | "\$300K low, \$500K likely, \$850K high" | Could disappoint at \$300K; could surprise at \$850K; plan for the middle but don't over-commit cash. |
+
+The range costs you nothing and tells the reader where the risk lives. The point estimate is the same guess with the uncertainty amputated.
+
+<Callout variant="tip" title="The reflex to build">
+When anyone hands you a lone number for a future event — a deadline, a budget, a forecast — silently ask: *"…plus or minus what?"* If they can't answer, they haven't finished thinking. Neither have you, until you can.
+</Callout>
+
+## Confidence intervals in plain language
+
+Once you accept that estimates are ranges, the next question is *how wide?* The honest tool here is the **confidence interval**. Strip the statistics jargon and it's simple: a **90% confidence interval** is a low value and a high value chosen so that you'd be **90% sure the true answer falls between them**. You're allowed to be wrong one time in ten — but only one.
+
+The trick to building one isn't to ask "what's my best guess and a little wiggle around it?" That produces a range that's far too tight. Instead, build it from the *edges* inward. Ask two separate questions:
+
+- **The surprising low:** "What value is low enough that I'd be genuinely *surprised* — not just mildly off — if the truth came in below it?" That's your lower bound.
+- **The surprising high:** "What value is high enough that I'd be genuinely surprised if the truth came in above it?" That's your upper bound.
+
+If there's only a 5% chance the truth is below your low and a 5% chance it's above your high, the 90% lives in the middle by construction.
+
+**Worked example — the length of the Nile.** Suppose you have no idea. A point estimate ("4,000 km") is a wild dart. A 90% interval is a real answer to a different, more honest question: *what range am I 90% sure contains it?* You might reason: "Surely longer than 1,000 km, surely shorter than 12,000 km." So your interval is **1,000–12,000 km**. Wide? Yes — and correct: the Nile is about 6,650 km, comfortably inside. A confident "4,000 km" would have been *wrong*; the embarrassingly wide range was *right*. That's the lesson in one number: a calibrated wide range beats a confident narrow one.
+
+<MCQ
+  client:visible
+  question="You're asked to give a 90% confidence interval for a quantity you know little about. Which interval is the BETTER answer?"
+  options={[
+    { text: "A wide range that you're genuinely 90% sure contains the truth.", correct: true },
+    { text: "A narrow range centered on your best single guess, because precision looks competent.", correct: false },
+    { text: "The single number you're most confident in — an interval is just two of those.", correct: false },
+    { text: "A range so wide it spans every conceivable value, to guarantee you're never wrong.", correct: false },
+  ]}
+  explanation="A 90% interval should actually capture the truth 90% of the time. When you know little, that honestly requires a wide range — and that's fine; width is information, not failure. A narrow range built to 'look competent' will miss far more than 10% of the time. (The all-spanning range is the opposite failure — covered later under false humility.)"
+/>
+
+## The flaw of averages
+
+Here's the famous one-liner, usually credited to statistician Sam Savage: **"Never cross a river that is on average four feet deep."** The average says four feet — wadeable. The river, though, is two feet deep at the banks and ten feet deep in the middle. The average is *true* and it *drowns you*, because you don't experience the average; you experience the spread, and the spread has a ten-foot hole in it.
+
+The **flaw of averages** is the error of plugging a single average into a decision and ignoring the distribution around it. It bites hardest whenever outcomes are *variable* and your exposure to the extremes isn't symmetric — when the bad tail hurts more than the good tail helps.
+
+**Worked example — staffing for "average" demand.** A support team gets **100 tickets per day on average**. So you staff for 100, right? Look at the actual spread:
+
+| Day type | Tickets | Frequency | What happens with staff-for-100 |
+|---|---|---|---|
+| Quiet | 60 | 40% of days | Agents idle — mild waste |
+| Normal | 90 | 40% of days | Fine |
+| Spike | 220 | 20% of days | Massive backlog, blown SLAs, furious customers |
+
+The average is a real 100 ((60×0.4) + (90×0.4) + (220×0.2) = 24 + 36 + 44 = **104**, near enough). Staffing to that central number leaves you fine on calm days and on fire 20% of the time. The variability — not the average — is what determines whether you survive the spike days. You have to plan for the range, with a buffer or surge plan for the high end, because the cost of the spike day dwarfs the cost of an idle quiet day.
+
+This connects straight back to lesson 03. There you met **expected value** and the idea of **ruin**: a bet with positive EV can still wipe you out if a single bad draw is fatal, because you don't get to play the average — you have to survive every individual outcome. The flaw of averages is the same trap wearing estimation clothes. The average outcome is irrelevant if one trip across the deep part of the river ends the game.
+
+<Callout variant="warning" title="The average can be a comfortable lie">
+A plan built on a single average is silently a bet that variability won't hurt you. Sometimes that's safe. But when the downside is steep — a stockout, an overdraft, a drowning — the average is exactly the number that makes a fatal plan look fine. Always ask: *what does the bad tail look like, and can I survive it?*
+</Callout>
+
+<Reveal client:visible label="Why the deep tail matters even more than it looks" buttonLabel="Show the fat-tails preview">
+In the river and the support queue, the extremes are bounded — a river is only so deep. But many real-world quantities have **fat tails**: rare events that are far more extreme *and* far more frequent than a "normal" bell-curve intuition expects. Market crashes, viral demand spikes, supply-chain failures. With fat tails, the average is even more dangerous, because a single trip into the tail can be many times worse than anything in your sample so far. You won't formalize this until the advanced material, but the instinct to plant now is: *the rarer and the more extreme the bad tail, the less you should trust the average and the more you should plan for the edge.*
+</Reveal>
+
+## The planning fallacy and overprecision
+
+Now the uncomfortable part. When researchers ask people to give 90% confidence intervals for a batch of trivia, the truth lands inside the range only about **30–50% of the time** — not 90%. People's "90% sure" is really more like "40% sure." This is **overprecision**: the systematic tendency to give ranges that are *far too narrow*, because a tight range feels knowledgeable and a wide one feels like an admission of ignorance.
+
+Its most famous special case is the **planning fallacy** — our chronic, almost unkillable habit of underestimating how long our own projects will take (and how much they'll cost), even when we *know* every similar project ran long. The new kitchen, the thesis, the software feature: each one was going to be the exception. None were. The point estimate ("six weeks") is overprecision in its purest form: a 0-width interval, which is wrong essentially always.
+
+**Worked example of the fix.** Your gut says the feature is "six weeks." Don't ship that. Force a range, and force it *wide* — because you already know your honest 90% interval is narrower than reality:
+
+| Scenario | Estimate | Honest takeaway |
+|---|---|---|
+| Gut point estimate | 6 weeks | Almost certainly optimistic — it's the planning fallacy talking. |
+| Naive range | 5–7 weeks | Still overprecise: a tight band around the same wish. |
+| Calibrated 90% range | 4–13 weeks, likely 7 | Wide because integration, review, and the unknown unknowns *always* show up. |
+
+The calibrated range looks alarming next to "six weeks." That alarm is the point — it's the planning fallacy becoming visible. The fix for overprecision is mechanical and slightly humbling: **take your honest range and widen it**, because you are reliably overconfident, and consciously knowing that is the only known countermeasure.
+
+<MCQ
+  client:visible
+  question="Studies show people's '90% confidence' ranges actually contain the true answer only about 40% of the time. What's the correct response when YOU build a 90% range?"
+  options={[
+    { text: "Deliberately widen it — you, like everyone, are systematically overconfident, so your honest range is too narrow.", correct: true },
+    { text: "Tighten it — being inside only 40% of the time means your ranges are too wide.", correct: false },
+    { text: "Ignore the finding; it applies to other people, not to careful estimators like you.", correct: false },
+    { text: "Switch back to single-point estimates, since ranges clearly don't work.", correct: false },
+  ]}
+  explanation="Inside only 40% of the time means the ranges were too NARROW — they should have been wide enough to catch 90%. Overprecision is near-universal, and 'it applies to others, not me' is itself the bias talking. The practical fix is to consciously widen your honest interval. Abandoning ranges for points makes overprecision total (a point is a zero-width interval)."
+/>
+
+## Best case / worst case / base case
+
+Here's the everyday version of all this, simple enough to do on a napkin: instead of one number, force out **three scenarios** — **worst case**, **base case** (most likely), and **best case** — and, crucially, attach a rough *probability* to each. That last step is what marries ranges to the expected value from lesson 03: once each scenario has a probability, you can weight them into a single planning figure *and* still see the spread.
+
+**Worked example — a product launch's first-year revenue.**
+
+| Scenario | Revenue | Probability | Contribution (revenue × prob) |
+|---|---|---|---|
+| Worst case (flops) | \$200,000 | 25% | \$50,000 |
+| Base case (steady) | \$600,000 | 50% | \$300,000 |
+| Best case (takes off) | \$1,400,000 | 25% | \$350,000 |
+
+The **expected (probability-weighted) value** is \$50K + \$300K + \$350K = **\$700,000**. But notice — the EV of \$700K isn't even the most likely outcome (\$600K); it's pulled up by the fat best case. And the *range* is the other half of the answer: you could land as low as **\$200K**. So you get two numbers that work together: plan your spending around the \$700K expectation, but make sure the business *survives* the \$200K worst case. The single point estimate would have given you one of those and hidden the other — and which one it hid would depend entirely on whether the estimator was an optimist or a pessimist.
+
+<MCQ
+  client:visible
+  question="Using the launch table — worst $200K (25%), base $600K (50%), best $1.4M (25%) — which pair of numbers should actually drive your plan?"
+  options={[
+    { text: "Spend against the ~$700K expected value, but make sure you survive the $200K worst case.", correct: true },
+    { text: "Just use the $1.4M best case — aim high and the rest takes care of itself.", correct: false },
+    { text: "Just use the $600K base case — the most likely outcome is the only one that matters.", correct: false },
+    { text: "Average the worst and best ($800K) and ignore the probabilities entirely.", correct: false },
+  ]}
+  explanation="Ranges plus EV give you both halves: the probability-weighted ~$700K tells you what to expect on average, and the $200K worst case tells you what you must survive. Planning on the best case is how companies run out of cash; planning only on the base case ignores both the upside and the survival question; and a naive midpoint throws away the probabilities (and the asymmetry) that make the EV $700K, not $800K."
+/>
+
+## Where ranges lie to you
+
+Ranges are honest by default, but they can be gamed — usually self-gamed — in two opposite ways, and you should be able to spot both.
+
+**Failure mode 1 — the useless-wide range (false humility).** A range so wide it can't be wrong is also a range that can't be *useful*. "The project will take somewhere between two days and two years" is technically a great confidence interval and a completely worthless one — it informs no decision. This is false humility: hiding behind width to avoid being pinned down. A good range is **as narrow as honesty allows, and no narrower** — wide enough to actually contain the truth 90% of the time, but tight enough to discriminate between plans.
+
+**Failure mode 2 — the fake range centered on a wish.** This is overprecision in disguise: someone produces a low / likely / high, but all three are clustered around the answer they *wanted*. "\$950K, \$1M, \$1.05M" isn't a range; it's a single optimistic point estimate wearing a costume of three. The tell is that the low case isn't actually painful — a genuine worst case should make you wince.
+
+Both failures point at the same missing skill: **calibration** — whether your "90% sure" is *actually* right 90% of the time. You can't eyeball your own calibration; it has to be *scored* over many predictions. (The expert "Calibration" course later in this path does exactly that — it tracks your confidence against reality until your 90% means 90%.) For now, the working defense is to interrogate both ends: *Is my low case genuinely painful? Is my range narrow enough to actually decide something?*
+
+<MCQ
+  client:visible
+  question="A manager presents a 'range' for next quarter: low $980K, likely $1.0M, high $1.02M. The CEO is suspicious. What's the trap?"
+  options={[
+    { text: "It's a fake range — all three numbers hug the desired $1M, so it's really one optimistic point estimate in disguise (a worst case that doesn't hurt).", correct: true },
+    { text: "It's too wide to be useful — the spread should be tightened further.", correct: false },
+    { text: "There's no problem; a tight range simply reflects strong confidence.", correct: false },
+    { text: "The trap is using a range at all — a single number would be clearer.", correct: false },
+  ]}
+  explanation="A real low case should be genuinely painful; $980K is barely below the wish. Three numbers clustered around the target aren't a range — they're an optimistic point estimate in costume, which is overprecision exactly. The fix isn't a single number (that's strictly worse) and it isn't tightening (already far too tight) — it's an honest, wider worst case that could actually hurt."
+/>
+
+### When to reach for it
+
+Reach for ranges on **anything that hasn't happened yet and that you'd otherwise answer with one number** — a deadline, a budget, a sales forecast, an arrival time, a project's cost, a market's size. The rule is blunt: *give a range, not a point.* Three numbers (low / likely / high), built from the surprising edges inward, deliberately widened against your own overconfidence, and — when a decision needs a single figure — collapsed into an expected value while keeping the worst case in view. The point estimate is only ever appropriate for things already measured and certain; for the future, it's a lie of confidence every time.
+
+<Callout variant="tip" title="The complete move">
+Replace every point estimate with **low / likely / high**. Build the range from the surprising edges, widen it because you're overconfident, and weight the scenarios into an expected value when you need one number — but always keep the worst case visible, because the spread, not the average, is what you actually have to survive.
+</Callout>
+
+## Recap
+
+<Quiz
+  client:visible
+  title="Check yourself: thinking in ranges"
+  questions={[
+    {
+      question: "What is the core problem with a point estimate like 'the project will take 6 weeks'?",
+      options: [
+        { text: "It collapses an uncertain spread into one number, communicating confidence the estimator doesn't actually have.", correct: true },
+        { text: "Six weeks is always an unrealistic amount of time for a project.", correct: false },
+        { text: "It uses weeks instead of days, which are more precise.", correct: false },
+        { text: "Nothing — a single precise number is the gold standard for estimates.", correct: false },
+      ],
+      explanation: "The flaw isn't the value; it's the singularity. A lone number erases the low/likely/high spread and reads as false confidence. A range ('4–13, likely 7') tells the listener where the risk actually lives.",
+    },
+    {
+      question: "The 'flaw of averages' — 'never cross a river that's on average 4 feet deep' — warns that…",
+      options: [
+        { text: "Planning on a single average ignores the spread, and the spread (the deep middle) is often what actually hurts or ruins you.", correct: true },
+        { text: "Averages are always calculated incorrectly.", correct: false },
+        { text: "You should always use the maximum value instead of the average.", correct: false },
+        { text: "Rivers are a bad analogy for business decisions.", correct: false },
+      ],
+      explanation: "You don't experience the average — you experience the distribution. A true average of 4 feet drowns you in the 10-foot middle. It's the same trap as 'ruin' from lesson 03: surviving every individual outcome matters more than the average outcome.",
+    },
+    {
+      question: "Research shows people's '90% confidence' intervals contain the truth only ~40% of the time. The fix is to…",
+      options: [
+        { text: "Deliberately widen your honest range, because overprecision (too-narrow ranges) is near-universal — including in you.", correct: true },
+        { text: "Tighten your range so it's more decisive.", correct: false },
+        { text: "Stop using ranges and return to single best guesses.", correct: false },
+        { text: "Only give ranges for topics you've personally studied.", correct: false },
+      ],
+      explanation: "Capturing the truth only 40% of the time means the ranges were too narrow. Overprecision and its cousin the planning fallacy push everyone toward over-tight estimates, so the mechanical countermeasure is to consciously widen. A point estimate is the most overprecise answer of all.",
+    },
+    {
+      question: "You build worst/base/best scenarios and attach probabilities. What two numbers should drive the decision?",
+      options: [
+        { text: "The probability-weighted expected value (to plan against) and the worst case (to make sure you survive it).", correct: true },
+        { text: "Only the best case, since that's the goal you're aiming for.", correct: false },
+        { text: "Only the base case, since the middle scenario is all that's likely.", correct: false },
+        { text: "The simple midpoint of worst and best, ignoring the probabilities.", correct: false },
+      ],
+      explanation: "Ranges plus EV give both halves of the answer: the expected value tells you what to plan around, while the worst case tells you what you must be able to survive. A point estimate hands you one and hides the other.",
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You can now refuse the single number. You replace it with a range, build that range from the surprising edges, widen it against your own overconfidence, and — when a decision demands one figure — weight the scenarios into an expected value while keeping the worst case in plain sight. That's the difference between a forecast that sounds confident and one that's actually *useful*.
+
+There's one trap left, and it's the subtlest in the course. You've now made decisions under uncertainty — with base rates, expected values, and ranges. But a good decision under uncertainty can still produce a bad outcome, and a reckless one can get lucky. The next lesson, **Decision vs. Outcome**, is about judging the *quality of the decision* separately from the *roll of the dice* — so you stop punishing good calls that got unlucky and stop rewarding bad ones that got away with it.
