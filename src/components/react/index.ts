@@ -61,6 +61,9 @@ export type { LessonCompleteProps } from '@/components/react/LessonComplete';
 export { MapTerritoryZoom, default as MapTerritoryZoomDefault } from '@/components/react/MapTerritoryZoom';
 export type { MapTerritoryZoomProps, MapTerritoryStep } from '@/components/react/MapTerritoryZoom';
 
+export { MapDriftScrubber, default as MapDriftScrubberDefault } from '@/components/react/MapDriftScrubber';
+export type { MapDriftScrubberProps, MapDriftStep } from '@/components/react/MapDriftScrubber';
+
 export { FirstPrinciplesBuilder, default as FirstPrinciplesBuilderDefault } from '@/components/react/FirstPrinciplesBuilder';
 export type { FirstPrinciplesBuilderProps, FirstPrinciplesPart } from '@/components/react/FirstPrinciplesBuilder';
 

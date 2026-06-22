@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'map-vs-territory',
-    icon: '🗺️',
-    difficulty: 'beginner',
-    order: 1,
-    accent: 'brand',
-    title: {
-      en: 'The Map Is Not the Territory',
-      es: 'El Mapa No Es el Territorio',
-    },
-    description: {
-      en: 'Every model is a simplification of reality, not reality itself. Useful maps leave things out — so the skill is knowing where your map stops matching the ground.',
-      es: 'Todo modelo es una simplificación de la realidad, no la realidad misma. Los mapas útiles omiten cosas, así que la destreza está en saber dónde tu mapa deja de coincidir con el terreno.',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['foundations', 'problem-solving'],
-    buildNotes:
-      'The canonical foundational model — the one every other model depends on. Sections: what "the map is not the territory" means (Korzybski) and why all models are wrong-but-useful (Box); a map omits detail on purpose — the value IS the omission (a 1:1 map is useless); when a map drifts from the territory (outdated assumptions, edge cases, reification — mistaking the model for the thing); examples across domains (a subway map vs. real geography, a financial model vs. the business, a stereotype vs. a person, GDP vs. wellbeing); how to stay safe (hold maps loosely, check them against reality, keep several maps of the same terrain — links to the latticework idea). Build an interactive island that lets the learner zoom a stylized "map" in/out and see what detail each zoom level drops (respect prefers-reduced-motion). Connect forward to first principles (rebuild the map from the territory) and circle of competence (know which maps you actually hold). Pitfall: reification — treating the model as the truth. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'incentives',
     icon: '🥕',
     difficulty: 'beginner',
