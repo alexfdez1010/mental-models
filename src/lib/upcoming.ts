@@ -73,25 +73,6 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   {
-    slug: 'opportunity-cost',
-    icon: '⚖️',
-    difficulty: 'intermediate',
-    order: 5,
-    accent: 'brand',
-    title: {
-      en: 'Opportunity Cost & Trade-offs',
-      es: 'Coste de Oportunidad y Disyuntivas',
-    },
-    description: {
-      en: 'The real cost of anything is the best thing you gave up to get it. The single idea that turns every choice into a comparison.',
-      es: 'El coste real de algo es lo mejor que renunciaste a cambio. La idea que convierte cada elección en una comparación.',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['decision-making', 'economics'],
-    buildNotes:
-      'Opportunity cost and trade-offs. Sections: cost = the next-best forgone alternative (not the sticker price); time/attention/capital are scarce; "compared to what?" as a default question; trade-offs vs. false either/ors. Worked examples with real numbers: a job offer vs. its alternative; holding cash vs. investing; one feature vs. another on a roadmap. Use a comparison table throughout. Build an interactive "choose A vs. B → what you forgo" island. Pitfall: ignoring non-monetary costs. Recap Quiz. en + es twin.',
-  },
-  {
     slug: 'thinking-in-probabilities',
     icon: '🎲',
     difficulty: 'intermediate',

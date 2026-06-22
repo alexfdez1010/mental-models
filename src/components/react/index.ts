@@ -69,3 +69,6 @@ export type { InversionFlipProps, InversionPair } from '@/components/react/Inver
 
 export { ConsequenceTree, default as ConsequenceTreeDefault } from '@/components/react/ConsequenceTree';
 export type { ConsequenceTreeProps, ConsequenceNode, ConsequenceValence } from '@/components/react/ConsequenceTree';
+
+export { OpportunityCostChooser, default as OpportunityCostChooserDefault } from '@/components/react/OpportunityCostChooser';
+export type { OpportunityCostChooserProps, OpportunityCostScenario, OpportunityCostOption } from '@/components/react/OpportunityCostChooser';
