@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'incentives',
-    icon: '🥕',
-    difficulty: 'beginner',
-    order: 2,
-    accent: 'accent',
-    title: {
-      en: 'Incentives: Follow the Reward',
-      es: 'Incentivos: Sigue la Recompensa',
-    },
-    description: {
-      en: '“Show me the incentive and I’ll show you the outcome.” People and systems drift toward whatever is rewarded — so to predict behavior, find the reward, not the stated intention.',
-      es: '«Enséñame el incentivo y te mostraré el resultado.» Las personas y los sistemas derivan hacia aquello que se recompensa, así que para predecir conductas busca la recompensa, no la intención declarada.',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['psychology', 'economics'],
-    buildNotes:
-      'The first psychology/economics model — Munger’s most-quoted lever. Sections: what an incentive is (anything that changes the payoff of a behavior); incentive-caused bias (people rationalize what pays them); the cobra effect / perverse incentives (rewarding the wrong proxy — the Hanoi rat-tail bounty, surgeons avoiding hard cases to protect their stats, sales quotas gaming); intrinsic vs. extrinsic incentives and crowding-out; "what gets measured gets managed" (Goodhart’s law in one line); designing good incentives (reward the outcome you actually want, not the easy proxy). Worked examples with a simple payoff table. Build an interactive island: a slider that changes a reward and shows the population shifting toward the gamed behavior (respect prefers-reduced-motion). Connect forward to second-order thinking (incentives create downstream effects), tragedy of the commons, and game theory. Pitfall: assuming people act on stated values rather than real payoffs. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'supply-and-demand',
     icon: '⚖️',
     difficulty: 'beginner',

@@ -81,3 +81,6 @@ export type { ExpectedValueCalculatorProps, ExpectedValueScenario, ExpectedValue
 
 export { BaseRateGrid, default as BaseRateGridDefault } from '@/components/react/BaseRateGrid';
 export type { BaseRateGridProps } from '@/components/react/BaseRateGrid';
+
+export { IncentiveSlider, default as IncentiveSliderDefault } from '@/components/react/IncentiveSlider';
+export type { IncentiveSliderProps } from '@/components/react/IncentiveSlider';
