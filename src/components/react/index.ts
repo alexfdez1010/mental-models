@@ -90,3 +90,6 @@ export type { SupplyDemandChartProps, PriceControl } from '@/components/react/Su
 
 export { ElasticityExplorer, default as ElasticityExplorerDefault } from '@/components/react/ElasticityExplorer';
 export type { ElasticityExplorerProps } from '@/components/react/ElasticityExplorer';
+
+export { SelectionSimulator, default as SelectionSimulatorDefault } from '@/components/react/SelectionSimulator';
+export type { SelectionSimulatorProps } from '@/components/react/SelectionSimulator';

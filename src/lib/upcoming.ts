@@ -38,14 +38,14 @@
  *     `economics`, `strategy`) has none. Fill the breadth, then deepen.
  *
  * ── Mental Models build queue ───────────────────────────────────────────────
- * The zero-to-expert ladder of models still to build (see TOPIC.md). The first
- * course, `what-are-mental-models`, has graduated and been removed. Lowest
- * `order` is built next. Orders 1–13 are a beginner→intermediate breadth pass
- * that seeds every starved discipline (map vs. territory, incentives, supply &
- * demand, natural selection, compounding, the razors, …) BEFORE the four
- * advanced/expert probability/systems courses (orders 14–17). This deliberately
- * front-loads foundational breadth so the build stops over-indexing on the
- * decision-making / probability tags.
+ * The zero-to-expert ladder of models still to build (see TOPIC.md). The
+ * earliest courses (`what-are-mental-models`, `natural-selection`, …) have
+ * graduated and been removed. Lowest `order` is built next. Orders 5–13 are the
+ * remaining beginner→intermediate breadth pass that seeds every starved
+ * discipline (compounding, the razors, circle of competence, comparative
+ * advantage, …) BEFORE the four advanced/expert probability/systems courses
+ * (orders 14–17). This deliberately front-loads foundational breadth so the
+ * build stops over-indexing on the decision-making / probability tags.
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -86,25 +86,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // ── Beginner → intermediate breadth pass (orders 1–13) ────────────────────
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
-  {
-    slug: 'natural-selection',
-    icon: '🧬',
-    difficulty: 'beginner',
-    order: 4,
-    accent: 'accent',
-    title: {
-      en: 'Natural Selection',
-      es: 'Selección Natural',
-    },
-    description: {
-      en: 'Variation, selection, heredity — repeat. Any system where traits vary, some survive better, and survivors pass on their traits will design itself over time, no designer required.',
-      es: 'Variación, selección, herencia: repite. Cualquier sistema donde los rasgos varían, algunos sobreviven mejor y los supervivientes los transmiten se diseña a sí mismo con el tiempo, sin diseñador alguno.',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['biology-evolution'],
-    buildNotes:
-      'The first biology/evolution model — and a general-purpose algorithm, not just a fact about animals. Sections: the three-part recipe (variation + selection + heredity → cumulative adaptation) and why each ingredient is necessary; fitness = reproductive success in a given environment (not "strongest"); selection pressure and how a changing environment changes what "fit" means; the algorithm transferred out of biology (A/B testing, markets selecting firms, ideas/memes, machine-learning evolutionary search) — this is the transfer payoff; common misreadings (evolution is not goal-directed, not "for the good of the species", not a ladder of progress). Worked example: trace a trait’s frequency rising over a few generations with simple numbers. Build an interactive island: a population of varying dots under an adjustable selection pressure, watch the trait distribution shift each generation (respect prefers-reduced-motion). Connect forward to the Red Queen effect, emergence, and incentives (selection IS an incentive landscape). Pitfall: teleology — assuming evolution "wants" an outcome. Recap Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'compounding',
     icon: '📈',
