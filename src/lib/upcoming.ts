@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'supply-and-demand',
-    icon: '⚖️',
-    difficulty: 'beginner',
-    order: 3,
-    accent: 'brand',
-    title: {
-      en: 'Supply & Demand',
-      es: 'Oferta y Demanda',
-    },
-    description: {
-      en: 'Prices are a conversation between how much exists and how much people want. Where the two curves cross sets the price — and shifting either one moves it in a predictable direction.',
-      es: 'Los precios son una conversación entre cuánto existe y cuánto se desea. Donde se cruzan las dos curvas se fija el precio, y mover cualquiera de ellas lo desplaza en una dirección predecible.',
-    },
-    dependencies: ['opportunity-cost'],
-    tags: ['economics'],
-    buildNotes:
-      'The core economics model. Sections: the demand curve (lower price → more wanted) and supply curve (higher price → more produced); equilibrium where they cross; what shifts a curve vs. moves along it (income, substitutes, input costs, tech, tastes) with worked before/after examples; shortages and surpluses when price is held off equilibrium (price ceilings → shortages/queues; price floors → surpluses); elasticity in plain language (how much quantity reacts to price — necessities vs. luxuries) with a couple of numbers; price as an information signal that coordinates strangers (links to incentives and emergence). Build an interactive supply/demand island: drag either curve and watch the equilibrium price/quantity move; toggle a price ceiling to reveal the shortage gap (respect prefers-reduced-motion). KaTeX optional for elasticity. Connect to opportunity cost (the curves are built from it), comparative advantage, and externalities/tragedy of the commons. Pitfall: confusing a shift of the curve with a movement along it; thinking price is set by cost alone. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'natural-selection',
     icon: '🧬',
     difficulty: 'beginner',

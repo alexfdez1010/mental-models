@@ -84,3 +84,9 @@ export type { BaseRateGridProps } from '@/components/react/BaseRateGrid';
 
 export { IncentiveSlider, default as IncentiveSliderDefault } from '@/components/react/IncentiveSlider';
 export type { IncentiveSliderProps } from '@/components/react/IncentiveSlider';
+
+export { SupplyDemandChart, default as SupplyDemandChartDefault } from '@/components/react/SupplyDemandChart';
+export type { SupplyDemandChartProps, PriceControl } from '@/components/react/SupplyDemandChart';
+
+export { ElasticityExplorer, default as ElasticityExplorerDefault } from '@/components/react/ElasticityExplorer';
+export type { ElasticityExplorerProps } from '@/components/react/ElasticityExplorer';
