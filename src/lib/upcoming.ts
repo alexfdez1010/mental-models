@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'occams-hanlons-razors',
-    icon: '🪒',
-    difficulty: 'beginner',
-    order: 6,
-    accent: 'accent',
-    title: {
-      en: 'Occam’s & Hanlon’s Razors',
-      es: 'Las Navajas de Occam y Hanlon',
-    },
-    description: {
-      en: 'Two cutting tools for trimming explanations: prefer the one needing the fewest assumptions, and don’t blame malice for what plain incompetence explains.',
-      es: 'Dos herramientas para podar explicaciones: prefiere la que exige menos supuestos y no atribuyas a la maldad lo que la simple incompetencia ya explica.',
-    },
-    dependencies: ['first-principles-thinking'],
-    tags: ['problem-solving', 'psychology'],
-    buildNotes:
-      'A problem-solving pair of heuristics for choosing among explanations. Sections: Occam’s razor (among competing explanations, prefer the one with the fewest assumptions — note it favors *simpler*, not *simplest at all costs*, and is a tie-breaker, not a proof); why fewer assumptions = fewer ways to be wrong (links to base rates / probability of conjunctions); Hanlon’s razor (never attribute to malice what is adequately explained by incompetence/carelessness) and why it’s a debiasing tool against the fundamental attribution error and conspiracy thinking; when each razor FAILS (Occam over-trims genuinely complex systems; Hanlon excuses real bad actors) — teach the limits explicitly. Worked examples: diagnosing a bug, a late friend, a market rumor. Build a small interactive island: a claim with two explanations, learner counts the assumptions each requires and the razor highlights the leaner one (respect prefers-reduced-motion). Connect to first principles, confirmation bias, and probability. Pitfall: treating a razor as proof rather than a prior. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'circle-of-competence',
     icon: '⭕',
     difficulty: 'beginner',

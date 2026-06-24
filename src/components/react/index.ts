@@ -99,3 +99,6 @@ export type { CompoundingCurveProps } from '@/components/react/CompoundingCurve'
 
 export { EarlyVsLate, default as EarlyVsLateDefault } from '@/components/react/EarlyVsLate';
 export type { EarlyVsLateProps } from '@/components/react/EarlyVsLate';
+
+export { RazorBalance, default as RazorBalanceDefault } from '@/components/react/RazorBalance';
+export type { RazorBalanceProps, RazorScenario, RazorExplanation } from '@/components/react/RazorBalance';
