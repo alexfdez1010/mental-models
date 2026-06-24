@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'compounding',
-    icon: '📈',
-    difficulty: 'beginner',
-    order: 5,
-    accent: 'brand',
-    title: {
-      en: 'Compounding',
-      es: 'Interés Compuesto',
-    },
-    description: {
-      en: 'Growth that feeds on its own output curves upward, slowly then suddenly. Small edges, repeated and left alone, end up dwarfing big one-off efforts.',
-      es: 'El crecimiento que se alimenta de su propio resultado se curva hacia arriba, despacio y luego de golpe. Las pequeñas ventajas, repetidas y sin interrumpir, acaban empequeñeciendo a los grandes esfuerzos puntuales.',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['science-engineering', 'economics'],
-    buildNotes:
-      'A foundational science/engineering + economics model with huge transfer. Sections: linear vs. exponential growth (add vs. multiply) and why human intuition is linear; the formula and the "slowly then suddenly" hockey stick; the rule of 72 for doubling time (worked example); what kills compounding (interruptions, withdrawals, drawdowns — one −50% year erases years of gains, ties to margin of safety and fat tails); compounding beyond money (skills, relationships, reputation, knowledge, technical debt as NEGATIVE compounding); time as the dominant variable (starting early beats contributing more). Worked tables comparing a small early edge vs. a big late effort. KaTeX for A=P(1+r)^t and the rule of 72. Build an interactive island: sliders for rate, time, and a one-off setback, plotting the curve and the final value (respect prefers-reduced-motion). Connect to feedback loops (compounding is a reinforcing loop) and second-order thinking. Pitfall: linear extrapolation; ignoring how a single big loss breaks the chain. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'occams-hanlons-razors',
     icon: '🪒',
     difficulty: 'beginner',

@@ -93,3 +93,9 @@ export type { ElasticityExplorerProps } from '@/components/react/ElasticityExplo
 
 export { SelectionSimulator, default as SelectionSimulatorDefault } from '@/components/react/SelectionSimulator';
 export type { SelectionSimulatorProps } from '@/components/react/SelectionSimulator';
+
+export { CompoundingCurve, default as CompoundingCurveDefault } from '@/components/react/CompoundingCurve';
+export type { CompoundingCurveProps } from '@/components/react/CompoundingCurve';
+
+export { EarlyVsLate, default as EarlyVsLateDefault } from '@/components/react/EarlyVsLate';
+export type { EarlyVsLateProps } from '@/components/react/EarlyVsLate';
