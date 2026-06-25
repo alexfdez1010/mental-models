@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'circle-of-competence',
-    icon: '⭕',
-    difficulty: 'beginner',
-    order: 7,
-    accent: 'brand',
-    title: {
-      en: 'Circle of Competence',
-      es: 'Círculo de Competencia',
-    },
-    description: {
-      en: 'Know the edge of what you actually understand. The size of the circle matters less than knowing where its boundary is — and staying honest about which side you’re on.',
-      es: 'Conoce el borde de lo que de verdad entiendes. El tamaño del círculo importa menos que saber dónde está su límite, y ser honesto sobre en qué lado estás.',
-    },
-    dependencies: ['map-vs-territory'],
-    tags: ['foundations', 'decision-making'],
-    buildNotes:
-      'A foundations/decision-making model about self-knowledge of expertise. Sections: what a circle of competence is (the domain where your maps are reliable) and why the boundary matters more than the area; the danger zone just outside the edge where confidence outruns skill (links to overconfidence bias and calibration); how to map your own circle honestly (track your forecasts, ask what you’d need to know, distinguish "I understand this" from "I’m familiar with this"); widening the circle deliberately vs. faking range; staying inside it under social pressure (Munger/Buffett "too hard" pile — it’s fine to pass). Worked examples across investing, hiring, medicine, and everyday choices. Build an interactive island: a circle the learner sizes per domain, with a glowing "boundary" band showing where risk spikes (respect prefers-reduced-motion). Connect to the map is not the territory (you only hold maps for some terrain), first principles, and calibration. Pitfall: confusing the *feeling* of competence with the real boundary. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'confirmation-bias',
     icon: '🔎',
     difficulty: 'intermediate',

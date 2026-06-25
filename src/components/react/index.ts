@@ -102,3 +102,6 @@ export type { EarlyVsLateProps } from '@/components/react/EarlyVsLate';
 
 export { RazorBalance, default as RazorBalanceDefault } from '@/components/react/RazorBalance';
 export type { RazorBalanceProps, RazorScenario, RazorExplanation } from '@/components/react/RazorBalance';
+
+export { CircleOfCompetence, default as CircleOfCompetenceDefault } from '@/components/react/CircleOfCompetence';
+export type { CircleOfCompetenceProps, CircleDomain, CircleDecision } from '@/components/react/CircleOfCompetence';
