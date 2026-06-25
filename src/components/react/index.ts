@@ -105,3 +105,6 @@ export type { RazorBalanceProps, RazorScenario, RazorExplanation } from '@/compo
 
 export { CircleOfCompetence, default as CircleOfCompetenceDefault } from '@/components/react/CircleOfCompetence';
 export type { CircleOfCompetenceProps, CircleDomain, CircleDecision } from '@/components/react/CircleOfCompetence';
+
+export { WasonTask, default as WasonTaskDefault } from '@/components/react/WasonTask';
+export type { WasonTaskProps, WasonGuess } from '@/components/react/WasonTask';

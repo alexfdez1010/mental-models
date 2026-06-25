@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'confirmation-bias',
-    icon: '🔎',
-    difficulty: 'intermediate',
-    order: 8,
-    accent: 'accent',
-    title: {
-      en: 'Confirmation Bias',
-      es: 'Sesgo de Confirmación',
-    },
-    description: {
-      en: 'We hunt for evidence that we’re right and look past what says we’re wrong. The mind defends its beliefs like a lawyer, not a scientist — unless you make it look for the disconfirming case.',
-      es: 'Buscamos pruebas de que tenemos razón y pasamos por alto lo que dice que no. La mente defiende sus creencias como un abogado, no como un científico, salvo que la obligues a buscar el caso que la refuta.',
-    },
-    dependencies: ['incentives'],
-    tags: ['psychology'],
-    buildNotes:
-      'The flagship cognitive-bias lesson on the psychology path. Sections: what confirmation bias is (seeking, interpreting, and remembering evidence that fits a prior belief); the three flavors — biased search, biased interpretation, biased memory; the classic demonstrations (Wason 2-4-6 rule-discovery task; people reading the same study and both sides feeling vindicated); why it’s adaptive-but-dangerous (cheap belief maintenance, social cohesion) and how it compounds in echo chambers / algorithmic feeds; the antidote — actively seek the disconfirming case, steelman the other side, pre-register what would change your mind, run the "consider the opposite" drill (links to inversion and Bayesian updating); related traps named briefly (myside bias, motivated reasoning). Worked example: the Wason task, run interactively. Build an interactive island that runs a mini Wason 2-4-6 test on the learner and reveals their confirmation pattern (respect prefers-reduced-motion). Connect to inversion, Occam/Hanlon, base rates, and calibration. Pitfall: believing you’re immune (bias blind spot). Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'margin-of-safety',
     icon: '🛟',
     difficulty: 'intermediate',
