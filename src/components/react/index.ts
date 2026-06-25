@@ -108,3 +108,6 @@ export type { CircleOfCompetenceProps, CircleDomain, CircleDecision } from '@/co
 
 export { WasonTask, default as WasonTaskDefault } from '@/components/react/WasonTask';
 export type { WasonTaskProps, WasonGuess } from '@/components/react/WasonTask';
+
+export { MarginOfSafetyMeter, default as MarginOfSafetyMeterDefault } from '@/components/react/MarginOfSafetyMeter';
+export type { MarginOfSafetyMeterProps } from '@/components/react/MarginOfSafetyMeter';

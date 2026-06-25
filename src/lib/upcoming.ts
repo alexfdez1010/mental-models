@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'margin-of-safety',
-    icon: '🛟',
-    difficulty: 'intermediate',
-    order: 9,
-    accent: 'brand',
-    title: {
-      en: 'Margin of Safety',
-      es: 'Margen de Seguridad',
-    },
-    description: {
-      en: 'Build the bridge to carry far more than it ever should. Leave a buffer between what you expect and what you can survive, because your estimates are wrong in ways you can’t see yet.',
-      es: 'Construye el puente para soportar mucho más de lo que debería. Deja un colchón entre lo que esperas y lo que puedes sobrevivir, porque tus estimaciones fallan de maneras que aún no ves.',
-    },
-    dependencies: ['second-order-thinking'],
-    tags: ['decision-making', 'science-engineering'],
-    buildNotes:
-      'An engineering model imported into decision-making. Sections: origin in structural engineering (rate a bridge for 5× the expected load) and the core idea (the buffer absorbs the errors you can’t foresee); margin of safety in investing (Graham — buy well below intrinsic value so being wrong still leaves you whole); the link to uncertainty (the wider your error bars, the bigger the margin needed — ties to calibration and fat tails); redundancy and fail-safes as margins (backups, spare capacity, slack); the cost of margin (efficiency vs. resilience trade-off — an over-optimized system has no slack and snaps). Worked examples with numbers: a load rating, a discounted purchase price, a runway/cash buffer. Build an interactive island: a load slider against a rated capacity bar showing the safety buffer shrinking toward failure (respect prefers-reduced-motion). Connect to inversion (avoid ruin), compounding (one big loss breaks the chain), expected value, and fat tails. Pitfall: optimizing away all slack; treating a point estimate as certain. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'comparative-advantage',
     icon: '🔁',
     difficulty: 'intermediate',

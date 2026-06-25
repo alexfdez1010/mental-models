@@ -1,0 +1,248 @@
+---
+title: "Copias, holgura y mecanismos a prueba de fallos: el margen disfrazado"
+description: "Un margen de seguridad no siempre es un único número más grande: a veces es una segunda forma de sobrevivir. La redundancia, la capacidad de reserva, la holgura y el diseño a prueba de fallos son la misma idea con distinta ropa."
+topic: "es/margin-of-safety"
+order: 5
+minutes: 12
+updated: 2026-06-25
+---
+
+import { MCQ, MatchConcepts, Categorize, Callout } from '@/components/react';
+
+Hasta ahora, "margen de seguridad (margin of safety)" ha significado sobre todo *un número más grande*: construir el puente para que aguante 5× la carga, comprar el euro de valor por cincuenta céntimos, llevar 0,6 millones de euros de efectivo de más. Sube el colchón, duerme mejor. Pero hay toda una segunda familia de márgenes que no se parece en nada a un número más grande: se parece a una **segunda forma de sobrevivir**.
+
+Pensad en la rueda de repuesto atornillada bajo vuestro coche. No hace nada por reforzar las ruedas principales. No añade ningún factor de seguridad a la goma sobre la que circuláis. Solo está ahí, peso muerto, hasta el día en que una rueda revienta en una carretera oscura — y entonces es lo único que se interpone entre vosotros y una caminata muy larga. Un avión comercial con dos motores puede perder uno y seguir volando. Un avión de línea tiene *tres* sistemas hidráulicos independientes precisamente para que perder uno (o dos) no sea fatal. Un hospital mantiene un generador de reserva que ronronea inútilmente durante años para que la única noche que falla la red eléctrica los respiradores no se apaguen. Ninguno de ellos hace que la cosa principal sea *más fuerte*. Cada uno os da otra forma de *no morir* cuando la cosa principal falla de todos modos.
+
+De eso trata esta lección. Un margen de seguridad puede ser una viga más gruesa — o puede ser una **copia de seguridad**, un **repuesto**, un colchón de **tiempo y capacidad** sin usar, o un diseño ingenioso que hace que el fallo **se rompa con suavidad en vez de catastróficamente**. La misma idea. Distinta ropa.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  question="Una pequeña tienda online funciona sobre un único servidor web. Añadir un margen de seguridad podría significar comprar un servidor más potente con el doble de capacidad — O ejecutar un segundo servidor idéntico que tome el relevo si el primero muere. ¿Qué te da la *segunda* opción que comprar simplemente un servidor más grande no te da?"
+  options={[
+    { text: 'Una forma de sobrevivir a que el primer servidor falle por completo — un único servidor más grande sigue dejándote con cero servidores en el instante en que esa máquina muere', correct: true },
+    { text: 'Nada distinto: dos servidores y un servidor grande son exactamente el mismo margen de seguridad' },
+    { text: 'Una web más rápida, que es lo único que importa para la seguridad' },
+    { text: 'Es estrictamente peor, porque dos servidores cuestan más que uno' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Nada de sentirse mal en un pretest. Un único servidor más grande eleva tu factor de seguridad frente a la *sobrecarga* — pero un servidor puede morir por razones que no tienen nada que ver con la carga: un disco averiado, un kernel panic, alguien que tropieza con el cable de alimentación. Cuando eso pasa, 'el doble de potente' sigue siendo 'completamente caído'. Un segundo servidor independiente es una clase distinta de margen: no un primario más fuerte, sino una *vía de respaldo* para sobrevivir. Eso es la redundancia (redundancy), y es el primer personaje de la lección de hoy."
+/>
+
+## Redundancia: una segunda forma de sobrevivir
+
+La **redundancia (redundancy)** consiste en tener una *copia de seguridad independiente* que toma el relevo cuando el primario falla. La palabra clave — y la machacaremos durante toda una sección dentro de un momento — es *independiente*. Un sistema redundante no intenta hacer que ningún componente individual sea irrompible. Acepta que los componentes se rompen, y dispone un repuesto para amortiguar la caída.
+
+Aquí va por qué esto es tan potente, en pura aritmética. Supón que un componente falla el 1 % de las veces — llamémoslo 99 % fiable. No está mal, pero un fallo de cada cien es mucho cuando lo que está en juego es alto. Ahora añade un *segundo* componente *independiente* que hace el mismo trabajo, de modo que el sistema solo cae si fallan **los dos** a la vez. La probabilidad de que dos cosas independientes fallen ambas es el producto de sus tasas de fallo individuales:
+
+```
+0.01 × 0.01 = 0.0001 = 0.01%
+```
+
+Has pasado de un fallo de cada cien a un fallo de cada *diez mil* — un salto de cien veces en fiabilidad — solo por añadir una copia de seguridad. Añade una tercera copia independiente y queda en 0,01 × 0,01 × 0,01 = 0,000001, uno entre un millón. Este es el motor que hay detrás de la redundancia: las probabilidades de fallo independientes **se multiplican**, así que cada copia que apilas hunde la probabilidad de fallo total de forma exponencial.
+
+| Montaje | Probabilidad de que fallen *todos* (cada uno con 1 % de fallo) | Fiabilidad del sistema |
+|---|---|---|
+| 1 componente | 0,01 | 99 % |
+| 2 independientes | 0,01 × 0,01 = 0,0001 | 99,99 % |
+| 3 independientes | 0,01³ = 0,000001 | 99,9999 % |
+
+Los ingenieros tienen un nombre para la dosis más simple de esto: **N+1**. Si de verdad necesitas *N* unidades para llevar el trabajo — N bombas, N fuentes de alimentación, N servidores — instalas **una más de las que necesitas**, de modo que cualquier unidad individual puede fallar y el sistema sigue funcionando a plena capacidad. Los sistemas grandes van más allá: N+2, o *2N* (un duplicado completo de todo). El principio escala, pero la semilla es siempre la misma — una más de las que necesitas.
+
+El mundo funciona sobre esto. Un avión bimotor está certificado para ascender y volar con un solo motor. Los arrays de disco **RAID** escriben tus datos repartidos entre varias unidades, de modo que cuando una unidad muere — y las unidades *mueren* — tus archivos sobreviven en las demás. La razón por la que te dicen que guardes tus fotos en dos sitios (e idealmente tres) es pura redundancia: la probabilidad de que tu portátil *y* tu copia en la nube *y* el disco externo fallen todos en la misma semana es ínfima — *si* fallan de forma independiente.
+
+Ese "si" está haciendo una cantidad enorme de trabajo. Quedaos con esa idea, porque es la bisagra de toda la lección.
+
+### Cuándo usarla
+
+Echa mano de la redundancia siempre que el fallo de un único componente sea intolerable y *no puedas* hacer que ese componente sea lo bastante fiable por sí solo. No le añades una copia de seguridad a tu tostadora; se la añades a aquello cuyo fallo te arruina el día — el procesador de pagos, la base de datos de producción, la única copia del manuscrito, el proveedor del que todo depende. La redundancia convierte "esto no debe fallar nunca" (imposible) en "estos no deben fallar *todos* a la vez" (muy alcanzable).
+
+## La trampa: la independencia (fallo de modo común)
+
+Ahora el matiz más importante de toda esta lección, y el que hunde calladamente sistemas reales: **la redundancia solo multiplica la fiabilidad si las copias fallan de forma independiente.** Ese precioso cálculo de 0,01 × 0,01 = 0,0001 lleva horneada una suposición oculta — que el fallo del segundo componente *no tiene nada que ver* con el del primero. En el momento en que esa suposición se rompe, la matemática se rompe con ella, y tu sistema "redundante" te está engañando.
+
+Un **fallo de modo común (common-mode failure)** es una única causa subyacente que tumba *todas* tus copias supuestamente independientes a la vez. Cuando esa causa compartida y agazapada se dispara, tus dos copias no se comportan como 0,01 × 0,01 — se comportan como un único componente, porque nunca estuvieron de verdad separadas. Imagínatelo:
+
+- **Dos servidores en la misma regleta.** Cada servidor es "independiente" — hasta que alguien salta el automático, y los dos se apagan en el mismo instante. Tu N+1 no te ha comprado nada.
+- **Dos centros de datos en la misma llanura de inundación.** Una pareja genuinamente redundante, hasta que el río crece y los sumerge a los dos. La causa compartida — la geografía — era el verdadero punto de fallo desde el principio.
+- **Dos inversiones "no correlacionadas"** que compraste para diversificar, y que se desploman ambas un 40 % en la misma semana de pánico en el mercado. En tiempos de calma sus precios deambulan de forma independiente; en una crisis, *todo el mundo* vende *todo*, las correlaciones se disparan a 1, y tus dos coberturas resultan ser una sola apuesta con dos etiquetas distintas.
+- **Dos copias hechas con el mismo script defectuoso,** ambas corrompidas silenciosamente exactamente de la misma manera. Tienes dos copias y cero buenas.
+
+Por eso la redundancia ingenua es peligrosa: *se siente* segura. Puedes señalar el repuesto, el duplicado y la segunda copia y sentirte cubierto, mientras una única dependencia compartida — la misma fuente de alimentación, el mismo proveedor, la misma suposición errónea, el mismo edificio — espera para tumbarlos a todos juntos. A los desastres del mundo real les encanta este patrón. Los generadores de reserva de Fukushima eran redundantes sobre el papel, pero estaban situados lo bastante bajos como para que el *mismo* tsunami que desencadenó la emergencia inundara también las copias que debían gestionarla. Una causa, todas las capas perdidas.
+
+<Callout variant="warning" title="La trampa de la redundancia">
+Dos copias de seguridad solo valen como dos copias si no pueden ser eliminadas por el **mismo** suceso. Antes de fiarte de cualquier montaje redundante, busca el **fallo de modo común** — la fuente de alimentación, ubicación, proveedor, código o suposición compartidos que podrían tumbarlo *todo a la vez*. Si encuentras uno, no tienes redundancia. Tienes un único componente que has dibujado dos veces.
+</Callout>
+
+El arreglo es hacer que las copias sean independientes en cada dimensión que importe: distintas alimentaciones eléctricas, distintas ubicaciones físicas, distintos proveedores, distintos diseños, incluso distintas *personas*. Los aviones de línea no se limitan a llevar tres sistemas hidráulicos — los enrutan por *distintas partes del fuselaje* para que un solo neumático reventado o la metralla de un motor no puedan seccionar los tres. Ese enrutado, no el número, es lo que hace que la redundancia sea real.
+
+### Cuándo usarla
+
+Haz la comprobación de modo común *cada* vez que te felicites por tener una copia de seguridad. Hazte una pregunta: *"¿Qué único suceso podría tumbar a la vez mi primario y mi copia?"* Si la respuesta honesta es "el mismo corte de luz", "la misma inundación", "el mismo pánico" o "el mismo bug", tu redundancia es decorativa. Arregla la dependencia compartida antes de fiarte del repuesto.
+
+## Holgura: margen en tiempo y capacidad
+
+La redundancia te da una segunda *cosa*. La **holgura (slack)** te da una segunda *ración de la misma cosa* — capacidad o tiempo sin usar, deliberadamente reservados para absorber sacudidas. Es el colchón de carga del ingeniero con otro disfraz: donde un factor de seguridad deja un margen entre la carga esperada y el punto de rotura, la holgura deja un margen entre tu uso esperado y tu límite.
+
+La holgura aparece por todas partes en cuanto conoces su forma:
+
+- **Inventario de reserva** — un almacén guarda existencias de más para que un envío retrasado no vacíe las estanterías.
+- **Holgura en el calendario** — un plan de proyecto deja huecos entre tareas, de modo que una tarea tardía no empuje hacia atrás toda la planificación (y la fecha de lanzamiento).
+- **Margen en los servidores** — ejecutas tus servidores al 50 % de capacidad, no al 99 %, para que un pico repentino de tráfico tenga adónde ir en vez de fundir la web.
+- **Un colchón de efectivo** — el fondo de emergencia de la lección 1, ahí ocioso precisamente para estar disponible el mes malo.
+
+Aquí va la holgura haciendo su trabajo, con números. Imagina un proyecto de cinco tareas en el que cada tarea *debería* llevar 2 días, una tras otra, terminando el día 10. Ahora la tarea 2 se topa con un imprevisto y se retrasa 3 días. Mira la diferencia que marca un poco de colchón:
+
+| Plan | Colchón incorporado | La tarea 2 se retrasa 3 días → | Entrega final |
+|---|---|---|---|
+| Calendario apretado (sin holgura) | 0 días | cada tarea posterior se empuja hacia atrás | día 13 — **3 días tarde** |
+| Calendario con holgura (colchón de 2 días) | 2 días de margen | el colchón absorbe casi todo el retraso | día 11 — **1 día tarde** |
+
+El mismo retraso, resultados radicalmente distintos. El calendario apretado pasa el retraso entero de 3 días directamente al cliente, porque optimizó para el caso en que *nada* sale mal — y algo siempre sale mal. El calendario con holgura se traga dos de los tres días perdidos dentro de su colchón y solo deja escapar uno. La holgura es la diferencia entre un retraso que absorbes y un retraso que *anuncias*.
+
+Fíjate en el parecido de familia: la holgura absorbe una sacudida igual que el colchón del ingeniero absorbe una carga inesperada. Es la misma jugada defensiva — dejar espacio que no esperas necesitar — aplicada al *tiempo* y la *capacidad* en lugar de a la resistencia estructural.
+
+### Cuándo usarla
+
+Incorpora holgura allá donde la variabilidad sea normal y funcionar al 100 % no te deje margen para absorberla — que es casi en todas partes donde ocurre el trabajo real. La señal de que has recortado la holgura demasiado: pequeñas sorpresas corrientes (una entrega tardía, un compañero enfermo, un repunte de tráfico) no paran de convertirse en emergencias. Si la variación rutinaria provoca crisis, has optimizado hasta eliminar el colchón que se suponía que debía absorberla.
+
+## A prueba de fallos: romperse con suavidad, no catastróficamente
+
+La redundancia y la holgura intentan ambas *evitar* el fallo. El diseño **a prueba de fallos (fail-safe)** hace una apuesta distinta y más humilde: las cosas van a fallar de todos modos, así que diséñalas para que fallen hacia un estado *seguro* cuando lo hagan. El margen aquí no está en prevenir el fallo — está en el **modo** del fallo. No en *si* se rompe, sino en *cómo* se rompe.
+
+El ejemplo más limpio vive en tu pared. Un **fusible** eléctrico es un eslabón débil deliberado: cuando circula demasiada corriente, el hilo del fusible se funde y *salta*, cortando el circuito antes de que la sobrecarga pueda iniciar un incendio. El fusible "falla" a propósito — ese es su único trabajo — para que las cosas caras e inflamables que tiene detrás no fallen. Un **magnetotérmico** hace lo mismo con un interruptor que salta. Más ejemplos de fallar *hacia* la seguridad en vez de *fuera* de ella:
+
+- Un **interruptor de hombre muerto (dead-man's switch)** en un tren o un cortacésped: si el operario lo suelta (o se desploma), la máquina *se para*. La pérdida de control va por defecto a "detener", no a "seguir".
+- **Frenos de seguridad de ascensor** que se mantienen *abiertos* por la tensión del cable — de modo que si el cable se rompe y se pierde la tensión, los frenos *se cierran de golpe* y muerden los raíles. Tanto el fallo de energía como el de cable van por defecto a "parar la cabina", no a "dejarla caer".
+- Un **sistema de tráfico a prueba de fallos** que pasa todos los semáforos a rojo intermitente cuando el controlador falla — yendo por defecto a "todos paran y ceden el paso", no a "todos los semáforos en verde".
+
+Contrasta esto con el diseño **a prueba de peligro (fail-dangerous)**, donde un fallo deja el sistema en un estado *dañino*. Un freno de ascensor mantenido *cerrado* por la energía se soltaría y dejaría caer la cabina en el instante en que la energía muriera — el propio modo de fallo se convierte en el desastre. Una verja que se abre cuando su cerradura se queda sin energía "falla con peligro" para la seguridad. El mismo componente, cableado para que su fallo apunte hacia la seguridad o hacia el daño, es toda la diferencia entre un inconveniente y una catástrofe.
+
+<Callout variant="info" title="La pregunta a prueba de fallos">
+Para cualquier cosa que pueda fallar — y todo puede — pregunta: *"Cuando esto se rompa, ¿hacia qué lado se rompe?"* Un buen diseño garantiza que el estado por defecto, el estado de pérdida de energía, el estado de nadie-mirando, sea el **seguro**. No puedes prevenir todos los fallos, pero casi siempre puedes elegir en qué dirección cae.
+</Callout>
+
+### Cuándo usarla
+
+Aplica el pensamiento a prueba de fallos a cualquier cosa donde el fallo en sí sea el peligro — herramientas eléctricas, vehículos, cerraduras, automatizaciones financieras, cualquier cosa que retenga energía o autoridad. No puedes llevar la probabilidad de fallo a cero, así que gastas tu esfuerzo en la *consecuencia*: dispón el sistema para que cuando falle (y fallará) caiga hacia "parado y seguro" en vez de hacia "en marcha y dañino". Es el margen al que recurres cuando evitar el fallo es imposible pero sobrevivirlo no.
+
+## Cinturón y tirantes: márgenes en capas (defensa en profundidad)
+
+¿Por qué elegir? Los sistemas más fuertes apilan *todo* esto — márgenes independientes en capas, de modo que ningún fallo individual, e idealmente ningún par, pueda ser fatal. Esto es la **defensa en profundidad (defense in depth)**: cinturón *y* tirantes *y* un segundo par de pantalones.
+
+Una central nuclear no se apoya en una sola salvaguarda; apila un recubrimiento sellado del combustible, una vasija a presión, un edificio de contención, refrigeración redundante y barras de parada a prueba de fallos que caen por gravedad cuando se pierde la energía. Un montaje de datos serio combina RAID (redundancia) con copias de seguridad externas (independencia geográfica) con capacidad de reserva (holgura) con degradación elegante (a prueba de fallos). El sentido entero de las capas es que los fallos tienen que alinearse *a través de cada capa independiente* para alcanzarte — y alinear fallos independientes es exactamente el suceso de baja probabilidad que la matemática de la multiplicación hizo tan pequeño. La defensa en profundidad no es más que la lección del modo común llevada hacia adelante: mantén las capas independientes, y un único mal suceso no podrá atravesarlas todas.
+
+## Atándolo todo
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada margen disfrazado con un ejemplo concreto del mismo en estado salvaje:"
+  pairs={[
+    { term: "Redundancia", definition: "Un avión bimotor que sigue volando tras fallar un motor" },
+    { term: "Holgura", definition: "Ejecutar los servidores a media capacidad para que un pico de tráfico tenga adónde ir" },
+    { term: "A prueba de fallos", definition: "Un fusible que salta a propósito para proteger el circuito que tiene detrás" },
+    { term: "Defensa en profundidad", definition: "RAID más copias externas más capacidad de reserva apiladas juntas" },
+  ]}
+  instructions="Elige un término y luego haz clic en su definición."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  explanation="La redundancia es una copia independiente que toma el relevo. La holgura es tiempo o capacidad sin usar, deliberados, que absorben sacudidas. Un sistema a prueba de fallos controla el MODO del fallo para que romperse te deje en algún sitio seguro. La defensa en profundidad apila varios márgenes independientes para que ningún fallo individual atraviese. Cuatro disfraces, una idea: sobrevivir al mal caso."
+/>
+
+<Categorize
+  client:visible
+  question="Un equipo afirma que cada montaje de abajo es 'redundante'. Clasifícalos: ¿es la copia VERDADERAMENTE independiente del primario, o es redundancia falsa esperando a que un único suceso de modo común borre a los dos?"
+  buckets={["Redundancia verdaderamente independiente", "Redundancia falsa (modo común)"]}
+  items={[
+    { text: "Dos servidores en ciudades distintas, en redes eléctricas distintas y con proveedores distintos", bucket: "Redundancia verdaderamente independiente" },
+    { text: "Dos servidores en el mismo rack enchufados a la misma regleta", bucket: "Redundancia falsa (modo común)" },
+    { text: "Copias en tu portátil Y en la nube Y en un disco en casa de un amigo", bucket: "Redundancia verdaderamente independiente" },
+    { text: "Dos copias de la base de datos generadas por el mismo script de exportación defectuoso", bucket: "Redundancia falsa (modo común)" },
+    { text: "Las líneas hidráulicas de un avión enrutadas por distintas partes del fuselaje", bucket: "Redundancia verdaderamente independiente" },
+    { text: "Dos fondos 'no correlacionados' que se desploman juntos en un pánico de mercado", bucket: "Redundancia falsa (modo común)" },
+  ]}
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  explanationLabel="Explicación"
+  explanation="La redundancia real necesita que las copias fallen por razones DISTINTAS. Distintas ciudades, distintas redes, distintas ubicaciones físicas, distinto enrutado — esas sobreviven a un único suceso compartido. Una regleta compartida, un script defectuoso compartido, una crisis compartida que tira de todas las correlaciones a 1: esas son un único punto de fallo dibujado dos veces. Busca siempre la causa común antes de fiarte del repuesto."
+/>
+
+<MCQ
+  client:visible
+  question="Un servicio web necesita 4 servidores para gestionar su tráfico normal. El equipo de operaciones ejecuta un montaje 'N+1' por redundancia. ¿Cuántos servidores están en marcha, y qué les compra el +1?"
+  options={[
+    { text: '5 servidores — uno más de los necesarios, así que cualquier servidor individual puede fallar y los 4 restantes siguen llevando la carga completa', correct: true },
+    { text: '4 servidores — N+1 solo significa ejecutar exactamente el número que necesitas', correct: false },
+    { text: '8 servidores — N+1 siempre significa duplicarlo todo', correct: false },
+    { text: '5 servidores, pero si uno falla la web cae de todos modos porque no hay repuesto', correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="N+1 significa una unidad más de las que el trabajo exige estrictamente: 4 necesarios más 1 repuesto son 5 en marcha. Pierde cualquier servidor individual y los otros 4 siguen cubriendo la demanda normal sin degradación. Duplicarlo todo (8 servidores) sería 2N — más margen, más coste. Ejecutar exactamente 4 es N con cero redundancia: el primer fallo te deja por debajo de capacidad."
+/>
+
+<MCQ
+  client:visible
+  question="Un componente es 99 % fiable (falla el 1 % de las veces). Añades un segundo componente, genuinamente INDEPENDIENTE, que hace el mismo trabajo, de modo que el sistema solo falla si fallan AMBOS. ¿Más o menos qué fiabilidad tiene la pareja?"
+  options={[
+    { text: 'Alrededor del 99,99 % — que fallen ambos es 0,01 × 0,01 = 0,0001, así que el fallo total cae de 1 de cada 100 a 1 de cada 10.000', correct: true },
+    { text: 'Alrededor del 99 % — añadir una copia no cambia la fiabilidad en absoluto', correct: false },
+    { text: 'Alrededor del 98 % — dos componentes significan dos oportunidades de fallar, así que la fiabilidad baja', correct: false },
+    { text: 'Exactamente el 100 % — una copia hace que el fallo sea imposible', correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Las probabilidades de fallo independientes se multiplican: 0,01 × 0,01 = 0,0001, una probabilidad del 0,01 % de que caigan ambos a la vez, así que la pareja es alrededor del 99,99 % fiable — una mejora de cien veces a partir de una sola copia. NO es el 100 % (nada lo es), y la fiabilidad sube, no baja — pero todo esto descansa sobre la palabra INDEPENDIENTE. Si una causa de modo común puede tumbar a los dos, la multiplicación es una fantasía y apenas estás mejor que con un único componente."
+/>
+
+<MCQ
+  client:visible
+  question="Una startup presume de mantener 'tres copias independientes' de su base de datos — las tres almacenadas en la misma cuenta de la nube, en la misma región, detrás del mismo inicio de sesión. Detecta la trampa."
+  options={[
+    { text: 'No son independientes: un inicio de sesión comprometido, una caída de la región o una suspensión de la cuenta es un fallo de modo común que mata las tres a la vez', correct: true },
+    { text: 'No hay trampa — tres copias son tres copias, así que están totalmente protegidas', correct: false },
+    { text: 'La trampa es que tres copias son demasiado POCAS; necesitan al menos diez', correct: false },
+    { text: 'La trampa es que las copias ralentizan la base de datos', correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Este es el corazón de la lección. Tres copias PARECEN una fiabilidad de 0,01³, pero comparten un único punto de fallo — una cuenta, una región, un inicio de sesión. Un único mal suceso (cuenta hackeada, región caída, lapso en la facturación) tumba las tres simultáneamente: fallo de modo común de manual. El número es irrelevante; la dependencia compartida lo es todo. La redundancia real repartiría las copias entre distintos proveedores, regiones y credenciales para que ningún suceso individual pueda alcanzarlas todas."
+/>
+
+## La versión de una sola frase
+
+<Callout variant="success" title="Los márgenes llevan muchos disfraces">
+Un margen de seguridad no siempre es un número más grande. A menudo es una **segunda forma de sobrevivir**: una copia **redundante** que toma el relevo, **holgura** que absorbe sacudidas en tiempo y capacidad, un mecanismo **a prueba de fallos** que se rompe con suavidad, o todos ellos **en capas** en profundidad. Cada uno te compra la supervivencia del mal caso — pero la redundancia y las capas solo funcionan cuando las copias son **verdaderamente independientes**. Encuentra la causa de modo común, o tendrás una sola apuesta dibujada dos veces.
+</Callout>
+
+### Cuándo usarlo
+
+Saca a relucir toda esta familia siempre que un único fallo sea inaceptable y un factor de seguridad más gordo por sí solo no lo cubra. Añade **redundancia** cuando la muerte de un componente sea intolerable; añade **holgura** cuando la variabilidad corriente no pare de convertirse en emergencia; añade diseño **a prueba de fallos** cuando el fallo en sí sea el peligro; y **apílalos en capas** cuando lo que está en juego sea lo bastante alto como para que no pueda dejarse pasar ningún fallo individual — ni siquiera doble. Luego, cada vez sin excepción, haz la comprobación de modo común: *¿qué único suceso podría tumbar a la vez mi primario y mi copia?* Esa pregunta es la diferencia entre un margen que es real y uno que solo parece tranquilizador.
+
+## Lo que viene
+
+Cada margen de esta lección — cada servidor de repuesto, cada día de holgura en el calendario, cada generador ronroneando — ha estado ahí *sin usar*, y ese es el sentido. Pero sin usar no es *gratis*. La rueda de repuesto es peso muerto que arrastras durante años. El servidor medio vacío es capacidad que pagas y no usas. El colchón de efectivo es dinero sin invertir. En la próxima lección, **El coste del margen**, afrontamos la trampa del otro lado: la holgura y la redundancia cuestan dinero, tiempo y velocidad de verdad — y un margen dimensionado puramente por "más es más seguro" puede ser su propia clase de error. Aprenderemos a *dimensionar bien* un margen en lugar de maximizarlo.
