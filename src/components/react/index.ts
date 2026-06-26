@@ -114,3 +114,6 @@ export type { MarginOfSafetyMeterProps } from '@/components/react/MarginOfSafety
 
 export { ComparativeAdvantageExplorer, default as ComparativeAdvantageExplorerDefault } from '@/components/react/ComparativeAdvantageExplorer';
 export type { ComparativeAdvantageExplorerProps, CAGood, CAParty } from '@/components/react/ComparativeAdvantageExplorer';
+
+export { CommonsDepletion, default as CommonsDepletionDefault } from '@/components/react/CommonsDepletion';
+export type { CommonsDepletionProps } from '@/components/react/CommonsDepletion';

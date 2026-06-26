@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'tragedy-of-the-commons',
-    icon: '🐄',
-    difficulty: 'intermediate',
-    order: 11,
-    accent: 'brand',
-    title: {
-      en: 'Tragedy of the Commons',
-      es: 'La Tragedia de los Comunes',
-    },
-    description: {
-      en: 'When a shared resource is free to take but costly to all, individually rational use adds up to collective ruin. Each gain is private; each cost is split — so the pasture gets stripped bare.',
-      es: 'Cuando un recurso compartido es gratis de tomar pero costoso para todos, el uso individualmente racional suma una ruina colectiva. Cada beneficio es privado; cada coste, repartido: así el pasto queda arrasado.',
-    },
-    dependencies: ['incentives', 'supply-and-demand'],
-    tags: ['economics', 'systems-thinking'],
-    buildNotes:
-      'An economics + systems model about misaligned shared incentives. Sections: the original parable (herders sharing a pasture — each adds one more cow because the gain is private and the overgrazing cost is shared) and the general structure (private benefit + socialized cost → over-exploitation); real cases (overfishing, antibiotic resistance, traffic congestion, groundwater, the atmosphere, spam); why it’s a structural trap, not a morality failure (each actor is behaving rationally — links to incentives and game theory’s prisoner’s dilemma); the cost is an *externality* (define it — a cost not borne by the decider); the ways out (Ostrom’s commons governance, property rights, regulation/quotas, taxes/Pigouvian pricing, social norms) and where each works. Worked example: a shared fishery collapsing over rounds with simple numbers. Build an interactive island: a shared resource depleting as each added "user" takes their rational share, with a toggle for a governance rule that saves it (respect prefers-reduced-motion). Connect to incentives, externalities, second-order thinking, and game theory. Pitfall: blaming individuals instead of the incentive structure. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'emergence',
     icon: '🐜',
     difficulty: 'intermediate',
