@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'emergence',
-    icon: '🐜',
-    difficulty: 'intermediate',
-    order: 12,
-    accent: 'accent',
-    title: {
-      en: 'Emergence',
-      es: 'Emergencia',
-    },
-    description: {
-      en: 'The whole does things no part can. Simple agents following simple rules produce flocks, markets, minds and traffic jams — patterns that exist only at the level above the pieces.',
-      es: 'El todo hace cosas que ninguna parte puede. Agentes simples que siguen reglas simples producen bandadas, mercados, mentes y atascos: patrones que solo existen en el nivel superior a las piezas.',
-    },
-    dependencies: ['natural-selection'],
-    tags: ['systems-thinking', 'biology-evolution'],
-    buildNotes:
-      'A systems-thinking model bridging into biology. Sections: what emergence is (higher-level patterns/properties that arise from many interacting parts and can’t be read off any single part); the canonical examples (ant colonies with no boss, bird flocks from 3 local rules, consciousness from neurons, prices from traders, traffic jams that move backward, cities); micro-rules → macro-pattern (Schelling segregation, Conway’s Life in one line) and why you can’t predict the whole by studying one part (reductionism’s limit — ties to "the map is not the territory"); strong vs. weak emergence kept lightweight and honest; why this matters for action (you intervene at the level of the rules and interactions, not the individuals — links to leverage points and feedback loops). Build the centerpiece interactive island: a boids-style flock OR a Schelling grid where the learner tweaks a couple of local rules and watches the global pattern self-organize (respect prefers-reduced-motion — show static end states when reduced). Connect to natural selection (an emergent algorithm), feedback loops, incentives, and the tragedy of the commons. Pitfall: assuming a group behaves like a big individual; looking for a "controller" that isn’t there. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'game-theory-basics',
     icon: '♟️',
     difficulty: 'advanced',

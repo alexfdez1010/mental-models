@@ -117,3 +117,9 @@ export type { ComparativeAdvantageExplorerProps, CAGood, CAParty } from '@/compo
 
 export { CommonsDepletion, default as CommonsDepletionDefault } from '@/components/react/CommonsDepletion';
 export type { CommonsDepletionProps } from '@/components/react/CommonsDepletion';
+
+export { SchellingGrid, default as SchellingGridDefault } from '@/components/react/SchellingGrid';
+export type { SchellingGridProps } from '@/components/react/SchellingGrid';
+
+export { EmergenceFlock, default as EmergenceFlockDefault } from '@/components/react/EmergenceFlock';
+export type { EmergenceFlockProps } from '@/components/react/EmergenceFlock';
