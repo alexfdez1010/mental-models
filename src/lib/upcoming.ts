@@ -87,25 +87,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // Seeds every starved discipline so the build covers the whole latticework
   // before climbing any one tag. Interleaved by tag on purpose.
   {
-    slug: 'comparative-advantage',
-    icon: '🔁',
-    difficulty: 'intermediate',
-    order: 10,
-    accent: 'accent',
-    title: {
-      en: 'Comparative Advantage',
-      es: 'Ventaja Comparativa',
-    },
-    description: {
-      en: 'Even if you’re better at everything, you can’t do everything. Specialize where your edge is largest, trade for the rest, and the whole pie grows — the most counter-intuitive result in economics.',
-      es: 'Aunque seas mejor en todo, no puedes hacerlo todo. Especialízate donde tu ventaja es mayor, intercambia el resto y el pastel entero crece: el resultado más contraintuitivo de la economía.',
-    },
-    dependencies: ['supply-and-demand', 'opportunity-cost'],
-    tags: ['economics', 'strategy'],
-    buildNotes:
-      'A counter-intuitive economics/strategy model built directly on opportunity cost. Sections: absolute vs. comparative advantage (being better at something vs. giving up the least to do it); the classic two-good worked example (e.g. a lawyer who also types faster than her assistant should still delegate typing) with the opportunity-cost numbers laid out in a table; why trade based on comparative advantage grows total output even when one party is better at everything (Ricardo); the same logic inside a team, a company, or your own time management (do your highest-edge work, delegate the rest); limits and caveats (transaction costs, transition pain, assumptions that break in the real world). Worked numeric table is the centerpiece. Build an interactive island: sliders for each party’s productivity in two goods, computing each one’s opportunity cost and highlighting who should specialize where, with total output before/after trade (respect prefers-reduced-motion). Connect to opportunity cost (its parent), supply & demand, and circle of competence. Pitfall: confusing absolute with comparative advantage. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'tragedy-of-the-commons',
     icon: '🐄',
     difficulty: 'intermediate',

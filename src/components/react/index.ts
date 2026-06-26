@@ -111,3 +111,6 @@ export type { WasonTaskProps, WasonGuess } from '@/components/react/WasonTask';
 
 export { MarginOfSafetyMeter, default as MarginOfSafetyMeterDefault } from '@/components/react/MarginOfSafetyMeter';
 export type { MarginOfSafetyMeterProps } from '@/components/react/MarginOfSafetyMeter';
+
+export { ComparativeAdvantageExplorer, default as ComparativeAdvantageExplorerDefault } from '@/components/react/ComparativeAdvantageExplorer';
+export type { ComparativeAdvantageExplorerProps, CAGood, CAParty } from '@/components/react/ComparativeAdvantageExplorer';
