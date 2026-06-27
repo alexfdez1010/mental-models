@@ -1,0 +1,231 @@
+---
+title: "Strength of Evidence: The Likelihood Ratio"
+description: "How much should a clue move you? One number answers it: the likelihood ratio — how many times more likely the evidence is if your hypothesis is true than if it's false. Weak clues whisper, strong clues shout, and extraordinary claims need extraordinary evidence."
+topic: "en/bayesian-updating"
+order: 5
+minutes: 12
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout, BayesCalculator } from '@/components/react';
+
+Last lesson left one piece in a black box. In the odds form — **posterior odds = prior odds × likelihood ratio** — the prior odds you can usually estimate, and the multiplying is just arithmetic. But that middle term, the **likelihood ratio**, is the part that actually says *how hard a clue should hit you*. Two pieces of evidence can both "point the same way" while one nudges you a hair and the other flips your whole belief. The difference between them is entirely captured by one number, and this lesson is about reading it.
+
+Here's the thing nobody tells you about evidence: its strength has almost nothing to do with how *confirming* it feels. A clue can scream "guilty!" at your gut and be worth essentially zero, while a dull, technical detail quietly settles the case. The gut measures vividness; the likelihood ratio measures *diagnosticity* — and only one of those tracks the truth. By the end of this lesson you'll be able to look at any clue and ask the one question that matters: *not "does this fit my theory?" but "how much better does it fit my theory than the alternative?"*
+
+That second question is the whole game. Hold it tight; we'll spend the rest of the lesson earning it.
+
+<MCQ
+  client:visible
+  pretest
+  question="A detective is weighing whether a suspect is guilty. Which of these two facts is STRONGER evidence of guilt? (Go with your gut — there's no grade.)"
+  options={[
+    { text: 'The suspect’s shoe print exactly matches a rare tread found at the scene — a tread on fewer than 1 in 500 shoes', correct: true },
+    { text: 'The suspect owns a kitchen knife of the type used in the crime' },
+    { text: 'They’re equally strong — both connect the suspect to the crime' },
+    { text: 'The kitchen knife is stronger; it’s the actual weapon type' },
+  ]}
+  explanation="The rare shoe print is far stronger, and the reason is the alternative. Almost everyone owns a kitchen knife, so 'owns a knife' is nearly as likely for an innocent person as a guilty one — it barely distinguishes the two worlds. But a tread on fewer than 1 in 500 shoes is common at the scene only if the suspect was there; it's very unlikely for a random innocent person. Strong evidence isn't evidence that fits guilt — it's evidence that would be surprising under innocence."
+/>
+
+## One number for how strong a clue is
+
+Formally, the strength of a piece of evidence is its **likelihood ratio (LR)**:
+
+$$\text{LR} = \frac{P(E \mid H)}{P(E \mid \lnot H)}$$
+
+In words: how many times more likely the evidence $E$ is *if your hypothesis $H$ is true* than if it's false. It's the same likelihood ratio you met in the odds form last lesson — and it is the *entire* strength of a clue, packed into one number. Everything about "how much should this move me" lives here. Recap the rule you already proved: **posterior odds = prior odds × LR.** The prior is where you stood; the LR is how hard the new clue shoves.
+
+The scale is wonderfully intuitive once you see where $1$ sits:
+
+- **LR = 1** → the evidence is exactly as likely whether $H$ is true or false. It's **non-diagnostic** — useless. Multiply your odds by $1$ and nothing happens. (This is the "useless evidence moves nothing" case from the odds form.)
+- **LR > 1** → evidence **for** $H$. The bigger the number, the harder it points. LR = 2 doubles your odds; LR = 100 multiplies them a hundredfold.
+- **LR < 1** → evidence **against** $H$. An LR of $\tfrac{1}{10} = 0.1$ cuts your odds to a tenth. (Evidence for $H$ is automatically evidence against $\lnot H$, and vice versa.)
+- **LR very large or very small** → **strong** evidence, in whichever direction.
+
+A rough feel for the magnitudes, with a concrete clue for each:
+
+| Likelihood ratio | Strength | Example clue |
+|---|---|---|
+| $\approx 1$ | None (non-diagnostic) | "The suspect owns a kitchen knife" — nearly everyone does |
+| $2$ | Weak | A spam email contains the word "deal" |
+| $5$ | Modest | A job candidate has a relevant degree |
+| $10$ | Moderate | A spam email contains "FREE!!! click now" |
+| $100$ | Strong | DNA partial match at one rare marker |
+| $1{,}000+$ | Very strong | A full DNA profile match |
+
+Notice the table is symmetric in spirit: an LR of $\tfrac{1}{100}$ is exactly as *strong* as an LR of $100$ — it just points the other way. Strength is about *distance from 1*, in either direction.
+
+<Callout variant="tip" title="The one question that measures evidence">
+Don't ask "does this fit my theory?" — almost everything fits *some* theory. Ask: **"how much more likely is this evidence if I'm right than if I'm wrong?"** That ratio *is* the strength. If the answer is "about the same either way," the clue is worthless no matter how confirming it feels.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A test fires (comes back positive) 60% of the time when the hypothesis is true, and 60% of the time when it's false. What is its likelihood ratio, and what does that tell you?"
+  options={[
+    { text: 'LR = 0.60 / 0.60 = 1 — non-diagnostic; a positive result should move your belief by exactly nothing', correct: true },
+    { text: 'LR = 1.2 — a modest amount of support for the hypothesis' },
+    { text: 'LR = 60 — strong evidence, because it fires 60% of the time under the hypothesis' },
+    { text: 'You can’t compute it without the prior' },
+  ]}
+  explanation="LR = P(E|H) / P(E|¬H) = 0.60 / 0.60 = 1. The test is just as likely to fire whether the hypothesis is true or false, so it carries no information — posterior odds = prior odds × 1 = prior odds, unchanged. The 60% true-positive rate looks reassuring in isolation, but a clue's strength is the *ratio*, not the top number alone. (And no — you don't need the prior to compute the LR; the LR is a property of the evidence itself.)"
+/>
+
+## Diagnostic vs. worthless: it's about the alternative
+
+Here is the single most important idea in the lesson, and it follows straight from the formula. The denominator $P(E \mid \lnot H)$ — how likely the evidence is *under the alternative* — is what makes or breaks a clue. **Strong evidence must be unlikely under the alternative.** If something is common whether or not your hypothesis holds, it can't discriminate between them, and the ratio collapses toward 1.
+
+Take the detective's two clues from the pretest, in numbers. Suppose almost every household owns a kitchen knife — so $P(\text{owns a knife} \mid \text{guilty}) \approx 0.95$ and $P(\text{owns a knife} \mid \text{innocent}) \approx 0.90$. The likelihood ratio:
+
+$$\text{LR}_{\text{knife}} = \frac{0.95}{0.90} \approx 1.06$$
+
+Barely above 1. The "smoking gun" of owning a knife multiplies your odds of guilt by about $1.06$ — a rounding error. It *feels* damning because it connects the suspect to the weapon, but it's nearly worthless, because it's almost as likely for an innocent person.
+
+Now the rare shoe print. Say a guilty suspect who was at the scene leaves that tread with probability $P(E \mid \text{guilty}) \approx 0.9$, while a random innocent person happens to own that rare tread with probability $P(E \mid \text{innocent}) \approx 0.002$ (fewer than 1 in 500 shoes):
+
+$$\text{LR}_{\text{print}} = \frac{0.9}{0.002} = 450$$
+
+An LR of **450**. *That* is a clue that earns its keep — not because it fits guilt better (both clues fit guilt fine) but because it's **rare under innocence.** The whole difference between a worthless clue and a decisive one lives in the denominator.
+
+<Callout variant="warning" title="Confirming ≠ diagnostic">
+A clue that "confirms" your hypothesis but is *equally* expected under the alternative tells you nothing. "The defendant was nervous on the stand" fits guilt — but innocent people are nervous too, so its LR sits near 1. Before you let any clue move you, sanity-check the denominator: *how likely would I see this exact thing if my hypothesis were false?* If "just as likely," drop it.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Why is 'the suspect owns a kitchen knife' nearly worthless as evidence of guilt, even though the crime used that kind of knife?"
+  options={[
+    { text: 'Because it’s almost as common among innocent people as guilty ones — P(owns knife | innocent) ≈ P(owns knife | guilty) — so the likelihood ratio is near 1', correct: true },
+    { text: 'Because owning a knife is illegal and therefore inadmissible' },
+    { text: 'Because the prior probability of guilt is always zero' },
+    { text: 'Because kitchen knives are never used in real crimes' },
+  ]}
+  explanation="It's the denominator. Nearly everyone owns a kitchen knife, so the evidence is about as likely whether the suspect is guilty or innocent — the likelihood ratio P(E|guilty) / P(E|innocent) ≈ 0.95/0.90 ≈ 1.06. A clue can only discriminate between two worlds if it's much more likely in one than the other. Strong evidence is *unlikely under the alternative*; this is the opposite."
+/>
+
+## Weak clues, multiplied
+
+A single weak clue moves you a little. But weak clues *stack* — and in odds form, stacking is just multiplication. If clues are independent, you chain their likelihood ratios:
+
+$$\text{posterior odds} = \text{prior odds} \times \text{LR}_1 \times \text{LR}_2 \times \text{LR}_3 \times \cdots$$
+
+Each new clue is another factor. So a string of individually unimpressive clues can multiply into a strong conclusion. Suppose you start at even odds, $1 : 1$, that a particular email is spam, and three weak signals arrive — each with a likelihood ratio of about $3$ (the word "winner," an unfamiliar sender domain, a suspicious link):
+
+$$\underbrace{1 : 1}_{\text{prior odds}} \times 3 \times 3 \times 3 = 27 : 1$$
+
+Three forgettable clues, each barely worth a second look on its own, multiply to **27 : 1** odds — about a $\tfrac{27}{27+1} \approx 96\%$ chance of spam. This is exactly how a naive Bayes spam filter convicts an email: no single word is proof, but enough mildly suspicious words multiply past any reasonable threshold. Detectives, doctors stacking symptoms, and hiring panels combining weak signals all run the same engine.
+
+One crucial caveat, which gets its own lesson next: **the clues must be independent.** If two "clues" are really the same fact wearing two hats — say, two witnesses who only heard the story from each other — multiplying both LRs double-counts the evidence and overshoots wildly. We'll dissect that trap in lesson 5; for now, just flag that multiplication assumes the clues are genuinely separate.
+
+<MCQ
+  client:visible
+  question="You're at 1:1 odds a coin is the trick (two-headed) one. You flip it twice and get heads both times. A heads is twice as likely from a trick coin as a fair one (LR = 2 each, and the flips are independent). What are your posterior odds?"
+  options={[
+    { text: '4:1 — 1:1 × 2 × 2 = 4:1 (an 80% chance it’s the trick coin)', correct: true },
+    { text: '2:1 — the two flips together count as one LR of 2' },
+    { text: '5:1 — you add the prior odds to the two LRs (1 + 2 + 2)' },
+    { text: 'Still 1:1 — two heads is just as likely either way' },
+  ]}
+  explanation="Independent clues multiply their likelihood ratios in: 1:1 × 2 × 2 = 4:1, about 80%. Each heads is twice as likely from the trick coin, and two independent heads stack to four times. You multiply (not add — 5:1 is the additive error), and you don't fold both flips into a single LR (that throws away the second flip's information). This is the chaining rule doing its job."
+/>
+
+## Use the slider to feel evidence strength
+
+The likelihood ratio is just the **true-positive rate divided by the false-positive rate** — sensitivity over the false-alarm rate. Drag those two and watch how a stronger ratio moves the posterior further from the prior. Same prior, same positive result; only the *strength of the clue* changes.
+
+<BayesCalculator
+  client:visible
+  title="Stronger evidence, bigger move"
+  hypothesisLabel="have the condition"
+  evidenceLabel="test positive"
+  priorLabel="Prior — base rate"
+  sensitivityLabel="True-positive rate"
+  falsePositiveLabel="False-positive rate"
+  initialPrior={10}
+  initialSensitivity={90}
+  initialFalsePositive={45}
+  populationSize={10000}
+  caption="The likelihood ratio here is true-positive ÷ false-positive. Start at 90/45 (ratio 2 — weak evidence, posterior barely above the prior), then drag the false-positive rate down to 9% (ratio 10) and watch the posterior jump. Same prior, same positive result — a stronger clue simply moves you further."
+/>
+
+At the start, $\text{LR} = \tfrac{90}{45} = 2$: a positive nudges a 10% prior up to only about 18%. Drag the false-positive rate down to 9% and $\text{LR} = \tfrac{90}{9} = 10$: the *same* positive now carries you to roughly 53%. The prior never moved and the test still "came back positive" — all that changed is how unlikely that positive is under the alternative, which is the whole strength of the evidence.
+
+## Extraordinary claims need extraordinary evidence
+
+This is the most practical takeaway in the course, and it's pure Bayes. The maxim — Laplace's, popularized by Hume, Sagan, and Truzzi as *"extraordinary claims require extraordinary evidence"* — isn't a slogan about skepticism. It's a direct reading of **posterior odds = prior odds × LR.** A claim that's *extraordinary* has, by definition, **tiny prior odds.** To drag those tiny odds up to anything believable, the likelihood ratio has to be enormous — *extraordinary* — to compensate.
+
+Work it through. Suppose someone claims to be genuinely psychic, and you put the prior odds of true psychic ability at about $1$ in a billion, i.e. $1 : 1{,}000{,}000{,}000$. They then pass a test that would be passed only $1\%$ of the time by a fraud — sounds impressive! That's a likelihood ratio of about:
+
+$$\text{LR} = \frac{P(\text{passes} \mid \text{psychic})}{P(\text{passes} \mid \text{faking})} \approx \frac{1}{0.01} = 100$$
+
+An LR of 100 is genuinely strong evidence in everyday life. Run it against this prior, though:
+
+$$\underbrace{1 : 1{,}000{,}000{,}000}_{\text{prior odds}} \times 100 = 100 : 1{,}000{,}000{,}000 = 1 : 10{,}000{,}000$$
+
+After "passing," the odds of real psychic ability are still $1$ in $10$ million. The strong-seeming clue barely dented the claim, because it was fighting a prior a billion-to-one against. To get even to *even odds* — $1 : 1$ — you'd need:
+
+$$\text{LR} = 1{,}000{,}000{,}000$$
+
+A likelihood ratio of about a **billion.** That means evidence so specific it would essentially *never* appear if the person were faking — $P(E \mid \text{faking})$ on the order of one in a billion. Ordinary "impressive" evidence (an LR of a few hundred) doesn't come close. That's the whole content of the maxim: it's not that extraordinary claims are forbidden, it's that the *bar for the likelihood ratio* scales with how small the prior is.
+
+<Callout variant="tip" title="The maxim, decoded">
+"Extraordinary claims require extraordinary evidence" = **a tiny prior demands a gigantic likelihood ratio to overcome it.** Perpetual-motion machines, miracle cures, "this one weird trick beats the market" — each starts at one-in-millions prior odds, so a few persuasive demos (LR of a few hundred) leave them still wildly improbable. Believe them only on evidence that would be near-impossible if they were false.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A perpetual-motion machine is demonstrated and passes a test that a clever fraud would pass only 1 in 200 times (LR ≈ 200). You'd set the prior odds the machine is real at about 1 in a billion. Should you believe it?"
+  options={[
+    { text: 'No — 1:1,000,000,000 × 200 = 200:1,000,000,000 = 1:5,000,000; still about a 1-in-5-million chance. The clue is strong but nowhere near the ~billion-fold LR needed to overcome the prior', correct: true },
+    { text: 'Yes — an LR of 200 is strong evidence, so the machine is probably real' },
+    { text: 'Yes — passing any test at all proves the claim' },
+    { text: 'You can’t say anything, because priors don’t apply to physics claims' },
+  ]}
+  explanation="Run the odds form: prior odds 1:1,000,000,000 × LR 200 = 1:5,000,000. After the demo it's still roughly a 1-in-5-million proposition. An LR of 200 is genuinely strong in daily life, but it's a rounding error against a billion-to-one prior. Extraordinary claims need an extraordinary LR — here, on the order of a billion — meaning evidence essentially impossible under 'it's a trick.' A single passed demo isn't it."
+/>
+
+### When to reach for it
+
+Reach for the likelihood ratio whenever you catch yourself about to be *moved* by a clue — a damning detail, a glowing reference, a scary statistic, a viral claim. Before you let it shift you, run two quick checks. First, the **diagnosticity check**: "how likely would I see this exact thing if my hypothesis were *false*?" If "about as likely," the LR is near 1 and you should ignore the clue, however vivid. Second, the **extraordinariness check**: for any claim with a tiny prior, ask whether the evidence is *extraordinary enough* — would it be near-impossible under the boring alternative? — before you let it carry you. And when several genuinely independent clues arrive, multiply their LRs to combine them. These three moves — judge by the alternative, scale the bar to the prior, multiply the independent — are the practical core of weighing evidence.
+
+<Quiz
+  client:visible
+  title="Check yourself: strength of evidence"
+  questions={[
+    {
+      question: 'The likelihood ratio of a piece of evidence is defined as:',
+      options: [
+        { text: 'P(E | H) ÷ P(E | ¬H) — how many times more likely the evidence is if the hypothesis is true than if it’s false', correct: true },
+        { text: 'P(H | E) ÷ P(H) — how much the posterior exceeds the prior' },
+        { text: 'P(E | H) − P(E | ¬H) — the difference between the two likelihoods' },
+        { text: 'P(H) × P(E) — the prior times the evidence probability' },
+      ],
+      explanation: 'The LR is the *ratio* of the two likelihoods, P(E|H) / P(E|¬H). It captures the entire strength of a clue in one number, and it slots straight into the odds form: posterior odds = prior odds × LR. It’s a ratio, not a difference, and it’s a property of the evidence — no prior required to compute it.',
+    },
+    {
+      question: 'What makes a piece of evidence *strong* (a likelihood ratio far from 1)?',
+      options: [
+        { text: 'It’s much more likely under one hypothesis than the other — in particular, unlikely under the alternative', correct: true },
+        { text: 'It feels emotionally confirming and fits the story you already believe' },
+        { text: 'It’s a fact that’s true with high probability, like “the suspect owns a knife”' },
+        { text: 'It comes from a large number of sources, regardless of what they say' },
+      ],
+      explanation: 'Strength is diagnosticity: the evidence must discriminate between the worlds, which means being unlikely under the alternative (a small denominator). “Owns a knife” is almost certain either way, so its LR sits near 1 despite feeling confirming. Vividness and emotional fit are exactly what the LR ignores.',
+    },
+    {
+      question: 'Why do "extraordinary claims require extraordinary evidence"?',
+      options: [
+        { text: 'An extraordinary claim has tiny prior odds, so it needs an enormous likelihood ratio just to reach believable posterior odds', correct: true },
+        { text: 'Because extraordinary claims are always false and no evidence can change that' },
+        { text: 'Because ordinary evidence has a likelihood ratio of zero' },
+        { text: 'Because the prior is irrelevant once any evidence arrives' },
+      ],
+      explanation: 'It’s the odds form: posterior odds = prior odds × LR. If the prior odds are, say, 1 in a billion, an LR of a few hundred leaves you still wildly improbable — you’d need an LR near a billion (evidence near-impossible under the alternative) to reach even odds. The bar for the LR scales with how small the prior is.',
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You can now read a clue's strength straight off its likelihood ratio, spot worthless evidence by checking the alternative, multiply independent clues into a strong conclusion, and see why a tiny prior demands extraordinary evidence. That's the engine running correctly. Next, in **"Where Updating Goes Wrong,"** we watch it break: people who drop the prior and treat the evidence as the whole answer, the *inverse fallacy* of confusing $P(E \mid H)$ with $P(H \mid E)$, the **double-counting** of correlated "clues" that aren't really independent (the caveat we flagged in the chaining section), and the stubborn refusal to update at all. Knowing the failure modes is what turns a formula into judgment.

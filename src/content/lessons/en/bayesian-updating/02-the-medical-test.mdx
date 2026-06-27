@@ -1,0 +1,173 @@
+---
+title: "The Medical Test: Why a Positive Isn't a Verdict"
+description: "The canonical Bayesian puzzle, worked in full: a rare disease, a 99%-accurate test, a positive result — and a true chance of only about 9%. Build it with a natural-frequency tree and an interactive posterior calculator until the answer stops feeling like a trick."
+topic: "en/bayesian-updating"
+order: 3
+minutes: 11
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout, BayesCalculator } from '@/components/react';
+
+There's one worked example that teaches Bayesian updating better than any abstract formula, and you've already met it twice — once in the last course, once in this course's pretest. It's time to take it apart completely, because once the **medical test** stops feeling like a trick, every other update in your life gets easier. The setup is deliberately simple: a disease, a test, a positive result. The answer is famously counter-intuitive, and the cure for the bad intuition is a picture, not an equation.
+
+Here's the scenario we'll use for the whole lesson. A disease affects **1 in 1,000 people**. A test for it is **"99% accurate"**, which we'll pin down to mean two things: if you *have* the disease it correctly says positive 99% of the time (a 99% **true-positive rate**), and if you *don't* have it, it wrongly says positive 1% of the time (a 1% **false-positive rate**). You take the test. It comes back **positive**. What's the chance you actually have the disease?
+
+<MCQ
+  client:visible
+  pretest
+  question="Commit to a gut answer before we work it out. A disease hits 1 in 1,000. The test has a 99% true-positive rate and a 1% false-positive rate. You test positive. The chance you're actually sick is closest to…"
+  options={[
+    { text: 'About 9%', correct: true },
+    { text: 'About 99%' },
+    { text: 'About 50%' },
+    { text: 'About 1%' },
+  ]}
+  explanation="Hold your answer — we're about to build it from a population of 100,000 people, where the logic becomes almost obvious. The headline: it's about 9%, not 99%. If your gut said 99%, you're in excellent company; that's the answer almost everyone gives, and it's wrong by a factor of ten. The reason is the base rate, and a natural-frequency tree makes it impossible to miss."
+/>
+
+## Don't use percentages — use people
+
+The reason this puzzle feels impossible in percentages is that percentages hide the base rate. So throw them out and count actual people instead. This is the single most powerful trick in all of Bayesian reasoning, and it has a name: **natural frequencies**. Instead of juggling "1%" and "0.1%" and "99%", we drop a concrete crowd of people into the problem and just tally who ends up where.
+
+Take **100,000 people** and walk them through the scenario step by step.
+
+- The disease affects 1 in 1,000, so of our 100,000 people, **100 have the disease** and **99,900 do not**. That split — 100 versus 99,900 — *is* the base rate, and it's doing almost all the work.
+- Of the **100 who have it**, the test correctly flags 99% → **99 true positives** (and 1 sick person wrongly cleared).
+- Of the **99,900 who don't have it**, the test wrongly flags 1% → **999 false positives**.
+
+Now just look at everyone who tested positive. There are `99 + 999 = 1,098` of them. Of those, only **99 actually have the disease.** So the chance that a positive-testing person is truly sick is:
+
+`99 ÷ 1,098 ≈ 0.090`, about **9%**.
+
+The whole "paradox" evaporates. The test is genuinely good — but the healthy crowd is so enormous that even 1% of it (999 people) swamps the tiny sick crowd (99 people). Most positives are false alarms not because the test is bad, but because there's so much more "healthy" to wrongly flag than "sick" to correctly flag.
+
+| Group | How many | Test says positive | Of those, who's truly sick? |
+|---|---|---|---|
+| Have the disease | 100 | 99 (true positives) | 99 |
+| Don't have it | 99,900 | 999 (false positives) | 0 |
+| **Everyone who tests positive** | — | **1,098** | **99 → about 9%** |
+
+<Callout variant="tip" title="The natural-frequency habit">
+Whenever a probability puzzle has you stuck, **stop computing percentages and imagine a fixed crowd** — 1,000 or 100,000 people — then walk them through the branches and count who lands where. Bayes' theorem is exactly this tally; the formula just hides the people. Research on doctors and judges shows that the *same* problem they get wrong in percentages, they get right in natural frequencies.
+</Callout>
+
+## Watch the answer move: the posterior calculator
+
+Reading the tally once convinces your head; *driving* it convinces your gut. Below is the same problem as a live calculator. It starts on our scenario — a 0.1% base rate (that's 1 in 1,000), a 99% true-positive rate, and a 1% false-positive rate — and shows the **posterior** (your real chance of disease after a positive test) as both a percentage and a crowd of people.
+
+Play with all three sliders and watch the posterior lurch:
+
+<BayesCalculator
+  client:visible
+  title="A rare disease and a 99%-accurate test"
+  hypothesisLabel="have the disease"
+  evidenceLabel="test positive"
+  priorLabel="Prior — how common the disease is"
+  sensitivityLabel="True-positive rate"
+  falsePositiveLabel="False-positive rate"
+  initialPrior={0.1}
+  initialSensitivity={99}
+  initialFalsePositive={1}
+  populationSize={100000}
+  caption="Start here, then experiment: raise the base rate and the posterior climbs fast; cut the false-positive rate and it climbs even faster. The true-positive rate barely matters by comparison. The base rate and the false-alarm rate run this puzzle."
+/>
+
+Three experiments worth running before you move on, because each one teaches a different lever:
+
+- **Make the disease ten times more common** — drag the prior from 0.1% up to 1%. The posterior jumps from ~9% to roughly 50%. Same test, same accuracy; the *only* thing that changed is how much "sick" there was to find. The base rate is the dominant dial.
+- **Cut the false-positive rate to 0.1%** (a far more specific test). The posterior leaps to about 50% even at the original rare base rate. False alarms, not missed cases, are what poison a screening test for a rare condition.
+- **Crank the true-positive rate up and down** between, say, 90% and 100%. The posterior barely flinches. Catching *more* of the rare sick people can't help much when they were rare to begin with — there just aren't many of them to catch.
+
+<MCQ
+  client:visible
+  question="Using the calculator's logic: which single change would raise the chance-you're-actually-sick (the posterior) the MOST, starting from the rare-disease scenario?"
+  options={[
+    { text: 'Cutting the false-positive rate from 1% to near 0% — fewer healthy people wrongly flagged means the true positives stop being drowned out', correct: true },
+    { text: 'Raising the true-positive rate from 99% to 100% — catching the last sick person' },
+    { text: 'Re-labelling the test as "99.9% accurate" without changing the numbers' },
+    { text: 'Taking the test in a quieter room' },
+  ]}
+  explanation="With a rare disease, the posterior is dominated by the flood of false positives — 999 of them versus just 99 true positives. Shrink that flood (cut the false-positive rate) and the true positives stop being outnumbered, so the posterior soars. Raising an already-99% true-positive rate adds at most one more true positive out of 1,098 — a rounding error. Marketing language and the room change nothing."
+/>
+
+## The second test: updating again
+
+So you tested positive and the honest read is "about 9%, probably a false alarm — but worth checking." What does a careful person do? **Run a second, independent test.** And here's the beautiful part: Bayesian updating tells you exactly what to do with the result, because **your posterior from the first test becomes your prior for the second.**
+
+You no longer walk into the second test believing "1 in 1,000." After the first positive, your honest belief is "about 9%." So plug a 9% prior into the same machinery. If the second independent test also comes back positive (99% true-positive, 1% false-positive again):
+
+- Out of 100,000 people who are *each* at a 9% prior: 9,000 have the disease, 91,000 don't.
+- True positives: `9,000 × 0.99 = 8,910`. False positives: `91,000 × 0.01 = 910`.
+- Posterior: `8,910 ÷ (8,910 + 910) ≈ 0.907`, about **91%.**
+
+One positive test took you from 0.1% to 9%. A second took you from 9% to 91%. *That's* updating by degrees — each piece of evidence moves you the right amount, and the moves compound. The single test that felt useless ("only 9%?") was actually a huge update; it multiplied your odds nearly a hundredfold. It just started from such a tiny base that even a hundredfold jump landed at 9%.
+
+<Callout variant="warning" title="“Independent” is doing real work">
+The second-test trick only works if the second test is **independent** of the first — a different method, not the same test repeated (which would just re-confirm the same false positive). If two tests share the same flaw, a second positive tells you almost nothing new. We'll meet this trap again as **double-counting evidence**: correlated clues feel like two confirmations but are closer to one. When sources aren't independent, updating twice over-counts.
+</Callout>
+
+<MCQ
+  client:visible
+  question="After one positive test your chance of disease is about 9%. You take a second, independent test and it ALSO comes back positive. Roughly what should you now believe?"
+  options={[
+    { text: 'About 91% — the first posterior (9%) becomes the new prior, and a second positive updates it sharply upward', correct: true },
+    { text: 'Still about 9% — a test is a test, nothing changed' },
+    { text: 'About 18% — just add the two 9% results together' },
+    { text: 'Exactly 99% — two positives means the test accuracy now applies directly' },
+  ]}
+  explanation="Updating chains: yesterday's posterior is today's prior. Starting from a 9% prior, a second independent positive (99% true-positive, 1% false-positive) gives 8,910 true positives vs 910 false positives → about 91%. You don't add probabilities (18% is nonsense), and you don't ignore the new evidence (9%). Each independent test multiplies your odds; two positives stack into near-certainty even though one alone left you mostly reassured."
+/>
+
+## Where this worked example lies to you
+
+The medical test is the perfect teacher, but lift two warnings out of it before you generalize.
+
+**First: the base rate has to be the *right* one.** Our 1-in-1,000 figure was the base rate for the *general population*. If you're tested because you already have symptoms, or because the disease runs in your family, your prior is no longer 1 in 1,000 — it might be 1 in 10, and then a positive test is genuinely alarming. The whole calculation is only as good as the prior you feed it, which is why choosing the right reference class (from the [base rates](/thinking-in-probabilities/base-rates) lesson) is half the battle. Screening a low-risk crowd and testing a high-risk patient are different problems with different priors and different posteriors.
+
+**Second: "9%" is not "ignore it."** A 9% chance of a serious disease is not nothing — it's 90 times your starting risk and absolutely worth a follow-up test. Bayesian updating doesn't tell you to dismiss the evidence; it tells you to *size it correctly* and act accordingly. The mistake the panicking patient makes isn't taking the test seriously — it's jumping straight to "I have it" and skipping the second test that would actually settle the question.
+
+### When to reach for it
+
+Reach for the natural-frequency tree **any time a test, signal, or filter flags something rare** — a medical screen, a fraud alert, a spam filter, a security scanner, a "this candidate fits the profile" hunch. The trigger is the phrase "the test is X% accurate" (or "the model is X% accurate") attached to a rare target. The instant you hear it, refuse to read accuracy as the answer. Instead: name the base rate, drop 100,000 imaginary cases into the branches, and count the true positives against the false positives. It takes thirty seconds and it routinely turns a panic into a sensible "let's confirm that."
+
+<Quiz
+  client:visible
+  title="Check yourself: the medical test"
+  questions={[
+    {
+      question: 'Why is the chance of disease after a positive test (about 9%) so much lower than the test\'s 99% accuracy?',
+      options: [
+        { text: 'The healthy group is so much larger that 1% of it (the false positives) outnumbers the true positives from the tiny sick group', correct: true },
+        { text: 'The test is actually broken or poorly designed' },
+        { text: 'Because 99% accuracy really means 9% accuracy' },
+        { text: 'Because positive tests are usually lab errors' },
+      ],
+      explanation: 'Of 100,000 people: 99 true positives from the 100 sick, but 999 false positives from the 99,900 healthy. The base rate makes false positives dominate, so a positive is mostly a false alarm even with a genuinely accurate test.',
+    },
+    {
+      question: 'What is the single most powerful trick for solving these puzzles?',
+      options: [
+        { text: 'Convert the percentages into natural frequencies — count actual people through each branch', correct: true },
+        { text: 'Multiply all the percentages together' },
+        { text: 'Trust the headline accuracy figure' },
+        { text: 'Assume the base rate is 50% unless told otherwise' },
+      ],
+      explanation: 'Natural frequencies (imagine 100,000 people and tally who lands where) make the base rate visible and turn an opaque percentage puzzle into simple counting — the format on which even experts stop making base-rate errors.',
+    },
+    {
+      question: 'After one positive test (posterior ≈ 9%), why does a second independent positive push you all the way to ~91%?',
+      options: [
+        { text: 'The 9% posterior becomes the new prior, so the second test now updates a much higher starting belief', correct: true },
+        { text: 'Two positives are added together to get a bigger number' },
+        { text: 'The test accuracy of 99% finally takes over after two tries' },
+        { text: 'Repeating any test always gives certainty' },
+      ],
+      explanation: 'Updating chains: each posterior is the next prior. Starting from 9% (not 0.1%), a second independent positive gives 8,910 true vs 910 false positives → ~91%. The evidence stacks multiplicatively, which is why a second independent confirmation is so powerful.',
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You've now solved the puzzle that breaks most people's intuition — and you did it by counting people, not by memorizing a formula. But the counting *is* a formula in disguise, and naming it lets you update without drawing a tree every time. Next, in **"Bayes' Theorem,"** we lift the equation straight out of the natural-frequency tree you just built, then meet its friendlier twin — the **odds form** — that lets you do these updates in your head: prior odds, times a likelihood ratio, equals posterior odds.

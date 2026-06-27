@@ -1,0 +1,255 @@
+---
+title: "Dónde se tuerce la actualización: los cinco modos de fallo"
+description: "Bayes es sencillo; usarlo bajo presión no lo es. Las cinco formas en que gente lista chafa una actualización — soltar el prior, voltear el condicional, contar dos veces la evidencia, negarse a moverse y leer los posos del té — y el hábito que arregla cada una."
+topic: "es/bayesian-updating"
+order: 6
+minutes: 11
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout } from '@/components/react';
+
+El teorema de Bayes cabe en una línea. Lo puedes escribir en una servilleta, puedes correr la forma de cuotas (odds) de cabeza, y tras cuatro lecciones resuelves la prueba médica en sueños. Entonces, ¿por qué casi todo el mundo — médicos, jueces, jurados, gente muy lista en un día perfectamente razonable — sigue equivocándose con estas actualizaciones en el mundo real? Porque la fórmula nunca fue lo difícil. Lo difícil es no engañarte a ti mismo mientras la usas.
+
+Los fallos no son aleatorios. Hay exactamente **cinco** formas recurrentes de que una actualización se salga de la vía, y en cuanto sabes ponerles nombre notas venir cada una. Tres de ellas son maneras distintas de *sobre*rreaccionar a la evidencia — tratándola como más grande de lo que es — y dos son maneras distintas de equivocarse en la *cantidad* al ignorar o bien el prior o bien el poder diagnóstico de la evidencia. Cada una es una violación del mismo modelo de una sola frase: **parte de tu prior, sopesa cómo de bien encaja la evidencia y muévete en proporción a lo fuerte que esa evidencia realmente es.** Esta última lección teórica es un recorrido por los cinco baches, con el hábito que parchea cada uno — y luego un repaso de todo el curso antes del examen.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Antes de nombrarlos: tres medios sacan el mismo titular alarmante sobre una empresa, y tu amigo dice: 'Tres fuentes independientes — tiene que ser verdad, ahora estoy seguro de que la empresa está acabada.' ¿Qué error queda más claramente a la vista?"
+  options={[
+    { text: 'Contar dos veces evidencia correlacionada — los tres medios pueden estar repitiendo UN único informe original, así que está más cerca de una sola pista que de tres', correct: true },
+    { text: 'Soltar el prior — el amigo olvidó la tasa base de empresas que quiebran' },
+    { text: 'Leer los posos del té — el titular es ruido no diagnóstico' },
+    { text: 'Ningún error — tres fuentes son de verdad el triple de evidencia' },
+  ]}
+  explanation="Sin nota en un pretest, pero archiva el instinto. La pista es la palabra 'independientes': tres medios que reproducen un único teletipo no son tres pistas independientes, son una sola pista con tres sombreros. Multiplicar tres cocientes de verosimilitud que se remontan todos a la misma fuente sobreactualiza muchísimo. Te lo encontrarás como modo de fallo 3 — y conocerás a sus cuatro hermanos a su lado."
+/>
+
+## Fallo 1 — Soltar el prior (descuido de la tasa base)
+
+**La analogía.** Entras a una película a mitad, ves a un hombre con una pistola humeante sobre un cadáver y concluyes que es el asesino. Quizá — pero te saltaste la primera hora, donde a lo mejor acababa de desarmar al verdadero tirador. Leer la evidencia sin el trasfondo es el descuido de la tasa base (base rate): tratas la escena que tienes delante como si fuera la historia entera.
+
+**La versión precisa.** Bayes necesita el prior $P(H)$ tanto como necesita la verosimilitud. Suéltalo — trata la evidencia como si llegara en el vacío — y la probabilidad posterior (posterior) se desploma sobre la verosimilitud. Es exactamente el paciente en pánico de la lección 2: un positivo en una prueba con un 99 % de acierto *parece* un veredicto del 99 %, pero la probabilidad real de enfermedad es de un **9 %** aproximadamente, porque la tasa base de la enfermedad rara (1 de cada 1,000) ahoga a la prueba. Olvida esa tasa base y sobrerreaccionas por un factor de diez.
+
+**Ejemplo concreto.** El modelo antifraude de un banco marca una transacción como fraudulenta y tiene un "98 % de acierto". ¿Debería el analista congelar la cuenta? Solo que el fraude es raro — pongamos 1 de cada 5,000 transacciones. De 100,000 transacciones, ~20 son fraude (el modelo caza ~20), pero el 2 % de las ~99,980 legítimas se marca por error — unas **2,000 falsas alarmas**. Así que de ~2,020 marcas, solo ~20 son fraude real: aproximadamente un **1 %**. Tratar la marca como fraude casi seguro — soltar la tasa base — congelaría a miles de clientes inocentes. Este es el [descuido de la tasa base](/es/thinking-in-probabilities/base-rates) que conociste en el camino de probabilidad, ahora con nombre bayesiano.
+
+**El arreglo: di tu prior en voz alta, primero.** Antes de mirar evidencia alguna, comprométete con un número de partida — "yo habría puesto esto en 1 de cada 5,000". En el instante en que lo nombras, la evidencia tiene algo contra lo que *empujar*, y notas si te estás moviendo una cantidad sensata o saltando del todo a la certeza. Sáltate ese paso y cada dato fresco se hace pasar por la respuesta entera.
+
+<Callout variant="warning" title="El error más común — y más caro">
+El descuido de la tasa base es el fallo número uno por algo: es lo que viene por defecto. La mente humana lee "la prueba tiene un 99 % de acierto" como "el resultado es 99 % fiable" *automáticamente*, y esa única sustitución impulsa pánicos médicos, congelaciones de cuentas por falso fraude y sospechas injustas. Si solo vas a arreglar uno de estos cinco, arregla este — y lo arreglas con cinco palabras dichas antes de espiar: **¿qué creía yo antes?**
+</Callout>
+
+## Fallo 2 — La falacia inversa (voltear el condicional)
+
+**La analogía.** "La mayoría de los jugadores profesionales de baloncesto son altos" es cierto. "La mayoría de las personas altas son jugadores profesionales de baloncesto" es absurdo. Los mismos dos hechos, el condicional volteado, y el segundo es descabelladamente falso. La barrita de $P(A \mid B)$ tiene una *dirección*, y darle la vuelta cambia el significado por completo.
+
+**La versión precisa.** Este es el cambiazo que nombró la lección 3: confundir $P(E \mid H)$ — cómo de probable es la evidencia *si la hipótesis se sostiene* — con $P(H \mid E)$ — cómo de probable es la hipótesis *dada la evidencia*. "Un positivo es 99 % probable si estoy enfermo" ($P(E\mid H)$) **no** es "tengo un 99 % de probabilidad de estar enfermo dado un positivo" ($P(H\mid E)$). Difieren exactamente por el prior y la rama de falsos positivos — y por eso pueden ser 99 % y 9 % para la *misma* prueba.
+
+**Ejemplo concreto — la falacia del fiscal (prosecutor's fallacy).** Una muestra de ADN de la escena de un crimen coincide con el acusado. El perito declara: "la probabilidad de una coincidencia si el acusado fuera inocente es de solo 1 entre un millón". El fiscal se vuelve hacia el jurado: "así que hay 1 entre un millón de probabilidades de que sea inocente". Esa segunda frase es la falacia inversa (inverse fallacy), y ha condenado a personas reales. $P(\text{coincidencia}\mid\text{inocente})$ es minúscula — pero eso **no** es $P(\text{inocente}\mid\text{coincidencia})$. Si la base de datos se cruzó con 10 millones de personas, esperarías unas 10 coincidencias inocentes por puro azar, así que una coincidencia aislada podría significar que el acusado es una de *once* personas más o menos igual de probables — lejos de una certeza de 1 entre un millón. Misma forma que "la mayoría de los terroristas son hombres jóvenes, por tanto este hombre joven es probablemente terrorista": eso confunde $P(\text{hombre joven}\mid\text{terrorista})$ (alta) con $P(\text{terrorista}\mid\text{hombre joven})$ (microscópica, porque los hombres jóvenes superan en número con creces a los terroristas).
+
+**El arreglo: pregunta "¿en qué dirección va el condicional?"** Cada vez que oigas una probabilidad sobre la evidencia, párate y etiquétala. ¿Es este número "cómo de probable es la pista *si* mi hipótesis es cierta", o "cómo de probable es mi hipótesis *dada* la pista"? Si es lo primero, aún no tienes tu respuesta — tienes una verosimilitud, y todavía has de pasarla por el prior para llegar a la probabilidad posterior que de verdad quieres.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un laboratorio informa: 'Si una moneda fuera justa, la probabilidad de sacar 10 caras seguidas es de 1 entre 1,000.' Un tertuliano concluye: 'Así que hay un 99,9 % de probabilidad de que esta moneda esté trucada.' ¿Qué fallo es este?"
+  options={[
+    { text: 'La falacia inversa — el tertuliano volteó P(10 caras | justa) en P(justa | 10 caras), ignorando lo raras que son de entrada las monedas trucadas', correct: true },
+    { text: 'Contar dos veces — las diez tiradas están correlacionadas' },
+    { text: 'Leer los posos del té — diez caras es no diagnóstico' },
+    { text: 'Ningún error — 1 entre 1,000 contra justa significa 99,9 % trucada' },
+  ]}
+  explanation="P(10 caras | justa) ≈ 0,001 es una verosimilitud. P(justa | 10 caras) es la posterior, y depende del prior: las monedas trucadas son extremadamente raras, así que incluso una casualidad de 1 entre 1,000 es más probable que sea una moneda justa con una racha inusual que una moneda trucada en tu bolsillo. Las tiradas no están correlacionadas (cada tirada es independiente), y diez caras SÍ es diagnóstico — el único error es invertir la barra."
+/>
+
+## Fallo 3 — Contar dos veces evidencia correlacionada
+
+**La analogía.** Un rumor se propaga: Alicia se lo cuenta a Bruno, Bruno a Carla, Carla a ti. Luego lo "confirmas" porque se lo oíste a Bruno *y* a Carla *y* a un tuit — pero los cuatro hilos se remontan a Alicia. Has contado una fuente cuatro veces y has confundido una cámara de eco con un coro.
+
+**La versión precisa.** La forma limpia de encadenar evidencia (de la lección 3) es multiplicar cocientes de verosimilitud: cuotas posteriores = cuotas previas × CV₁ × CV₂ × …. Pero esa multiplicación **solo es válida si las pistas son independientes.** Cuando dos pistas están correlacionadas — aparecerían juntas tanto si la hipótesis es cierta como si no — multiplicar ambas cuenta la misma información dos veces y sobreactualiza, a veces de forma salvaje.
+
+**Ejemplo concreto.** Recuerda la segunda prueba de la lección 2: un positivo te llevó del 0,1 % al 9 %, y un segundo positivo *independiente* te llevó al 91 %. Pero supón que la "segunda prueba" es la **misma** prueba corrida otra vez sobre la **misma** muestra. Si el primer positivo fue una falsa alarma causada por una muestra contaminada, la repetición producirá alegremente el mismo falso positivo — comparte el modo de fallo. Tratarlo como una confirmación independiente y multiplicar su cociente de verosimilitud te empuja hacia el 91 % sobre lo que en realidad sigue siendo una sola pista. Misma trampa con los tres medios: tres artículos, un teletipo, un cociente de verosimilitud — no tres.
+
+**El arreglo: pregunta "¿son estas pistas de verdad independientes, o una sola pista con tres sombreros?"** Antes de multiplicar un segundo cociente de verosimilitud, comprueba si la segunda pista podría torcerse por la *misma razón* que la primera. Si una única causa subyacente (una fuente, un sesgo compartido, un fallo de sensor compartido) pudiera producir ambas, están correlacionadas — descuenta la segunda con fuerza o suéltala. La independencia es la suposición que hace legal el encadenamiento, y es la suposición que la gente viola en voz baja con más frecuencia.
+
+<Callout variant="tip" title="El test de independencia, en una pregunta">
+Aquí tienes una comprobación rápida de si dos piezas de "confirmación" de verdad se apilan: **¿aparecería la segunda pista aunque la primera fuera un error?** Si una muestra contaminada (o una sola fuente sesgada, o un único rumor compartido) dispararía *ambas*, no son independientes — y deberías contarlas como aproximadamente una. La confirmación independiente genuina es poderosa precisamente porque es difícil de conseguir; la mayoría de las "múltiples fuentes" son una sola fuente disfrazada.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Sospechas que un restaurante está sobrevalorado. Encuentras tres reseñas radiantes de cinco estrellas y actualizas con fuerza hacia 'en realidad es estupendo'. Luego te das cuenta de que las tres se publicaron la misma semana, con frases parecidas, por cuentas sin ninguna otra reseña. ¿Qué deberías hacer?"
+  options={[
+    { text: 'Descontarlas con fuerza — parecen una sola fuente coordinada, así que están cerca de una única pista débil, no de tres confirmaciones independientes', correct: true },
+    { text: 'Fiarte más de ellas — tres reseñas son el triple de evidencia pase lo que pase' },
+    { text: 'Voltear el condicional y calcular P(reseña | estupendo)' },
+    { text: 'Ignorar tu prior por completo y quedarte con las reseñas' },
+  ]}
+  explanation="La semana compartida, las frases compartidas y las cuentas vacías gritan un único origen coordinado — probablemente una sola fuente (el dueño, un servicio de reseñas falsas) con tres sombreros. Multiplicar tres cocientes de verosimilitud correlacionados sobreactualiza fatal; deberían contar como una sola pista débil y sospechosa. Esto es contar dos veces, y el test de independencia lo caza: si una campaña de reseñas falsas produjo las tres, no son independientes."
+/>
+
+## Fallo 4 — Negarse a actualizar (anclaje y sesgo de confirmación)
+
+**La analogía.** Un abogado defensor con un cliente culpable: cada hecho que apunta a la culpa se explica para quitarlo de en medio, cada brizna que apunta a la inocencia se pregona a los cuatro vientos. El veredicto estaba decidido antes que la evidencia; el "razonamiento" es solo decoración. Eso es una creencia que ha dejado de ser una posterior y se ha convertido en una identidad.
+
+**La versión precisa.** Este es el extremo terco — la imagen especular del crédulo "saltar a la certeza". Aquí la posterior *nunca se mueve*, llegue lo que llegue, porque cada pieza de evidencia que desmiente se reinterpreta, se descuenta o se ignora hasta que encaja con la conclusión que ya sostienes. En términos de Bayes, has fijado en secreto el prior en 1 (o en 0): un prior de 1 no lo mueve ninguna evidencia finita, así que la mente está cerrada por construcción. Esto es el **sesgo de confirmación (confirmation bias)** con las matemáticas a la vista — el motor de todo otro curso de este camino: [sesgo de confirmación](/es/confirmation-bias).
+
+**Ejemplo concreto — la asimetría.** Fíjate en *cómo* funciona la negativa: no es que quien actualiza con terquedad ignore toda la evidencia, es que aplica criterios descabelladamente distintos según la dirección. La evidencia *a favor* de su postura pasa con una pluma — una anécdota que apoya, aceptada al instante. La evidencia *en contra* debe superar una montaña — matizada, escrutada al detalle, "correlación no es causalidad", "el estudio era pequeño", "ojo con la fuente". La misma fuerza de evidencia, escrutinio opuesto, dependiendo solo de hacia dónde apunte. Un bayesiano aplica el *mismo* cociente de verosimilitud apunte hacia donde apunte la pista; la mente con sesgo de confirmación lo reescala en silencio para proteger el prior.
+
+**El arreglo: comprométete de antemano a "¿qué evidencia me haría cambiar de opinión?"** Antes de que la discusión se caliente, escribe — en voz alta, por adelantado — la observación concreta que te movería hacia el otro lado. "Abandonaría esta hipótesis si viera X". Una creencia que *ninguna* evidencia posible podría desalojar no es una creencia fuerte; es una creencia infalsable, y no está haciendo ningún trabajo bayesiano en absoluto. Nombrar tu detonante de actualización por adelantado es el antídoto contra explicar todo para quitárselo de en medio a posteriori.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Dos personas debaten una afirmación. Una dice: 'Cambiaría de opinión si viera un estudio grande, preregistrado, que no mostrara efecto.' La otra dice: 'Ningún estudio podría convencerme; sé que tengo razón.' ¿Quién actualiza como un bayesiano?"
+  options={[
+    { text: 'La primera — nombrar la evidencia concreta que la movería mantiene el prior por debajo de 1, así que la nueva evidencia puede de verdad hacer su trabajo', correct: true },
+    { text: 'La segunda — la confianza inquebrantable es la marca de una creencia fuerte y correcta' },
+    { text: 'Ninguna — los bayesianos nunca cambian de opinión' },
+    { text: 'Ambas por igual — confianza y apertura son lo mismo' },
+  ]}
+  explanation="Una creencia que nada podría cambiar tiene un prior implícito de 1, y un prior de 1 es inamovible ante cualquier evidencia — eso es sesgo de confirmación, no convicción. La primera persona mantiene un prior finito y se compromete de antemano a una observación que la desmentiría, así que un cociente de verosimilitud aún puede moverla. Actualizar por grados exige que *alguna* evidencia, en principio, pudiera moverte."
+/>
+
+## Fallo 5 — Actualizar con evidencia no diagnóstica (leer los posos del té)
+
+**La analogía.** Un horóscopo dice "afrontarás un reto esta semana, pero tu resiliencia te sacará adelante". Asientes — ¡encaja! También le encaja literalmente a todo el mundo, todas las semanas. La evidencia que es cierta pase lo que pase no es evidencia; es un espejo, y estás actualizando con tu propio reflejo.
+
+**La versión precisa.** La lección 4 dio el diagnóstico del poder diagnóstico: el **cociente de verosimilitud (likelihood ratio)**, $\frac{P(E\mid H)}{P(E\mid \lnot H)}$. Cuando ese cociente ronda el **1**, la evidencia es igual de probable haya o no la hipótesis, así que lleva *cero* información y la posterior debería igualar al prior — no deberías moverte nada. El fallo es moverte igual: sentirte persuadido por algo que se vería exactamente igual en el mundo donde estás equivocado.
+
+**Ejemplo concreto.** Un fundador de startup señala "¡enorme engagement — la gente pasa montones de tiempo en la app!" como prueba de que a los usuarios les encanta el producto. Pero ¿también verías mucho tiempo en la app si la app fuera *confusa* y la gente estuviera perdida, buscando el botón? Si es así, $P(\text{mucho tiempo}\mid\text{adorada}) \approx P(\text{mucho tiempo}\mid\text{confusa})$ — cociente de verosimilitud cerca de 1 — y la métrica es no diagnóstica entre "adorada" y "rota". Igual con un jefe que lee "el candidato parecía seguro y bien vestido" como evidencia fuerte de competencia: gente segura y bien vestida que es *además* incompetente es extremadamente común, así que la pista apenas separa las hipótesis. La evidencia vaga, que-encaja-con-todo, que-aparecería-igual tiene un cociente de verosimilitud de alrededor de 1 y merece un encogimiento de hombros, no una actualización.
+
+**El arreglo: pregunta "¿vería esta evidencia con la misma facilidad si estuviera equivocado?"** Esa única pregunta *es* el cociente de verosimilitud en castellano llano. Si la respuesta es "sí, probablemente" — la pista aparecería más o menos con la misma frecuencia en el mundo donde tu hipótesis es falsa — entonces el cociente ronda el 1, la evidencia es no diagnóstica, y la jugada disciplinada es dejar tu creencia exactamente donde estaba.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un vidente le dice a un desconocido afligido: 'Percibo que has perdido a alguien cercano hace poco, y cargas con culpa por algo que quedó sin decir.' El desconocido queda atónito por la precisión. Desde una óptica bayesiana, ¿por qué esto NO es evidencia fuerte de poderes psíquicos?"
+  options={[
+    { text: 'La afirmación es cierta para casi todo el que visita a un vidente, así que P(afirmación | vidente) ≈ P(afirmación | sin poderes) — un cociente de verosimilitud cerca de 1, no diagnóstico', correct: true },
+    { text: 'Porque los videntes son comunes, así que el prior es alto' },
+    { text: 'Porque el desconocido contó dos veces las dos pistas' },
+    { text: 'Porque el desconocido volteó el condicional' },
+  ]}
+  explanation="Una lectura en frío funciona precisamente porque es no diagnóstica: casi todo el mundo ha perdido a alguien y carga con un remordimiento no dicho, así que un farsante sin poderes produciría el mismísimo 'acierto'. Cociente de verosimilitud ≈ 1 significa que la evidencia encaja con ambos mundos por igual y no debería moverte a ninguna parte. La pista parece específica pero aparecería con la misma facilidad si el vidente estuviera equivocado — la definición de leer los posos del té."
+/>
+
+## Una posterior es el comienzo de la siguiente actualización
+
+Una idea más antes de la lista de comprobación, porque es lo que evita que los cinco arreglos sean una tarea de una sola vez. **Una actualización nunca es el final de nada.** La posterior en la que aterrizas no es un veredicto definitivo que archivar — es el **input** de tu siguiente decisión y el **prior** de tu siguiente actualización. La posterior de ayer es el prior de hoy; el 9 % que alcanzaste tras un positivo se convirtió en el prior que metiste en la segunda prueba.
+
+Ahí es donde Bayes se cruza con el [pensamiento de segundo orden (second-order thinking)](/es/second-order-thinking): una buena actualización no solo responde "¿qué creo ahora?" — prepara "¿y qué hago *después*, y qué creeré tras la siguiente pieza de evidencia?". Los cinco fallos *empeoran* todos cuando olvidas esto, porque una posterior chapucera no solo te da una respuesta equivocada — envenena cada actualización río abajo.
+
+<Callout variant="tip" title="Actualizar es una cadena, no un veredicto">
+Trata cada posterior como provisional: la mejor creencia que puedes sostener *hasta que llegue la siguiente pista*, momento en que se convierte en el prior desde el que actualizas. Esto es lo que hace del pensamiento bayesiano una *práctica* y no un cálculo. Nunca terminas; solo estás mejor calibrado de lo que estabas una pista atrás — y aspirando a seguir así a medida que la evidencia sigue llegando.
+</Callout>
+
+### El hábito del pre-mortem: cinco preguntas antes de fiarte de una actualización
+
+Aquí tienes toda la lección como lista de comprobación. Antes de dejar que ninguna pieza de evidencia mueva tu creencia, corre estas cinco — cada una desarma un modo de fallo:
+
+1. **¿Qué creía yo antes?** (Di el prior en voz alta — derrota *soltar el prior*.)
+2. **¿En qué dirección va el condicional?** (¿Es esto "evidencia dada la hipótesis" o "hipótesis dada la evidencia"? — derrota la *falacia inversa*.)
+3. **¿Son estas pistas de verdad independientes?** (¿O una sola pista con tres sombreros? — derrota *contar dos veces*.)
+4. **¿Qué evidencia me haría cambiar de opinión?** (Comprometida de antemano, antes de la discusión — derrota *negarse a actualizar*.)
+5. **¿Vería esta evidencia con la misma facilidad si estuviera equivocado?** (¿Ronda el cociente de verosimilitud el 1? — derrota *leer los posos del té*.)
+
+Treinta segundos con estas cinco preguntas cazan casi toda actualización chapucera del mundo real. Tampoco son cinco habilidades separadas — son cinco guardianes alrededor de la *misma* frase: parte de tu prior, sopesa la evidencia por lo diagnóstica que de verdad es, y muévete en proporción.
+
+<Quiz
+  client:visible
+  title="Compruébate: modos de fallo"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  correctCountLabel="correctas"
+  gateLabel="Comprueba tu respuesta para continuar."
+  perfectMessage="Puntuación perfecta, ¡bien hecho!"
+  goodMessage="Buen trabajo, repasa las que has fallado."
+  keepPracticingMessage="Sigue practicando, lo tienes."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: 'Un médico ve un positivo en un cribado de enfermedad rara y le dice al paciente "casi seguro que la tienes". ¿Qué modo de fallo es este, y cuál es el arreglo?',
+      options: [
+        { text: 'Soltar el prior — el arreglo es enunciar primero la tasa base, y luego pasarla por la prueba', correct: true },
+        { text: 'La falacia inversa — el arreglo es usar frecuencias naturales' },
+        { text: 'Contar dos veces — el arreglo es correr una segunda prueba' },
+        { text: 'Leer los posos del té — el arreglo es ignorar la prueba' },
+      ],
+      explanation: 'Leer un positivo en un cribado de enfermedad rara como casi seguro es el descuido de la tasa base clásico: el prior (1 de cada 1,000) está haciendo casi todo el trabajo y se soltó, así que una probabilidad real de ~9 % se infló a "seguro". El arreglo es nombrar la tasa base en voz alta antes de tocar el resultado de la prueba.',
+    },
+    {
+      question: '¿Qué enunciado describe correctamente la falacia inversa?',
+      options: [
+        { text: 'Confundir P(evidencia | hipótesis) con P(hipótesis | evidencia) — p. ej. leer "una coincidencia es rara si inocente" como "la inocencia es rara dada una coincidencia"', correct: true },
+        { text: 'Contar la misma fuente varias veces' },
+        { text: 'Negarse a mover tu creencia pase lo que pase' },
+        { text: 'Actualizar con evidencia de cociente de verosimilitud cerca de 1' },
+      ],
+      explanation: 'La falacia inversa (la falacia del fiscal en los tribunales) voltea la barra del condicional. Que P(coincidencia | inocente) sea minúscula NO hace que P(inocente | coincidencia) sea minúscula — difieren por el prior y por cuántas personas podrían coincidir. Las otras opciones describen contar dos veces, negarse a actualizar y leer los posos del té.',
+    },
+    {
+      question: 'Sostienes una creencia fuerte y notas que exiges un estudio enorme para moverte en su contra, pero aceptas una sola anécdota a su favor. ¿Qué es esto, y cuál es la cura?',
+      options: [
+        { text: 'Sesgo de confirmación / negarse a actualizar — la cura es comprometerte de antemano con la evidencia concreta que te haría cambiar de opinión', correct: true },
+        { text: 'Descuido de la tasa base — la cura son las frecuencias naturales' },
+        { text: 'Contar dos veces — la cura es el test de independencia' },
+        { text: 'Leer los posos del té — la cura es comprobar el cociente de verosimilitud' },
+      ],
+      explanation: 'Aplicar el escrutinio de una pluma a la evidencia que apoya y el de una montaña a la que desmiente es la asimetría característica del sesgo de confirmación — el prior se ha fijado en secreto cerca de 1, así que nada puede moverlo. La cura es nombrar, por adelantado, la observación concreta que te haría cambiar de opinión, manteniendo el prior finito y movible.',
+    },
+  ]}
+/>
+
+## Todo el curso en una frase
+
+Da un paso atrás y mira la escalera. La lección 1 nombró los tres ingredientes — **prior, verosimilitud, posterior** — y los encajó en una sola jugada: nunca construyas una creencia desde cero; parte de lo que creías y deja que la evidencia la *empuje*. La lección 2 hizo esa jugada concreta con la **prueba médica**, contando personas a través de un árbol de frecuencias naturales hasta que "alrededor de un 9 %, no un 99 %" dejó de parecer un truco. La lección 3 extrajo el **teorema** de ese árbol y te entregó su gemelo más amable, la forma de cuotas — **cuotas previas × cociente de verosimilitud = cuotas posteriores** — que puedes correr en una servilleta. La lección 4 abrió ese término del medio, el **cociente de verosimilitud**, el único número de lo diagnóstica que es una pista, y mostró por qué las afirmaciones extraordinarias exigen evidencia extraordinaria. Y esta lección mapeó los cinco baches — **soltar el prior, voltear el condicional, contar dos veces, negarse a moverse y leer los posos del té** — que se tragan a quienes conocen la fórmula perfectamente.
+
+Cada peldaño, y cada modo de fallo, se reduce a la misma frase: **parte de tu prior, sopesa la evidencia por lo fuerte que encaja, y muévete en proporción — nunca del todo, nunca nada.** Soltar el prior rompe el *parte*. La falacia inversa y leer los posos del té rompen el *sopesa*. Contar dos veces y negarse a actualizar rompen la *proporción*. Mantén las tres intactas y estarás actualizando como un bayesiano — cambiando de opinión por grados, en un mundo que casi nunca te entrega un veredicto.
+
+## Adónde va esto a continuación
+
+Esa es la última lección teórica. Lo que queda es demostrar que dominas la jugada — toda ella, bajo presión, sin un árbol en el que apoyarte — en el **Examen final**. Está calificado y es distinto a todo lo demás del curso: **una pregunta cada vez**, y en cuanto envías una respuesta se **bloquea** — sin botón de Atrás, sin segundo intento, sin espiar lo que viene. Tu puntuación aparece solo al final, y el aprobado está en el **70 %**. Trátalo como lo real: lee cada escenario, nombra el prior, pregunta hacia dónde apunta el condicional, y muévete en proporción.
+
+Más allá del examen, el camino de probabilidad sigue trepando hacia su nivel experto. Allí te esperan dos cimas: **colas anchas y cisnes negros** — qué pasa cuando los eventos raros no son meramente raros sino que cambian el mundo, y la suave campana de Gauss que tus intuiciones dan por hecha es el mapa equivocado por completo; y la **calibración** — la disciplina de saber *cómo de acertado estás de verdad*, para que cuando digas "70 % de probabilidad", ocurra alrededor del 70 % de las veces. La actualización bayesiana te dice hacia dónde mover tu creencia; la calibración te dice si puedes fiarte del número en el que aterrizaste. Aprueba el examen primero — luego ve a conocer las colas.

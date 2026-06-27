@@ -1,0 +1,235 @@
+---
+title: "Prior, verosimilitud, posterior: los tres ingredientes"
+description: "Toda actualización bayesiana se construye con tres piezas — lo que creías antes, cómo de bien encaja la nueva evidencia y la creencia más afinada que obtienes al combinarlas. Nómbralas una vez y toda la máquina encaja en su sitio."
+topic: "es/bayesian-updating"
+order: 2
+minutes: 9
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout } from '@/components/react';
+
+Toda actualización bayesiana — la prueba médica, el veredicto del jurado, la conjetura de «¿se habrá retrasado mi vuelo?» — se cocina con exactamente tres ingredientes. Aprende sus nombres una sola vez y dejas de ver una niebla de probabilidades para empezar a ver una receta: lo que creías *antes*, cómo de bien *encaja* la nueva evidencia y la creencia con la que te quedas *después*. Eso es todo. Tres piezas, un solo movimiento, usos infinitos.
+
+La lección de introducción os prometió estos tres por su nombre — **el prior**, **la verosimilitud (likelihood)**, **la probabilidad posterior (posterior)** — y dejó caer la idea de que se combinan. Esta lección frena el ritmo y os entrega cada uno por separado, porque casi cualquier error de razonamiento de todo el curso no es más que agarrar el ingrediente equivocado u olvidar uno por completo. El paciente que entró en pánico no falló en la aritmética; soltó el prior. Nombra los ingredientes con suficiente claridad y su error se vuelve obvio antes de calcular un solo número.
+
+Una promesa rápida sobre las matemáticas: *sí* existe una fórmula exacta que une estos tres de golpe, y tiene su propia lección entera (la lección 3, «El teorema de Bayes»). Aquí nos quedamos en lenguaje llano. Vuestro único trabajo de hoy es reconocer las tres piezas en libertad y sentir — con palabras — cómo se combinan.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un amigo guarda dos monedas en una bolsa: una moneda normal y justa (cara la mitad de las veces) y una moneda trucada con cara por las dos caras (cara siempre). Mete la mano a ciegas, saca una, la lanza una vez — y sale cara. A bote pronto: ¿qué probabilidad hay de que tenga la moneda trucada?"
+  options={[
+    { text: 'Alrededor de 2 entre 3 (≈67%) — cara es el doble de probable con la moneda trucada, pero partías de un prior 50/50, así que solo se desplaza a medias', correct: true },
+    { text: '100% — salió cara, y la moneda trucada es la moneda de las caras' },
+    { text: 'Sigue siendo 50% — un solo lanzamiento no puede decirte nada' },
+    { text: 'Alrededor del 75% — parte la diferencia entre las dos monedas' },
+  ]}
+  explanation="En un pretest no hay nota — solo archiva tu instinto. La moneda trucada siempre muestra cara; la moneda justa muestra cara la mitad de las veces. Así que cara es el doble de probable que venga de la moneda trucada — eso es la verosimilitud haciendo su trabajo. Pero partías de 50/50 (el prior), y una sola cara no es concluyente, así que solo te desplazas a medias: hasta 2 entre 3, no hasta la certeza total. «100%» olvida que la moneda justa también puede salir cara; «sigue siendo 50%» se niega a actualizar en absoluto. Construiremos el 2/3 desde cero más abajo."
+/>
+
+## El prior: donde empiezas
+
+**El prior, escrito $P(H)$, es tu creencia en una hipótesis *antes* de que llegue la nueva evidencia.** Es la respuesta a «¿qué probabilidad había de esto, de entrada?». La palabra clave es *antes* — el prior es tu línea de salida, y nunca, jamás, tienes permiso para partir de una pizarra en blanco. Toda actualización empieza desde un prior, incluso cuando no lo elegiste conscientemente.
+
+¿De dónde sale el prior? Normalmente directo de la lección de [tasas base](/es/thinking-in-probabilities/base-rates): es el ancla de la visión exterior, lo común que es la cosa en la multitud relevante. El 1 entre 1,000 de la enfermedad era un prior. «La mayoría de los restaurantes nuevos cierran antes de cinco años» es un prior. El prior es la tasa base (base rate), ahora con sombrero bayesiano y esperando a que la evidencia la empuje.
+
+En nuestro ejemplo de las monedas, el prior no podría estar más limpio. Tu amigo saca una moneda *al azar* de una bolsa de dos, así que antes de cualquier lanzamiento, la moneda trucada y la moneda justa son igual de probables: **el prior es 50/50.** $P(\text{trucada}) = 0.5$. Esa es la creencia contra la que el lanzamiento está a punto de empujar.
+
+<Callout variant="warning" title="Sáltate el prior y toda la máquina se rompe">
+El error bayesiano más común — el que este curso entero existe para curar — es **tirar el prior a la basura** y tratar la nueva evidencia como la respuesta completa. El paciente que lee «prueba positiva» como «la tengo» hizo exactamente esto: se quedó con la verosimilitud, soltó el prior y entró en pánico. Una creencia sin prior no es una creencia; es solo una reacción a lo último que viste. **Di siempre tu prior en voz alta antes de mirar la evidencia.**
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Estás a punto de entrevistar a un candidato que sobre el papel pinta fantástico. Antes de que entre, te recuerdas: «Solo alrededor de 1 de cada 5 candidatos que llegan a esta ronda acaban siendo una contratación sólida». ¿Qué ingrediente es ese «1 de cada 5»?"
+  options={[
+    { text: 'El prior — tu creencia en la hipótesis («contratación sólida») antes de ver la evidencia de hoy (la entrevista)', correct: true },
+    { text: 'La verosimilitud — cómo de bien encaja la entrevista con la historia de «contratación sólida»' },
+    { text: 'La posterior — tu juicio final tras la entrevista' },
+    { text: 'Ninguno de estos; es solo una distracción de la entrevista de verdad' },
+  ]}
+  explanation="«1 de cada 5 candidatos que llegan a esta ronda son contrataciones sólidas» es una tasa base, y una tasa base usada como creencia de partida es un prior — tu $P(H)$ antes de la evidencia de hoy. La entrevista en sí es la evidencia cuya verosimilitud sopesarás a continuación; el juicio al que llegues después es la posterior. Nombrar el prior por adelantado es justo la disciplina que evita que una entrevista encantadora te arrastre hasta el «sin duda»."
+/>
+
+## La verosimilitud: cómo de bien encaja la evidencia
+
+Ahora llega la evidencia. La **verosimilitud, escrita $P(E \mid H)$, pregunta: *si la hipótesis fuera cierta, cómo de esperable sería esta evidencia?*** Lee esa barra `$\mid$` en voz alta como la palabra **«dado»**. $P(E \mid H)$ es «la probabilidad de la Evidencia, *dada* la Hipótesis cierta». Corre *hacia delante*: asume la hipótesis y luego pregunta cómo de natural se ve la evidencia desde dentro de ese mundo.
+
+Hay un gemelo que no puedes saltarte: $P(E \mid \lnot H)$, la verosimilitud con la hipótesis siendo **falsa** ($\lnot$ significa «no»). «Si la hipótesis fuera *falsa*, cómo de esperable sería esta misma evidencia?» La evidencia solo es útil cuando estas dos difieren — cuando la pista es mucho más esperable en un mundo que en el otro. Si una pista es igual de probable tanto si la hipótesis es cierta como si no, no te dice nada, por dramática que se sienta.
+
+Volvamos a las monedas. La evidencia es **una cara**. ¿Cómo de esperable es cara en cada mundo?
+
+- Si tiene la moneda **trucada**: cara está garantizada. $P(\text{cara} \mid \text{trucada}) = 1$.
+- Si tiene la moneda **justa**: cara la mitad de las veces. $P(\text{cara} \mid \text{justa}) = 0.5$.
+
+Así que cara es **el doble de probable** que venga de la moneda trucada que de la justa. Esa razón — 1 frente a 0.5 — es todo el contenido informativo del lanzamiento. Es lo que sacará de su centro tu prior 50/50.
+
+<Callout variant="warning" title="La verosimilitud NO es la respuesta">
+Aquí está la trampa a la que todo el curso vuelve una y otra vez. $P(E \mid H)$ — «si está enfermo, la prueba casi siempre se dispara» — **no** es lo mismo que $P(H \mid E)$ — «dada una prueba positiva, casi seguro que estoy enfermo». Se escriben casi idénticas y *se sienten* idénticas, pero corren en direcciones opuestas, y confundirlas es la **falacia inversa (inverse fallacy)**. La moneda lo muestra en miniatura: $P(\text{cara} \mid \text{trucada}) = 100\%$, y sin embargo ver cara **no** te hace estar 100% seguro de que es la moneda trucada — porque la moneda justa también produce caras. La siguiente lección, la prueba médica, está construida enteramente para grabarte esta diferencia en los huesos.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="«Si es la moneda trucada, verás cara seguro» es una verosimilitud del 100%. ¿Por qué ver cara no te hace estar 100% seguro de que es la moneda trucada?"
+  options={[
+    { text: 'Porque la moneda justa también produce caras (la mitad de las veces), así que cara es consistente con ambos mundos — la verosimilitud apunta hacia delante (moneda → lanzamiento), no hacia atrás (lanzamiento → moneda)', correct: true },
+    { text: 'Porque las verosimilitudes del 100% siempre están equivocadas' },
+    { text: 'Porque el prior era en secreto mayor que el 50%' },
+    { text: 'En realidad sí lo hace — cara demuestra que es la moneda trucada', correct: false },
+  ]}
+  explanation="«P(cara dado trucada) = 100%» corre hacia delante: asume la moneda trucada, predice el lanzamiento. Lo que quieres corre hacia atrás: dada cara, ¿qué moneda? Esos difieren porque la moneda justa *también* da cara (el 50% de las veces), así que una sola cara es consistente con ambas. Leer la verosimilitud hacia delante como la respuesta hacia atrás es la falacia inversa — el error exacto que la lección de la prueba médica desmonta por completo."
+/>
+
+## La posterior: donde aterrizas
+
+La **posterior, escrita $P(H \mid E)$, es tu creencia actualizada en la hipótesis *después* de tener en cuenta la evidencia.** Es la recompensa — la creencia más afinada que obtienes al combinar el prior con la verosimilitud. Fíjate en que tiene la misma barra de «dado» que la verosimilitud, pero al revés: $P(H \mid E)$ es «probabilidad de la **Hipótesis**, dada la **Evidencia**». Ese es el número que de verdad querías desde el principio.
+
+¿Cómo se combinan los dos ingredientes? En una frase informal sobre la que descansa todo el curso:
+
+> **La posterior es proporcional a verosimilitud × prior.**
+
+En palabras: coge cómo de plausible era cada hipótesis de partida (prior), multiplica por cómo de bien predice la evidencia que viste (verosimilitud), y la hipótesis que puntúe más alto en *ambas* se lleva la mayor creencia. Una hipótesis necesita haber sido razonablemente probable *y* explicar bien la evidencia. (La ecuación exacta — lo que convierte «proporcional a» en «igual a» — es la lección 3. Resiste el impulso de calcularla aún; la intuición es lo que importa.)
+
+Aterricemos la moneda. Cada mundo recibe una puntuación de verosimilitud × prior, y luego normalizamos para que las dos puntuaciones sumen 1:
+
+| Hipótesis | Prior $P(H)$ | Verosimilitud $P(\text{cara} \mid H)$ | Puntuación (verosimilitud × prior) | Posterior $P(H \mid \text{cara})$ |
+|---|---|---|---|---|
+| **Moneda trucada** | 0.5 | 1.0 | $0.5 \times 1.0 = 0.50$ | $0.50 / 0.75 = \tfrac{2}{3} \approx 67\%$ |
+| **Moneda justa** | 0.5 | 0.5 | $0.5 \times 0.5 = 0.25$ | $0.25 / 0.75 = \tfrac{1}{3} \approx 33\%$ |
+
+Las dos puntuaciones son 0.50 y 0.25, que suman 0.75. La cuota de la moneda trucada es $0.50 / 0.75 = 2/3$. Así que tras una cara, deberías creer **alrededor del 67%** que es la moneda trucada — más que el 50%, pero ni de lejos seguro. El lanzamiento *sí* fue evidencia real (te movió del 50% al 67%), solo que no evidencia concluyente, porque la moneda justa puede fingir una cara.
+
+**Y las posteriors se encadenan.** Supón que tu amigo lanza la *misma* moneda otra vez y sale cara por segunda vez. Tu creencia ya no es 50/50 — es el 2/3 que acabas de ganar. Ese 2/3 se convierte en tu nuevo **prior**, y actualizas de nuevo con la segunda cara. Pasa la misma maquinaria y aterrizas en **4/5 (80%)**. Cada posterior se convierte en el siguiente prior; la evidencia se apila. Este es el mismo motor de «la posterior de ayer es el prior de hoy» que verás impulsar la segunda prueba médica en la siguiente lección.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Tras una cara crees 2/3 (≈67%) que es la moneda trucada. Tu amigo lanza la MISMA moneda otra vez y sale cara una vez más. ¿Cuál es la forma correcta de manejar el segundo lanzamiento?"
+  options={[
+    { text: 'Convierte el 2/3 en tu nuevo prior y actualiza de nuevo con la segunda cara — las posteriors se encadenan, y esta aterriza en torno al 80%', correct: true },
+    { text: 'Empieza de cero desde 50/50, ya que cada lanzamiento es una pregunta nueva' },
+    { text: 'Suma 67% + 67%, así que ya estás más que seguro' },
+    { text: 'Quédate en 67% — un segundo resultado idéntico no te dice nada nuevo' },
+  ]}
+  explanation="Actualizar se encadena: cada posterior se convierte en el siguiente prior. No reinicias a 50/50 (eso tira todo lo que te enseñó el primer lanzamiento), no sumas probabilidades (más del 100% es absurdo) y no ignoras la nueva evidencia. Llevar el 2/3 hacia delante como prior y actualizar con una segunda cara da en torno a 4/5 — 80%. Dos caras hacen la moneda trucada mucho más probable, pero una moneda justa *puede* sacar cara dos veces, así que sigues sin llegar a la certeza."
+/>
+
+## Detectar las tres piezas en libertad
+
+Las monedas son limpias a propósito, pero los ingredientes están por todas partes. Entrena el reflejo en una situación de lo más corriente: **un amigo llega 20 minutos tarde. ¿Está atrapado en el tráfico, o simplemente se le olvidó?**
+
+- **Prior** $P(H)$ — de entrada, ¿con qué frecuencia *este* amigo se queda de verdad atrapado en el tráfico frente a las veces que pasa de venir? Si es fiable pero conduce por una ruta congestionada, quizá habrías dicho un 70% «tráfico, no que pasa» antes de esta noche. Esa es tu creencia de partida.
+- **Verosimilitud** $P(E \mid H)$ — la evidencia es «20 minutos tarde, sin mensaje». ¿Cómo de esperable es *eso* si está atrapado en el tráfico? Bastante esperable — conduciendo, no puede escribir con seguridad. Y el gemelo $P(E \mid \lnot H)$: ¿cómo de esperable es el mismo silencio si se le olvidó por completo? También bastante esperable — alguien a quien se le olvidó tampoco manda mensaje. La pista apenas distingue los dos mundos, así que es evidencia *débil* y no debería moverte mucho.
+- **Posterior** $P(H \mid E)$ — combínalos: un prior alto en «tráfico» más evidencia débil y no distintiva te deja más o menos donde empezaste — aún inclinado hacia «tráfico», solo ligeramente abollado. Ahora imagina que la evidencia cambia a «te ha escrito *lo siento muchísimo, se me ha ido del todo la cabeza*». *Esa* pista es mucho más esperable si se le olvidó que si está conduciendo — un cociente de verosimilitud fuerte — y debería empujar tu posterior con fuerza hacia «se le olvidó».
+
+La misma receta, sin monedas, sin medicina: nombra el prior, sopesa cómo de distinto encaja la evidencia en cada mundo, combina en una posterior. Una vez que sabes hacer esto con un amigo que llega tarde, puedes hacerlo con una oferta de trabajo, un diagnóstico o un titular.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En el ejemplo del amigo que llega tarde, ¿qué hace que «20 minutos tarde, sin mensaje» sea evidencia DÉBIL para la hipótesis de «atrapado en el tráfico»?"
+  options={[
+    { text: 'Es aproximadamente igual de esperable tanto si está en el tráfico COMO si se le olvidó, así que apenas distingue los dos mundos — las verosimilitudes están demasiado próximas para mover mucho la posterior', correct: true },
+    { text: 'Porque llegar tarde es siempre información sin sentido' },
+    { text: 'Porque el prior ya era del 70%, así que ninguna evidencia podría cambiarlo nunca' },
+    { text: 'Porque evidencia débil es cualquier cosa que llegue por mensaje de texto' },
+  ]}
+  explanation="La evidencia es tan fuerte como la *brecha* entre «P(evidencia dado tráfico)» y «P(evidencia dado que se le olvidó)». El silencio-y-tardanza es más o menos igual de esperable tanto si está atrapado como si se le olvidó, así que las dos verosimilitudes están próximas y la pista no puede llevar tu creencia muy lejos. Cambia por «te escribe que se le ha ido del todo la cabeza» y la brecha estalla — mucho más esperable bajo «se le olvidó» — así que esa pista *sí* movería la posterior con fuerza. La fuerza vive en la diferencia, no en el drama."
+/>
+
+### Cuándo recurrir a ello
+
+Recurre a estos tres nombres **en el instante en que nueva evidencia aterrice sobre cualquier creencia que tengas** — un resultado de prueba, una entrevista, un amigo que llega tarde, un rumor de mercado, un titular alarmante. El detonante es la sensación de «esto cambia las cosas». Antes de dejar que cambie nada, pasa la lista de verificación: *¿cuál era mi prior?* (dilo en voz alta), *¿cuánto más esperable es esta evidencia si mi hipótesis es cierta que si es falsa?* (la brecha de verosimilitud), y *¿dónde me deja eso?* (la posterior). Nombrar las piezas cuesta cinco segundos y expone al instante los dos errores clásicos — soltar el prior y confundir la verosimilitud hacia delante con la respuesta hacia atrás.
+
+<Quiz
+  client:visible
+  title="Ponte a prueba: los tres ingredientes"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  correctCountLabel="correctas"
+  gateLabel="Comprueba tu respuesta para continuar."
+  perfectMessage="Puntuación perfecta, ¡bien hecho!"
+  goodMessage="Buen trabajo, repasa las que has fallado."
+  keepPracticingMessage="Sigue practicando, lo tienes."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: 'Empareja la definición: ¿qué ingrediente es la posterior, P(H | E) — tu creencia DESPUÉS de sopesar la evidencia?',
+      options: [
+        { text: 'La posterior — la creencia actualizada que obtienes al combinar prior y verosimilitud', correct: true },
+        { text: 'El prior — tu creencia antes de cualquier evidencia' },
+        { text: 'La verosimilitud — cómo de esperable es la evidencia si la hipótesis es cierta' },
+        { text: 'La tasa base — la frecuencia a nivel de multitud desde la que partes' },
+      ],
+      explanation: 'La posterior P(H | E) es la hipótesis dada la evidencia — tu destino. El prior P(H) es la salida; la verosimilitud P(E | H) corre en el otro sentido (evidencia dada la hipótesis); la tasa base suele ser solo de donde sale el prior.',
+    },
+    {
+      question: 'En una frase informal, ¿cómo se combinan el prior y la verosimilitud en la posterior?',
+      options: [
+        { text: 'La posterior es proporcional a verosimilitud × prior — una hipótesis se gana la creencia siendo plausible de partida Y prediciendo bien la evidencia', correct: true },
+        { text: 'La posterior es igual a la verosimilitud, punto — el prior es solo un calentamiento' },
+        { text: 'La posterior es el prior más la verosimilitud, sumados' },
+        { text: 'La posterior es el mayor de entre prior o verosimilitud' },
+      ],
+      explanation: 'La intuición sobre la que descansa todo el curso es multiplicativa: puntúa cada hipótesis por verosimilitud × prior, y luego normaliza. Tratar la posterior como solo la verosimilitud (ignorando el prior) es la falacia inversa; nunca sumas probabilidades ni coges un máximo. La ecuación exacta llega en la lección 3.',
+    },
+    {
+      question: 'Una moneda trucada de dos caras muestra cara el 100% de las veces. Lanzas la moneda-de-la-bolsa una vez y sale cara. ¿Por qué la posterior es solo de en torno al 67% trucada, no del 100%?',
+      options: [
+        { text: 'Porque la moneda justa también da cara (el 50% de los lanzamientos), así que una sola cara es consistente con ambas — el prior era 50/50 y una cara solo lo desplaza a medias', correct: true },
+        { text: 'Porque la moneda trucada en realidad no siempre cae de cara' },
+        { text: 'Porque deberías ignorar el lanzamiento por completo y quedarte en el 50%' },
+        { text: 'Porque el 67% es solo la media de 100% y 33%', correct: false },
+      ],
+      explanation: 'Puntuar verosimilitud × prior da 0.5 para la moneda trucada y 0.25 para la justa; al normalizar sale 2/3. El lanzamiento es evidencia real (50% → 67%) pero no concluyente, porque la moneda justa puede fingir una cara. Leer la verosimilitud del 100% como una posterior del 100% sería la falacia inversa.',
+    },
+  ]}
+/>
+
+## Hacia dónde va esto
+
+Ya tienes todo el vocabulario que habla el resto del curso: **prior** (donde empiezas, normalmente la tasa base), **verosimilitud** (cómo de bien encaja la evidencia con cada mundo — hacia delante, dada la hipótesis, y enfáticamente *no* la respuesta) y **posterior** (donde aterrizas, proporcional a verosimilitud × prior). Has visto los tres combinarse en una moneda, encadenarse a lo largo de dos lanzamientos y reaparecer en un amigo que llega tarde sin nada de matemáticas.
+
+A continuación, en **«La prueba médica»**, llevamos estos tres ingredientes al rompecabezas bayesiano más famoso de todos — una enfermedad rara, una prueba con un 99% de precisión, un resultado positivo — y encontramos una probabilidad real de solo en torno al 9%. Lo construirás con un árbol de frecuencias naturales que hace imposible olvidar el prior, manejarás una calculadora interactiva de posterior y verás la falacia inversa (la verosimilitud confundida con la posterior) quedar desmontada para siempre. El vocabulario que acabas de aprender es exactamente lo que convierte ese «truco» en algo obvio.

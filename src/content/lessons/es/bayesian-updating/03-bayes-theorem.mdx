@@ -1,0 +1,205 @@
+---
+title: "El teorema de Bayes: la ecuación y su gemela más simpática"
+description: "Saca la fórmula directamente del árbol de frecuencias naturales y luego conoce la forma de cuotas — cuotas previas por un cociente de verosimilitud igual a cuotas posteriores — que te deja actualizar de cabeza, sin calculadora."
+topic: "es/bayesian-updating"
+order: 4
+minutes: 12
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout } from '@/components/react';
+
+En la última lección resolvisteis la prueba médica contando personas a través de un árbol. Ese recuento era el teorema de Bayes (Bayes' theorem) desde el principio — la famosa ecuación no es más que la contabilidad del mismísimo conteo que ya hicisteis. Así que esta lección no trae ideas nuevas, solo *notación* nueva: ponemos nombre a las piezas, escribimos la fórmula y luego — la parte que de verdad te cambia la vida — conocemos una segunda forma de ella tan fácil que puedes actualizar de cabeza mientras alguien sigue hablando.
+
+Primero, las cuatro piezas, en los símbolos que usa todo el mundo. Sea $H$ la **hipótesis** ("tengo la enfermedad") y $E$ la **evidencia** ("la prueba dio positivo").
+
+- $P(H)$ — el **prior**: cómo de probable era $H$ antes de la evidencia. (Nuestra tasa base, $0.001$.)
+- $P(E \mid H)$ — la **verosimilitud (likelihood)**: cómo de probable es la evidencia *si la hipótesis es verdadera*. Lee la barra como "dado". (Nuestra tasa de verdaderos positivos, $0.99$.)
+- $P(E \mid \lnot H)$ — la verosimilitud de la evidencia *si la hipótesis es falsa*. (Nuestra tasa de falsos positivos, $0.01$; $\lnot H$ significa "no $H$".)
+- $P(H \mid E)$ — la **probabilidad posterior (posterior)**: cómo de probable es la hipótesis *después* de la evidencia. El número que queremos.
+
+## La fórmula, leída del árbol
+
+Aquí está el teorema de Bayes:
+
+$$P(H \mid E) = \frac{P(E \mid H)\,P(H)}{P(E)}$$
+
+En palabras: la posterior es igual a la verosimilitud por el prior, dividido entre cómo de probable era la evidencia en conjunto. Ese denominador $P(E)$ — la **probabilidad total de la evidencia**, venga de quien venga — no es más que las dos formas en que la evidencia puede aparecer, sumadas:
+
+$$P(E) = P(E \mid H)\,P(H) + P(E \mid \lnot H)\,P(\lnot H)$$
+
+Ahora mira cómo esto se corresponde *exactamente* con las personas que contaste la última lección. El numerador $P(E \mid H)\,P(H) = 0.99 \times 0.001 = 0.00099$ es la **rama de verdaderos positivos** — 99 personas de cada 100.000. El segundo término del denominador $P(E \mid \lnot H)\,P(\lnot H) = 0.01 \times 0.999 = 0.00999$ es la **rama de falsos positivos** — 999 personas. Así que:
+
+$$P(H \mid E) = \frac{0.00099}{0.00099 + 0.00999} = \frac{0.00099}{0.01098} \approx 0.090$$
+
+Es el mismo `99 ÷ 1.098 ≈ 9%` que obtuviste contando. Las fracciones son las personas, divididas entre 100.000 arriba y abajo, de modo que el 100.000 se cancela. **La fórmula y el árbol son el mismo objeto.** Si los símbolos se te escurren alguna vez, vuelve a contar personas — esas no pueden mentirte jamás.
+
+<Callout variant="tip" title="Posterior ∝ verosimilitud × prior">
+Quita el denominador (que solo está ahí para que las probabilidades sumen 1) y el corazón de Bayes son tres palabras: **la posterior es proporcional a la verosimilitud por el prior.** Tu creencia actualizada es tu creencia antigua, *escalada* por lo bien que encaja la evidencia. Un prior de cero se queda en cero (nada actualiza una mente cerrada); una verosimilitud que es igual bajo ambas hipótesis ($P(E\mid H) = P(E\mid\lnot H)$) deja el prior intacto (la evidencia inútil no mueve nada). Todo lo demás está en medio.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En el teorema de Bayes, ¿qué cantidad es la que la gente confunde más a menudo con la respuesta que de verdad quiere?"
+  options={[
+    { text: 'La verosimilitud P(E | H) — "cómo de probable es un positivo si estoy enfermo" — se confunde con la posterior P(H | E), "cómo de probable es que esté enfermo si el positivo aparece"', correct: true },
+    { text: 'El prior P(H) — nadie confunde nunca la tasa base' },
+    { text: 'El denominador P(E) — siempre vale exactamente 1' },
+    { text: 'El símbolo ¬H, que no tiene ningún significado real' },
+  ]}
+  explanation="Este intercambio — confundir P(E | H) con P(H | E) — es el error bayesiano más común con diferencia, a veces llamado la 'falacia inversa' (inverse fallacy). 'Un positivo es 99% probable si estás enfermo' (la verosimilitud) NO es 'estás 99% enfermo dado un positivo' (la posterior). Difieren exactamente en el prior y en la rama de falsos positivos. El denominador no suele ser 1, y ¬H ('no H') es muy real — es donde viven los falsos positivos."
+/>
+
+## La gemela más simpática: la forma de cuotas
+
+La fórmula de arriba es correcta pero aparatosa — ese denominador es un incordio. Hay una segunda forma de escribir Bayes que se deshace del denominador por completo, y es la que los profesionales usan de verdad. El truco está en dejar de pensar en probabilidades y pensar en **cuotas (odds)** (que conocisteis en el curso anterior: unas cuotas de 3:1 en contra de la lluvia significan 3 "no" por cada 1 "sí").
+
+En forma de cuotas, el teorema de Bayes se convierte en una sola multiplicación:
+
+$$\underbrace{\frac{P(H \mid E)}{P(\lnot H \mid E)}}_{\text{cuotas posteriores}} = \underbrace{\frac{P(H)}{P(\lnot H)}}_{\text{cuotas previas}} \times \underbrace{\frac{P(E \mid H)}{P(E \mid \lnot H)}}_{\text{cociente de verosimilitud}}$$
+
+Dilo como una frase y es inolvidable: **cuotas previas × cociente de verosimilitud = cuotas posteriores.** Coges cómo estaba la apuesta antes, multiplicas por con cuánta fuerza apunta la evidencia y ya tienes cómo está la apuesta ahora. Sin denominador, sin sumar fracciones — una sola multiplicación. Ese término del medio, el **cociente de verosimilitud (likelihood ratio)** (cuánto más probable es la evidencia bajo $H$ que bajo $\lnot H$), es toda la fuerza de la evidencia condensada en un número, y se lleva una lección entera a continuación.
+
+Pásale la prueba médica:
+
+- **Cuotas previas** de enfermedad: $0.001 : 0.999$, o aproximadamente $1 : 1000$ (1 enfermo por cada 1000 sanos).
+- **Cociente de verosimilitud**: $\dfrac{P(\text{positivo}\mid\text{enfermo})}{P(\text{positivo}\mid\text{sano})} = \dfrac{0.99}{0.01} = 99$. Un positivo es 99 veces más probable en una persona enferma que en una sana.
+- **Cuotas posteriores**: $1 : 1000$ por $99$ da $99 : 1000$ — unos 99 enfermos por cada 1000 sanos entre los positivos.
+
+Convierte $99 : 1000$ de vuelta a probabilidad: $\dfrac{99}{99 + 1000} = \dfrac{99}{1099} \approx 0.090$, **el 9% otra vez.** Tres rutas — contar personas, la fórmula de la probabilidad, la forma de cuotas — una sola respuesta. La forma de cuotas es la que puedes hacer en una servilleta.
+
+<Callout variant="tip" title="Por qué la forma de cuotas gana para encadenar">
+Actualizar sobre varias piezas de evidencia es multiplicar en forma de cuotas: **cuotas posteriores = cuotas previas × CV₁ × CV₂ × …** Cada pista independiente no es más que otro cociente de verosimilitud que multiplicas. Por eso el segundo positivo de la última lección fue tan fácil de encadenar — y por eso, en cuotas, una ristra de pistas débiles (cada CV un poco por encima de 1) puede multiplicarse hasta dar una conclusión fuerte. Intenta encadenar eso con la forma de fracciones y verás por qué los profesionales viven en cuotas.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un filtro de spam tiene 20× más probabilidad de ver la palabra '¡gratis!!!' en spam que en correo real (cociente de verosimilitud = 20). Antes juzgabas un correo concreto con unas cuotas de 1:1 de ser spam. Tras ver '¡gratis!!!', las cuotas posteriores son…"
+  options={[
+    { text: '20:1 a favor de spam — cuotas previas (1:1) × cociente de verosimilitud (20) = 20:1, alrededor de un 95% de probabilidad de spam', correct: true },
+    { text: 'Siguen siendo 1:1 — una sola palabra no puede cambiar nada' },
+    { text: '20:20, que es lo mismo que 1:1' },
+    { text: '21:1 — sumas el cociente de verosimilitud a las cuotas previas' },
+  ]}
+  explanation="Cuotas previas × cociente de verosimilitud = cuotas posteriores, así que 1:1 × 20 = 20:1. Como probabilidad eso es 20/21 ≈ 95%. Multiplicas el cociente de verosimilitud, no lo sumas (21:1 es el error aditivo), y desde luego no lo ignoras. Así funciona literalmente un filtro de spam bayesiano ingenuo: parte de las cuotas previas y multiplica por el cociente de verosimilitud de cada palabra."
+/>
+
+## Ejemplo resuelto: el problema de los taxis, en cuotas
+
+Vamos a correr un caso nuevo de principio a fin para demostrar que la forma de cuotas no es un truco de una sola vez. Los taxis de una ciudad son **85% Verdes, 15% Azules**. Un taxi protagoniza un atropello con fuga nocturno. Un testigo dice que era **Azul**, y en las pruebas ese testigo identifica correctamente el color de un taxi el **80%** de las veces (y se equivoca el 20%). ¿Cómo de probable es que el taxi fuera *de verdad* Azul?
+
+La intuición grita "80% — lo ha dicho el testigo". Bayes dice otra cosa. Sea $H$ = "el taxi era Azul", $E$ = "el testigo dijo Azul".
+
+- **Cuotas previas** (Azul : Verde) $= 15 : 85$, es decir, $3 : 17$.
+- **Cociente de verosimilitud** $= \dfrac{P(\text{dice Azul}\mid\text{Azul})}{P(\text{dice Azul}\mid\text{Verde})} = \dfrac{0.80}{0.20} = 4$. (Si el taxi es Verde, el testigo dice Azul por error el 20% de las veces.)
+- **Cuotas posteriores** $= 3 : 17$ por $4 = 12 : 17$.
+- **Como probabilidad** $= \dfrac{12}{12 + 17} = \dfrac{12}{29} \approx 0.41$, alrededor del **41%.**
+
+Así que aunque un testigo que acierta el 80% de las veces *dijera Azul*, sigue siendo **más probable que el taxi fuera Verde** — porque los taxis Verdes son tan comunes que los errores ocasionales del testigo sobre ellos (decir "Azul" por equivocación) se acumulan más rápido que los avistamientos genuinos de Azul. La tasa base (las cuotas previas) se niega a que la ignoren, exactamente igual que en la prueba médica. La misma lección, otro disfraz.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En el problema de los taxis el testigo es fiable al 80% y dice 'Azul', y aun así el taxi probablemente sea Verde. ¿Cuál es la explicación más limpia?"
+  options={[
+    { text: 'Los taxis Verdes son tanto más comunes que el 20% de error del testigo sobre ellos produce más informes falsos de "Azul" que taxis Azules de verdad hay para ver', correct: true },
+    { text: 'El testigo miente sobre lo que vio' },
+    { text: 'Los testigos presenciales son siempre exactamente fiables al 50%' },
+    { text: 'Una fiabilidad del 80% significa que la respuesta es exactamente 80% Azul' },
+  ]}
+  explanation="Es la tasa base otra vez. De 100 taxis: 15 Azules (el testigo llama 'Azul' correctamente a 12 de ellos) y 85 Verdes (el testigo llama 'Azul' por error a 17 de ellos). Así que de 29 informes de 'Azul', solo 12 son reales → ~41%. El testigo no miente; es que hay muchísimo más Verde que identificar mal. La fiabilidad (una verosimilitud) no es la posterior — tienes que pasarla por las cuotas previas."
+/>
+
+## Las piezas, en una tabla
+
+Ten esto a mano hasta que el vocabulario sea automático:
+
+| Símbolo | Nombre | Pregunta en lenguaje llano | Prueba médica |
+|---|---|---|---|
+| $P(H)$ | Prior | ¿Cómo de probable antes de la evidencia? | $0.001$ (tasa base) |
+| $P(E \mid H)$ | Verosimilitud | Si $H$ es verdadera, ¿cómo de probable es esta evidencia? | $0.99$ (verdadero positivo) |
+| $P(E \mid \lnot H)$ | Verosimilitud de falsa alarma | Si $H$ es falsa, ¿cómo de probable es esta evidencia? | $0.01$ (falso positivo) |
+| $P(H \mid E)$ | Posterior | ¿Cómo de probable después de la evidencia? | $\approx 0.09$ |
+| $\frac{P(E\mid H)}{P(E\mid\lnot H)}$ | Cociente de verosimilitud | ¿Cuántas veces mejor encaja la evidencia con $H$? | $99$ |
+
+### Cuándo recurrir a ella
+
+Recurre a la **forma de cuotas** siempre que quieras actualizar *rápido* o *repetidamente* — una ristra de pistas en una negociación, varios síntomas que apuntan a un diagnóstico, múltiples valoraciones independientes de una contratación. Estima tus cuotas previas, pregúntale a cada pista nueva "¿cuánto más probable es esto si tengo razón que si me equivoco?" (eso es el cociente de verosimilitud) y multiplica. Recurre a la **fórmula completa** (o al árbol) cuando quieras la probabilidad posterior exacta para una sola pieza de evidencia, o cuando necesites mostrar el desarrollo. Son el mismo teorema; elige la forma que encaje con la tarea.
+
+<Quiz
+  client:visible
+  title="Ponte a prueba: el teorema de Bayes"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  correctCountLabel="correctas"
+  gateLabel="Comprueba tu respuesta para continuar."
+  perfectMessage="Puntuación perfecta, ¡bien hecho!"
+  goodMessage="Buen trabajo, repasa las que has fallado."
+  keepPracticingMessage="Sigue practicando, lo tienes."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: '¿Qué dice la forma de cuotas del teorema de Bayes?',
+      options: [
+        { text: 'Cuotas posteriores = cuotas previas × cociente de verosimilitud', correct: true },
+        { text: 'Cuotas posteriores = cuotas previas + cociente de verosimilitud' },
+        { text: 'Probabilidad posterior = verosimilitud ÷ prior' },
+        { text: 'Posterior = prior, siempre' },
+      ],
+      explanation: 'En forma de cuotas, Bayes es una sola multiplicación: cómo estaba la apuesta (cuotas previas) por con cuánta fuerza apunta la evidencia (cociente de verosimilitud) da cómo está la apuesta ahora (cuotas posteriores). Sin denominador.',
+    },
+    {
+      question: 'La "falacia inversa" es el error de:',
+      options: [
+        { text: 'Confundir P(E | H) con P(H | E) — leer "la evidencia es probable si la hipótesis se cumple" como "la hipótesis es probable dada la evidencia"', correct: true },
+        { text: 'Invertir una fracción antes de multiplicar' },
+        { text: 'Usar cuotas en lugar de probabilidades' },
+        { text: 'Olvidar redondear la respuesta final' },
+      ],
+      explanation: 'P(E | H) y P(H | E) son cantidades distintas relacionadas por Bayes. "Un positivo es 99% probable si estás enfermo" no es "99% probable estar enfermo dado un positivo"; difieren en el prior y en la rama de falsos positivos. Confundirlas es el error bayesiano clásico.',
+    },
+    {
+      question: 'En el problema de los taxis (85% Verdes, 15% Azules, testigo fiable al 80%, dice "Azul"), el taxi probablemente sea Verde porque:',
+      options: [
+        { text: 'La gran tasa base de Verdes hace que el 20% de errores del testigo sobre los Verdes produzca más "Azules" falsos que taxis Azules verdaderos hay', correct: true },
+        { text: 'El testigo no es fiable, por debajo del 50%' },
+        { text: 'Los taxis Azules son físicamente más difíciles de ver' },
+        { text: 'Las cuotas previas son irrelevantes una vez que habla un testigo' },
+      ],
+      explanation: 'Cuotas previas 15:85 × cociente de verosimilitud (0.8/0.2 = 4) = 12:17, alrededor del 41% Azul. Que el testigo diga "Azul" cuadruplica las cuotas, pero partiendo de unas cuotas previas tan desequilibradas, cuadruplicar aún se queda por debajo del 50%. La tasa base permanece en las cuentas.',
+    },
+  ]}
+/>
+
+## Hacia dónde va esto
+
+Ya sabes escribir Bayes de tres formas y correrlo en cuotas sobre una servilleta. Una pieza sigue siendo una caja negra, eso sí: ese **cociente de verosimilitud** del medio — el número que dice con qué fuerza apunta de verdad una pista. A continuación, en **"La fuerza de la evidencia"**, lo abrimos: qué hace que una evidencia sea diagnóstica frente a inútil, por qué un cociente de verosimilitud cercano a 1 significa "ignora esto", cómo las pistas débiles se multiplican hasta dar conclusiones fuertes, y de dónde sale la regla *las afirmaciones extraordinarias exigen evidencia extraordinaria* — es un cociente de verosimilitud peleando contra un prior diminuto.

@@ -83,27 +83,69 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced / expert probability + systems tier (orders 15–17) ───────────
-  // Built only after the breadth pass above seeds every discipline.
+  // ── Breadth pass — seed starved disciplines before deepening probability ──
+  // After Bayesian Updating graduated, the queue had drifted all-`probability`.
+  // These intermediate courses re-balance the tag taxonomy (psychology, systems,
+  // biology) and are built BEFORE the advanced/expert probability tier below.
   {
-    slug: 'bayesian-updating',
-    icon: '🔁',
-    difficulty: 'advanced',
-    order: 15,
-    accent: 'brand',
+    slug: 'availability-heuristic',
+    icon: '🧠',
+    difficulty: 'intermediate',
+    order: 12,
+    accent: 'accent',
     title: {
-      en: 'Bayesian Updating',
-      es: 'Actualización Bayesiana',
+      en: 'The Availability Heuristic',
+      es: 'La Heurística de Disponibilidad',
     },
     description: {
-      en: 'Change your mind by degrees, not all at once. Start from a base rate, weigh the new evidence, and land on a calibrated new belief instead of overreacting to the latest headline.',
-      es: 'Cambia de opinión por grados, no de golpe. Parte de una tasa base, pondera la nueva evidencia y llega a una creencia nueva y calibrada en vez de sobrerreaccionar al último titular.',
+      en: 'You judge how likely something is by how easily an example springs to mind — so vivid, recent, scary stories feel common even when they’re rare. Learn to tell what’s memorable from what’s frequent.',
+      es: 'Juzgas la probabilidad de algo por lo fácil que te viene un ejemplo a la mente — así que las historias vívidas, recientes y aterradoras parecen comunes aunque sean raras. Aprende a distinguir lo memorable de lo frecuente.',
     },
     dependencies: ['thinking-in-probabilities'],
-    tags: ['probability', 'decision-making'],
+    tags: ['psychology', 'probability'],
     buildNotes:
-      'Bayesian updating — the advanced probability rung above Thinking in Probabilities. Sections: prior, likelihood, posterior in plain language; the base rate as your prior (links back to the base-rate fallacy); the canonical medical-test worked example (rare disease + imperfect test → surprisingly low posterior) done with real numbers and a natural-frequency tree; updating incrementally as evidence arrives; strength of evidence (likelihood ratios) vs. weight of the prior; why extraordinary claims need extraordinary evidence. Use KaTeX for Bayes’ theorem and at least one frequency table; build an interactive posterior-calculator / natural-frequency-grid island (sliders for base rate, true-positive, false-positive → live posterior). Connect to second-order thinking (a posterior is the input to the next decision) and calibration. Pitfall: ignoring the base rate; confusing P(evidence|hypothesis) with P(hypothesis|evidence). Recap Quiz + MindMap. en + es twin. Sets up fat tails and calibration on the expert tier.',
+      'The availability heuristic — a core cognitive bias, the psychology rung that pairs with base rates. Sections: define the heuristic (estimating frequency/probability by how easily instances come to mind) from Kahneman & Tversky; why ease-of-recall ≠ true frequency; the drivers that inflate availability (vividness, recency, emotional charge, media coverage, personal experience); worked examples — people overestimate deaths from shark attacks/plane crashes/terrorism and underestimate common killers (heart disease, diabetes); the role of news (rare-but-dramatic events get covered, common ones don’t → distorted risk maps); availability cascades (a story repeated until it feels true); connection to base-rate neglect (availability is HOW we drop the base rate) and to the upcoming fat-tails course. Build/reuse an interactive island contrasting perceived vs. actual frequency (e.g. a bar-pair chart the learner guesses then reveals), respecting prefers-reduced-motion. Pitfall: confusing what’s easy to recall with what’s likely; letting headlines set your priors. Recap Quiz + MindMap. en + es twin.',
   },
+  {
+    slug: 'bottlenecks-and-constraints',
+    icon: '⛓️',
+    difficulty: 'intermediate',
+    order: 13,
+    accent: 'brand',
+    title: {
+      en: 'Bottlenecks & the Theory of Constraints',
+      es: 'Cuellos de Botella y la Teoría de las Restricciones',
+    },
+    description: {
+      en: 'A chain is only as strong as its weakest link, and a system only as fast as its slowest step. Find the one constraint that governs the whole, and stop optimizing the parts that don’t matter.',
+      es: 'Una cadena es tan fuerte como su eslabón más débil, y un sistema tan rápido como su paso más lento. Encuentra la única restricción que gobierna el todo y deja de optimizar las partes que no importan.',
+    },
+    dependencies: ['feedback-loops'],
+    tags: ['systems-thinking'],
+    buildNotes:
+      'Bottlenecks & the theory of constraints — the systems-thinking rung on finding leverage. Sections: the bottleneck as the single step that caps a whole system’s throughput (the slowest stage on an assembly line, the narrowest pipe); Goldratt’s Theory of Constraints and the five focusing steps (identify, exploit, subordinate, elevate, repeat); why improving a NON-bottleneck does nothing for the whole (and can make things worse by piling up inventory) — the counter-intuitive heart of the lesson; Amdahl’s law / the math of speeding up one part of a pipeline; the constraint MOVES once you fix one (there’s always a new weakest link); everyday examples (traffic merges, the one slow teammate, a website’s slowest query, a morning routine). Build an interactive pipeline/flow island where the learner adjusts each stage’s capacity and watches total throughput track ONLY the bottleneck. Connect to leverage points and feedback loops (the prerequisite). Pitfall: local optimization — polishing parts that aren’t the constraint. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'red-queen-effect',
+    icon: '🏃',
+    difficulty: 'advanced',
+    order: 14,
+    accent: 'accent',
+    title: {
+      en: 'The Red Queen Effect',
+      es: 'El Efecto de la Reina Roja',
+    },
+    description: {
+      en: '“It takes all the running you can do to keep in the same place.” When everyone adapts, standing still means falling behind — in evolution, business, and the arms races you can’t opt out of.',
+      es: '«Hace falta correr todo lo que puedas para quedarte en el mismo sitio.» Cuando todos se adaptan, quedarse quieto es retroceder — en la evolución, los negocios y las carreras armamentísticas de las que no puedes salir.',
+    },
+    dependencies: ['natural-selection'],
+    tags: ['biology-evolution', 'strategy'],
+    buildNotes:
+      'The Red Queen effect — the biology/strategy rung extending natural selection into co-evolution. Sections: the name (Van Valen, from Carroll’s Red Queen — running to stay in place); coevolutionary arms races (predator/prey, host/parasite, the evolution of sex as a defense against parasites); why relative fitness, not absolute improvement, is what matters when competitors also improve; the business analogue (everyone adopting the same tech/efficiency gain cancels out — no one gains lasting advantage; you must run just to keep your position); arms races and escalation (antibiotics vs. resistance, spam vs. filters, offense vs. defense) and when they’re worth opting out of; connection to game theory and competition. Build an interactive coevolution island (two populations whose fitness curves chase each other so neither pulls ahead). Pitfall: mistaking effort/improvement for progress when the baseline is moving; ignoring that competitors adapt too. Recap Quiz + MindMap. en + es twin.',
+  },
+  // ── Advanced / expert probability tier (orders 16–17) ─────────────────────
+  // Built after the breadth pass above re-seeds the starved disciplines.
   {
     slug: 'fat-tails',
     icon: '🐘',

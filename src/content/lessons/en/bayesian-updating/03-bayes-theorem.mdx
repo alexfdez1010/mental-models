@@ -1,0 +1,167 @@
+---
+title: "Bayes' Theorem: The Equation and Its Friendlier Twin"
+description: "Lift the formula straight out of the natural-frequency tree, then meet the odds form — prior odds times a likelihood ratio equals posterior odds — that lets you update in your head without a calculator."
+topic: "en/bayesian-updating"
+order: 4
+minutes: 12
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout } from '@/components/react';
+
+In the last lesson you solved the medical test by counting people through a tree. That counting was Bayes' theorem all along — the famous equation is just bookkeeping for exactly the tally you already did. So this lesson holds no new ideas, only new *notation*: we name the pieces, write the formula, and then — the part that actually changes your life — meet a second form of it that's so easy you can update in your head while someone is still talking.
+
+First, the four pieces, in the symbols everyone uses. Let $H$ be the **hypothesis** ("I have the disease") and $E$ the **evidence** ("the test was positive").
+
+- $P(H)$ — the **prior**: how likely $H$ was before the evidence. (Our base rate, $0.001$.)
+- $P(E \mid H)$ — the **likelihood**: how likely the evidence is *if the hypothesis is true*. Read the bar "given." (Our true-positive rate, $0.99$.)
+- $P(E \mid \lnot H)$ — the likelihood of the evidence *if the hypothesis is false*. (Our false-positive rate, $0.01$; $\lnot H$ means "not $H$.")
+- $P(H \mid E)$ — the **posterior**: how likely the hypothesis is *after* the evidence. The number we want.
+
+## The formula, read off the tree
+
+Here is Bayes' theorem:
+
+$$P(H \mid E) = \frac{P(E \mid H)\,P(H)}{P(E)}$$
+
+In words: the posterior equals the likelihood times the prior, divided by how likely the evidence was overall. That denominator $P(E)$ — the **total probability of the evidence**, from anyone — is just the two ways the evidence can appear, added up:
+
+$$P(E) = P(E \mid H)\,P(H) + P(E \mid \lnot H)\,P(\lnot H)$$
+
+Now watch this map *exactly* onto the people you counted last lesson. The numerator $P(E \mid H)\,P(H) = 0.99 \times 0.001 = 0.00099$ is the **true-positive branch** — 99 people out of 100,000. The denominator's second term $P(E \mid \lnot H)\,P(\lnot H) = 0.01 \times 0.999 = 0.00999$ is the **false-positive branch** — 999 people. So:
+
+$$P(H \mid E) = \frac{0.00099}{0.00099 + 0.00999} = \frac{0.00099}{0.01098} \approx 0.090$$
+
+That's the same `99 ÷ 1,098 ≈ 9%` you got by counting. The fractions are the people, divided by 100,000 top and bottom so the 100,000 cancels. **The formula and the tree are the same object.** If the symbols ever feel slippery, drop back to counting people — they can never lie to you.
+
+<Callout variant="tip" title="Posterior ∝ likelihood × prior">
+Strip away the denominator (which is just there to make the probabilities sum to 1) and the heart of Bayes is three words: **posterior is proportional to likelihood times prior.** Your updated belief is your old belief, *scaled* by how well the evidence fits. A prior of zero stays zero (nothing updates a closed mind); a likelihood that's equal under both hypotheses ($P(E\mid H) = P(E\mid\lnot H)$) leaves the prior untouched (useless evidence moves nothing). Everything else is in between.
+</Callout>
+
+<MCQ
+  client:visible
+  question="In Bayes' theorem, which quantity is the one people most often confuse with the answer they actually want?"
+  options={[
+    { text: 'The likelihood P(E | H) — "how likely is a positive test if I\'m sick" — gets mistaken for the posterior P(H | E), "how likely am I sick if the test is positive"', correct: true },
+    { text: 'The prior P(H) — nobody ever confuses the base rate' },
+    { text: 'The denominator P(E) — it is always exactly 1' },
+    { text: 'The symbol ¬H, which has no real meaning' },
+  ]}
+  explanation="This swap — confusing P(E | H) with P(H | E) — is the single most common Bayesian error, sometimes called the 'inverse fallacy.' 'A positive test is 99% likely if you're sick' (the likelihood) is NOT 'you're 99% likely sick given a positive test' (the posterior). They differ by exactly the prior and the false-positive branch. The denominator is not generally 1, and ¬H ('not H') is very real — it's where the false positives live."
+/>
+
+## The friendlier twin: the odds form
+
+The formula above is correct but clunky — that denominator is a pain. There's a second way to write Bayes that throws the denominator away entirely, and it's the form practitioners actually use. The trick is to stop thinking in probabilities and think in **odds** (which you met in the last course: odds of 3:1 against rain means 3 "no" for every 1 "yes").
+
+In odds form, Bayes' theorem becomes a single multiplication:
+
+$$\underbrace{\frac{P(H \mid E)}{P(\lnot H \mid E)}}_{\text{posterior odds}} = \underbrace{\frac{P(H)}{P(\lnot H)}}_{\text{prior odds}} \times \underbrace{\frac{P(E \mid H)}{P(E \mid \lnot H)}}_{\text{likelihood ratio}}$$
+
+Say it as a sentence and it's unforgettable: **prior odds × likelihood ratio = posterior odds.** You take how the bet stood before, multiply by how strongly the evidence points, and you've got how the bet stands now. No denominator, no adding fractions — just one multiply. That middle term, the **likelihood ratio** (how much more likely the evidence is under $H$ than under $\lnot H$), is the entire strength of the evidence in one number, and it gets a whole lesson next.
+
+Run the medical test through it:
+
+- **Prior odds** of disease: $0.001 : 0.999$, or about $1 : 1000$ (1 sick for every 1000 healthy).
+- **Likelihood ratio**: $\dfrac{P(\text{positive}\mid\text{sick})}{P(\text{positive}\mid\text{healthy})} = \dfrac{0.99}{0.01} = 99$. A positive is 99 times more likely from a sick person than a healthy one.
+- **Posterior odds**: $1 : 1000$ times $99$ gives $99 : 1000$ — about 99 sick for every 1000 healthy among the positives.
+
+Convert $99 : 1000$ back to a probability: $\dfrac{99}{99 + 1000} = \dfrac{99}{1099} \approx 0.090$, **9% again.** Three routes — counting people, the probability formula, the odds form — one answer. The odds form is the one you can do on a napkin.
+
+<Callout variant="tip" title="Why the odds form wins for chaining">
+Updating on several pieces of evidence is multiplication in odds form: **posterior odds = prior odds × LR₁ × LR₂ × …** Each independent clue is just another likelihood ratio you multiply in. That's why the second positive test in the last lesson was so easy to chain — and why, in odds, a string of weak clues (each LR a little above 1) can multiply into a strong conclusion. Try chaining that with the fraction form and you'll see why practitioners live in odds.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A spam filter is 20× more likely to see the word 'free!!!' in spam than in real mail (likelihood ratio = 20). You'd previously judged a particular email at about 1:1 odds of being spam. After seeing 'free!!!', the posterior odds are…"
+  options={[
+    { text: '20:1 in favour of spam — prior odds (1:1) × likelihood ratio (20) = 20:1, roughly a 95% chance of spam', correct: true },
+    { text: 'Still 1:1 — a single word can\'t change anything' },
+    { text: '20:20, which is the same as 1:1' },
+    { text: '21:1 — you add the likelihood ratio to the prior odds' },
+  ]}
+  explanation="Prior odds × likelihood ratio = posterior odds, so 1:1 × 20 = 20:1. As a probability that's 20/21 ≈ 95%. You multiply the likelihood ratio in, you don't add it (21:1 is the additive error), and you certainly don't ignore it. This is literally how a naive Bayes spam filter works: start from prior odds, multiply by each word's likelihood ratio."
+/>
+
+## Worked example: the cab problem, in odds
+
+Let's run a fresh case end to end to prove the odds form isn't a one-trick pony. A city's cabs are **85% Green, 15% Blue**. A cab is in a night-time hit-and-run. A witness says it was **Blue**, and in tests this witness correctly identifies a cab's colour **80%** of the time (and is wrong 20%). How likely is it the cab was *actually* Blue?
+
+Intuition screams "80% — the witness said so." Bayes says otherwise. Let $H$ = "the cab was Blue," $E$ = "the witness said Blue."
+
+- **Prior odds** (Blue : Green) $= 15 : 85$, i.e. $3 : 17$.
+- **Likelihood ratio** $= \dfrac{P(\text{says Blue}\mid\text{Blue})}{P(\text{says Blue}\mid\text{Green})} = \dfrac{0.80}{0.20} = 4$. (If the cab is Green, the witness wrongly says Blue 20% of the time.)
+- **Posterior odds** $= 3 : 17$ times $4 = 12 : 17$.
+- **As a probability** $= \dfrac{12}{12 + 17} = \dfrac{12}{29} \approx 0.41$, about **41%.**
+
+So even though a witness who's right 80% of the time *said Blue*, it's still **more likely the cab was Green** — because Green cabs are so common that the witness's occasional mistakes on them (wrongly saying "Blue") pile up faster than the genuine Blue sightings. The base rate (prior odds) refuses to be ignored, exactly as it did in the medical test. Same lesson, different costume.
+
+<MCQ
+  client:visible
+  question="In the cab problem the witness is 80% reliable and says 'Blue,' yet the cab is probably Green. What's the cleanest explanation?"
+  options={[
+    { text: 'Green cabs are so much more common that the witness\'s 20% error rate on them produces more false "Blue" reports than there are true Blue cabs to see', correct: true },
+    { text: 'The witness is lying about what they saw' },
+    { text: 'Eyewitnesses are always exactly 50% reliable' },
+    { text: '80% reliability means the answer is exactly 80% Blue' },
+  ]}
+  explanation="It's the base rate again. Of 100 cabs: 15 Blue (witness correctly calls 12 of them Blue) and 85 Green (witness wrongly calls 17 of them Blue). So of 29 'Blue' reports, only 12 are real → ~41%. The witness isn't lying; there's just so much more Green to misidentify. Reliability (a likelihood) is not the posterior — you must run it through the prior odds."
+/>
+
+## The pieces, in one table
+
+Keep this within reach until the vocabulary is automatic:
+
+| Symbol | Name | Plain-language question | Medical test |
+|---|---|---|---|
+| $P(H)$ | Prior | How likely before the evidence? | $0.001$ (base rate) |
+| $P(E \mid H)$ | Likelihood | If $H$ is true, how likely is this evidence? | $0.99$ (true-positive) |
+| $P(E \mid \lnot H)$ | False-alarm likelihood | If $H$ is false, how likely is this evidence? | $0.01$ (false-positive) |
+| $P(H \mid E)$ | Posterior | How likely after the evidence? | $\approx 0.09$ |
+| $\frac{P(E\mid H)}{P(E\mid\lnot H)}$ | Likelihood ratio | How many times better does the evidence fit $H$? | $99$ |
+
+### When to reach for it
+
+Reach for the **odds form** whenever you want to update *quickly* or *repeatedly* — a string of clues in a negotiation, several symptoms pointing at a diagnosis, multiple independent reviews of a hire. Estimate your prior odds, ask of each new clue "how much more likely is this if I'm right than if I'm wrong?" (that's the likelihood ratio), and multiply. Reach for the **full formula** (or the tree) when you want the exact posterior probability for a single piece of evidence, or when you need to show your work. They're the same theorem; pick the form that fits the job.
+
+<Quiz
+  client:visible
+  title="Check yourself: Bayes' theorem"
+  questions={[
+    {
+      question: 'What does the odds form of Bayes\' theorem say?',
+      options: [
+        { text: 'Posterior odds = prior odds × likelihood ratio', correct: true },
+        { text: 'Posterior odds = prior odds + likelihood ratio' },
+        { text: 'Posterior probability = likelihood ÷ prior' },
+        { text: 'Posterior = prior, always' },
+      ],
+      explanation: 'In odds form Bayes is a single multiplication: how the bet stood (prior odds) times how strongly the evidence points (likelihood ratio) gives how the bet stands now (posterior odds). No denominator needed.',
+    },
+    {
+      question: 'The "inverse fallacy" is the error of:',
+      options: [
+        { text: 'Confusing P(E | H) with P(H | E) — reading "the evidence is likely if the hypothesis holds" as "the hypothesis is likely given the evidence"', correct: true },
+        { text: 'Inverting a fraction before multiplying' },
+        { text: 'Using odds instead of probabilities' },
+        { text: 'Forgetting to round the final answer' },
+      ],
+      explanation: 'P(E | H) and P(H | E) are different quantities related by Bayes. "A positive test is 99% likely if sick" is not "99% likely sick given a positive test"; they differ by the prior and the false-positive branch. Confusing them is the classic Bayesian mistake.',
+    },
+    {
+      question: 'In the cab problem (85% Green, 15% Blue, witness 80% reliable, says "Blue"), the cab is probably Green because:',
+      options: [
+        { text: 'The large Green base rate means the witness\'s 20% errors on Green produce more false "Blue" calls than there are true Blue cabs', correct: true },
+        { text: 'The witness is unreliable below 50%' },
+        { text: 'Blue cabs are physically harder to see' },
+        { text: 'The prior odds are irrelevant once a witness speaks' },
+      ],
+      explanation: 'Prior odds 15:85 × likelihood ratio (0.8/0.2 = 4) = 12:17, about 41% Blue. The witness saying "Blue" raises the odds fourfold, but starting from such lopsided prior odds, fourfold still lands below 50%. The base rate stays in the math.',
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You can now write Bayes three ways and run it in odds on a napkin. One piece is still a black box, though: that **likelihood ratio** in the middle — the number that says how strong a clue actually is. Next, in **"Strength of Evidence,"** we open it up: what makes evidence diagnostic versus worthless, why a likelihood ratio near 1 means "ignore this," how weak clues multiply into strong conclusions, and where the rule *extraordinary claims require extraordinary evidence* comes from — it's a likelihood ratio fighting a tiny prior.

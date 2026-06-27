@@ -1,0 +1,223 @@
+---
+title: "La prueba médica: por qué un positivo no es una sentencia"
+description: "El rompecabezas bayesiano por excelencia, resuelto de principio a fin: una enfermedad rara, una prueba «99% precisa», un resultado positivo — y una probabilidad real de solo el 9% aproximadamente. Constrúyelo con un árbol de frecuencias naturales y una calculadora interactiva de probabilidad posterior hasta que la respuesta deje de parecer un truco."
+topic: "es/bayesian-updating"
+order: 3
+minutes: 11
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout, BayesCalculator } from '@/components/react';
+
+Hay un ejemplo resuelto que enseña la actualización bayesiana mejor que cualquier fórmula abstracta, y ya os lo habéis cruzado dos veces — una en el curso anterior, otra en el pretest de este curso. Toca desmontarlo por completo, porque en cuanto la **prueba médica** deje de parecer un truco, cualquier otra actualización de vuestra vida se volverá más fácil. El planteamiento es deliberadamente sencillo: una enfermedad, una prueba, un resultado positivo. La respuesta es célebremente contraintuitiva, y el remedio para la mala intuición es un dibujo, no una ecuación.
+
+Este es el escenario que usaremos durante toda la lección. Una enfermedad afecta a **1 de cada 1,000 personas**. Una prueba para detectarla es **«99% precisa»**, lo que concretaremos en dos cosas: si *tienes* la enfermedad, dice correctamente positivo el 99% de las veces (una **tasa de verdaderos positivos** del 99%), y si *no* la tienes, dice positivo por error el 1% de las veces (una **tasa de falsos positivos** del 1%). Te haces la prueba. Sale **positiva**. ¿Qué probabilidad hay de que realmente tengas la enfermedad?
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Comprométete con una respuesta visceral antes de resolverlo. Una enfermedad afecta a 1 de cada 1,000. La prueba tiene una tasa de verdaderos positivos del 99% y una tasa de falsos positivos del 1%. Das positivo. La probabilidad de que estés realmente enfermo está más cerca de…"
+  options={[
+    { text: 'Alrededor del 9%', correct: true },
+    { text: 'Alrededor del 99%' },
+    { text: 'Alrededor del 50%' },
+    { text: 'Alrededor del 1%' },
+  ]}
+  explanation="Aguanta tu respuesta — estamos a punto de construirla a partir de una población de 100,000 personas, donde la lógica se vuelve casi obvia. El titular: es alrededor del 9%, no del 99%. Si tu instinto dijo 99%, estás en excelente compañía; esa es la respuesta que da casi todo el mundo, y se equivoca por un factor de diez. La razón es la tasa base (base rate), y un árbol de frecuencias naturales (natural frequencies) hace imposible no verla."
+/>
+
+## No uses porcentajes — usa personas
+
+La razón por la que este rompecabezas parece imposible en porcentajes es que los porcentajes esconden la tasa base. Así que tíralos a la basura y cuenta personas de verdad. Este es el truco más poderoso de todo el razonamiento bayesiano, y tiene nombre: **frecuencias naturales (natural frequencies)**. En vez de hacer malabares con «1%», «0,1%» y «99%», dejamos caer una multitud concreta de personas dentro del problema y simplemente contamos quién acaba dónde.
+
+Coge **100,000 personas** y guíalas por el escenario paso a paso.
+
+- La enfermedad afecta a 1 de cada 1,000, así que de nuestras 100,000 personas, **100 tienen la enfermedad** y **99,900 no**. Esa división — 100 frente a 99,900 — *es* la tasa base, y está haciendo casi todo el trabajo.
+- De las **100 que la tienen**, la prueba marca correctamente al 99% → **99 verdaderos positivos** (y 1 persona enferma a la que da el alta por error).
+- De las **99,900 que no la tienen**, la prueba marca por error al 1% → **999 falsos positivos**.
+
+Ahora fíjate solo en todos los que dieron positivo. Hay `99 + 999 = 1,098`. De esos, solo **99 tienen realmente la enfermedad.** Así que la probabilidad de que una persona con positivo esté de verdad enferma es:
+
+`99 ÷ 1,098 ≈ 0.090`, alrededor del **9%**.
+
+Toda la «paradoja» se evapora. La prueba es genuinamente buena — pero la multitud sana es tan enorme que incluso el 1% de ella (999 personas) ahoga a la diminuta multitud enferma (99 personas). La mayoría de los positivos son falsas alarmas no porque la prueba sea mala, sino porque hay mucho más «sano» que marcar por error que «enfermo» que marcar bien.
+
+| Grupo | Cuántos | La prueba dice positivo | De esos, ¿quién está realmente enfermo? |
+|---|---|---|---|
+| Tienen la enfermedad | 100 | 99 (verdaderos positivos) | 99 |
+| No la tienen | 99,900 | 999 (falsos positivos) | 0 |
+| **Todos los que dan positivo** | — | **1,098** | **99 → alrededor del 9%** |
+
+<Callout variant="tip" title="El hábito de las frecuencias naturales">
+Cuando un rompecabezas de probabilidad te deje bloqueado, **deja de calcular porcentajes e imagina una multitud fija** — 1,000 o 100,000 personas — y luego guíalas por las ramas y cuenta quién aterriza dónde. El teorema de Bayes es exactamente este recuento; la fórmula solo esconde a las personas. La investigación con médicos y jueces demuestra que el *mismo* problema que fallan en porcentajes lo aciertan en frecuencias naturales.
+</Callout>
+
+## Mira moverse la respuesta: la calculadora de probabilidad posterior
+
+Leer el recuento una vez convence a tu cabeza; *manejarlo* convence a tu instinto. Abajo tienes el mismo problema como una calculadora en vivo. Arranca con nuestro escenario — una tasa base del 0,1% (es decir, 1 de cada 1,000), una tasa de verdaderos positivos del 99% y una tasa de falsos positivos del 1% — y muestra la **probabilidad posterior (posterior)** (tu probabilidad real de enfermedad tras un positivo) tanto como porcentaje como en forma de multitud de personas.
+
+Juega con los tres deslizadores y mira cómo da bandazos la probabilidad posterior:
+
+<BayesCalculator
+  client:visible
+  title="Una enfermedad rara y una prueba «99% precisa»"
+  eyebrow="Actualización bayesiana"
+  hypothesisLabel="tienen la enfermedad"
+  evidenceLabel="dan positivo"
+  priorLabel="Prior — cómo de común es la enfermedad"
+  sensitivityLabel="Tasa de verdaderos positivos"
+  falsePositiveLabel="Tasa de falsos positivos"
+  instructions="Ajusta los tres números. La probabilidad posterior — tu probabilidad real de enfermedad tras un positivo — se actualiza en vivo."
+  breakdownLabel="De cada {n} personas"
+  priorBarLabel="Prior (antes de la prueba)"
+  posteriorBarLabel="Posterior (tras un positivo)"
+  readoutTemplate="Tras un positivo, solo el {posterior}% de quienes {evidence} realmente {hypothesis}."
+  frequencyTemplate="De {positives} que {evidence}, solo {truePos} {hypothesis} de verdad — los otros {falsePos} son falsas alarmas."
+  truePosLabel="verdaderos positivos"
+  falsePosLabel="falsos positivos"
+  legendTemplate="{have} de {n} realmente {hypothesis}"
+  resetLabel="Reiniciar"
+  initialPrior={0.1}
+  initialSensitivity={99}
+  initialFalsePositive={1}
+  populationSize={100000}
+  caption="Empieza aquí y luego experimenta: sube la tasa base y la probabilidad posterior trepa rápido; recorta la tasa de falsos positivos y trepa aún más rápido. La tasa de verdaderos positivos apenas importa en comparación. La tasa base y la tasa de falsas alarmas mandan en este rompecabezas."
+/>
+
+Tres experimentos que merece la pena hacer antes de seguir, porque cada uno enseña una palanca distinta:
+
+- **Haz la enfermedad diez veces más común** — arrastra el prior del 0,1% hasta el 1%. La probabilidad posterior salta de ~9% a aproximadamente 50%. Misma prueba, misma precisión; lo *único* que cambió es cuánto «enfermo» había que encontrar. La tasa base es el dial dominante.
+- **Recorta la tasa de falsos positivos al 0,1%** (una prueba mucho más específica). La probabilidad posterior salta a aproximadamente 50% incluso con la tasa base rara original. Las falsas alarmas, no los casos no detectados, son lo que envenena una prueba de cribado para una condición rara.
+- **Sube y baja la tasa de verdaderos positivos** entre, digamos, el 90% y el 100%. La probabilidad posterior apenas se inmuta. Cazar a *más* de las raras personas enfermas no ayuda mucho cuando eran raras de entrada — sencillamente no hay muchas que cazar.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Usando la lógica de la calculadora: ¿qué cambio único elevaría MÁS la probabilidad de estar realmente enfermo (la probabilidad posterior), partiendo del escenario de la enfermedad rara?"
+  options={[
+    { text: 'Recortar la tasa de falsos positivos del 1% a casi 0% — menos personas sanas marcadas por error significa que los verdaderos positivos dejan de quedar ahogados', correct: true },
+    { text: 'Subir la tasa de verdaderos positivos del 99% al 100% — cazar a la última persona enferma' },
+    { text: 'Reetiquetar la prueba como «99,9% precisa» sin cambiar los números' },
+    { text: 'Hacerse la prueba en una habitación más tranquila' },
+  ]}
+  explanation="Con una enfermedad rara, la probabilidad posterior está dominada por la avalancha de falsos positivos — 999 de ellos frente a solo 99 verdaderos positivos. Reduce esa avalancha (recorta la tasa de falsos positivos) y los verdaderos positivos dejan de estar en inferioridad, así que la probabilidad posterior se dispara. Subir una tasa de verdaderos positivos que ya es del 99% añade como mucho un verdadero positivo más de 1,098 — un error de redondeo. El lenguaje publicitario y la habitación no cambian nada."
+/>
+
+## La segunda prueba: actualizar otra vez
+
+Así que diste positivo y la lectura honesta es «alrededor del 9%, probablemente una falsa alarma — pero merece la pena comprobarlo». ¿Qué hace una persona cuidadosa? **Hacerse una segunda prueba independiente.** Y aquí está lo bonito: la actualización bayesiana te dice exactamente qué hacer con el resultado, porque **tu probabilidad posterior de la primera prueba se convierte en tu prior para la segunda.**
+
+Ya no entras en la segunda prueba creyendo «1 de cada 1,000». Tras el primer positivo, tu creencia honesta es «alrededor del 9%». Así que mete un prior del 9% en la misma maquinaria. Si la segunda prueba independiente también sale positiva (de nuevo 99% de verdaderos positivos, 1% de falsos positivos):
+
+- De 100,000 personas que están *cada una* en un prior del 9%: 9,000 tienen la enfermedad, 91,000 no.
+- Verdaderos positivos: `9,000 × 0.99 = 8,910`. Falsos positivos: `91,000 × 0.01 = 910`.
+- Probabilidad posterior: `8,910 ÷ (8,910 + 910) ≈ 0.907`, alrededor del **91%.**
+
+Una prueba positiva te llevó del 0,1% al 9%. Una segunda te llevó del 9% al 91%. *Eso* es actualizar por grados — cada pieza de evidencia te mueve la cantidad justa, y los movimientos se acumulan. La única prueba que parecía inútil («¿solo el 9%?») era en realidad una actualización enorme; multiplicó tus probabilidades casi por cien. Solo que partía de una base tan diminuta que incluso un salto de cien veces aterrizó en el 9%.
+
+<Callout variant="warning" title="«Independiente» está haciendo un trabajo de verdad">
+El truco de la segunda prueba solo funciona si la segunda prueba es **independiente** de la primera — un método distinto, no la misma prueba repetida (que solo reconfirmaría el mismo falso positivo). Si dos pruebas comparten el mismo defecto, un segundo positivo casi no te dice nada nuevo. Nos volveremos a topar con esta trampa como el **doble conteo de evidencia**: las pistas correlacionadas parecen dos confirmaciones pero están más cerca de ser una. Cuando las fuentes no son independientes, actualizar dos veces cuenta de más.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Tras una prueba positiva, tu probabilidad de enfermedad es de alrededor del 9%. Te haces una segunda prueba independiente y TAMBIÉN sale positiva. ¿Qué deberías creer ahora, más o menos?"
+  options={[
+    { text: 'Alrededor del 91% — la primera probabilidad posterior (9%) se convierte en el nuevo prior, y un segundo positivo la actualiza con fuerza al alza', correct: true },
+    { text: 'Todavía alrededor del 9% — una prueba es una prueba, nada cambió' },
+    { text: 'Alrededor del 18% — basta con sumar los dos resultados del 9%' },
+    { text: 'Exactamente el 99% — dos positivos significa que la precisión de la prueba ahora se aplica directamente' },
+  ]}
+  explanation="Las actualizaciones se encadenan: la probabilidad posterior de ayer es el prior de hoy. Partiendo de un prior del 9%, un segundo positivo independiente (99% de verdaderos positivos, 1% de falsos positivos) da 8,910 verdaderos positivos frente a 910 falsos positivos → alrededor del 91%. No sumas probabilidades (el 18% es un disparate), y no ignoras la nueva evidencia (el 9%). Cada prueba independiente multiplica tus probabilidades; dos positivos se apilan hasta la casi certeza aunque uno solo te dejara mayormente tranquilo."
+/>
+
+## En qué te miente este ejemplo resuelto
+
+La prueba médica es la maestra perfecta, pero saca dos advertencias de ella antes de generalizar.
+
+**Primera: la tasa base tiene que ser la *correcta*.** Nuestra cifra de 1 entre 1,000 era la tasa base de la *población general*. Si te hacen la prueba porque ya tienes síntomas, o porque la enfermedad es hereditaria en tu familia, tu prior ya no es 1 de cada 1,000 — podría ser 1 de cada 10, y entonces un positivo sí es genuinamente alarmante. Todo el cálculo es solo tan bueno como el prior que le metas, por lo que elegir la clase de referencia correcta (de la lección de [tasas base](/es/thinking-in-probabilities/base-rates)) es la mitad de la batalla. Cribar a una multitud de bajo riesgo y hacer la prueba a un paciente de alto riesgo son problemas distintos con priors distintos y probabilidades posteriores distintas.
+
+**Segunda: «9%» no es «ignóralo».** Un 9% de probabilidad de una enfermedad grave no es nada — es 90 veces tu riesgo de partida y merece absolutamente una prueba de seguimiento. La actualización bayesiana no te dice que descartes la evidencia; te dice que la *dimensiones correctamente* y actúes en consecuencia. El error que comete el paciente que entra en pánico no es tomarse la prueba en serio — es saltar directamente a «la tengo» y saltarse la segunda prueba que de verdad zanjaría la cuestión.
+
+### Cuándo recurrir a ella
+
+Recurre al árbol de frecuencias naturales **cada vez que una prueba, señal o filtro marque algo raro** — un cribado médico, una alerta de fraude, un filtro de spam, un escáner de seguridad, una corazonada de «este candidato encaja con el perfil». El detonante es la frase «la prueba es X% precisa» (o «el modelo es X% preciso») pegada a un objetivo raro. En el instante en que la oigas, niégate a leer la precisión como la respuesta. En vez de eso: nombra la tasa base, deja caer 100,000 casos imaginarios en las ramas y cuenta los verdaderos positivos contra los falsos positivos. Cuesta treinta segundos y rutinariamente convierte un pánico en un sensato «vamos a confirmarlo».
+
+<Quiz
+  client:visible
+  title="Ponte a prueba: la prueba médica"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  correctCountLabel="correctas"
+  gateLabel="Comprueba tu respuesta para continuar."
+  perfectMessage="Puntuación perfecta, ¡bien hecho!"
+  goodMessage="Buen trabajo, repasa las que has fallado."
+  keepPracticingMessage="Sigue practicando, lo tienes."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: '¿Por qué la probabilidad de enfermedad tras un positivo (alrededor del 9%) es tanto más baja que el 99% de precisión de la prueba?',
+      options: [
+        { text: 'El grupo sano es tanto más grande que el 1% de él (los falsos positivos) supera a los verdaderos positivos del diminuto grupo enfermo', correct: true },
+        { text: 'La prueba está en realidad estropeada o mal diseñada' },
+        { text: 'Porque un 99% de precisión significa en realidad un 9% de precisión' },
+        { text: 'Porque los positivos suelen ser errores de laboratorio' },
+      ],
+      explanation: 'De 100,000 personas: 99 verdaderos positivos de las 100 enfermas, pero 999 falsos positivos de las 99,900 sanas. La tasa base hace que dominen los falsos positivos, así que un positivo es mayormente una falsa alarma incluso con una prueba genuinamente precisa.',
+    },
+    {
+      question: '¿Cuál es el truco más poderoso para resolver estos rompecabezas?',
+      options: [
+        { text: 'Convertir los porcentajes en frecuencias naturales — cuenta personas de verdad por cada rama', correct: true },
+        { text: 'Multiplicar todos los porcentajes entre sí' },
+        { text: 'Fiarte de la cifra de precisión del titular' },
+        { text: 'Suponer que la tasa base es del 50% salvo que se diga lo contrario' },
+      ],
+      explanation: 'Las frecuencias naturales (imagina 100,000 personas y cuenta quién aterriza dónde) hacen visible la tasa base y convierten un rompecabezas opaco de porcentajes en un simple recuento — el formato con el que incluso los expertos dejan de cometer errores de tasa base.',
+    },
+    {
+      question: 'Tras una prueba positiva (probabilidad posterior ≈ 9%), ¿por qué un segundo positivo independiente te empuja hasta ~91%?',
+      options: [
+        { text: 'La probabilidad posterior del 9% se convierte en el nuevo prior, así que la segunda prueba ahora actualiza una creencia de partida mucho más alta', correct: true },
+        { text: 'Los dos positivos se suman para obtener un número mayor' },
+        { text: 'La precisión de la prueba del 99% por fin toma el control tras dos intentos' },
+        { text: 'Repetir cualquier prueba siempre da certeza' },
+      ],
+      explanation: 'Las actualizaciones se encadenan: cada probabilidad posterior es el siguiente prior. Partiendo del 9% (no del 0,1%), un segundo positivo independiente da 8,910 verdaderos frente a 910 falsos positivos → ~91%. La evidencia se apila de forma multiplicativa, por eso una segunda confirmación independiente es tan poderosa.',
+    },
+  ]}
+/>
+
+## Hacia dónde va esto
+
+Ya has resuelto el rompecabezas que rompe la intuición de la mayoría de la gente — y lo hiciste contando personas, no memorizando una fórmula. Pero el recuento *es* una fórmula disfrazada, y nombrarla te permite actualizar sin dibujar un árbol cada vez. A continuación, en **«El teorema de Bayes»**, sacamos la ecuación directamente del árbol de frecuencias naturales que acabas de construir, y luego conocemos a su gemela más amable — la **forma de cuotas (odds)** — que te permite hacer estas actualizaciones de cabeza: cuotas a priori, por un cociente de verosimilitud, igual a cuotas a posteriori.

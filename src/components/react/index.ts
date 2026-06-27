@@ -132,3 +132,6 @@ export type { IteratedDilemmaProps, DilemmaStrategyOption, StrategyKey } from '@
 
 export { LoopSimulator, default as LoopSimulatorDefault } from '@/components/react/LoopSimulator';
 export type { LoopSimulatorProps } from '@/components/react/LoopSimulator';
+
+export { BayesCalculator, default as BayesCalculatorDefault } from '@/components/react/BayesCalculator';
+export type { BayesCalculatorProps } from '@/components/react/BayesCalculator';

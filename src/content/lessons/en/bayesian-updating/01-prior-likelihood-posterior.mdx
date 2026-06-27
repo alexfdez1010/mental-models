@@ -1,0 +1,184 @@
+---
+title: "Prior, Likelihood, Posterior: The Three Ingredients"
+description: "Every Bayesian update is built from three pieces — what you believed before, how well the new evidence fits, and the sharper belief you get by combining them. Name them once and the whole machine clicks into place."
+topic: "en/bayesian-updating"
+order: 2
+minutes: 9
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout } from '@/components/react';
+
+Every Bayesian update — the medical test, the courtroom verdict, the "is my flight delayed?" guess — is cooked from exactly three ingredients. Learn their names once and you stop seeing a fog of probabilities and start seeing a recipe: what you believed *before*, how well the new evidence *fits*, and the belief you're left with *after*. That's it. Three pieces, one move, infinite uses.
+
+The intro lesson promised these three by name — **prior**, **likelihood**, **posterior** — and waved at the idea that you combine them. This lesson slows down and hands you each one, because almost every reasoning error in the whole course is really just grabbing the wrong ingredient or forgetting one entirely. The panicking patient didn't fail at arithmetic; he dropped the prior. Name the ingredients clearly enough and his mistake becomes obvious before you compute a single number.
+
+A quick promise about the math: there *is* an exact formula that snaps these three together, and it gets a whole lesson of its own (lesson 3, "Bayes' Theorem"). Here we stay in plain language. Your only job today is to recognize the three pieces in the wild and to feel — in words — how they combine.
+
+<MCQ
+  client:visible
+  pretest
+  question="A friend keeps two coins in a bag: one ordinary fair coin (heads half the time) and one trick coin with heads on both sides (heads every time). They reach in blindly, pull one out, flip it once — and it lands heads. Gut call: how likely is it they're holding the trick coin?"
+  options={[
+    { text: 'About 2 in 3 (≈67%) — heads is twice as likely from the trick coin, but you started at a 50/50 prior, so it only swings part-way', correct: true },
+    { text: '100% — it landed heads, and the trick coin is the heads coin' },
+    { text: 'Still 50% — one flip can’t tell you anything' },
+    { text: 'About 75% — split the difference between the two coins' },
+  ]}
+  explanation="No grade on a pretest — just file your gut. The trick coin always shows heads; the fair coin shows heads half the time. So heads is twice as likely to come from the trick coin — that’s the likelihood doing its job. But you started 50/50 (the prior), and one heads isn’t conclusive, so you swing only part-way: to 2 in 3, not all the way to certain. ‘100%’ forgets the fair coin can also land heads; ‘still 50%’ refuses to update at all. We’ll build the 2/3 from scratch below."
+/>
+
+## The prior: where you start
+
+**The prior, written $P(H)$, is your belief in a hypothesis *before* the new evidence arrives.** It's the answer to "how likely was this, going in?" The key word is *before* — the prior is your starting line, and you are never, ever allowed to start from a blank slate. Every update begins from a prior, even when you didn't consciously pick one.
+
+Where does the prior come from? Usually straight from the [base rates](/thinking-in-probabilities/base-rates) lesson: it's the outside-view anchor, how common the thing is across the relevant crowd. The disease's 1-in-1,000 was a prior. "Most new restaurants close within five years" is a prior. The prior is the base rate, now wearing a Bayesian hat and waiting for evidence to push on it.
+
+In our coin example, the prior couldn't be cleaner. Your friend pulls a coin *at random* from a bag of two, so before any flip, the trick coin and the fair coin are equally likely: **the prior is 50/50.** $P(\text{trick}) = 0.5$. That's the belief the flip is about to push against.
+
+<Callout variant="warning" title="Skip the prior and the whole machine breaks">
+The single most common Bayesian error — the one this entire course exists to cure — is **throwing the prior away** and treating the new evidence as the complete answer. The patient who reads "positive test" as "I have it" did exactly this: he kept the likelihood, dropped the prior, and panicked. A belief with no prior isn't a belief; it's just a reaction to the last thing you saw. **Always say your prior out loud before you look at the evidence.**
+</Callout>
+
+<MCQ
+  client:visible
+  question="You’re about to interview a candidate who looks fantastic on paper. Before they walk in, you remind yourself: ‘Only about 1 in 5 candidates who reach this round end up being a strong hire.’ Which ingredient is that ‘1 in 5’?"
+  options={[
+    { text: 'The prior — your belief in the hypothesis (“strong hire”) before you see today’s evidence (the interview)', correct: true },
+    { text: 'The likelihood — how well the interview fits the “strong hire” story' },
+    { text: 'The posterior — your final judgment after the interview' },
+    { text: 'None of these; it’s just a distraction from the real interview' },
+  ]}
+  explanation="‘1 in 5 reach-this-round candidates are strong hires’ is a base rate, and a base rate used as a starting belief is a prior — your $P(H)$ before today’s evidence. The interview itself is the evidence whose likelihood you’ll weigh next; the judgment you reach afterward is the posterior. Naming the prior up front is exactly the discipline that stops a charming interview from sweeping you to ‘definitely.’"
+/>
+
+## The likelihood: how well the evidence fits
+
+Now the evidence arrives. The **likelihood, written $P(E \mid H)$, asks: *if the hypothesis were true, how expected would this evidence be?*** Read that bar `$\mid$` out loud as the word **"given."** $P(E \mid H)$ is "the probability of the Evidence, *given* the Hypothesis is true." It runs *forward*: assume the hypothesis, then ask how natural the evidence looks from inside that world.
+
+There's a twin you can't skip: $P(E \mid \lnot H)$, the likelihood under the hypothesis being **false** ($\lnot$ means "not"). "If the hypothesis were *false*, how expected would this same evidence be?" Evidence is only useful when these two differ — when the clue is much more expected in one world than the other. If a clue is equally likely whether or not the hypothesis is true, it tells you nothing, no matter how dramatic it feels.
+
+Back to the coins. The evidence is **one heads**. How expected is heads in each world?
+
+- If they're holding the **trick** coin: heads is guaranteed. $P(\text{heads} \mid \text{trick}) = 1$.
+- If they're holding the **fair** coin: heads half the time. $P(\text{heads} \mid \text{fair}) = 0.5$.
+
+So heads is **twice as likely** to come from the trick coin as from the fair one. That ratio — 1 versus 0.5 — is the entire informational content of the flip. It's what will pull your 50/50 prior off-center.
+
+<Callout variant="warning" title="The likelihood is NOT the answer">
+Here's the trap the whole course circles back to. $P(E \mid H)$ — "if sick, the test almost always fires" — is **not** the same as $P(H \mid E)$ — "given a positive test, I'm almost certainly sick." They're written almost identically and they *feel* identical, but they run in opposite directions, and confusing them is the **inverse fallacy**. The coin shows it in miniature: $P(\text{heads} \mid \text{trick}) = 100\%$, yet seeing heads does **not** make you 100% sure it's the trick coin — because the fair coin produces heads too. The next lesson, the medical test, is built entirely to drill this difference into your bones.
+</Callout>
+
+<MCQ
+  client:visible
+  question="“If it’s the trick coin, you’ll definitely see heads” is a 100% likelihood. Why doesn’t seeing heads make you 100% sure it’s the trick coin?"
+  options={[
+    { text: 'Because the fair coin also produces heads (half the time), so heads is consistent with both worlds — the likelihood points forward (coin → flip), not backward (flip → coin)', correct: true },
+    { text: 'Because 100% likelihoods are always wrong' },
+    { text: 'Because the prior was secretly higher than 50%' },
+    { text: 'It actually does — heads proves the trick coin', correct: false },
+  ]}
+  explanation="‘P(heads given trick) = 100%’ runs forward: assume the trick coin, predict the flip. The thing you want runs backward: given heads, which coin? Those differ because the fair coin *also* yields heads (50% of the time), so a single heads is consistent with both. Reading the forward likelihood as the backward answer is the inverse fallacy — the exact mistake the medical-test lesson dismantles in full."
+/>
+
+## The posterior: where you land
+
+The **posterior, written $P(H \mid E)$, is your updated belief in the hypothesis *after* taking the evidence into account.** It's the payoff — the sharper belief you get by combining the prior with the likelihood. Note it has the same "given" bar as the likelihood, but flipped: $P(H \mid E)$ is "probability of the **Hypothesis**, given the **Evidence**." That's the number you actually wanted all along.
+
+How do the two ingredients combine? In one informal sentence that the whole course rests on:
+
+> **Posterior is proportional to likelihood × prior.**
+
+In words: take how plausible each hypothesis was to begin with (prior), multiply by how well it predicts the evidence you saw (likelihood), and the hypothesis that scores highest on *both* wins the most belief. A hypothesis needs to have been reasonably likely *and* to explain the evidence well. (The exact equation — what turns "proportional to" into "equals" — is lesson 3. Resist the urge to compute it yet; the intuition is the point.)
+
+Let's land the coin. Each world gets a score of likelihood × prior, then we normalize so the two scores add to 1:
+
+| Hypothesis | Prior $P(H)$ | Likelihood $P(\text{heads} \mid H)$ | Score (likelihood × prior) | Posterior $P(H \mid \text{heads})$ |
+|---|---|---|---|---|
+| **Trick coin** | 0.5 | 1.0 | $0.5 \times 1.0 = 0.50$ | $0.50 / 0.75 = \tfrac{2}{3} \approx 67\%$ |
+| **Fair coin** | 0.5 | 0.5 | $0.5 \times 0.5 = 0.25$ | $0.25 / 0.75 = \tfrac{1}{3} \approx 33\%$ |
+
+The two scores are 0.50 and 0.25, totalling 0.75. The trick coin's share is $0.50 / 0.75 = 2/3$. So after one heads, you should believe **about 67%** it's the trick coin — up from 50%, but nowhere near certain. The flip *was* real evidence (it moved you from 50% to 67%), just not conclusive evidence, because the fair coin can fake a heads.
+
+**And posteriors chain.** Suppose your friend flips the *same* coin again and it's heads a second time. Your belief is no longer 50/50 — it's the 2/3 you just earned. That 2/3 becomes your new **prior**, and you update again on the second heads. Run the same machinery and you land at **4/5 (80%)**. Each posterior becomes the next prior; evidence stacks. This is the same "yesterday's posterior is today's prior" engine you'll watch power the second medical test next lesson.
+
+<MCQ
+  client:visible
+  question="After one heads you believe 2/3 (≈67%) trick coin. Your friend flips the SAME coin again and it’s heads once more. What’s the right way to handle the second flip?"
+  options={[
+    { text: 'Make the 2/3 your new prior and update again on the second heads — posteriors chain, and this one lands at about 80%', correct: true },
+    { text: 'Start over from 50/50, since each flip is a fresh question' },
+    { text: 'Add 67% + 67%, so you’re now more than certain' },
+    { text: 'Stay at 67% — a second identical result tells you nothing new' },
+  ]}
+  explanation="Updating chains: each posterior becomes the next prior. You don’t reset to 50/50 (that throws away everything the first flip taught you), you don’t add probabilities (over 100% is nonsense), and you don’t ignore the new evidence. Carrying 2/3 forward as the prior and updating on a second heads gives about 4/5 — 80%. Two heads make the trick coin much more likely, but a fair coin *can* flip heads twice, so you’re still shy of certainty."
+/>
+
+## Spotting the three pieces in the wild
+
+The coins are clean on purpose, but the ingredients are everywhere. Train the reflex on an ordinary situation: **a friend is 20 minutes late. Are they stuck in traffic, or did they just forget?**
+
+- **Prior** $P(H)$ — going in, how often does *this* friend get genuinely stuck in traffic versus flake? If they're reliable but drive a congested route, maybe you'd have said 70% "traffic, not flaking" before tonight. That's your starting belief.
+- **Likelihood** $P(E \mid H)$ — the evidence is "20 minutes late, no text." How expected is *that* if they're stuck in traffic? Pretty expected — driving, can't text safely. And the twin $P(E \mid \lnot H)$: how expected is the same silence if they forgot entirely? Also fairly expected — someone who forgot also sends no text. The clue barely distinguishes the two worlds, so it's *weak* evidence and shouldn't move you much.
+- **Posterior** $P(H \mid E)$ — combine them: a high prior on "traffic" plus weak, non-distinguishing evidence leaves you roughly where you started — still leaning "traffic," only slightly dented. Now imagine the evidence changes to "they texted *I'm so sorry, totally spaced on this*." *That* clue is far more expected if they forgot than if they're driving — a strong likelihood ratio — and it should swing your posterior hard toward "flaked."
+
+Same recipe, no coins, no medicine: name the prior, weigh how differently the evidence fits each world, combine into a posterior. Once you can do this on a late friend, you can do it on a job offer, a diagnosis, or a headline.
+
+<MCQ
+  client:visible
+  question="In the late-friend example, what makes ‘20 minutes late, no text’ WEAK evidence for the ‘stuck in traffic’ hypothesis?"
+  options={[
+    { text: 'It’s roughly as expected whether they’re in traffic OR they forgot, so it barely distinguishes the two worlds — the likelihoods are too close to move the posterior much', correct: true },
+    { text: 'Because being late is always meaningless information' },
+    { text: 'Because the prior was already 70%, so no evidence could ever change it' },
+    { text: 'Because weak evidence is anything that arrives by text message' },
+  ]}
+  explanation="Evidence is only as strong as the *gap* between ‘P(evidence given traffic)’ and ‘P(evidence given they forgot).’ Silence-and-lateness is about equally expected whether they’re stuck or forgot, so the two likelihoods are close and the clue can’t pull your belief far. Swap in ‘they texted that they totally spaced’ and the gap explodes — far more expected under ‘forgot’ — so that clue *would* move the posterior sharply. Strength lives in the difference, not the drama."
+/>
+
+### When to reach for it
+
+Reach for these three names **the instant new evidence lands on any belief you hold** — a test result, an interview, a late friend, a market rumor, a scary headline. The trigger is the feeling "this changes things." Before you let it change anything, run the checklist: *What was my prior?* (say it out loud), *How much more expected is this evidence if my hypothesis is true than if it's false?* (the likelihood gap), and *So where does that leave me?* (the posterior). Naming the pieces costs five seconds and instantly exposes the two classic blunders — dropping the prior, and mistaking the forward likelihood for the backward answer.
+
+<Quiz
+  client:visible
+  title="Check yourself: the three ingredients"
+  questions={[
+    {
+      question: 'Match the definition: which ingredient is the posterior, P(H | E) — your belief AFTER weighing the evidence?',
+      options: [
+        { text: 'The posterior — the updated belief you get by combining prior and likelihood', correct: true },
+        { text: 'The prior — your belief before any evidence' },
+        { text: 'The likelihood — how expected the evidence is if the hypothesis is true' },
+        { text: 'The base rate — the crowd-level frequency you start from' },
+      ],
+      explanation: 'The posterior P(H | E) is the hypothesis given the evidence — your destination. The prior P(H) is the start; the likelihood P(E | H) runs the other way (evidence given hypothesis); the base rate is usually just where the prior comes from.',
+    },
+    {
+      question: 'In one informal sentence, how do the prior and likelihood combine into the posterior?',
+      options: [
+        { text: 'Posterior is proportional to likelihood × prior — a hypothesis wins belief by being plausible to begin with AND predicting the evidence well', correct: true },
+        { text: 'Posterior equals the likelihood, full stop — the prior is just a warm-up' },
+        { text: 'Posterior is the prior plus the likelihood, added together' },
+        { text: 'Posterior is whichever of prior or likelihood is larger' },
+      ],
+      explanation: 'The intuition the whole course rests on is multiplicative: score each hypothesis by likelihood × prior, then normalize. Treating the posterior as just the likelihood (ignoring the prior) is the inverse fallacy; you never add probabilities or take a max. The exact equation comes in lesson 3.',
+    },
+    {
+      question: 'A two-headed trick coin shows heads 100% of the time. You flip the bag-coin once and get heads. Why is the posterior only about 67% trick, not 100%?',
+      options: [
+        { text: 'Because the fair coin also yields heads (50% of flips), so a single heads is consistent with both — the prior was 50/50 and one heads only swings it part-way', correct: true },
+        { text: 'Because the trick coin doesn’t really always land heads' },
+        { text: 'Because you should ignore the flip entirely and stay at 50%' },
+        { text: 'Because 67% is just the average of 100% and 33%', correct: false },
+      ],
+      explanation: 'Scoring likelihood × prior gives 0.5 for the trick coin and 0.25 for the fair coin; normalizing yields 2/3. The flip is real evidence (50% → 67%) but not conclusive, because the fair coin can fake a heads. Reading the 100% likelihood as a 100% posterior would be the inverse fallacy.',
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You now hold the whole vocabulary the rest of the course speaks: **prior** (where you start, usually the base rate), **likelihood** (how well the evidence fits each world — forward, given the hypothesis, and emphatically *not* the answer), and **posterior** (where you land, proportional to likelihood × prior). You watched all three combine on a coin, chain across two flips, and reappear on a late friend with no math at all.
+
+Next, in **"The Medical Test,"** we take these three ingredients to the most famous Bayesian puzzle of all — a rare disease, a 99%-accurate test, a positive result — and find a true chance of only about 9%. You'll build it with a natural-frequency tree that makes the prior impossible to forget, drive an interactive posterior calculator, and watch the inverse fallacy (likelihood mistaken for posterior) get dismantled for good. The vocabulary you just learned is exactly what turns that "trick" into something obvious.

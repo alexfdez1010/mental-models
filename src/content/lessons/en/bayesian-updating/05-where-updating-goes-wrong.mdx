@@ -1,0 +1,204 @@
+---
+title: "Where Updating Goes Wrong: The Five Failure Modes"
+description: "Bayes is simple; using it under pressure is not. The five ways smart people botch an update — dropping the prior, flipping the conditional, double-counting evidence, refusing to budge, and reading tea leaves — and the habit that fixes each."
+topic: "en/bayesian-updating"
+order: 6
+minutes: 11
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout } from '@/components/react';
+
+Bayes' theorem is one line. You can write it on a napkin, you can run the odds form in your head, and after four lessons you can solve the medical test in your sleep. So why does almost everyone — doctors, judges, juries, very smart people having a perfectly reasonable day — keep getting these updates wrong in the wild? Because the formula was never the hard part. The hard part is not fooling yourself while you use it.
+
+The failures aren't random. There are exactly **five** recurring ways an update goes off the rails, and once you can name them you can feel each one coming. Three of them are different ways of *over*-reacting to evidence — treating it as bigger than it is — and two are different ways of getting the *amount* wrong by ignoring either the prior or the evidence's diagnosticity. Every one of them is a violation of the same one-sentence model: **start from your prior, weigh how well the evidence fits, and move in proportion to how strong that evidence really is.** This last teaching lesson is a tour of the five potholes, with the habit that patches each — and then a recap of the whole course before the exam.
+
+<MCQ
+  client:visible
+  pretest
+  question="Before we name them: three news outlets all run the same scary headline about a company, and your friend says, 'Three independent sources — it must be true, I'm now sure the company is doomed.' Which mistake is most clearly on display?"
+  options={[
+    { text: 'Double-counting correlated evidence — the three outlets may all be repeating ONE original report, so it’s closer to a single clue than three', correct: true },
+    { text: 'Dropping the prior — the friend forgot the base rate of companies failing' },
+    { text: 'Reading tea leaves — the headline is non-diagnostic noise' },
+    { text: 'No mistake at all — three sources really are three times the evidence' },
+  ]}
+  explanation="No grade on a pretest, but file the instinct. The tell is the word 'independent': three outlets echoing one wire report are not three independent clues, they're one clue wearing three hats. Multiplying three likelihood ratios that all trace back to the same source massively over-updates. You'll meet this as failure mode 3 — and you'll meet four siblings alongside it."
+/>
+
+## Failure 1 — Dropping the prior (base-rate neglect)
+
+**The analogy.** You walk into a movie halfway through, see a man holding a smoking gun over a body, and conclude he's the killer. Maybe — but you skipped the first hour, where he might have just disarmed the real shooter. Reading the evidence without the backstory is base-rate neglect: you treat the scene in front of you as the whole story.
+
+**The precise version.** Bayes needs the prior $P(H)$ as much as it needs the likelihood. Drop it — treat the evidence as if it arrived in a vacuum — and the posterior collapses onto the likelihood. That's exactly the panicking patient from lesson 2: a positive test on a 99%-accurate screen *feels* like a 99% verdict, but the real chance of disease is about **9%**, because the rare-disease base rate (1 in 1,000) drowns the test. Forget that base rate and you over-react by a factor of ten.
+
+**Concrete example.** A bank's fraud model flags a transaction as fraudulent and is "98% accurate." Should the analyst freeze the account? Only fraud is rare — say 1 in 5,000 transactions. Of 100,000 transactions, ~20 are fraud (the model catches ~20), but 2% of the ~99,980 legitimate ones get wrongly flagged — about **2,000 false alarms**. So of ~2,020 flags, only ~20 are real fraud: roughly **1%**. Treating the flag as near-certain fraud — dropping the base rate — would freeze thousands of innocent customers. This is the [base-rate neglect](/thinking-in-probabilities/base-rates) you met on the probability path, now wearing a Bayesian name.
+
+**The fix: say your prior out loud, first.** Before you look at any evidence, commit to a starting number — "I'd have put this at about 1 in 5,000." The instant you've named it, the evidence has something to push *against*, and you can feel whether you're moving a sensible amount or flipping all the way to certain. Skip that step and every fresh fact masquerades as the whole answer.
+
+<Callout variant="warning" title="The most common — and most expensive — error">
+Base-rate neglect is failure number one for a reason: it's the default. The human mind reads "the test is 99% accurate" as "the result is 99% trustworthy" *automatically*, and that single substitution drives medical panics, false fraud freezes, and wrongful suspicion. If you only ever fix one of these five, fix this one — and you fix it with five words spoken before you peek: **what did I believe before?**
+</Callout>
+
+## Failure 2 — The inverse fallacy (flipping the conditional)
+
+**The analogy.** "Most professional basketball players are tall" is true. "Most tall people are professional basketball players" is absurd. Same two facts, conditional flipped, and the second is wildly false. The little bar in $P(A \mid B)$ has a *direction*, and reversing it changes the meaning completely.
+
+**The precise version.** This is the swap lesson 3 named: confusing $P(E \mid H)$ — how likely the evidence is *if the hypothesis holds* — with $P(H \mid E)$ — how likely the hypothesis is *given the evidence*. "A positive test is 99% likely if I'm sick" ($P(E\mid H)$) is **not** "I'm 99% likely sick given a positive test" ($P(H\mid E)$). They differ by exactly the prior and the false-positive branch — which is why they can be 99% and 9% for the *same* test.
+
+**Concrete example — the prosecutor's fallacy.** A DNA sample at a crime scene matches the defendant. The expert testifies: "the chance of a match if the defendant were innocent is just 1 in a million." The prosecutor turns to the jury: "so there's a 1-in-a-million chance he's innocent." That second sentence is the inverse fallacy, and it has convicted real people. $P(\text{match}\mid\text{innocent})$ is tiny — but that is **not** $P(\text{innocent}\mid\text{match})$. If the database was searched across 10 million people, you'd expect about 10 innocent matches by chance, so a lone match might mean the defendant is one of *eleven* roughly-equally-likely people — far from a 1-in-a-million certainty. Same shape as "most terrorists are young men, therefore this young man is probably a terrorist": that confuses $P(\text{young man}\mid\text{terrorist})$ (high) with $P(\text{terrorist}\mid\text{young man})$ (microscopic, because young men vastly outnumber terrorists).
+
+**The fix: ask "which direction is the conditional?"** Whenever you hear a probability about evidence, stop and label it. Is this number "how likely the clue is *if* my hypothesis is true," or "how likely my hypothesis is *given* the clue"? If it's the first, you don't have your answer yet — you have a likelihood, and you still have to run it through the prior to get the posterior you actually want.
+
+<MCQ
+  client:visible
+  question="A lab reports: 'If a coin were fair, the chance of getting 10 heads in a row is about 1 in 1,000.' A pundit concludes: 'So there's a 99.9% chance this coin is rigged.' Which failure is this?"
+  options={[
+    { text: 'The inverse fallacy — the pundit flipped P(10 heads | fair) into P(fair | 10 heads), ignoring how rare rigged coins are to begin with', correct: true },
+    { text: 'Double-counting — the ten flips are correlated' },
+    { text: 'Reading tea leaves — ten heads is non-diagnostic' },
+    { text: 'No error — 1 in 1,000 against fair means 99.9% rigged' },
+  ]}
+  explanation="P(10 heads | fair) ≈ 0.001 is a likelihood. P(fair | 10 heads) is the posterior, and it depends on the prior: rigged coins are extremely rare, so even a 1-in-1,000 fluke is more likely to be a fair coin having an unusual run than a rigged coin in your pocket. The flips aren't correlated (each flip is independent), and ten heads IS diagnostic — the sole error is reversing the bar."
+/>
+
+## Failure 3 — Double-counting correlated evidence
+
+**The analogy.** A rumour spreads: Alice tells Bob, Bob tells Carol, Carol tells you. Then you "confirm" it because you heard it from Bob *and* Carol *and* a tweet — but all four threads trace back to Alice. You've counted one source four times and mistaken an echo chamber for a chorus.
+
+**The precise version.** The clean way to chain evidence (from lesson 3) is to multiply likelihood ratios: posterior odds = prior odds × LR₁ × LR₂ × …. But that multiplication is **only valid if the clues are independent.** When two clues are correlated — they'd both appear together whether or not the hypothesis is true — multiplying both in counts the same information twice and over-updates, sometimes wildly.
+
+**Concrete example.** Recall the second test from lesson 2: one positive took you from 0.1% to 9%, and a second *independent* positive took you to 91%. But suppose the "second test" is the **same** test run again on the **same** sample. If the first positive was a false alarm caused by a contaminated sample, the repeat will cheerfully produce the same false positive — it shares the failure mode. Treating it as an independent confirmation and multiplying its likelihood ratio in pushes you toward 91% on what is really still one clue. Same trap with the three news outlets: three articles, one wire report, one likelihood ratio — not three.
+
+**The fix: ask "are these clues really independent, or one clue wearing three hats?"** Before you multiply a second likelihood ratio in, check whether the second clue could go wrong for the *same reason* as the first. If a single underlying cause (one source, one shared bias, one shared sensor flaw) could produce both, they're correlated — discount the second heavily or drop it. Independence is the assumption that makes chaining legal, and it's the assumption people quietly violate most.
+
+<Callout variant="tip" title="The independence test, in one question">
+Here's a fast check for whether two pieces of "confirmation" really stack: **would the second clue still show up even if the first one were a mistake?** If a contaminated sample (or a single biased source, or one shared rumour) would trigger *both*, they're not independent — and you should count them as roughly one. Genuine independent confirmation is powerful precisely because it's hard to get; most "multiple sources" are one source in costume.
+</Callout>
+
+<MCQ
+  client:visible
+  question="You suspect a restaurant is overrated. You find three glowing five-star reviews and update hard toward 'actually great.' Then you notice all three were posted the same week, in similar phrasing, by accounts with no other reviews. What should you do?"
+  options={[
+    { text: 'Discount them heavily — they look like one coordinated source, so they’re close to a single weak clue, not three independent confirmations', correct: true },
+    { text: 'Trust them more — three reviews is three times the evidence no matter what' },
+    { text: 'Flip the conditional and compute P(review | great)' },
+    { text: 'Ignore your prior entirely and go with the reviews' },
+  ]}
+  explanation="The shared week, shared phrasing, and empty accounts scream a single coordinated origin — likely one source (the owner, a fake-review service) wearing three hats. Multiplying three correlated likelihood ratios over-updates badly; they should count as roughly one weak, suspect clue. This is double-counting, and the independence test catches it: if one fake-review campaign produced all three, they aren't independent."
+/>
+
+## Failure 4 — Refusing to update (anchoring and confirmation bias)
+
+**The analogy.** A defence lawyer with a guilty client: every fact that points to guilt gets explained away, every shred that points to innocence gets trumpeted. The verdict was decided before the evidence; the "reasoning" is just decoration. That's a belief that has stopped being a posterior and become an identity.
+
+**The precise version.** This is the stubborn extreme — the mirror image of the gullible "flip to certain." Here the posterior *never moves*, no matter what arrives, because every piece of disconfirming evidence gets reinterpreted, discounted, or ignored until it fits the conclusion you already hold. In Bayes' terms, you've secretly set the prior to 1 (or 0): a prior of 1 can't be moved by any finite evidence, so the mind is closed by construction. This is **confirmation bias** with the math showing — the engine of a whole other course on this path: [confirmation bias](/confirmation-bias).
+
+**Concrete example — the asymmetry.** Notice *how* the refusal works: it's not that the stubborn updater ignores all evidence, it's that they apply wildly different standards depending on direction. Evidence *for* their view sails through on a feather — one supportive anecdote, accepted instantly. Evidence *against* it must clear a mountain — caveated, nitpicked, "correlation isn't causation," "the study was small," "consider the source." Same strength of evidence, opposite scrutiny, depending only on which way it points. A Bayesian applies the *same* likelihood ratio whichever direction the clue points; the confirmation-biased mind silently rescales it to protect the prior.
+
+**The fix: pre-commit to "what evidence would change my mind?"** Before the argument heats up, write down — out loud, in advance — the specific observation that would move you the other way. "I'd abandon this hypothesis if I saw X." A belief that *no* possible evidence could dislodge isn't a strong belief; it's an unfalsifiable one, and it's not doing any Bayesian work at all. Naming your update-trigger in advance is the antidote to explaining everything away after the fact.
+
+<MCQ
+  client:visible
+  question="Two people debate a claim. One says, 'I'd change my mind if I saw a large pre-registered study showing no effect.' The other says, 'No study could convince me; I just know I'm right.' Which one is updating like a Bayesian?"
+  options={[
+    { text: 'The first — naming the specific evidence that would move them keeps the prior below 1, so new evidence can actually do its job', correct: true },
+    { text: 'The second — unshakeable confidence is the mark of a strong, correct belief' },
+    { text: 'Neither — Bayesians never change their minds' },
+    { text: 'Both equally — confidence and openness are the same thing' },
+  ]}
+  explanation="A belief that nothing could change has an implicit prior of 1, and a prior of 1 is immovable by any evidence — that's confirmation bias, not conviction. The first person keeps a finite prior and pre-commits to a disconfirming observation, so a likelihood ratio can still shift them. Updating by degrees requires that *some* evidence, in principle, could move you."
+/>
+
+## Failure 5 — Updating on non-diagnostic evidence (reading tea leaves)
+
+**The analogy.** A horoscope says "you'll face a challenge this week, but your resilience will see you through." You nod — it fits! It also fits literally everyone, every week. Evidence that's true no matter what isn't evidence; it's a mirror, and you're updating on your own reflection.
+
+**The precise version.** Lesson 4 gave the diagnostic of diagnosticity: the **likelihood ratio**, $\frac{P(E\mid H)}{P(E\mid \lnot H)}$. When that ratio is near **1**, the evidence is just as likely whether or not the hypothesis is true, so it carries *zero* information and the posterior should equal the prior — you shouldn't move at all. The failure is moving anyway: feeling persuaded by something that would look exactly the same in the world where you're wrong.
+
+**Concrete example.** A startup founder points to "huge engagement — people are spending tons of time in the app!" as proof users love the product. But would you also see high time-in-app if the app were *confusing* and people were lost, hunting for the button? If so, $P(\text{high time}\mid\text{loved}) \approx P(\text{high time}\mid\text{confusing})$ — likelihood ratio near 1 — and the metric is non-diagnostic between "loved" and "broken." Same with a manager who reads "the candidate seemed confident and well-dressed" as strong evidence of competence: confident, well-dressed people who are *also* incompetent are extremely common, so the clue barely separates the hypotheses. Vague, fits-everything, would-appear-anyway evidence has a likelihood ratio of about 1 and deserves a shrug, not an update.
+
+**The fix: ask "would I see this evidence just as easily if I were wrong?"** That single question *is* the likelihood ratio in plain English. If the answer is "yeah, probably" — the clue would show up about as often in the world where your hypothesis is false — then the ratio is near 1, the evidence is non-diagnostic, and the disciplined move is to leave your belief exactly where it was.
+
+<MCQ
+  client:visible
+  question="A psychic tells a grieving stranger, 'I sense you've recently lost someone close, and you're carrying guilt about something left unsaid.' The stranger is stunned by the accuracy. From a Bayesian view, why is this NOT strong evidence of psychic power?"
+  options={[
+    { text: 'The statement is true of almost everyone who visits a psychic, so P(statement | psychic) ≈ P(statement | no powers) — a likelihood ratio near 1, non-diagnostic', correct: true },
+    { text: 'Because psychics are common, so the prior is high' },
+    { text: 'Because the stranger double-counted the two clues' },
+    { text: 'Because the stranger flipped the conditional' },
+  ]}
+  explanation="A cold reading works precisely because it's non-diagnostic: nearly everyone has lost someone and carries an unsaid regret, so a fraud with no powers would produce the exact same 'hit.' Likelihood ratio ≈ 1 means the evidence fits both worlds equally and should move you nowhere. The clue feels specific but would appear just as easily if the psychic were wrong — the definition of reading tea leaves."
+/>
+
+## A posterior is the start of the next update
+
+One more idea before the checklist, because it's what keeps all five fixes from being a one-time chore. **An update is never the end of anything.** The posterior you land on isn't a final verdict to file away — it's the **input** to your next decision and the **prior** for your next update. Yesterday's posterior is today's prior; the 9% you reached after one positive test became the prior you fed into the second.
+
+That's where Bayes meets [second-order thinking](/second-order-thinking): a good update doesn't just answer "what do I believe now?" — it sets up "and what do I do *next*, and what will I believe after the next piece of evidence?" The five failures all get *worse* when you forget this, because a botched posterior doesn't just give you one wrong answer — it poisons every update downstream of it.
+
+<Callout variant="tip" title="Updating is a chain, not a verdict">
+Treat every posterior as provisional: the best belief you can hold *until the next clue arrives*, at which point it becomes the prior you update from. This is what makes Bayesian thinking a *practice* rather than a calculation. You're never done; you're just better calibrated than you were a clue ago — and aiming to stay that way as the evidence keeps coming.
+</Callout>
+
+### The pre-mortem habit: five questions before you trust an update
+
+Here's the whole lesson as a checklist. Before you let any piece of evidence move your belief, run these five — each one disarms one failure mode:
+
+1. **What did I believe before?** (Say the prior out loud — defeats *dropping the prior*.)
+2. **Which direction is the conditional?** (Is this "evidence given hypothesis" or "hypothesis given evidence"? — defeats the *inverse fallacy*.)
+3. **Are these clues really independent?** (Or one clue wearing three hats? — defeats *double-counting*.)
+4. **What evidence would change my mind?** (Pre-committed, before the argument — defeats *refusing to update*.)
+5. **Would I see this evidence just as easily if I were wrong?** (Is the likelihood ratio near 1? — defeats *reading tea leaves*.)
+
+Thirty seconds of these five questions catches almost every botched update in the wild. They're not five separate skills, either — they're five guards around the *same* sentence: start from your prior, weigh the evidence by how diagnostic it really is, and move in proportion.
+
+<Quiz
+  client:visible
+  title="Check yourself: failure modes"
+  questions={[
+    {
+      question: 'A doctor sees a positive result on a rare-disease screen and tells the patient "you almost certainly have it." Which failure mode is this, and what’s the fix?',
+      options: [
+        { text: 'Dropping the prior — the fix is to state the base rate first, then run it through the test', correct: true },
+        { text: 'The inverse fallacy — the fix is to use natural frequencies' },
+        { text: 'Double-counting — the fix is to run a second test' },
+        { text: 'Reading tea leaves — the fix is to ignore the test' },
+      ],
+      explanation: 'Reading a positive on a rare-disease screen as near-certain is the classic base-rate neglect: the prior (1 in 1,000) is doing most of the work and got dropped, so a real ~9% chance got inflated to "certain." The fix is to name the base rate out loud before touching the test result.',
+    },
+    {
+      question: 'Which statement correctly describes the inverse fallacy?',
+      options: [
+        { text: 'Confusing P(evidence | hypothesis) with P(hypothesis | evidence) — e.g. reading "a match is rare if innocent" as "innocence is rare given a match"', correct: true },
+        { text: 'Counting the same source multiple times' },
+        { text: 'Refusing to move your belief no matter what' },
+        { text: 'Updating on evidence with a likelihood ratio near 1' },
+      ],
+      explanation: 'The inverse fallacy (the prosecutor’s fallacy in court) flips the conditional bar. P(match | innocent) being tiny does NOT make P(innocent | match) tiny — they differ by the prior and how many people could match. The other options describe double-counting, refusing to update, and reading tea leaves.',
+    },
+    {
+      question: 'You hold a strong belief and notice you demand a huge study to be moved against it but accept a single anecdote in its favour. What is this, and what’s the cure?',
+      options: [
+        { text: 'Confirmation bias / refusing to update — the cure is to pre-commit to the specific evidence that would change your mind', correct: true },
+        { text: 'Base-rate neglect — the cure is natural frequencies' },
+        { text: 'Double-counting — the cure is the independence test' },
+        { text: 'Reading tea leaves — the cure is checking the likelihood ratio' },
+      ],
+      explanation: 'Applying a feather’s scrutiny to supporting evidence and a mountain’s to disconfirming evidence is the signature asymmetry of confirmation bias — the prior has secretly been set near 1, so nothing can move it. The cure is to name, in advance, the specific observation that would change your mind, keeping the prior finite and movable.',
+    },
+  ]}
+/>
+
+## The whole course in one sentence
+
+Step back and look at the ladder. Lesson 1 named the three ingredients — **prior, likelihood, posterior** — and snapped them into one move: never build a belief from scratch; start from what you believed and let evidence *nudge* it. Lesson 2 made that move concrete with the **medical test**, counting people through a natural-frequency tree until "about 9%, not 99%" stopped feeling like a trick. Lesson 3 lifted the actual **theorem** out of that tree and handed you its friendlier twin, the odds form — **prior odds × likelihood ratio = posterior odds** — that you can run on a napkin. Lesson 4 opened up that middle term, the **likelihood ratio**, the single number for how diagnostic a clue is, and showed why extraordinary claims need extraordinary evidence. And this lesson mapped the five potholes — **dropping the prior, flipping the conditional, double-counting, refusing to budge, and reading tea leaves** — that swallow people who know the formula perfectly well.
+
+Every rung, and every failure mode, reduces to the same sentence: **start from your prior, weigh the evidence by how strongly it fits, and move in proportion — never all the way, never not at all.** Dropping the prior breaks the *start*. The inverse fallacy and reading tea leaves break the *weighing*. Double-counting and refusing to update break the *proportion*. Hold all three intact and you're updating like a Bayesian — changing your mind by degrees, in a world that almost never hands you a verdict.
+
+## Where this goes next
+
+That's the last teaching lesson. What's left is to prove you own the move — all of it, under pressure, without a tree to lean on — in the **Final Exam**. It's graded and unlike anything else in the course: **one question at a time**, and once you submit an answer it **locks** — no Back button, no second attempt, no peeking ahead. Your score appears only at the end, and the pass mark is **70%**. Treat it like the real thing: read each scenario, name the prior, ask which way the conditional points, and move in proportion.
+
+Beyond the exam, the probability path keeps climbing into its expert tier. Two summits wait for you there: **fat tails and black swans** — what happens when the rare events aren't merely rare but world-changing, and the gentle bell curve your intuitions assume is the wrong map entirely; and **calibration** — the discipline of knowing *how right you actually are*, so that when you say "70% likely," it happens about 70% of the time. Bayesian updating tells you which way to move your belief; calibration tells you whether you can trust the number you landed on. Pass the exam first — then go meet the tails.

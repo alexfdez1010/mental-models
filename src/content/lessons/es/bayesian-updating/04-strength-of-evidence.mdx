@@ -1,0 +1,293 @@
+---
+title: "La fuerza de la evidencia: el cociente de verosimilitud"
+description: "¿Cuánto debería moverte una pista? Hay un único número que lo responde: el cociente de verosimilitud (likelihood ratio) — cuántas veces más probable es la evidencia si tu hipótesis es cierta que si es falsa. Las pistas débiles susurran, las fuertes gritan, y las afirmaciones extraordinarias exigen evidencia extraordinaria."
+topic: "es/bayesian-updating"
+order: 5
+minutes: 12
+updated: 2026-06-27
+---
+
+import { MCQ, Quiz, Callout, BayesCalculator } from '@/components/react';
+
+La lección pasada dejó una pieza dentro de una caja negra. En la forma de cuotas — **cuotas posteriores = cuotas previas × cociente de verosimilitud** — las cuotas previas normalmente las puedes estimar, y multiplicar es pura aritmética. Pero ese término del medio, el **cociente de verosimilitud (likelihood ratio)**, es la parte que de verdad dice *con cuánta fuerza debería golpearte una pista*. Dos piezas de evidencia pueden «apuntar en la misma dirección» mientras una te empuja un pelín y la otra le da la vuelta a toda tu creencia. La diferencia entre ambas la captura por completo un único número, y esta lección va de saber leerlo.
+
+Esto es lo que nadie te cuenta sobre la evidencia: su fuerza no tiene casi nada que ver con lo *confirmatoria* que se siente. Una pista puede gritarle «¡culpable!» a tu instinto y valer esencialmente cero, mientras que un detalle anodino y técnico zanja el caso en silencio. El instinto mide la viveza; el cociente de verosimilitud mide la *diagnosticidad* — y solo uno de los dos sigue la pista de la verdad. Al terminar esta lección serás capaz de mirar cualquier pista y hacerte la única pregunta que importa: *no «¿esto encaja con mi teoría?» sino «¿cuánto mejor encaja con mi teoría que con la alternativa?»*.
+
+Esa segunda pregunta es todo el juego. Agárrala fuerte; dedicaremos el resto de la lección a ganárnosla.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un detective sopesa si un sospechoso es culpable. ¿Cuál de estos dos hechos es evidencia MÁS FUERTE de culpabilidad? (Tira de instinto — aquí no hay nota.)"
+  options={[
+    { text: 'La huella del zapato del sospechoso coincide exactamente con un dibujo de suela poco común hallado en la escena — un dibujo presente en menos de 1 de cada 500 zapatos', correct: true },
+    { text: 'El sospechoso tiene en casa un cuchillo de cocina del tipo usado en el crimen' },
+    { text: 'Son igual de fuertes — ambos conectan al sospechoso con el crimen' },
+    { text: 'El cuchillo de cocina es más fuerte; es el tipo de arma de verdad' },
+  ]}
+  explanation="La huella de suela rara es mucho más fuerte, y la razón es la alternativa. Casi todo el mundo tiene un cuchillo de cocina, así que «tiene un cuchillo» es casi tan probable para una persona inocente como para una culpable — apenas distingue los dos mundos. Pero un dibujo de suela presente en menos de 1 de cada 500 zapatos solo aparece en la escena si el sospechoso estuvo allí; es muy improbable en una persona inocente cualquiera. La evidencia fuerte no es la que encaja con la culpa — es la que sería sorprendente bajo la inocencia."
+/>
+
+## Un solo número para la fuerza de una pista
+
+Formalmente, la fuerza de una pieza de evidencia es su **cociente de verosimilitud (likelihood ratio, LR)**:
+
+$$\text{LR} = \frac{P(E \mid H)}{P(E \mid \lnot H)}$$
+
+En palabras: cuántas veces más probable es la evidencia $E$ *si tu hipótesis $H$ es cierta* que si es falsa. Es el mismo cociente de verosimilitud que conociste en la forma de cuotas de la lección pasada — y es la fuerza *entera* de una pista, comprimida en un único número. Todo lo relativo a «¿cuánto debería moverme esto?» vive aquí. Recuerda la regla que ya demostraste: **cuotas posteriores = cuotas previas × LR.** El prior es dónde estabas; el LR es con cuánta fuerza empuja la nueva pista.
+
+La escala es maravillosamente intuitiva en cuanto ves dónde se sienta el $1$:
+
+- **LR = 1** → la evidencia es exactamente igual de probable tanto si $H$ es cierta como si es falsa. Es **no diagnóstica** — inútil. Multiplica tus cuotas por $1$ y no pasa nada. (Es el caso de «la evidencia inútil no mueve nada» de la forma de cuotas.)
+- **LR > 1** → evidencia **a favor** de $H$. Cuanto mayor el número, con más fuerza apunta. LR = 2 duplica tus cuotas; LR = 100 las multiplica por cien.
+- **LR < 1** → evidencia **en contra** de $H$. Un LR de $\tfrac{1}{10} = 0.1$ reduce tus cuotas a una décima parte. (La evidencia a favor de $H$ es automáticamente evidencia en contra de $\lnot H$, y viceversa.)
+- **LR muy grande o muy pequeño** → evidencia **fuerte**, en la dirección que sea.
+
+Una idea aproximada de las magnitudes, con una pista concreta para cada una:
+
+| Cociente de verosimilitud | Fuerza | Pista de ejemplo |
+|---|---|---|
+| $\approx 1$ | Nula (no diagnóstica) | «El sospechoso tiene un cuchillo de cocina» — casi todo el mundo lo tiene |
+| $2$ | Débil | Un correo de spam contiene la palabra «oferta» |
+| $5$ | Modesta | Un candidato a un puesto tiene un título relevante |
+| $10$ | Moderada | Un correo de spam contiene «¡¡¡GRATIS!!! haz clic ya» |
+| $100$ | Fuerte | Coincidencia parcial de ADN en un marcador raro |
+| $1{,}000+$ | Muy fuerte | Coincidencia de un perfil de ADN completo |
+
+Fíjate en que la tabla es simétrica en espíritu: un LR de $\tfrac{1}{100}$ es exactamente igual de *fuerte* que un LR de $100$ — solo que apunta en la otra dirección. La fuerza va de la *distancia respecto a 1*, en cualquier dirección.
+
+<Callout variant="tip" title="La única pregunta que mide la evidencia">
+No preguntes «¿esto encaja con mi teoría?» — casi todo encaja con *alguna* teoría. Pregunta: **«¿cuánto más probable es esta evidencia si tengo razón que si me equivoco?»** Ese cociente *es* la fuerza. Si la respuesta es «más o menos lo mismo en ambos casos», la pista no vale nada por muy confirmatoria que se sienta.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una prueba se dispara (da positivo) el 60% de las veces cuando la hipótesis es cierta, y el 60% de las veces cuando es falsa. ¿Cuál es su cociente de verosimilitud, y qué te dice?"
+  options={[
+    { text: 'LR = 0.60 / 0.60 = 1 — no diagnóstica; un positivo debería mover tu creencia exactamente nada', correct: true },
+    { text: 'LR = 1.2 — un apoyo modesto a la hipótesis' },
+    { text: 'LR = 60 — evidencia fuerte, porque se dispara el 60% de las veces bajo la hipótesis' },
+    { text: 'No puedes calcularlo sin el prior' },
+  ]}
+  explanation="LR = P(E|H) / P(E|¬H) = 0.60 / 0.60 = 1. La prueba es igual de probable que se dispare tanto si la hipótesis es cierta como si es falsa, así que no aporta información — cuotas posteriores = cuotas previas × 1 = cuotas previas, sin cambios. La tasa de verdaderos positivos del 60% parece tranquilizadora en aislamiento, pero la fuerza de una pista es el cociente, no el número de arriba a secas. (Y no — no necesitas el prior para calcular el LR; el LR es una propiedad de la propia evidencia.)"
+/>
+
+## Diagnóstica frente a inútil: todo está en la alternativa
+
+Esta es la idea más importante de la lección, y sale directamente de la fórmula. El denominador $P(E \mid \lnot H)$ — lo probable que es la evidencia *bajo la alternativa* — es lo que hace o deshace una pista. **La evidencia fuerte tiene que ser improbable bajo la alternativa.** Si algo es común tanto si tu hipótesis se cumple como si no, no puede discriminar entre las dos, y el cociente se desploma hacia 1.
+
+Coge las dos pistas del detective del pretest, en números. Supón que casi todos los hogares tienen un cuchillo de cocina — de modo que $P(\text{tiene cuchillo} \mid \text{culpable}) \approx 0.95$ y $P(\text{tiene cuchillo} \mid \text{inocente}) \approx 0.90$. El cociente de verosimilitud:
+
+$$\text{LR}_{\text{knife}} = \frac{0.95}{0.90} \approx 1.06$$
+
+Apenas por encima de 1. La «prueba irrefutable» de tener un cuchillo multiplica tus cuotas de culpabilidad por unos $1.06$ — un error de redondeo. *Se siente* incriminatoria porque conecta al sospechoso con el arma, pero es casi inútil, porque es casi igual de probable en una persona inocente.
+
+Ahora la huella de suela rara. Digamos que un sospechoso culpable que estuvo en la escena deja ese dibujo con probabilidad $P(E \mid \text{culpable}) \approx 0.9$, mientras que una persona inocente cualquiera resulta tener ese dibujo raro con probabilidad $P(E \mid \text{inocente}) \approx 0.002$ (menos de 1 de cada 500 zapatos):
+
+$$\text{LR}_{\text{print}} = \frac{0.9}{0.002} = 450$$
+
+Un LR de **450**. *Esa* sí es una pista que se gana el sueldo — no porque encaje mejor con la culpa (ambas pistas encajan bien con la culpa) sino porque es **rara bajo la inocencia.** Toda la diferencia entre una pista inútil y una decisiva vive en el denominador.
+
+<Callout variant="warning" title="Confirmar ≠ diagnosticar">
+Una pista que «confirma» tu hipótesis pero es *igual* de esperable bajo la alternativa no te dice nada. «El acusado estaba nervioso en el estrado» encaja con la culpa — pero los inocentes también se ponen nerviosos, así que su LR ronda 1. Antes de dejar que cualquier pista te mueva, comprueba el denominador: *¿cuán probable sería ver esto exacto si mi hipótesis fuera falsa?* Si es «igual de probable», deséchala.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Por qué «el sospechoso tiene un cuchillo de cocina» es casi inútil como evidencia de culpabilidad, aunque el crimen usara ese tipo de cuchillo?"
+  options={[
+    { text: 'Porque es casi tan común entre los inocentes como entre los culpables — P(tiene cuchillo | inocente) ≈ P(tiene cuchillo | culpable) — así que el cociente de verosimilitud ronda 1', correct: true },
+    { text: 'Porque tener un cuchillo es ilegal y por tanto inadmisible' },
+    { text: 'Porque la probabilidad previa de culpabilidad es siempre cero' },
+    { text: 'Porque los cuchillos de cocina nunca se usan en crímenes reales' },
+  ]}
+  explanation="Es el denominador. Casi todo el mundo tiene un cuchillo de cocina, así que la evidencia es más o menos igual de probable tanto si el sospechoso es culpable como inocente — el cociente de verosimilitud P(E|culpable) / P(E|inocente) ≈ 0.95/0.90 ≈ 1.06. Una pista solo puede discriminar entre dos mundos si es mucho más probable en uno que en el otro. La evidencia fuerte es improbable bajo la alternativa; esto es lo contrario."
+/>
+
+## Pistas débiles, multiplicadas
+
+Una sola pista débil te mueve poco. Pero las pistas débiles *se apilan* — y en forma de cuotas, apilar no es más que multiplicar. Si las pistas son independientes, encadenas sus cocientes de verosimilitud:
+
+$$\text{cuotas posteriores} = \text{cuotas previas} \times \text{LR}_1 \times \text{LR}_2 \times \text{LR}_3 \times \cdots$$
+
+Cada nueva pista es otro factor. Así que una sarta de pistas individualmente nada impresionantes puede multiplicarse hasta una conclusión fuerte. Supón que partes de cuotas a la par, $1 : 1$, de que un correo concreto es spam, y llegan tres señales débiles — cada una con un cociente de verosimilitud de unos $3$ (la palabra «ganador», un dominio de remitente desconocido, un enlace sospechoso):
+
+$$\underbrace{1 : 1}_{\text{cuotas previas}} \times 3 \times 3 \times 3 = 27 : 1$$
+
+Tres pistas olvidables, cada una apenas digna de una segunda mirada por sí sola, se multiplican hasta unas cuotas de **27 : 1** — alrededor de un $\tfrac{27}{27+1} \approx 96\%$ de probabilidad de que sea spam. Así es exactamente como un filtro de spam de Bayes ingenuo «condena» un correo: ninguna palabra suelta es prueba, pero suficientes palabras ligeramente sospechosas se multiplican más allá de cualquier umbral razonable. Los detectives, los médicos apilando síntomas y los tribunales de contratación combinando señales débiles hacen funcionar el mismo motor.
+
+Una salvedad crucial, a la que dedicamos la próxima lección entera: **las pistas tienen que ser independientes.** Si dos «pistas» son en realidad el mismo hecho con dos disfraces — pongamos, dos testigos que solo oyeron la historia el uno del otro — multiplicar ambos LR cuenta dos veces la evidencia y se pasa de largo de forma salvaje. Diseccionaremos esa trampa en la lección 5; por ahora, basta con marcar que multiplicar da por hecho que las pistas son genuinamente separadas.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Estás a cuotas 1:1 de que una moneda es la trucada (de dos caras). La lanzas dos veces y salen cara las dos. Una cara es el doble de probable con una moneda trucada que con una justa (LR = 2 cada vez, y los lanzamientos son independientes). ¿Cuáles son tus cuotas posteriores?"
+  options={[
+    { text: '4:1 — 1:1 × 2 × 2 = 4:1 (un 80% de probabilidad de que sea la trucada)', correct: true },
+    { text: '2:1 — los dos lanzamientos juntos cuentan como un único LR de 2' },
+    { text: '5:1 — sumas las cuotas previas a los dos LR (1 + 2 + 2)' },
+    { text: 'Siguen 1:1 — dos caras es igual de probable en cualquier caso' },
+  ]}
+  explanation="Las pistas independientes multiplican sus cocientes de verosimilitud: 1:1 × 2 × 2 = 4:1, alrededor del 80%. Cada cara es el doble de probable con la moneda trucada, y dos caras independientes se apilan hasta cuatro veces. Multiplicas (no sumas — 5:1 es el error aditivo), y no metes ambos lanzamientos en un único LR (eso tira a la basura la información del segundo lanzamiento). Es la regla de encadenado haciendo su trabajo."
+/>
+
+## Usa el deslizador para sentir la fuerza de la evidencia
+
+El cociente de verosimilitud no es más que la **tasa de verdaderos positivos dividida entre la tasa de falsos positivos** — la sensibilidad entre la tasa de falsas alarmas. Arrastra esas dos y mira cómo un cociente más fuerte aleja más el posterior del prior. Mismo prior, mismo resultado positivo; lo único que cambia es la *fuerza de la pista*.
+
+<BayesCalculator
+  client:visible
+  title="Evidencia más fuerte, mayor movimiento"
+  eyebrow="Actualización bayesiana"
+  hypothesisLabel="tienen la condición"
+  evidenceLabel="dan positivo"
+  priorLabel="Prior — tasa base"
+  sensitivityLabel="Tasa de verdaderos positivos"
+  falsePositiveLabel="Tasa de falsos positivos"
+  instructions="Ajusta los tres números. La probabilidad posterior se actualiza en vivo."
+  breakdownLabel="De cada {n} personas"
+  priorBarLabel="Prior (antes de la prueba)"
+  posteriorBarLabel="Posterior (tras un positivo)"
+  readoutTemplate="Tras un positivo, solo el {posterior}% de quienes {evidence} realmente {hypothesis}."
+  frequencyTemplate="De {positives} que {evidence}, solo {truePos} {hypothesis} de verdad — los otros {falsePos} son falsas alarmas."
+  truePosLabel="verdaderos positivos"
+  falsePosLabel="falsos positivos"
+  legendTemplate="{have} de {n} realmente {hypothesis}"
+  resetLabel="Reiniciar"
+  initialPrior={10}
+  initialSensitivity={90}
+  initialFalsePositive={45}
+  populationSize={10000}
+  caption="El cociente de verosimilitud aquí es verdaderos positivos ÷ falsos positivos. Empieza en 90/45 (cociente 2 — evidencia débil, el posterior apenas por encima del prior), luego baja la tasa de falsos positivos al 9% (cociente 10) y mira cómo salta el posterior. Mismo prior, mismo resultado positivo — una pista más fuerte simplemente te mueve más lejos."
+/>
+
+Al principio, $\text{LR} = \tfrac{90}{45} = 2$: un positivo empuja un prior del 10% hasta solo un 18% aproximadamente. Baja la tasa de falsos positivos al 9% y $\text{LR} = \tfrac{90}{9} = 10$: el *mismo* positivo ahora te lleva hasta más o menos un 53%. El prior nunca se movió y la prueba sigue habiendo «dado positivo» — lo único que cambió es lo improbable que es ese positivo bajo la alternativa, que es la fuerza entera de la evidencia.
+
+## Las afirmaciones extraordinarias exigen evidencia extraordinaria
+
+Esta es la conclusión más práctica del curso, y es Bayes puro. La máxima — de Laplace, popularizada por Hume, Sagan y Truzzi como *«las afirmaciones extraordinarias exigen evidencia extraordinaria»* — no es un eslogan sobre escepticismo. Es una lectura directa de **cuotas posteriores = cuotas previas × LR.** Una afirmación *extraordinaria* tiene, por definición, **cuotas previas minúsculas.** Para arrastrar esas cuotas diminutas hasta algo creíble, el cociente de verosimilitud tiene que ser enorme — *extraordinario* — para compensar.
+
+Vamos a desarrollarlo. Supón que alguien afirma ser genuinamente vidente, y pones las cuotas previas de una capacidad vidente real en torno a $1$ entre mil millones, es decir, $1 : 1{,}000{,}000{,}000$. Acto seguido pasa una prueba que solo superaría el $1\%$ de las veces un farsante — ¡suena impresionante! Eso es un cociente de verosimilitud de aproximadamente:
+
+$$\text{LR} = \frac{P(\text{passes} \mid \text{psychic})}{P(\text{passes} \mid \text{faking})} \approx \frac{1}{0.01} = 100$$
+
+Un LR de 100 es evidencia genuinamente fuerte en la vida cotidiana. Pero pásalo contra este prior:
+
+$$\underbrace{1 : 1{,}000{,}000{,}000}_{\text{cuotas previas}} \times 100 = 100 : 1{,}000{,}000{,}000 = 1 : 10{,}000{,}000$$
+
+Tras «superar» la prueba, las cuotas de una capacidad vidente real siguen siendo $1$ entre $10$ millones. La pista de apariencia fuerte apenas hizo mella en la afirmación, porque estaba peleando contra un prior de mil millones a uno en contra. Para llegar siquiera a *cuotas a la par* — $1 : 1$ — necesitarías:
+
+$$\text{LR} = 1{,}000{,}000{,}000$$
+
+Un cociente de verosimilitud de unos **mil millones.** Eso significa evidencia tan específica que esencialmente *nunca* aparecería si la persona estuviera fingiendo — $P(E \mid \text{faking})$ del orden de uno entre mil millones. La evidencia «impresionante» corriente (un LR de unos pocos cientos) no se acerca ni de lejos. Ese es todo el contenido de la máxima: no es que las afirmaciones extraordinarias estén prohibidas, es que el *listón para el cociente de verosimilitud* escala con lo pequeño que sea el prior.
+
+<Callout variant="tip" title="La máxima, descifrada">
+«Las afirmaciones extraordinarias exigen evidencia extraordinaria» = **un prior minúsculo exige un cociente de verosimilitud gigantesco para superarlo.** Las máquinas de movimiento perpetuo, las curas milagrosas, «este truco raro bate al mercado» — cada una arranca con cuotas previas de uno entre millones, así que unas pocas demos persuasivas (un LR de unos cientos) las dejan todavía descabelladamente improbables. Créetelas solo ante evidencia que sería casi imposible si fueran falsas.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Se demuestra una máquina de movimiento perpetuo y pasa una prueba que un farsante astuto superaría solo 1 de cada 200 veces (LR ≈ 200). Pondrías las cuotas previas de que la máquina sea real en torno a 1 entre mil millones. ¿Deberías creértelo?"
+  options={[
+    { text: 'No — 1:1,000,000,000 × 200 = 200:1,000,000,000 = 1:5,000,000; sigue siendo alrededor de 1 entre 5 millones. La pista es fuerte, pero ni de lejos el LR de ~mil millones que hace falta para superar el prior', correct: true },
+    { text: 'Sí — un LR de 200 es evidencia fuerte, así que la máquina probablemente es real' },
+    { text: 'Sí — pasar cualquier prueba demuestra la afirmación' },
+    { text: 'No puedes decir nada, porque los priors no se aplican a afirmaciones de física' },
+  ]}
+  explanation="Pasa la forma de cuotas: cuotas previas 1:1,000,000,000 × LR 200 = 1:5,000,000. Tras la demo sigue siendo más o menos una proposición de 1 entre 5 millones. Un LR de 200 es genuinamente fuerte en la vida diaria, pero es un error de redondeo contra un prior de mil millones a uno. Las afirmaciones extraordinarias necesitan un LR extraordinario — aquí, del orden de mil millones — es decir, evidencia esencialmente imposible bajo «es un truco». Una sola demo superada no lo es."
+/>
+
+### Cuándo recurrir a él
+
+Recurre al cociente de verosimilitud siempre que te pilles a punto de dejarte *mover* por una pista — un detalle incriminatorio, una referencia entusiasta, una estadística que asusta, una afirmación viral. Antes de dejar que te desplace, haz dos comprobaciones rápidas. Primero, la **comprobación de diagnosticidad**: «¿cuán probable sería ver esto exacto si mi hipótesis fuera *falsa*?». Si es «más o menos igual de probable», el LR ronda 1 y deberías ignorar la pista, por vívida que sea. Segundo, la **comprobación de lo extraordinario**: ante cualquier afirmación con un prior minúsculo, pregúntate si la evidencia es *lo bastante extraordinaria* — ¿sería casi imposible bajo la alternativa aburrida? — antes de dejar que te arrastre. Y cuando llegan varias pistas genuinamente independientes, multiplica sus LR para combinarlas. Estos tres movimientos — juzgar por la alternativa, escalar el listón al prior, multiplicar las independientes — son el núcleo práctico de sopesar la evidencia.
+
+<Quiz
+  client:visible
+  title="Ponte a prueba: la fuerza de la evidencia"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  correctCountLabel="correctas"
+  gateLabel="Comprueba tu respuesta para continuar."
+  perfectMessage="Puntuación perfecta, ¡bien hecho!"
+  goodMessage="Buen trabajo, repasa las que has fallado."
+  keepPracticingMessage="Sigue practicando, lo tienes."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: 'El cociente de verosimilitud de una pieza de evidencia se define como:',
+      options: [
+        { text: 'P(E | H) ÷ P(E | ¬H) — cuántas veces más probable es la evidencia si la hipótesis es cierta que si es falsa', correct: true },
+        { text: 'P(H | E) ÷ P(H) — cuánto supera el posterior al prior' },
+        { text: 'P(E | H) − P(E | ¬H) — la diferencia entre las dos verosimilitudes' },
+        { text: 'P(H) × P(E) — el prior por la probabilidad de la evidencia' },
+      ],
+      explanation: 'El LR es el cociente de las dos verosimilitudes, P(E|H) / P(E|¬H). Captura la fuerza entera de una pista en un único número, y encaja directo en la forma de cuotas: cuotas posteriores = cuotas previas × LR. Es un cociente, no una diferencia, y es una propiedad de la evidencia — no hace falta prior para calcularlo.',
+    },
+    {
+      question: '¿Qué hace que una pieza de evidencia sea *fuerte* (un cociente de verosimilitud lejos de 1)?',
+      options: [
+        { text: 'Es mucho más probable bajo una hipótesis que bajo la otra — en particular, improbable bajo la alternativa', correct: true },
+        { text: 'Se siente emocionalmente confirmatoria y encaja con la historia que ya te crees' },
+        { text: 'Es un hecho cierto con alta probabilidad, como «el sospechoso tiene un cuchillo»' },
+        { text: 'Viene de un gran número de fuentes, sin importar lo que digan' },
+      ],
+      explanation: 'La fuerza es diagnosticidad: la evidencia tiene que discriminar entre los mundos, lo que significa ser improbable bajo la alternativa (un denominador pequeño). «Tiene un cuchillo» es casi seguro en cualquier caso, así que su LR ronda 1 pese a sentirse confirmatorio. La viveza y el encaje emocional son justo lo que el LR ignora.',
+    },
+    {
+      question: '¿Por qué «las afirmaciones extraordinarias exigen evidencia extraordinaria»?',
+      options: [
+        { text: 'Una afirmación extraordinaria tiene cuotas previas minúsculas, así que necesita un cociente de verosimilitud enorme solo para alcanzar cuotas posteriores creíbles', correct: true },
+        { text: 'Porque las afirmaciones extraordinarias siempre son falsas y ninguna evidencia puede cambiarlo' },
+        { text: 'Porque la evidencia corriente tiene un cociente de verosimilitud de cero' },
+        { text: 'Porque el prior es irrelevante en cuanto llega cualquier evidencia' },
+      ],
+      explanation: 'Es la forma de cuotas: cuotas posteriores = cuotas previas × LR. Si las cuotas previas son, pongamos, 1 entre mil millones, un LR de unos cientos te deja todavía descabelladamente improbable — necesitarías un LR cercano a mil millones (evidencia casi imposible bajo la alternativa) para llegar a cuotas a la par. El listón para el LR escala con lo pequeño que sea el prior.',
+    },
+  ]}
+/>
+
+## Hacia dónde va esto
+
+Ya puedes leer la fuerza de una pista directamente de su cociente de verosimilitud, detectar evidencia inútil comprobando la alternativa, multiplicar pistas independientes hasta una conclusión fuerte y ver por qué un prior minúsculo exige evidencia extraordinaria. Ese es el motor funcionando correctamente. A continuación, en **«Dónde se tuerce la actualización»**, lo vemos romperse: gente que deja caer el prior y trata la evidencia como la respuesta entera, la *falacia inversa* de confundir $P(E \mid H)$ con $P(H \mid E)$, el **doble conteo** de «pistas» correlacionadas que no son de verdad independientes (la salvedad que marcamos en la sección de encadenado) y la negativa tozuda a actualizar siquiera. Conocer los modos de fallo es lo que convierte una fórmula en juicio.
