@@ -129,3 +129,6 @@ export type { PayoffMatrixProps, PayoffCell, PayoffGrid } from '@/components/rea
 
 export { IteratedDilemma, default as IteratedDilemmaDefault } from '@/components/react/IteratedDilemma';
 export type { IteratedDilemmaProps, DilemmaStrategyOption, StrategyKey } from '@/components/react/IteratedDilemma';
+
+export { LoopSimulator, default as LoopSimulatorDefault } from '@/components/react/LoopSimulator';
+export type { LoopSimulatorProps } from '@/components/react/LoopSimulator';

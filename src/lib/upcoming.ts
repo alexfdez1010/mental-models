@@ -83,27 +83,8 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced / expert probability + systems tier (orders 14–17) ───────────
+  // ── Advanced / expert probability + systems tier (orders 15–17) ───────────
   // Built only after the breadth pass above seeds every discipline.
-  {
-    slug: 'feedback-loops',
-    icon: '🔄',
-    difficulty: 'advanced',
-    order: 14,
-    accent: 'accent',
-    title: {
-      en: 'Feedback Loops & Systems Thinking',
-      es: 'Bucles de Retroalimentación y Pensamiento Sistémico',
-    },
-    description: {
-      en: 'Why systems run away, settle down, or oscillate. Reinforcing loops amplify, balancing loops resist, and delays make both misbehave — the engine room beneath second-order effects.',
-      es: 'Por qué los sistemas se disparan, se estabilizan u oscilan. Los bucles reforzadores amplifican, los equilibradores resisten y los retardos descontrolan a ambos: la sala de máquinas bajo los efectos de segundo orden.',
-    },
-    dependencies: ['second-order-thinking'],
-    tags: ['systems-thinking', 'science-engineering'],
-    buildNotes:
-      'Systems & feedback, the advanced rung above second-order thinking. Sections: stocks vs. flows; reinforcing (amplifying) loops — compounding, viral growth, bank runs; balancing (stabilizing) loops — thermostats, predator–prey, market clearing; the role of delays (why loops overshoot and oscillate, e.g. the shower-temperature lag, the beer-game bullwhip); leverage points (where to push a system). Worked examples with simple stock-and-flow numbers and at least one oscillation traced over time. Build an interactive loop-simulator island (a stock with an adjustable reinforcing/balancing rate + delay slider, plotting the trajectory; respect prefers-reduced-motion). Connect explicitly to second-order thinking (loops are *why* downstream effects compound) and to incentives. Pitfall: assuming systems move linearly / ignoring delay. Recap Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'bayesian-updating',
     icon: '🔁',
