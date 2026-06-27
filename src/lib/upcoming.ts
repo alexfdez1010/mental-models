@@ -83,28 +83,6 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Beginner → intermediate breadth pass (orders 1–13) ────────────────────
-  // Seeds every starved discipline so the build covers the whole latticework
-  // before climbing any one tag. Interleaved by tag on purpose.
-  {
-    slug: 'game-theory-basics',
-    icon: '♟️',
-    difficulty: 'advanced',
-    order: 13,
-    accent: 'brand',
-    title: {
-      en: 'Game Theory: Thinking in Moves',
-      es: 'Teoría de Juegos: Pensar en Jugadas',
-    },
-    description: {
-      en: 'When your best move depends on theirs and theirs on yours, you need more than preference — you need strategy. Equilibria, dominant moves, and why rational players can still both lose.',
-      es: 'Cuando tu mejor jugada depende de la suya y la suya de la tuya, no basta con preferir: hace falta estrategia. Equilibrios, jugadas dominantes y por qué jugadores racionales pueden perder los dos.',
-    },
-    dependencies: ['incentives', 'second-order-thinking'],
-    tags: ['strategy', 'economics'],
-    buildNotes:
-      'The strategy path’s entry to interdependent decisions — advanced because it composes incentives + second-order thinking. Sections: what a "game" is (payoffs depend on others’ choices) and the payoff matrix; dominant strategies; Nash equilibrium in plain language (no one can improve by unilaterally changing) with a worked 2×2; the prisoner’s dilemma (rational individual choices → collectively worse outcome — ties directly to tragedy of the commons) and why cooperation is hard; repeated games and how repetition + reputation enable cooperation (tit-for-tat, Axelrod tournaments); other canonical games kept brief (stag hunt = coordination/trust, chicken = brinkmanship); zero-sum vs. positive-sum framing and the danger of treating positive-sum situations as zero-sum. Worked 2×2 payoff tables throughout. Build an interactive island: a 2×2 payoff matrix the learner fills, with the dominant strategies and Nash cell highlighted live, plus an iterated prisoner’s-dilemma toggle showing cooperation emerging over rounds (respect prefers-reduced-motion). Connect to incentives, tragedy of the commons, second-order thinking, and moats/competition. Pitfall: assuming one-shot logic in a repeated game; treating positive-sum as zero-sum. Recap Quiz + MindMap. en + es twin.',
-  },
   // ── Advanced / expert probability + systems tier (orders 14–17) ───────────
   // Built only after the breadth pass above seeds every discipline.
   {

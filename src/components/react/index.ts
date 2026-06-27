@@ -123,3 +123,9 @@ export type { SchellingGridProps } from '@/components/react/SchellingGrid';
 
 export { EmergenceFlock, default as EmergenceFlockDefault } from '@/components/react/EmergenceFlock';
 export type { EmergenceFlockProps } from '@/components/react/EmergenceFlock';
+
+export { PayoffMatrix, default as PayoffMatrixDefault } from '@/components/react/PayoffMatrix';
+export type { PayoffMatrixProps, PayoffCell, PayoffGrid } from '@/components/react/PayoffMatrix';
+
+export { IteratedDilemma, default as IteratedDilemmaDefault } from '@/components/react/IteratedDilemma';
+export type { IteratedDilemmaProps, DilemmaStrategyOption, StrategyKey } from '@/components/react/IteratedDilemma';
