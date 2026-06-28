@@ -88,25 +88,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // These intermediate courses re-balance the tag taxonomy (psychology, systems,
   // biology) and are built BEFORE the advanced/expert probability tier below.
   {
-    slug: 'availability-heuristic',
-    icon: '🧠',
-    difficulty: 'intermediate',
-    order: 12,
-    accent: 'accent',
-    title: {
-      en: 'The Availability Heuristic',
-      es: 'La Heurística de Disponibilidad',
-    },
-    description: {
-      en: 'You judge how likely something is by how easily an example springs to mind — so vivid, recent, scary stories feel common even when they’re rare. Learn to tell what’s memorable from what’s frequent.',
-      es: 'Juzgas la probabilidad de algo por lo fácil que te viene un ejemplo a la mente — así que las historias vívidas, recientes y aterradoras parecen comunes aunque sean raras. Aprende a distinguir lo memorable de lo frecuente.',
-    },
-    dependencies: ['thinking-in-probabilities'],
-    tags: ['psychology', 'probability'],
-    buildNotes:
-      'The availability heuristic — a core cognitive bias, the psychology rung that pairs with base rates. Sections: define the heuristic (estimating frequency/probability by how easily instances come to mind) from Kahneman & Tversky; why ease-of-recall ≠ true frequency; the drivers that inflate availability (vividness, recency, emotional charge, media coverage, personal experience); worked examples — people overestimate deaths from shark attacks/plane crashes/terrorism and underestimate common killers (heart disease, diabetes); the role of news (rare-but-dramatic events get covered, common ones don’t → distorted risk maps); availability cascades (a story repeated until it feels true); connection to base-rate neglect (availability is HOW we drop the base rate) and to the upcoming fat-tails course. Build/reuse an interactive island contrasting perceived vs. actual frequency (e.g. a bar-pair chart the learner guesses then reveals), respecting prefers-reduced-motion. Pitfall: confusing what’s easy to recall with what’s likely; letting headlines set your priors. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'bottlenecks-and-constraints',
     icon: '⛓️',
     difficulty: 'intermediate',

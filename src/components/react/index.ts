@@ -135,3 +135,6 @@ export type { LoopSimulatorProps } from '@/components/react/LoopSimulator';
 
 export { BayesCalculator, default as BayesCalculatorDefault } from '@/components/react/BayesCalculator';
 export type { BayesCalculatorProps } from '@/components/react/BayesCalculator';
+
+export { AvailabilityGauge, default as AvailabilityGaugeDefault } from '@/components/react/AvailabilityGauge';
+export type { AvailabilityGaugeProps, AvailabilityItem } from '@/components/react/AvailabilityGauge';
