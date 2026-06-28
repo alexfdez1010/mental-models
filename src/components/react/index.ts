@@ -141,3 +141,6 @@ export type { AvailabilityGaugeProps, AvailabilityItem } from '@/components/reac
 
 export { PipelineThroughput, default as PipelineThroughputDefault } from '@/components/react/PipelineThroughput';
 export type { PipelineThroughputProps } from '@/components/react/PipelineThroughput';
+
+export { CoevolutionRace, default as CoevolutionRaceDefault } from '@/components/react/CoevolutionRace';
+export type { CoevolutionRaceProps } from '@/components/react/CoevolutionRace';

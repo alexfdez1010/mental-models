@@ -83,31 +83,10 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Breadth pass — seed starved disciplines before deepening probability ──
-  // After Bayesian Updating graduated, the queue had drifted all-`probability`.
-  // These intermediate courses re-balance the tag taxonomy (psychology, systems,
-  // biology) and are built BEFORE the advanced/expert probability tier below.
-  {
-    slug: 'red-queen-effect',
-    icon: '🏃',
-    difficulty: 'advanced',
-    order: 14,
-    accent: 'accent',
-    title: {
-      en: 'The Red Queen Effect',
-      es: 'El Efecto de la Reina Roja',
-    },
-    description: {
-      en: '“It takes all the running you can do to keep in the same place.” When everyone adapts, standing still means falling behind — in evolution, business, and the arms races you can’t opt out of.',
-      es: '«Hace falta correr todo lo que puedas para quedarte en el mismo sitio.» Cuando todos se adaptan, quedarse quieto es retroceder — en la evolución, los negocios y las carreras armamentísticas de las que no puedes salir.',
-    },
-    dependencies: ['natural-selection'],
-    tags: ['biology-evolution', 'strategy'],
-    buildNotes:
-      'The Red Queen effect — the biology/strategy rung extending natural selection into co-evolution. Sections: the name (Van Valen, from Carroll’s Red Queen — running to stay in place); coevolutionary arms races (predator/prey, host/parasite, the evolution of sex as a defense against parasites); why relative fitness, not absolute improvement, is what matters when competitors also improve; the business analogue (everyone adopting the same tech/efficiency gain cancels out — no one gains lasting advantage; you must run just to keep your position); arms races and escalation (antibiotics vs. resistance, spam vs. filters, offense vs. defense) and when they’re worth opting out of; connection to game theory and competition. Build an interactive coevolution island (two populations whose fitness curves chase each other so neither pulls ahead). Pitfall: mistaking effort/improvement for progress when the baseline is moving; ignoring that competitors adapt too. Recap Quiz + MindMap. en + es twin.',
-  },
   // ── Advanced / expert probability tier (orders 16–17) ─────────────────────
-  // Built after the breadth pass above re-seeds the starved disciplines.
+  // The lowest-order entries, built next. The breadth-pass courses that re-seeded
+  // the starved disciplines (e.g. `red-queen-effect`) have graduated and been
+  // removed; their topic MDX is now the record.
   {
     slug: 'fat-tails',
     icon: '🐘',
@@ -145,6 +124,67 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['probability', 'decision-making', 'psychology'],
     buildNotes:
       'Calibration — the expert capstone of the probability path: not just estimating odds but being *right about how right you are*. Sections: what calibration means (of all the times you say 70%, ~70% should happen) and the calibration curve; overconfidence and the overprecision bias (90% confidence intervals that catch the truth far less than 90% of the time); proper scoring rules — the Brier score and log score — that reward honesty and punish bluffing, with a worked numeric example; confidence intervals / error bars as honest ranges (ties back to thinking in ranges); how to get calibrated (track predictions, give ranges, do calibration training, post-mortem your scores), referencing forecasting research (superforecasters) without overclaiming; resolution vs. calibration (being calibrated AND decisive). Use KaTeX for the Brier score; build an interactive calibration island (the learner assigns confidences to several true/false claims, then sees their calibration plotted and Brier score scored). Connect to Bayesian updating (calibrated priors), overconfidence bias (psychology), and margin of safety. Pitfall: confident ≠ correct; precision masquerading as accuracy. Recap Quiz + MindMap. en + es twin.',
+  },
+  // ── Breadth re-seed (orders 18–20) ────────────────────────────────────────
+  // Appended to keep the queue ≥3 and tag-diverse after `red-queen-effect`
+  // graduated and the remaining tier was all-`probability`. One advanced rung
+  // each into the starved psychology, systems-thinking, and economics tags.
+  {
+    slug: 'loss-aversion',
+    icon: '⚖️',
+    difficulty: 'advanced',
+    order: 18,
+    accent: 'brand',
+    title: {
+      en: 'Loss Aversion & Prospect Theory',
+      es: 'Aversión a la Pérdida y Teoría Prospectiva',
+    },
+    description: {
+      en: 'Losses hurt about twice as much as equivalent gains feel good — so the same choice flips depending on whether it’s framed as winning or losing. The asymmetry that bends nearly every decision you make.',
+      es: 'Las pérdidas duelen aproximadamente el doble de lo que agrada una ganancia equivalente — así que la misma elección se invierte según se plantee como ganar o perder. La asimetría que tuerce casi todas tus decisiones.',
+    },
+    dependencies: ['thinking-in-probabilities', 'incentives'],
+    tags: ['psychology', 'decision-making'],
+    buildNotes:
+      'Loss aversion & prospect theory — the advanced psychology rung on how real humans weigh risk, departing from the expected-value ideal. Sections: loss aversion (a loss looms ~2× a same-size gain — the ~2.25 coefficient) with the coin-flip-you-refuse example; the reference point — outcomes are judged as gains/losses from a baseline, not absolute wealth (Kahneman & Tversky); the value function (concave for gains, convex for losses, steeper on the loss side — diminishing sensitivity → risk-averse for gains, risk-seeking for losses to avoid a sure loss); framing effects (the Asian-disease problem: identical odds flip choices when worded as lives saved vs lives lost); the endowment effect & status-quo bias as loss aversion in disguise (the mug experiment); probability weighting in one line (we overweight tiny probabilities → lotteries and insurance coexist); practical debiasing (widen the frame, aggregate decisions, ask "what’s my reference point?"). Build an interactive framing/value-function island (a slider showing the kinked value curve, and a toggle that re-frames one scenario as gain vs loss and shows the preference flip). Connect to expected value, incentives, and margin of safety. Pitfall: treating framing as cosmetic; ignoring that the reference point is a choice. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'stocks-and-flows',
+    icon: '🛁',
+    difficulty: 'advanced',
+    order: 19,
+    accent: 'accent',
+    title: {
+      en: 'Stocks & Flows',
+      es: 'Stocks y Flujos',
+    },
+    description: {
+      en: 'A bathtub fills when the tap outruns the drain — and most reasoning errors about debt, climate, hiring, and inventory come from confusing the level in the tub with the rate of the tap.',
+      es: 'Una bañera se llena cuando el grifo supera al desagüe — y casi todos los errores de razonamiento sobre deuda, clima, contratación e inventario nacen de confundir el nivel de la bañera con el caudal del grifo.',
+    },
+    dependencies: ['feedback-loops'],
+    tags: ['systems-thinking'],
+    buildNotes:
+      'Stocks & flows — the advanced systems rung underneath feedback loops: the grammar of accumulation. Sections: the bathtub model — a stock is a quantity that accumulates (water, money, CO₂, population, trust), a flow is the rate that fills or drains it (inflow/outflow); the core insight — a stock keeps rising as long as inflow > outflow, even if the inflow is falling (the "the deficit is shrinking so the debt is shrinking" fallacy; emissions slowing ≠ CO₂ falling); stocks change only through flows and they integrate (smooth, delay, give systems memory and inertia); bathtub dynamics & lags (why systems overshoot and respond slowly — ties to feedback loops and bottlenecks); worked examples with numbers (a reservoir, a bank balance, a hiring pipeline, a warehouse); the stock-flow distinction as a debugging tool for policy and personal finance. Build an interactive bathtub/stock-flow island (independent inflow & outflow sliders → watch the stock integrate, overshoot, and lag; show that inflow=outflow holds the stock steady at any level). Connect to feedback loops, compounding, and bottlenecks. Pitfall: confusing the level with the rate; assuming a falling inflow means a falling stock. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'externalities',
+    icon: '🏭',
+    difficulty: 'advanced',
+    order: 20,
+    accent: 'brand',
+    title: {
+      en: 'Externalities',
+      es: 'Externalidades',
+    },
+    description: {
+      en: 'When the person who decides isn’t the person who pays, the price lies — and the market quietly over-produces pollution and under-produces vaccines. The gap between private and social cost.',
+      es: 'Cuando quien decide no es quien paga, el precio miente — y el mercado produce de más la contaminación y de menos las vacunas. La brecha entre el coste privado y el coste social.',
+    },
+    dependencies: ['supply-and-demand', 'tragedy-of-the-commons'],
+    tags: ['economics'],
+    buildNotes:
+      'Externalities — the advanced economics rung extending supply & demand and the tragedy of the commons: costs and benefits that spill onto third parties who never agreed to them. Sections: definition — a cost (negative) or benefit (positive) imposed on someone outside a transaction, so private cost ≠ social cost; negative externalities (pollution, noise, congestion, antibiotic resistance) → the market over-produces them because the decider doesn’t bear the full cost; positive externalities (vaccines, education, R&D, a restored façade) → the market under-produces them because the decider doesn’t capture the full benefit; the marginal private vs. social cost/benefit picture (the wedge and the deadweight loss) with a worked numeric example; remedies — Pigouvian taxes & subsidies (price the spillover), cap-and-trade, regulation, and the Coase theorem (clear property rights + low bargaining cost can internalize it privately) and its limits; relation to the commons (a shared sink is a negative externality at scale) and to incentives. Build an interactive supply–demand-with-externality island (a slider for the external cost/benefit that shifts the social curve away from the private one, shading the over/under-production gap and the welfare loss, with a tax/subsidy toggle that re-aligns them). Pitfall: assuming the market price reflects true cost; ignoring positive externalities; treating a tax as a penalty rather than a price correction. Recap Quiz + MindMap. en + es twin.',
   },
 ];
 
