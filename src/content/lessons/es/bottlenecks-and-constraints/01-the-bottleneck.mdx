@@ -1,0 +1,372 @@
+---
+title: "Detectar la restricción"
+description: "El trabajo se acumula delante del cuello de botella y todo lo que viene detrás está parado — dos pistas inequívocas que te permiten señalar el único paso más lento de cualquier sistema que no hayas visto nunca."
+topic: "es/bottlenecks-and-constraints"
+order: 2
+minutes: 11
+updated: 2026-06-28
+---
+
+import { MCQ, Quiz, Callout, FillBlank, Categorize, MatchConcepts, MindMap, PipelineThroughput } from '@/components/react';
+
+La lección anterior te entregó una regla que suena casi demasiado redonda para ser útil: el **rendimiento (throughput)** de un sistema —el ritmo al que de verdad produce salida terminada— equivale a la capacidad de su paso más lento, el **cuello de botella (bottleneck)**. Ni la media. Ni la suma. El mínimo. Viste cómo la línea del deslizador lo obedecía a la perfección, con el rendimiento pegado a la barra más corta por mucho que arrastraras el resto.
+
+Pero el deslizador tenía el cuello de botella *señalado en rojo para ti*. El mundo real es lo bastante grosero como para dejarse la etiqueta. Nadie te entrega una ficha técnica que diga «la etapa 3 hace 30 unidades por hora y, por cierto, esa es tu restricción». Entras en una cocina que va a la deriva, en una autopista atascada, en un equipo de soporte ahogado en tickets — y el paso más lento se esconde a plena vista, con la misma pinta que cualquier otro paso. Tu trabajo es encontrarlo igualmente.
+
+La buena noticia es que un cuello de botella es casi físicamente incapaz de esconderse. Deja dos huellas dactilares allá donde va y, una vez que sabes qué aspecto tienen, empezarás a verlas en las colas del aeropuerto, en la única impresora por la que todos se pelean, en el despliegue que se lleva toda la tarde. Esta lección va de leer esas huellas — de convertir «rendimiento = el mínimo» de una fórmula pulcra en una destreza que puedas usar sobre un sistema que no hayas visto nunca.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  question="Entras en un taller que no conoces. Un puesto de trabajo tiene una pila alta y creciente de piezas a medio terminar esperando delante de él, mientras que el puesto justo después está parado sin nada que hacer. ¿Cuál es probablemente el cuello de botella?"
+  options={[
+    { text: 'El puesto con la pila creciente delante — el trabajo se acumula antes de la restricción', correct: true },
+    { text: 'El puesto parado que viene después — estar parado significa que es el lento' },
+    { text: 'Ninguno; no se puede saber sin medir la capacidad de cada puesto' },
+    { text: 'Ambos son igual de probables; las pilas y la inactividad son aleatorias' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="En un pretest no hay respuestas malas — pero la pila marca el camino. El trabajo se acumula *delante de* un cuello de botella porque llega más rápido de lo que el paso lento puede tragar, y el paso *posterior* al cuello de botella se queda sin trabajo porque solo se alimenta al ritmo del cuello de botella. La cola creciente está aguas arriba de la restricción; la inactividad está aguas abajo. Así que la restricción es el puesto con la pila delante, no el que está parado detrás."
+/>
+
+## El rendimiento es la capacidad de la restricción
+
+Hagamos hermética la regla principal, porque el resto de la lección se apoya en ella. Tres palabras hacen todo el trabajo, así que defínelas con precisión:
+
+- **Capacidad (capacity)** — lo *máximo* que un solo paso podría procesar por unidad de tiempo si nunca tuviera que esperar: piezas por hora, pacientes por hora, tickets por día. Es la velocidad punta de un paso, medida en aislamiento.
+- **Rendimiento (throughput)** — lo que el sistema *entero* termina de verdad por unidad de tiempo. No la velocidad punta de un paso — el ritmo real de entrega del sistema, lo que sale por la puerta.
+- **Utilización (utilization)** — lo ocupado que está realmente un paso, como fracción de su propia capacidad. Un puesto que *podría* hacer 60 por hora pero al que solo se le alimentan 30 funciona al 50 % de utilización. Está medio parado, y esa inactividad es una pista, no un defecto.
+
+La regla, dicha con rigor: **el rendimiento equivale a la capacidad del paso de menor capacidad.** Cada paso aguas arriba de la restricción solo puede pasar el trabajo tan rápido como la restricción lo acepta; cada paso aguas abajo solo puede recibir trabajo tan rápido como la restricción lo suelta. Así que la capacidad de la restricción es un techo duro para todo el flujo — y la propia restricción funciona a (casi) el 100 % de utilización mientras todo lo demás funciona por debajo.
+
+Aquí tienes un ejemplo resuelto. Un servicio de urgencias hospitalarias mueve a cada paciente por cuatro pasos. Sus capacidades aisladas (pacientes por hora):
+
+| Paso | Qué ocurre | Capacidad (pacientes/h) | Utilización a plena carga |
+|---|---|---|---|
+| Triaje | Una enfermera valora la gravedad | 18 | 50 % |
+| Examen médico | El médico diagnostica | **9** | **100 %** |
+| Laboratorio / imagen | Análisis de sangre, radiografía | 14 | 64 % |
+| Alta | Papeleo, instrucciones | 20 | 45 % |
+
+El rendimiento es de **9 pacientes por hora** — el paso del examen médico, la cifra más baja. El triaje *podría* atender a 18, pero no tiene sentido valorar pacientes al doble de velocidad de lo que un médico puede verlos; el exceso de velocidad solo construye una sala de espera. Fíjate en la columna de utilización: el cuello de botella funciona a tope al 100 %, y todos los demás pasos están por debajo, sin actividad plena. **Esa brecha de utilización es en sí misma un mapa** — el paso clavado al 100 % es tu restricción, y el margen sobrante en todo lo demás es el rendimiento que estás dejando tirado por el suelo.
+
+<Callout variant="tip" title="La versión de una frase">
+**Rendimiento = la capacidad del paso de menor capacidad.** La restricción funciona al 100 % de utilización; todo lo demás tiene margen — y ese margen es velocidad desperdiciada, no rendimiento gratis.
+</Callout>
+
+Una comprobación rápida de por qué la media y la suma siguen fallando. La capacidad *media* de urgencias es (18 + 9 + 14 + 20) / 4 = 15,25 — pero no puedes esquivar al médico haciendo medias; cada paciente físicamente tiene que ser visto por uno. La *suma* es 61 — la fantasía de que la potencia combinada equivale a la salida, que es justo lo contrario en una cadena donde el trabajo tiene que pasar por cada paso por turno. El mínimo, 9, es la única cifra que sobrevive al contacto con la realidad.
+
+### Cuándo usarlo
+
+Echa mano de esto en cuanto oigas a alguien explicar un sistema lento señalando su parte *más rápida* («¡pero nuestra recepción es tan eficiente!») o su *media* («de media somos bastante rápidos»). Ambas son ciegas al rendimiento. La única cifra que predice la salida real es la capacidad del único paso más lento — así que ve a encontrar ese paso e ignora el resto del folleto presumido.
+
+## Cómo encontrar el cuello de botella sin ficha técnica
+
+Casi nunca te entregarán la tabla de capacidades de arriba. Entonces, ¿cómo encuentras la restricción *mirando*? Vigila sus dos señales inconfundibles — son las dos caras de la misma moneda, porque el trabajo que no puede *pasar* por el paso lento tiene que ir *a algún sitio*.
+
+**Señal n.º 1 — El trabajo se acumula delante de la restricción.** El material llega al cuello de botella más rápido de lo que puede procesarse, así que se acumula: una cola creciente, un inventario que se hincha, una sala de espera llena, una bandeja de entrada que nunca se vacía. Allá donde veas una pila que *no para de crecer*, el paso lento está justo detrás de esa pila.
+
+**Señal n.º 2 — Todo lo que viene después está sin trabajo.** Los pasos *posteriores* al cuello de botella se alimentan solo al ritmo del cuello de botella, que por definición es más lento de lo que pueden manejar. Así que están parados, infrautilizados, esperando un trabajo que gotea. La falta de trabajo es la sombra de la restricción, proyectada hacia delante.
+
+Júntalas y obtienes un puntero preciso: **la restricción se sitúa exactamente entre la acumulación y la falta de trabajo.** El trabajo se apila justo antes de ella; la inactividad se extiende justo después. Unos cuantos ejemplos para afinar el ojo:
+
+- **La cocina con una sola freidora.** Los platos de comida a medio hacer se atascan en la línea esperando a la única freidora, mientras los puestos de emplatado y pase se quedan de brazos cruzados sin nada que adornar. Acumulación *antes* de la freidora, manos ociosas *después*. La freidora es la restricción — no los cocineros que parecen ocupados, ni los camareros que parecen desbordados.
+- **El estrechamiento de carriles en la autopista.** Tres carriles se reducen a dos. Los coches se apilan en una cola lentísima *antes* del estrechamiento — y la carretera *pasado* el estrechamiento está gloriosa y sospechosamente vacía, circulando a toda velocidad. Esa carretera vacía aguas abajo es la falta de trabajo; la cola aguas arriba es la acumulación. El punto de estrechamiento es el cuello de botella, aunque sea el tramo vacío el que se siente como la «parte rápida».
+- **El equipo de soporte con una sola ingeniera sénior.** Los tickets fáciles se resuelven rápido, pero todos los difíciles se enrutan a la única ingeniera sénior, y *esos* tickets se apilan en un atasco creciente con su nombre. Mientras tanto, el júnior que los cerraría *tras* su visto bueno tiene una cola tranquila. La ingeniera sénior es la restricción; contratar a tres júniors más no tocará el rendimiento.
+
+Arrastra la tubería de abajo para ver aparecer ambas señales a la vez. Es la hora punta matutina de una cafetería — pedido, luego la única máquina de espresso, luego vaporizar leche, luego entrega. Fíjate en dónde se forma la acumulación ▓ y dónde se extiende la falta de trabajo ░, y observa que siempre flanquean la barra roja.
+
+<PipelineThroughput
+  client:visible
+  title="Hora punta: dónde se forma la cola"
+  caption="La cola de una cafetería. Las bebidas se acumulan (▓) justo antes del paso más lento — la solitaria máquina de espresso, en rojo — mientras cada puesto posterior se queda sin trabajo (░), esperando vasos que llegan solo al ritmo de la máquina. La restricción vive exactamente entre la acumulación y la falta de trabajo. Arrastra una barra no roja y no pasa nada; arrastra la roja y toda la cafetería se acelera — hasta que una nueva etapa pasa a ser la más lenta."
+  eyebrow="Encuentra el cuello de botella"
+  bottleneckLabel="Cuello de botella"
+  throughputLabel="Rendimiento de la línea"
+  capacityLabel="Capacidad de la etapa"
+  pileupLabel="Trabajo que se acumula"
+  starvedLabel="Parada / sin trabajo"
+  unitLabel="uds/h"
+  instructions="Arrastra una barra para cambiar la capacidad de esa etapa y observa cómo se mueve el rendimiento de la línea."
+  readout="La etapa {stage} hace {rate} {unit} · margen sobrante: {slack} {unit}"
+  stageLabels={['Pedido','Espresso','Vaporizar leche','Entrega']}
+  initialCapacities={[60,22,40,55]}
+  min={10}
+  max={70}
+/>
+
+<Callout variant="warning" title="La trampa: culpar al paso que parece ocupado">
+El cuello de botella a menudo *no parece* el problema. El paso sin trabajo de aguas abajo parece vago («¿por qué están siempre parados?»), y el paso desbordado de aguas arriba parece anegado («¡necesitamos más personal de recepción!»). Ambas son lecturas erróneas. El paso parado se queda sin trabajo *por culpa de* la restricción, y la recepción anegada no hace más que palear trabajo a una pila que la restricción no puede vaciar. No premies al paso que parece ocupado ni regañes al que está parado — lee el *flujo*, encuentra dónde la pila se encuentra con la falta de trabajo, y empuja ahí.
+</Callout>
+
+Ahora haz el diagnóstico tú. La misma línea de cuatro etapas; clasifica cada etapa según lo que está haciendo.
+
+<Categorize
+  client:visible
+  question="Una línea de cuatro etapas funciona a capacidades de 40, 15, 35 y 50 unidades/h (en ese orden). Clasifica cada etapa por su papel en el flujo."
+  buckets={['El cuello de botella', 'Acumula trabajo (antes de él)', 'Sin trabajo / parada (después de él)']}
+  items={[
+    { text: 'Etapa 2 — 15 unidades/h, el paso más lento, funcionando a tope', bucket: 'El cuello de botella' },
+    { text: 'Etapa 1 — 40 unidades/h, alimenta al paso lento más rápido de lo que puede aceptar', bucket: 'Acumula trabajo (antes de él)' },
+    { text: 'Etapa 3 — 35 unidades/h, solo recibe 15/h de aguas arriba', bucket: 'Sin trabajo / parada (después de él)' },
+    { text: 'Etapa 4 — 50 unidades/h, la última de la fila, también recibe solo 15/h', bucket: 'Sin trabajo / parada (después de él)' },
+  ]}
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  explanationLabel="Explicación"
+  explanation="La etapa 2 (15/h) es la de menor capacidad, así que es el cuello de botella y funciona al ~100 %. La etapa 1 está antes y puede empujar 40/h hacia un paso que solo acepta 15, así que el trabajo se acumula entre ellas. Las etapas 3 y 4 están aguas abajo y reciben trabajo al ritmo del cuello de botella (15/h) pese a poder manejar 35 y 50 — así que se quedan sin trabajo y paradas. La acumulación está aguas arriba de la restricción; la falta de trabajo, aguas abajo."
+/>
+
+### Cuándo usarlo
+
+Usa las dos señales siempre que *no puedas* medir las capacidades directamente — que es la mayoría de las veces. No necesitas un cronómetro en cada paso; necesitas detectar la única cola creciente y la inactividad justo después de ella. En un almacén, en la tubería de CI de una base de código, en una oficina de pasaportes o en tu propia lista de tareas, la pregunta es la misma: *¿dónde se acumula el trabajo, y qué espera detrás de esa pila?* La respuesta apunta directa a la restricción.
+
+## Un cuello de botella solo muerde cuando la demanda lo supera
+
+Aquí hay una sutileza que hace tropezar incluso a gente cuidadosa: un paso lento solo es una *restricción* si al sistema se le está pidiendo de verdad producir más de lo que puede. Un cuello de botella necesita **demanda** apretando contra él para morder.
+
+Define la **demanda**: cuánta salida se le está *pidiendo* al sistema que entregue por unidad de tiempo — pedidos por hora, clientes por hora, peticiones por día. La regla se afina así: **un paso restringe el sistema solo cuando la demanda supera la capacidad de ese paso.** Si el mercado solo quiere 20 unidades por hora y tu paso interno más lento puede hacer 30, ese paso «lento» está al 67 % de utilización con capacidad de sobra — no está reteniendo nada. No hay acumulación, ni falta de trabajo, ni cola. Nada está restringido, porque a nada se le aprieta hasta su límite.
+
+Ejemplo resuelto. El paso más lento de una panadería pequeña es el único horno, capacidad **40 hogazas por hora**. Dos escenarios:
+
+| | Demanda (hogazas/h) | Capacidad del horno | Rendimiento | ¿Es el horno la restricción? |
+|---|---|---|---|---|
+| Martes tranquilo | 25 | 40 | 25 | **No** — demanda < capacidad; el horno tiene margen, no se forma cola |
+| Avalancha del sábado | 70 | 40 | 40 | **Sí** — demanda > capacidad; la masa se acumula, el horno está clavado al 100 % |
+
+El mismo horno, la misma cocina. El martes no es un cuello de botella — comprar un segundo horno sería tirar el dinero, porque estarías añadiendo capacidad que nadie pide. El sábado ese mismo horno *sí es* el cuello de botella, con la masa acumulándose mientras él funciona a tope. **La restricción no es una propiedad fija del paso lento; es una relación entre la capacidad de ese paso y la demanda que aprieta sobre él.**
+
+Y aquí está el giro que ensancha todo el modelo: a veces la cosa más lenta del cuadro es la *propia demanda*. Si la panadería pudiera hornear 40 hogazas por hora pero el pueblo solo quiere 25, entonces la restricción vinculante no está dentro de la panadería en absoluto — es el **mercado**. Esta es una restricción *externa*: el sistema tiene capacidad interna de sobra, y lo que limita su salida queda fuera del proceso (no hay suficientes clientes, ni suficiente materia prima, ni suficientes ventas). Cuando un negocio con máquinas paradas dice «podríamos producir más, lo que pasa es que la gente no compra», ha localizado correctamente una restricción de mercado — y ninguna optimización de la planta la moverá. Una restricción de demanda no se arregla acelerando el horno; se arregla encontrando más bocas.
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada término con su definición precisa."
+  pairs={[
+    { term: 'Cuello de botella', definition: 'El único paso cuya capacidad limitada pone techo a la salida de todo el sistema' },
+    { term: 'Rendimiento', definition: 'El ritmo al que el sistema termina de verdad su salida — igual a la capacidad de la restricción' },
+    { term: 'Capacidad', definition: 'Lo máximo que un solo paso podría procesar por unidad de tiempo si nunca tuviera que esperar' },
+    { term: 'Margen / inactividad', definition: 'Capacidad sin usar en un paso que no es el cuello de botella — velocidad desperdiciada, no rendimiento gratis' },
+    { term: 'Acumulación de trabajo en curso', definition: 'La cola creciente de trabajo sin terminar que se forma delante de la restricción' },
+    { term: 'Falta de trabajo', definition: 'La inactividad de los pasos aguas abajo de la restricción, alimentados solo a su ritmo' },
+  ]}
+  instructions="Elige un término y luego haz clic en su definición."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  explanationLabel="Explicación"
+  explanation="La capacidad es la velocidad punta de un solo paso en aislamiento; el rendimiento es la salida real de todo el sistema, que equivale a la capacidad de la restricción. El cuello de botella es ese paso que restringe. Todo lo demás aparece como margen (capacidad sin usar), y ese margen se divide en dos señales: el trabajo en curso se acumula delante de la restricción, mientras que los pasos de detrás se quedan sin trabajo. Lee la acumulación y la falta de trabajo y habrás localizado el cuello de botella."
+/>
+
+### Cuándo usarlo
+
+Antes de gastarte un euro en ensanchar un paso «lento», comprueba si la demanda siquiera aprieta sobre él. Si la cola no crece y aguas abajo no hay falta de trabajo, no tienes una restricción interna vinculante — y tu cuello de botella real podría ser *externo* (el mercado, tus proveedores, tu cartera de clientes potenciales). Acelerar la producción cuando la restricción es la demanda solo construye inventario que nadie pidió.
+
+## El cuello de botella gobierna el conjunto
+
+Da un paso atrás y el cuadro se reduce a una sola frase: **encuentra el único paso más lento contra el que aprieta la demanda, y conocerás el rendimiento del sistema — es la capacidad de ese paso, y de ningún otro.** Cualquier otra cifra de la planta es una distracción. La velocidad de los pasos rápidos es invisible para la salida. La media es una ficción. La suma es una fantasía. Hay una única cifra gobernante, y toda la destreza de esta lección consiste en localizarla a ojo.
+
+Por eso vale la pena grabarse a fuego las dos señales. Rara vez consigues la tabla de capacidades; casi siempre consigues el *flujo*, y el flujo anuncia la restricción a gritos: una acumulación que no para de crecer, con la inactividad extendiéndose justo detrás. Ponte en la costura entre ambas y estarás de pie sobre el cuello de botella. Todo lo que este curso hace a continuación —exprimir más a la restricción, negarse a malgastar esfuerzo en otra parte, echar las cuentas de cuánto ayudará un arreglo— arranca de este único acto de señalar el paso correcto.
+
+<MCQ
+  client:visible
+  question="Un túnel de lavado tiene cuatro estaciones con capacidades de 30, 30, 12 y 25 coches por hora (en orden: prelavado, lavado, secado, encerado). En un día con coches haciendo cola en la entrada, ¿cuántos coches por hora salen limpios y encerados, y dónde se formará la cola de coches que esperan?"
+  options={[
+    { text: '12 coches/h, con la cola formándose delante de la estación de secado (el paso más lento)', correct: true },
+    { text: '25 coches/h, con la cola formándose en la estación de encerado' },
+    { text: '30 coches/h, ya que dos estaciones pueden hacer 30 cada una' },
+    { text: '24,25 coches/h — la media de las cuatro estaciones' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="El rendimiento es la capacidad mínima: la estación de secado a 12 coches/h. Con coches esperando en la entrada (demanda > capacidad), los coches mojados se acumulan delante de la estación de secado más rápido de lo que puede manejarlos, así que la cola se forma ahí. La estación de encerado, aunque puede hacer 25, solo se alimenta a 12/h — se queda sin trabajo y parada. Ni 25, ni 30, ni la media de 24,25: el paso más lento gobierna el conjunto, y la acumulación se forma justo delante de él."
+/>
+
+<MCQ
+  client:visible
+  question="La tubería de pedidos de una tienda online funciona así: recibir pedido (200/h) → recoger artículos (60/h) → empaquetar (90/h) → enviar (150/h). Es Black Friday y los pedidos inundan muy por encima de 200/h. ¿Dónde se acumulará el trabajo y qué pasos se quedarán sin trabajo?"
+  options={[
+    { text: 'Los pedidos se acumulan delante de «recoger artículos» (60/h, la restricción); empaquetar y enviar se quedan sin trabajo, alimentados solo a 60/h', correct: true },
+    { text: 'El trabajo se acumula en «enviar» porque es el último; los pasos anteriores se quedan sin trabajo' },
+    { text: 'El trabajo se acumula por igual en cada paso porque la demanda es altísima' },
+    { text: 'No se acumula nada; la recepción de 200/h hace que el sistema funcione a 200/h' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="La recogida es el paso más lento a 60/h, así que es la restricción y el rendimiento del sistema es 60/h. La recepción puede aceptar 200/h y empujarlo todo hacia la recogida, así que los pedidos sin recoger se acumulan delante del paso de recogida. Empaquetar (90/h) y enviar (150/h) están aguas abajo y solo reciben 60/h, así que se quedan sin trabajo y parados pese a sus capacidades mayores. El alto ritmo de recepción no ayuda — solo hace que la pila delante de la recogida crezca más rápido."
+/>
+
+<FillBlank
+  client:visible
+  question="Completa el procedimiento para detectar cuellos de botella."
+  text="Para encontrar una restricción a ojo, busca dónde se {{acumula|desvanece}} el trabajo — la restricción está justo detrás de esa cola creciente — y los pasos que están {{sin trabajo y parados|funcionando a tope}} aguas abajo de ella. El rendimiento del sistema equivale a la {{capacidad de ese paso más lento|media de todos los pasos}}, pero solo cuando {{la demanda supera|la demanda se mantiene por debajo de}} su capacidad."
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+  explanation="Las dos señales: una acumulación creciente marca el punto justo antes de la restricción, y la falta de trabajo (pasos parados) marca todo lo que viene después. El rendimiento equivale a la capacidad del paso más lento — no a la media — y ese paso solo ata cuando la demanda lo supera de verdad. Por debajo de eso, el paso lento tiene margen y nada está restringido."
+/>
+
+## Repaso
+
+<MindMap
+  client:visible
+  title="Detectar la restricción"
+  eyebrow="Visión de conjunto"
+  outlineLabel="Esquema"
+  root={{
+    label: 'Detectar la restricción',
+    children: [
+      {
+        label: 'La regla central',
+        children: [
+          { label: 'Rendimiento = capacidad del paso de MENOR capacidad' },
+          { label: 'Ni la media, ni la suma — el mínimo' },
+          { label: 'La restricción funciona al ~100 % de utilización; el resto tiene margen' },
+        ],
+      },
+      {
+        label: 'Tres términos precisos',
+        children: [
+          { label: 'Capacidad = velocidad punta de un paso en aislamiento' },
+          { label: 'Rendimiento = el ritmo real de salida del sistema' },
+          { label: 'Utilización = lo ocupado que está un paso frente a su propia capacidad' },
+        ],
+      },
+      {
+        label: 'Las dos señales (encuéntralo a ojo)',
+        children: [
+          { label: 'Acumulación: el trabajo se apila DELANTE de la restricción' },
+          { label: 'Falta de trabajo: los pasos POSTERIORES están parados, alimentados a su ritmo' },
+          { label: 'Restricción = la costura entre acumulación y falta de trabajo' },
+        ],
+      },
+      {
+        label: 'Huellas del mundo real',
+        children: [
+          { label: 'Cocina: los platos se atascan en la única freidora' },
+          { label: 'Autopista: cola antes del estrechamiento, carretera vacía después' },
+          { label: 'Soporte: los tickets se apilan en la única ingeniera sénior' },
+        ],
+      },
+      {
+        label: 'La demanda la hace morder',
+        children: [
+          { label: 'Un paso lento restringe SOLO cuando la demanda > su capacidad' },
+          { label: 'Por debajo: tiene margen, no hay cola, no es un cuello de botella' },
+          { label: 'La restricción puede ser EXTERNA (el mercado, los proveedores)' },
+        ],
+      },
+      {
+        label: 'La trampa',
+        children: [
+          { label: 'No culpes al paso parado (sin trabajo) ni al anegado (aguas arriba)' },
+          { label: 'Lee el flujo, no lo ocupado que parece cada paso' },
+        ],
+      },
+    ],
+  }}
+/>
+
+<Quiz
+  client:visible
+  title="Ponte a prueba: detectar la restricción"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  correctCountLabel="correctas"
+  gateLabel="Comprueba tu respuesta para continuar."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  perfectMessage="Puntuación perfecta, ¡bien hecho!"
+  goodMessage="Buen trabajo, repasa las que has fallado."
+  keepPracticingMessage="Sigue practicando, lo tienes."
+  questions={[
+    {
+      question: "¿Cuál es la diferencia entre la capacidad de un paso y el rendimiento del sistema?",
+      options: [
+        { text: "La capacidad es la velocidad punta de un solo paso en aislamiento; el rendimiento es lo que el sistema entero termina de verdad, y equivale a la capacidad de la restricción", correct: true },
+        { text: "Son lo mismo medido en unidades distintas", correct: false },
+        { text: "El rendimiento es la suma de la capacidad de cada paso", correct: false },
+        { text: "La capacidad siempre es menor que el rendimiento", correct: false },
+      ],
+      explanation: "La capacidad es por paso y se mide como si ese paso nunca esperara. El rendimiento es el ritmo real de salida del sistema, y la cadena lo limita al paso de menor capacidad. Así que rendimiento = la capacidad de la restricción, nunca la suma ni la media.",
+    },
+    {
+      question: "Ves un almacén donde las cajas se apilan en una pila creciente delante de la máquina etiquetadora, mientras el muelle de carga justo después está vacío. ¿Dónde está la restricción?",
+      options: [
+        { text: "La máquina etiquetadora — la pila se forma delante de ella y el muelle de detrás está sin trabajo", correct: true },
+        { text: "El muelle de carga — está vacío, así que debe de ser el lento", correct: false },
+        { text: "El puesto que tenga más operarios de brazos cruzados", correct: false },
+        { text: "No hay manera de saberlo sin medir cada máquina", correct: false },
+      ],
+      explanation: "Las dos señales apuntan directas a ella: el trabajo se acumula delante de la restricción (la máquina etiquetadora) y la falta de trabajo se extiende detrás (el muelle vacío). La restricción está en la costura entre la pila creciente y la inactividad.",
+    },
+    {
+      question: "El paso interno más lento de una fábrica puede hacer 50 unidades/h, pero los clientes solo piden 30 unidades/h. ¿Es el paso de 50 unidades la restricción vinculante?",
+      options: [
+        { text: "No — la demanda (30) está por debajo de la capacidad de ese paso (50), así que tiene margen y no ata; la restricción real es externa (el mercado)", correct: true },
+        { text: "Sí — el paso interno más lento es siempre la restricción, independientemente de la demanda", correct: false },
+        { text: "Sí — porque 50 es una cifra finita, tiene que estar limitando la salida", correct: false },
+        { text: "No hay ninguna restricción en este sistema", correct: false },
+      ],
+      explanation: "Un paso solo restringe cuando la demanda supera su capacidad. Aquí la demanda (30) está muy por debajo de los 50 del paso, así que no se forma cola y el paso está parado. Lo que de verdad pone techo a la salida queda fuera del proceso — una restricción de mercado/demanda — que ninguna aceleración de la planta arreglará.",
+    },
+    {
+      question: "Una línea de autobús tiene paradas con capacidades de embarque (en orden) de 40, 18, 35 y 50 pasajeros por hora, y mucha más de 50 gente quiere subir. ¿Cuál es el rendimiento de la línea y qué paradas se quedan sin trabajo?",
+      options: [
+        { text: "18 pasajeros/h; la tercera y la cuarta parada se quedan sin trabajo, recibiendo viajeros solo al ritmo de la segunda parada", correct: true },
+        { text: "50 pasajeros/h, fijado por la parada de mayor capacidad", correct: false },
+        { text: "35,75 pasajeros/h, la media de las cuatro paradas", correct: false },
+        { text: "143 pasajeros/h, la suma de las cuatro paradas", correct: false },
+      ],
+      explanation: "El rendimiento es el mínimo: 18/h en la segunda parada. Con la demanda superando la capacidad, una multitud se acumula ahí, y las paradas posteriores (35 y 50) solo se alimentan a 18/h, así que se quedan sin trabajo. Ni el máximo, ni la media, ni la suma — el paso más lento gobierna el conjunto.",
+    },
+    {
+      question: "¿Por qué es un error añadir más personal de recepción a un proceso donde el paso de recepción ya está desbordado y anegado?",
+      options: [
+        { text: "Si la recepción no es la restricción, acelerarla solo palea más trabajo a la pila que hay delante del cuello de botella real — el rendimiento no se mueve", correct: true },
+        { text: "Añadir personal en cualquier sitio siempre reduce el rendimiento", correct: false },
+        { text: "El paso de recepción es sin duda el cuello de botella porque es el que parece más ocupado", correct: false },
+        { text: "La recepción nunca puede ser un cuello de botella bajo ninguna circunstancia", correct: false },
+      ],
+      explanation: "Parecer anegado no es lo mismo que ser la restricción. Si la recepción alimenta a un paso posterior más lento, una recepción más rápida solo hace crecer la acumulación delante de ese paso más lento. El rendimiento sigue clavado a la capacidad del cuello de botella real, y te has gastado el dinero en alargar la cola.",
+    },
+  ]}
+/>
+
+## Adónde va esto a continuación
+
+Ya sabes *señalar la restricción* — por capacidad si tienes la suerte de contar con los números, y a ojo (acumulación delante, falta de trabajo detrás, demanda apretando) cuando no. Ese es el diagnóstico. La pregunta obvia que sigue es la que todo el campo se construyó para responder: *ahora que la he encontrado, ¿qué hago exactamente?*
+
+La lección 3 te da el procedimiento. Es la **teoría de las restricciones (Theory of Constraints) de Eliyahu Goldratt** y sus famosos **cinco pasos de focalización** — identificar la restricción, *explotarla* (exprimir hasta la última gota antes de gastar un céntimo), *subordinar* todo lo demás para servirla, *elevarla* (solo ahora añade capacidad) y luego *repetir*, porque en el momento en que arreglas un cuello de botella aparece uno nuevo. En esta lección has hecho el paso uno. A continuación aprenderás los otros cuatro — y por qué hacerlos en el orden equivocado es la manera en que los equipos listos malgastan años.

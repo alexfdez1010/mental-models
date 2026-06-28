@@ -88,25 +88,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // These intermediate courses re-balance the tag taxonomy (psychology, systems,
   // biology) and are built BEFORE the advanced/expert probability tier below.
   {
-    slug: 'bottlenecks-and-constraints',
-    icon: '⛓️',
-    difficulty: 'intermediate',
-    order: 13,
-    accent: 'brand',
-    title: {
-      en: 'Bottlenecks & the Theory of Constraints',
-      es: 'Cuellos de Botella y la Teoría de las Restricciones',
-    },
-    description: {
-      en: 'A chain is only as strong as its weakest link, and a system only as fast as its slowest step. Find the one constraint that governs the whole, and stop optimizing the parts that don’t matter.',
-      es: 'Una cadena es tan fuerte como su eslabón más débil, y un sistema tan rápido como su paso más lento. Encuentra la única restricción que gobierna el todo y deja de optimizar las partes que no importan.',
-    },
-    dependencies: ['feedback-loops'],
-    tags: ['systems-thinking'],
-    buildNotes:
-      'Bottlenecks & the theory of constraints — the systems-thinking rung on finding leverage. Sections: the bottleneck as the single step that caps a whole system’s throughput (the slowest stage on an assembly line, the narrowest pipe); Goldratt’s Theory of Constraints and the five focusing steps (identify, exploit, subordinate, elevate, repeat); why improving a NON-bottleneck does nothing for the whole (and can make things worse by piling up inventory) — the counter-intuitive heart of the lesson; Amdahl’s law / the math of speeding up one part of a pipeline; the constraint MOVES once you fix one (there’s always a new weakest link); everyday examples (traffic merges, the one slow teammate, a website’s slowest query, a morning routine). Build an interactive pipeline/flow island where the learner adjusts each stage’s capacity and watches total throughput track ONLY the bottleneck. Connect to leverage points and feedback loops (the prerequisite). Pitfall: local optimization — polishing parts that aren’t the constraint. Recap Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'red-queen-effect',
     icon: '🏃',
     difficulty: 'advanced',

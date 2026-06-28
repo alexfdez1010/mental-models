@@ -1,0 +1,103 @@
+---
+title: "La velocidad del paso más lento"
+description: "El agua sale de una botella a la velocidad de su cuello, no de su cuerpo. Todo sistema tiene un cuello — un paso que limita el conjunto — y, en cuanto lo ves, dejas de malgastar esfuerzo en las partes que nunca fueron el problema."
+topic: "es/bottlenecks-and-constraints"
+order: 1
+minutes: 8
+updated: 2026-06-28
+---
+
+import { MCQ, Callout, PipelineThroughput } from '@/components/react';
+
+Vierte el agua de una botella y fíjate en qué te limita. No es el cuerpo ancho de cristal, que podría vaciarse en un parpadeo. Es el **cuello** estrecho. El agua solo puede salir tan rápido como le permita la parte más lenta del recorrido — y podrías ensanchar el cuerpo de la botella hasta el tamaño de un barril sin verter ni una sola gota más rápido. Para acelerar la cosa, hay exactamente algo que merece la pena tocar: el cuello.
+
+Esa humilde botella es un modelo completo de cómo se comporta casi cualquier sistema, y el tema de todo este curso. Una fábrica, un hospital, una cola de caja, un despliegue de software, una rutina matutina, una carretera de seis carriles que de repente se estrecha a dos — cada uno es una **cadena de pasos**, y en cada una de ellas un único paso es el cuello. Cuánto entrega de verdad el sistema entero lo fija ese único paso más lento y, para desesperación nuestra, *nada más*. Tenemos un nombre para ello: el **cuello de botella (bottleneck)**.
+
+## Qué es un cuello de botella
+
+Un **cuello de botella (bottleneck)** es el único paso de un proceso cuya capacidad limitada pone un tope a la salida del proceso *entero*. «Capacidad» no es más que cuánto puede gestionar ese paso por unidad de tiempo — coches por minuto en el estrechamiento, piezas por hora en la máquina más lenta, tickets por día del único equipo saturado. El cuello de botella es el paso que *menos* tiene.
+
+Y aquí está la regla que hace que el concepto merezca un curso entero — el único número que llevarte de esta lección:
+
+> El **rendimiento (throughput)** — la tasa a la que un sistema produce de verdad salida terminada — es igual a la capacidad de su **cuello de botella**. No la media de los pasos. No la suma. El mínimo.
+
+Cualquier otro paso es más rápido de lo que necesita ser. Su velocidad de más es *invisible* para la salida del sistema, porque el trabajo todavía tiene que pasar a duras penas por el cuello antes de poder salir. Una cadena de montaje de cinco etapas cuyas etapas pueden hacer 50, 30, 45, 35 y 60 unidades por hora no produce 50, ni 60, ni la media de 44. Produce **30** — la etapa más lenta — y las otras cuatro pasan parte de cada hora paradas o acumulando trabajo que no pueden pasar adelante.
+
+<Callout variant="tip" title="La versión en una frase">
+Un **cuello de botella** es el paso más lento de una cadena, y la salida real de un sistema (su **rendimiento**) la fija ese único paso por sí solo — así que todo el juego consiste en encontrarlo y empujar *ahí*, no en todas partes.
+</Callout>
+
+## Míralo en movimiento
+
+No tienes que creerte la regla a ciegas — aquí tienes la máquina en persona. Cada barra es una etapa de una cadena de montaje, y puedes arrastrar su capacidad. La línea discontinua es el rendimiento real de la línea. Fíjate en dos cosas. Primera: el rendimiento siempre se sitúa exactamente en la barra **más corta** — el cuello de botella, en rojo. Segunda, y esto es el curso entero en un solo gesto: arrastra una barra *más alta* arriba o abajo y la línea de rendimiento **no se inmuta** — esa capacidad se desperdicia (la parte atenuada de la barra). Solo cuando mueves el *cuello de botella* se mueve la línea — y, en el instante en que otra etapa pasa a ser la más lenta, la insignia roja **salta** hacia ella.
+
+<PipelineThroughput
+  client:visible
+  title="Una línea, una sola restricción"
+  caption="El rendimiento sigue a la barra más corta e ignora todas las demás. Sube una que no sea el cuello de botella y no pasa nada; sube el cuello de botella y la línea se acelera — hasta que una etapa distinta se convierte en la nueva restricción. Ese salto es el corazón de todo el curso."
+  eyebrow="Encuentra el cuello de botella"
+  instructions="Arrastra la capacidad de cada etapa. La línea discontinua es el rendimiento de la línea: siempre se queda en la barra más corta. Sube una etapa que no sea el cuello de botella y la línea no se mueve; sube el cuello de botella y se acelera, hasta que otra etapa pasa a ser la más lenta y la insignia roja salta hacia ella."
+  readout="La etapa {stage} es el cuello de botella: marca el ritmo a {rate} {unit}. El resto de la línea tiene capacidad de sobra ({slack} {unit} de holgura desperdiciada) y aun así no puede ir más rápido que esa etapa."
+  bottleneckLabel="Cuello de botella"
+  throughputLabel="Rendimiento de la línea"
+  capacityLabel="Capacidad de la etapa"
+  pileupLabel="Trabajo que se acumula"
+  starvedLabel="Parada / sin trabajo"
+  unitLabel="uds/h"
+/>
+
+Dedica veinte segundos a arrastrar esos deslizadores. Intenta hacer que la línea vaya más rápido subiendo la barra *más alta* — no puedes. Luego sube la roja y nota la diferencia. Todo lo que viene a partir de aquí es solo aprender a leer lo que ya estás viendo.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una cadena de montaje tiene cinco etapas que pueden procesar 50, 30, 45, 35 y 60 unidades por hora. Con materia prima siempre disponible, ¿cuántas unidades terminadas produce de verdad la línea por hora?"
+  options={[
+    { text: '30 — la línea funciona a la velocidad de su etapa más lenta, el cuello de botella', correct: true },
+    { text: '44 — la media de las cinco etapas' },
+    { text: '60 — la etapa más rápida marca el ritmo' },
+    { text: '220 — las cinco etapas se suman' },
+  ]}
+  explanation="En un pretest no hay corazonadas equivocadas — pero la respuesta es 30, la etapa más lenta. El trabajo no puede salir de la línea hasta que ha pasado por todas las etapas, así que solo puede terminarse tan rápido como le permita la más lenta. Las etapas rápidas no ayudan: simplemente se quedan parte del tiempo paradas o apilan trabajo delante de la etapa de 30 unidades. Rendimiento = el mínimo, nunca la media ni la suma."
+/>
+
+## Por qué esto rompe nuestra intuición
+
+Vuelve a mirar lo equivocadas que se sienten las respuestas tentadoras. La **media** (44) parece justa — seguro que una línea de etapas casi todas rápidas es rápida de media, ¿no? Pero no puedes sortear un muro a base de promedios; el trabajo tiene que pasar físicamente *por* la etapa de 30 unidades. La **suma** (220) es la corazonada de que «más caballaje total = más salida», que es como pensamos en el esfuerzo combinado de un equipo — y es justo al revés para una cadena. Y la **etapa más rápida** (60) es la parte de la que estamos más orgullosos, la máquina reluciente a la que queremos dar el mérito — y que no contribuye absolutamente nada al rendimiento.
+
+Esto es lo que hace que los cuellos de botella merezcan estudiarse. Nuestro reflejo sin entrenar, ante un sistema lento, es mejorar *lo que sea más fácil*, o hacer *cada parte* un poco mejor, o mejorar la parte que resulta que entendemos mejor. En una cadena, las tres son casi siempre movimiento desperdiciado. Hay un paso que importa, y mejorar cualquiera de los otros — por satisfactorio que sea, por visible que sea — mueve la salida del sistema exactamente cero.
+
+<Callout variant="warning" title="La trampa contra la que lucha todo este curso">
+El error número uno es la **optimización local** — mejorar un paso que *no* es la restricción y sentirte productivo mientras el sistema no se acelera lo más mínimo. Peor aún: acelerar un paso que no es el cuello de botella puede apilar trabajo delante del de verdad y dejar parados, sin trabajo, los pasos posteriores. El esfuerzo gastado en cualquier sitio que no sea el cuello de botella es, para la salida del sistema, esfuerzo tirado a la basura.
+</Callout>
+
+## Cómo conecta esto con lo que ya sabes
+
+Esto no es un punto de partida nuevo — es **los bucles de retroalimentación y el pensamiento sistémico** apuntados a una pregunta concreta y despiadada. El pensamiento sistémico te enseñó a dejar de mirar las partes por separado y a fijarte en cómo se comporta el conjunto; el cuello de botella es la versión más afilada posible de esa lección, porque dice que el comportamiento del conjunto lo gobierna *una* parte que tienes que ir a buscar. Cuando llegues a la idea del último curso de un **punto de apalancamiento** — el lugar donde un empujón pequeño lo cambia todo — reconocerás el cuello de botella como el punto de apalancamiento más concreto que existe. Empuja la restricción y el sistema se transforma; empuja en cualquier otro sitio y se traga tu esfuerzo y se encoge de hombros.
+
+Aquí también hay un bucle. Alivia el cuello de botella y aparece un *nuevo* paso más lento — la restricción no desaparece, se *mueve*. Ese ciclo interminable de «arregla uno, revela el siguiente» es una estructura de retroalimentación que aprenderás a cabalgar en lugar de combatir.
+
+## El mapa del curso
+
+Cinco lecciones de enseñanza, y luego un examen que no puedes deshacer:
+
+1. **El cuello de botella** — el único paso más lento, el rendimiento como el mínimo, y cómo *detectar* la restricción en cualquier proceso (busca la acumulación delante de ella y la inactividad detrás).
+2. **La Teoría de las Restricciones** — los cinco pasos de enfoque de Goldratt: identificar, explotar, subordinar, elevar, repetir — el procedimiento concreto para gobernar una restricción.
+3. **No pulas la piedra equivocada** — por qué mejorar un paso que no es el cuello de botella no sirve de nada (y puede perjudicar), la trampa de la optimización local, y el inventario que apila.
+4. **La ley de Amdahl** — las matemáticas de acelerar una parte de una tubería, por qué incluso una aceleración *infinita* de un paso que no es el cuello de botella tiene un techo duro, y cómo hacer la cuenta de «¿cuánto va a ayudar esto de verdad?».
+5. **La restricción siempre se mueve** — por qué arreglar un cuello de botella revela el siguiente, cómo cabalgar ese ciclo, y los cuellos de botella cotidianos que se esconden en tu tráfico, tu equipo, tus consultas y tus mañanas.
+
+Y luego un **Examen Final** — calificado, una pregunta cada vez, de un solo sentido: en cuanto respondes, se bloquea. Sin botón de atrás, sin reintentos.
+
+### Cómo usar este curso
+
+Una sola regla hace casi todo el trabajo: **adivina antes de mirar.** Comprométete con una respuesta en tu cabeza antes de revelar ninguna explicación. Los problemas de cuellos de botella están llenos de respuestas que *parecen* correctas — haz la media, súmalo, dale el mérito a la parte rápida — y resultan ser justo al revés. El pequeño aguijonazo de equivocarse es lo que hace que la regla de verdad se quede pegada.
+
+A continuación: el cuello de botella en sí — qué es, cómo el rendimiento se desploma hasta su capacidad, y las señales reveladoras que te permiten señalar la restricción en un sistema que no has visto nunca antes.

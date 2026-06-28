@@ -1,0 +1,348 @@
+---
+title: "La ley de Amdahl: las matemáticas de la aceleración"
+description: "Hay un techo infranqueable a lo mucho que puedes acelerar un sistema acelerando una sola de sus partes — y una única fórmula limpia te dice exactamente dónde está ese muro, antes de que malgastes un solo euro intentando trepar por encima de él."
+topic: "es/bottlenecks-and-constraints"
+order: 5
+minutes: 12
+updated: 2026-06-28
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, Callout, MindMap } from '@/components/react';
+
+Ya has aprendido la regla tres veces y desde tres ángulos: el rendimiento (throughput) es el *mínimo*, los cinco pasos de Goldratt son el procedimiento para gobernar al más lento, y pulir un no-cuello-de-botella aporta exactamente cero a lo que el sistema entrega. Todo cierto, todo cualitativo. Esta lección te da el *número*. Cuando alguien diga «hagamos la base de datos el doble de rápida», podrás responder, en una servilleta, «estupendo — eso nos compra una aceleración global de 1,43x, y ni una gota más». La fórmula que hace esto es la **ley de Amdahl (Amdahl's law)**, y una vez la tengas en la cabeza nunca más te dejarás engañar por una optimización de nombre impresionante apuntada al sitio equivocado.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  question="Una tarea pasa el 90 % de su tiempo en el paso A y el 10 % en el paso B. Haces el paso B infinitamente rápido — instantáneo, tiempo cero, magia. ¿Cuánto más rápida corre ahora la tarea entera?"
+  options={[
+    { text: 'Unas 1,11x más rápida — el 90 % que nunca tocaste sigue teniendo que correr, y ahora lo domina todo', correct: true },
+    { text: '10x más rápida — eliminaste un paso entero' },
+    { text: 'Infinitamente más rápida — el paso B tarda ahora tiempo cero' },
+    { text: '1,9x más rápida — más o menos el doble' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="En un pretest no hay respuestas malas — pero la respuesta escuece: solo unas 1,11x. La tarea tardaba 100 unidades de tiempo (90 en A, 10 en B). Borra B por completo y te quedan 90 unidades. 100/90 ≈ 1,11. Eliminaste un paso del todo y el conjunto entero se volvió apenas un 11 % más rápido, porque la parte que no podías tocar era el 90 % del trabajo. Ese techo — fijado por lo que *no* arreglas — es toda la lección."
+/>
+
+## El planteamiento: todo sistema es parte-mejorable, parte-fija
+
+En 1967 un arquitecto de ordenadores llamado **Gene Amdahl** se levantó en una conferencia para argumentar en contra del bombo en torno a los ordenadores masivamente paralelos. Su argumento era aritmético, no de opinión: un programa nunca es *enteramente* paralelizable. Alguna fracción de él es tercamente secuencial — tiene que correr de principio a fin en un solo procesador por muchos que le eches al problema. Y esa fracción fija, demostró, pone un tope infranqueable a lo mucho que todos tus procesadores extra podrán jamás comprarte. El argumento iba sobre computación paralela, pero las matemáticas son universales — se aplican a cualquier cosa que puedas dividir en «la parte que puedo acelerar» y «la parte que no».
+
+Así que plantéalo en general. Coge cualquier tarea y divide su tiempo total en dos cubos:
+
+- La fracción $p$ del trabajo que **sí** puedes acelerar — la etapa paralelizable, la consulta lenta, el paso manual que puedes automatizar. ($p$ está entre 0 y 1; si el 80 % del tiempo es mejorable, $p = 0.8$.)
+- La fracción $(1 - p)$ que **no** puedes — la sobrecarga fija, el trozo irreduciblemente secuencial, la parte de la tarea que está atascada a su velocidad actual.
+
+Ahora supón que aceleras la parte mejorable por un factor $s$. Hazla el doble de rápida, $s = 2$; diez veces más rápida, $s = 10$; infinitamente rápida, $s \to \infty$. La pregunta que responde Amdahl es la única que importa: *¿cuánto más rápida se vuelve la tarea entera?* No la parte que afinaste — el **conjunto entero**, de principio a fin, que es lo que de verdad le importa a cualquiera.
+
+<Callout variant="tip" title="La versión de una frase">
+Divide una tarea en la parte que puedes acelerar ($p$) y la parte que no ($1-p$). Por mucho que aprietes sobre $p$, la parte fija $(1-p)$ se queda exactamente donde estaba — y fija un muro que nunca podrás cruzar.
+</Callout>
+
+## La fórmula
+
+Aquí la tienes, toda la ley de Amdahl en una línea:
+
+$$\text{Aceleración} = \frac{1}{(1-p) + \dfrac{p}{s}}$$
+
+«Aceleración» significa tiempo viejo dividido entre tiempo nuevo — una aceleración de 2 significa que la tarea corre ahora en la mitad del tiempo. Lee el denominador como «el nuevo tiempo total, medido como fracción del tiempo total viejo», y se desmonta en dos piezas honestas:
+
+- $(1-p)$ — la parte fija, que tarda **lo mismo** que antes. No la tocaste, así que aporta su cuota original completa al nuevo total.
+- $\dfrac{p}{s}$ — la parte mejorable, que solía tardar $p$ del tiempo y ahora, acelerada por un factor $s$, tarda solo $p/s$. Acelérala 4x y se encoge a una cuarta parte de su cuota antigua.
+
+Suma esas dos y tienes el nuevo tiempo total como fracción del viejo; dale la vuelta (el $1$ de arriba) y tienes la aceleración. Eso es todo. Sin cálculo, sin supuestos ocultos — solo «la parte que arreglaste se hizo más pequeña, la parte que no se quedó igual, súmalas e invierte».
+
+Compruébalo contra el pretest. Allí, $p = 0.1$ (solo el paso B, el 10 %, era mejorable) y lo hicimos infinito, así que $p/s \to 0$:
+
+$$\text{Aceleración} = \frac{1}{(1-0.1) + 0} = \frac{1}{0.9} \approx 1.11$$
+
+Exactamente las 1,11x que resultaron tan decepcionantes. La fórmula no te miente — es la misma decepción, hecha precisa.
+
+<MCQ
+  client:visible
+  question="Un informe tarda 200 segundos en generarse: 50 segundos de preparación fija y 150 segundos de cálculo numérico que puedes acelerar. Haces el cálculo 3x más rápido. Usando la ley de Amdahl, ¿cuál es la aceleración global?"
+  options={[
+    { text: 'Unas 2x — el tiempo nuevo es 50 + 150/3 = 100 s, y 200/100 = 2x', correct: true },
+    { text: '3x — el cálculo es 3x más rápido, así que el informe es 3x más rápido' },
+    { text: '1,33x — ahorraste un tercio del tiempo' },
+    { text: '2,5x — el promedio de 2x y 3x' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Aquí p = 150/200 = 0,75 y s = 3. Tiempo nuevo = fijo + acelerado = 50 + 150/3 = 50 + 50 = 100 segundos. Aceleración = 200/100 = 2x. O directo de la fórmula: 1 / (0,25 + 0,75/3) = 1 / (0,25 + 0,25) = 1/0,5 = 2. El cálculo se volvió 3x más rápido, pero el informe entero solo se volvió 2x más rápido, porque esos 50 segundos fijos se niegan a encogerse."
+/>
+
+## El techo infranqueable
+
+Ahora empuja $s$ hasta el infinito — acelera la parte mejorable *perfectamente*, hazla instantánea, lo mejor que podrías hacer jamás. El término $p/s$ se desvanece, y la fórmula colapsa en algo bello y brutal:
+
+$$\lim_{s \to \infty} \text{Aceleración} = \frac{1}{1 - p}$$
+
+Ese es el **techo**. El hecho más importante de toda la lección. Por mucho dinero, talento o magia que viertas en la parte mejorable, la aceleración global *nunca* puede superar $\frac{1}{1-p}$, porque la parte que no arreglaste todavía tiene que correr. Si el 25 % del trabajo es no-mejorable, entonces $1-p = 0.25$ y tu techo es $1/0.25 = 4$x — podrías hacer el otro 75 % literalmente instantáneo y la tarea entera seguiría corriendo solo 4x más rápido. La parte fija se ha convertido en el nuevo cuello de botella, exactamente en el sentido que las lecciones 1 a 3 te entrenaron a ver. La ley de Amdahl es la idea del cuello de botella escrita como aritmética continua: alivia todo salvo una parte terca, y esa parte *se convierte* en la restricción y te pone tope.
+
+Aquí está el techo en unas cuantas fracciones que merece la pena memorizar:
+
+| Fracción no-mejorable $(1-p)$ | Fracción mejorable $p$ | Aceleración máxima posible $\frac{1}{1-p}$ |
+|---|---|---|
+| 10 % | 90 % | **10x** |
+| 25 % | 75 % | **4x** |
+| 50 % | 50 % | **2x** |
+| 90 % | 10 % | **1,11x** |
+
+Lee la fila de abajo y siéntela: cuando el 90 % del trabajo está atascado, lo mejor que podrás hacer jamás — aceleración perfecta e infinita del otro 10 % — es unas miserables 1,11x. Eso es el pretest, ahí sentado en la tabla. Y fíjate en que la tabla responde a una pregunta antes de que hayas gastado un céntimo: te dice lo *máximo* que una optimización podría llegar a valer, lo cual suele ser razón suficiente para no molestarte.
+
+<Callout variant="warning" title="El techo lo fija lo que NO arreglas">
+Tu aceleración máxima es $1/(1-p)$ — un número que depende *enteramente* de la fracción que estás dejando en paz, y nada en absoluto de lo ingeniosa que sea tu optimización. No puedes superar este muro a base de ingeniería. La única manera de subir el techo es hacer más del trabajo mejorable (encoger $1-p$) — lo que equivale a ir a atacar una parte mayor del problema.
+</Callout>
+
+## Un ejemplo resuelto completo
+
+Hagámoslo concreto con un pipeline de datos. Tiempo total de ejecución: **100 minutos**. De eso, **80 minutos** son una etapa de transformación paralelizable (este es tu $p$ — el 80 % del trabajo, así que $p = 0.8$) y **20 minutos** son sobrecarga fija: leer la fuente, escribir el resultado, el pegamento secuencial que no puedes paralelizar ($1 - p = 0.2$). Tu jefe lo quiere más rápido y pregunta cuánto ayudará acelerar la etapa de transformación. Calculémoslo para un rango de esfuerzos y veamos qué pasa.
+
+Para cada $s$, el tiempo nuevo es $20 + \frac{80}{s}$ minutos, y la aceleración es $100$ dividido entre eso:
+
+| Factor de aceleración $s$ de la transformación | Nuevo tiempo de transformación | Nuevo tiempo total | Aceleración global |
+|---|---|---|---|
+| 1 (no hacer nada) | 80 min | 100 min | 1,00x |
+| 2 | 40 min | 60 min | **1,67x** |
+| 4 | 20 min | 40 min | **2,5x** |
+| 8 | 10 min | 30 min | **3,33x** |
+| $\infty$ (instantáneo) | 0 min | 20 min | **5x** |
+
+Recorre esa última columna. Duplicar la velocidad de la transformación ($s=2$) te da 1,67x. Ir a 4x te da 2,5x. Ir a 8x — ocho veces más rápido, un esfuerzo de ingeniería serio — te da solo 3,33x. Y hacerla *infinitamente* rápida, el máximo teórico, topa en 5x ($= 1/0,2$, directo de la fórmula del techo). Esos 20 minutos de sobrecarga fija son el muro: incluso con la transformación desaparecida por completo, el pipeline no puede correr en menos de 20 minutos, así que no puede superar una aceleración de 5x. Jamás.
+
+<MCQ
+  client:visible
+  question="En ese mismo pipeline de 100 minutos (80 min mejorables, 20 min fijos), tu equipo pasa un mes haciendo la etapa de transformación 8x más rápida, y luego propone otro mes para empujarla de 8x a 16x. ¿Cuánta aceleración global *adicional* compra, a grandes rasgos, ese segundo mes?"
+  options={[
+    { text: 'Casi nada — unas 3,33x → 3,85x, una ganancia de ~0,5x por todo un mes de trabajo', correct: true },
+    { text: 'Otras 2x encima — la aceleración casi se duplica de nuevo' },
+    { text: 'Unas 1,6x más — proporcional al esfuerzo' },
+    { text: 'Por fin rompería el techo de 5x' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Con s = 16: tiempo nuevo = 20 + 80/16 = 20 + 5 = 25 min, aceleración = 100/25 = 4x... seamos precisos: eso es 4x, frente a 3,33x con s=8 — una ganancia de unas 0,67x. (Con s=8 el tiempo era 30 min → 3,33x.) Sea como sea, un mes entero duplicando la velocidad de la transformación empuja el resultado global de ~3,33x hacia el techo de 5x en menos de un punto. Cuanto más te acercas al muro, más cuesta cada duplicación y menos compra. Estás pagando mes a mes por migajas."
+/>
+
+## Rendimientos decrecientes, y dónde gastar de verdad
+
+Mira fijamente ese ejemplo resuelto y salta un patrón a la vista: **cada duplicación de $s$ compra menos que la anterior.** La primera duplicación (1x → 2x) compró 0,67x de aceleración global. La siguiente (2x → 4x) compró 0,83x. Para cuando vas de 8x → 16x estás rascando fracciones de una fracción. Esto es la ley de los rendimientos decrecientes (diminishing returns), y Amdahl te dice exactamente *por qué* muerde: a medida que aceleras la parte mejorable, esta se encoge hacia cero, así que la parte fija toma el relevo como el coste dominante — y la parte fija no la puedes tocar, por definición. Estás estampándote asintóticamente contra el techo.
+
+Entonces, ¿dónde *deberías* gastar? La fórmula responde limpiamente: para obtener la mayor aceleración global, apunta a la **$p$ más grande** — la parte que se come más tiempo total. Una parte con una $p$ grande tiene un techo generoso ($1/(1-p)$ es alto) y recompensa cada pizca de aceleración que le des. Una parte con una $p$ pequeña tiene un techo apenas por encima de 1x; incluso una astucia infinita ahí se desperdicia. Y «encuentra la parte que domina el tiempo total, y empuja ahí» es *precisamente* rendimiento = mínimo y el primer paso de enfoque de Goldratt — **identifica la restricción** — vestido de álgebra. La ley de Amdahl no contradice las lecciones anteriores; las *cuantifica*. El cuello de botella es la etapa con la mayor cuota del tiempo, la única optimización con margen real, y las matemáticas te lo dicen.
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada pieza de la ley de Amdahl con lo que significa."
+  pairs={[
+    { term: 'p', definition: 'La fracción del tiempo total que se pasa en la parte que puedes acelerar' },
+    { term: '1 − p', definition: "La fracción que no puedes acelerar — la parte fija e irreducible" },
+    { term: 's', definition: 'El factor por el que aceleras la parte mejorable (2x, 8x, infinito...)' },
+    { term: '1 / (1 − p)', definition: 'El techo infranqueable: la mejor aceleración global que puedes alcanzar jamás' },
+    { term: 'Rendimientos decrecientes', definition: 'Cada duplicación extra de s compra menos, a medida que la parte fija pasa a dominar' },
+  ]}
+  instructions="Elige un término y luego haz clic en su definición."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  explanationLabel="Explicación"
+  explanation="Toda la ley vive en estas cinco ideas: p y 1−p dividen el trabajo, s es lo fuerte que empujas sobre la rebanada mejorable, 1/(1−p) es el muro que fija la rebanada que no puedes tocar, y los rendimientos decrecientes son lo que sientes al acercarte a ese muro. Memoriza la fórmula del techo y podrás estimar cualquier aceleración de cabeza."
+/>
+
+<Categorize
+  client:visible
+  question="Una petición web tarda 1000 ms: 950 ms en una consulta lenta a base de datos y 50 ms en todo lo demás. Ordena cada optimización propuesta según si merece la pena hacerla."
+  buckets={['Merece la pena (p grande)', 'Apenas ayuda (p pequeña)']}
+  items={[
+    { text: 'Cachear la consulta a la base de datos para que devuelva en 50 ms en lugar de 950 ms', bucket: 'Merece la pena (p grande)' },
+    { text: 'Optimizar a mano los 50 ms de código de pegamento hasta los 25 ms', bucket: 'Apenas ayuda (p pequeña)' },
+    { text: 'Añadir un índice que recorte la consulta de 950 ms aproximadamente a la mitad', bucket: 'Merece la pena (p grande)' },
+    { text: 'Reescribir el serializador JSON (parte de los 50 ms) para rascar 10 ms', bucket: 'Apenas ayuda (p pequeña)' },
+    { text: 'Mover la consulta a la base de datos a una máquina más rápida (domina el tiempo)', bucket: 'Merece la pena (p grande)' },
+    { text: 'Microoptimizar el registrador de peticiones (unos pocos ms de los 50)', bucket: 'Apenas ayuda (p pequeña)' },
+  ]}
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  explanationLabel="Explicación"
+  explanation="La consulta a la base de datos es el 95 % del tiempo (p = 0,95, techo = 20x) — toda optimización apuntada a ella tiene un margen enorme y merece la pena. Todo lo demás junto es el 5 % (techo = 1,05x); lo mejor que podrías hacer perfeccionándolo entero es una aceleración de 1,05x, así que pulir el pegamento, el serializador o el registrador es movimiento desperdiciado por muy ingenioso que sea. La misma lección que 'no pulas la piedra equivocada', ahora con las matemáticas para demostrar que la piedra es la equivocada."
+/>
+
+## Cuándo usarlo
+
+### Cuándo usarlo
+
+Echa mano de la ley de Amdahl en el momento en que alguien proponga una optimización y quieras saber — *antes* de construirla — si merece el esfuerzo. Necesitas dos números: $p$ (¿qué fracción del tiempo total se lleva esta parte?) y una estimación de $s$ (¿cuánto más rápida puedo hacerla de forma realista?). Mételos. Si la respuesta es «1,1x por tres semanas de trabajo», acabas de ahorrarte tres semanas. Es un filtro de cinco segundos que atrapa el error más caro de la ingeniería: verter esfuerzo en una parte demasiado pequeña para importar. Perfila primero para encontrar la $p$ grande, luego apunta ahí — Amdahl convierte «¿dónde deberíamos optimizar?» de un debate en un problema de aritmética.
+
+<Callout variant="warning" title="La trampa: optimizar una pequeña rebanada del tiempo">
+No puedes recuperar más de lo que vale una parte. Si algo es solo el 10 % del tiempo total, perfeccionarlo — aceleración *infinita* — te compra como mucho 1,11x, y cualquier aceleración realista compra mucho menos. La versión más seductora de esta trampa es optimizar la parte que *mejor entiendes* o que te parece más *divertida*, en lugar de la parte que de verdad es grande. Mide la rebanada antes de afilar el cuchillo: un arreglo brillante a una rebanada del 5 % sigue siendo un error de redondeo.
+</Callout>
+
+<FillBlank
+  client:visible
+  question="Enuncia la regla del techo de memoria."
+  text="Por mucho que aceleres una parte de un sistema, tu aceleración global nunca puede superar {{1 / (1 − p)|p / s}}, un muro fijado enteramente por la fracción del trabajo que {{no puedes|sí puedes}} mejorar. Para subir ese techo, debes {{hacer más del trabajo mejorable|empujar la misma parte más fuerte}}."
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+  explanation="El techo es 1/(1−p) — determinado por la parte que NO arreglas, no por lo fuerte que empujes la que sí. Acelerar una rebanada mejorable de tamaño fijo se topa con rendimientos decrecientes contra ese muro; la única manera de mover el muro es agrandar p, es decir, atacar una cuota mayor del tiempo total."
+/>
+
+<Quiz
+  client:visible
+  title="Ponte a prueba: las matemáticas de la aceleración"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  correctCountLabel="correctas"
+  gateLabel="Comprueba tu respuesta para continuar."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  perfectMessage="Puntuación perfecta, ¡bien hecho!"
+  goodMessage="Buen trabajo, repasa las que has fallado."
+  keepPracticingMessage="Sigue practicando, lo tienes."
+  questions={[
+    {
+      question: "La ley de Amdahl dice que la aceleración global = 1 / ((1−p) + p/s). ¿Qué representa el término p/s?",
+      options: [
+        { text: 'El nuevo tiempo, ya encogido, de la parte mejorable — solía tardar p del tiempo y ahora tarda p/s', correct: true },
+        { text: 'La aceleración total de todo el sistema', correct: false },
+        { text: 'La fracción del trabajo que no puedes mejorar', correct: false },
+        { text: 'El número de procesadores que añadiste', correct: false },
+      ],
+      explanation: "La parte mejorable tardaba originalmente una fracción p del tiempo; acelerarla por un factor s la encoge a p/s. Suma eso a la parte fija intacta (1−p) para obtener el nuevo tiempo total como fracción del viejo, luego invierte para la aceleración.",
+    },
+    {
+      question: "Un trabajo es 60 % mejorable y 40 % fijo. Aceleras la parte mejorable infinitamente. ¿Cuál es la aceleración global máxima?",
+      options: [
+        { text: '1,67x — el techo es 1/(1−p) = 1/0,4 = 2,5... espera, recalcula', correct: false },
+        { text: '2,5x — el techo es 1/(1−0,6) = 1/0,4 = 2,5x', correct: true },
+        { text: '5x — eliminaste el 60 % del trabajo', correct: false },
+        { text: 'Ilimitada — aceleración infinita significa ganancia infinita', correct: false },
+      ],
+      explanation: "El techo es 1/(1−p) = 1/(1−0,6) = 1/0,4 = 2,5x. El 40 % fijo no puede encogerse, así que incluso hacer el otro 60 % instantáneo te deja en una aceleración global de 2,5x y no más. (La aritmética de la primera opción está mal — ojo con eso.)",
+    },
+    {
+      question: "Dos partes de un sistema: la parte A es el 70 % del tiempo, la parte B es el 30 %. Puedes hacer cualquiera de las dos 10x más rápida, pero solo una. ¿Cuál da la mayor aceleración global?",
+      options: [
+        { text: 'Acelerar A (la p más grande) — su mayor cuota del tiempo da la mayor ganancia global', correct: true },
+        { text: 'Acelerar B — las partes más pequeñas responden mejor a la optimización', correct: false },
+        { text: 'Dan aceleraciones idénticas porque s es la misma', correct: false },
+        { text: 'Ninguna ayuda salvo que aceleres las dos', correct: false },
+      ],
+      explanation: "Acelerar A 10x: tiempo = 0,7/10 + 0,3 = 0,07 + 0,3 = 0,37, aceleración ≈ 2,7x. Acelerar B 10x: tiempo = 0,7 + 0,3/10 = 0,7 + 0,03 = 0,73, aceleración ≈ 1,37x. Misma s, pero apuntar a la p más grande gana con claridad — que es exactamente 'ataca el cuello de botella'.",
+    },
+    {
+      question: "¿Por qué te topas con rendimientos decrecientes a medida que sigues acelerando la parte mejorable?",
+      options: [
+        { text: 'A medida que la parte mejorable se encoge hacia cero, la parte fija pasa a dominar el total — y la parte fija no la puedes tocar', correct: true },
+        { text: 'La fórmula se rompe para s grandes', correct: false },
+        { text: 'El hardware físicamente no puede ir más rápido a partir de cierto punto', correct: false },
+        { text: 'Porque p aumenta cada vez que optimizas', correct: false },
+      ],
+      explanation: "Cada duplicación de s reduce a la mitad lo que queda de la parte mejorable, así que contribuye cada vez menos al total — mientras la parte fija intacta (1−p) se queda quieta y domina cada vez más. Te acercas asintóticamente al techo 1/(1−p), y el último tramo cuesta lo máximo por lo mínimo.",
+    },
+    {
+      question: "Tu perfilador muestra que un programa pasa el 5 % de su tiempo en una función. Un compañero ha pasado dos semanas haciendo esa función 50x más rápida. ¿Qué predice la ley de Amdahl sobre el resultado global?",
+      options: [
+        { text: 'Casi nada — el techo de una parte del 5 % es solo 1/(1−0,05) ≈ 1,05x, así que dos semanas compraron como mucho una aceleración de ~5 %', correct: true },
+        { text: 'Una aceleración global de unas 50x, igualando la mejora de la función', correct: false },
+        { text: 'Una aceleración global de 2,5x', correct: false },
+        { text: 'No hay forma de estimarlo sin reejecutar todo el programa', correct: false },
+      ],
+      explanation: "Una rebanada del 5 % tiene un techo de 1/0,95 ≈ 1,05x — hacerla 50x más rápida (cuota nueva 0,1 %) rinde unas 1/(0,95 + 0,001) ≈ 1,05x. Dos semanas de trabajo brillante sobre una parte del 5 % compraron como mucho una aceleración del ~5 %. El arreglo debería haber apuntado a la parte de p grande que el perfilador también reveló.",
+    },
+  ]}
+/>
+
+## Repaso
+
+<MindMap
+  client:visible
+  title="La ley de Amdahl — las matemáticas de la aceleración"
+  eyebrow="Visión de conjunto"
+  outlineLabel="Esquema"
+  root={{
+    label: "Ley de Amdahl",
+    children: [
+      {
+        label: 'El planteamiento',
+        children: [
+          { label: 'Divide una tarea: p = fracción mejorable, 1−p = fija' },
+          { label: 'Acelera la parte mejorable por un factor s' },
+          { label: 'Gene Amdahl, 1967 — computación paralela, pero universal' },
+        ],
+      },
+      {
+        label: 'La fórmula',
+        children: [
+          { label: 'Aceleración = 1 / ((1−p) + p/s)' },
+          { label: '(1−p): parte fija, mismo tiempo que antes' },
+          { label: 'p/s: parte mejorable, ahora encogida' },
+        ],
+      },
+      {
+        label: 'El techo infranqueable',
+        children: [
+          { label: 'Cuando s → ∞, aceleración → 1/(1−p)' },
+          { label: 'Lo fija la parte que NO arreglas, no tu astucia' },
+          { label: '25 % fijo → 4x máx.; 90 % fijo → 1,11x máx.' },
+          { label: 'La parte fija se vuelve el nuevo cuello de botella' },
+        ],
+      },
+      {
+        label: 'Rendimientos decrecientes',
+        children: [
+          { label: 'Cada duplicación de s compra menos que la anterior' },
+          { label: 'La parte fija domina al encogerse la parte mejorable' },
+        ],
+      },
+      {
+        label: 'Dónde gastar',
+        children: [
+          { label: 'Apunta a la p MÁS GRANDE — la parte que domina el tiempo' },
+          { label: '= rendimiento es mínimo = identifica la restricción' },
+          { label: 'Las optimizaciones de p pequeña tienen tope cerca de 1x — sáltalas' },
+        ],
+      },
+    ],
+  }}
+/>
+
+## Adónde va esto a continuación
+
+Ahora tienes la llave cuantitativa de todo el curso: el rendimiento es el mínimo, la restricción es la parte que tiene la $p$ más grande, y la ley de Amdahl te dice por adelantado exactamente cuánto vale un arreglo — techo incluido. Puedes mirar cualquier optimización propuesta y decir, antes de construirla, «eso vale 2x» o «eso no vale nada», lo cual es un superpoder genuino.
+
+Pero hay un giro que las matemáticas han estado insinuando en voz baja. Acelera la parte de $p$ grande lo suficiente y deja de ser la más grande — alguna *otra* parte domina ahora el tiempo, con su propia $p$, su propio techo. La restricción no desapareció; **se movió**. La última lección didáctica, *La restricción siempre se mueve*, va sobre cabalgar ese juego sin fin — por qué arreglar un cuello de botella siempre revela el siguiente, cómo ciclar por ellos deliberadamente (el quinto paso de Goldratt: vuelve al principio), y dónde se esconde esta cacería interminable en tu tráfico, tu equipo, tus consultas y tus mañanas.

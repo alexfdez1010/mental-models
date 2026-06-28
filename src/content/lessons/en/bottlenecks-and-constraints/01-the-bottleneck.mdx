@@ -1,0 +1,304 @@
+---
+title: "Spotting the Constraint"
+description: "Work piles up in front of the bottleneck and everything behind it sits idle — two dead giveaways that let you point at the one slowest step in any system you've never seen before."
+topic: "en/bottlenecks-and-constraints"
+order: 2
+minutes: 11
+updated: 2026-06-28
+---
+
+import { MCQ, Quiz, Callout, FillBlank, Categorize, MatchConcepts, MindMap, PipelineThroughput } from '@/components/react';
+
+Last lesson handed you a rule that sounds almost too neat to be useful: a system's **throughput** — the rate at which it actually produces finished output — equals the capacity of its slowest step, the **bottleneck**. Not the average. Not the sum. The minimum. You watched the line in the slider obey it perfectly, throughput glued to the shortest bar no matter how you dragged the rest.
+
+But the slider had the bottleneck *labelled in red for you*. The real world is rude enough to leave the label off. Nobody hands you a spec sheet that says "Stage 3 does 30 units an hour, and by the way that's your constraint." You walk into a struggling kitchen, a jammed highway, a support team drowning in tickets — and the slowest step is hiding in plain sight, looking exactly like every other step. Your job is to find it anyway.
+
+The good news is that a bottleneck is almost physically incapable of hiding. It leaves two fingerprints everywhere it goes, and once you know what they look like, you'll start seeing them in queues at the airport, in the one printer everyone fights over, in the deploy that takes all afternoon. This lesson is about reading those fingerprints — turning "throughput = the minimum" from a tidy formula into a skill you can use on a system you've never seen before.
+
+<MCQ
+  client:visible
+  pretest
+  question="You walk into an unfamiliar workshop. One workstation has a tall, growing pile of half-finished parts waiting in front of it, while the station right after it sits idle with nothing to do. Which station is most likely the bottleneck?"
+  options={[
+    { text: 'The station with the growing pile in front of it — work backs up before the constraint', correct: true },
+    { text: 'The idle station after it — being idle means it is the slow one' },
+    { text: 'Neither; you cannot tell without measuring every station’s capacity' },
+    { text: 'Both are equally likely; piles and idleness are random' },
+  ]}
+  explanation="No wrong guesses on a pretest — but the pile points the way. Work piles up *in front of* a bottleneck because it arrives faster than the slow step can swallow it, and the step *after* the bottleneck sits starved because it gets fed only at the bottleneck's pace. The growing queue is upstream of the constraint; the idleness is downstream. So the constraint is the station with the pile in front of it, not the idle one behind it."
+/>
+
+## Throughput is the capacity of the constraint
+
+Let's make the headline rule airtight, because the rest of the lesson leans on it. Three words do all the work, so define them precisely:
+
+- **Capacity** — the *most* a single step could process per unit of time if it never had to wait: parts per hour, patients per hour, tickets per day. It's a step's top speed, measured in isolation.
+- **Throughput** — what the *whole* system actually finishes per unit of time. Not a step's top speed — the system's real, out-the-door delivery rate.
+- **Utilization** — how busy a step actually is, as a fraction of its own capacity. A station that *could* do 60 an hour but only ever gets fed 30 is running at 50% utilization. It's half-idle, and that idleness is a clue, not a flaw.
+
+The rule, stated rigorously: **throughput equals the capacity of the lowest-capacity step.** Every step upstream of the constraint can only pass work along as fast as the constraint accepts it; every step downstream can only receive work as fast as the constraint releases it. So the constraint's capacity is a hard ceiling on the entire flow — and the constraint itself runs at (near) 100% utilization while everything else runs below it.
+
+Here's a worked example. A hospital emergency department moves each patient through four steps. Their isolated capacities (patients per hour):
+
+| Step | What happens | Capacity (patients/hr) | Utilization at full load |
+|---|---|---|---|
+| Triage | Nurse assesses severity | 18 | 50% |
+| Doctor exam | Physician diagnoses | **9** | **100%** |
+| Labs / imaging | Bloodwork, X-ray | 14 | 64% |
+| Discharge | Paperwork, instructions | 20 | 45% |
+
+Throughput is **9 patients per hour** — the doctor-exam step, the lowest number. Triage *could* handle 18, but it's pointless to assess patients twice as fast as a doctor can see them; the extra speed just builds a waiting room. Notice the utilization column: the bottleneck runs flat-out at 100%, and every other step idles below it. **That utilization gap is itself a map** — the step pinned at 100% is your constraint, and the slack everywhere else is the throughput you're leaving on the floor.
+
+<Callout variant="tip" title="The one-sentence version">
+**Throughput = the capacity of the lowest-capacity step.** The constraint runs at 100% utilization; everything else has slack — and that slack is wasted speed, not free performance.
+</Callout>
+
+A quick gut-check on why average and sum keep failing. The ED's *average* capacity is (18 + 9 + 14 + 20) / 4 = 15.25 — but you can't average your way past the doctor; every patient physically has to be seen by one. The *sum* is 61 — the fantasy that combined horsepower equals output, which is exactly backwards for a chain where work has to pass through each step in turn. The minimum, 9, is the only number that survives contact with reality.
+
+### When to use it
+
+Reach for this the instant you hear someone explain a slow system by pointing at its *fastest* part ("but our intake is so efficient!") or its *average* ("on average we're pretty quick"). Both are throughput-blind. The only number that predicts real output is the capacity of the single slowest step — so go find that step and ignore the rest of the brag sheet.
+
+## How to find the bottleneck without a spec sheet
+
+Almost never will someone hand you the capacity table above. So how do you find the constraint by *looking*? Watch for its two unmistakable tells — they're two sides of the same coin, because work that can't get *through* the slow step has to go *somewhere*.
+
+**Tell #1 — Work piles up in front of the constraint.** Material arrives at the bottleneck faster than it can be processed, so it accumulates: a growing queue, a swelling inventory, a packed waiting room, an inbox that never empties. Wherever you see a pile that *keeps getting bigger*, the slow step is right behind that pile.
+
+**Tell #2 — Everything downstream is starved.** The steps *after* the bottleneck get fed only at the bottleneck's pace, which is by definition slower than they can handle. So they sit idle, under-used, waiting for work that trickles in. Starvation is the constraint's shadow, cast forward.
+
+Put them together and you get a precise pointer: **the constraint sits exactly between the pile-up and the starvation.** Work stacks up just before it; idleness spreads just after it. A few examples to tune your eye:
+
+- **The kitchen with one fryer.** Plates of half-cooked food back up on the line waiting for the single fryer, while the plating and expo stations stand around with nothing to garnish. Pile-up *before* the fryer, idle hands *after* it. The fryer is the constraint — not the chefs who look busy, not the servers who look slammed.
+- **The highway lane merge.** Three lanes squeeze to two. Cars stack into a crawling queue *before* the merge — and the road *past* the merge is gloriously, suspiciously empty, moving at full speed. That empty road downstream is starvation; the queue upstream is the pile-up. The merge point is the bottleneck, even though it's the empty stretch that feels like the "fast part."
+- **The support team with one senior engineer.** Easy tickets get cleared fast, but every hard one routes to the single senior engineer, and *those* tickets stack into a growing backlog with her name on them. Meanwhile the junior who'd close them out *after* her sign-off has a quiet queue. The senior engineer is the constraint; hiring three more juniors won't touch the throughput.
+
+Drag the pipeline below to watch both tells appear at once. It's a coffee shop's morning rush — order, then the single espresso machine, then milk-steam, then hand-off. Watch where the ▓ pile-up forms and where the ░ starvation spreads, and notice they always straddle the red bar.
+
+<PipelineThroughput
+  client:visible
+  title="Morning rush: where the queue forms"
+  caption="A coffee shop line. Drinks pile up (▓) just before the slowest step — the lone espresso machine, in red — while every station after it sits starved (░), waiting for cups that arrive only at the machine's pace. The constraint lives exactly between the pile-up and the starvation. Drag a non-red bar and nothing happens; drag the red one and the whole shop speeds up — until a new stage becomes the slowest."
+  stageLabels={['Order','Espresso','Steam milk','Hand off']}
+  initialCapacities={[60,22,40,55]}
+  unitLabel="drinks/hr"
+  min={10}
+  max={70}
+/>
+
+<Callout variant="warning" title="The pitfall: blaming the busy-looking step">
+The bottleneck often *doesn't look* like the problem. The starved step downstream looks lazy ("why are they always idle?"), and the overwhelmed step upstream looks swamped ("we need more intake staff!"). Both are misreads. The idle step is starved *by* the constraint, and the swamped intake is just shovelling work into a pile the constraint can't clear. Don't reward the busy-looking step or scold the idle one — read the *flow*, find where the pile meets the starvation, and push there.
+</Callout>
+
+Now make the diagnosis yourself. Same four-stage line; sort each stage by what it's doing.
+
+<Categorize
+  client:visible
+  question="A four-stage line runs at capacities 40, 15, 35, and 50 units/hr (in order). Sort each stage by its role in the flow."
+  buckets={['The bottleneck', 'Piles up work (before it)', 'Starved / idle (after it)']}
+  items={[
+    { text: 'Stage 2 — 15 units/hr, the slowest step, running flat-out', bucket: 'The bottleneck' },
+    { text: 'Stage 1 — 40 units/hr, feeds the slow step faster than it can accept', bucket: 'Piles up work (before it)' },
+    { text: 'Stage 3 — 35 units/hr, gets fed only 15/hr from upstream', bucket: 'Starved / idle (after it)' },
+    { text: 'Stage 4 — 50 units/hr, last in line, also fed only 15/hr', bucket: 'Starved / idle (after it)' },
+  ]}
+  explanation="Stage 2 (15/hr) is the lowest capacity, so it's the bottleneck and it runs at ~100%. Stage 1 sits before it and can push 40/hr into a step that only takes 15, so work piles up between them. Stages 3 and 4 are downstream and receive work at the bottleneck's pace (15/hr) despite being able to handle 35 and 50 — so they're starved and idle. The pile-up is upstream of the constraint; the starvation is downstream."
+/>
+
+### When to use it
+
+Use the two tells whenever you *can't* measure capacities directly — which is most of the time. You don't need a stopwatch on every step; you need to spot the one growing queue and the idleness just past it. In a warehouse, a codebase's CI pipeline, a passport office, or your own to-do list, the question is the same: *where does work pile up, and what sits waiting behind that pile?* The answer points straight at the constraint.
+
+## A bottleneck only bites when demand exceeds it
+
+Here's a subtlety that trips up even careful people: a slow step is only a *constraint* if the system is actually being asked to produce more than it can. A bottleneck needs **demand** pressing against it to bite.
+
+Define **demand**: how much output the system is being *asked* to deliver per unit of time — orders per hour, customers per hour, requests per day. The rule sharpens to this: **a step constrains the system only when demand exceeds that step's capacity.** If the market only wants 20 units an hour and your slowest internal step can do 30, that "slow" step is sitting at 67% utilization with capacity to spare — it isn't holding anything back. There's no pile-up, no starvation, no queue. Nothing is constrained, because nothing is being pushed to its limit.
+
+Worked example. A small bakery's slowest step is the single oven, capacity **40 loaves per hour**. Two scenarios:
+
+| | Demand (loaves/hr) | Oven capacity | Throughput | Is the oven the constraint? |
+|---|---|---|---|---|
+| Quiet Tuesday | 25 | 40 | 25 | **No** — demand < capacity; oven has slack, no queue forms |
+| Saturday rush | 70 | 40 | 40 | **Yes** — demand > capacity; dough piles up, the oven is pinned at 100% |
+
+Same oven, same kitchen. On Tuesday it's not a bottleneck — buying a second oven would be money lit on fire, because you'd be adding capacity nobody's asking for. On Saturday the exact same oven *is* the bottleneck, dough backing up while it runs flat-out. **The constraint isn't a fixed property of the slow step; it's a relationship between that step's capacity and the demand pressing on it.**
+
+And here's the twist that widens the whole model: sometimes the slowest thing in the picture is *demand itself*. If the bakery could bake 40 loaves an hour but the town only ever wants 25, then the binding constraint isn't inside the bakery at all — it's the **market**. This is an *external* constraint: the system has internal capacity to spare, and the thing capping its output sits outside the process (not enough customers, not enough raw material, not enough sales). When a business with idle machines says "we could make more, people just aren't buying," they've correctly located a market constraint — and no amount of factory-floor optimization will move it. You don't fix a demand constraint by speeding up the oven; you fix it by finding more mouths.
+
+<MatchConcepts
+  client:visible
+  question="Match each term to its precise definition."
+  pairs={[
+    { term: 'Bottleneck', definition: 'The single step whose limited capacity caps the whole system’s output' },
+    { term: 'Throughput', definition: 'The rate at which the system actually finishes output — equal to the constraint’s capacity' },
+    { term: 'Capacity', definition: 'The most a single step could process per unit of time if it never had to wait' },
+    { term: 'Slack / idle', definition: 'Unused capacity on a non-bottleneck step — wasted speed, not free performance' },
+    { term: 'Work-in-progress pile-up', definition: 'The growing queue of unfinished work that forms in front of the constraint' },
+    { term: 'Starvation', definition: 'The idleness of steps downstream of the constraint, fed only at its pace' },
+  ]}
+  explanation="Capacity is a single step's top speed in isolation; throughput is the whole system's real output, which equals the constraint's capacity. The bottleneck is that constraining step. Everything else shows up as slack (unused capacity), and that slack splits into two tells: work-in-progress piles up in front of the constraint, while steps behind it are starved. Read the pile-up and the starvation and you've located the bottleneck."
+/>
+
+### When to use it
+
+Before you spend a dollar widening a "slow" step, check whether demand is even pressing on it. If the queue isn't growing and downstream isn't starved, you don't have a binding internal constraint — and your real bottleneck might be *external* (the market, your suppliers, your pipeline of leads). Speeding up production when the constraint is demand just builds inventory nobody ordered.
+
+## The bottleneck governs the whole
+
+Step back and the picture collapses to a single sentence: **find the one slowest step that demand is pressing against, and you know the system's throughput — it's that step's capacity, and nothing else's.** Every other number on the floor is a distraction. The fast steps' speed is invisible to output. The average is a fiction. The sum is a fantasy. There is one governing number, and the whole skill of this lesson is locating it by sight.
+
+That's why the two tells are worth burning into memory. You rarely get the capacity table; you almost always get the *flow*, and the flow advertises the constraint loudly: a pile-up that keeps growing, with idleness spreading just behind it. Stand at the seam between them and you're standing on the bottleneck. Everything this course does next — wringing more out of the constraint, refusing to waste effort elsewhere, doing the math on how much a fix will help — starts from this one act of pointing at the right step.
+
+<MCQ
+  client:visible
+  question="A car wash has four stations with capacities 30, 30, 12, and 25 cars per hour (in order: pre-soak, wash, dry, wax). On a busy day with cars lined up at the entrance, how many cars per hour leave clean and waxed, and where will the queue of waiting cars form?"
+  options={[
+    { text: '12 cars/hr, with the queue forming in front of the dry station (the slowest step)', correct: true },
+    { text: '25 cars/hr, with the queue forming at the wax station' },
+    { text: '30 cars/hr, since two stations can each do 30' },
+    { text: '24.25 cars/hr — the average of the four stations' },
+  ]}
+  explanation="Throughput is the minimum capacity: the dry station at 12 cars/hr. With cars waiting at the entrance (demand > capacity), wet cars back up in front of the dry station faster than it can handle them, so the queue forms there. The wax station, though it can do 25, is fed only 12/hr — it's starved and idle. Not 25, not 30, not the average of 24.25: the slowest step governs the whole, and the pile-up forms right in front of it."
+/>
+
+<MCQ
+  client:visible
+  question="An online store's order pipeline runs: receive order (200/hr) → pick items (60/hr) → pack (90/hr) → ship (150/hr). It's Black Friday and orders are flooding in well past 200/hr. Where will work pile up, and which steps will sit starved?"
+  options={[
+    { text: 'Orders pile up in front of “pick items” (60/hr, the constraint); pack and ship are starved, fed only 60/hr', correct: true },
+    { text: 'Work piles up at “ship” since it’s last; the earlier steps are starved' },
+    { text: 'Work piles up evenly at every step because demand is so high' },
+    { text: 'Nothing piles up; the 200/hr intake means the system runs at 200/hr' },
+  ]}
+  explanation="Picking is the slowest step at 60/hr, so it's the constraint and the system's throughput is 60/hr. Receiving can accept 200/hr and shove it all toward picking, so unpicked orders pile up in front of the pick step. Pack (90/hr) and ship (150/hr) are downstream and only ever receive 60/hr, so they're starved and idle despite their higher capacities. The high intake rate doesn't help — it just makes the pile in front of picking grow faster."
+/>
+
+<FillBlank
+  client:visible
+  question="Fill in the bottleneck-spotting procedure."
+  text="To find a constraint by sight, look for where work {{piles up|disappears}} — the constraint sits right behind that growing queue — and for the steps that are {{starved and idle|running flat-out}} downstream of it. The system's throughput equals the {{capacity of that slowest step|average of all the steps}}, but only when {{demand exceeds|demand stays below}} its capacity."
+  explanation="The two tells: a growing pile-up marks the spot just before the constraint, and starvation (idle steps) marks everything after it. Throughput equals the slowest step's capacity — not the average — and that step only binds when demand actually exceeds it. Below that, the slow step has slack and nothing is constrained."
+/>
+
+## Recap
+
+<MindMap
+  client:visible
+  title="Spotting the Constraint"
+  root={{
+    label: 'Spotting the Constraint',
+    children: [
+      {
+        label: 'The core rule',
+        children: [
+          { label: 'Throughput = capacity of the LOWEST-capacity step' },
+          { label: 'Not the average, not the sum — the minimum' },
+          { label: 'Constraint runs at ~100% utilization; rest has slack' },
+        ],
+      },
+      {
+        label: 'Three precise terms',
+        children: [
+          { label: 'Capacity = a step’s top speed in isolation' },
+          { label: 'Throughput = the system’s real out-the-door rate' },
+          { label: 'Utilization = how busy a step is vs. its own capacity' },
+        ],
+      },
+      {
+        label: 'The two tells (find it by sight)',
+        children: [
+          { label: 'Pile-up: work backs up IN FRONT of the constraint' },
+          { label: 'Starvation: steps AFTER it sit idle, fed at its pace' },
+          { label: 'Constraint = the seam between pile-up and starvation' },
+        ],
+      },
+      {
+        label: 'Real-world fingerprints',
+        children: [
+          { label: 'Kitchen: plates back up at the one fryer' },
+          { label: 'Highway: queue before the merge, empty road after' },
+          { label: 'Support: tickets stack on the one senior engineer' },
+        ],
+      },
+      {
+        label: 'Demand makes it bite',
+        children: [
+          { label: 'A slow step constrains ONLY when demand > its capacity' },
+          { label: 'Below that: it has slack, no queue, not a bottleneck' },
+          { label: 'Constraint can be EXTERNAL (the market, suppliers)' },
+        ],
+      },
+      {
+        label: 'The pitfall',
+        children: [
+          { label: 'Don’t blame the idle (starved) or swamped (upstream) step' },
+          { label: 'Read the flow, not how busy each step looks' },
+        ],
+      },
+    ],
+  }}
+/>
+
+<Quiz
+  client:visible
+  title="Check yourself: spotting the constraint"
+  questions={[
+    {
+      question: "What is the difference between a step's capacity and the system's throughput?",
+      options: [
+        { text: "Capacity is a single step's top speed in isolation; throughput is what the whole system actually finishes, and it equals the constraint's capacity", correct: true },
+        { text: "They're the same thing measured in different units", correct: false },
+        { text: "Throughput is the sum of every step's capacity", correct: false },
+        { text: "Capacity is always lower than throughput", correct: false },
+      ],
+      explanation: "Capacity is per-step and measured as if that step never waited. Throughput is the system's real output rate, and the chain caps it at the lowest-capacity step. So throughput = the constraint's capacity, never the sum or the average.",
+    },
+    {
+      question: "You see a warehouse where boxes are stacking up in a growing pile before the labeling machine, while the loading dock right after it sits empty. Where is the constraint?",
+      options: [
+        { text: "The labeling machine — the pile forms in front of it and the dock behind it is starved", correct: true },
+        { text: "The loading dock — it's empty, so it must be the slow one", correct: false },
+        { text: "Whichever station has the most workers standing around", correct: false },
+        { text: "There's no way to tell without measuring every machine", correct: false },
+      ],
+      explanation: "The two tells point straight at it: work piles up in front of the constraint (the labeling machine) and starvation spreads behind it (the empty dock). The constraint sits at the seam between the growing pile and the idleness.",
+    },
+    {
+      question: "A factory's slowest internal step can make 50 units/hr, but customers only ever order 30 units/hr. Is the 50-unit step the binding constraint?",
+      options: [
+        { text: "No — demand (30) is below that step's capacity (50), so it has slack and isn't binding; the real constraint is external (the market)", correct: true },
+        { text: "Yes — the slowest internal step is always the constraint regardless of demand", correct: false },
+        { text: "Yes — because 50 is a finite number it must be limiting output", correct: false },
+        { text: "There's no constraint at all in this system", correct: false },
+      ],
+      explanation: "A step only constrains when demand exceeds its capacity. Here demand (30) is well under the step's 50, so no queue forms and the step idles. The thing actually capping output is outside the process — a market/demand constraint — which no factory-floor speedup will fix.",
+    },
+    {
+      question: "A bus route has stops with boarding capacities (in order) of 40, 18, 35, and 50 passengers per hour, and far more than 50 people want to ride. What's the route's throughput, and which stops are starved?",
+      options: [
+        { text: "18 passengers/hr; the third and fourth stops are starved, receiving riders only at the second stop's pace", correct: true },
+        { text: "50 passengers/hr, set by the highest-capacity stop", correct: false },
+        { text: "35.75 passengers/hr, the average of the four stops", correct: false },
+        { text: "143 passengers/hr, the sum of all four stops", correct: false },
+      ],
+      explanation: "Throughput is the minimum: 18/hr at the second stop. With demand exceeding capacity, a crowd piles up there, and the stops after it (35 and 50) are fed only 18/hr, so they sit starved. Not the max, not the average, not the sum — the slowest step governs the whole.",
+    },
+    {
+      question: "Why is it a mistake to add more intake staff to a process where the intake step is already overwhelmed and swamped?",
+      options: [
+        { text: "If intake isn't the constraint, speeding it up just shovels more work into the pile in front of the real bottleneck — throughput doesn't move", correct: true },
+        { text: "Adding staff anywhere always reduces throughput", correct: false },
+        { text: "The intake step is definitely the bottleneck because it looks the busiest", correct: false },
+        { text: "Intake can never be a bottleneck under any circumstances", correct: false },
+      ],
+      explanation: "Looking swamped isn't the same as being the constraint. If intake feeds a slower downstream step, faster intake only grows the pile-up in front of that slower step. Throughput stays pinned at the real bottleneck's capacity, and you've spent money making the queue longer.",
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You can now *point at the constraint* — by capacity if you're lucky enough to have the numbers, and by sight (pile-up in front, starvation behind, demand pressing on it) when you're not. That's the diagnosis. The obvious next question is the one the whole field was built to answer: *now that I've found it, what exactly do I do?*
+
+Lesson 3 gives you the procedure. It's **Eliyahu Goldratt's Theory of Constraints** and its famous **five focusing steps** — identify the constraint, *exploit* it (wring every drop out of it before spending a cent), *subordinate* everything else to serve it, *elevate* it (only now add capacity), and then *repeat*, because the moment you fix one bottleneck a new one appears. You've done step one in this lesson. Next, you'll learn the other four — and why doing them in the wrong order is how smart teams waste years.

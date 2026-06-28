@@ -1,0 +1,288 @@
+---
+title: "Amdahl's Law: The Math of Speedup"
+description: "There's a hard ceiling on how much faster you can make a system by speeding up one part of it — and a single tidy formula tells you exactly where that wall is, before you waste a dollar trying to climb past it."
+topic: "en/bottlenecks-and-constraints"
+order: 5
+minutes: 12
+updated: 2026-06-28
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, Callout, MindMap } from '@/components/react';
+
+You've learned the rule three times now and from three angles: throughput is the *minimum*, Goldratt's five steps are the procedure for governing the slowest one, and polishing a non-bottleneck adds exactly zero to what the system delivers. All true, all qualitative. This lesson hands you the *number*. When someone says "let's make the database twice as fast," you'll be able to answer, on the back of a napkin, "great — that buys us a 1.43x speedup overall, and not one drop more." The formula that does this is **Amdahl's law**, and once it's in your head you'll never again be fooled by an impressive-sounding optimization aimed at the wrong place.
+
+<MCQ
+  client:visible
+  pretest
+  question="A task spends 90% of its time in step A and 10% in step B. You make step B infinitely fast — instant, zero time, magic. How much faster does the whole task run now?"
+  options={[
+    { text: 'About 1.11x faster — the 90% you never touched still has to run, and it now dominates everything', correct: true },
+    { text: '10x faster — you eliminated a whole step' },
+    { text: 'Infinitely faster — step B now takes zero time' },
+    { text: '1.9x faster — roughly double' },
+  ]}
+  explanation="No wrong guesses on a pretest — but the answer stings: only about 1.11x. The task took 100 units of time (90 in A, 10 in B). Erase B entirely and you're left with 90 units. 100/90 ≈ 1.11. You deleted a step completely and the whole thing got barely 11% faster, because the part you couldn't touch was 90% of the work. That ceiling — set by what you *don't* fix — is the entire lesson."
+/>
+
+## The setup: every system is part-improvable, part-fixed
+
+In 1967 a computer architect named **Gene Amdahl** stood up at a conference to argue against the hype around massively parallel computers. His point was arithmetic, not opinion: a program is never *entirely* parallelizable. Some fraction of it is stubbornly sequential — it has to run start-to-finish on one processor no matter how many you throw at the problem. And that fixed fraction, he showed, puts a hard cap on how much all your extra processors can ever buy you. The argument was about parallel computing, but the math is universal — it applies to anything you can split into "the part I can speed up" and "the part I can't."
+
+So set it up generally. Take any task and split its total time into two buckets:
+
+- The fraction $p$ of the work you **can** speed up — the parallelizable stage, the slow query, the manual step you can automate. ($p$ is between 0 and 1; if 80% of the time is improvable, $p = 0.8$.)
+- The fraction $(1 - p)$ you **can't** — the fixed overhead, the irreducibly sequential bit, the part of the task that's stuck at its current speed.
+
+Now suppose you speed up the improvable part by a factor $s$. Make it twice as fast, $s = 2$; ten times as fast, $s = 10$; infinitely fast, $s \to \infty$. The question Amdahl answers is the only one that matters: *how much faster does the whole task get?* Not the part you tuned — the **whole thing**, end to end, which is what anyone actually cares about.
+
+<Callout variant="tip" title="The one-sentence version">
+Split a task into the part you can speed up ($p$) and the part you can't ($1-p$). However hard you push on $p$, the fixed part $(1-p)$ stays exactly where it was — and it sets a wall you can never cross.
+</Callout>
+
+## The formula
+
+Here it is, the whole of Amdahl's law in one line:
+
+$$\text{Speedup} = \frac{1}{(1-p) + \dfrac{p}{s}}$$
+
+"Speedup" means old time divided by new time — a speedup of 2 means the task now runs in half the time. Read the denominator as "the new total time, measured as a fraction of the old total time," and it falls apart into two honest pieces:
+
+- $(1-p)$ — the fixed part, which takes the **same** time as before. You didn't touch it, so it contributes its full original share to the new total.
+- $\dfrac{p}{s}$ — the improvable part, which used to take $p$ of the time and now, sped up by a factor $s$, takes only $p/s$. Speed it up 4x and it shrinks to a quarter of its old share.
+
+Add those two and you have the new total time as a fraction of the old; flip it over (the $1$ on top) and you have the speedup. That's it. No calculus, no hidden assumptions — just "the part you fixed got smaller, the part you didn't stayed the same, add them up and invert."
+
+Sanity-check it against the pretest. There, $p = 0.1$ (only step B, the 10%, was improvable) and we made it infinite, so $p/s \to 0$:
+
+$$\text{Speedup} = \frac{1}{(1-0.1) + 0} = \frac{1}{0.9} \approx 1.11$$
+
+Exactly the 1.11x that felt so disappointing. The formula isn't lying to you — it's the same disappointment, made precise.
+
+<MCQ
+  client:visible
+  question="A report takes 200 seconds to generate: 50 seconds of fixed setup and 150 seconds of number-crunching you can speed up. You make the crunching 3x faster. Using Amdahl's law, what's the overall speedup?"
+  options={[
+    { text: 'About 2x — new time is 50 + 150/3 = 100 s, and 200/100 = 2x', correct: true },
+    { text: '3x — the crunching is 3x faster, so the report is 3x faster' },
+    { text: '1.33x — you saved a third of the time' },
+    { text: '2.5x — the average of 2x and 3x' },
+  ]}
+  explanation="Here p = 150/200 = 0.75 and s = 3. New time = fixed + sped-up = 50 + 150/3 = 50 + 50 = 100 seconds. Speedup = 200/100 = 2x. Or straight from the formula: 1 / (0.25 + 0.75/3) = 1 / (0.25 + 0.25) = 1/0.5 = 2. The crunching got 3x faster, but the whole report only got 2x faster, because that fixed 50 seconds refuses to shrink."
+/>
+
+## The hard ceiling
+
+Now push $s$ all the way to infinity — speed up the improvable part *perfectly*, make it instantaneous, the best you could ever possibly do. The $p/s$ term vanishes, and the formula collapses to something beautiful and brutal:
+
+$$\lim_{s \to \infty} \text{Speedup} = \frac{1}{1 - p}$$
+
+That's the **ceiling**. The single most important fact in the whole lesson. No matter how much money, talent, or magic you pour into the improvable part, the overall speedup can *never* exceed $\frac{1}{1-p}$, because the part you didn't fix still has to run. If 25% of the work is un-improvable, then $1-p = 0.25$ and your ceiling is $1/0.25 = 4$x — you could make the other 75% literally instantaneous and the whole task would still only run 4x faster. The fixed part has become the new bottleneck, in exactly the sense lessons 1 through 3 trained you to see. Amdahl's law is the bottleneck idea written as continuous arithmetic: relieve everything except one stubborn part, and that part *becomes* the constraint and caps you.
+
+Here's the ceiling at a few fractions worth memorizing:
+
+| Un-improvable fraction $(1-p)$ | Improvable fraction $p$ | Max possible speedup $\frac{1}{1-p}$ |
+|---|---|---|
+| 10% | 90% | **10x** |
+| 25% | 75% | **4x** |
+| 50% | 50% | **2x** |
+| 90% | 10% | **1.11x** |
+
+Read the bottom row and feel it: when 90% of the work is stuck, the absolute best you can ever do — perfect, infinite speedup of the other 10% — is a measly 1.11x. That's the pretest, sitting right there in the table. And notice the table answers a question before you've spent a cent: it tells you the *most* an optimization could ever be worth, which is often reason enough to not bother.
+
+<Callout variant="warning" title="The ceiling is set by what you DON'T fix">
+Your maximum speedup is $1/(1-p)$ — a number that depends *entirely* on the fraction you're leaving alone, and not at all on how clever your optimization is. You can't out-engineer this wall. The only way to raise the ceiling is to make more of the work improvable (shrink $1-p$) — which is to say, go attack a bigger part of the problem.
+</Callout>
+
+## A full worked example
+
+Make it concrete with a data pipeline. Total runtime: **100 minutes**. Of that, **80 minutes** is a parallelizable transform stage (this is your $p$ — 80% of the work, so $p = 0.8$) and **20 minutes** is fixed overhead: reading the source, writing the result, the sequential glue you can't parallelize ($1 - p = 0.2$). Your boss wants it faster and asks how much speeding up the transform stage will help. Let's compute it for a range of efforts and watch what happens.
+
+For each $s$, the new time is $20 + \frac{80}{s}$ minutes, and the speedup is $100$ divided by that:
+
+| Speedup factor $s$ of the transform | New transform time | New total time | Overall speedup |
+|---|---|---|---|
+| 1 (do nothing) | 80 min | 100 min | 1.00x |
+| 2 | 40 min | 60 min | **1.67x** |
+| 4 | 20 min | 40 min | **2.5x** |
+| 8 | 10 min | 30 min | **3.33x** |
+| $\infty$ (instant) | 0 min | 20 min | **5x** |
+
+Walk down that last column. Doubling the transform's speed ($s=2$) gets you 1.67x. Going to 4x gets you 2.5x. Going to 8x — eight times faster, a serious engineering effort — gets you only 3.33x. And making it *infinitely* fast, the theoretical maximum, caps out at 5x ($= 1/0.2$, straight from the ceiling formula). That 20 minutes of fixed overhead is the wall: even with the transform gone entirely, the pipeline can't run in less than 20 minutes, so it can't beat a 5x speedup. Ever.
+
+<MCQ
+  client:visible
+  question="In that same 100-minute pipeline (80 min improvable, 20 min fixed), your team spends a month getting the transform stage 8x faster, then proposes another month to push it from 8x to 16x. Roughly how much *additional* overall speedup does that second month buy?"
+  options={[
+    { text: 'Almost nothing — about 3.33x → 3.85x, a gain of ~0.5x for a whole month of work', correct: true },
+    { text: 'Another 2x on top — speedup roughly doubles again' },
+    { text: 'About 1.6x more — proportional to the effort' },
+    { text: 'It would finally break the 5x ceiling' },
+  ]}
+  explanation="At s = 16: new time = 20 + 80/16 = 20 + 5 = 25 min, speedup = 100/25 = 4x... let's be precise: that's 4x, up from 3.33x at s=8 — a gain of about 0.67x. (At s=8 the time was 30 min → 3.33x.) Either way, a full month doubling the transform's speed nudges the overall result from ~3.33x toward the 5x ceiling by less than a point. The closer you get to the wall, the more each doubling costs and the less it buys. You're paying month-by-month for crumbs."
+/>
+
+## Diminishing returns, and where to actually spend
+
+Stare at that worked example and a pattern jumps out: **each doubling of $s$ buys less than the one before.** The first doubling (1x → 2x) bought 0.67x of overall speedup. The next (2x → 4x) bought 0.83x. By the time you're going 8x → 16x you're scraping up fractions of a fraction. This is the law of diminishing returns, and Amdahl tells you exactly *why* it bites: as you speed the improvable part up, it shrinks toward zero, so the fixed part takes over as the dominant cost — and you can't touch the fixed part, by definition. You're asymptotically slamming into the ceiling.
+
+So where *should* you spend? The formula answers cleanly: to get the biggest overall speedup, target the **biggest $p$** — the part that eats the most total time. A part with a large $p$ has a generous ceiling ($1/(1-p)$ is high) and rewards every bit of speedup you give it. A part with a small $p$ has a ceiling barely above 1x; even infinite cleverness there is wasted. And "find the part that dominates the total time, and push there" is *precisely* throughput = min and Goldratt's first focusing step — **identify the constraint** — dressed up in algebra. Amdahl's law doesn't contradict the earlier lessons; it *quantifies* them. The bottleneck is the stage with the biggest share of the time, the one optimization with real headroom, and the math tells you so.
+
+<MatchConcepts
+  client:visible
+  question="Match each piece of Amdahl's law to what it means."
+  pairs={[
+    { term: 'p', definition: 'The fraction of total time spent in the part you can speed up' },
+    { term: '1 − p', definition: "The fraction you can't speed up — the fixed, irreducible part" },
+    { term: 's', definition: 'The factor by which you speed up the improvable part (2x, 8x, infinite...)' },
+    { term: '1 / (1 − p)', definition: 'The hard ceiling: the best overall speedup you can ever reach' },
+    { term: 'Diminishing returns', definition: 'Each extra doubling of s buys less, as the fixed part comes to dominate' },
+  ]}
+  explanation="The whole law lives in these five ideas: p and 1−p split the work, s is how hard you push the improvable slice, 1/(1−p) is the wall set by the slice you can't touch, and diminishing returns is what you feel as you approach that wall. Memorize the ceiling formula and you can estimate any speedup in your head."
+/>
+
+<Categorize
+  client:visible
+  question="A web request takes 1000 ms: 950 ms in a slow database query and 50 ms in everything else. Sort each proposed optimization by whether it's worth doing."
+  buckets={['Worth it (big p)', 'Barely helps (small p)']}
+  items={[
+    { text: 'Cache the database query so it returns in 50 ms instead of 950 ms', bucket: 'Worth it (big p)' },
+    { text: 'Hand-optimize the 50 ms of glue code down to 25 ms', bucket: 'Barely helps (small p)' },
+    { text: 'Add an index that cuts the 950 ms query roughly in half', bucket: 'Worth it (big p)' },
+    { text: 'Rewrite the JSON serializer (part of the 50 ms) to shave 10 ms', bucket: 'Barely helps (small p)' },
+    { text: 'Move the database query to a faster machine (it dominates the time)', bucket: 'Worth it (big p)' },
+    { text: 'Micro-optimize the request logger (a few ms of the 50)', bucket: 'Barely helps (small p)' },
+  ]}
+  explanation="The database query is 95% of the time (p = 0.95, ceiling = 20x) — every optimization aimed at it has enormous headroom and is worth it. Everything else combined is 5% (ceiling = 1.05x); the absolute best you could do by perfecting all of it is a 1.05x speedup, so polishing the glue, the serializer, or the logger is wasted motion no matter how clever. Same lesson as 'don't polish the wrong stone,' now with the math to prove the stone is wrong."
+/>
+
+## When to use it
+
+### When to use it
+
+Reach for Amdahl's law the moment someone proposes an optimization and you want to know — *before* building it — whether it's worth the effort. You need two numbers: $p$ (what fraction of the total time does this part take?) and a guess at $s$ (how much faster can I realistically make it?). Plug them in. If the answer is "1.1x for three weeks of work," you've just saved three weeks. It's a five-second filter that catches the most expensive mistake in engineering: pouring effort into a part too small to matter. Profile first to find the big $p$, then aim there — Amdahl turns "where should we optimize?" from a debate into an arithmetic problem.
+
+<Callout variant="warning" title="The pitfall: optimizing a small slice of the time">
+You can't get back more than a part is worth. If something is only 10% of the total time, perfecting it — *infinite* speedup — buys you at most 1.11x, and any realistic speedup buys far less. The most seductive version of this trap is optimizing the part you *understand best* or find most *fun*, rather than the part that's actually big. Measure the slice before you sharpen the knife: a brilliant fix to a 5% slice is still a rounding error.
+</Callout>
+
+<FillBlank
+  client:visible
+  question="State the ceiling rule from memory."
+  text="No matter how much you speed up one part of a system, your overall speedup can never exceed {{1 / (1 − p)|p / s}}, a wall set entirely by the fraction of the work you {{cannot|can}} improve. To raise that ceiling, you must {{make more of the work improvable|push the same part harder}}."
+  explanation="The ceiling is 1/(1−p) — determined by the part you DON'T fix, not by how hard you push the part you do. Speeding up a fixed-size improvable slice runs into diminishing returns against that wall; the only way to move the wall is to enlarge p, i.e. attack a bigger share of the total time."
+/>
+
+<Quiz
+  client:visible
+  title="Check yourself: the math of speedup"
+  questions={[
+    {
+      question: "Amdahl's law says overall Speedup = 1 / ((1−p) + p/s). What does the term p/s represent?",
+      options: [
+        { text: 'The new, shrunken time of the improvable part — it used to take p of the time and now takes p/s', correct: true },
+        { text: 'The total speedup of the whole system', correct: false },
+        { text: 'The fraction of work you cannot improve', correct: false },
+        { text: 'The number of processors you added', correct: false },
+      ],
+      explanation: "The improvable part originally took a fraction p of the time; speeding it up by a factor s shrinks it to p/s. Add that to the untouched fixed part (1−p) to get the new total time as a fraction of the old, then invert for the speedup.",
+    },
+    {
+      question: "A job is 60% improvable and 40% fixed. You speed the improvable part up infinitely. What's the maximum overall speedup?",
+      options: [
+        { text: '1.67x — the ceiling is 1/(1−p) = 1/0.4 = 2.5... wait, recompute', correct: false },
+        { text: '2.5x — the ceiling is 1/(1−0.6) = 1/0.4 = 2.5x', correct: true },
+        { text: '5x — you eliminated 60% of the work', correct: false },
+        { text: 'Unlimited — infinite speedup means infinite gain', correct: false },
+      ],
+      explanation: "The ceiling is 1/(1−p) = 1/(1−0.6) = 1/0.4 = 2.5x. The fixed 40% can't shrink, so even making the other 60% instantaneous leaves you at a 2.5x overall speedup and no more. (The first option's arithmetic is wrong — watch for that.)",
+    },
+    {
+      question: "Two parts of a system: part A is 70% of the time, part B is 30%. You can make either one 10x faster, but only one. Which gives the bigger overall speedup?",
+      options: [
+        { text: 'Speeding up A (the bigger p) — its larger share of the time gives the bigger overall gain', correct: true },
+        { text: 'Speeding up B — smaller parts respond better to optimization', correct: false },
+        { text: 'They give identical speedups since s is the same', correct: false },
+        { text: 'Neither helps unless you speed up both', correct: false },
+      ],
+      explanation: "Speeding A 10x: time = 0.7/10 + 0.3 = 0.07 + 0.3 = 0.37, speedup ≈ 2.7x. Speeding B 10x: time = 0.7 + 0.3/10 = 0.7 + 0.03 = 0.73, speedup ≈ 1.37x. Same s, but aiming at the bigger p wins decisively — which is exactly 'attack the bottleneck.'",
+    },
+    {
+      question: "Why do you hit diminishing returns as you keep speeding up the improvable part?",
+      options: [
+        { text: 'As the improvable part shrinks toward zero, the fixed part comes to dominate the total — and you can\'t touch the fixed part', correct: true },
+        { text: 'The formula breaks down for large s', correct: false },
+        { text: 'Hardware physically cannot go faster than a certain point', correct: false },
+        { text: 'Because p increases every time you optimize', correct: false },
+      ],
+      explanation: "Each doubling of s halves what's left of the improvable part, so it contributes ever less to the total — while the untouched fixed part (1−p) stays put and increasingly dominates. You're asymptotically approaching the 1/(1−p) ceiling, and the last stretch costs the most for the least.",
+    },
+    {
+      question: "Your profiler shows a program spends 5% of its time in a function. A teammate has spent two weeks making that function 50x faster. What does Amdahl's law predict about the overall result?",
+      options: [
+        { text: 'Almost nothing — the ceiling for a 5% part is only 1/(1−0.05) ≈ 1.05x, so two weeks bought at most a ~5% speedup', correct: true },
+        { text: 'A roughly 50x overall speedup, matching the function\'s improvement', correct: false },
+        { text: 'A 2.5x overall speedup', correct: false },
+        { text: 'No way to estimate without rerunning the whole program', correct: false },
+      ],
+      explanation: "A 5% slice has a ceiling of 1/0.95 ≈ 1.05x — making it 50x faster (new share 0.1%) yields about 1/(0.95 + 0.001) ≈ 1.05x. Two weeks of brilliant work on a 5% part bought a ~5% speedup at best. The fix should have aimed at whatever big-p part the profiler also revealed.",
+    },
+  ]}
+/>
+
+## Recap
+
+<MindMap
+  client:visible
+  title="Amdahl's Law — the math of speedup"
+  root={{
+    label: "Amdahl's Law",
+    children: [
+      {
+        label: 'The setup',
+        children: [
+          { label: 'Split a task: p = improvable fraction, 1−p = fixed' },
+          { label: 'Speed the improvable part up by factor s' },
+          { label: 'Gene Amdahl, 1967 — parallel computing, but universal' },
+        ],
+      },
+      {
+        label: 'The formula',
+        children: [
+          { label: 'Speedup = 1 / ((1−p) + p/s)' },
+          { label: '(1−p): fixed part, same time as before' },
+          { label: 'p/s: improvable part, now shrunken' },
+        ],
+      },
+      {
+        label: 'The hard ceiling',
+        children: [
+          { label: 'As s → ∞, speedup → 1/(1−p)' },
+          { label: 'Set by the part you DON\'T fix, not your cleverness' },
+          { label: '25% fixed → 4x max; 90% fixed → 1.11x max' },
+          { label: 'The fixed part becomes the new bottleneck' },
+        ],
+      },
+      {
+        label: 'Diminishing returns',
+        children: [
+          { label: 'Each doubling of s buys less than the last' },
+          { label: 'Fixed part dominates as improvable part shrinks' },
+        ],
+      },
+      {
+        label: 'Where to spend',
+        children: [
+          { label: 'Target the BIGGEST p — the part that dominates time' },
+          { label: '= throughput is min = identify the constraint' },
+          { label: 'Small-p optimizations are capped near 1x — skip them' },
+        ],
+      },
+    ],
+  }}
+/>
+
+## Where this goes next
+
+You now hold the quantitative key to the whole course: throughput is the minimum, the constraint is whichever part has the biggest $p$, and Amdahl's law tells you in advance exactly how much a fix is worth — ceiling and all. You can look at any proposed optimization and say, before building it, "that's worth 2x" or "that's worth nothing," which is a genuine superpower.
+
+But there's one twist the math has been quietly hinting at. Speed up the big-$p$ part enough and it stops being the biggest — some *other* part now dominates the time, with its own $p$, its own ceiling. The constraint didn't disappear; it **moved**. The final teaching lesson, *The Constraint Always Moves*, is about riding that endless game — why fixing one bottleneck always reveals the next, how to cycle through them deliberately (Goldratt's fifth step: go back to the beginning), and where this never-ending hunt is hiding in your traffic, your team, your queries, and your mornings.

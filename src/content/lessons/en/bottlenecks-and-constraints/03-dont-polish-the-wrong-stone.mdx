@@ -1,0 +1,301 @@
+---
+title: "Don't Polish the Wrong Stone"
+description: "Speeding up any step that isn't the bottleneck moves a system's output by exactly zero — and a faster upstream step is worse than useless, burying the constraint in a growing pile of work that just waits."
+topic: "en/bottlenecks-and-constraints"
+order: 4
+minutes: 12
+updated: 2026-06-28
+---
+
+import { MCQ, Quiz, Callout, Categorize, MatchConcepts, FillBlank, MindMap, PipelineThroughput } from '@/components/react';
+
+You've found the constraint (lesson 1) and you've learned Goldratt's procedure for governing it (lesson 2). Now comes the lesson everyone *agrees* with in theory and *violates* in practice — the counter-intuitive heart of the whole course. It is this: **work on the wrong step and you accomplish nothing, no matter how hard you work, how much you spend, or how proud you are of the result.** Worse, on a bad day, you accomplish something *negative*.
+
+Picture a jeweller with a necklace of ten stones. Nine are already polished to a mirror shine. One is dull. A visitor will judge the whole necklace by its worst stone — that's just how eyes work. So where does our jeweller spend the afternoon? On the nine that already gleam, of course, because polishing them *feels* like progress and the dull one is annoying to deal with. Hours later the nine sparkle a fraction brighter, the dull stone is exactly as dull, and the necklace looks no better than when he started. He polished the wrong stones.
+
+That's the mistake this lesson is built to inoculate you against. The dull stone is your bottleneck. Everything else is a stone that's already shiny enough — and every minute spent buffing it is a minute the necklace doesn't improve.
+
+<MCQ
+  client:visible
+  pretest
+  question="A four-stage pipeline runs at 30, 50, 30, 40 units/hr (raw material always available). You spend a fortnight and a big budget upgrading the second stage from 50 to 70 units/hr. What's the line's new throughput?"
+  options={[
+    { text: '30 units/hr — unchanged; the slowest stage is still 30, so the line still produces 30', correct: true },
+    { text: '70 units/hr — the upgraded stage now sets the pace' },
+    { text: '47.5 units/hr — the new average of the four stages' },
+    { text: '50 units/hr — somewhere between the bottleneck and the fast stage' },
+  ]}
+  explanation="No wrong guesses on a pretest — but the answer is a flat, infuriating 30. Stage 2 was never the constraint; it already had spare capacity. Pushing it from 50 to 70 just gives it *more* spare capacity (and more idle time). Work still has to crawl through a 30-unit stage to leave, so the line still finishes 30 units an hour. Two weeks and a budget bought you exactly zero throughput. That is the wrong stone, polished."
+/>
+
+## Local vs. global optimization
+
+The deep error has a name, and naming it is half the cure. **Local optimization** is improving one *part* of a system — a single step, a department, a machine, a metric — in isolation, judging success by how good that part now looks. **Global optimization** is improving the output of the *whole* system — what actually comes out the far end. The trap is that these two feel like the same thing, and they are not. A system can be a showroom of locally-optimized parts and still be globally terrible.
+
+The analogy that sticks: an orchestra. Local optimization is tuning the loudest trumpet a touch louder, drilling the violinist on her solo, polishing each instrument in isolation until it's individually flawless. Global optimization is whether the *whole orchestra sounds good together*. And here's the rub — you can have eighty individually excellent musicians and a catastrophe of a concert, because one section is playing half a beat behind. Making the trumpet louder doesn't fix that; it makes the mess *louder*. The performance is set by how the parts *combine*, not by how good the best part is in isolation.
+
+A chain is the most ruthless version of this. The output of a chain is its **throughput**, and you proved last lesson that throughput equals the capacity of the slowest step — the **minimum**, never the average, never the sum. So "optimize the part" and "optimize the whole" come apart completely: you can drive every non-bottleneck stage to perfection and the whole still produces exactly what the one slow stage allows.
+
+<Callout variant="tip" title="The one-sentence version">
+**Local optimization** makes one part look great; **global optimization** makes the whole system *deliver* more — and in a chain, only one part (the bottleneck) connects the two. Polish any other and the part shines while the system doesn't budge.
+</Callout>
+
+### When to use it
+
+Reach for the local-vs-global distinction the instant someone reports a "win" — a department hit its target, a machine ran at record efficiency, a stage got 40% faster. Before you celebrate, ask the only question that matters: *did the output of the whole system go up?* If the answer is "well, our part improved," you may be looking at a beautifully polished wrong stone.
+
+## Why a faster non-bottleneck adds zero throughput
+
+Let's make the "exactly zero" claim airtight, because it really is exactly zero — not "a little," not "diminishing returns," but **none**. Recall the rule:
+
+> Throughput = the capacity of the bottleneck = the minimum capacity across all stages.
+
+Now take any stage that *isn't* the minimum. By definition it has **slack**: capacity it isn't using, because work only arrives at the rate the bottleneck lets it flow. A stage running at 50 in a line capped at 30 is already idle for a chunk of every hour — it does its 30 units' worth of work and then twiddles its thumbs waiting for the next batch to clear the constraint. Raise that stage to 70 and what have you changed? Its slack grew from 20 to 40. It now twiddles its thumbs *longer*. The minimum is still 30. Throughput is still 30. You bought idle time and called it an upgrade.
+
+Walk the numbers on the pretest line — stages at 30, 50, 30, 40:
+
+| | Stage 1 | Stage 2 | Stage 3 | Stage 4 | Throughput |
+|---|---|---|---|---|---|
+| Before | 30 | 50 | 30 (tied bottleneck) | 40 | **30** |
+| Upgrade stage 2 → 70 | 30 | **70** | 30 | 40 | **30** (unchanged) |
+| Upgrade stage 4 → 60 | 30 | 50 | 30 | **60** | **30** (unchanged) |
+| Upgrade *a* bottleneck (stage 1 → 45) | **45** | 50 | 30 | 40 | **30** (other bottleneck still caps it!) |
+| Upgrade *both* bottlenecks → 45 | **45** | 50 | **45** | 40 | **40** (constraint moved to stage 4) |
+
+Notice three things. Pumping stage 2 or stage 4 does nothing. Lifting just *one* of the two tied 30-stages also does nothing, because the *other* 30-stage still caps the line — when a constraint is shared, you have to relieve all of it. And only when you finally exceed every slow stage does throughput climb — and immediately a *new* slowest stage (the 40) takes over as the constraint. The output never moves until the *bottleneck* moves.
+
+Don't take it on faith — drag it yourself. Push the tall bars up and watch the dashed throughput line refuse to react:
+
+<PipelineThroughput
+  client:visible
+  title="Raise the non-bottleneck — watch nothing happen"
+  caption="Stage C is the constraint (red). Drag B or D as high as you like: the dashed throughput line doesn't move a pixel, and you're just growing the faded 'wasted slack' on top of those bars. Only when you drag C upward does the line climb — until A or D becomes the new bottleneck and the red badge jumps. Every drag that isn't on the red bar is a wrong stone, polished."
+  stageLabels={['A', 'B', 'C', 'D']}
+  initialCapacities={[40, 55, 25, 45]}
+  unitLabel="units/hr"
+  min={10}
+  max={80}
+/>
+
+<Categorize
+  client:visible
+  question="For a line currently bottlenecked at one slow stage, sort each action by whether it actually raises the system's throughput."
+  buckets={['Raises throughput', 'Does nothing (or worse)']}
+  items={[
+    { text: 'Speed up the bottleneck stage itself', bucket: 'Raises throughput' },
+    { text: 'Speed up the single fastest stage in the line', bucket: 'Does nothing (or worse)' },
+    { text: 'Add a second machine in parallel at the bottleneck', bucket: 'Raises throughput' },
+    { text: 'Make the upstream prep cook twice as fast (cook is not the constraint)', bucket: 'Does nothing (or worse)' },
+    { text: 'Cut wasted setup/changeover time at the bottleneck', bucket: 'Raises throughput' },
+    { text: 'Buy a faster machine for a stage that already has slack', bucket: 'Does nothing (or worse)' },
+  ]}
+  explanation="Throughput = the bottleneck's capacity, full stop. So only actions that add capacity *at the constraint* — speeding it up, paralleling it, or stealing back its wasted time (Goldratt's 'exploit') — move the number. Speeding up the fastest stage, a slack stage, or an upstream non-bottleneck just manufactures more idle time at best, and a pile-up at worst. The prep cook getting faster is the classic 'worse' case — coming up next."
+/>
+
+## Worse than useless: the WIP pile-up
+
+Up to now the worst case was "wasted effort." But speed up a non-bottleneck that sits *upstream* of the constraint — before it in the flow — and you cross from useless into actively harmful. Here's why.
+
+A faster upstream stage doesn't push more work *out* of the system (the bottleneck still caps that). It pushes more work *at* the bottleneck, faster than the bottleneck can swallow it. The excess has to go somewhere, and it goes into a pile: a growing heap of half-finished work waiting its turn at the constraint. That heap has a name — **work-in-progress**, or **WIP**: any unit that's been started but not yet finished, stuck somewhere in the middle of the pipeline.
+
+And it's not a one-time heap. The upstream stage produces 50/hr, the bottleneck clears 30/hr, so the pile grows by 20 units *every hour, forever*. This is exactly the **reinforcing loop** you met in feedback loops: an unchecked build-up that compounds because nothing balances it. The faster you run the upstream stage, the faster the pile climbs.
+
+Make it concrete with a kitchen. One grill is the bottleneck — it can cook 30 plates an hour, and that's the restaurant's real throughput. The prep cook, eager to look productive, doubles her speed and fires tickets at the grill twice as fast. Does the restaurant serve more dinners? Not one extra plate — the grill still does 30. What *does* happen: a wall of prepped tickets stacks up beside the grill, growing all night. The cook *feels* like a hero. The kitchen is now a disaster.
+
+That pile isn't free clutter — it costs, in ways that hide until they hurt:
+
+- **Cash frozen in inventory.** Every half-finished unit is money you've spent (materials, labour) that you can't collect on until it's finished and sold. A growing WIP pile is a growing pile of *frozen cash*.
+- **Lead times explode.** A unit entering a 200-deep queue waits for 200 ahead of it to clear the bottleneck before its turn. The same line, same throughput, now takes far longer per item from start to finish — customers wait longer for nothing in return.
+- **Defects discovered late.** If the prep cook is making a systematic error, it's now baked into 200 buried tickets before anyone catches it at the grill. Big WIP piles hide problems and turn small mistakes into huge rework.
+- **Clutter, confusion, and stress.** Floor space, mental load, "which of these 200 do I do first?", the constant low-grade panic of a visibly-overflowing queue. None of it produces a single extra finished plate.
+
+So the faster prep cook didn't just waste her own effort — she actively degraded the whole operation: more frozen cash, longer waits, later-caught defects, more chaos. Same throughput, strictly worse system. *That* is why a non-bottleneck improvement can be worse than useless.
+
+<MCQ
+  client:visible
+  question="A code team has one reviewer who can approve 8 pull requests a day — that's the bottleneck. To 'go faster,' management tells the eight developers to merge-ready their PRs more aggressively, and now they finish 20 PRs a day between them. Three weeks later, what does the team most likely see?"
+  options={[
+    { text: 'Throughput is still ~8 merged PRs/day, but the review queue has ballooned by ~12 PRs every day — longer wait times, stale branches, and merge conflicts piling up', correct: true },
+    { text: 'Throughput jumps to ~20 merged PRs/day because the developers are now faster' },
+    { text: 'Nothing changes at all — the developers\' extra speed is simply invisible and harmless' },
+    { text: 'The reviewer automatically speeds up to 20/day to match the new developer pace' },
+  ]}
+  explanation="The reviewer is the constraint, so merged-PRs/day stays pinned near 8 no matter how fast the developers go. The extra 12 PRs/day don't vanish — they pour into the review queue, a textbook upstream-of-bottleneck WIP pile-up. The queue grows by ~12 daily: branches go stale, conflicts multiply, and the lead time from 'PR opened' to 'merged' stretches out badly. The developers' 'productivity' made everything except throughput worse. The fix is at the reviewer (exploit/elevate the constraint), not upstream of it."
+/>
+
+## The efficiency trap: the cult of "keep everyone busy"
+
+So why does this mistake get made over and over by smart, well-meaning people? Because of how we *measure* work. The instinct — and the management tradition behind it — is to judge each worker, machine, or department by its own **utilization**: the fraction of time it's actually busy producing, rather than idle. An idle machine looks like waste. An idle worker looks like a problem. So we push every part to run flat out, all the time, at 100%.
+
+That instinct is poison to a system with a bottleneck. Driving every *non-bottleneck* to 100% utilization is precisely the recipe for the pile-up you just saw. A non-bottleneck running flat out *over*produces by definition — it makes more than the constraint can absorb — and the surplus becomes WIP. The local metric (utilization) goes green; the global metric (throughput) doesn't move; and a pile of frozen cash grows quietly in the corner. **Maximizing the utilization of a non-bottleneck doesn't speed the system up — it just inflates inventory.**
+
+This is the manager's hardest pill, so let's state it plainly:
+
+> An idle non-bottleneck is **not** a problem to be fixed.
+
+It feels wrong. The prep cook standing there waiting *looks* like waste. But her idleness is the system working *correctly* — she's pacing herself to the grill, exactly the **subordinate** step from lesson 2: non-bottlenecks should match the constraint's rhythm, and their idle time is *free*, because they had spare capacity to burn. Forcing her to "be productive" by working flat out is what *breaks* the system. The free thing and the productive-looking thing are opposites here.
+
+There's a Goodhart's-Law sting baked into this. **Goodhart's Law:** when a measure becomes a target, it stops being a good measure. Make "keep your utilization high" the target for each part, and people optimize for *that* — running flat out, hoarding work, overproducing — at the direct expense of the thing you actually wanted, which was the system's throughput. The local efficiency metric becomes the *enemy* of global output. The metric meant to make the system productive is the very thing strangling it.
+
+<MCQ
+  client:visible
+  question="A plant manager proudly reports that every machine on the floor is running at 95–100% utilization, with almost no idle time anywhere. The plant's actual finished-goods output, however, is flat, and the warehouse of half-finished parts keeps growing. What's the most likely diagnosis?"
+  options={[
+    { text: 'The non-bottleneck machines are being run flat out and overproducing — high local utilization is generating WIP, not throughput; their idle time was supposed to be free', correct: true },
+    { text: 'The plant is perfectly optimized; 100% utilization everywhere is the goal and growing inventory is a sign of success' },
+    { text: 'Output is flat because the machines aren\'t busy enough — they should run at 110%' },
+    { text: 'Utilization and throughput are the same thing, so the report must contain an error' },
+  ]}
+  explanation="Classic efficiency trap. Throughput is set by the bottleneck alone, so 95–100% utilization on *every* machine means the non-bottlenecks are running far past what the constraint can absorb — and the overflow is exactly the growing pile of half-finished parts. High utilization everywhere isn't a triumph; it's the *symptom* of the disease. The non-bottlenecks should be idle part of the time (free idleness, subordinated to the constraint), and effort should be aimed at the one machine that actually caps output."
+/>
+
+<MatchConcepts
+  client:visible
+  question="Match each term to its precise definition."
+  pairs={[
+    { term: 'Local optimization', definition: 'Improving one part/step/metric in isolation, judged by how good that part now looks' },
+    { term: 'Global optimization', definition: 'Improving the output of the whole system — what actually comes out the far end' },
+    { term: 'Work-in-progress (WIP)', definition: 'Units that have been started but not yet finished, stuck mid-pipeline' },
+    { term: 'Utilization', definition: 'The fraction of time a worker or machine is busy producing rather than idle' },
+    { term: 'Slack', definition: 'Spare, unused capacity a non-bottleneck stage has because work arrives only at the bottleneck\'s rate' },
+  ]}
+  explanation="These five terms are the lesson's vocabulary. The trap is the mismatch between local optimization (one shiny part) and global optimization (the whole's output) — they come apart in any chain. Pushing utilization of a slack-having non-bottleneck just converts that slack into a WIP pile, frozen cash sitting mid-pipeline. Throughput, not utilization, is the score that counts."
+/>
+
+<FillBlank
+  client:visible
+  question="Fill in the core lesson."
+  text="Speeding up a step that isn't the constraint changes the system's throughput by {{exactly zero|a large amount}}, because that step already has {{slack|a deficit}}. If the step is upstream of the bottleneck, it's actually worse: it floods the constraint with {{work-in-progress|finished goods}} that just waits in a growing pile. And measuring each part by its own {{utilization|throughput}} pushes everyone to run flat out, which overproduces at non-bottlenecks and builds exactly that pile — so an idle non-bottleneck is {{not a problem|an emergency}} to fix."
+  explanation="The whole lesson in four blanks: zero throughput gain (the non-bottleneck has slack to spare), an upstream non-bottleneck piles up WIP, the utilization metric is what drives the over-running, and idle non-bottlenecks are correct, not broken. Throughput is the only score; everything else is local noise."
+/>
+
+## When to use it
+
+This is less a "sometimes" lens and more a permanent reflex to install. Before you optimize *anything* — buy the faster machine, hire into the busy team, drill the loud trumpet, push a department to run harder — ask one question:
+
+> **Is this the constraint?**
+
+If yes: push with everything you've got; this is the highest-leverage spot in the whole system (it's the most concrete kind of leverage point from the last course). If no: stop. Improving it will move the system's output by zero, and if it sits upstream of the real bottleneck, you'll make things actively worse. You'd be polishing a stone nobody will ever notice, while the dull one — the only one that matters — stays exactly as dull.
+
+The discipline is uncomfortable precisely because the wrong stones are the *fun* ones to polish: the part you understand best, the metric that's easy to move, the team that's eager to look busy. Resist all of it. Find the dull stone first.
+
+<Callout variant="warning" title="The pitfall in one sentence">
+Before optimizing any step, *prove it's the constraint*. If it isn't, every hour and dollar you spend improving it returns **zero** throughput — and if it's upstream of the real bottleneck, it returns *negative*, burying the constraint in a growing pile of frozen, waiting work while you congratulate yourself on the polish.
+</Callout>
+
+<Quiz
+  client:visible
+  title="Check yourself: optimizing the right step"
+  questions={[
+    {
+      question: "A line runs at 20, 35, 50, 35 units/hr. A manager triples the third stage to 150 units/hr. What happens to the line's throughput?",
+      options: [
+        { text: "It stays at 20 — stage 3 was never the constraint, so tripling it just multiplies its idle time", correct: true },
+        { text: "It triples to roughly 60, in proportion to the stage-3 upgrade", correct: false },
+        { text: "It rises to 35, the second-slowest stage", correct: false },
+        { text: "It jumps to 150 to match the upgraded stage", correct: false },
+      ],
+      explanation: "Throughput = the minimum = 20 (stage 1). Stage 3 already had piles of slack at 50; pushing it to 150 just gives it even more idle time. The slowest stage is untouched, so the line still finishes 20/hr. A spectacular upgrade, zero benefit — the wrong stone.",
+    },
+    {
+      question: "Why is speeding up a non-bottleneck stage that sits UPSTREAM of the constraint *worse* than speeding up one downstream of it?",
+      options: [
+        { text: "An upstream stage feeds work into the constraint faster than it can clear, so the excess accumulates as a growing WIP pile (frozen cash, longer lead times, late-found defects)", correct: true },
+        { text: "Upstream stages are always the real bottleneck, so speeding them up overloads the system", correct: false },
+        { text: "There's no difference — both upstream and downstream speed-ups raise throughput equally", correct: false },
+        { text: "A downstream stage can never be sped up, while an upstream one can", correct: false },
+      ],
+      explanation: "Both add zero throughput, but the upstream one adds harm on top. It shoves work at the constraint faster than the constraint clears it, and the surplus piles up as work-in-progress that grows every hour — freezing cash, stretching lead times, and hiding defects. A faster downstream stage just sits idle waiting for the constraint to feed it; no pile forms.",
+    },
+    {
+      question: "A factory boasts that every machine runs at 100% utilization. From a Theory-of-Constraints view, what should this make you suspect?",
+      options: [
+        { text: "The non-bottlenecks are overproducing — 100% utilization everywhere means WIP is piling up, since the constraint can't absorb everything the others make", correct: true },
+        { text: "The factory has achieved perfect efficiency and maximum throughput", correct: false },
+        { text: "The bottleneck has been eliminated, since nothing is idle", correct: false },
+        { text: "Utilization is irrelevant and tells you nothing about anything", correct: false },
+      ],
+      explanation: "If a non-bottleneck is at 100%, it's producing more than the bottleneck can take — and that surplus becomes a WIP pile. Healthy non-bottlenecks are idle *part* of the time, subordinated to the constraint's pace; that idleness is free. Universal 100% utilization is a red flag for inventory build-up, not a trophy.",
+    },
+    {
+      question: "Which statement best captures the difference between local and global optimization?",
+      options: [
+        { text: "Local optimization makes one part look better in isolation; global optimization raises the whole system's actual output — and in a chain the two only coincide at the bottleneck", correct: true },
+        { text: "They're synonyms — improving any part always improves the whole proportionally", correct: false },
+        { text: "Local optimization is about cost and global optimization is about speed; they never interact", correct: false },
+        { text: "Global optimization means optimizing every part to 100%, which automatically optimizes the whole", correct: false },
+      ],
+      explanation: "A system can be a museum of locally-perfect parts and still deliver terribly, because output is set by how the parts combine — in a chain, by the slowest one. Optimizing every part (option 4's instinct) is exactly the trap: it overproduces at non-bottlenecks. Only improving the constraint links local effort to global gain.",
+    },
+    {
+      question: "Goodhart's Law says 'when a measure becomes a target, it stops being a good measure.' How does that apply to the efficiency trap?",
+      options: [
+        { text: "Making per-worker utilization the target pushes everyone to run flat out and hoard work, overproducing at non-bottlenecks — so the local metric becomes the enemy of global throughput", correct: true },
+        { text: "It doesn't apply; utilization is a perfect measure of system output", correct: false },
+        { text: "It means you should set even higher utilization targets to overcome the law", correct: false },
+        { text: "It means throughput, not utilization, is impossible to measure", correct: false },
+      ],
+      explanation: "Utilization is a fine diagnostic until you make it the goal. Then people optimize for *it* — running non-bottlenecks flat out, building WIP — at the direct expense of throughput, the thing you actually wanted. The metric meant to drive productivity ends up strangling it. Aim the score at throughput, and let non-bottlenecks be idle.",
+    },
+  ]}
+/>
+
+## Recap
+
+<MindMap
+  client:visible
+  title="Don't Polish the Wrong Stone"
+  root={{
+    label: "Optimize the constraint — nothing else",
+    children: [
+      {
+        label: 'Local vs. global',
+        children: [
+          { label: 'Local = one part looks great (a step, dept, metric)' },
+          { label: 'Global = the WHOLE system delivers more' },
+          { label: 'In a chain they meet only at the bottleneck' },
+        ],
+      },
+      {
+        label: 'Faster non-bottleneck = zero',
+        children: [
+          { label: 'Throughput = min capacity; non-bottleneck has slack' },
+          { label: 'More capacity → just more idle time, not output' },
+          { label: 'Tied bottlenecks: must relieve ALL of them to gain' },
+        ],
+      },
+      {
+        label: 'Upstream = worse than zero',
+        children: [
+          { label: 'Floods the constraint → WIP pile grows every hour' },
+          { label: 'A reinforcing build-up (feedback loops)' },
+          { label: 'Costs: frozen cash, long lead times, late defects, chaos' },
+          { label: 'Kitchen: fast prep cook buries the one grill' },
+        ],
+      },
+      {
+        label: 'The efficiency trap',
+        children: [
+          { label: 'Measuring each part by its own utilization → run flat out' },
+          { label: 'Non-bottleneck at 100% → overproduction → WIP' },
+          { label: 'An idle non-bottleneck is NOT a problem (subordinate it)' },
+          { label: 'Goodhart: local metric becomes enemy of throughput' },
+        ],
+      },
+      {
+        label: 'The reflex',
+        children: [
+          { label: 'Before optimizing anything: "Is this the constraint?"' },
+          { label: 'No → zero gain (or negative). Stop.' },
+          { label: 'Yes → push hard; it\'s the real leverage point' },
+        ],
+      },
+    ],
+  }}
+/>
+
+## Where this goes next
+
+You now know the *direction* of the rule: a non-bottleneck improvement gives you zero throughput, and an upstream one gives you less than zero. But there's a sharper, quantitative question lurking underneath. When you *do* speed up part of a system — say a part that's genuinely a portion of the work — exactly *how much* faster does the whole thing get? Is there a hard ceiling on the payoff, no matter how dramatically you accelerate that one part?
+
+There is, and it has a precise formula. The next lesson, **Amdahl's Law**, is the math of this whole lesson: it shows that speeding up one fraction of a process has a strict, calculable limit on the total improvement — and that even an *infinite* speedup of a non-dominant part can only help so much. You'll be able to do the arithmetic of "how much will this actually help?" *before* you spend the fortnight and the budget. The intuition you built here — most effort is wasted because it's aimed at the wrong stone — is about to get its equation.

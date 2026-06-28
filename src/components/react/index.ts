@@ -138,3 +138,6 @@ export type { BayesCalculatorProps } from '@/components/react/BayesCalculator';
 
 export { AvailabilityGauge, default as AvailabilityGaugeDefault } from '@/components/react/AvailabilityGauge';
 export type { AvailabilityGaugeProps, AvailabilityItem } from '@/components/react/AvailabilityGauge';
+
+export { PipelineThroughput, default as PipelineThroughputDefault } from '@/components/react/PipelineThroughput';
+export type { PipelineThroughputProps } from '@/components/react/PipelineThroughput';
