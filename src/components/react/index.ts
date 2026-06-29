@@ -150,3 +150,6 @@ export type { TailExplorerProps } from '@/components/react/TailExplorer';
 
 export { CalibrationLab, default as CalibrationLabDefault } from '@/components/react/CalibrationLab';
 export type { CalibrationLabProps, CalibrationClaim } from '@/components/react/CalibrationLab';
+
+export { ValueFunctionExplorer, default as ValueFunctionExplorerDefault } from '@/components/react/ValueFunctionExplorer';
+export type { ValueFunctionExplorerProps } from '@/components/react/ValueFunctionExplorer';

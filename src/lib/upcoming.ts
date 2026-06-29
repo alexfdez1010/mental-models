@@ -83,33 +83,13 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced psychology / systems / economics tier ────────────────────────
-  // `calibration-and-confidence` (the expert probability capstone) has graduated
-  // and been removed; its topic MDX is now the record. The lowest-order entry
-  // below (`loss-aversion`, order 18) is built next.
-  // ── Breadth re-seed (orders 18–20) ────────────────────────────────────────
-  // Appended to keep the queue ≥3 and tag-diverse after `red-queen-effect`
-  // graduated and the remaining tier was all-`probability`. One advanced rung
-  // each into the starved psychology, systems-thinking, and economics tags.
-  {
-    slug: 'loss-aversion',
-    icon: '⚖️',
-    difficulty: 'advanced',
-    order: 18,
-    accent: 'brand',
-    title: {
-      en: 'Loss Aversion & Prospect Theory',
-      es: 'Aversión a la Pérdida y Teoría Prospectiva',
-    },
-    description: {
-      en: 'Losses hurt about twice as much as equivalent gains feel good — so the same choice flips depending on whether it’s framed as winning or losing. The asymmetry that bends nearly every decision you make.',
-      es: 'Las pérdidas duelen aproximadamente el doble de lo que agrada una ganancia equivalente — así que la misma elección se invierte según se plantee como ganar o perder. La asimetría que tuerce casi todas tus decisiones.',
-    },
-    dependencies: ['thinking-in-probabilities', 'incentives'],
-    tags: ['psychology', 'decision-making'],
-    buildNotes:
-      'Loss aversion & prospect theory — the advanced psychology rung on how real humans weigh risk, departing from the expected-value ideal. Sections: loss aversion (a loss looms ~2× a same-size gain — the ~2.25 coefficient) with the coin-flip-you-refuse example; the reference point — outcomes are judged as gains/losses from a baseline, not absolute wealth (Kahneman & Tversky); the value function (concave for gains, convex for losses, steeper on the loss side — diminishing sensitivity → risk-averse for gains, risk-seeking for losses to avoid a sure loss); framing effects (the Asian-disease problem: identical odds flip choices when worded as lives saved vs lives lost); the endowment effect & status-quo bias as loss aversion in disguise (the mug experiment); probability weighting in one line (we overweight tiny probabilities → lotteries and insurance coexist); practical debiasing (widen the frame, aggregate decisions, ask "what’s my reference point?"). Build an interactive framing/value-function island (a slider showing the kinked value curve, and a toggle that re-frames one scenario as gain vs loss and shows the preference flip). Connect to expected value, incentives, and margin of safety. Pitfall: treating framing as cosmetic; ignoring that the reference point is a choice. Recap Quiz + MindMap. en + es twin.',
-  },
+  // ── Advanced psychology / systems / economics / strategy / biology tier ────
+  // `loss-aversion` (the advanced psychology rung, order 18) has graduated and
+  // been removed; its topic MDX is now the record. The lowest-order entry below
+  // (`stocks-and-flows`, order 19) is built next.
+  // ── Breadth re-seed (orders 19–22) ────────────────────────────────────────
+  // Kept ≥3 and tag-diverse as courses graduate: systems-thinking, economics,
+  // strategy, and biology-evolution each carry one advanced rung here.
   {
     slug: 'stocks-and-flows',
     icon: '🛁',
@@ -147,6 +127,48 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['economics'],
     buildNotes:
       'Externalities — the advanced economics rung extending supply & demand and the tragedy of the commons: costs and benefits that spill onto third parties who never agreed to them. Sections: definition — a cost (negative) or benefit (positive) imposed on someone outside a transaction, so private cost ≠ social cost; negative externalities (pollution, noise, congestion, antibiotic resistance) → the market over-produces them because the decider doesn’t bear the full cost; positive externalities (vaccines, education, R&D, a restored façade) → the market under-produces them because the decider doesn’t capture the full benefit; the marginal private vs. social cost/benefit picture (the wedge and the deadweight loss) with a worked numeric example; remedies — Pigouvian taxes & subsidies (price the spillover), cap-and-trade, regulation, and the Coase theorem (clear property rights + low bargaining cost can internalize it privately) and its limits; relation to the commons (a shared sink is a negative externality at scale) and to incentives. Build an interactive supply–demand-with-externality island (a slider for the external cost/benefit that shifts the social curve away from the private one, shading the over/under-production gap and the welfare loss, with a tax/subsidy toggle that re-aligns them). Pitfall: assuming the market price reflects true cost; ignoring positive externalities; treating a tax as a penalty rather than a price correction. Recap Quiz + MindMap. en + es twin.',
+  },
+  // ── Breadth re-seed (orders 21–22) ────────────────────────────────────────
+  // Appended as `loss-aversion` (order 18) graduates, to keep the queue ≥3 and
+  // tag-diverse: a strategy rung and a biology-evolution rung, the two tags the
+  // remaining advanced tier (systems-thinking, economics) was missing.
+  {
+    slug: 'moats',
+    icon: '🏰',
+    difficulty: 'advanced',
+    order: 21,
+    accent: 'brand',
+    title: {
+      en: 'Moats & Durable Advantage',
+      es: 'Fosos (Moats) y Ventaja Duradera',
+    },
+    description: {
+      en: 'Any business earning fat profits invites attackers — a moat is whatever keeps them from crossing. Network effects, switching costs, scale, and brand: why a few advantages compound for decades while most evaporate in a quarter.',
+      es: 'Todo negocio que gana beneficios jugosos atrae atacantes — un foso es aquello que les impide cruzar. Efectos de red, costes de cambio, escala y marca: por qué unas pocas ventajas se acumulan durante décadas mientras la mayoría se evaporan en un trimestre.',
+    },
+    dependencies: ['game-theory-basics', 'comparative-advantage'],
+    tags: ['strategy', 'economics'],
+    buildNotes:
+      'Moats & durable advantage — the advanced strategy rung: why excess profit attracts competition and what makes an advantage *last*. Sections: the core idea — in a free market, high returns invite imitation that competes them away, so a durable advantage is whatever raises a wall against that imitation (Buffett’s "economic moat"); the main moat types, each with a worked example and how it can be breached — (1) network effects (the product gets better as more people use it; tie back to the systems/feedback course), (2) switching costs (it’s painful or risky to leave — data, habits, contracts), (3) economies of scale / cost advantage (a bigger player’s unit costs are structurally lower), (4) intangible assets (brand, patents, regulatory licenses), (5) efficient-scale niches (a market only big enough for one or two players); the difference between a real moat and a mirage (a hot product, first-mover hype, or a great team is not a moat); moat *erosion* and the Red Queen connection (you must keep running to maintain it; technology shifts fill moats in); measuring a moat by pricing power and return-on-capital persistence. Build an interactive moat-erosion / network-effects island (e.g. a slider for the strength of a network effect or switching cost vs. competitive pressure over time, showing margins either compounding or decaying to commodity levels). Pitfall: confusing a temporarily great product with a structural moat; assuming any moat is permanent. Connect to comparative advantage, game theory, incentives, and the Red Queen effect. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'ecosystems-and-niches',
+    icon: '🌳',
+    difficulty: 'advanced',
+    order: 22,
+    accent: 'accent',
+    title: {
+      en: 'Ecosystems & Niches',
+      es: 'Ecosistemas y Nichos',
+    },
+    description: {
+      en: "No species wins everywhere — each survives by fitting a niche the others can't exploit. The model behind competitive exclusion, specialization, and why crowded markets push every player to differentiate or die.",
+      es: 'Ninguna especie gana en todas partes — cada una sobrevive ocupando un nicho que las demás no pueden explotar. El modelo tras la exclusión competitiva, la especialización y por qué los mercados saturados empujan a cada jugador a diferenciarse o morir.',
+    },
+    dependencies: ['natural-selection', 'red-queen-effect'],
+    tags: ['biology-evolution', 'strategy'],
+    buildNotes:
+      'Ecosystems & niches — the advanced biology-evolution rung built on natural selection: how many species coexist by dividing up the environment rather than all fighting for the same resource. Sections: the niche — the specific role/resource-space a species occupies (what it eats, where, when), not just its habitat; the competitive exclusion principle (Gause) — two species competing for the exact same limiting resource can’t coexist; one wins, so survivors differentiate; resource partitioning & specialization with worked examples (Darwin’s finches and beak size, warblers feeding in different parts of the same tree); generalist vs specialist trade-offs (broad-but-shallow vs narrow-but-efficient, and when each wins); keystone species, food webs, and how removing one node cascades (tie to systems-thinking/feedback and second-order effects); the powerful business/strategy transfer — markets are ecosystems, "find an unoccupied niche", differentiation as avoiding head-to-head competitive exclusion (tie to moats and comparative advantage); invasive species & disturbance as the failure modes. Build an interactive niche / competitive-exclusion island (e.g. two or more species on overlapping resource axes; a slider for niche overlap that shows coexistence when overlap is low and one competitor driven extinct when overlap is high). Pitfall: assuming "most competitive wins everything" (it wins its niche, not all niches); confusing habitat with niche. Recap Quiz + MindMap. en + es twin.',
   },
 ];
 
