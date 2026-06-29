@@ -1,0 +1,217 @@
+---
+title: "When the Average Lies"
+description: "In fat-tailed worlds the mean, the standard deviation and the backtest quietly mislead you. Learn why summary statistics break in Extremistan — and which numbers to trust instead."
+topic: "en/fat-tails"
+order: 4
+minutes: 9
+updated: 2026-06-29
+---
+
+import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+
+You already met the **flaw of averages** in *Thinking in Probabilities*: plan around a single mean and reality — which is spread out — punishes you. This lesson is the sequel's villain. In Extremistan, the average doesn't just smooth over the spread. It actively *lies*. The number you computed, the standard deviation you reported, the backtest you trusted — each was built as if the world were mild, and the world is not.
+
+You've finished lessons 01 and 02 of this course, so you know the terrain: **Mediocristan** (bell curves, where one observation can't dominate) versus **Extremistan** (power laws, where one observation can be the whole story). Now we put the textbook statistics on trial and watch them fail one by one.
+
+<MCQ
+  client:visible
+  pretest
+  question="You collect 1,000 net-worth figures from a city. The average comes out to $280,000. What does that average most reliably tell you?"
+  options={[
+    { text: "The typical resident is worth around \$280,000.", correct: false },
+    { text: "Half the residents are worth more than \$280,000.", correct: false },
+    { text: "Almost nothing about the typical resident — it's mostly a statement about the richest person in the sample.", correct: true },
+    { text: "The data is roughly bell-shaped around \$280,000.", correct: false },
+  ]}
+  explanation="Wealth lives in Extremistan. One billionaire can drag the mean far above what any typical resident has, while the median (the middle person) stays modest. In fat tails the average is often a report on the maximum, not the center. That's the whole lesson — let's see why."
+/>
+
+## The running average that never settles
+
+**Analogy.** Imagine measuring the average height of people walking into a stadium. After thirty people your running average is already near 170 cm, and it barely moves for the rest of the day — even the tallest human alive adds a few centimetres to a sum of thousands. Now imagine the average *net worth* of those same people. It crawls along until a billionaire walks in, and then it leaps. Add a richer one and it leaps again. The line never settles down; it just waits for the next record to yank it.
+
+**Definition.** In Mediocristan the **sample mean** converges: as you add data, the running average homes in on a stable value and stops wandering. In Extremistan it doesn't. Each new tail event resets the picture. For very fat tails — a tail index $\alpha \le 1$ — the *theoretical* mean is literally **infinite**: there is no stable number for the average to converge to, no matter how much data you gather.
+
+This is exactly the lurch lesson 01's **TailExplorer** let you feel: in the bell-curve mode the running mean glides to rest; flip to the power-law mode and it twitches upward every time a monster lands.
+
+**Worked example.** Two running averages, sampled in order:
+
+| After *n* samples | Mediocristan: avg height (cm) | Extremistan: avg net worth (\$) |
+|---|---|---|
+| 10 | 171.2 | 88,000 |
+| 50 | 170.6 | 142,000 |
+| 200 | 170.9 | 210,000 |
+| 201 (a billionaire walks in) | 170.9 | **5,180,000** |
+| 1,000 | 170.8 | 1,090,000 |
+
+Height settled by sample 50 and never budged. Net worth was "converging" toward \$210,000 — until sample 201 multiplied it 24-fold, and then it kept drifting. Any average you reported before the billionaire was not a small error. It was a number describing a world that hadn't shown you its tail yet.
+
+<Callout type="warning" title="The convergence you were taught assumes thin tails">
+The Law of Large Numbers — "averages settle as samples grow" — is true, but it needs a finite, well-behaved variance to work *fast*. In fat tails that assumption is gone, so convergence is glacial or (for $\alpha \le 1$) never happens at all. The theorem didn't fail; you applied it in the wrong country.
+</Callout>
+
+### When to use it
+
+Whenever someone quotes "the average" of a fat-tailed quantity — income, file sizes, pandemic deaths, market moves, city sizes — ask: *has this average stopped moving as data accumulated, or is it still waiting for the next record?* If it's the latter, the average is a placeholder, not a fact.
+
+## Standard deviation: one point can own the whole spread
+
+**Analogy.** You measure the "typical bumpiness" of a road by the spread of bump heights. Ninety-nine bumps are a centimetre or two. The hundredth is a missing manhole cover. Report "the average bump is small with a tiny spread" and you have technically summarised the data and completely failed to describe the road.
+
+**Definition.** **Standard deviation** ($\sigma$) and its square, the **variance**, measure spread by squaring distances from the mean. Squaring is the trap: it weights far-out points enormously. In a fat tail a *single* extreme observation can supply most of the total variance — and for tail indices $\alpha \le 2$ the theoretical variance is **infinite**. When that happens, "the data sits within $\pm 2\sigma$" is meaningless, because $\sigma$ itself has no stable value.
+
+**Worked example.** Take 100 daily returns: 99 of them are $\pm 1\%$, and one is $-30\%$ (a crash day). The squared deviation of that one day is $0.30^2 = 0.09$; each ordinary day contributes about $0.01^2 = 0.0001$. So the single crash carries roughly $0.09$ versus $99 \times 0.0001 \approx 0.0099$ for *all* the calm days combined — about **90% of the total variance from one observation out of a hundred**. Your reported $\sigma$ is essentially a measurement of that one day. Drop it from the sample and $\sigma$ collapses; the spread you "measured" was never a property of the typical day.
+
+<MCQ
+  client:visible
+  question="A risk report shows a portfolio's daily standard deviation, computed from two years of data, then states a '95% range' as mean ± 2 standard deviations. The returns are fat-tailed. What's the core problem?"
+  options={[
+    { text: "Two years isn't enough data to compute a standard deviation.", correct: false },
+    { text: "The standard deviation is dominated by a few extreme days, so '± 2 sigma' describes a mild world that doesn't exist.", correct: true },
+    { text: "They should have used variance instead of standard deviation.", correct: false },
+    { text: "The mean should have been subtracted twice.", correct: false },
+  ]}
+  explanation="The '± 2 sigma covers 95%' rule is a bell-curve fact. In fat tails the variance is unstable and often dominated by one or two days, so the range is both wrong and falsely reassuring. Variance and standard deviation are the same trap squared — switching between them changes nothing."
+/>
+
+### When to use it
+
+Treat any single-number "spread" — standard deviation, VaR bands, "± 2σ", confidence intervals — as suspect the moment the data is fat-tailed. Before trusting it, ask how much of the variance comes from the top one or two points. If most of it does, the statistic is describing your outliers, not your spread.
+
+## The mean is mostly the maximum
+
+**Analogy.** Bill Gates walks into a bar with ten regulars. The "average customer" in that bar is now a multimillionaire. Nobody in the room actually resembles the average; the average resembles Bill Gates. The mean didn't summarise the room — it impersonated the biggest person in it.
+
+**Definition.** In a fat-tailed sample, a large fraction of the **sum** comes from the single biggest observation — so the **mean**, which is just the sum divided by *n*, inherits that domination. The mean becomes a statement about the maximum, not the typical case. The honest center is the **median**: the middle value, which no single giant can move.
+
+**Worked example.** A table of 1,000 ordinary values plus one monster:
+
+| | Count | Each | Subtotal |
+|---|---|---|---|
+| Ordinary observations | 1,000 | \$2,000 | \$2,000,000 |
+| The monster | 1 | \$8,000,000 | \$8,000,000 |
+| **Total** | 1,001 | — | **\$10,000,000** |
+
+The mean is $10{,}000{,}000 / 1001 \approx 9{,}990$, i.e. \$9,990 — five times any ordinary value, and **80% of the total sum came from one observation out of 1,001**. The mean reports \$9,990; the median reports \$2,000. The median is telling you the truth about a typical case; the mean is telling you about the monster while wearing the costume of "typical."
+
+<Callout type="info" title="Max-to-sum: a fat-tail detector you can compute">
+Divide the largest observation by the total sum. In Mediocristan this **maximum-to-sum ratio** shrinks toward zero as you add data (no single point can dominate). In Extremistan it stays stubbornly large — one point keeps owning a big slice of the whole. If your max-to-sum ratio isn't heading to zero, the mean is not your friend.
+</Callout>
+
+### When to use it
+
+Any time the quantity can't go negative and has no natural ceiling — wealth, losses, claim sizes, downloads, casualties — lead with the **median**, and report the mean only alongside the max-to-sum ratio so your audience can see how much of "the average" is really one record.
+
+## Sample size lies: your data under-counts the tail
+
+**Analogy.** You've tasted 200 spoonfuls from a giant pot of soup and declared it perfectly mild. The problem: the chef dropped exactly one ghost pepper into the pot, and your spoon hasn't hit it yet. Two hundred mild spoonfuls is not evidence the soup is mild. It's evidence you haven't reached the pepper.
+
+**Definition.** In Mediocristan, a few hundred samples pin down the mean tightly — every point is roughly the same size, so more data just sharpens a stable picture. In Extremistan, even an enormous sample can mislead, because the **single most important observation — the biggest one — hasn't happened yet**. Your sample systematically *under-represents* the tail, which means your estimate of the mean for a fat-tailed positive quantity is **biased low**: the record-breaker that would lift the true average is, by construction, usually missing from the data you have.
+
+**Worked example.** Suppose the true process produces a \$100M event once every 500 draws on average. Pull a sample of 300 draws. More likely than not, *zero* such events appear — so your sample mean is computed entirely from ordinary values and sits well below the true long-run mean. You didn't measure a mild process. You measured the gaps between rare events and mistook the gaps for the whole.
+
+<MCQ
+  client:visible
+  question="For a fat-tailed positive quantity (like flood damage or pandemic deaths), the average you estimate from a finite historical sample tends to be:"
+  options={[
+    { text: "An unbiased estimate — averages are always unbiased.", correct: false },
+    { text: "Biased low, because the largest, most consequential observations are usually absent from a finite sample.", correct: true },
+    { text: "Biased high, because outliers inflate every average.", correct: false },
+    { text: "Exactly right once you have more than 1,000 points.", correct: false },
+  ]}
+  explanation="The events that matter most are the rarest, so a finite record usually hasn't sampled them yet. Their absence drags your estimate below the true mean. More data helps in Mediocristan; in Extremistan it can keep lying right up until the record event finally lands."
+/>
+
+### When to use it
+
+Whenever you hear "we have *N* data points, so our estimate is reliable," ask whether *N* lives in Mediocristan or Extremistan. In Extremistan the right question isn't "how much data?" but "has the data sampled the part that matters — the tail — yet?" Usually it hasn't.
+
+## "It's never happened before" is the most dangerous sentence in risk
+
+**Analogy.** A levee has held for thirty years. Does that prove it's safe? Only if a thirty-year record can contain a five-hundred-year flood — and it can't. The absence of catastrophe in your data isn't evidence of safety. It's mostly evidence that your data is shorter than the disaster's return time.
+
+**Definition.** A **backtest** — running a strategy, a levee design, or a bridge load against historical data — can only ever see events that already happened. In fat tails the most consequential event is, by definition, often *absent* from the record. So "this has never failed in 30 years of data" tells you almost nothing about the failure that lives in a tail your sample never reached. The track record measures the calm between disasters, not the disaster.
+
+**Worked example.** A trading strategy shows a beautiful 30-year backtest: steady gains, "maximum historical drawdown" of just 12%, an enviable Sharpe ratio. Every one of those numbers was computed over a window that happened not to contain a 1987, a 2008, or a 2020. The strategy didn't *survive* those events — it never *met* them. The reassuring "max drawdown" is simply the worst thing that fit inside a too-short window. The real maximum drawdown is the one that hasn't been sampled.
+
+<Reveal client:visible buttonText="Why is this the deadliest sentence in risk?">
+Because it inverts the burden of proof. "It's never happened" feels like evidence of safety, but in a fat tail it's often just evidence that your record is shorter than the event's recurrence time. The rarer and bigger the event, the *more* likely it's missing from any finite sample — so the very catastrophes you most need to plan for are precisely the ones your data is most likely to have skipped. Absence of evidence gets misread as evidence of absence, at exactly the worst moment. (Lesson 04 turns this into the turkey problem: 1,000 well-fed days are the turkey's strongest "evidence" of safety on the morning before Thanksgiving.)
+</Reveal>
+
+<Callout type="warning" title="The numbers that quietly assume a mild world">
+Mean. Standard deviation. Sharpe ratio. "Max historical drawdown." 95% VaR. Every one of these was built as if variance were finite and tails were thin. In Extremistan they don't merely have wide error bars — they're describing a world that isn't the one you live in. Trusting them is the failure mode of this entire lesson.
+</Callout>
+
+## What to do instead
+
+You can't make Extremistan behave, but you can stop letting its statistics fool you. The toolkit:
+
+- **Lead with the median and order statistics.** The median, quartiles and percentiles can't be hijacked by a single giant, so they describe the typical case honestly. Report the mean only with context.
+- **Compute the max-to-sum ratio.** If one observation owns a big slice of the total — and that slice isn't shrinking as data grows — you're in a fat tail and the mean is untrustworthy. It's a one-line diagnostic.
+- **Stress-test *beyond* the worst case in your data.** Your historical maximum is a floor on what's possible, never a ceiling. Ask "what if the next event is 2x, 5x, 10x the worst we've seen?" — because in a fat tail it can be.
+- **Never let "no outlier in the sample" become "no outlier exists."** Absence from the record is the expected state for rare events, not proof of their impossibility.
+- **Size for the tail, not the average.** Build the levee, set the position limit and hold the capital for the event that ruins you — not for the comfortable median day. Recall from *Thinking in Probabilities*: it is **ruin**, not the average outcome, that ends the game.
+
+<MCQ
+  client:visible
+  question="Which single practice best protects you when you suspect a quantity is fat-tailed?"
+  options={[
+    { text: "Collect more data until the mean stabilises.", correct: false },
+    { text: "Report the median, check the max-to-sum ratio, and size for the tail rather than the average.", correct: true },
+    { text: "Use variance instead of standard deviation for a sharper estimate.", correct: false },
+    { text: "Trust the backtest, since it's based on real historical events.", correct: false },
+  ]}
+  explanation="More data doesn't rescue a fat-tailed mean (the tail may still be unsampled), and variance is the same trap as standard deviation. The robust move is to lean on order statistics, diagnose tail dominance with max-to-sum, and plan for the event your sample hasn't shown you yet."
+/>
+
+### When to use it
+
+Adopt this toolkit by default for any open-ended, can't-go-negative, no-natural-ceiling quantity. The cost of treating Mediocristan as Extremistan is a slightly over-cautious plan; the cost of treating Extremistan as Mediocristan is the plan that worked perfectly until the day it didn't.
+
+## Recap
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: "Why can a sample mean in Extremistan keep jumping instead of settling as you add data?",
+      options: [
+        { text: "Because each new record-sized outlier yanks the running average; for very fat tails the theoretical mean may be infinite.", correct: true },
+        { text: "Because the data is being measured in the wrong units.", correct: false },
+        { text: "Because means always jump — that's normal in every dataset.", correct: false },
+      ],
+      explanation: "In fat tails the sum is dominated by extremes, so a single new monster resets the average. With a tail index of 1 or less there's no finite value to converge to at all.",
+    },
+    {
+      question: "In a sample of 1,000 ordinary values plus one giant, what does the median tell you that the mean hides?",
+      options: [
+        { text: "The honest typical value, because no single giant can move the middle observation.", correct: true },
+        { text: "The size of the giant, more accurately than the mean does.", correct: false },
+        { text: "The total sum of the dataset.", correct: false },
+      ],
+      explanation: "The mean is dragged toward the maximum; the median sits at the middle and ignores the outlier, so it reports the typical case truthfully.",
+    },
+    {
+      question: "A bridge 'has never failed in 30 years of load data.' Why is this weak evidence of safety in a fat-tailed world?",
+      options: [
+        { text: "Because the most consequential overload may live in a tail your 30-year record never sampled.", correct: true },
+        { text: "Because 30 years is a short time for a bridge.", correct: false },
+        { text: "Because load data is always unreliable.", correct: false },
+      ],
+      explanation: "Backtests only see what already happened. The rarest, biggest events are usually absent from a finite record, so 'never happened' often just means 'our data is shorter than the event's return time.'",
+    },
+    {
+      question: "For a fat-tailed positive quantity, the mean estimated from a finite historical sample is typically biased which way, and why?",
+      options: [
+        { text: "Biased low, because the rare record-breaking observations that lift the true mean are usually missing from the sample.", correct: true },
+        { text: "Biased high, because a few outliers always inflate the average.", correct: false },
+        { text: "Unbiased, because the mean is always an unbiased estimator.", correct: false },
+      ],
+      explanation: "The biggest, most important observations are the rarest, so they're usually absent from any finite record. Their absence drags the estimate below the true long-run mean.",
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You now know that the average, the standard deviation and the backtest can all lie when the tail is fat — and that "it's never happened before" is the sentence that gets people hurt. **Lesson 04** takes that idea to its sharpest form: the **turkey problem**. A turkey fed every morning for 1,000 days has the most reassuring backtest imaginable — right up to the Wednesday before Thanksgiving. That's the black swan, and we'll meet it next.

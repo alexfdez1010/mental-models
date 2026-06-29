@@ -1,0 +1,212 @@
+---
+title: "La campana de Gauss y las leyes de potencia"
+description: "Dos formas rivales del azar. La campana de Gauss hace los extremos astronómicamente raros; las leyes de potencia los hacen raros pero inevitables. Aprende cómo la forma equivocada entierra los mayores riesgos."
+topic: "es/fat-tails"
+order: 3
+minutes: 9
+updated: 2026-06-29
+---
+
+import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+
+En la lección 01 conociste dos mundos. **Mediocristán**, donde ningún suceso aislado puede mover mucho la media (estaturas, tallas de zapato), y **Extremistán**, donde un solo suceso puede eclipsar todo lo demás (la riqueza, las ventas de libros, las pandemias). Esos mundos no son solo una sensación: cada uno tiene una *forma característica* que describe cómo se comporta su azar. Mediocristán funciona con la **campana de Gauss**. Extremistán funciona con **leyes de potencia**. Esta lección trata de cómo esas dos formas tratan las colas — los sucesos raros y lejanos — porque ahí es exactamente donde discrepan con violencia, y donde elegir la forma equivocada te hace daño.
+
+<MCQ
+  client:visible
+  pretest
+  question="Comprobación de instinto antes de empezar. Un modelo afirma que cierto movimiento del mercado es un 'suceso de 10 sigmas' — algo que, según ese modelo, no debería ocurrir ni una vez en la vida del universo. Y sin embargo acaba de ocurrir. ¿Cuál es la explicación más probable?"
+  options={[
+    { text: "Has presenciado un milagro genuino que solo pasa una vez en el universo.", correct: false, explanation: "Si tu modelo dice que un suceso es imposible y aun así sigue pasando, el problema no es el suceso: es el modelo. 'Una vez en el universo' debería hacerte sospechar de las matemáticas, no del mundo." },
+    { text: "El modelo tiene la forma equivocada — infracuenta los extremos, así que un suceso normal le parece imposible.", correct: true, explanation: "Exacto. Un 'suceso de 10 sigmas' es casi siempre la señal de que has ajustado un modelo de cola fina (la campana) a datos de cola gruesa. El mundo está bien; el modelo está mal especificado." },
+    { text: "El cálculo de las sigmas estaba mal, pero el modelo es sólido.", correct: false, explanation: "Los errores de aritmética existen, pero una lectura de 10 sigmas no es un redondeo. Es el inconfundible olor de una campana a la que se le pide describir Extremistán." },
+    { text: "Los mercados son simplemente impredecibles y no se les aplica ningún modelo.", correct: false, explanation: "Demasiado derrotista. Los modelos de ley de potencia predicen estos movimientos como raros-pero-esperados. El problema no es que predecir sea imposible: es que se usó la distribución equivocada." },
+  ]}
+/>
+
+## Las sumas de cosas pequeñas se apilan en una campana
+
+Imagina que mides la estatura de cada adulto de una ciudad y apilas los resultados. No obtienes una línea plana ni picos aleatorios: obtienes una colina suave, gruesa en el centro y fina en los dos extremos. La mayoría se agrupa cerca de la media; las personas muy altas y muy bajas son raras y simétricas. Esa colina es la **distribución normal**, también llamada **gaussiana** o, con cariño, la **campana de Gauss**.
+
+Su disciplina de origen es la estadística, y su historia es sencilla: cuando una magnitud es la *suma de muchos efectos pequeños e independientes*, esos efectos casi se cancelan y se apilan en una campana. La estatura es una pila de muchos genes más nutrición más sueño — ningún gen aislado te hace medir tres metros. Los errores de medición, la media de muchas tiradas de dado, el total de muchas tiradas de moneda: todas campanas.
+
+Dos números describen una campana por completo:
+
+- La **media** ($\mu$, "mu") — el centro de la colina, el valor promedio.
+- La **desviación típica** ($\sigma$, "sigma") — la distancia habitual a la media, es decir, lo ancha que es la colina. Una $\sigma$ pequeña es una colina estrecha y puntiaguda; una $\sigma$ grande es una colina ancha y suave.
+
+Todo en una campana se mide en unidades de $\sigma$ a partir de $\mu$. "Dos sigmas por encima de la media" significa "el doble del bamboleo habitual por encima del promedio". Esa regla única es lo que hace a la campana tan seductora — y, en el mundo equivocado, tan peligrosa.
+
+<Callout type="info" title="Por qué tantas cosas tienen forma de campana">
+El **teorema central del límite** dice que si promedias suficientes piezas independientes y de varianza finita, la media tiende a una campana *sea cual sea la forma que tuvieran las piezas*. Es la razón de que la gaussiana esté por todas partes en la naturaleza — y la razón de que la gente recurra a ella por reflejo, incluso cuando sus supuestos (independiente, finita, aditiva) fallan en silencio.
+</Callout>
+
+## La regla 68–95–99,7 y lo rápido que se desvanece la cola
+
+La campana tiene un ritmo famoso. Avanza en pasos de una $\sigma$ y la probabilidad de caer dentro se desploma según un calendario fijo:
+
+- Alrededor del **68%** de los resultados cae dentro de $1\sigma$ de la media.
+- Alrededor del **95%** cae dentro de $2\sigma$.
+- Alrededor del **99,7%** cae dentro de $3\sigma$.
+
+Ese último 0,3% es la cola, y aquí viene la parte brutal: la cola no se encoge con educación, *implosiona*. Mira lo rápido que caen las probabilidades de superar $k$ sigmas:
+
+| Más allá de... | Aproximadamente con esta frecuencia | En palabras |
+|---|---|---|
+| $3\sigma$ | 1 entre 370 | una mala semana |
+| $4\sigma$ | 1 entre 15.800 | una mala carrera profesional |
+| $5\sigma$ | 1 entre 3,5 millones | una mala civilización |
+| $6\sigma$ | 1 entre ~500 millones | básicamente nunca |
+
+Cada sigma extra multiplica la rareza por un factor enorme. Esto se debe a que la cola de la campana decae de forma *superexponencial* — su altura cae como $e^{-x^2/2}$, donde el $x^2$ del exponente hace que la probabilidad se hunda más rápido que cualquier exponencial corriente. Empuja hacia valores lejanos de $x$ y la curva se pega tanto a cero que los extremos se vuelven astronómica, cómicamente improbables.
+
+Ese desplome es justo la razón de que un modelo gaussiano, al recibir un crac real, lo declare un suceso "de 10 sigmas, una vez desde el Big Bang". El modelo no miente sobre sus propias matemáticas — simplemente describe un mundo que no existe.
+
+<MCQ
+  client:visible
+  question="Bajo una distribución normal, ¿cuánto más raro es aproximadamente un suceso de 5 sigmas que uno de 4 sigmas?"
+  options={[
+    { text: "Unas 5/4 veces más raro — un pequeño escalón.", correct: false, explanation: "Eso sería cierto si la rareza creciera de forma lineal. No lo hace. La cola de la campana decae de forma superexponencial, así que cada sigma te cuesta órdenes de magnitud." },
+    { text: "Cientos de veces más raro.", correct: true, explanation: "Orden de magnitud correcto: 4 sigmas es aproximadamente 1 entre 15.800 y 5 sigmas aproximadamente 1 entre 3,5 millones — unas 200 veces más raro. Un sigma extra, dos ceros más." },
+    { text: "Exactamente el doble de raro.", correct: false, explanation: "Duplicar sería suave. La realidad es mucho más empinada: el salto de 4 a 5 sigmas es un factor de cientos, porque la cola cae como e^(-x²/2)." },
+    { text: "Algo más común, porque las colas engordan a lo lejos.", correct: false, explanation: "Eso es el comportamiento de la ley de potencia, no el de la campana. La cola gaussiana hace lo contrario: se adelgaza ferozmente cuanto más lejos vas." },
+  ]}
+/>
+
+### Cuándo la campana es la herramienta correcta
+
+Recurre a la gaussiana cuando la magnitud sea genuinamente **aditiva, acotada y de Mediocristán**: estaturas, pesos, errores de medición, la media de muchas extracciones independientes, las tolerancias de fabricación. Son sumas de muchos efectos pequeños y finitos sin ningún término dominante — exactamente la receta que el teorema central del límite premia.
+
+<Callout type="warning" title="La trampa de la distribución por defecto">
+La campana es la distribución que a todo el mundo le enseñan primero, así que se convierte en el valor por defecto silencioso — la forma que supones cuando no has pensado en qué forma aplica. Ese reflejo es la manera más común de que el riesgo de cola gruesa quede oculto. Antes de ajustar una gaussiana, pregúntate: *¿es esta magnitud realmente aditiva y acotada, o podría una sola observación ser mayor que todas las demás juntas?* Si lo segundo te suena posible, estás en Extremistán, y la campana te traicionará.
+</Callout>
+
+## Leyes de potencia: mandan las grandes
+
+Ahora imagina la riqueza en lugar de la estatura. No existe un "multimillonario medio" como existe una estatura media — una sola fortuna puede superar al millón de personas más pobres juntas. Apila patrimonios y no obtienes una colina; obtienes un acantilado en el cero, un cuerpo largo y una cola que se niega a morir. Esa forma es una **ley de potencia**, y su filosofía cotidiana es contundente: *mandan las grandes.*
+
+Con precisión: en una ley de potencia, la probabilidad de superar cierto valor $x$ decae como una potencia de $x$,
+
+$$P(X > x) \propto x^{-\alpha}.$$
+
+El exponente $\alpha$ ("alfa") es el **exponente de la cola**, y fija lo gruesa que es. Lo contraintuitivo: un **$\alpha$ más pequeño significa una cola más gruesa**. Un exponente pequeño hace que $x^{-\alpha}$ se encoja con pereza al crecer $x$, así que los valores gigantes siguen siendo sorprendentemente probables.
+
+Todo el drama está en *cómo* decaen las dos distribuciones. La cola de la campana cae **exponencialmente** (en realidad superexponencialmente), $e^{-x^2/2}$ — se cierra de golpe. La cola de una ley de potencia cae solo **polinómicamente**, $x^{-\alpha}$ — se cierra despacio. A lo lejos en la cola, un polinomio es enormemente mayor que una exponencial, así que la ley de potencia asigna *muchísima* más probabilidad a los sucesos extremos. La misma distancia desde lo "normal", veredictos radicalmente distintos.
+
+<MCQ
+  client:visible
+  question="Dos magnitudes que siguen leyes de potencia, una con exponente de cola α = 1,2 y otra con α = 3,5. ¿Cuál tiene la cola más gruesa — el mayor riesgo de valores atípicos monstruosos?"
+  options={[
+    { text: "α = 3,5, porque un exponente mayor significa extremos mayores.", correct: false, explanation: "Al revés. Un exponente mayor hace que x^(-α) se encoja más rápido, lo que adelgaza la cola. Alfa grande = más manso." },
+    { text: "α = 1,2, porque un exponente más pequeño decae más despacio y mantiene probables a los gigantes.", correct: true, explanation: "Sí. Una α más pequeña hace que la cola x^(-α) caiga con pereza, así que los valores extremos siguen siendo sorprendentemente probables. α = 1,2 es genuinamente salvaje (puede que ni siquiera la media sea estable); α = 3,5 es comparativamente manso." },
+    { text: "Son igual de gruesas — α solo desplaza la curva, no el peso de la cola.", correct: false, explanation: "α es precisamente el mando del peso de la cola. Controla cuánta probabilidad vive a lo lejos, que es todo el juego en Extremistán." },
+    { text: "Ninguna es de cola gruesa; todas las leyes de potencia son de cola fina.", correct: false, explanation: "Las leyes de potencia son las colas gruesas por excelencia. Su decaimiento polinómico deja muchísima más masa en los extremos que cualquier campana." },
+  ]}
+/>
+
+## Invariancia de escala y la regla 80/20
+
+Las leyes de potencia tienen una belleza extraña: se ven igual a cualquier nivel de zoom. Toma el 20% que más gana; dentro de *ellos*, la riqueza sigue siendo salvajemente desigual — un 20% superior de ese 20% acapara la mayoría, y así sucesivamente, para siempre. Esa propiedad es la **invariancia de escala** (o autosemejanza): haz zoom en la cola y encuentras una copia más pequeña del mismo desequilibrio.
+
+La cara cotidiana de esto es la **regla 80/20**, también llamada **principio de Pareto**: aproximadamente el 80% de los efectos viene del 20% de las causas. El 80% de los informes de fallos de un programa vienen del 20% de sus fallos; el 80% de las ventas, del 20% de los clientes. Y como las leyes de potencia se anidan en sí mismas, la regla se repite.
+
+Observa el anidamiento con números redondos. Empieza con 100 unidades de "efecto" producidas por 100 "causas":
+
+| Capa | Causas (acumuladas) | Efecto (acumulado) |
+|---|---|---|
+| Top 20% de las causas | 20% | 80% |
+| Top 20% *de esas* | 4% | ~64% |
+| Top 20% *de esas* | 0,8% | ~51% |
+
+Aplica el 80/20 a la franja superior y obtienes el 80% del 80% ≈ **64% del efecto a partir de solo el 4% de las causas**. Una capa más y aproximadamente la mitad de todo se rastrea hasta menos del 1% de las causas. Los gigantes dentro de los gigantes son donde está la acción.
+
+<Callout type="tip" title="Usa el anidamiento como herramienta de triaje">
+Cuando el esfuerzo es escaso, no lo repartas por igual — las leyes de potencia dicen que no te lo puedes permitir. Encuentra los pocos vitales (el 20%, y luego el 20% del 20%) y vuelca tu atención ahí. La otra cara: en el *riesgo*, ese mismo anidamiento significa que un número diminuto de sucesos carga con la mayor parte del peligro, así que la preparación "media" es exactamente lo contrario de lo que necesitas.
+</Callout>
+
+## Dónde viven realmente las leyes de potencia
+
+Esto no es una curiosidad de las finanzas. Una vez conoces la forma, la ves por todas partes donde los humanos, las redes o la energía se concentran. El hilo común: la magnitud es *escalable* — una unidad puede copiarse, enlazarse o componerse sin un techo natural.
+
+| Magnitud | Comportamiento aproximado de la cola |
+|---|---|
+| Riqueza personal | Cola de potencia gruesa; unas pocas fortunas dominan |
+| Tamaños de ciudades | **Ley de Zipf** — la enésima ciudad mide unas 1/n del tamaño de la mayor |
+| Frecuencias de palabras | Ley de potencia — "el" y "de" aplastan la larga cola de palabras raras |
+| Ventas de libros / música | Ley de potencia extrema — un puñado de superéxitos, una vasta cola fría |
+| Energía de los terremotos | Ley de potencia (Gutenberg–Richter) — los seísmos raros liberan casi toda la energía total |
+| Tamaños de archivos | Cola gruesa — unos pocos archivos enormes dominan el almacenamiento |
+| Enlaces por página web | Ley de potencia — unos pocos hubs acaparan la mayoría de los enlaces |
+
+Fíjate en que ninguna de estas es una suma acotada de efectos pequeños e independientes. Son procesos en los que el ganador se lo lleva casi todo — la riqueza engendra riqueza, los enlaces populares atraen más enlaces — y esa retroalimentación es el motor que fabrica las colas gruesas.
+
+## El remate: raro frente a esperado
+
+Aquí está toda la lección en una colisión. Toma un suceso muy a lo lejos en la cola — llámalo "de unos 5 sigmas", el tipo de movimiento que queda muy fuera de la experiencia cotidiana. Entrega los *mismos datos* a un modelo de cola fina y a uno de cola gruesa y pregunta: "¿cada cuánto?".
+
+| Modelo | Veredicto sobre un suceso de cola lejana | Qué te dice que hagas |
+|---|---|---|
+| Campana de Gauss (cola fina) | "Esencialmente imposible — una vez entre millones." | Ignóralo; no lo presupuestes. |
+| Ley de potencia (cola gruesa) | "Raro, pero del todo esperado — planifícalo." | Lleva un colchón; *vendrá*. |
+
+El mismo mundo, los mismos números, consejos opuestos — y solo un modelo acierta sobre Extremistán. La cola de la gaussiana se desvanece como $e^{-x^2/2}$; la de la ley de potencia persiste como $x^{-\alpha}$. Allí afuera donde viven los cracs, las pandemias y los éxitos virales, esa diferencia es la que separa "no puede pasar" de "pasa según calendario".
+
+<Reveal client:visible buttonLabel="¿Por qué es tan peligroso ajustar una campana a datos de cola gruesa?">
+Porque la gaussiana *sí* ajustará el centro tranquilo de maravilla — el 99% de los datos está en el cuerpo, donde ambas formas se parecen, así que el ajuste parece excelente. Pero entonces la campana impone su propia cola fina a los extremos, declarando "imposibles" justo los sucesos que más importan. Te queda un modelo que es preciso exactamente donde no pasa nada importante y catastróficamente erróneo exactamente donde pasa todo lo importante. El buen ajuste es la trampa.
+</Reveal>
+
+<Callout type="success" title="Elegir la forma">
+Recurre a un modelo de **ley de potencia / cola gruesa** siempre que la magnitud sea *escalable, social o económica*, o siempre que notes que unos pocos gigantes dominan el total. Recurre a la **campana de Gauss** solo para magnitudes *acotadas, aditivas y de Mediocristán* — las sumas de muchas cosas pequeñas e independientes. En caso de duda, asume la cola gruesa: estar sobrepreparado para un extremo cuesta un colchón; estar infrapreparado cuesta la partida entera.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Un analista ajusta una distribución normal a los rendimientos diarios de una acción. El ajuste parece excelente — encaja con los datos a la perfección. ¿Por qué deberías seguir desconfiando de su estimación del riesgo de crac?"
+  options={[
+    { text: "Porque el ajuste es probablemente un error de aritmética.", correct: false, explanation: "No — el ajuste es genuinamente bueno en el cuerpo. Eso es justo lo que lo hace engañoso; el problema no es un error de cálculo." },
+    { text: "Porque los rendimientos son de cola gruesa, así que la gaussiana encaja con el centro tranquilo pero infracuenta radicalmente los cracs de la cola.", correct: true, explanation: "Precisamente. El ~99% de los días vive en el cuerpo, donde ambas formas coinciden, así que el ajuste parece estupendo — mientras la cola fina de la campana etiqueta los cracs reales como 'imposibles'. El buen ajuste central oculta el error fatal de la cola." },
+    { text: "Porque los rendimientos están acotados, así que no aplica ninguna distribución.", correct: false, explanation: "Los rendimientos no están acotados en el sentido que importa — ese es el quid. Son escalables y de cola gruesa, por eso la campana falla." },
+    { text: "Porque la distribución normal siempre sobreestima el riesgo.", correct: false, explanation: "Lo contrario. Con datos de cola gruesa, la gaussiana *infraestima* el riesgo de cola, llamando imposibles a extremos esperados." },
+  ]}
+/>
+
+## Repaso
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: "¿Qué única característica de la campana de Gauss hace que infracuente los extremos?",
+      options: [
+        { text: "Su cola decae de forma superexponencial (como e^(-x²/2)), así que la probabilidad lejana se desploma asombrosamente rápido.", correct: true, explanation: "Ese decaimiento superexponencial es todo el mecanismo — cada sigma extra cuesta órdenes de magnitud, así que los extremos genuinos parecen imposibles." },
+        { text: "No tiene media.", correct: false, explanation: "La campana tiene una media (μ) perfectamente definida. Su problema es la velocidad a la que se desvanece su cola, no un centro ausente." },
+        { text: "Es asimétrica, inclinada hacia los valores grandes.", correct: false, explanation: "La campana es simétrica. Son las leyes de potencia las que están sesgadas hacia los gigantes." },
+      ],
+    },
+    {
+      question: "En una ley de potencia P(X > x) ∝ x^(-α), ¿qué significa un exponente de cola α MÁS PEQUEÑO?",
+      options: [
+        { text: "Una cola más gruesa — los valores extremos siguen siendo más probables.", correct: true, explanation: "Una α más pequeña hace que x^(-α) decaiga despacio, dejando más probabilidad a lo lejos. Exponente más pequeño, cola más gruesa, mundo más salvaje." },
+        { text: "Una cola más fina, más cercana a una campana.", correct: false, explanation: "Al revés — una α mayor es el caso manso, de cola más fina. La α pequeña es la peligrosa." },
+        { text: "Nada sobre la cola; α solo fija la media.", correct: false, explanation: "α es el mando mismo del grosor de la cola. Gobierna cuánta masa se sienta en los extremos." },
+      ],
+    },
+    {
+      question: "Aplicando la regla 80/20 dos veces (anidándola), ¿qué porcentaje aproximado de los efectos viene del 4% superior de las causas?",
+      options: [
+        { text: "Alrededor del 64% — eso es el 80% del 80%.", correct: true, explanation: "Anidar 80/20 da 80% × 80% ≈ 64% de los efectos a partir del 20% × 20% = 4% de las causas. Las leyes de potencia se repiten a sí mismas." },
+        { text: "Alrededor del 80%, igual que con una capa.", correct: false, explanation: "Una capa da 80% a partir del 20%. Anidar lo aprieta hasta ~64% a partir de solo el 4% — la concentración se compone." },
+        { text: "Alrededor del 20% — el efecto se reparte al anidar.", correct: false, explanation: "Se concentra, no se reparte. Cada capa anidada tira de más efecto hacia menos causas." },
+      ],
+    },
+    {
+      question: "Un suceso 'que solo pasa una vez en el universo' según tu modelo acaba de ocurrir por tercera vez esta década. La conclusión honesta es:",
+      options: [
+        { text: "Tu modelo tiene la forma equivocada — es una cola fina sobre datos de cola gruesa.", correct: true, explanation: "Los sucesos 'imposibles' repetidos son la firma de una gaussiana ajustada a un mundo de ley de potencia. Arregla la distribución, no tu sentido de la suerte." },
+        { text: "Tienes una mala suerte extraordinaria, pero el modelo está bien.", correct: false, explanation: "Tres imposibilidades en una década no es mala suerte: es un modelo mal especificado anunciándose a gritos." },
+        { text: "Los sucesos extremos no son modelables, así que ríndete.", correct: false, explanation: "Los modelos de cola gruesa predicen estos sucesos como raros-pero-esperados. La lección no es 'no modeles': es 'usa la forma correcta'." },
+      ],
+    },
+  ]}
+/>
+
+**Adónde lleva esto:** si la campana es la forma equivocada, entonces las propias herramientas que nos enseñó — la **media** y la **desviación típica** — heredan su punto ciego. En la lección 03 veremos por qué, con datos de cola gruesa, la media y la desviación típica se vuelven engañosas: oscilan salvajemente con cada nueva observación y mienten en silencio sobre el riesgo que de verdad cargas.

@@ -83,29 +83,10 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced / expert probability tier (orders 16–17) ─────────────────────
-  // The lowest-order entries, built next. The breadth-pass courses that re-seeded
-  // the starved disciplines (e.g. `red-queen-effect`) have graduated and been
-  // removed; their topic MDX is now the record.
-  {
-    slug: 'fat-tails',
-    icon: '🐘',
-    difficulty: 'advanced',
-    order: 16,
-    accent: 'accent',
-    title: {
-      en: 'Fat Tails & Black Swans',
-      es: 'Colas Anchas y Cisnes Negros',
-    },
-    description: {
-      en: 'Some worlds are mild and some are wild. In fat-tailed domains the rare extreme dominates the average, the bell curve lies, and one outlier rewrites the whole record — so plan for the tail, not the typical.',
-      es: 'Hay mundos mansos y mundos salvajes. En los dominios de cola ancha lo extremo y raro domina la media, la campana de Gauss miente y un solo caso atípico reescribe todo el registro — así que planifica para la cola, no para lo típico.',
-    },
-    dependencies: ['thinking-in-probabilities'],
-    tags: ['probability', 'decision-making'],
-    buildNotes:
-      'Fat tails & black swans — the advanced rung extending Thinking in Probabilities into the extremes. Sections: Mediocristan vs. Extremistan (height/weight vs. wealth, book sales, pandemics) — where one sample can or cannot dominate the total; the normal/bell curve and why it under-counts extremes; power laws and the 80/20 family; why the mean and standard deviation mislead in fat-tailed data; black swans (rare, high-impact, rationalized after the fact) and the turkey problem; ergodicity / ruin in one line (never risk what you can’t recover from — links to margin of safety); practical consequences (sample size lies, backtests miss the crash, insurance vs. exposure). Use KaTeX for the power-law form and at least one comparison table. Build an interactive island contrasting a thin-tailed vs. fat-tailed distribution (slider for tail thickness → watch the max sample and the running average lurch), respecting prefers-reduced-motion. Connect to base rates and expected value (a tiny-probability, huge-payoff term can dominate the EV sum). Pitfall: using thin-tailed intuitions (averages, “it’s never happened”) in a fat-tailed world. Recap Quiz + MindMap. en + es twin.',
-  },
+  // ── Advanced / expert probability tier ────────────────────────────────────
+  // The lowest-order entry, built next. The breadth-pass courses that re-seeded
+  // the starved disciplines (e.g. `red-queen-effect`, `fat-tails`) have graduated
+  // and been removed; their topic MDX is now the record.
   {
     slug: 'calibration-and-confidence',
     icon: '🎯',

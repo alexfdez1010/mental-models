@@ -144,3 +144,6 @@ export type { PipelineThroughputProps } from '@/components/react/PipelineThrough
 
 export { CoevolutionRace, default as CoevolutionRaceDefault } from '@/components/react/CoevolutionRace';
 export type { CoevolutionRaceProps } from '@/components/react/CoevolutionRace';
+
+export { TailExplorer, default as TailExplorerDefault } from '@/components/react/TailExplorer';
+export type { TailExplorerProps } from '@/components/react/TailExplorer';

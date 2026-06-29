@@ -1,0 +1,217 @@
+---
+title: "Cuando la media miente"
+description: "En mundos de colas anchas la media, la desviación típica y el backtest os engañan en silencio. Aprended por qué los estadísticos resumen fallan en Extremistán y en qué números fiaros."
+topic: "es/fat-tails"
+order: 4
+minutes: 9
+updated: 2026-06-29
+---
+
+import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+
+Ya conocisteis la **falacia de las medias** en *Pensar en probabilidades*: planificáis en torno a una sola media y la realidad —que está dispersa— os castiga. Esta lección es el villano de la secuela. En Extremistán la media no se limita a suavizar la dispersión: directamente *miente*. El número que calculasteis, la desviación típica que reportasteis, el backtest en el que confiasteis: cada uno se construyó como si el mundo fuera apacible, y el mundo no lo es.
+
+Habéis terminado las lecciones 01 y 02 de este curso, así que conocéis el terreno: **Mediocristán** (campanas de Gauss, donde una sola observación no puede dominar) frente a **Extremistán** (leyes de potencias, donde una observación puede ser toda la historia). Ahora ponemos los estadísticos de manual en el banquillo y los vemos fallar uno a uno.
+
+<MCQ
+  client:visible
+  pretest
+  question="Recogéis 1.000 cifras de patrimonio de una ciudad. La media sale $280.000. ¿Qué os dice esa media con mayor fiabilidad?"
+  options={[
+    { text: "El residente típico vale en torno a \$280.000.", correct: false },
+    { text: "La mitad de los residentes valen más de \$280.000.", correct: false },
+    { text: "Casi nada sobre el residente típico: es sobre todo una afirmación sobre la persona más rica de la muestra.", correct: true },
+    { text: "Los datos tienen forma de campana aproximadamente en torno a \$280.000.", correct: false },
+  ]}
+  explanation="El patrimonio vive en Extremistán. Un solo multimillonario puede arrastrar la media muy por encima de lo que tiene cualquier residente típico, mientras que la mediana (la persona del medio) se mantiene modesta. En colas anchas la media suele ser un informe sobre el máximo, no sobre el centro. Esa es toda la lección: veamos por qué."
+/>
+
+## La media móvil que nunca se asienta
+
+**Analogía.** Imaginad medir la estatura media de la gente que entra en un estadio. Tras treinta personas vuestra media móvil ya ronda los 170 cm, y apenas se mueve el resto del día: incluso el ser humano más alto vivo añade unos pocos centímetros a una suma de miles. Ahora imaginad el *patrimonio* medio de esas mismas personas. Avanza despacio hasta que entra un multimillonario, y entonces da un salto. Añadid uno más rico y salta de nuevo. La línea nunca se asienta; solo espera al próximo récord que la sacuda.
+
+**Definición.** En Mediocristán la **media muestral** converge: a medida que añadís datos, la media móvil se asienta en un valor estable y deja de vagar. En Extremistán no. Cada nuevo evento de cola reinicia el cuadro. Para colas muy anchas —un índice de cola $\alpha \le 1$— la media *teórica* es literalmente **infinita**: no hay número estable hacia el que la media pueda converger, por muchos datos que reunáis.
+
+Esta es exactamente la sacudida que el **TailExplorer** de la lección 01 os dejó sentir: en el modo campana de Gauss la media móvil se desliza hasta el reposo; cambiad al modo ley de potencias y da un tirón hacia arriba cada vez que aterriza un monstruo.
+
+**Ejemplo resuelto.** Dos medias móviles, muestreadas en orden:
+
+| Tras *n* muestras | Mediocristán: estatura media (cm) | Extremistán: patrimonio medio (\$) |
+|---|---|---|
+| 10 | 171,2 | 88.000 |
+| 50 | 170,6 | 142.000 |
+| 200 | 170,9 | 210.000 |
+| 201 (entra un multimillonario) | 170,9 | **5.180.000** |
+| 1.000 | 170,8 | 1.090.000 |
+
+La estatura se asentó en la muestra 50 y nunca se movió. El patrimonio "convergía" hacia \$210.000 hasta que la muestra 201 lo multiplicó por 24, y luego siguió a la deriva. Cualquier media que reportarais antes del multimillonario no era un error pequeño. Era un número que describía un mundo que aún no os había enseñado su cola.
+
+<Callout type="warning" title="La convergencia que os enseñaron asume colas finas">
+La Ley de los Grandes Números —"las medias se asientan al crecer la muestra"— es cierta, pero necesita una varianza finita y bien portada para funcionar *rápido*. En colas anchas esa premisa desaparece, así que la convergencia es glacial o (para $\alpha \le 1$) nunca ocurre. El teorema no falló; lo aplicasteis en el país equivocado.
+</Callout>
+
+### Cuándo usarlo
+
+Siempre que alguien cite "la media" de una magnitud de cola ancha —ingresos, tamaños de fichero, muertes en una pandemia, movimientos de mercado, tamaños de ciudad— preguntad: *¿esta media ha dejado de moverse según se acumulaban datos, o sigue esperando el próximo récord?* Si es lo segundo, la media es un marcador de posición, no un hecho.
+
+## Desviación típica: un solo punto puede acaparar toda la dispersión
+
+**Analogía.** Medís la "irregularidad típica" de una carretera por la dispersión de las alturas de los baches. Noventa y nueve baches son de un centímetro o dos. El número cien es una tapa de alcantarilla que falta. Reportad "el bache medio es pequeño con muy poca dispersión" y habréis resumido técnicamente los datos y fracasado por completo en describir la carretera.
+
+**Definición.** La **desviación típica** ($\sigma$) y su cuadrado, la **varianza**, miden la dispersión elevando al cuadrado las distancias a la media. Elevar al cuadrado es la trampa: pondera enormemente los puntos lejanos. En una cola ancha una *sola* observación extrema puede aportar la mayor parte de la varianza total, y para índices de cola $\alpha \le 2$ la varianza teórica es **infinita**. Cuando eso pasa, "los datos caen dentro de $\pm 2\sigma$" no significa nada, porque $\sigma$ misma carece de valor estable.
+
+**Ejemplo resuelto.** Tomad 100 rendimientos diarios: 99 de ellos son $\pm 1\%$, y uno es $-30\%$ (un día de crac). La desviación al cuadrado de ese día es $0{,}30^2 = 0{,}09$; cada día corriente aporta unos $0{,}01^2 = 0{,}0001$. Así que el único crac carga aproximadamente $0{,}09$ frente a $99 \times 0{,}0001 \approx 0{,}0099$ de *todos* los días tranquilos juntos: alrededor del **90% de la varianza total a partir de una observación de cien**. Vuestra $\sigma$ reportada es, en esencia, una medición de ese único día. Quitadlo de la muestra y $\sigma$ se desploma; la dispersión que "medisteis" nunca fue una propiedad del día típico.
+
+<MCQ
+  client:visible
+  question="Un informe de riesgo muestra la desviación típica diaria de una cartera, calculada con dos años de datos, y declara un 'rango del 95%' como media ± 2 desviaciones típicas. Los rendimientos son de cola ancha. ¿Cuál es el problema central?"
+  options={[
+    { text: "Dos años no son datos suficientes para calcular una desviación típica.", correct: false },
+    { text: "La desviación típica está dominada por unos pocos días extremos, así que '± 2 sigma' describe un mundo apacible que no existe.", correct: true },
+    { text: "Deberían haber usado la varianza en vez de la desviación típica.", correct: false },
+    { text: "La media debería haberse restado dos veces.", correct: false },
+  ]}
+  explanation="La regla '± 2 sigma cubre el 95%' es un hecho de la campana de Gauss. En colas anchas la varianza es inestable y a menudo está dominada por uno o dos días, así que el rango es a la vez erróneo y falsamente tranquilizador. La varianza y la desviación típica son la misma trampa al cuadrado: cambiar de una a otra no arregla nada."
+/>
+
+### Cuándo usarlo
+
+Tratad cualquier "dispersión" de un solo número —desviación típica, bandas de VaR, "± 2σ", intervalos de confianza— como sospechosa en cuanto los datos sean de cola ancha. Antes de fiaros, preguntad cuánta varianza procede de los uno o dos puntos más altos. Si la mayoría procede de ahí, el estadístico describe vuestros valores atípicos, no vuestra dispersión.
+
+## La media es sobre todo el máximo
+
+**Analogía.** Bill Gates entra en un bar con diez parroquianos. El "cliente medio" de ese bar es ahora multimillonario. Nadie en la sala se parece de verdad a la media; la media se parece a Bill Gates. La media no resumió la sala: suplantó a la persona más grande que había en ella.
+
+**Definición.** En una muestra de cola ancha, una gran fracción de la **suma** procede de la única observación mayor, así que la **media**, que no es más que la suma dividida entre *n*, hereda esa dominación. La media se convierte en una afirmación sobre el máximo, no sobre el caso típico. El centro honesto es la **mediana**: el valor del medio, que ningún gigante puede mover por sí solo.
+
+**Ejemplo resuelto.** Una tabla de 1.000 valores corrientes más un monstruo:
+
+| | Cantidad | Cada uno | Subtotal |
+|---|---|---|---|
+| Observaciones corrientes | 1.000 | \$2.000 | \$2.000.000 |
+| El monstruo | 1 | \$8.000.000 | \$8.000.000 |
+| **Total** | 1.001 | — | **\$10.000.000** |
+
+La media es $10{.}000{.}000 / 1001 \approx 9.990$, es decir \$9.990 —cinco veces cualquier valor corriente—, y el **80% de la suma total procede de una observación de 1.001**. La media reporta \$9.990; la mediana reporta \$2.000. La mediana os dice la verdad sobre un caso típico; la media os habla del monstruo disfrazada de "típico".
+
+<Callout type="info" title="Máximo-sobre-suma: un detector de colas anchas que podéis calcular">
+Dividid la observación mayor entre la suma total. En Mediocristán este **cociente máximo-sobre-suma** se encoge hacia cero a medida que añadís datos (ningún punto puede dominar). En Extremistán se mantiene tercamente grande: un solo punto sigue acaparando una porción enorme del todo. Si vuestro cociente máximo-sobre-suma no tiende a cero, la media no es vuestra amiga.
+</Callout>
+
+### Cuándo usarlo
+
+Cada vez que la magnitud no pueda ser negativa y no tenga techo natural —patrimonio, pérdidas, tamaños de siniestro, descargas, víctimas— encabezad con la **mediana**, y reportad la media solo junto al cociente máximo-sobre-suma para que vuestra audiencia vea cuánto de "la media" es en realidad un solo récord.
+
+## El tamaño muestral miente: vuestros datos infravaloran la cola
+
+**Analogía.** Habéis probado 200 cucharadas de una olla gigante de sopa y la habéis declarado perfectamente suave. El problema: el cocinero echó exactamente una guindilla picantísima en la olla, y vuestra cuchara aún no la ha tocado. Doscientas cucharadas suaves no son prueba de que la sopa sea suave. Son prueba de que no habéis llegado a la guindilla.
+
+**Definición.** En Mediocristán, unos pocos cientos de muestras fijan la media con precisión: todos los puntos tienen un tamaño parecido, así que más datos solo afinan un cuadro estable. En Extremistán, incluso una muestra enorme puede engañar, porque la **única observación más importante —la mayor— aún no ha ocurrido**. Vuestra muestra *infrarrepresenta* sistemáticamente la cola, lo que significa que vuestra estimación de la media para una magnitud positiva de cola ancha está **sesgada a la baja**: el récord que elevaría la media verdadera, por construcción, suele faltar en los datos que tenéis.
+
+**Ejemplo resuelto.** Supongamos que el proceso real produce un evento de \$100M una vez cada 500 extracciones de media. Tomad una muestra de 300 extracciones. Es más probable que no aparezca *ninguno* de esos eventos, así que vuestra media muestral se calcula enteramente con valores corrientes y queda muy por debajo de la media verdadera a largo plazo. No medisteis un proceso suave. Medisteis los huecos entre eventos raros y confundisteis los huecos con el todo.
+
+<MCQ
+  client:visible
+  question="Para una magnitud positiva de cola ancha (como los daños por inundación o las muertes en una pandemia), la media que estimáis a partir de una muestra histórica finita tiende a ser:"
+  options={[
+    { text: "Una estimación insesgada: las medias siempre son insesgadas.", correct: false },
+    { text: "Sesgada a la baja, porque las observaciones mayores y más trascendentes suelen estar ausentes de una muestra finita.", correct: true },
+    { text: "Sesgada al alza, porque los valores atípicos inflan toda media.", correct: false },
+    { text: "Exactamente correcta en cuanto tenéis más de 1.000 puntos.", correct: false },
+  ]}
+  explanation="Los eventos que más importan son los más raros, así que un registro finito normalmente aún no los ha muestreado. Su ausencia arrastra vuestra estimación por debajo de la media verdadera. Más datos ayudan en Mediocristán; en Extremistán pueden seguir mintiendo hasta que por fin aterriza el evento récord."
+/>
+
+### Cuándo usarlo
+
+Siempre que oigáis "tenemos *N* puntos de datos, así que nuestra estimación es fiable", preguntad si *N* vive en Mediocristán o en Extremistán. En Extremistán la pregunta correcta no es "¿cuántos datos?", sino "¿ha muestreado ya la parte que importa, la cola?". Normalmente no.
+
+## "Nunca ha pasado antes" es la frase más peligrosa del riesgo
+
+**Analogía.** Un dique ha aguantado treinta años. ¿Demuestra eso que es seguro? Solo si un registro de treinta años puede contener una crecida de quinientos años, y no puede. La ausencia de catástrofe en vuestros datos no es prueba de seguridad. Es sobre todo prueba de que vuestros datos son más cortos que el periodo de retorno del desastre.
+
+**Definición.** Un **backtest** —probar una estrategia, un diseño de dique o la carga de un puente contra datos históricos— solo puede ver eventos que ya ocurrieron. En colas anchas el evento más trascendente, por definición, suele estar *ausente* del registro. Así que "esto nunca ha fallado en 30 años de datos" no os dice casi nada sobre el fallo que vive en una cola que vuestra muestra nunca alcanzó. El historial mide la calma entre desastres, no el desastre.
+
+**Ejemplo resuelto.** Una estrategia de trading muestra un backtest precioso de 30 años: ganancias estables, una "caída máxima histórica" de apenas el 12%, un ratio de Sharpe envidiable. Cada uno de esos números se calculó sobre una ventana que casualmente no contenía un 1987, un 2008 ni un 2020. La estrategia no *sobrevivió* a esos eventos: nunca los *encontró*. La tranquilizadora "caída máxima" es simplemente lo peor que cupo dentro de una ventana demasiado corta. La caída máxima real es la que no se ha muestreado.
+
+<Reveal client:visible buttonText="¿Por qué es esta la frase más letal del riesgo?">
+Porque invierte la carga de la prueba. "Nunca ha pasado" parece prueba de seguridad, pero en una cola ancha suele ser solo prueba de que vuestro registro es más corto que el tiempo de recurrencia del evento. Cuanto más raro y grande es el evento, *más* probable es que falte en cualquier muestra finita, así que las catástrofes mismas que más necesitáis planificar son precisamente las que vuestros datos tienen más probabilidad de haber saltado. La ausencia de evidencia se malinterpreta como evidencia de ausencia, en el peor momento posible. (La lección 04 convierte esto en el problema del pavo: 1.000 días bien alimentado son la "prueba" de seguridad más fuerte del pavo la mañana antes de Acción de Gracias.)
+</Reveal>
+
+<Callout type="warning" title="Los números que asumen en silencio un mundo apacible">
+Media. Desviación típica. Ratio de Sharpe. "Caída máxima histórica". VaR al 95%. Cada uno de estos se construyó como si la varianza fuera finita y las colas finas. En Extremistán no solo tienen barras de error anchas: describen un mundo que no es en el que vivís. Fiaros de ellos es el modo de fallo de toda esta lección.
+</Callout>
+
+## Qué hacer en su lugar
+
+No podéis hacer que Extremistán se porte bien, pero sí podéis dejar de permitir que sus estadísticos os engañen. El instrumental:
+
+- **Encabezad con la mediana y los estadísticos de orden.** La mediana, los cuartiles y los percentiles no pueden ser secuestrados por un solo gigante, así que describen el caso típico con honestidad. Reportad la media solo con contexto.
+- **Calculad el cociente máximo-sobre-suma.** Si una observación acapara una porción enorme del total —y esa porción no se encoge al crecer los datos— estáis en una cola ancha y la media no es de fiar. Es un diagnóstico de una línea.
+- **Estresad *más allá* del peor caso de vuestros datos.** Vuestro máximo histórico es un suelo de lo posible, nunca un techo. Preguntad "¿y si el próximo evento es 2x, 5x, 10x lo peor que hemos visto?", porque en una cola ancha puede serlo.
+- **Nunca dejéis que "ningún atípico en la muestra" se convierta en "ningún atípico existe".** La ausencia del registro es el estado esperado de los eventos raros, no prueba de su imposibilidad.
+- **Dimensionad para la cola, no para la media.** Construid el dique, fijad el límite de posición y guardad el capital para el evento que os arruina, no para el cómodo día mediano. Recordad de *Pensar en probabilidades*: es la **ruina**, no el resultado medio, lo que termina el juego.
+
+<MCQ
+  client:visible
+  question="¿Qué práctica os protege mejor cuando sospecháis que una magnitud es de cola ancha?"
+  options={[
+    { text: "Recoger más datos hasta que la media se estabilice.", correct: false },
+    { text: "Reportar la mediana, comprobar el cociente máximo-sobre-suma y dimensionar para la cola en vez de para la media.", correct: true },
+    { text: "Usar la varianza en vez de la desviación típica para una estimación más nítida.", correct: false },
+    { text: "Fiaros del backtest, ya que se basa en eventos históricos reales.", correct: false },
+  ]}
+  explanation="Más datos no rescatan una media de cola ancha (la cola puede seguir sin muestrear), y la varianza es la misma trampa que la desviación típica. El movimiento robusto es apoyarse en los estadísticos de orden, diagnosticar la dominación de cola con máximo-sobre-suma y planificar para el evento que vuestra muestra no os ha mostrado todavía."
+/>
+
+### Cuándo usarlo
+
+Adoptad este instrumental por defecto para cualquier magnitud abierta, que no pueda ser negativa y sin techo natural. El coste de tratar Mediocristán como Extremistán es un plan algo demasiado cauto; el coste de tratar Extremistán como Mediocristán es el plan que funcionó a la perfección hasta el día en que no.
+
+## Repaso
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: "¿Por qué una media muestral en Extremistán puede seguir saltando en vez de asentarse según añadís datos?",
+      options: [
+        { text: "Porque cada nuevo atípico de tamaño récord sacude la media móvil; para colas muy anchas la media teórica puede ser infinita.", correct: true },
+        { text: "Porque los datos se están midiendo en las unidades equivocadas.", correct: false },
+        { text: "Porque las medias siempre saltan: es normal en todo conjunto de datos.", correct: false },
+      ],
+      explanation: "En colas anchas la suma está dominada por los extremos, así que un solo monstruo nuevo reinicia la media. Con un índice de cola de 1 o menos no hay valor finito al que converger.",
+    },
+    {
+      question: "En una muestra de 1.000 valores corrientes más un gigante, ¿qué os dice la mediana que la media oculta?",
+      options: [
+        { text: "El valor típico honesto, porque ningún gigante por sí solo puede mover la observación del medio.", correct: true },
+        { text: "El tamaño del gigante, con más precisión que la media.", correct: false },
+        { text: "La suma total del conjunto de datos.", correct: false },
+      ],
+      explanation: "La media es arrastrada hacia el máximo; la mediana se sitúa en el medio e ignora el atípico, así que reporta el caso típico con veracidad.",
+    },
+    {
+      question: "Un puente 'nunca ha fallado en 30 años de datos de carga'. ¿Por qué es esto débil prueba de seguridad en un mundo de cola ancha?",
+      options: [
+        { text: "Porque la sobrecarga más trascendente puede vivir en una cola que vuestro registro de 30 años nunca muestreó.", correct: true },
+        { text: "Porque 30 años es poco tiempo para un puente.", correct: false },
+        { text: "Porque los datos de carga siempre son poco fiables.", correct: false },
+      ],
+      explanation: "Los backtests solo ven lo que ya ocurrió. Los eventos más raros y grandes suelen estar ausentes de un registro finito, así que 'nunca ha pasado' a menudo solo significa 'nuestros datos son más cortos que el periodo de retorno del evento'.",
+    },
+    {
+      question: "Para una magnitud positiva de cola ancha, la media estimada con una muestra histórica finita está típicamente sesgada ¿en qué sentido, y por qué?",
+      options: [
+        { text: "Sesgada a la baja, porque las raras observaciones que baten récords y que elevan la media verdadera suelen faltar en la muestra.", correct: true },
+        { text: "Sesgada al alza, porque unos pocos atípicos siempre inflan la media.", correct: false },
+        { text: "Insesgada, porque la media siempre es un estimador insesgado.", correct: false },
+      ],
+      explanation: "Las observaciones mayores y más importantes son las más raras, así que normalmente faltan en cualquier registro finito. Su ausencia arrastra la estimación por debajo de la media verdadera a largo plazo.",
+    },
+  ]}
+/>
+
+## Hacia dónde sigue esto
+
+Ahora sabéis que la media, la desviación típica y el backtest pueden mentir cuando la cola es ancha, y que "nunca ha pasado antes" es la frase que hace daño a la gente. La **lección 04** lleva esa idea a su forma más afilada: el **problema del pavo**. Un pavo alimentado cada mañana durante 1.000 días tiene el backtest más tranquilizador imaginable, justo hasta el miércoles antes de Acción de Gracias. Ese es el cisne negro, y lo conoceremos a continuación.
