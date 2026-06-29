@@ -147,3 +147,6 @@ export type { CoevolutionRaceProps } from '@/components/react/CoevolutionRace';
 
 export { TailExplorer, default as TailExplorerDefault } from '@/components/react/TailExplorer';
 export type { TailExplorerProps } from '@/components/react/TailExplorer';
+
+export { CalibrationLab, default as CalibrationLabDefault } from '@/components/react/CalibrationLab';
+export type { CalibrationLabProps, CalibrationClaim } from '@/components/react/CalibrationLab';

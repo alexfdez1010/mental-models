@@ -1,0 +1,338 @@
+---
+title: "Examen final: Calibración"
+description: "Un examen final calificado y de un solo sentido sobre la calibración: la curva de fiabilidad, la sobreconfianza y la sobreprecisión, el Brier score y el log score, pensar en rangos y conseguir calibrarse. Nota de aprobado: 70%."
+topic: "es/calibration-and-confidence"
+order: 7
+minutes: 20
+updated: 2026-06-29
+---
+
+import { Callout, FinalExam, MindMap } from '@/components/react';
+
+Este es el examen final de **Calibración: saber lo que sabes**. Reúne todo el curso: qué significa de verdad la calibración (calibration) (el encaje entre tu confianza declarada y tu tasa real de aciertos), la curva de fiabilidad (reliability curve) y las dos caras de la sobreconfianza (overconfidence) —la sobreestimación (overestimation) y la sobreprecisión (overprecision)—, las reglas de puntuación propias que califican tu honestidad (el Brier score y el log score), pensar en rangos en lugar de en puntos, y los hábitos prácticos que te calibran. Varias preguntas parecen fáciles hasta que descubres la trampa: un pronosticador perfectamente calibrado pero completamente inútil, una respuesta segura que debería haber sido humilde, o un Brier score leído al revés. Razona cada una con calma; recuerda que un Brier más bajo es mejor, y que la calibración no es lo mismo que la exactitud (accuracy).
+
+<Callout variant="warning" title="Cómo funciona este examen">
+Lee con atención: este examen es definitivo. Cada pregunta aparece de una en una. Una vez
+que envías una respuesta queda **bloqueada para siempre**: no hay vuelta atrás, ni segundo
+intento, ni reinicio. Tu puntuación permanece oculta hasta el final, donde verás un veredicto
+de aprobado o suspenso. **La nota de aprobado es el 70%.** Algunas preguntas te piden que
+*selecciones todas* las respuestas correctas.
+</Callout>
+
+<FinalExam
+  client:visible
+  passPercent={70}
+  questionLabel="Pregunta"
+  ofLabel="de"
+  submitLabel="Enviar respuesta"
+  lockWarningLabel="Atención: una vez que envíes, esta respuesta es definitiva. No podrás cambiarla."
+  selectHintLabel="Selecciona una respuesta para continuar."
+  nextLabel="Siguiente pregunta"
+  seeResultsLabel="Ver resultados"
+  correctLabel="Correcto"
+  incorrectLabel="Incorrecto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  completeTitleLabel="Examen completado"
+  scoreLabel="Has acertado"
+  passLabel="Aprobado"
+  failLabel="No superado"
+  reviewLabel="Tus respuestas"
+  questions={[
+    {
+      question: '¿Qué significa estar "bien calibrado"?',
+      options: [
+        { text: 'De todas las veces que dices estar un 70% seguro, la cosa se cumple alrededor del 70% de las veces: tu confianza declarada coincide con tu tasa real de aciertos', correct: true },
+        { text: 'Aciertas casi siempre, sin importar la confianza que hubieras declarado' },
+        { text: 'Siempre asignas probabilidades muy altas para sonar decidido' },
+        { text: 'Tus predicciones son siempre 0% o 100%, sin término medio' },
+      ],
+      explanation: 'La calibración es el encaje entre la confianza declarada y la frecuencia observada. Coge cada predicción en la que dijiste 70%: en todo ese grupo, alrededor del 70% debería resultar cierto. Acertar "casi siempre" describe la exactitud (accuracy), no la calibración; sonar siempre seguro o ir al todo o nada es lo contrario de calibrarse.',
+    },
+    {
+      question: 'En una curva de fiabilidad (gráfico de calibración), la confianza va en el eje x y la fracción real de aciertos va en el eje y. ¿Qué representa la diagonal de 45 grados?',
+      options: [
+        { text: 'Calibración perfecta: para cada nivel de confianza, la fracción que se cumplió es igual a la confianza declarada', correct: true },
+        { text: 'Exactitud perfecta: cada una de las predicciones fue correcta' },
+        { text: 'Adivinar al azar, sin ninguna habilidad' },
+        { text: 'La frontera entre puntuaciones posibles e imposibles' },
+      ],
+      explanation: 'La línea de 45 grados es donde la confianza declarada iguala a la frecuencia observada en cada punto: tu grupo del 30% se cumple el 30% de las veces, tu grupo del 90% el 90% de las veces. Esa es la definición de calibración perfecta. Por sí sola no dice nada sobre la exactitud: un pronosticador que solo dice 50% y acierta la mitad de las veces también se sitúa justo en la diagonal.',
+    },
+    {
+      question: 'Un pronosticador dice 80% en un lote de preguntas, pero esas preguntas se cumplen solo el 55% de las veces. ¿Dónde se sitúa ese punto respecto a la diagonal y qué significa?',
+      options: [
+        { text: 'Por debajo de la diagonal: sobreconfianza (la confianza declarada es mayor que la tasa real de aciertos)', correct: true },
+        { text: 'Por encima de la diagonal: infraconfianza' },
+        { text: 'Exactamente sobre la diagonal: perfectamente calibrado' },
+        { text: 'Fuera del gráfico por completo: los datos deben de estar mal' },
+      ],
+      explanation: 'En x = 80% la fracción real de aciertos es solo del 55%, así que el punto queda por debajo de la línea de 45 grados (la y es menor que la x). Los puntos por debajo de la diagonal indican que la confianza declarada supera la tasa real de aciertos: la firma de la sobreconfianza. Los puntos por encima de la diagonal significan lo contrario: infraconfianza.',
+    },
+    {
+      question: 'Dos pronosticadores predicen una moneda justa. El pronosticador A siempre dice "50% cara"; el pronosticador B siempre dice "99% cara". A lo largo de muchas tiradas, ambos aciertan más o menos la mitad de las veces. ¿Qué es cierto sobre su calibración?',
+      options: [
+        { text: 'A está bien calibrado (sus afirmaciones del 50% se cumplen el 50% de las veces); B está pésimamente calibrado y descomunalmente sobreconfiado, aunque ambos tengan la misma tasa de aciertos', correct: true },
+        { text: 'Ambos están igual de bien calibrados porque tienen la misma exactitud' },
+        { text: 'B está mejor calibrado porque el 99% suena más seguro' },
+        { text: 'Ninguno se puede evaluar sin saber qué moneda cayó primero' },
+      ],
+      explanation: 'Este es el ejemplo clásico de que la calibración no es la exactitud. Ambos pronosticadores aciertan ~50% de las veces (misma exactitud), pero A dice 50% y acierta el 50% de las veces (perfectamente calibrado), mientras que B dice 99% y acierta solo el 50% de las veces (enormemente sobreconfiado, muy por debajo de la diagonal). Misma tasa de aciertos, calibración opuesta.',
+    },
+    {
+      question: '¿Qué grupo se cita célebremente como el patrón oro de la calibración en el mundo real?',
+      options: [
+        { text: 'Los meteorólogos: cuando dicen un 70% de probabilidad de lluvia, llueve alrededor del 70% de las veces', correct: true },
+        { text: 'Los analistas de bolsa que publican objetivos de precio a fin de año' },
+        { text: 'Los tertulianos políticos de la televisión por cable' },
+        { text: 'Los médicos que estiman las probabilidades de supervivencia de un paciente sin recibir feedback' },
+      ],
+      explanation: 'Los meteorólogos son el ejemplo de manual de excelente calibración: su "70% de probabilidad de lluvia" de verdad llueve alrededor del 70% de las veces. La razón es un bucle de feedback rápido y repetido: hacen pronósticos probabilísticos constantemente y aprenden de los resultados. Los tertulianos y los analistas suelen carecer de ese feedback estrecho y tienden a la sobreconfianza.',
+    },
+    {
+      question: 'La sobreconfianza tiene dos caras distintas. ¿Qué par las nombra correctamente?',
+      options: [
+        { text: 'La sobreestimación (overestimation) (tus probabilidades o tus estimaciones se van demasiado arriba) y la sobreprecisión (overprecision) (tus márgenes de error son demasiado estrechos)', correct: true },
+        { text: 'La sobrerreacción y la infrarreacción' },
+        { text: 'El optimismo y el pesimismo' },
+        { text: 'La exactitud y la resolución' },
+      ],
+      explanation: 'La sobreestimación significa que tus probabilidades declaradas o tus estimaciones puntuales son sistemáticamente demasiado altas: tus respuestas con un 90% de confianza solo aciertan alrededor del 75% de las veces. La sobreprecisión significa que tus rangos de incertidumbre son demasiado ajustados: tus "intervalos de confianza del 90%" capturan la verdad mucho menos del 90% de las veces. Son fallos separados y necesitan arreglos separados.',
+    },
+    {
+      question: 'Haces un test de 10 ítems de "intervalos de confianza del 90%": para cada dato das un rango bajo-alto que crees con un 90% de seguridad que contiene el valor real. ¿Cuántos falla aproximadamente una persona bien calibrada? ¿Y qué revela fallar 5 de 10?',
+      options: [
+        { text: 'Fallar 1 está calibrado; fallar 5 significa que tus intervalos son demasiado estrechos: sobreprecisión de manual', correct: true },
+        { text: 'Fallar 5 está calibrado; fallar 1 significa que tienes infraconfianza' },
+        { text: 'El objetivo es cero fallos; cualquier fallo significa fracasar' },
+        { text: 'Para un intervalo del 90% se esperan unos 9 fallos' },
+      ],
+      explanation: 'Un intervalo del 90% auténtico debería contener la verdad 9 de cada 10 veces, así que una persona calibrada falla alrededor de 1 de cada 10. Fallar 5 de 10 significa que la verdad cayó fuera de tus rangos la mitad de las veces: tus intervalos eran más o menos la mitad de anchos de lo que exigía la honestidad. Eso es sobreprecisión: márgenes de error demasiado estrechos, la forma más común y tozuda de sobreconfianza.',
+    },
+    {
+      question: '¿Qué es el "efecto fácil-difícil" (hard-easy effect)?',
+      options: [
+        { text: 'La sobreconfianza es peor en las preguntas difíciles (y la gente a veces incluso tiene infraconfianza en las muy fáciles)', correct: true },
+        { text: 'Las preguntas fáciles siempre se contestan bien y las difíciles nunca' },
+        { text: 'La gente se niega a contestar cualquier pregunta que le parezca difícil' },
+        { text: 'La confianza no tiene relación con la dificultad de la pregunta' },
+      ],
+      explanation: 'El efecto fácil-difícil: a medida que las preguntas se vuelven más difíciles, la brecha entre confianza y exactitud se ensancha, así que la sobreconfianza es más severa en lo difícil. En los ítems muy fáciles la gente puede incluso caer en una leve infraconfianza. La lección práctica es descontar tu confianza más justo cuando un problema te parece difícil.',
+    },
+    {
+      question: '¿Cuáles de los siguientes son mecanismos reales que impulsan la sobreconfianza? (Selecciona todas las que correspondan.)',
+      allowMultiple: true,
+      options: [
+        { text: 'No buscamos activamente evidencia que desmienta nuestra propia visión', correct: true },
+        { text: 'Recordamos nuestros aciertos y olvidamos convenientemente nuestros fallos', correct: true },
+        { text: 'Sonar seguro está socialmente recompensado, así que la confianza se refuerza', correct: true },
+        { text: 'Las estimaciones de probabilidad son físicamente imposibles de formar para el cerebro humano' },
+      ],
+      explanation: 'La sobreconfianza se alimenta de no salir a buscar evidencia que desmienta, de recordar selectivamente nuestros éxitos mientras olvidamos nuestros fracasos, y de la recompensa social por sonar seguro (a la gente decidida se la escucha). La opción falsa es la última: los humanos pueden formar y forman estimaciones de probabilidad; el problema es el sesgo en esas estimaciones, no la incapacidad de hacerlas.',
+    },
+    {
+      question: '¿Qué hace que una regla de puntuación sea "propia" (proper)?',
+      options: [
+        { text: 'Informar honestamente de tu probabilidad real maximiza tu puntuación esperada: no la puedes manipular con un farol', correct: true },
+        { text: 'Solo recompensa predicciones del 0% o del 100%' },
+        { text: 'Siempre da a todo el mundo la misma puntuación independientemente de sus pronósticos' },
+        { text: 'Recompensa sonar más seguro de lo que realmente estás' },
+      ],
+      explanation: 'Una regla de puntuación propia está construida para que tu puntuación esperada sea la mejor exactamente cuando informas de tu probabilidad honesta. Si de verdad crees un 70%, declarar 70% supera de media a declarar 90% o 50%. Eso elimina el incentivo de tirarse un farol o de cubrirse estratégicamente: las reglas propias hacen de la honestidad la política óptima.',
+    },
+    {
+      question: '¿Cómo se calcula el Brier score y qué dirección es mejor?',
+      options: [
+        { text: 'Brier = (p − o) al cuadrado, promediado sobre las predicciones, donde o es 1 si el evento ocurrió y 0 si no; va de 0 a 1, y MÁS BAJO es mejor', correct: true },
+        { text: 'Brier = (p − o) al cuadrado promediado, de 0 a 1, donde MÁS ALTO es mejor' },
+        { text: 'El Brier es el porcentaje de predicciones que acertaste, donde más alto es mejor' },
+        { text: 'El Brier es la confianza media que declaraste, donde más alto significa más habilidad' },
+      ],
+      explanation: 'El Brier score es la media de las diferencias al cuadrado entre tu probabilidad p y el resultado o (1 si ocurrió, 0 si no). Va de 0 (perfecto) a 1 (lo peor posible), así que más bajo es mejor: mide el error. Confundirlo con un porcentaje de exactitud, o pensar que más alto es mejor, pone toda la escala al revés.',
+    },
+    {
+      question: 'Predijiste 0,9 de que un evento ocurriría, y NO ocurrió (o = 0). ¿Cuál es el Brier score para esa única predicción?',
+      options: [
+        { text: '(0,9 − 0) al cuadrado = 0,81', correct: true },
+        { text: '(0,9 − 0) al cuadrado = 0,09' },
+        { text: '(0,9 − 1) al cuadrado = 0,01' },
+        { text: '0,9, porque esa era tu probabilidad declarada' },
+      ],
+      explanation: 'Con o = 0, el error al cuadrado es (0,9 − 0) al cuadrado = 0,81: un Brier de una sola predicción muy alto (malo), porque estabas un 90% seguro de algo que no ocurrió. Si el evento hubiera ocurrido (o = 1) la puntuación habría sido (0,9 − 1) al cuadrado = 0,01, casi perfecta. Los fallos seguros se castigan con dureza.',
+    },
+    {
+      question: 'A lo largo de dos predicciones, los errores al cuadrado salen 0,81 y 0,01. ¿Cuál es el Brier score medio?',
+      options: [
+        { text: '(0,81 + 0,01) / 2 = 0,41', correct: true },
+        { text: '0,81 + 0,01 = 0,82' },
+        { text: '(0,81 + 0,01) / 2 = 0,82' },
+        { text: '0,81 − 0,01 = 0,80' },
+      ],
+      explanation: 'El Brier score promedia los errores al cuadrado de las predicciones: (0,81 + 0,01) / 2 = 0,82 / 2 = 0,41. Un fallo seguro (0,81) tiró de la media hacia arriba con fuerza aunque la otra predicción fuera casi perfecta (0,01): un recordatorio de que una sola llamada equivocada con exceso de confianza te cuesta mucho.',
+    },
+    {
+      question: '¿Por qué se describe el log score como "brutal" y qué regla enseña sobre las probabilidades extremas?',
+      options: [
+        { text: 'Castiga los fallos seguros mucho más duramente que el Brier score: una probabilidad de 0 sobre algo que ocurre puntúa menos infinito, así que nunca debes decir 0% ni 100%', correct: true },
+        { text: 'Recompensa decir 0% o 100% tan a menudo como sea posible' },
+        { text: 'Es idéntico al Brier score en todas las situaciones' },
+        { text: 'Ignora lo seguro que estabas y solo cuenta acierto frente a fallo' },
+      ],
+      explanation: 'El log score crece sin límite a medida que tu probabilidad declarada sobre el resultado verdadero se acerca a cero, así que estar 100% seguro de algo falso cuesta infinito. La lección práctica: deja una rendija de duda —nunca afirmes 0% ni 100%— porque un solo fallo catastrófico puede arruinar todo tu log score. Es mucho más despiadado con la sobreconfianza que el Brier.',
+    },
+    {
+      question: 'El Brier score se descompone en dos componentes con significado. ¿Cuáles son?',
+      options: [
+        { text: 'Calibración y resolución', correct: true },
+        { text: 'Exactitud y precisión' },
+        { text: 'Media y varianza' },
+        { text: 'Optimismo y pesimismo' },
+      ],
+      explanation: 'El Brier score se separa en un término de calibración (lo bien que tus probabilidades declaradas encajan con las frecuencias de los resultados) y un término de resolución (cuánto varían tus pronósticos respecto a la tasa base: tu capacidad de separar los casos probables de los improbables). Un buen pronosticador necesita ambos: calibrado Y capaz de discriminar, no solo una cosa.',
+    },
+    {
+      question: '¿Cuál es la diferencia entre una estimación puntual y un intervalo de confianza?',
+      options: [
+        { text: 'Una estimación puntual es un único número, tu mejor conjetura; un intervalo de confianza es un rango que crees que contiene el valor real con cierta probabilidad declarada', correct: true },
+        { text: 'Una estimación puntual siempre está mal; un intervalo de confianza siempre está bien' },
+        { text: 'Son dos nombres para el mismo número único' },
+        { text: 'Un intervalo de confianza es solo una estimación puntual redondeada a la decena más cercana' },
+      ],
+      explanation: 'Una estimación puntual se compromete con un número ("unos 8 millones"); un intervalo de confianza da un rango con una probabilidad asociada ("90% seguro de que está entre 5 y 12 millones"). El intervalo es honesto sobre la incertidumbre: te dice cuánto no sabes, mientras que una estimación puntual a secas lo esconde.',
+    },
+    {
+      question: 'Un truco fiable para construir un intervalo honesto es fijar los límites a propósito. ¿Cuál es el método recomendado?',
+      options: [
+        { text: 'Fija un límite inferior que estés un 95% seguro de que es demasiado BAJO y un límite superior que estés un 95% seguro de que es demasiado ALTO; luego comprueba que el rango te resulte incómodamente ancho', correct: true },
+        { text: 'Coge tu mejor conjetura y súmale o réstale un 1% para obtener los límites' },
+        { text: 'Haz el intervalo lo más estrecho posible para que parezca preciso' },
+        { text: 'Usa el rango que produzca tu primer instinto, sin ajustarlo' },
+      ],
+      explanation: 'Como los intervalos de primera versión casi siempre son demasiado estrechos, la disciplina consiste en empujar los límites hacia fuera: elige un extremo bajo que estés un 95% seguro de que es demasiado bajo y un extremo alto que estés un 95% seguro de que es demasiado alto. Si el rango resultante te resulta incómodamente ancho, eso suele ser señal de que por fin es honesto, no señal de que lo hiciste mal.',
+    },
+    {
+      question: '¿Por qué insiste el curso en que "unos márgenes de error honestos dimensionan tu margen de seguridad"?',
+      options: [
+        { text: 'Un intervalo sinceramente ancho te dice cuánto podría salir mal, así que puedes dejar sitio para ello; uno falsamente estrecho esconde el riesgo y te deja expuesto', correct: true },
+        { text: 'Los intervalos más anchos siempre significan que vas a perder dinero' },
+        { text: 'Los márgenes de error son decorativos y no influyen en las decisiones' },
+        { text: 'El intervalo más estrecho posible da el mayor margen de seguridad' },
+      ],
+      explanation: 'Tu intervalo es un mapa de lo mal que podría errar tu estimación. Si es sinceramente ancho, puedes planificar para el peor extremo: crear holgura, colchones y un margen de seguridad. Si finges precisión con un intervalo ajustado, planificas para un futuro que quizá no llegue y te pilla por sorpresa cuando la realidad cae fuera de tu rango.',
+    },
+    {
+      question: '¿Cuál es el hábito más importante para combatir el sesgo retrospectivo (hindsight bias) y calibrarse?',
+      options: [
+        { text: 'Escribir las predicciones en un diario ANTES de conocer los resultados, con probabilidades y rangos explícitos', correct: true },
+        { text: 'Recordar a posteriori lo seguro que te sentías en su momento' },
+        { text: 'Registrar solo las predicciones que resultaron correctas' },
+        { text: 'Evitar escribir nada para mantenerte flexible' },
+      ],
+      explanation: 'El sesgo retrospectivo reescribe la memoria de modo que crees que "lo sabías desde el principio". Escribir las predicciones antes de los resultados —con probabilidades y rangos explícitos— congela lo que de verdad creías, así no puedes engañarte después. Recordar de memoria tu confianza pasada es exactamente lo que el sesgo retrospectivo corrompe, y registrar solo los aciertos garantiza un historial halagador e inútil.',
+    },
+    {
+      question: '¿Por qué hay que separar la "calidad de la decisión" de la "suerte del resultado" al revisar tus pronósticos?',
+      options: [
+        { text: 'Una buena decisión puede tener un mal resultado (y viceversa) por culpa de la suerte; juzgar el proceso solo por los resultados te enseña las lecciones equivocadas', correct: true },
+        { text: 'Los resultados son lo único que importa, así que la calidad de la decisión es irrelevante' },
+        { text: 'Las buenas decisiones siempre producen buenos resultados, así que son lo mismo' },
+        { text: 'La suerte se puede eliminar por completo con suficiente planificación' },
+      ],
+      explanation: 'En cualquier dominio incierto, una apuesta bien razonada puede perder y una temeraria puede ganar: eso es la varianza. Si calificas tu pensamiento solo por si salió bien, "aprenderás" a repetir procesos afortunados pero malos y a abandonar los sensatos pero desafortunados. La calibración exige juzgar la calidad de la decisión dado lo que sabías, por separado de la tirada de dados.',
+    },
+    {
+      question: '¿Cómo mejoran un pronóstico las clases de referencia y las tasas base, y cómo se conecta esto con el razonamiento bayesiano?',
+      options: [
+        { text: 'Te dan un prior calibrado de partida —la tasa a la que resultan los casos similares— que luego actualizas con la evidencia específica del caso, exactamente la jugada bayesiana', correct: true },
+        { text: 'Te dicen que ignores toda la estadística general y confíes solo en los detalles vívidos de este único caso' },
+        { text: 'Garantizan que el caso concreto coincidirá con la media exactamente' },
+        { text: 'Sustituyen la probabilidad por completo por una única respuesta de sí o no' },
+      ],
+      explanation: 'Una clase de referencia es el conjunto de situaciones pasadas similares; su tasa base es la frecuencia con que resultaron de una determinada manera. Partir de esa tasa base te da un prior calibrado, que luego ajustas con las particularidades de este caso. Ancla en la tasa base, actualiza con la evidencia: eso es razonamiento bayesiano, y es un antídoto potente contra dejarse arrastrar por una historia vívida pero poco representativa.',
+    },
+    {
+      question: 'El Good Judgment Project de Tetlock descubrió que los "superpronosticadores" (superforecasters) comparten varios hábitos. ¿Cuáles de los siguientes están entre ellos? (Selecciona todas las que correspondan.)',
+      allowMultiple: true,
+      options: [
+        { text: 'Partir de tasas base / clases de referencia', correct: true },
+        { text: 'Hacer actualizaciones pequeñas y frecuentes a medida que llega nueva evidencia', correct: true },
+        { text: 'Usar probabilidades de grano fino (p. ej. 63%, no solo "probable")', correct: true },
+        { text: 'Comprometerse a fondo con un único pronóstico y negarse a cambiarlo' },
+      ],
+      explanation: 'Los superpronosticadores anclan en las tasas base, ajustan sus estimaciones en pequeños incrementos según va goteando la evidencia, y piensan en probabilidades granulares en vez de en palabras vagas. La opción falsa es la última: negarse a actualizar es lo contrario de lo que hacen; los buenos pronosticadores revisan a menudo y de forma proporcional, sin atrincherarse jamás para defender un número por orgullo.',
+    },
+    {
+      question: 'Un pronosticador responde a todas y cada una de las preguntas con un "50% de probabilidad". ¿Qué es cierto sobre este pronosticador reloj-que-siempre-dice-50%?',
+      options: [
+        { text: 'En preguntas de sí/no equilibradas puede estar perfectamente calibrado y aun así tener resolución nula: calibrado pero inútil', correct: true },
+        { text: 'Está pésimamente calibrado y descomunalmente sobreconfiado' },
+        { text: 'Es el pronosticador ideal porque el 50% es la respuesta más segura' },
+        { text: 'Tiene alta resolución pero mala calibración' },
+      ],
+      explanation: 'Esta es la trampa central de la lección. Un pronosticador que siempre dice 50% en preguntas que de verdad se reparten 50/50 se sitúa justo en la diagonal: perfectamente calibrado. Pero nunca distingue un evento casi seguro de un cara o cruz, así que su resolución es nula y los pronósticos son inútiles para decidir. La calibración por sí sola no basta; también necesitas resolución (capacidad de discriminar).',
+    },
+    {
+      question: '¿Cuál es la meta última que fija el curso: el equilibrio justo entre calibración y resolución?',
+      options: [
+        { text: 'Estar a la vez calibrado Y ser decidido: honesto sobre la incertidumbre (humildad) pero dispuesto a hacer pronósticos nítidos y discriminantes (resolución)', correct: true },
+        { text: 'Maximizar solo la calibración, aunque cada pronóstico sea un inútil 50%' },
+        { text: 'Maximizar la confianza a toda costa para sonar siempre con autoridad' },
+        { text: 'Evitar hacer pronósticos probabilísticos por completo para ir sobre seguro' },
+      ],
+      explanation: 'La calibración es humildad (tus probabilidades dicen la verdad); la resolución es decisión (de verdad separas lo probable de lo improbable). Un pronosticador perfectamente calibrado pero siempre al 50% tiene lo primero sin lo segundo y es inútil; un tertuliano sobreconfiado no tiene ninguna de las dos honestidades. El objetivo es ambas a la vez —calibrado Y decidido— para que tus pronósticos sean a la vez fiables e informativos.',
+    },
+  ]}
+/>
+
+## Repaso del curso
+
+<MindMap
+  client:visible
+  title="La calibración en una imagen"
+  outlineLabel="Esquema"
+  root={{
+    label: 'Calibración: saber lo que sabes',
+    children: [
+      {
+        label: 'Qué significa la calibración',
+        children: [{ label: 'La confianza declarada debería coincidir con la tasa real de aciertos: de todas tus llamadas al 70%, ~70% se cumplen. La curva de fiabilidad traza la confianza (x) frente a la fracción de aciertos (y); la línea de 45 grados es perfecta; por debajo = sobreconfiado, por encima = infraconfiado. La calibración no es la exactitud: los meteorólogos son el patrón oro.' }],
+      },
+      {
+        label: 'Sobreconfianza y sobreprecisión',
+        children: [{ label: 'Dos caras: la sobreestimación (respuestas al 90% que aciertan ~75%) y la sobreprecisión (intervalos del 90% que atrapan la verdad solo el ~40-50% de las veces). El efecto fácil-difícil hace que la sobreconfianza sea peor en las preguntas difíciles. Impulsada por no buscar evidencia que desmienta, recordar los aciertos y la recompensa social por sonar seguro.' }],
+      },
+      {
+        label: 'Puntuar tus creencias',
+        children: [{ label: 'Las reglas de puntuación propias hacen óptima la honestidad. Brier = (p − o) al cuadrado, promediado; 0 lo mejor, 1 lo peor, MÁS BAJO es mejor. El log score es brutal con los fallos seguros: nunca digas 0% ni 100%. El Brier se descompone en calibración + resolución.' }],
+      },
+      {
+        label: 'Pensar en rangos',
+        children: [{ label: 'Estimación puntual frente a intervalo de confianza. Los primeros intervalos son demasiado estrechos: ensánchalos a propósito. Usa la disciplina del intervalo del 90% (espera ~1 fallo de cada 10); fija límites que estés un 95% seguro de que son demasiado bajo y demasiado alto. Unos márgenes de error honestos dimensionan tu margen de seguridad.' }],
+      },
+      {
+        label: 'Conseguir calibrarse',
+        children: [{ label: 'Anota las predicciones ANTES de los resultados (combate el sesgo retrospectivo); da rangos + probabilidades explícitas; puntúa, mira la curva de fiabilidad y ajusta. Separa la calidad de la decisión de la suerte del resultado; ancla en las tasas base (se conecta con Bayes). Los superpronosticadores usan tasas base, actualizaciones pequeñas y probabilidades de grano fino. Un reloj que siempre dice 50% está calibrado pero es inútil: apunta a estar calibrado Y ser decidido.' }],
+      },
+    ],
+  }}
+/>
+
+<Callout variant="success" title="Ideas clave">
+La calibración es la disciplina silenciosa de hacer que tu confianza diga la verdad: de
+todas las veces que dices **70%**, la cosa debería cumplirse alrededor del **70%** de las
+veces; esa es la línea de 45 grados en la **curva de fiabilidad**, con la sobreconfianza
+situada por debajo y la infraconfianza por encima. No es lo mismo que la exactitud: los
+pronosticadores de moneda del 50%-siempre y del 99%-siempre comparten tasa de aciertos pero
+viven en mundos opuestos. La sobreconfianza tiene **dos caras** —conjeturas que se van
+demasiado arriba y márgenes de error demasiado estrechos— y la cura es puntuarte con
+honestidad. El **Brier score** (más bajo es mejor, de 0 a 1) y el brutal **log score**
+recompensan decir la verdad y castigan los fallos seguros, así que nunca dices 0% ni 100%.
+Piensa en **rangos**, no en puntos: ensancha tu primer intervalo, espera alrededor de 1
+fallo de cada 10 en un intervalo del 90% real, y deja que unos márgenes de error honestos
+dimensionen tu margen de seguridad. Después construye el bucle de hábitos: **anota antes de
+los resultados**, ancla en las tasas base, actualiza en pequeños pasos como un
+**superpronosticador**, y separa la calidad de tu decisión de la suerte del resultado. Por
+encima de todo, recuerda la trampa del reloj que siempre dice 50%: perfectamente calibrado,
+absolutamente inútil. La meta no es solo la humildad: es la calibración **y** la decisión,
+juntas.
+</Callout>

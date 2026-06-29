@@ -1,0 +1,390 @@
+---
+title: "Scoring Your Beliefs"
+description: "Proper scoring rules turn a probability into a number the future can grade. Meet the Brier score and the log score — rigged so honesty wins and bluffing loses."
+topic: "en/calibration-and-confidence"
+order: 4
+minutes: 11
+updated: 2026-06-29
+---
+
+import { MCQ, Quiz, Callout } from '@/components/react';
+
+You now know what calibration *is* — the match between your stated confidence and
+your hit rate — and you've seen the two ways it breaks: overestimation and
+overprecision. But "your 80%s should come true 80% of the time" is still a vibe
+until you can attach a single, gradeable number to a forecast. This lesson is where
+calibration grows teeth. We're going to take a probability — a slippery, deniable
+thing — and turn it into a score the future can compute, settle, and rank.
+
+The trick is choosing the *right* score. A naive grading scheme can be gamed: you'd
+quickly learn to game it instead of getting calibrated. The scores in this lesson
+are special. They are mathematically rigged so that the only way to win is to tell
+the truth about your uncertainty. That's not a slogan — it's a theorem, and by the
+end you'll be able to feel exactly why bluffing makes your score worse.
+
+<MCQ
+  client:visible
+  pretest
+  question="You want a way to grade probability forecasts so that, over many predictions, the highest scorers are the people whose confidence is most honest. What's the danger with a badly designed scoring rule?"
+  options={[
+    { text: 'It can be gamed — people learn to misreport their true probability to chase a better score, instead of getting more honest', correct: true },
+    { text: 'It will always reward the most confident forecaster, no matter what' },
+    { text: 'It cannot be computed until you have thousands of predictions' },
+    { text: 'It treats a 50% forecast and a 99% forecast as identical' },
+  ]}
+  explanation="No penalty on a pretest. The whole reason we're picky about scoring rules is gameability. A clumsy rule rewards some lie — say, always claiming 100% — and then the smart move is to bluff rather than to be calibrated. The scoring rules in this lesson are built so that the score-maximizing move is to report exactly what you believe. Honesty isn't just nice; it's optimal."
+/>
+
+## Why score a belief at all
+
+A probability is a **promise**. When you say "70% this ships on time," you're
+promising that, across all the times you say 70%, the thing happens about seven
+times in ten. The problem with promises is that any single one is easy to wriggle
+out of. The project slips, you shrug: "Well, I did say *only* 70%." It rained on
+your "20% chance of rain" day; you mutter that 20% isn't zero. Each excuse is
+locally valid. Memory does the rest — it files your hits as "I knew it" and your
+misses as "bad luck."
+
+A **scoring rule** is the accountant that never forgets. It takes each forecast and
+its outcome, hands back a number, and adds it to the pile. One forecast tells you
+almost nothing. A thousand forecasts, each scored, reveal the honest shape of your
+judgment — the picture flattering memory can't fake. The point of a score isn't to
+nail any single call; it's to be unforgeable *in aggregate*.
+
+The hard part is design. We want a rule where the best long-run score belongs to the
+person whose probabilities are most honest — not the loudest, not the most cautious,
+not the cleverest gamer. Build the rule wrong and you've built a machine that trains
+bad habits. Build it right and you've built a machine that trains calibration. Let's
+build it right.
+
+### When to use it
+
+Reach for an explicit scoring rule the moment you're making **repeated** probability
+judgments you actually want to improve — forecasting deadlines, diagnoses, market
+moves, sports, geopolitics. For a single one-off bet, a score is overkill; the magic
+is statistical and only shows up over many calls. If you forecast the same *kind* of
+thing again and again, score it.
+
+## The Brier score
+
+Here's the centerpiece. The **Brier score** is the simplest honest grade for a
+binary forecast, and it's nothing more than *squared error*.
+
+You assign a probability $p$ to an event. The outcome $o$ is $1$ if the event
+happens and $0$ if it doesn't. The Brier score for that single forecast is the
+squared distance between what you said and what happened:
+
+$$\text{Brier} = (p - o)^2$$
+
+Over $N$ forecasts you just average them:
+
+$$BS = \frac{1}{N}\sum_{i=1}^{N}(p_i - o_i)^2$$
+
+The range runs from $0$ to $1$, and **lower is better**. A score of $0$ means you
+said $1.0$ to everything that happened and $0.0$ to everything that didn't —
+flawless prophecy. A score of $1$ means you confidently called every single one
+backwards. The "I have no idea" baseline of saying $0.5$ to everything gives
+$(0.5 - o)^2 = 0.25$ no matter what, so any honest skill should pull you below
+$0.25$.
+
+The analogy: think of $p$ as where you throw a dart and $o$ as where the bullseye
+turns out to be — at $0$ or at $1$. Brier scores the **squared miss distance**.
+Land close to the truth, tiny penalty. Land far, the squaring makes the penalty
+balloon. Confidence is wonderful when you're right and expensive when you're wrong,
+and the squaring is exactly what makes "expensive" hurt.
+
+Watch what squaring does to a bold call. Suppose you say $p = 0.95$:
+
+- If the event **happens** ($o = 1$): $(0.95 - 1)^2 = (-0.05)^2 = 0.0025$. Almost
+  free. You were brave and right.
+- If the event **doesn't** ($o = 0$): $(0.95 - 0)^2 = 0.9025$. A near-maximal
+  penalty. You were brave and wrong, and the rule made you pay for it.
+
+That asymmetry — $0.0025$ for the brave hit versus $0.9025$ for the brave miss — is
+the entire personality of the Brier score. It dares you to be confident, then
+punishes confidence that wasn't earned.
+
+<MCQ
+  client:visible
+  question="You forecast a 0.95 probability that a launch succeeds. It fails (outcome = 0). What is the Brier score for this single forecast, and is that good or bad?"
+  options={[
+    { text: '0.9025 — a terrible (near-worst) score, because you were nearly certain and wrong', correct: true },
+    { text: '0.0025 — an excellent score, because you were nearly certain' },
+    { text: '0.05 — a middling score, just the gap between 0.95 and 1' },
+    { text: '0.95 — your stated probability is the score' },
+  ]}
+  explanation="Brier = (p − o)^2 = (0.95 − 0)^2 = 0.9025, and lower is better, so this is near the worst possible score of 1. Squaring is what makes a confident miss so brutal: the same 0.95, had the launch succeeded, would have scored (0.95 − 1)^2 = 0.0025. Same confidence, opposite outcome, a 360x difference in penalty."
+/>
+
+### A fully worked Brier example
+
+Let's grade a whole batch. Suppose over a season you made five forecasts. Here's
+each one with its probability $p$, the eventual outcome $o$, and the squared error
+$(p - o)^2$.
+
+| # | Forecast | $p$ | Outcome $o$ | $(p - o)^2$ |
+|---|----------|-----|-------------|-------------|
+| 1 | "Project ships on time" | 0.90 | 1 (it shipped) | $(0.90 - 1)^2 = 0.0100$ |
+| 2 | "Candidate accepts offer" | 0.70 | 1 (accepted) | $(0.70 - 1)^2 = 0.0900$ |
+| 3 | "Rain tomorrow" | 0.30 | 0 (stayed dry) | $(0.30 - 0)^2 = 0.0900$ |
+| 4 | "Rival product launches Q3" | 0.60 | 0 (didn't) | $(0.60 - 0)^2 = 0.3600$ |
+| 5 | "Server survives the spike" | 0.95 | 1 (survived) | $(0.95 - 1)^2 = 0.0025$ |
+
+Add the squared errors: $0.0100 + 0.0900 + 0.0900 + 0.3600 + 0.0025 = 0.5525$.
+Divide by $N = 5$:
+
+$$BS = \frac{0.5525}{5} = 0.1105$$
+
+A Brier score of $0.1105$. That's comfortably below the $0.25$ "coin-flip" baseline,
+so this forecaster has real skill. Notice forecast #4 — the confident-ish $0.60$ on
+something that didn't happen — did most of the damage, contributing $0.36$ of the
+$0.5525$. And forecast #5, the brave $0.95$ that came true, barely cost anything. The
+score is telling a story: be confident where you're right, hedge where you're unsure,
+and never be loud-and-wrong.
+
+<Callout variant="tip" title="That number from the calibration lab">
+Remember the **Brier score** the calibration lab handed you back in lesson 1, after
+you rated a batch of true/false claims? This is exactly what it computed: it took
+your stated probability $p$ on each claim, looked at whether the claim was actually
+true ($o = 1$) or false ($o = 0$), squared the gap, and averaged. The mysterious
+number was $\frac{1}{N}\sum (p_i - o_i)^2$ all along. Now you can read it: under
+$0.25$ means you beat a coin flip; the closer to $0$, the better.
+</Callout>
+
+### Pitfall: lower is better, and the number isn't a percentage
+
+Two traps. First, **lower is better** — it's a penalty, an error, not a grade out of
+100. A "Brier score of 0.9" is a disaster, not an A. People who are used to "bigger
+is better" scores read it exactly backwards. Second, **the Brier score is not your
+hit rate or your accuracy in percent.** A $0.1105$ doesn't mean "11% right" or "89%
+right." It's mean squared error in probability space. The only anchors you need:
+$0$ is perfect, $1$ is perfectly wrong, and $0.25$ is the do-nothing baseline of
+always guessing $0.5$.
+
+## A proper scoring rule: honesty is optimal
+
+Now the punchline that makes all of this worth doing. The Brier score is a **proper
+scoring rule**, and "proper" has a precise, almost magical meaning:
+
+> A scoring rule is **proper** if your *expected* score is best (here: lowest) exactly
+> when you report your *true* probability. To shade your number up or down to look
+> bolder or safer can only make your expected score worse.
+
+In other words, the rule is rigged so that bluffing is mathematically self-defeating.
+You cannot game it. The score-maximizing strategy *is* honest reporting. Let's prove
+it to ourselves with numbers.
+
+Suppose you genuinely believe an event has a $70\%$ chance: your honest probability is
+$0.70$. The temptation is to *report* something bolder — say $0.90$ — because confident
+people sound smarter. Does it help your expected Brier score?
+
+Your expected Brier score for reporting some number $r$, when the truth is really
+$0.70$, is a weighted average over the two ways the world can go. With probability
+$0.70$ the event happens ($o = 1$) and you score $(r - 1)^2$; with probability $0.30$
+it doesn't ($o = 0$) and you score $(r - 0)^2$:
+
+$$E[\text{Brier}] = 0.70\,(r - 1)^2 + 0.30\,(r - 0)^2$$
+
+Compare two reports:
+
+| Report $r$ | $0.70\,(r-1)^2$ | $0.30\,(r-0)^2$ | Expected Brier |
+|-----------|------------------|------------------|----------------|
+| Honest: $r = 0.70$ | $0.70\,(0.09) = 0.0630$ | $0.30\,(0.49) = 0.1470$ | $\mathbf{0.2100}$ |
+| Bluff: $r = 0.90$ | $0.70\,(0.01) = 0.0070$ | $0.30\,(0.81) = 0.2430$ | $0.2500$ |
+| Timid: $r = 0.50$ | $0.70\,(0.25) = 0.1750$ | $0.30\,(0.25) = 0.0750$ | $0.2500$ |
+
+Reporting your honest $0.70$ gives the **lowest** expected Brier ($0.21$). Puffing up
+to $0.90$ to look confident *raises* it to $0.25$. Shrinking to a timid $0.50$ also
+raises it to $0.25$. Every lie about your belief — in either direction — costs you, on
+average. The minimum sits exactly at the truth.
+
+That's not a coincidence of the numbers $0.70$ and $0.90$. A one-line calculus gesture
+shows it always holds: treat the expected score $f(r) = q\,(r-1)^2 + (1-q)\,(r-0)^2$ as
+a function of your report $r$, where $q$ is your true belief. Take the derivative,
+$f'(r) = 2q(r-1) + 2(1-q)r = 2(r - q)$, and set it to zero: $r = q$. The expected
+score is minimized precisely when your report equals your true probability. The rule
+*forces* honesty to be optimal.
+
+<Callout variant="warning" title="Why this is the whole game">
+Most ways of "rewarding good predictions" are gameable — and a gameable rule trains
+you to game it instead of getting calibrated. A **proper** scoring rule closes that
+door. Because honesty is the score-maximizing strategy, training against a proper
+score is literally training your calibration. You stop performing confidence and start
+reporting belief, because that's what wins.
+</Callout>
+
+<MCQ
+  client:visible
+  question="You truly believe an event is 70% likely, but you report 90% to sound more decisive. Under a proper scoring rule like the Brier score, what happens to your EXPECTED score over many such situations?"
+  options={[
+    { text: 'It gets worse — your expected score is best only when you report your true 70%', correct: true },
+    { text: 'It gets better — reporting higher confidence always improves the score' },
+    { text: 'It stays exactly the same; only the outcome matters, not what you report' },
+    { text: 'It becomes impossible to compute' },
+  ]}
+  explanation="That's the definition of a proper scoring rule: your expected score is optimized when, and only when, you report your true probability. Inflating 70% to 90% to look bold raises your expected Brier from about 0.21 to 0.25 — the lie costs you on average. The rule is rigged so the smart move and the honest move are the same move."
+/>
+
+## The log score: brutal on overconfidence
+
+The Brier score is the friendly one. Its meaner, more famous cousin is the
+**logarithmic scoring rule** — the **log score** — and it has a special talent for
+destroying overconfidence.
+
+The idea is even simpler to state. Look at what *actually happened*, find the
+probability you assigned to *that* outcome, and take its logarithm:
+
+$$\text{log score} = \log(p_{\text{outcome}})$$
+
+If the event happened, $p_{\text{outcome}}$ is the $p$ you gave the event; if it
+didn't, it's $1 - p$. Because the log of a number below $1$ is negative, the log
+score is always $\le 0$, and — convention warning — **higher (closer to zero) is
+better**. (You'll often see it written with a minus sign as a *loss*, $-\log p$,
+where lower is better; same content, flipped sign.) Assigning a high probability to
+what actually happened earns a score near $0$; assigning a tiny probability to what
+actually happened drags the score toward $-\infty$.
+
+That last word is the whole point. The log score punishes a confident miss far more
+viciously than Brier does. Brier's worst possible single penalty is bounded at $1$.
+The log score has **no floor**. The closer you push your probability toward $0$ on
+something that then happens, the worse your score, with no limit:
+
+| You said it would happen with probability... | ...and it happened. Brier $(p-1)^2$ | Log score $\log(p)$ |
+|---|---|---|
+| $p = 0.5$ | $0.25$ | $\log(0.5) = -0.69$ |
+| $p = 0.1$ | $0.81$ | $\log(0.1) = -2.30$ |
+| $p = 0.01$ | $0.98$ | $\log(0.01) = -4.61$ |
+| $p = 0.001$ | $0.998$ | $\log(0.001) = -6.91$ |
+| $p = 0$ | $1.00$ | $\log(0) = -\infty$ |
+
+Watch the two columns diverge. As your probability for the true outcome shrinks from
+$0.1$ to $0.01$ to $0.001$, Brier crawls from $0.81$ toward its ceiling of $1$ — it's
+running out of room to punish you. The log score, meanwhile, marches off a cliff:
+$-2.30$, $-4.61$, $-6.91$, and then, at $p = 0$, straight to negative infinity. Say
+something is **impossible** and watch it happen, and the log score declares your
+performance infinitely bad. The lesson writes itself: **never say never.** Never
+assign $0$ (or $1$) to anything that isn't a logical certainty, because reality only
+needs to embarrass you once.
+
+This brutality isn't sadism — it's information theory. The quantity $-\log p$ is
+literally the **surprise** of an outcome you'd assigned probability $p$: rare things
+you didn't see coming carry more surprise, more "bits," than things you expected. The
+log score grades you on total surprise, which is why a single arrogant "impossible"
+that comes true can wipe out a career's worth of careful forecasts. And like Brier,
+the log score is **proper** — your expected score is still optimized by reporting your
+true probability. It just enforces honesty with a bigger stick.
+
+### When to use it
+
+Use the **log score** when the cost of a confident, catastrophic miss is genuinely
+catastrophic — risk, safety, anything with fat tails — because you *want* a rule that
+screams at overprecision. Use the **Brier score** when you want a stable, bounded,
+intuitive number that won't be dominated by one freak event and is easy to explain to
+a room. Brier is the everyday workhorse; the log score is the discipline you bring out
+when "we were *certain* that couldn't happen" would be the epitaph.
+
+<MCQ
+  client:visible
+  question="A forecaster assigns probability 0.01 to an event and it happens. Which statement is true about how the Brier score and the log score penalize this confident miss?"
+  options={[
+    { text: 'The log score punishes it far more harshly; Brier is bounded near 0.98 while the log score is about −4.61 and would head to −infinity as the probability approached 0', correct: true },
+    { text: 'Brier punishes it more harshly than the log score', correct: false },
+    { text: 'Both give exactly the same penalty for any confident miss', correct: false },
+    { text: 'Neither penalizes it, because 0.01 is not exactly 0', correct: false },
+  ]}
+  explanation="Brier = (0.01 − 1)^2 = 0.9801, near its ceiling of 1 — it has almost no room left to punish you. The log score = log(0.01) = −4.61 and keeps plunging without limit as the probability drops toward 0, reaching −infinity at exactly 0. That unbounded penalty is why the log score is the strict teacher of 'never say never.'"
+/>
+
+## What a good score actually rewards
+
+One last idea, kept brief because lesson 5 gives it the full treatment. Why does a low
+Brier score mean good judgment? Because the score quietly measures *two* virtues at
+once, and you need both.
+
+The Brier score can be **decomposed** into pieces with names. The headline split is
+**calibration** plus **resolution** (sometimes called refinement). Roughly:
+
+- **Calibration** asks: when you say 70%, does it happen 70% of the time? This is the
+  honesty you've been training — being neither over- nor under-confident.
+- **Resolution** asks: do you actually *separate* the likely from the unlikely? A
+  forecaster who says $0.5$ to everything can be perfectly calibrated and still useless,
+  because they never commit. Resolution rewards pushing your probabilities toward $0$
+  and $1$ **when you're right to** — being **decisive**, not just honest.
+
+A great Brier score needs both. Be calibrated but never decisive (always $0.5$) and you
+land at the boring $0.25$ baseline. Be decisive but miscalibrated (loud and wrong) and
+the squared errors crush you. The low scores belong to forecasters who are honest about
+their uncertainty *and* willing to stick their neck out when the evidence earns it. We
+unpack the calibration-versus-resolution tension — and why the best forecasters chase
+both — in the final lesson.
+
+<Callout variant="info" title="The takeaway in one line">
+A proper score grades two things together: **be honest** (calibration) *and* **be
+decisive when you can be** (resolution). Honesty alone gets you to average; honesty
+plus earned confidence gets you to excellent.
+</Callout>
+
+## Recap
+
+You can now turn any probability into a number the future will grade, and you know why
+those numbers are trustworthy.
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: "What is the Brier score for a single forecast where you assigned probability 0.8 to an event that then happened (outcome = 1)?",
+      options: [
+        { text: '(0.8 − 1)^2 = 0.04', correct: true },
+        { text: '0.8, because that was your probability' },
+        { text: '(0.8 − 0)^2 = 0.64' },
+        { text: '0.2, the gap between 0.8 and 1' },
+      ],
+      explanation: "Brier = (p − o)^2 = (0.8 − 1)^2 = (−0.2)^2 = 0.04. Low, because you were fairly confident and right. Had the event NOT happened, it would have been (0.8 − 0)^2 = 0.64 — the same forecast, sixteen times the penalty.",
+    },
+    {
+      question: "What does it mean for a scoring rule to be 'proper'?",
+      options: [
+        { text: 'Your expected score is optimized exactly when you report your true probability, so honesty beats bluffing on average', correct: true },
+        { text: 'It only ever gives scores between 0 and 1' },
+        { text: 'It always rewards the most confident forecaster' },
+        { text: 'It can be computed without knowing the outcome' },
+      ],
+      explanation: "Proper means the rule is rigged so that reporting your genuine belief gives the best expected score. Inflate your 70% to 90% to look bold and your expected Brier rises from about 0.21 to 0.25 — the lie costs you. Both the Brier score and the log score are proper.",
+    },
+    {
+      question: "A forecaster always says exactly 0.5 to every yes/no question, never committing either way. What can we say about their Brier score?",
+      options: [
+        { text: 'It is exactly 0.25 every time — perfectly calibrated in a sense, but with zero resolution, so no better than a coin flip', correct: true },
+        { text: 'It will be 0, the best possible, because 0.5 is the safe answer' },
+        { text: 'It will be 1, the worst possible' },
+        { text: 'It cannot be computed without more information' },
+      ],
+      explanation: "Saying 0.5 every time gives (0.5 − o)^2 = 0.25 regardless of the outcome — the do-nothing baseline. It shows why a good score needs resolution (decisiveness), not just calibration: this forecaster never separates the likely from the unlikely, so they're useless even if never badly wrong.",
+    },
+    {
+      question: "Why is the log score considered more brutal toward overconfidence than the Brier score?",
+      options: [
+        { text: 'The log score is unbounded: a probability approaching 0 on something that happens drives the score toward −infinity, while Brier is capped near 1', correct: true },
+        { text: 'The log score gives a positive penalty and Brier gives a negative one' },
+        { text: 'The log score ignores the outcome entirely' },
+        { text: 'The log score rewards saying 0 or 1, so it encourages boldness' },
+      ],
+      explanation: "Brier's worst single penalty is bounded at 1, so it runs out of room to punish you. The log score has no floor — saying something is impossible (probability 0) and watching it happen scores −infinity. That's why the log score teaches 'never say never,' and it ties to surprise in information theory.",
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You can now grade a *probability*. But a huge share of real forecasts aren't yes/no
+events — they're **quantities**: how long will this take, how much will it cost, how
+many users by December? You can't slap a single $p$ on "the project takes 40 days,"
+because there are infinitely many possible answers. The honest tool for that is a
+**range** — a 90% interval wide enough to actually contain the truth — and, predictably,
+your first instinct will make it far too narrow.
+
+Lesson 4, **Thinking in Ranges**, takes the scoring discipline you just built and aims
+it at quantities: how to state an honest 90% interval, why overprecision sabotages your
+first attempt every time, and how a well-built range connects back to the margin of
+safety. Same goal — confidence that tells the truth — pointed at a harder target.

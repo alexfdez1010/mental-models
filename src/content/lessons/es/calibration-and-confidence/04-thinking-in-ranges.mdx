@@ -1,0 +1,403 @@
+---
+title: "Pensar en rangos"
+description: "Convierte las estimaciones puntuales de falsa precisión en intervalos de confianza honestos: por qué tu primer margen de error siempre es demasiado estrecho, cómo ensancharlo y cómo dimensionar un margen de seguridad acorde al rango."
+topic: "es/calibration-and-confidence"
+order: 5
+minutes: 10
+updated: 2026-06-29
+---
+
+import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+
+Allá por la lección 2 conociste la **sobreprecisión (overprecision)**: la cara más
+silenciosa y traicionera del exceso de confianza. No el "mi estimación es demasiado
+alta", sino "mis márgenes de error son demasiado estrechos". Viste cómo el famoso test
+del intervalo del 90% atrapaba la verdad solo la mitad de las veces: la gente dibuja
+rangos tan ajustados que la realidad se escapa por los lados. Esta lección es el
+antídoto, y es gloriosamente práctica. La sobreprecisión es un hábito, y los hábitos
+tienen cura. La cura consiste en aprender a pensar —y a *responder*— en **rangos**.
+
+Ya aprendiste en *Pensar en probabilidades* que un rango le gana a una sola estimación.
+Aquí bajamos un nivel más: no solo "usa un rango", sino cómo calibrar su **anchura**
+para que el rango cuente la verdad honesta sobre lo que no sabes.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  question="Te piden los ingresos del próximo trimestre. ¿Qué respuesta refleja con más honestidad lo que de verdad sabes?"
+  options={[
+    { text: "“Unos 4 millones, pero estoy un 80% seguro de que la cifra real cae entre 3 y 6 millones.”", correct: true },
+    { text: "“4,0 millones.”" },
+    { text: "“4,2718 millones.”" },
+    { text: "“Ni idea, podría ser cualquier cosa.”" },
+  ]}
+  explanation="No hay penalización en un pretest. Una estimación puntual pelada (“4,0 millones”) esconde toda tu incertidumbre y casi seguro está equivocada hasta el último euro; y los decimales de más de “4,2718” son falsa precisión disfrazada de rigor. “Ni idea” tira a la basura la información real que sí tienes. La respuesta honesta da un centro Y un rango con una confianza asociada: ese rango es el contenido real de tu conocimiento. Esa es la lección entera."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Una estimación puntual es una mentira segura de sí misma
+
+Cuando alguien te pregunta "¿cuánto tardará esto?" y respondes **"tres semanas"**,
+acabas de soltar una pequeña mentira con mucho aplomo. No porque seas deshonesto, sino
+porque la respuesta verdadera nunca fue un solo número. Era un abanico de resultados
+posibles, y lo aplastaste en un punto para sonar decidido. Una **estimación puntual
+(point estimate)** es un número sin anchura. Parece nítida y autoritaria, y se
+equivoca prácticamente siempre: el proyecto tarda 19 días, o 26, o 41, pero nunca
+*exactamente* los 21 que dijiste.
+
+La alternativa honesta es un **intervalo de confianza (confidence interval)** (también
+llamado **margen de error (error bar)**): un *rango* junto con una *probabilidad
+declarada* de que el valor verdadero cae dentro de él. "80% seguro: 3 a 5 semanas" es
+un intervalo de confianza. Lleva dos piezas de información que la estimación puntual
+tiró: lo ancha que es tu incertidumbre, y lo seguro que estás de esa anchura.
+
+Piénsalo como el parte meteorológico. "Mañana hará 22 grados" es una estimación
+puntual, y se equivocará. "Entre 18 y 25, y me sorprendería salir de ahí" es un margen
+de error, y puede ser *correcto*. El pronóstico no se volvió más vago: se volvió
+honesto.
+
+<Callout variant="tip" title="La definición en una línea">
+Un **intervalo de confianza** es un rango *más* una probabilidad: "estoy **C%** seguro
+de que el valor verdadero está entre **L** y **H**". El número C es una promesa por la
+que pueden calificarte, exactamente igual que las probabilidades de la lección 1: a lo
+largo de muchos intervalos, un intervalo del 80% bien calibrado debería contener la
+verdad en torno al 80% de las veces.
+</Callout>
+
+### Cuándo usarlo
+
+Echa mano de un intervalo en cuanto un solo número vaya a usarse como si fuera certero:
+presupuestos, plazos, pronósticos, cargas de ingeniería, pronósticos médicos. La
+prueba: *si me equivoco con este número, ¿cuesta algo?* Si la respuesta es sí, la
+anchura de tu incertidumbre forma parte de la respuesta, y esconderla dentro de una
+estimación puntual no hace más que esconder el riesgo. Guarda la estimación puntual
+para suposiciones de verdad triviales y de poco riesgo, donde nadie vaya a construir
+nada sobre el número.
+
+<MCQ
+  client:visible
+  question="¿Qué distingue exactamente a un intervalo de confianza de una simple estimación puntual?"
+  options={[
+    { text: 'Declara un rango Y una probabilidad de que el valor verdadero esté dentro', correct: true },
+    { text: 'Siempre es más ancho, así que siempre es más seguro de usar' },
+    { text: 'Garantiza que el valor verdadero está dentro del rango', correct: false },
+    { text: 'Sustituye el número por la palabra “probablemente”' },
+  ]}
+  explanation="Un intervalo lleva dos datos que le faltan a una estimación puntual: una anchura (el rango de L a H) y una confianza (la probabilidad C de que la verdad esté dentro). NO garantiza nada: un intervalo del 80% está pensado para fallar más o menos 1 de cada 5 veces. Esa probabilidad declarada es la parte que puedes puntuar, y es lo que hace que los intervalos sean honestos y no meramente vagos."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Tu primer intervalo siempre es demasiado estrecho
+
+Aquí está el fallo universal, y nombrarlo es la mitad del arreglo: **el primer
+intervalo que escribes es demasiado estrecho.** La sobreprecisión no es un defecto de
+gente rara; es el ajuste por defecto del estimador humano. Tu cerebro se ancla en el
+número que le viene a la mente, le rocía un poco de anchura para sentirse humilde, y se
+para... muchísimo antes de tiempo.
+
+Así que la cura es mecánica: **dibuja tu intervalo y luego ensánchalo a propósito.** El
+mejor movimiento para ensanchar es hacerte una sola pregunta —*"¿qué podría dejar la
+respuesta* **fuera** *de este rango?"*— y seguir estirando los límites hasta que te
+sorprendieras de verdad al equivocarte, no simplemente te incomodaras un poco.
+
+Estimemos algo que nadie ha memorizado: **el peso de una ballena azul adulta.**
+
+| Etapa | Bajo | Alto | Razonamiento |
+|---|---|---|---|
+| Primer instinto (demasiado estrecho) | 50 toneladas | 80 toneladas | "Animal grande, número grandecito." |
+| Pregunta: ¿qué queda fuera de esto? | — | — | Las crías pesan muchísimo menos; los machos récord pesan muchísimo más; podría tener mal las unidades. |
+| Intervalo ensanchado | 40 toneladas | 200 toneladas | Ahora sí me sorprendería fallar. |
+
+Una ballena azul típica pesa alrededor de **140 toneladas**. La primera estimación
+encogida de 50 a 80 **falla estrepitosamente**: la verdad nunca estuvo ni cerca de
+caer dentro. El intervalo ensanchado de 40 a 200 **contiene la verdad** con holgura.
+Fíjate en lo que te costó ensanchar: casi nada. Un rango más ancho es ligeramente menos
+impresionante en una cena y muchísimo más probable de ser *correcto*. Ese intercambio
+es uno que deberías aceptar casi siempre.
+
+<Callout variant="warning" title="Ensanchar no es hacer trampa">
+Estirar "50 a 80" hasta "40 a 200" da la sensación de rendirse. No lo es: es justo lo
+contrario de rendirse. Un intervalo estrecho que falla no te enseñó nada y le mintió a
+quien confió en él. Un intervalo ancho que contiene la verdad está haciendo su único
+trabajo. Si ensanchar tu rango te da sensación de debilidad, esa sensación *es* la
+sobreprecisión hablando.
+</Callout>
+
+### Cuándo usarlo
+
+Cada vez que produzcas un intervalo, pásale la pasada de ensanchado: es gratis y es
+donde de verdad ocurre la calibración. Importa más justo donde peor se siente: en
+preguntas que crees que *deberías* saber (el efecto difícil-fácil de la lección 2
+significa que los expertos se vuelven sobreprecisos en su propio terreno). Cuanto más
+seguro se sienta el primer intervalo, más necesita el interrogatorio del "¿qué queda
+fuera de esto?".
+
+<MCQ
+  client:visible
+  question="Tu intervalo honesto del 90% para una cantidad te parece vergonzosamente ancho. ¿Qué significa eso con más probabilidad?"
+  options={[
+    { text: 'Quizá por fin tenga más o menos la anchura correcta: los intervalos estrechos son el error habitual, no los anchos', correct: true },
+    { text: 'Está claro que no sabes nada y no deberías responder' },
+    { text: 'Deberías encogerlo para parecer más competente' },
+    { text: 'Los intervalos anchos siempre son mejores, sea cual sea la pregunta' },
+  ]}
+  explanation="El reflejo de encoger un intervalo ancho “para parecer competente” es precisamente la sobreprecisión que hace que los rangos del 90% de la mayoría atrapen la verdad solo la mitad de las veces. Un rango que parece incómodamente ancho suele ser el primero honesto. (Tampoco ancho es automáticamente virtuoso: un intervalo bien calibrado es tan estrecho como pueda serlo mientras sigue atrapando la verdad al ritmo declarado. El arreglo de la sobreprecisión es ensanchar hacia la honestidad, no cubrirse infinitamente.)"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## La disciplina del intervalo del 90%
+
+No puedes llegar a la calibración a base de intuición; tienes que *medirla*. Aquí va el
+ejercicio. Para un lote de estimaciones, fija cada intervalo a tu nivel honesto de
+**90% de confianza**. La promesa cocida dentro del "90%" es sencilla y comprobable: a
+lo largo del lote, deberías **fallar más o menos 1 de cada 10.** Haz diez, espera
+fallar uno. Si fallas cuatro o cinco de cada diez, tus rangos son sistemáticamente
+demasiado ajustados: eso es la sobreprecisión, cuantificada, mirándote a la cara.
+
+Un truco limpio para *construir* cada intervalo es la **técnica de los pares absolutos
+(absolute-pairs technique)**: no pienses en el rango como un todo. Piensa en los dos
+límites **por separado**.
+
+- Elige un límite **bajo** del que estés **95% seguro de que es demasiado bajo**: la
+  verdad está casi seguro por encima.
+- Elige un límite **alto** del que estés **95% seguro de que es demasiado alto**: la
+  verdad está casi seguro por debajo.
+
+Cose esos dos y obtienes un intervalo que tiene en torno al 90% de probabilidad de
+contener la respuesta (alrededor de un 5% de la probabilidad se escapa por cada
+extremo). Tratar los límites de uno en uno derrota el instinto del cerebro de abrazarse
+al ancla, porque ahora estás cazando activamente un número lo bastante bajo —y un
+número lo bastante alto— como para *sorprenderte* a ti mismo.
+
+Aquí va un lote trabajado. Fija cada intervalo del 90% y luego contrástalo con la
+realidad:
+
+| Pregunta | [Bajo, Alto] (90%) | Verdad | ¿Acierto? |
+|---|---|---|---|
+| Punto de ebullición del agua en la cima del Everest (°C) | [60, 90] | 71 | Acierto |
+| Año en que se inventó la imprenta | [1400, 1500] | 1440 | Acierto |
+| Envergadura de un Boeing 747 (metros) | [40, 80] | 68 | Acierto |
+| Número de huesos en el cuerpo humano adulto | [180, 230] | 206 | Acierto |
+| Longitud del Nilo (km) | [5.000, 7.500] | 6.650 | Acierto |
+| Población de Australia, 2023 (millones) | [15, 22] | 26 | Fallo |
+
+Cinco aciertos, un fallo de seis: una tasa de acierto de alrededor del **83%**. Para un
+intervalo del *90%* eso es un pelín bajo pero respetable: en un lote más largo querrías
+empujar los rangos un pelo más anchos para que la tasa de acierto a largo plazo suba
+hacia el 90%. El fallo de Australia es la pista: el límite alto (22) estaba anclado
+demasiado bajo; un límite 95%-demasiado-alto habría quedado más cerca de 30. Un fallo
+diagnosticado; ensancha y reapunta.
+
+<Reveal client:visible buttonText="¿Por qué apuntar a fallar 1 de cada 10, en vez de no fallar nunca?">
+Porque un intervalo que *nunca* fallas es inútilmente ancho. Si fijaras cada rango
+"entre cero e infinito", acertarías el 100% de las veces y no habrías dicho nada. La
+calibración es un acto de equilibrio: el intervalo debería ser **tan estrecho como sea
+posible mientras siga atrapando la verdad al ritmo que afirmaste.** Un intervalo del
+90% que de verdad falla 1 de cada 10 lleva la máxima información útil compatible con ser
+honesto. No fallar ninguno significa que ensanchaste de más; fallar cuatro significa que
+ensanchaste de menos. "Más o menos 1 de cada 10" es el punto dulce hacia el que la
+disciplina te está afinando.
+</Reveal>
+
+### Cuándo usarlo
+
+Haz el ejercicio completo de lote-y-puntuación periódicamente como *entrenamiento* —diez
+o veinte datos estimables, puntuados con honestidad— para descubrir hacia qué lado se
+sesgan tus rangos y por cuánto. Usa la técnica de los pares absolutos en *cada*
+intervalo individual que construyas, siempre; cuesta diez segundos y es la defensa única
+más fiable que tienes contra la sobreprecisión.
+
+## Los rangos no tienen por qué ser simétricos
+
+Un matiz rápido pero importante: un intervalo honesto **no** siempre está centrado en
+tu mejor estimación. La realidad suele ser desequilibrada, y tu rango también debería
+serlo. La parte negativa y la positiva sencillamente pueden diferir.
+
+El ejemplo más claro son los **plazos de proyectos**. Las tareas pueden terminar un
+poco antes, pero pueden retrasarse *enormemente*, porque todo lo que sale mal añade
+retraso y casi nada de lo que sale bien lo resta. Así que un intervalo realista para
+"tres semanas" podría ser **2,5 a 8 semanas**: apenas margen por debajo, una larga cola
+por arriba. Esa larga cola derecha es la **falacia de la planificación (planning
+fallacy)** y las **colas anchas (fat tails)** con ropa de trabajo: las estimaciones se
+sesgan largas por la misma razón estructural por la que los eventos extremos se agolpan
+en la cola. No fuerces un rango simétrico sobre un mundo asimétrico; pon la anchura
+donde de verdad viven las sorpresas.
+
+<MCQ
+  client:visible
+  question="¿Por qué un intervalo honesto para una fecha de entrega suele estar desequilibrado, con una larga cola por el lado alto?"
+  options={[
+    { text: 'Lo que sale mal añade retraso mientras que lo que sale bien rara vez resta mucho, así que el riesgo a la baja es sobre todo “más tarde”', correct: true },
+    { text: 'La gente es pesimista y exagera lo tarde que se retrasan las cosas' },
+    { text: 'Las fechas de entrega son aleatorias, así que cualquier forma de intervalo vale igual' },
+    { text: 'Los intervalos simétricos están matemáticamente prohibidos' },
+  ]}
+  explanation="Los calendarios se sesgan largos porque los modos de fallo son asimétricos: una docena de cosillas pueden empujar cada una la tarea más tarde, pero casi nada la empuja dramáticamente más pronto. Eso es la falacia de la planificación, y es la misma estructura de cola ancha que te encuentras en otros sitios: una larga cola derecha de malas sorpresas. Un intervalo honesto refleja esa forma: poco margen por debajo de la estimación, mucho por encima."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Los rangos son la entrada del margen de seguridad
+
+Ahora la recompensa: la razón por la que esta destreza merece el esfuerzo. Tu margen de
+error honesto es exactamente lo que te dice **cuánto colchón dejar.** Este es el modelo
+del **margen de seguridad (margin of safety)** (tema de su propio curso), hecho
+cuantitativo. Ingenieros, inversores y planificadores no dimensionan su colchón al
+*punto medio* de una estimación: lo dimensionan a la **anchura de la incertidumbre** que
+la rodea. Un intervalo bien calibrado es el número que convierte el margen de seguridad
+en un cálculo en lugar de una sensación.
+
+La lógica es directa: el margen de seguridad es la brecha entre lo que *puedes*
+soportar y lo que *esperas* afrontar. Pero "lo que esperas afrontar" no es un punto: es
+un rango. Cuanto mayor el rango, mayor el colchón que necesitas para estar a salvo en
+todo él. **Una estimación puntual no puede dimensionar un margen de seguridad en
+absoluto**, porque no tiene anchura; solo un intervalo puede.
+
+Ejemplo trabajado: una **pasarela peatonal**. Supón que tu *estimación puntual* de
+carga máxima es 8 toneladas. Tentador construir para, digamos, 10 y llamarlo un cómodo
+margen del 25%. Pero la estimación puntual escondió la verdadera pregunta. Tu intervalo
+honesto del 90% para la carga máxima, tras ensanchar y pensar en avalanchas de gente,
+festivales y algún camioncito ocasional, es **6 a 14 toneladas.**
+
+| Enfoque | Carga de diseño | Margen sobre... | Problema |
+|---|---|---|---|
+| Colchón sobre la estimación puntual | 10 toneladas | la *estimación* de 8 toneladas | Una multitud de festival de 13 toneladas la hace colapsar. |
+| Colchón sobre el techo del intervalo | 14 toneladas, luego añadir margen → ~18 toneladas | el *límite alto de 14 toneladas* | Dimensionado al peor caso real que verás de forma plausible. |
+
+El primer diseño parece prudente y es secretamente frágil: compró margen contra un
+número que ya sabías que estaba mal. El segundo dimensiona el colchón al **techo del
+rango honesto**: sobrevive a todo el intervalo, no solo al punto medio. La misma idea
+dimensiona un **presupuesto**: si tus costes son "80% seguro: 3 a 6 millones", no
+reservas un colchón encima de 4, sino que financias hacia el **6**, porque ahí es donde
+tu propio rango honesto te dijo que vive el peligro. El intervalo hizo la parte difícil;
+el margen de seguridad solo lee la respuesta en el extremo alto.
+
+<Callout variant="info" title="La cadena en una línea">
+Probabilidad calibrada → intervalo honesto → su **anchura** → el **margen de seguridad**
+que necesitas. Haz el intervalo demasiado estrecho (sobreprecisión) y cada colchón que
+construyas encima será demasiado pequeño. La sobreprecisión no es solo un error de
+estimación: es un error de *seguridad*, porque encoge el mismísimo número contra el que
+se supone que debe dimensionarse tu colchón.
+</Callout>
+
+### Cuándo usarlo
+
+Siempre que una decisión necesite un colchón —una carga estructural, una reserva de
+efectivo, una holgura de calendario, el tamaño de una posición— construye primero el
+intervalo calibrado y luego dimensiona el margen a su anchura (y al extremo *peor*
+relevante de un rango asimétrico). Si te pillas añadiendo un colchón a un solo número
+puntual, para: te has saltado el paso que te dice cómo de grande debería ser realmente
+el colchón.
+
+## Decirlo en voz alta
+
+Una última destreza, más silenciosa: comunicar el rango sin acobardarte. "**3 a 6
+millones, 80% de confianza**" es más útil que un nítido "4,2 millones": le entrega al
+oyente tu incertidumbre real para que *él* pueda dimensionar sus propias decisiones y
+colchones. El número nítido parece más competente e informa peor.
+
+La parte difícil no es dibujar el rango; es la **presión social por colapsarlo**. Las
+salas premian a quien da un golpe en la mesa con un único número seguro y desconfían en
+silencio del "está en algún punto entre 3 y 6". Resistir ese tirón —mantenerte honesto
+sobre la anchura cuando todos quieren falsa precisión— es una disciplina en sí misma.
+Es la tensión profunda entre sonar decidido y estar calibrado, y es exactamente donde
+arranca la próxima lección.
+
+## Repaso
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: '¿Cuál es la cura práctica de la sobreprecisión cuando haces una estimación?',
+      options: [
+        { text: 'Dibuja tu intervalo y luego ensánchalo a propósito preguntando “¿qué podría dejar la respuesta fuera de este rango?” hasta que te sorprenderías al equivocarte', correct: true },
+        { text: 'Añade más decimales a la estimación puntual' },
+        { text: 'Elige el único número del que te sientas más seguro' },
+        { text: 'Niégate a estimar hasta tener información perfecta' },
+      ],
+      explanation: 'Tu primer intervalo es de forma fiable demasiado estrecho, así que el arreglo es mecánico: ensánchalo. La pregunta “¿qué podría dejar la respuesta fuera de este rango?” te obliga a cazar los modos de fallo que tu ancla escondió, y estiras hasta que equivocarte te sorprendería de verdad.',
+    },
+    {
+      question: 'Fijas diez intervalos del 90% y solo 5 contienen la verdad. ¿Qué te dice eso?',
+      options: [
+        { text: 'Tus rangos son sistemáticamente demasiado estrechos —sobreprecisión— y necesitan ensancharse', correct: true },
+        { text: 'Estás bien calibrado; 5 de 10 está bien para un intervalo del 90%' },
+        { text: 'Tus rangos son demasiado anchos y deberían ajustarse' },
+        { text: 'Nada: un intervalo del 90% nunca se puede comprobar' },
+      ],
+      explanation: 'Un intervalo del 90% bien calibrado debería atrapar la verdad unas 9 de cada 10 veces. Atraparla solo 5 significa que tus intervalos son muchísimo demasiado ajustados: sobreprecisión de manual. El ejercicio es exactamente este: puntúa un lote, ve la brecha y ensancha hasta que la tasa de acierto a largo plazo suba hacia el 90%.',
+    },
+    {
+      question: 'Usando la técnica de los pares absolutos, ¿cómo deberías elegir el límite BAJO de un intervalo del 90%?',
+      options: [
+        { text: 'Elige un valor del que estés en torno al 95% seguro de que es demasiado bajo (la verdad está casi seguro por encima)', correct: true },
+        { text: 'Elige tu mejor estimación única y réstale un 10%' },
+        { text: 'Elige el número más bajo con el que aún te sientas cómodo' },
+        { text: 'Elige un valor del que estés un 50% seguro de que es demasiado bajo' },
+      ],
+      explanation: 'El truco es dimensionar los dos límites por separado. Un límite bajo del que estás ~95% seguro de que es demasiado bajo, emparejado con un límite alto del que estás ~95% seguro de que es demasiado alto, deja escapar alrededor de un 5% por cada extremo y acota más o menos un intervalo del 90%, a la vez que derrota el hábito del cerebro de abrazarse al ancla.',
+    },
+    {
+      question: 'Un intervalo del 90% bien calibrado para la carga máxima de un puente es 6 a 14 toneladas. ¿Cómo usa esto el margen de seguridad?',
+      options: [
+        { text: 'Dimensiona el colchón al techo del rango honesto (en torno a 14), no al punto medio: el margen se dimensiona a la anchura de la incertidumbre', correct: true },
+        { text: 'Construye al punto medio, 10 toneladas, ya que es la mejor estimación' },
+        { text: 'Ignora el rango y usa la estimación puntual original de 8 toneladas' },
+        { text: 'Haz el intervalo más estrecho para que el puente salga más barato de construir' },
+      ],
+      explanation: 'El margen de seguridad se dimensiona a la ANCHURA de la incertidumbre, no al punto medio. Un colchón construido sobre la estimación puntual de 8 toneladas es secretamente frágil; dimensionar al techo del intervalo honesto (14 toneladas, luego añadir margen) sobrevive a todo el rango. El intervalo calibrado es la entrada que hace cuantitativo el colchón.',
+    },
+  ]}
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Incorrecto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  scoreLabel="Tu puntuación"
+  correctCountLabel="correctas"
+  restartLabel="Reiniciar"
+  completeLabel="Completado"
+  gateLabel="Comprueba tu respuesta para continuar."
+/>
+
+## Hacia dónde va esto
+
+Ya puedes convertir un número de falsa precisión en un intervalo honesto, ensancharlo
+más allá de tu primer instinto sobrepreciso, puntuar un lote contra la regla del 90% y
+alimentar su anchura directamente a un **margen de seguridad**. Lo que queda es
+convertir todo esto en una *práctica permanente*, y enfrentar la tensión que acabamos de
+insinuar: estar honestamente incierto (**calibración**) sin dejar de ser decisivo y útil
+(**resolución**).
+
+La lección 5, **Calibrarse**, es el programa de entrenamiento: registrar tus
+predicciones, hacer ejercicios de calibración, hacer autopsias a tus puntuaciones y qué
+hacen distinto los *superpronosticadores*. Es donde todo el curso se convierte en un
+hábito que conservas, incluida la valentía de decir "3 a 6 millones, 80% de confianza"
+en voz alta y no acobardarte.

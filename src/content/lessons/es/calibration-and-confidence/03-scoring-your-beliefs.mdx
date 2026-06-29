@@ -1,0 +1,444 @@
+---
+title: "Puntúa tus creencias"
+description: "Las reglas de puntuación propias (proper scoring rules) convierten una probabilidad en un número que el futuro puede calificar. Conoce el Brier score y el log score, amañados para que ganar honestamente venza y farolear pierda."
+topic: "es/calibration-and-confidence"
+order: 4
+minutes: 11
+updated: 2026-06-29
+---
+
+import { MCQ, Quiz, Callout } from '@/components/react';
+
+Ya sabéis qué *es* la calibración: el ajuste entre la confianza que declaráis y
+vuestra tasa de aciertos, y habéis visto las dos formas en que se rompe: la
+sobreestimación y la sobreprecisión. Pero "vuestros 80% deberían cumplirse el 80%
+de las veces" sigue siendo una vibración hasta que podáis asignar un único número
+calificable a un pronóstico. Esta lección es donde a la calibración le salen los
+dientes. Vamos a tomar una probabilidad —algo escurridizo y negable— y a convertirla
+en una puntuación que el futuro pueda calcular, zanjar y ordenar.
+
+El truco está en elegir la puntuación *adecuada*. Un sistema de calificación ingenuo
+se puede manipular: aprenderíais rápido a manipularlo en vez de a calibraros. Las
+puntuaciones de esta lección son especiales. Están matemáticamente amañadas para que
+la única forma de ganar sea decir la verdad sobre vuestra incertidumbre. Eso no es un
+eslogan: es un teorema, y al final podréis sentir exactamente por qué farolear empeora
+vuestra puntuación.
+
+<MCQ
+  client:visible
+  pretest
+  question="Quieres una forma de calificar pronósticos de probabilidad para que, a lo largo de muchas predicciones, los que más puntúen sean las personas cuya confianza es más honesta. ¿Cuál es el peligro de una regla de puntuación mal diseñada?"
+  options={[
+    { text: 'Se puede manipular: la gente aprende a declarar mal su probabilidad real para perseguir una puntuación mejor, en lugar de volverse más honesta', correct: true },
+    { text: 'Siempre recompensará al pronosticador más confiado, pase lo que pase' },
+    { text: 'No se puede calcular hasta que tengas miles de predicciones' },
+    { text: 'Trata un pronóstico del 50% y uno del 99% como idénticos' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer — adivina"
+  explanation="Sin penalización en un pretest. Toda la razón por la que somos tan tiquismiquis con las reglas de puntuación es la manipulabilidad. Una regla torpe recompensa alguna mentira —por ejemplo, declarar siempre 100%— y entonces la jugada lista es farolear en lugar de calibrarse. Las reglas de puntuación de esta lección están construidas para que la jugada que maximiza la puntuación sea declarar exactamente lo que crees. La honestidad no solo es agradable: es óptima."
+/>
+
+## Por qué puntuar una creencia siquiera
+
+Una probabilidad es una **promesa**. Cuando dices "70% de que esto se entregue a
+tiempo", estás prometiendo que, en todas las ocasiones en que dices 70%, la cosa
+ocurre unas siete de cada diez veces. El problema de las promesas es que de cualquiera
+de ellas es fácil escabullirse. El proyecto se retrasa, te encoges de hombros: "Bueno,
+*solo* dije 70%." Llovió en tu día de "20% de probabilidad de lluvia"; murmuras que 20%
+no es cero. Cada excusa es válida localmente. La memoria hace el resto: archiva tus
+aciertos como "lo sabía" y tus fallos como "mala suerte".
+
+Una **regla de puntuación (scoring rule)** es el contable que nunca olvida. Toma cada
+pronóstico y su resultado, te devuelve un número y lo suma al montón. Un solo
+pronóstico no te dice casi nada. Mil pronósticos, cada uno puntuado, revelan la forma
+honesta de tu juicio: la imagen que la memoria aduladora no puede falsear. El objetivo
+de una puntuación no es clavar una sola predicción; es ser infalsificable *en
+agregado*.
+
+La parte difícil es el diseño. Queremos una regla en la que la mejor puntuación a
+largo plazo pertenezca a la persona cuyas probabilidades son más honestas, no al más
+ruidoso, ni al más cauto, ni al más hábil manipulando. Construye la regla mal y habrás
+construido una máquina que entrena malos hábitos. Constrúyela bien y habrás construido
+una máquina que entrena la calibración. Vamos a construirla bien.
+
+### Cuándo usarlo
+
+Echa mano de una regla de puntuación explícita en cuanto estés haciendo juicios de
+probabilidad **repetidos** que de verdad quieras mejorar: pronosticar plazos,
+diagnósticos, movimientos de mercado, deportes, geopolítica. Para una única apuesta
+puntual, una puntuación es excesiva; la magia es estadística y solo aparece a lo largo
+de muchas predicciones. Si pronosticas el mismo *tipo* de cosa una y otra vez,
+puntúalo.
+
+## El Brier score
+
+Aquí está la pieza central. El **Brier score** es la calificación honesta más sencilla
+para un pronóstico binario, y no es más que *error cuadrático*.
+
+Asignas una probabilidad $p$ a un evento. El resultado $o$ es $1$ si el evento ocurre y
+$0$ si no. El Brier score para ese único pronóstico es la distancia al cuadrado entre lo
+que dijiste y lo que pasó:
+
+$$\text{Brier} = (p - o)^2$$
+
+A lo largo de $N$ pronósticos simplemente los promedias:
+
+$$BS = \frac{1}{N}\sum_{i=1}^{N}(p_i - o_i)^2$$
+
+El rango va de $0$ a $1$, y **más bajo es mejor**. Una puntuación de $0$ significa que
+dijiste $1.0$ a todo lo que ocurrió y $0.0$ a todo lo que no: profecía impecable. Una
+puntuación de $1$ significa que te equivocaste con confianza en cada una de ellas. La
+referencia del "no tengo ni idea" de decir $0.5$ a todo da $(0.5 - o)^2 = 0.25$ pase lo
+que pase, así que cualquier habilidad honesta debería llevarte por debajo de $0.25$.
+
+La analogía: piensa en $p$ como dónde lanzas un dardo y en $o$ como dónde resulta estar
+la diana, en $0$ o en $1$. Brier puntúa la **distancia de fallo al cuadrado**. Aterriza
+cerca de la verdad: penalización mínima. Aterriza lejos: el cuadrado hace que la
+penalización se dispare. La confianza es maravillosa cuando tienes razón y cara cuando
+te equivocas, y el cuadrado es exactamente lo que hace que "cara" duela.
+
+Mira lo que hace el cuadrado a una predicción atrevida. Supón que dices $p = 0.95$:
+
+- Si el evento **ocurre** ($o = 1$): $(0.95 - 1)^2 = (-0.05)^2 = 0.0025$. Casi gratis.
+  Fuiste valiente y acertaste.
+- Si **no** ocurre ($o = 0$): $(0.95 - 0)^2 = 0.9025$. Una penalización casi máxima.
+  Fuiste valiente y te equivocaste, y la regla te lo hizo pagar.
+
+Esa asimetría —$0.0025$ por el acierto valiente frente a $0.9025$ por el fallo
+valiente— es toda la personalidad del Brier score. Te reta a tener confianza y luego
+castiga la confianza que no te habías ganado.
+
+<MCQ
+  client:visible
+  question="Pronosticas una probabilidad de 0,95 de que un lanzamiento tenga éxito. Fracasa (resultado = 0). ¿Cuál es el Brier score de este único pronóstico, y eso es bueno o malo?"
+  options={[
+    { text: '0,9025 — una puntuación pésima (casi la peor), porque estabas casi seguro y te equivocaste', correct: true },
+    { text: '0,0025 — una puntuación excelente, porque estabas casi seguro' },
+    { text: '0,05 — una puntuación mediocre, solo la diferencia entre 0,95 y 1' },
+    { text: '0,95 — tu probabilidad declarada es la puntuación' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Brier = (p − o)^2 = (0,95 − 0)^2 = 0,9025, y más bajo es mejor, así que esto está cerca de la peor puntuación posible, 1. El cuadrado es lo que hace tan brutal un fallo confiado: ese mismo 0,95, de haber tenido éxito el lanzamiento, habría puntuado (0,95 − 1)^2 = 0,0025. Misma confianza, resultado opuesto, una diferencia de 360x en la penalización."
+/>
+
+### Un ejemplo de Brier completamente resuelto
+
+Califiquemos un lote entero. Supón que a lo largo de una temporada hiciste cinco
+pronósticos. Aquí está cada uno con su probabilidad $p$, el resultado final $o$ y el
+error cuadrático $(p - o)^2$.
+
+| # | Pronóstico | $p$ | Resultado $o$ | $(p - o)^2$ |
+|---|----------|-----|-------------|-------------|
+| 1 | "El proyecto se entrega a tiempo" | 0.90 | 1 (se entregó) | $(0.90 - 1)^2 = 0.0100$ |
+| 2 | "El candidato acepta la oferta" | 0.70 | 1 (aceptó) | $(0.70 - 1)^2 = 0.0900$ |
+| 3 | "Mañana llueve" | 0.30 | 0 (siguió seco) | $(0.30 - 0)^2 = 0.0900$ |
+| 4 | "El producto rival se lanza en el T3" | 0.60 | 0 (no lo hizo) | $(0.60 - 0)^2 = 0.3600$ |
+| 5 | "El servidor sobrevive al pico" | 0.95 | 1 (sobrevivió) | $(0.95 - 1)^2 = 0.0025$ |
+
+Suma los errores cuadráticos: $0.0100 + 0.0900 + 0.0900 + 0.3600 + 0.0025 = 0.5525$.
+Divide entre $N = 5$:
+
+$$BS = \frac{0.5525}{5} = 0.1105$$
+
+Un Brier score de $0.1105$. Eso está cómodamente por debajo de la referencia de
+"cara o cruz" de $0.25$, así que este pronosticador tiene habilidad de verdad. Fíjate
+en el pronóstico nº 4 —el $0.60$ tirando a confiado sobre algo que no ocurrió— que hizo
+casi todo el daño, aportando $0.36$ de los $0.5525$. Y el pronóstico nº 5, el valiente
+$0.95$ que se cumplió, apenas costó nada. La puntuación está contando una historia: sé
+confiado donde aciertas, cúbrete donde dudas y nunca seas ruidoso-y-erróneo.
+
+<Callout variant="tip" title="Ese número del laboratorio de calibración">
+¿Recuerdas el **Brier score** que el laboratorio de calibración te devolvió en la
+lección 1, después de que puntuaras un lote de afirmaciones verdadero/falso? Esto es
+exactamente lo que calculó: tomó tu probabilidad declarada $p$ en cada afirmación, miró
+si la afirmación era realmente verdadera ($o = 1$) o falsa ($o = 0$), elevó al cuadrado
+la diferencia y promedió. El número misterioso era $\frac{1}{N}\sum (p_i - o_i)^2$ todo
+el tiempo. Ahora puedes leerlo: por debajo de $0.25$ significa que superas el cara o
+cruz; cuanto más cerca de $0$, mejor.
+</Callout>
+
+### Trampa: más bajo es mejor, y el número no es un porcentaje
+
+Dos trampas. Primero, **más bajo es mejor**: es una penalización, un error, no una nota
+sobre 100. Un "Brier score de 0,9" es un desastre, no un sobresaliente. La gente
+acostumbrada a puntuaciones de "más grande es mejor" lo lee exactamente al revés.
+Segundo, **el Brier score no es tu tasa de aciertos ni tu precisión en porcentaje.** Un
+$0.1105$ no significa "11% acertado" ni "89% acertado". Es el error cuadrático medio en
+el espacio de probabilidades. Las únicas anclas que necesitas: $0$ es perfecto, $1$ es
+perfectamente erróneo, y $0.25$ es la referencia de no-hacer-nada de adivinar siempre
+$0.5$.
+
+## Una regla de puntuación propia (proper scoring rule): la honestidad es óptima
+
+Ahora la frase clave que hace que todo esto valga la pena. El Brier score es una **regla
+de puntuación propia (proper scoring rule)**, y "propia" tiene un significado preciso,
+casi mágico:
+
+> Una regla de puntuación es **propia (proper)** si tu puntuación *esperada* es la mejor
+> (aquí: la más baja) exactamente cuando declaras tu probabilidad *real*. Matizar tu
+> número hacia arriba o hacia abajo para parecer más atrevido o más prudente solo puede
+> empeorar tu puntuación esperada.
+
+Dicho de otro modo, la regla está amañada para que farolear sea matemáticamente
+autodestructivo. No puedes manipularla. La estrategia que maximiza la puntuación *es*
+declarar con honestidad. Demostrémonoslo con números.
+
+Supón que crees de verdad que un evento tiene un $70\%$ de probabilidad: tu probabilidad
+honesta es $0.70$. La tentación es *declarar* algo más atrevido —por ejemplo $0.90$—
+porque la gente confiada suena más lista. ¿Ayuda eso a tu Brier score esperado?
+
+Tu Brier score esperado al declarar algún número $r$, cuando la verdad es realmente
+$0.70$, es un promedio ponderado sobre las dos formas en que puede ir el mundo. Con
+probabilidad $0.70$ el evento ocurre ($o = 1$) y puntúas $(r - 1)^2$; con probabilidad
+$0.30$ no ocurre ($o = 0$) y puntúas $(r - 0)^2$:
+
+$$E[\text{Brier}] = 0.70\,(r - 1)^2 + 0.30\,(r - 0)^2$$
+
+Compara dos declaraciones:
+
+| Declaración $r$ | $0.70\,(r-1)^2$ | $0.30\,(r-0)^2$ | Brier esperado |
+|-----------|------------------|------------------|----------------|
+| Honesta: $r = 0.70$ | $0.70\,(0.09) = 0.0630$ | $0.30\,(0.49) = 0.1470$ | $\mathbf{0.2100}$ |
+| Farol: $r = 0.90$ | $0.70\,(0.01) = 0.0070$ | $0.30\,(0.81) = 0.2430$ | $0.2500$ |
+| Tímida: $r = 0.50$ | $0.70\,(0.25) = 0.1750$ | $0.30\,(0.25) = 0.0750$ | $0.2500$ |
+
+Declarar tu honesto $0.70$ da el Brier esperado **más bajo** ($0.21$). Inflarlo hasta
+$0.90$ para parecer confiado lo *sube* a $0.25$. Encogerlo a un tímido $0.50$ también lo
+sube a $0.25$. Cada mentira sobre tu creencia —en cualquier dirección— te cuesta, en
+promedio. El mínimo se sitúa exactamente en la verdad.
+
+Eso no es una casualidad de los números $0.70$ y $0.90$. Un gesto de cálculo de una
+línea muestra que siempre se cumple: trata la puntuación esperada
+$f(r) = q\,(r-1)^2 + (1-q)\,(r-0)^2$ como una función de tu declaración $r$, donde $q$
+es tu creencia real. Toma la derivada, $f'(r) = 2q(r-1) + 2(1-q)r = 2(r - q)$, e
+iguálala a cero: $r = q$. La puntuación esperada se minimiza precisamente cuando tu
+declaración iguala tu probabilidad real. La regla *fuerza* a que la honestidad sea
+óptima.
+
+<Callout variant="warning" title="Por qué este es todo el juego">
+La mayoría de las formas de "recompensar buenas predicciones" son manipulables, y una
+regla manipulable te entrena para manipularla en vez de para calibrarte. Una regla de
+puntuación **propia (proper)** cierra esa puerta. Como la honestidad es la estrategia
+que maximiza la puntuación, entrenar contra una puntuación propia es literalmente
+entrenar tu calibración. Dejas de actuar confianza y empiezas a declarar creencia,
+porque eso es lo que gana.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Crees de verdad que un evento es 70% probable, pero declaras 90% para sonar más decidido. Bajo una regla de puntuación propia como el Brier score, ¿qué le pasa a tu puntuación ESPERADA a lo largo de muchas situaciones así?"
+  options={[
+    { text: 'Empeora: tu puntuación esperada es la mejor solo cuando declaras tu 70% real', correct: true },
+    { text: 'Mejora: declarar más confianza siempre mejora la puntuación' },
+    { text: 'Se queda exactamente igual; solo importa el resultado, no lo que declares' },
+    { text: 'Se vuelve imposible de calcular' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Esa es la definición de una regla de puntuación propia: tu puntuación esperada se optimiza cuando, y solo cuando, declaras tu probabilidad real. Inflar el 70% al 90% para parecer atrevido sube tu Brier esperado de aproximadamente 0,21 a 0,25: la mentira te cuesta en promedio. La regla está amañada para que la jugada lista y la jugada honesta sean la misma jugada."
+/>
+
+## El log score: brutal con la sobreconfianza
+
+El Brier score es el simpático. Su primo más cruel y más famoso es la **regla de
+puntuación logarítmica (logarithmic scoring rule)** —el **log score**— y tiene un
+talento especial para destruir la sobreconfianza.
+
+La idea es aún más sencilla de enunciar. Mira lo que *realmente ocurrió*, encuentra la
+probabilidad que asignaste a *ese* resultado y toma su logaritmo:
+
+$$\text{log score} = \log(p_{\text{outcome}})$$
+
+Si el evento ocurrió, $p_{\text{outcome}}$ es el $p$ que diste al evento; si no, es
+$1 - p$. Como el logaritmo de un número menor que $1$ es negativo, el log score siempre
+es $\le 0$ y —aviso de convención— **más alto (más cerca de cero) es mejor**. (A menudo
+lo verás escrito con un signo menos como una *pérdida (loss)*, $-\log p$, donde más bajo
+es mejor; el mismo contenido, con el signo invertido.) Asignar una probabilidad alta a
+lo que realmente ocurrió gana una puntuación cercana a $0$; asignar una probabilidad
+minúscula a lo que realmente ocurrió arrastra la puntuación hacia $-\infty$.
+
+Esa última palabra es justo el quid. El log score castiga un fallo confiado mucho más
+viciosamente que Brier. La peor penalización individual posible de Brier está acotada en
+$1$. El log score **no tiene suelo**. Cuanto más empujes tu probabilidad hacia $0$ en
+algo que luego ocurre, peor tu puntuación, sin límite:
+
+| Dijiste que ocurriría con probabilidad... | ...y ocurrió. Brier $(p-1)^2$ | Log score $\log(p)$ |
+|---|---|---|
+| $p = 0.5$ | $0.25$ | $\log(0.5) = -0.69$ |
+| $p = 0.1$ | $0.81$ | $\log(0.1) = -2.30$ |
+| $p = 0.01$ | $0.98$ | $\log(0.01) = -4.61$ |
+| $p = 0.001$ | $0.998$ | $\log(0.001) = -6.91$ |
+| $p = 0$ | $1.00$ | $\log(0) = -\infty$ |
+
+Mira cómo divergen las dos columnas. A medida que tu probabilidad para el resultado
+verdadero se reduce de $0.1$ a $0.01$ a $0.001$, Brier se arrastra de $0.81$ hacia su
+techo de $1$: se está quedando sin margen para castigarte. El log score, mientras tanto,
+se despeña por un precipicio: $-2.30$, $-4.61$, $-6.91$, y luego, en $p = 0$, derecho al
+infinito negativo. Di que algo es **imposible** y míralo ocurrir, y el log score declara
+tu desempeño infinitamente malo. La lección se escribe sola: **nunca digas nunca.** No
+asignes nunca $0$ (ni $1$) a nada que no sea una certeza lógica, porque a la realidad le
+basta con avergonzarte una sola vez.
+
+Esta brutalidad no es sadismo: es teoría de la información. La cantidad $-\log p$ es
+literalmente la **sorpresa** de un resultado al que habías asignado probabilidad $p$:
+las cosas raras que no veías venir cargan más sorpresa, más "bits", que las cosas que
+esperabas. El log score te califica según la sorpresa total, que es por lo que un único
+"imposible" arrogante que se cumple puede borrar el trabajo de toda una carrera de
+pronósticos cuidadosos. Y como Brier, el log score es **propio (proper)**: tu puntuación
+esperada se sigue optimizando declarando tu probabilidad real. Solo que impone la
+honestidad con un palo más grande.
+
+### Cuándo usarlo
+
+Usa el **log score** cuando el coste de un fallo confiado y catastrófico sea
+genuinamente catastrófico —riesgo, seguridad, cualquier cosa con colas anchas (fat
+tails)— porque *quieres* una regla que le grite a la sobreprecisión. Usa el **Brier
+score** cuando quieras un número estable, acotado e intuitivo que no quede dominado por
+un único evento extremo y sea fácil de explicar a una sala. Brier es el caballo de
+batalla del día a día; el log score es la disciplina que sacas cuando "estábamos
+*seguros* de que eso no podía pasar" sería el epitafio.
+
+<MCQ
+  client:visible
+  question="Un pronosticador asigna probabilidad 0,01 a un evento y este ocurre. ¿Qué afirmación es cierta sobre cómo penalizan el Brier score y el log score este fallo confiado?"
+  options={[
+    { text: 'El log score lo castiga mucho más duramente; Brier queda acotado cerca de 0,98 mientras que el log score es de unos −4,61 y se iría a −infinito a medida que la probabilidad se acercara a 0', correct: true },
+    { text: 'Brier lo castiga más duramente que el log score', correct: false },
+    { text: 'Ambos dan exactamente la misma penalización para cualquier fallo confiado', correct: false },
+    { text: 'Ninguno lo penaliza, porque 0,01 no es exactamente 0', correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Brier = (0,01 − 1)^2 = 0,9801, cerca de su techo de 1: apenas le queda margen para castigarte. El log score = log(0,01) = −4,61 y sigue cayendo en picado sin límite a medida que la probabilidad baja hacia 0, alcanzando −infinito exactamente en 0. Esa penalización no acotada es por lo que el log score es el maestro estricto del 'nunca digas nunca'."
+/>
+
+## Qué recompensa realmente una buena puntuación
+
+Una última idea, mantenida breve porque la lección 5 le da el tratamiento completo. ¿Por
+qué un Brier score bajo significa buen juicio? Porque la puntuación mide en silencio
+*dos* virtudes a la vez, y necesitas ambas.
+
+El Brier score se puede **descomponer** en piezas con nombre. La división principal es
+**calibración (calibration)** más **resolución (resolution)** (a veces llamada
+refinamiento). A grandes rasgos:
+
+- La **calibración** pregunta: cuando dices 70%, ¿ocurre el 70% de las veces? Esta es la
+  honestidad que has estado entrenando: no ser ni sobreconfiado ni infraconfiado.
+- La **resolución** pregunta: ¿de verdad *separas* lo probable de lo improbable? Un
+  pronosticador que dice $0.5$ a todo puede estar perfectamente calibrado y aun así ser
+  inútil, porque nunca se moja. La resolución recompensa empujar tus probabilidades hacia
+  $0$ y $1$ **cuando tienes razón en hacerlo**: ser **decisivo**, no solo honesto.
+
+Un gran Brier score necesita ambas. Sé calibrado pero nunca decisivo (siempre $0.5$) y
+aterrizas en la aburrida referencia de $0.25$. Sé decisivo pero descalibrado (ruidoso y
+erróneo) y los errores cuadráticos te aplastan. Las puntuaciones bajas pertenecen a los
+pronosticadores que son honestos sobre su incertidumbre *y* están dispuestos a mojarse
+cuando la evidencia se lo gana. Desglosamos la tensión calibración-frente-a-resolución
+—y por qué los mejores pronosticadores persiguen ambas— en la lección final.
+
+<Callout variant="info" title="La conclusión en una línea">
+Una puntuación propia califica dos cosas a la vez: **sé honesto** (calibración) *y* **sé
+decisivo cuando puedas** (resolución). La honestidad por sí sola te lleva a la media; la
+honestidad más la confianza ganada te lleva a lo excelente.
+</Callout>
+
+## Resumen
+
+Ya puedes convertir cualquier probabilidad en un número que el futuro calificará, y
+sabes por qué esos números son fiables.
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: "¿Cuál es el Brier score de un único pronóstico en el que asignaste probabilidad 0,8 a un evento que luego ocurrió (resultado = 1)?",
+      options: [
+        { text: '(0,8 − 1)^2 = 0,04', correct: true },
+        { text: '0,8, porque esa era tu probabilidad' },
+        { text: '(0,8 − 0)^2 = 0,64' },
+        { text: '0,2, la diferencia entre 0,8 y 1' },
+      ],
+      explanation: "Brier = (p − o)^2 = (0,8 − 1)^2 = (−0,2)^2 = 0,04. Baja, porque estabas bastante confiado y acertaste. De NO haber ocurrido el evento, habría sido (0,8 − 0)^2 = 0,64: el mismo pronóstico, dieciséis veces la penalización.",
+    },
+    {
+      question: "¿Qué significa que una regla de puntuación sea 'propia (proper)'?",
+      options: [
+        { text: 'Tu puntuación esperada se optimiza exactamente cuando declaras tu probabilidad real, así que la honestidad le gana al farol en promedio', correct: true },
+        { text: 'Solo da puntuaciones entre 0 y 1' },
+        { text: 'Siempre recompensa al pronosticador más confiado' },
+        { text: 'Se puede calcular sin conocer el resultado' },
+      ],
+      explanation: "Propia significa que la regla está amañada para que declarar tu creencia genuina dé la mejor puntuación esperada. Infla tu 70% al 90% para parecer atrevido y tu Brier esperado sube de unos 0,21 a 0,25: la mentira te cuesta. Tanto el Brier score como el log score son propios.",
+    },
+    {
+      question: "Un pronosticador dice siempre exactamente 0,5 a cada pregunta de sí/no, sin mojarse nunca en ninguna dirección. ¿Qué podemos decir de su Brier score?",
+      options: [
+        { text: 'Es exactamente 0,25 cada vez: perfectamente calibrado en cierto sentido, pero con resolución cero, así que no es mejor que un cara o cruz', correct: true },
+        { text: 'Será 0, el mejor posible, porque 0,5 es la respuesta segura' },
+        { text: 'Será 1, el peor posible' },
+        { text: 'No se puede calcular sin más información' },
+      ],
+      explanation: "Decir 0,5 cada vez da (0,5 − o)^2 = 0,25 sin importar el resultado: la referencia de no-hacer-nada. Muestra por qué una buena puntuación necesita resolución (decisión), no solo calibración: este pronosticador nunca separa lo probable de lo improbable, así que es inútil aunque nunca se equivoque feo.",
+    },
+    {
+      question: "¿Por qué se considera que el log score es más brutal con la sobreconfianza que el Brier score?",
+      options: [
+        { text: 'El log score no está acotado: una probabilidad que se acerca a 0 sobre algo que ocurre lleva la puntuación hacia −infinito, mientras que Brier queda topado cerca de 1', correct: true },
+        { text: 'El log score da una penalización positiva y Brier una negativa' },
+        { text: 'El log score ignora el resultado por completo' },
+        { text: 'El log score recompensa decir 0 o 1, así que fomenta la audacia' },
+      ],
+      explanation: "La peor penalización individual de Brier está acotada en 1, así que se queda sin margen para castigarte. El log score no tiene suelo: decir que algo es imposible (probabilidad 0) y verlo ocurrir puntúa −infinito. Por eso el log score enseña 'nunca digas nunca', y se conecta con la sorpresa en la teoría de la información.",
+    },
+  ]}
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Incorrecto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  scoreLabel="Tu puntuación"
+  correctCountLabel="correctas"
+  restartLabel="Reiniciar"
+  completeLabel="Completado"
+  gateLabel="Comprueba tu respuesta para continuar."
+/>
+
+## Hacia dónde va esto
+
+Ya puedes calificar una *probabilidad*. Pero una enorme parte de los pronósticos reales
+no son eventos de sí/no: son **cantidades**: ¿cuánto tardará esto?, ¿cuánto costará?,
+¿cuántos usuarios para diciembre? No puedes pegar un único $p$ a "el proyecto tarda 40
+días", porque hay infinitas respuestas posibles. La herramienta honesta para eso es un
+**rango**: un intervalo del 90% lo bastante ancho como para contener de verdad la
+verdad, y, como era de esperar, tu primer instinto lo hará demasiado estrecho.
+
+La lección 4, **Pensar en rangos**, toma la disciplina de puntuación que acabas de
+construir y la apunta hacia las cantidades: cómo enunciar un intervalo honesto del 90%,
+por qué la sobreprecisión sabotea tu primer intento cada vez, y cómo un rango bien
+construido conecta de vuelta con el margen de seguridad. El mismo objetivo —confianza que
+dice la verdad— apuntado a un blanco más difícil.

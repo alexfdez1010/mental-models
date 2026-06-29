@@ -83,29 +83,10 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced / expert probability tier ────────────────────────────────────
-  // The lowest-order entry, built next. The breadth-pass courses that re-seeded
-  // the starved disciplines (e.g. `red-queen-effect`, `fat-tails`) have graduated
-  // and been removed; their topic MDX is now the record.
-  {
-    slug: 'calibration-and-confidence',
-    icon: '🎯',
-    difficulty: 'expert',
-    order: 17,
-    accent: 'brand',
-    title: {
-      en: 'Calibration: Knowing What You Know',
-      es: 'Calibración: saber lo que sabes',
-    },
-    description: {
-      en: 'A calibrated thinker’s 70% guesses come true about 70% of the time. Measure your overconfidence, widen your honest error bars, and turn vague hunches into probabilities you can be scored on.',
-      es: 'Las apuestas al 70% de quien está bien calibrado aciertan el 70% de las veces. Mide tu exceso de confianza, ensancha tus márgenes de error honestos y convierte corazonadas vagas en probabilidades que se pueden puntuar.',
-    },
-    dependencies: ['thinking-in-probabilities', 'bayesian-updating'],
-    tags: ['probability', 'decision-making', 'psychology'],
-    buildNotes:
-      'Calibration — the expert capstone of the probability path: not just estimating odds but being *right about how right you are*. Sections: what calibration means (of all the times you say 70%, ~70% should happen) and the calibration curve; overconfidence and the overprecision bias (90% confidence intervals that catch the truth far less than 90% of the time); proper scoring rules — the Brier score and log score — that reward honesty and punish bluffing, with a worked numeric example; confidence intervals / error bars as honest ranges (ties back to thinking in ranges); how to get calibrated (track predictions, give ranges, do calibration training, post-mortem your scores), referencing forecasting research (superforecasters) without overclaiming; resolution vs. calibration (being calibrated AND decisive). Use KaTeX for the Brier score; build an interactive calibration island (the learner assigns confidences to several true/false claims, then sees their calibration plotted and Brier score scored). Connect to Bayesian updating (calibrated priors), overconfidence bias (psychology), and margin of safety. Pitfall: confident ≠ correct; precision masquerading as accuracy. Recap Quiz + MindMap. en + es twin.',
-  },
+  // ── Advanced psychology / systems / economics tier ────────────────────────
+  // `calibration-and-confidence` (the expert probability capstone) has graduated
+  // and been removed; its topic MDX is now the record. The lowest-order entry
+  // below (`loss-aversion`, order 18) is built next.
   // ── Breadth re-seed (orders 18–20) ────────────────────────────────────────
   // Appended to keep the queue ≥3 and tag-diverse after `red-queen-effect`
   // graduated and the remaining tier was all-`probability`. One advanced rung

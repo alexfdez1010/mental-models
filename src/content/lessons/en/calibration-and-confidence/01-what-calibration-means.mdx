@@ -1,0 +1,318 @@
+---
+title: "What Calibration Means"
+description: "Plot your stated confidence against how often you're right and you get a reliability curve. Below the 45° line is overconfidence, above it is underconfidence — and weather forecasters live almost exactly on the line."
+topic: "en/calibration-and-confidence"
+order: 2
+minutes: 9
+updated: 2026-06-29
+---
+
+import { MCQ, Quiz, Callout, Reveal, CalibrationLab } from '@/components/react';
+
+In the intro you met the idea in a sentence: of all the times you say *70%*, about
+70% should come true. That's a fine slogan, but a slogan can't tell you *how* wrong
+you are, or *where*. To make calibration tactile — something you can see, measure, and
+fix — we need a picture. That picture is the **reliability curve**, and once you can
+read it, "I'm well calibrated" stops being a vibe and becomes a graph you can point at.
+
+This is the lesson where calibration gets a coordinate system. We'll build the curve
+from a real table of forecasts, learn to read overconfidence and underconfidence
+straight off the diagonal, separate calibration cleanly from "being right," and meet
+the professionals who are so good at this they've basically turned it into a day job.
+Then you'll score your *own* confidence in the lab and watch your curve appear.
+
+<MCQ
+  client:visible
+  pretest
+  question="A forecaster reviews every time they said “80% sure” over a year — 50 such calls — and finds they were right 64 times out of every 100 such calls on average. On a plot of stated confidence (x) vs. actual hit rate (y), where does their 80% point land?"
+  options={[
+    { text: 'Below the 45° diagonal — they claimed 80% but only delivered ~64%, so they were overconfident there', correct: true },
+    { text: 'Above the diagonal, because 64% is still a passing grade' },
+    { text: 'Exactly on the diagonal — close enough counts as calibrated' },
+    { text: 'It can’t be plotted; a hit rate isn’t a confidence' },
+  ]}
+  explanation="No penalty on a pretest — this is the whole lesson in one dot. The x-axis is what they SAID (80%); the y-axis is how often they were actually right at that confidence (~64%). Since 64 sits below 80, the point falls below the 45° line of perfect calibration — the signature of overconfidence. The further below the line, the bigger the bluff. By the end of this lesson you'll read these dots fluently."
+/>
+
+## The reliability curve: confidence in, accuracy out
+
+Here's the analogy. Imagine a bathroom scale that you test by stepping on it with
+known weights — a 10 kg dumbbell, a 50 kg sack, a 90 kg friend. A *perfect* scale
+reads exactly what you put on it: 50 in, 50 out. Plot "true weight" against "what the
+scale said" and every point lands on a straight 45° line. A scale that always reads
+high sits *below* that line; one that reads low sits *above* it. The **reliability
+curve** does the same thing for your confidence: it weighs your stated certainty
+against the truth and shows you, level by level, whether your instrument reads high.
+
+The construction is simple. You make a pile of predictions, each tagged with a
+confidence (50%, 60%, 70%, …). Then you sort them into **buckets** by that confidence,
+and for each bucket you compute one number: *of the things I said this confident
+about, what fraction actually came true?* Plot stated confidence on the x-axis and
+that actual fraction on the y-axis. Connect the dots. That's your reliability curve,
+also called a **calibration plot**.
+
+> **Reliability curve (definition).** For each confidence level *c*, take every
+> forecast you made at confidence *c* and compute the fraction that came true. The
+> point (*c*, that fraction) goes on the plot. Perfect calibration is the line
+> *y = x* — the 45° diagonal — where stated confidence equals observed hit rate at
+> every level.
+
+### A fully worked example
+
+Meet Dana, who spent a year writing down 100 forecasts — "85% this feature ships
+Friday," "70% my sister takes the job," that sort of thing — each tagged with a
+confidence drawn from 50/60/70/80/90. At year's end she sorts them into buckets and
+counts how many in each came true.
+
+| Stated confidence | # forecasts in bucket | # that came true | Actual hit rate | On the plot |
+|---|---|---|---|---|
+| 50% | 20 | 11 | 55% | slightly **above** the line |
+| 60% | 25 | 14 | 56% | **below** the line |
+| 70% | 22 | 14 | 64% | **below** the line |
+| 80% | 18 | 12 | 67% | **below** the line |
+| 90% | 15 | 11 | 73% | **far below** the line |
+
+Read it like a story. At 50% Dana is basically honest — she said 50%, reality
+delivered 55%, the dot sits right on (or a hair above) the diagonal. But watch what
+happens as her confidence climbs: at 60% she only hits 56%, at 70% only 64%, at 80%
+only 67%, and at 90% — where she felt nearly certain — she's right just 73% of the
+time. Every high-confidence dot sags *below* the diagonal, and the sag gets **worse
+the more confident she gets**. That downward-bowing, steepest-at-the-top shape is the
+fingerprint of overconfidence. Dana's "90%" is worth about 73 cents on the dollar.
+
+Crucially, you didn't need to know *which* forecasts were right — you didn't relitigate
+the feature launch or her sister's job. The curve reads her judgment in aggregate. One
+missed 90% call proves nothing; *eleven out of fifteen* across a year is a verdict.
+
+<CalibrationLab
+  client:visible
+  title="Score your own confidence"
+  instructions="For each claim, decide True or False, then pick how sure you are. After all ten, we'll plot your reliability curve, measure your overconfidence gap, and hand you a Brier score (lower is better — you'll meet the formula in lesson 3)."
+  caption="Ten verifiable claims. Commit to a confidence BEFORE you think about the next one — the whole point is to catch your own gap in the act."
+  claims={[
+    { statement: 'The Nile is longer than the Amazon.', isTrue: true },
+    { statement: 'A kilogram of steel weighs more than a kilogram of feathers.', isTrue: false },
+    { statement: 'Mount Everest is the closest point on Earth to the Moon.', isTrue: false },
+    { statement: 'Honey never spoils if stored sealed and dry.', isTrue: true },
+    { statement: 'There are more trees on Earth than stars in the Milky Way.', isTrue: true },
+    { statement: 'The Great Wall of China is visible to the naked eye from the Moon.', isTrue: false },
+    { statement: 'Octopuses have three hearts.', isTrue: true },
+    { statement: 'Bananas grow on trees.', isTrue: false },
+    { statement: 'The human body has more bacterial cells than human cells.', isTrue: true },
+    { statement: 'Lightning never strikes the same place twice.', isTrue: false },
+  ]}
+/>
+
+Did your high-confidence answers hold up? If you said "90%" a few times and missed one
+or two, congratulations — you're human, and your dot just sagged below the line like
+almost everyone's. That's not a failure; it's the *measurement* that makes improvement
+possible. You can't fix a gap you can't see.
+
+<Callout variant="tip" title="How to read any reliability curve in five seconds">
+Find the 45° diagonal — that's perfect. **Below the line = overconfident** (you claimed
+more certainty than you delivered). **Above the line = underconfident** (you were
+righter than you dared to say). The *vertical distance* from a dot to the diagonal is
+exactly how much your confidence over- or under-shot reality at that level. That's the
+whole instrument.
+</Callout>
+
+### Common pitfall: confusing the axes
+
+The single most common mistake is reading the y-value as "my grade" and panicking that
+it's low. The y-axis is not a score — it's the *truth that your confidence is being
+compared against*. A bucket where you said 60% and hit 60% is **perfect**, even though
+60% sounds mediocre. Calibration doesn't ask your accuracy to be high; it asks it to
+**equal what you claimed**. A point at (60%, 60%) is flawless calibration; a point at
+(90%, 75%) is a problem — even though 75% is the higher number.
+
+### When to use it
+
+Build a reliability curve whenever you have a stack of past predictions with
+confidences attached and outcomes you can check: a sales team's "% likely to close,"
+a doctor's "probably benign," your own dated forecasts. It needs **volume** — a dozen
+calls per bucket before the fractions mean much — and it needs **resolved outcomes**.
+It's the wrong tool for a single one-off bet (one flip can't fill a bucket) or for
+beliefs that never get settled.
+
+## Reading the diagonal: three shapes
+
+Once the diagonal is your reference line, three shapes tell you almost everything.
+
+The **perfectly calibrated** curve *is* the diagonal: every dot sits on *y = x*. Say
+70%, hit 70%; say 90%, hit 90%. Confidence tells the truth at every level.
+
+The **overconfident** curve sags **below** the diagonal, and — this is the part to
+burn in — it sags *worst at the high-confidence end*. Low-confidence guesses are
+roughly honest (it's hard to be overconfident when you're already saying "coin flip"),
+but as the curve climbs toward 90% and 99%, the gap between claim and reality yawns
+open. The line bends down and to the right, flattening out far short of the corner.
+That's Dana. That's most people. The dangerous dots are always in the top-right.
+
+The **underconfident** curve bows **above** the diagonal: you keep saying "60%, maybe?"
+about things that come true 80% of the time. Rarer than overconfidence and gentler in
+its consequences — being pleasantly surprised costs less than being blindsided — but
+still a miscalibration. The cure is the mirror image: dare to say the higher number.
+
+<Reveal client:visible buttonText="Why does overconfidence bend the curve specifically at the top?">
+Because the top is where there's room to fall. At 50% confidence you literally cannot
+be overconfident — 50% is the humblest a binary call can be, and the truth has nowhere
+to sit but at or above your claim. But at 95% there's a 45-point cliff beneath you, and
+overconfident people sprint straight off it: they hand out "95%" and "99%" like candy
+on claims that were really 80% bets. So the gap between claim and reality is biggest
+exactly where confidence is highest — which is why an overconfident curve is nearly
+fine at the left and falls apart at the right.
+</Reveal>
+
+<MCQ
+  client:visible
+  question="A reliability curve hugs the diagonal at 50% and 60%, then dives well below it at 80% and 90%. What's the diagnosis?"
+  options={[
+    { text: 'Classic overconfidence — honest on easy, low-confidence calls but claiming far more certainty than earned on the high-confidence ones', correct: true },
+    { text: 'Underconfidence, because the curve starts on the diagonal' },
+    { text: 'Perfect calibration, since it touches the line somewhere' },
+    { text: 'A broken plot — a real curve can’t cross the diagonal' },
+  ]}
+  explanation="This is the textbook overconfident shape: fine at the low end, sagging below the line and steepest at the high-confidence end. The 80% and 90% claims are where reality fell furthest short of the promise. Touching the diagonal at 50% doesn't redeem it — it's exactly what overconfidence looks like, because 50% is the one place you can't overshoot."
+/>
+
+## Calibration vs. accuracy vs. resolution
+
+Three words get tangled here, so let's pin them down.
+
+**Accuracy** is just how often you're right overall — your raw hit rate. **Calibration**
+is whether your *confidence matches* that hit rate, level by level. They're genuinely
+different: recall the two coin-flip predictors from the intro — "heads, 50%" every time
+and "heads, 99%" every time — who had *identical* accuracy (50%) but opposite
+calibration (one perfect, one catastrophic). Accuracy asks "were you right?";
+calibration asks "was your confidence honest?"
+
+There's a third word lurking, and it's the one that keeps calibration from being a cop-out:
+**resolution**. A forecaster who says "50%" to *everything* — every coin, every
+election, every diagnosis — can be perfectly calibrated and perfectly useless, because
+they never commit. **Resolution** is the willingness to push your probabilities away
+from a wishy-washy 50% toward confident 90s and 10s *when the evidence earns it* — to
+actually distinguish the likely from the unlikely. The goal isn't just honesty; it's
+honest *and* decisive: sharp probabilities that are still true.
+
+<Callout variant="warning" title="Calibration alone is a trap you can game">
+You can be flawlessly calibrated by saying "50%" to every yes/no question forever —
+and contribute exactly nothing. That's why calibration is necessary but not
+sufficient. The full target is **calibration + resolution**: bold, decisive
+probabilities that *still* come true at the rate you claim. We unpack that tension in
+depth in lesson 5 — for now, just know that "be vague to stay safe" is not the lesson.
+</Callout>
+
+We're deliberately leaving resolution at the teaser stage — lesson 5 ("Getting
+Calibrated") gives it the full treatment, including how the best forecasters keep both
+dials high at once. Here, just hold the trio: accuracy = right-ness, calibration =
+honest confidence, resolution = useful decisiveness.
+
+<MCQ
+  client:visible
+  question="Which statement best separates calibration from accuracy?"
+  options={[
+    { text: 'Accuracy is how often you’re right; calibration is whether your confidence matches how often you’re right', correct: true },
+    { text: 'Calibration and accuracy are two names for the same hit rate' },
+    { text: 'Accuracy is about honesty; calibration is about raw correctness' },
+    { text: 'Calibration only matters when accuracy is above 90%' },
+  ]}
+  explanation="Accuracy = your overall hit rate. Calibration = whether your stated confidence lines up with that hit rate, level by level. The 99%-every-time coin predictor nails the distinction: high stated confidence, 50% accuracy, terrible calibration. You can share accuracy and differ wildly in calibration — that's the whole point."
+/>
+
+## Weather forecasters: the gold standard
+
+Here's the encouraging part, and it's a true story. The most reliably **well-calibrated**
+professionals on the planet aren't physicists or statisticians — they're TV and national
+**weather forecasters**. When a U.S. National Weather Service forecaster says "70% chance
+of rain," it rains on close to 70% of those days. Their reliability curves famously hug
+the diagonal almost perfectly across the whole range, from 10% drizzle to 90% downpour.
+
+Why them? Not raw genius — **feedback**. Three ingredients make calibration trainable,
+and weather has all three in abundance:
+
+- **Volume.** A forecaster issues thousands of probabilistic forecasts a year. That's
+  thousands of dots — every bucket fills up fast, and the curve stops being noise.
+- **Fast, unambiguous outcomes.** By tomorrow you *know* whether it rained. No spin, no
+  "well, it depends how you define rain." The truth arrives on schedule.
+- **Scoring with consequences.** Forecasters' probabilities are tracked and graded
+  (with proper scoring rules — lesson 3), so a chronic over- or under-shooter sees the
+  gap and gets nudged back to the diagonal, season after season.
+
+Contrast that with a pundit predicting elections (a handful of forecasts a decade,
+fuzzy outcomes, no scorekeeping) and you see why weather forecasters are calibrated
+and pundits are punchlines. The lesson is liberating: calibration isn't a gift, it's a
+**trained reflex**. Anyone who attaches numbers to predictions, checks them, and adjusts
+will drift toward the diagonal — exactly what lesson 5 turns into a routine.
+
+<MCQ
+  client:visible
+  question="Spot the real reason weather forecasters are so well calibrated."
+  options={[
+    { text: 'They make huge volumes of probabilistic forecasts with fast, checkable outcomes and get scored on them', correct: true },
+    { text: 'Predicting weather is inherently easier than predicting anything else' },
+    { text: 'They’re naturally more humble than other professionals' },
+    { text: 'Modern weather is so predictable that 90% forecasts are basically guaranteed' },
+  ]}
+  explanation="Calibration is a feedback skill, not a talent or a personality trait. Weather forecasting supplies the three things that train it: enormous volume (thousands of forecasts), fast and unambiguous outcomes (you know by tomorrow), and real scoring. That tight, repeated feedback loop is what bends anyone's curve onto the diagonal — and it's exactly the loop lesson 5 teaches you to build for yourself."
+/>
+
+## Recap
+
+<Quiz
+  client:visible
+  title="Check yourself: reading the curve"
+  questions={[
+    {
+      question: 'On a reliability curve, what does the 45° diagonal represent?',
+      options: [
+        { text: 'Perfect calibration — stated confidence equals actual hit rate at every level', correct: true },
+        { text: 'The minimum passing score for a forecaster' },
+        { text: 'The average confidence across all your forecasts' },
+        { text: 'The line above which all forecasts are correct' },
+      ],
+      explanation: 'The diagonal is y = x: at every confidence level, the fraction that came true equals the confidence you stated. Dots on the line are perfectly calibrated; the vertical distance to the line measures your over- or under-confidence at that level.',
+    },
+    {
+      question: 'A forecaster’s dots sit BELOW the diagonal, and the gap grows as confidence rises. This is the signature of…',
+      options: [
+        { text: 'Overconfidence — they claimed more certainty than they delivered, worst at the high-confidence end', correct: true },
+        { text: 'Underconfidence — they were righter than they admitted' },
+        { text: 'Perfect calibration with a bit of noise' },
+        { text: 'High resolution — bold, decisive forecasts' },
+      ],
+      explanation: 'Below the line = overconfidence, and the classic shape sags worst at the top because that’s where there’s room to fall (you can’t overshoot at 50%). The high-confidence dots — the “90%” and “99%” calls — are where reality fell furthest short of the promise.',
+    },
+    {
+      question: 'A bucket where you said “60%” and were right 60% of the time is…',
+      options: [
+        { text: 'Perfectly calibrated — your confidence matched reality exactly, even though 60% isn’t a high number', correct: true },
+        { text: 'Badly calibrated, because 60% accuracy is too low' },
+        { text: 'Overconfident, because you should have said 50%' },
+        { text: 'Impossible to evaluate without knowing which calls were right' },
+      ],
+      explanation: 'Calibration asks your accuracy to EQUAL your claim, not to be high. (60%, 60%) sits dead on the diagonal — flawless. The trap is reading the y-value as a grade: a perfectly calibrated 60% beats a miscalibrated, overconfident 90%.',
+    },
+    {
+      question: 'Why are professional weather forecasters the calibration gold standard?',
+      options: [
+        { text: 'Massive forecast volume, fast unambiguous outcomes, and real scoring create the feedback loop that trains calibration', correct: true },
+        { text: 'Because the weather is fundamentally easy to predict' },
+        { text: 'Because they alone use probabilities, while other experts use words' },
+        { text: 'Because being calibrated is an innate trait they happen to share' },
+      ],
+      explanation: 'Calibration is trained by feedback, not born. Weather supplies all three ingredients — volume, fast checkable outcomes, and scoring — so forecasters’ curves hug the diagonal. The takeaway is hopeful: build that loop for yourself (lesson 5) and your curve straightens too.',
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You can now read calibration off a graph: build the buckets, plot confidence against
+hit rate, and find the diagonal. Below it, you bluffed; above it, you sandbagged; and
+for almost everyone the curve sags *below* the line, steepest right where confidence is
+highest. That universal downward bend isn't bad luck — it has a structure, and it comes
+in two distinct flavors. In **lesson 2, Overconfidence & Overprecision**, we split it
+apart: *overestimation* (your point guesses run too high) versus *overprecision* (your
+error bars run too narrow), the 90% intervals that catch the truth barely half the
+time, and the unsettling "hard–easy effect" that makes the questions you find hardest
+the very ones you'll botch most confidently.

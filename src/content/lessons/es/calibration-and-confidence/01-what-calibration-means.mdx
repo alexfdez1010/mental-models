@@ -1,0 +1,384 @@
+---
+title: "Qué significa la calibración"
+description: "Representa tu confianza declarada frente a cuántas veces aciertas y obtienes una curva de fiabilidad. Por debajo de la línea de 45° hay exceso de confianza; por encima, defecto de confianza — y los meteorólogos viven casi exactamente sobre la línea."
+topic: "es/calibration-and-confidence"
+order: 2
+minutes: 9
+updated: 2026-06-29
+---
+
+import { MCQ, Quiz, Callout, Reveal, CalibrationLab } from '@/components/react';
+
+En la introducción conociste la idea en una frase: de todas las veces que dices *70%*, en
+torno al 70% debería cumplirse. Es un buen eslogan, pero un eslogan no te dice *cuánto* te
+equivocas, ni *dónde*. Para hacer la calibración (calibration) tangible — algo que puedas ver,
+medir y corregir — hace falta un dibujo. Ese dibujo es la **curva de fiabilidad (reliability
+curve)** y, en cuanto sabes leerla, "estoy bien calibrado" deja de ser una sensación y se
+convierte en un gráfico al que puedes señalar.
+
+Esta es la lección en la que la calibración consigue un sistema de coordenadas. Construiremos
+la curva a partir de una tabla real de pronósticos, aprenderemos a leer el exceso y el defecto
+de confianza directamente sobre la diagonal, separaremos limpiamente la calibración de "acertar"
+y conoceremos a los profesionales que son tan buenos en esto que prácticamente lo han convertido
+en su oficio. Después puntuarás tu *propia* confianza en el laboratorio y verás aparecer tu curva.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una persona que hace pronósticos revisa todas las veces que dijo “80% de seguridad” a lo largo de un año — 50 afirmaciones de ese tipo — y descubre que, de media, acertó 64 de cada 100 de ellas. En un gráfico de confianza declarada (x) frente a tasa real de acierto (y), ¿dónde cae su punto del 80%?"
+  options={[
+    { text: 'Por debajo de la diagonal de 45° — afirmó un 80% pero solo cumplió ~64%, así que ahí tuvo exceso de confianza', correct: true },
+    { text: 'Por encima de la diagonal, porque un 64% sigue siendo aprobado' },
+    { text: 'Exactamente sobre la diagonal — quedarse cerca cuenta como estar calibrado' },
+    { text: 'No se puede representar; una tasa de acierto no es una confianza' },
+  ]}
+  explanation="Sin penalización en un pretest — esto es la lección entera en un solo punto. El eje x es lo que DIJO (80%); el eje y es cuántas veces acertó realmente con esa confianza (~64%). Como 64 queda por debajo de 80, el punto cae por debajo de la línea de 45° de la calibración perfecta — la firma del exceso de confianza. Cuanto más por debajo de la línea, mayor el farol. Al final de esta lección leerás estos puntos con soltura."
+/>
+
+## La curva de fiabilidad: confianza dentro, acierto fuera
+
+Esta es la analogía. Imagina una báscula de baño que pones a prueba subiéndote con pesos
+conocidos — una mancuerna de 10 kg, un saco de 50 kg, un amigo de 90 kg. Una báscula *perfecta*
+marca exactamente lo que le pones: 50 dentro, 50 fuera. Si representas el "peso real" frente a
+"lo que dijo la báscula", todos los puntos caen sobre una recta de 45°. Una báscula que siempre
+marca de más se sitúa *por debajo* de esa línea; una que marca de menos, *por encima*. La **curva
+de fiabilidad (reliability curve)** hace lo mismo con tu confianza: pesa tu certeza declarada
+contra la verdad y te muestra, nivel a nivel, si tu instrumento marca de más.
+
+La construcción es sencilla. Reúnes un montón de predicciones, cada una etiquetada con una
+confianza (50%, 60%, 70%…). Después las repartes en **cubetas** según esa confianza, y para cada
+cubeta calculas un número: *de las cosas sobre las que dije estar así de seguro, ¿qué fracción se
+cumplió de verdad?* Representas la confianza declarada en el eje x y esa fracción real en el eje y.
+Unes los puntos. Esa es tu curva de fiabilidad, también llamada **gráfico de calibración
+(calibration plot)**.
+
+> **Curva de fiabilidad (definición).** Para cada nivel de confianza *c*, toma todos los
+> pronósticos que hiciste con confianza *c* y calcula la fracción que se cumplió. El punto
+> (*c*, esa fracción) va al gráfico. La calibración perfecta es la línea *y = x* — la diagonal de
+> 45° — donde la confianza declarada iguala a la tasa de acierto observada en cada nivel.
+
+### Un ejemplo completo, paso a paso
+
+Te presento a Dana, que se pasó un año anotando 100 pronósticos — "85% de que esta función se
+publica el viernes", "70% de que mi hermana acepta el trabajo", ese tipo de cosas — cada uno
+etiquetado con una confianza tomada de 50/60/70/80/90. Al final del año los reparte en cubetas y
+cuenta cuántos de cada una se cumplieron.
+
+| Confianza declarada | Nº de pronósticos en la cubeta | Nº que se cumplieron | Tasa real de acierto | En el gráfico |
+|---|---|---|---|---|
+| 50% | 20 | 11 | 55% | ligeramente **por encima** de la línea |
+| 60% | 25 | 14 | 56% | **por debajo** de la línea |
+| 70% | 22 | 14 | 64% | **por debajo** de la línea |
+| 80% | 18 | 12 | 67% | **por debajo** de la línea |
+| 90% | 15 | 11 | 73% | **muy por debajo** de la línea |
+
+Léelo como una historia. Al 50% Dana es básicamente honesta — dijo 50%, la realidad entregó 55%,
+el punto se sitúa justo sobre (o un pelín por encima de) la diagonal. Pero fíjate en lo que pasa
+a medida que sube su confianza: al 60% solo acierta el 56%, al 70% solo el 64%, al 80% solo el
+67% y al 90% — donde se sentía casi segura — acierta apenas el 73% de las veces. Cada punto de
+confianza alta se hunde *por debajo* de la diagonal, y el hundimiento empeora **cuanto más segura
+se pone**. Esa forma que se comba hacia abajo, más pronunciada en lo más alto, es la huella
+dactilar del exceso de confianza. El "90%" de Dana vale unos 73 céntimos por euro.
+
+Lo crucial es que no necesitabas saber *cuáles* pronósticos eran correctos — no volviste a juzgar
+el lanzamiento de la función ni el trabajo de su hermana. La curva lee su criterio en conjunto.
+Un solo fallo en una afirmación al 90% no demuestra nada; *once de quince* a lo largo de un año
+es un veredicto.
+
+<CalibrationLab
+  client:visible
+  title="Puntúa tu propia confianza"
+  eyebrow="Laboratorio de calibración"
+  instructions="Para cada afirmación, decide Verdadero o Falso y luego elige cómo de seguro estás. Después de las diez, representaremos tu curva de fiabilidad, mediremos tu brecha de exceso de confianza y te daremos un Brier score (cuanto más bajo, mejor — conocerás la fórmula en la lección 3)."
+  caption="Diez afirmaciones verificables. Comprométete con una confianza ANTES de pensar en la siguiente — el objetivo es pillar tu propia brecha con las manos en la masa."
+  truthPrompt="¿Es verdadero o falso?"
+  trueLabel="Verdadero"
+  falseLabel="Falso"
+  confidencePrompt="¿Cómo de seguro estás?"
+  progressTemplate="Afirmación {n} de {total}"
+  resetLabel="Empezar de nuevo"
+  resultsTitle="Tu calibración"
+  brierLabel="Brier score"
+  avgConfidenceLabel="Confianza media"
+  accuracyLabel="Acierto real"
+  gapLabel="Brecha de exceso"
+  xAxisLabel="Dijiste…"
+  yAxisLabel="…acertaste así de a menudo"
+  diagonalLabel="Calibración perfecta"
+  overconfidentVerdict="Exceso de confianza: tus afirmaciones superaron a tus aciertos en {gap} puntos. Te crees más seguro de lo que la realidad respalda."
+  underconfidentVerdict="Defecto de confianza: acertaste {gap} puntos más de lo que te atreviste a afirmar. Podrías ser más audaz con tus probabilidades."
+  calibratedVerdict="Muy bien calibrado: tu confianza y tu acierto solo se separan en {gap} puntos. Tu instrumento dice la verdad."
+  readoutTemplate="Dijiste {conf} de media y acertaste el {acc} de las veces — una brecha de {gap} puntos. Tu Brier score es {brier}."
+  claims={[
+    { statement: 'El Nilo es más largo que el Amazonas.', isTrue: true },
+    { statement: 'Un kilogramo de acero pesa más que un kilogramo de plumas.', isTrue: false },
+    { statement: 'El monte Everest es el punto de la Tierra más cercano a la Luna.', isTrue: false },
+    { statement: 'La miel nunca se estropea si se guarda sellada y seca.', isTrue: true },
+    { statement: 'Hay más árboles en la Tierra que estrellas en la Vía Láctea.', isTrue: true },
+    { statement: 'La Gran Muralla China es visible a simple vista desde la Luna.', isTrue: false },
+    { statement: 'Los pulpos tienen tres corazones.', isTrue: true },
+    { statement: 'Los plátanos crecen en árboles.', isTrue: false },
+    { statement: 'El cuerpo humano tiene más células bacterianas que células humanas.', isTrue: true },
+    { statement: 'Un rayo nunca cae dos veces en el mismo sitio.', isTrue: false },
+  ]}
+/>
+
+¿Aguantaron tus respuestas de confianza alta? Si dijiste "90%" unas cuantas veces y fallaste una o
+dos, enhorabuena — eres humano, y tu punto acaba de hundirse por debajo de la línea como el de casi
+todo el mundo. Eso no es un fracaso; es la *medición* que hace posible mejorar. No puedes corregir
+una brecha que no ves.
+
+<Callout variant="tip" title="Cómo leer cualquier curva de fiabilidad en cinco segundos">
+Busca la diagonal de 45° — esa es la perfección. **Por debajo de la línea = exceso de confianza**
+(afirmaste más certeza de la que entregaste). **Por encima de la línea = defecto de confianza**
+(fuiste más certero de lo que te atreviste a decir). La *distancia vertical* de un punto a la
+diagonal es exactamente cuánto se pasó o se quedó corta tu confianza respecto a la realidad en ese
+nivel. Ese es todo el instrumento.
+</Callout>
+
+### Error común: confundir los ejes
+
+El error más habitual con diferencia es leer el valor del eje y como "mi nota" y entrar en pánico
+porque es bajo. El eje y no es una puntuación — es la *verdad contra la que se compara tu
+confianza*. Una cubeta donde dijiste 60% y acertaste el 60% es **perfecta**, aunque 60% suene
+mediocre. La calibración no pide que tu acierto sea alto; pide que **iguale lo que afirmaste**. Un
+punto en (60%, 60%) es calibración impecable; un punto en (90%, 75%) es un problema — aunque 75%
+sea el número más alto.
+
+### Cuándo usarla
+
+Construye una curva de fiabilidad siempre que tengas un montón de predicciones pasadas con
+confianzas asociadas y resultados que puedas comprobar: el "% de probabilidad de cierre" de un
+equipo de ventas, el "probablemente benigno" de un médico, tus propios pronósticos fechados.
+Necesita **volumen** — una docena de afirmaciones por cubeta antes de que las fracciones signifiquen
+algo — y necesita **resultados resueltos**. Es la herramienta equivocada para una única apuesta
+aislada (un solo lanzamiento de moneda no llena una cubeta) o para creencias que nunca llegan a
+zanjarse.
+
+## Leer la diagonal: tres formas
+
+Una vez que la diagonal es tu línea de referencia, tres formas te lo cuentan casi todo.
+
+La curva **perfectamente calibrada** *es* la diagonal: cada punto se sitúa sobre *y = x*. Di 70%,
+acierta 70%; di 90%, acierta 90%. La confianza dice la verdad en todos los niveles.
+
+La curva con **exceso de confianza** se hunde **por debajo** de la diagonal y — esta es la parte que
+hay que grabarse a fuego — se hunde *más en el extremo de confianza alta*. Las conjeturas de
+confianza baja son más o menos honestas (es difícil pasarse de confiado cuando ya estás diciendo
+"cara o cruz"), pero a medida que la curva trepa hacia el 90% y el 99%, la brecha entre afirmación
+y realidad se abre de par en par. La línea se curva hacia abajo y a la derecha, aplanándose mucho
+antes de llegar a la esquina. Esa es Dana. Esa es la mayoría de la gente. Los puntos peligrosos
+siempre están en la esquina superior derecha.
+
+La curva con **defecto de confianza** se comba **por encima** de la diagonal: sigues diciendo "60%,
+¿quizá?" sobre cosas que se cumplen el 80% de las veces. Es más rara que el exceso de confianza y
+más suave en sus consecuencias — llevarse una grata sorpresa cuesta menos que quedarse de piedra —
+pero sigue siendo una mala calibración. La cura es la imagen especular: atrévete a decir el número
+más alto.
+
+<Reveal client:visible buttonText="¿Por qué el exceso de confianza curva el gráfico justamente en lo alto?">
+Porque lo alto es donde hay sitio para caer. Al 50% de confianza literalmente no puedes tener
+exceso de confianza — 50% es lo más humilde que puede ser una afirmación binaria, y la verdad no
+tiene más sitio que sobre tu afirmación o por encima de ella. Pero al 95% tienes debajo un
+precipicio de 45 puntos, y quien se pasa de confiado se lanza de cabeza por él: reparte "95%" y
+"99%" como caramelos sobre afirmaciones que en realidad eran apuestas del 80%. Así que la brecha
+entre afirmación y realidad es mayor exactamente donde la confianza es más alta — por eso una curva
+con exceso de confianza está casi bien a la izquierda y se desmorona a la derecha.
+</Reveal>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una curva de fiabilidad se pega a la diagonal en el 50% y el 60%, y luego se hunde muy por debajo de ella en el 80% y el 90%. ¿Cuál es el diagnóstico?"
+  options={[
+    { text: 'Exceso de confianza clásico — honesta en las afirmaciones fáciles de confianza baja, pero afirmando mucha más certeza de la merecida en las de confianza alta', correct: true },
+    { text: 'Defecto de confianza, porque la curva arranca sobre la diagonal' },
+    { text: 'Calibración perfecta, porque toca la línea en algún punto' },
+    { text: 'Un gráfico defectuoso — una curva real no puede cruzar la diagonal' },
+  ]}
+  explanation="Esta es la forma de manual del exceso de confianza: bien en el extremo bajo, hundiéndose por debajo de la línea y más pronunciada en el extremo de confianza alta. Las afirmaciones del 80% y el 90% son donde la realidad se quedó más lejos de la promesa. Tocar la diagonal en el 50% no la redime — es exactamente el aspecto del exceso de confianza, porque el 50% es el único sitio donde no puedes pasarte."
+/>
+
+## Calibración vs. acierto vs. resolución
+
+Aquí se enredan tres palabras, así que vamos a fijarlas.
+
+El **acierto (accuracy)** es simplemente cuántas veces aciertas en total — tu tasa de acierto en
+bruto. La **calibración (calibration)** es si tu *confianza coincide* con esa tasa de acierto, nivel
+a nivel. Son genuinamente distintas: recuerda los dos pronosticadores de la moneda de la
+introducción — "cara, 50%" siempre y "cara, 99%" siempre — que tenían un acierto *idéntico* (50%)
+pero una calibración opuesta (uno perfecto, otro catastrófico). El acierto pregunta "¿acertaste?";
+la calibración pregunta "¿era honesta tu confianza?".
+
+Hay una tercera palabra al acecho, y es la que impide que la calibración sea una escapatoria: la
+**resolución (resolution)**. Quien dice "50%" a *todo* — cada moneda, cada elección, cada
+diagnóstico — puede estar perfectamente calibrado y ser perfectamente inútil, porque nunca se moja.
+La **resolución** es la disposición a empujar tus probabilidades lejos de un tibio 50% hacia 90s y
+10s seguros *cuando la evidencia lo merece* — a distinguir de verdad lo probable de lo improbable.
+El objetivo no es solo la honestidad; es honesta *y* decidida: probabilidades nítidas que además
+sean ciertas.
+
+<Callout variant="warning" title="La calibración por sí sola es una trampa que puedes amañar">
+Puedes estar impecablemente calibrado diciendo "50%" a cada pregunta de sí/no para siempre — y no
+aportar absolutamente nada. Por eso la calibración es necesaria pero no suficiente. El objetivo
+completo es **calibración + resolución**: probabilidades audaces y decididas que *aun así* se
+cumplen al ritmo que afirmas. Desentrañamos esa tensión a fondo en la lección 5 — por ahora, ten
+claro que "ser vago para ir a lo seguro" no es la lección.
+</Callout>
+
+Dejamos la resolución deliberadamente en modo avance — la lección 5 ("Cómo calibrarse") le da el
+tratamiento completo, incluido cómo los mejores pronosticadores mantienen ambos diales altos a la
+vez. Aquí, quédate solo con el trío: acierto = lo que aciertas, calibración = confianza honesta,
+resolución = decisión útil.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Qué afirmación separa mejor la calibración del acierto?"
+  options={[
+    { text: 'El acierto es cuántas veces aciertas; la calibración es si tu confianza coincide con cuántas veces aciertas', correct: true },
+    { text: 'Calibración y acierto son dos nombres para la misma tasa de acierto' },
+    { text: 'El acierto va de honestidad; la calibración va de corrección en bruto' },
+    { text: 'La calibración solo importa cuando el acierto está por encima del 90%' },
+  ]}
+  explanation="Acierto = tu tasa de acierto global. Calibración = si tu confianza declarada cuadra con esa tasa de acierto, nivel a nivel. El pronosticador de la moneda que dice 99% siempre clava la distinción: confianza declarada alta, 50% de acierto, calibración pésima. Puedes compartir el acierto y diferir muchísimo en calibración — eso es justo lo que importa."
+/>
+
+## Los meteorólogos: el patrón oro
+
+Aquí viene la parte alentadora, y es una historia real. Los profesionales **mejor calibrados** del
+planeta con mayor fiabilidad no son físicos ni estadísticos — son los **meteorólogos** de la tele
+y de los servicios nacionales. Cuando un meteorólogo del Servicio Meteorológico Nacional de EE. UU.
+dice "70% de probabilidad de lluvia", llueve en cerca del 70% de esos días. Sus curvas de fiabilidad
+abrazan célebremente la diagonal casi a la perfección en todo el rango, desde el 10% de llovizna
+hasta el 90% de diluvio.
+
+¿Por qué ellos? No por genialidad bruta — por el **feedback**. Tres ingredientes hacen que la
+calibración sea entrenable, y la meteorología los tiene todos en abundancia:
+
+- **Volumen.** Un meteorólogo emite miles de pronósticos probabilísticos al año. Eso son miles de
+  puntos — cada cubeta se llena rápido y la curva deja de ser ruido.
+- **Resultados rápidos e inequívocos.** Para mañana ya *sabes* si llovió. Sin maquillaje, sin "bueno,
+  depende de cómo definas lluvia". La verdad llega puntual.
+- **Puntuación con consecuencias.** Las probabilidades de los meteorólogos se registran y se evalúan
+  (con reglas de puntuación adecuadas — lección 3), así que quien crónicamente se pasa o se queda
+  corto ve la brecha y vuelve a la diagonal, temporada tras temporada.
+
+Compara eso con un tertuliano que predice elecciones (un puñado de pronósticos por década,
+resultados difusos, sin marcador) y entiendes por qué los meteorólogos están calibrados y los
+tertulianos son el remate de un chiste. La lección es liberadora: la calibración no es un don, es un
+**reflejo entrenado**. Cualquiera que ponga números a sus predicciones, las compruebe y se ajuste
+irá derivando hacia la diagonal — exactamente lo que la lección 5 convierte en rutina.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Identifica la verdadera razón por la que los meteorólogos están tan bien calibrados."
+  options={[
+    { text: 'Hacen volúmenes enormes de pronósticos probabilísticos con resultados rápidos y comprobables, y se les puntúa por ellos', correct: true },
+    { text: 'Predecir el tiempo es intrínsecamente más fácil que predecir cualquier otra cosa' },
+    { text: 'Son por naturaleza más humildes que otros profesionales' },
+    { text: 'El tiempo moderno es tan predecible que un pronóstico del 90% está básicamente garantizado' },
+  ]}
+  explanation="La calibración es una destreza de feedback, no un talento ni un rasgo de personalidad. La meteorología aporta las tres cosas que la entrenan: volumen enorme (miles de pronósticos), resultados rápidos e inequívocos (lo sabes para mañana) y puntuación real. Ese bucle de feedback estrecho y repetido es lo que dobla la curva de cualquiera hacia la diagonal — y es justo el bucle que la lección 5 te enseña a construir para ti."
+/>
+
+## Resumen
+
+<Quiz
+  client:visible
+  title="Comprueba tu nivel: leer la curva"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Incorrecto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  scoreLabel="Tu puntuación"
+  correctCountLabel="correctas"
+  restartLabel="Reiniciar"
+  completeLabel="Completado"
+  gateLabel="Comprueba tu respuesta para continuar."
+  questions={[
+    {
+      question: '¿Qué representa la diagonal de 45° en una curva de fiabilidad?',
+      options: [
+        { text: 'Calibración perfecta — la confianza declarada iguala a la tasa real de acierto en todos los niveles', correct: true },
+        { text: 'La nota mínima para aprobar de un pronosticador' },
+        { text: 'La confianza media de todos tus pronósticos' },
+        { text: 'La línea por encima de la cual todos los pronósticos son correctos' },
+      ],
+      explanation: 'La diagonal es y = x: en cada nivel de confianza, la fracción que se cumplió iguala a la confianza que declaraste. Los puntos sobre la línea están perfectamente calibrados; la distancia vertical a la línea mide tu exceso o defecto de confianza en ese nivel.',
+    },
+    {
+      question: 'Los puntos de un pronosticador se sitúan POR DEBAJO de la diagonal, y la brecha crece a medida que sube la confianza. Esta es la firma de…',
+      options: [
+        { text: 'Exceso de confianza — afirmó más certeza de la que entregó, peor en el extremo de confianza alta', correct: true },
+        { text: 'Defecto de confianza — fue más certero de lo que admitió' },
+        { text: 'Calibración perfecta con algo de ruido' },
+        { text: 'Resolución alta — pronósticos audaces y decididos' },
+      ],
+      explanation: 'Por debajo de la línea = exceso de confianza, y la forma clásica se hunde más en lo alto porque ahí es donde hay sitio para caer (no puedes pasarte al 50%). Los puntos de confianza alta — las afirmaciones del “90%” y el “99%” — son donde la realidad se quedó más lejos de la promesa.',
+    },
+    {
+      question: 'Una cubeta donde dijiste “60%” y acertaste el 60% de las veces está…',
+      options: [
+        { text: 'Perfectamente calibrada — tu confianza coincidió con la realidad exactamente, aunque 60% no sea un número alto', correct: true },
+        { text: 'Mal calibrada, porque un 60% de acierto es demasiado bajo' },
+        { text: 'Con exceso de confianza, porque deberías haber dicho 50%' },
+        { text: 'Imposible de evaluar sin saber qué afirmaciones fueron correctas' },
+      ],
+      explanation: 'La calibración pide que tu acierto IGUALE tu afirmación, no que sea alto. (60%, 60%) cae justo sobre la diagonal — impecable. La trampa es leer el valor del eje y como una nota: un 60% perfectamente calibrado gana a un 90% mal calibrado y con exceso de confianza.',
+    },
+    {
+      question: '¿Por qué los meteorólogos profesionales son el patrón oro de la calibración?',
+      options: [
+        { text: 'Un volumen enorme de pronósticos, resultados rápidos e inequívocos y puntuación real crean el bucle de feedback que entrena la calibración', correct: true },
+        { text: 'Porque el tiempo es fundamentalmente fácil de predecir' },
+        { text: 'Porque solo ellos usan probabilidades, mientras que otros expertos usan palabras' },
+        { text: 'Porque estar calibrado es un rasgo innato que casualmente comparten' },
+      ],
+      explanation: 'La calibración se entrena con feedback, no se nace con ella. La meteorología aporta los tres ingredientes — volumen, resultados rápidos y comprobables, y puntuación — así que las curvas de los meteorólogos abrazan la diagonal. La conclusión es esperanzadora: construye ese bucle para ti (lección 5) y tu curva también se endereza.',
+    },
+  ]}
+/>
+
+## Hacia dónde sigue esto
+
+Ya sabes leer la calibración en un gráfico: construye las cubetas, representa la confianza frente a
+la tasa de acierto y encuentra la diagonal. Por debajo, fanfarroneaste; por encima, te quedaste
+corto; y para casi todo el mundo la curva se hunde *por debajo* de la línea, más pronunciada justo
+donde la confianza es más alta. Esa comba hacia abajo universal no es mala suerte — tiene una
+estructura, y viene en dos sabores distintos. En la **lección 2, Exceso de confianza y exceso de
+precisión**, la separamos: la *sobreestimación* (tus conjeturas puntuales salen demasiado altas)
+frente al *exceso de precisión* (tus barras de error salen demasiado estrechas), los intervalos del
+90% que atrapan la verdad apenas la mitad de las veces, y el inquietante "efecto difícil-fácil" que
+hace que las preguntas que te parecen más difíciles sean justo las que más confiadamente meterás la
+pata.
