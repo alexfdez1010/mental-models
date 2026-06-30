@@ -38,14 +38,14 @@
  *     `economics`, `strategy`) has none. Fill the breadth, then deepen.
  *
  * ── Mental Models build queue ───────────────────────────────────────────────
- * The zero-to-expert ladder of models still to build (see TOPIC.md). The
- * earliest courses (`what-are-mental-models`, `natural-selection`, …) have
- * graduated and been removed. Lowest `order` is built next. Orders 5–13 are the
- * remaining beginner→intermediate breadth pass that seeds every starved
- * discipline (compounding, the razors, circle of competence, comparative
- * advantage, …) BEFORE the four advanced/expert probability/systems courses
- * (orders 14–17). This deliberately front-loads foundational breadth so the
- * build stops over-indexing on the decision-making / probability tags.
+ * The zero-to-expert ladder of models still to build (see TOPIC.md). The whole
+ * beginner→intermediate breadth pass and the first advanced rungs
+ * (`what-are-mental-models`, `natural-selection`, `supply-and-demand`,
+ * `tragedy-of-the-commons`, `externalities`, …) have graduated and been removed.
+ * Lowest `order` is built next. The remaining entries are the **advanced tier**,
+ * deliberately kept tag-diverse so no single roadmap tag races ahead: strategy
+ * (`moats`), biology-evolution (`ecosystems-and-niches`), systems-thinking
+ * (`leverage-points`), and psychology (`lollapalooza-effect`).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -83,33 +83,11 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced systems / economics / strategy / biology tier ─────────────────
-  // `stocks-and-flows` (the advanced systems rung, order 19) has graduated and
+  // ── Advanced systems / economics / strategy / biology / psychology tier ────
+  // `externalities` (the advanced economics rung, order 20) has graduated and
   // been removed; its topic MDX is now the record. The lowest-order entry below
-  // (`externalities`, order 20) is built next.
-  // ── Breadth re-seed (orders 20–22) ────────────────────────────────────────
-  // Kept ≥3 and tag-diverse as courses graduate: economics, strategy, and
-  // biology-evolution each carry one advanced rung here.
-  {
-    slug: 'externalities',
-    icon: '🏭',
-    difficulty: 'advanced',
-    order: 20,
-    accent: 'brand',
-    title: {
-      en: 'Externalities',
-      es: 'Externalidades',
-    },
-    description: {
-      en: 'When the person who decides isn’t the person who pays, the price lies — and the market quietly over-produces pollution and under-produces vaccines. The gap between private and social cost.',
-      es: 'Cuando quien decide no es quien paga, el precio miente — y el mercado produce de más la contaminación y de menos las vacunas. La brecha entre el coste privado y el coste social.',
-    },
-    dependencies: ['supply-and-demand', 'tragedy-of-the-commons'],
-    tags: ['economics'],
-    buildNotes:
-      'Externalities — the advanced economics rung extending supply & demand and the tragedy of the commons: costs and benefits that spill onto third parties who never agreed to them. Sections: definition — a cost (negative) or benefit (positive) imposed on someone outside a transaction, so private cost ≠ social cost; negative externalities (pollution, noise, congestion, antibiotic resistance) → the market over-produces them because the decider doesn’t bear the full cost; positive externalities (vaccines, education, R&D, a restored façade) → the market under-produces them because the decider doesn’t capture the full benefit; the marginal private vs. social cost/benefit picture (the wedge and the deadweight loss) with a worked numeric example; remedies — Pigouvian taxes & subsidies (price the spillover), cap-and-trade, regulation, and the Coase theorem (clear property rights + low bargaining cost can internalize it privately) and its limits; relation to the commons (a shared sink is a negative externality at scale) and to incentives. Build an interactive supply–demand-with-externality island (a slider for the external cost/benefit that shifts the social curve away from the private one, shading the over/under-production gap and the welfare loss, with a tax/subsidy toggle that re-aligns them). Pitfall: assuming the market price reflects true cost; ignoring positive externalities; treating a tax as a penalty rather than a price correction. Recap Quiz + MindMap. en + es twin.',
-  },
-  // ── Breadth re-seed (orders 21–22) ────────────────────────────────────────
+  // (`moats`, order 21) is built next.
+  // ── Breadth re-seed (orders 21–24) ────────────────────────────────────────
   // Appended as `loss-aversion` (order 18) graduates, to keep the queue ≥3 and
   // tag-diverse: a strategy rung and a biology-evolution rung, the two tags the
   // remaining advanced tier (systems-thinking, economics) was missing.
@@ -150,6 +128,48 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['biology-evolution', 'strategy'],
     buildNotes:
       'Ecosystems & niches — the advanced biology-evolution rung built on natural selection: how many species coexist by dividing up the environment rather than all fighting for the same resource. Sections: the niche — the specific role/resource-space a species occupies (what it eats, where, when), not just its habitat; the competitive exclusion principle (Gause) — two species competing for the exact same limiting resource can’t coexist; one wins, so survivors differentiate; resource partitioning & specialization with worked examples (Darwin’s finches and beak size, warblers feeding in different parts of the same tree); generalist vs specialist trade-offs (broad-but-shallow vs narrow-but-efficient, and when each wins); keystone species, food webs, and how removing one node cascades (tie to systems-thinking/feedback and second-order effects); the powerful business/strategy transfer — markets are ecosystems, "find an unoccupied niche", differentiation as avoiding head-to-head competitive exclusion (tie to moats and comparative advantage); invasive species & disturbance as the failure modes. Build an interactive niche / competitive-exclusion island (e.g. two or more species on overlapping resource axes; a slider for niche overlap that shows coexistence when overlap is low and one competitor driven extinct when overlap is high). Pitfall: assuming "most competitive wins everything" (it wins its niche, not all niches); confusing habitat with niche. Recap Quiz + MindMap. en + es twin.',
+  },
+  // Appended as `externalities` (order 20) graduates, to keep the queue ≥3 and
+  // tag-diverse: a systems-thinking rung and a psychology rung — the two tags
+  // the remaining advanced tier (strategy, economics, biology-evolution) was
+  // missing.
+  {
+    slug: 'leverage-points',
+    icon: '🎯',
+    difficulty: 'advanced',
+    order: 23,
+    accent: 'accent',
+    title: {
+      en: 'Leverage Points',
+      es: 'Puntos de Apalancamiento',
+    },
+    description: {
+      en: 'In any system, some places to push are almost useless and a few are astonishingly powerful — and our intuition usually reaches for the weak ones. Donella Meadows’ ladder of where to intervene, from tweaking numbers to changing the goal of the whole system.',
+      es: 'En cualquier sistema, algunos lugares donde empujar son casi inútiles y unos pocos son asombrosamente potentes — y nuestra intuición suele agarrar los débiles. La escalera de Donella Meadows sobre dónde intervenir, desde ajustar números hasta cambiar el objetivo de todo el sistema.',
+    },
+    dependencies: ['feedback-loops', 'stocks-and-flows'],
+    tags: ['systems-thinking'],
+    buildNotes:
+      'Leverage points — the advanced systems-thinking rung built on feedback loops and stocks & flows: where to push a complex system to change its behaviour, and why the obvious places are usually the weak ones. Frame around Donella Meadows’ famous ordered list (places to intervene, in increasing order of power), but teach the *idea* not a memorised rank: low-leverage points (constants, parameters, numbers — tweaking a tax rate or a thermostat setpoint) vs. high-leverage points (the strength and structure of feedback loops, the rules of the system, the information flows, the goal of the system, and the paradigm/mindset out of which the system arises). Sections: the counterintuition — Meadows’ insight that people reliably push hardest on low-leverage parameters (numbers) while the powerful levers (loop structure, rules, goals, paradigms) sit ignored; a worked walk *up* the ladder on one concrete system (e.g. a city’s traffic, an overdrawn aquifer, or a company’s culture) showing how the same problem yields to a higher lever; negative vs positive feedback as levers (strengthening a balancing loop vs weakening a runaway reinforcing loop — tie back to the feedback-loops course); rules, information flows, and "the goal of the system" as progressively deeper levers (add a missing feedback of information — e.g. making people see their own energy use — as a classic mid-ladder win); paradigms as the highest leverage and the hardest to shift. Pitfalls: pushing a lever in the wrong direction (Meadows’ warning that high leverage points are "not intuitive, and when found, often pushed the wrong way"); mistaking activity at a low leverage point for progress. Build an interactive leverage-ladder island: a system with a few intervention sliders/levers at different ladder heights; the learner applies effort at a chosen level and sees how much the system’s output actually moves, making "same effort, wildly different result" visible. Ties to feedback-loops, stocks-and-flows, bottlenecks, second-order thinking. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'lollapalooza-effect',
+    icon: '🎰',
+    difficulty: 'advanced',
+    order: 24,
+    accent: 'brand',
+    title: {
+      en: 'The Lollapalooza Effect',
+      es: 'El Efecto Lollapalooza',
+    },
+    description: {
+      en: 'Biases rarely strike one at a time. When several psychological tendencies point the same way at once, they don’t add — they multiply, tipping ordinary people into bubbles, cults, and manias. Munger’s name for the moment many models combine into one overwhelming force.',
+      es: 'Los sesgos rara vez actúan de uno en uno. Cuando varias tendencias psicológicas apuntan a la vez en la misma dirección, no se suman: se multiplican, empujando a gente normal hacia burbujas, sectas y manías. El nombre que dio Munger al momento en que muchos modelos se combinan en una sola fuerza arrolladora.',
+    },
+    dependencies: ['confirmation-bias', 'incentives', 'loss-aversion'],
+    tags: ['psychology'],
+    buildNotes:
+      'The Lollapalooza effect — the advanced psychology rung where the major cognitive biases stop acting in isolation and *combine*: Charlie Munger’s term for when several psychological tendencies all push in the same direction at once and produce an extreme, nonlinear outcome (the effects compound and reinforce rather than merely add). Assumes the intermediate bias courses (confirmation bias, availability, loss aversion, incentives, social proof). Sections: the core idea — most real-world disasters and manias aren’t one bias but a *confluence* (Munger: "you get lollapalooza effects when two, three or four forces are all operating in the same direction"); why combination is multiplicative not additive (each bias lowers resistance to the next; reinforcing feedback — tie to feedback-loops); worked case studies pulled apart bias-by-bias — e.g. an open-outcry auction or bidding war (social proof + commitment/consistency + deprivation-superreaction/loss aversion + reciprocation), a market bubble (social proof + incentive-caused bias + envy + over-optimism + confirmation), a cult or high-pressure sales close (authority + social proof + commitment + reciprocation + scarcity); the defensive use — building a mental "checklist" of biases to run against a decision precisely because no single one announces itself; the connection to the latticework thesis of the whole site (models combine — this is that idea turned on the psychology tag). Pitfalls: hindsight over-fitting (don’t just label everything "lollapalooza" after the fact — name the *specific* tendencies and show they pointed the same way); assuming biases always compound (sometimes they offset). Build an interactive island: a scenario (auction or bubble) with toggles for each contributing bias; as the learner switches biases on, a "pressure"/likelihood meter climbs nonlinearly, and turning several on at once spikes it — making the multiplicative stacking visible vs. the sum of the parts. Recap Quiz + MindMap. en + es twin.',
   },
 ];
 

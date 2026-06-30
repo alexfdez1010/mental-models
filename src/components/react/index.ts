@@ -156,3 +156,6 @@ export type { ValueFunctionExplorerProps } from '@/components/react/ValueFunctio
 
 export { StockFlowBathtub, default as StockFlowBathtubDefault } from '@/components/react/StockFlowBathtub';
 export type { StockFlowBathtubProps } from '@/components/react/StockFlowBathtub';
+
+export { ExternalityChart, default as ExternalityChartDefault } from '@/components/react/ExternalityChart';
+export type { ExternalityChartProps } from '@/components/react/ExternalityChart';
