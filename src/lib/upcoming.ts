@@ -43,9 +43,10 @@
  * (`what-are-mental-models`, `natural-selection`, `supply-and-demand`,
  * `tragedy-of-the-commons`, `externalities`, …) have graduated and been removed.
  * Lowest `order` is built next. The remaining entries are the **advanced tier**,
- * deliberately kept tag-diverse so no single roadmap tag races ahead: strategy
- * (`moats`), biology-evolution (`ecosystems-and-niches`), systems-thinking
- * (`leverage-points`), and psychology (`lollapalooza-effect`).
+ * deliberately kept tag-diverse so no single roadmap tag races ahead:
+ * biology-evolution (`ecosystems-and-niches`), systems-thinking
+ * (`leverage-points`), and psychology (`lollapalooza-effect`). The strategy rung
+ * (`moats`) has graduated and been removed; its topic MDX is now the record.
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -84,32 +85,12 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Advanced systems / economics / strategy / biology / psychology tier ────
-  // `externalities` (the advanced economics rung, order 20) has graduated and
-  // been removed; its topic MDX is now the record. The lowest-order entry below
-  // (`moats`, order 21) is built next.
-  // ── Breadth re-seed (orders 21–24) ────────────────────────────────────────
-  // Appended as `loss-aversion` (order 18) graduates, to keep the queue ≥3 and
-  // tag-diverse: a strategy rung and a biology-evolution rung, the two tags the
-  // remaining advanced tier (systems-thinking, economics) was missing.
-  {
-    slug: 'moats',
-    icon: '🏰',
-    difficulty: 'advanced',
-    order: 21,
-    accent: 'brand',
-    title: {
-      en: 'Moats & Durable Advantage',
-      es: 'Fosos (Moats) y Ventaja Duradera',
-    },
-    description: {
-      en: 'Any business earning fat profits invites attackers — a moat is whatever keeps them from crossing. Network effects, switching costs, scale, and brand: why a few advantages compound for decades while most evaporate in a quarter.',
-      es: 'Todo negocio que gana beneficios jugosos atrae atacantes — un foso es aquello que les impide cruzar. Efectos de red, costes de cambio, escala y marca: por qué unas pocas ventajas se acumulan durante décadas mientras la mayoría se evaporan en un trimestre.',
-    },
-    dependencies: ['game-theory-basics', 'comparative-advantage'],
-    tags: ['strategy', 'economics'],
-    buildNotes:
-      'Moats & durable advantage — the advanced strategy rung: why excess profit attracts competition and what makes an advantage *last*. Sections: the core idea — in a free market, high returns invite imitation that competes them away, so a durable advantage is whatever raises a wall against that imitation (Buffett’s "economic moat"); the main moat types, each with a worked example and how it can be breached — (1) network effects (the product gets better as more people use it; tie back to the systems/feedback course), (2) switching costs (it’s painful or risky to leave — data, habits, contracts), (3) economies of scale / cost advantage (a bigger player’s unit costs are structurally lower), (4) intangible assets (brand, patents, regulatory licenses), (5) efficient-scale niches (a market only big enough for one or two players); the difference between a real moat and a mirage (a hot product, first-mover hype, or a great team is not a moat); moat *erosion* and the Red Queen connection (you must keep running to maintain it; technology shifts fill moats in); measuring a moat by pricing power and return-on-capital persistence. Build an interactive moat-erosion / network-effects island (e.g. a slider for the strength of a network effect or switching cost vs. competitive pressure over time, showing margins either compounding or decaying to commodity levels). Pitfall: confusing a temporarily great product with a structural moat; assuming any moat is permanent. Connect to comparative advantage, game theory, incentives, and the Red Queen effect. Recap Quiz + MindMap. en + es twin.',
-  },
+  // `externalities` (order 20) and `moats` (the advanced strategy rung, order 21)
+  // have graduated and been removed; their topic MDX is now the record. The
+  // lowest-order entry below (`ecosystems-and-niches`, order 22) is built next.
+  // ── Breadth re-seed (orders 22–24) ────────────────────────────────────────
+  // A biology-evolution rung, a systems-thinking rung, and a psychology rung,
+  // kept tag-diverse so no single roadmap tag races ahead.
   {
     slug: 'ecosystems-and-niches',
     icon: '🌳',

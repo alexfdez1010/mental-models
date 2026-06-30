@@ -159,3 +159,6 @@ export type { StockFlowBathtubProps } from '@/components/react/StockFlowBathtub'
 
 export { ExternalityChart, default as ExternalityChartDefault } from '@/components/react/ExternalityChart';
 export type { ExternalityChartProps } from '@/components/react/ExternalityChart';
+
+export { MoatErosion, default as MoatErosionDefault } from '@/components/react/MoatErosion';
+export type { MoatErosionProps } from '@/components/react/MoatErosion';
