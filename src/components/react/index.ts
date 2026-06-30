@@ -153,3 +153,6 @@ export type { CalibrationLabProps, CalibrationClaim } from '@/components/react/C
 
 export { ValueFunctionExplorer, default as ValueFunctionExplorerDefault } from '@/components/react/ValueFunctionExplorer';
 export type { ValueFunctionExplorerProps } from '@/components/react/ValueFunctionExplorer';
+
+export { StockFlowBathtub, default as StockFlowBathtubDefault } from '@/components/react/StockFlowBathtub';
+export type { StockFlowBathtubProps } from '@/components/react/StockFlowBathtub';

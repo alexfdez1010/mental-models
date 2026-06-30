@@ -83,32 +83,13 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced psychology / systems / economics / strategy / biology tier ────
-  // `loss-aversion` (the advanced psychology rung, order 18) has graduated and
+  // ── Advanced systems / economics / strategy / biology tier ─────────────────
+  // `stocks-and-flows` (the advanced systems rung, order 19) has graduated and
   // been removed; its topic MDX is now the record. The lowest-order entry below
-  // (`stocks-and-flows`, order 19) is built next.
-  // ── Breadth re-seed (orders 19–22) ────────────────────────────────────────
-  // Kept ≥3 and tag-diverse as courses graduate: systems-thinking, economics,
-  // strategy, and biology-evolution each carry one advanced rung here.
-  {
-    slug: 'stocks-and-flows',
-    icon: '🛁',
-    difficulty: 'advanced',
-    order: 19,
-    accent: 'accent',
-    title: {
-      en: 'Stocks & Flows',
-      es: 'Stocks y Flujos',
-    },
-    description: {
-      en: 'A bathtub fills when the tap outruns the drain — and most reasoning errors about debt, climate, hiring, and inventory come from confusing the level in the tub with the rate of the tap.',
-      es: 'Una bañera se llena cuando el grifo supera al desagüe — y casi todos los errores de razonamiento sobre deuda, clima, contratación e inventario nacen de confundir el nivel de la bañera con el caudal del grifo.',
-    },
-    dependencies: ['feedback-loops'],
-    tags: ['systems-thinking'],
-    buildNotes:
-      'Stocks & flows — the advanced systems rung underneath feedback loops: the grammar of accumulation. Sections: the bathtub model — a stock is a quantity that accumulates (water, money, CO₂, population, trust), a flow is the rate that fills or drains it (inflow/outflow); the core insight — a stock keeps rising as long as inflow > outflow, even if the inflow is falling (the "the deficit is shrinking so the debt is shrinking" fallacy; emissions slowing ≠ CO₂ falling); stocks change only through flows and they integrate (smooth, delay, give systems memory and inertia); bathtub dynamics & lags (why systems overshoot and respond slowly — ties to feedback loops and bottlenecks); worked examples with numbers (a reservoir, a bank balance, a hiring pipeline, a warehouse); the stock-flow distinction as a debugging tool for policy and personal finance. Build an interactive bathtub/stock-flow island (independent inflow & outflow sliders → watch the stock integrate, overshoot, and lag; show that inflow=outflow holds the stock steady at any level). Connect to feedback loops, compounding, and bottlenecks. Pitfall: confusing the level with the rate; assuming a falling inflow means a falling stock. Recap Quiz + MindMap. en + es twin.',
-  },
+  // (`externalities`, order 20) is built next.
+  // ── Breadth re-seed (orders 20–22) ────────────────────────────────────────
+  // Kept ≥3 and tag-diverse as courses graduate: economics, strategy, and
+  // biology-evolution each carry one advanced rung here.
   {
     slug: 'externalities',
     icon: '🏭',

@@ -1,0 +1,103 @@
+---
+title: "Inertia, Lags & Overshoot"
+description: "Stocks are slow, and slowness has consequences. Why a stock can only change at the speed of its flows, how to estimate how long a real change takes, and why that lag makes systems sail right past their targets."
+topic: "en/stocks-and-flows"
+order: 5
+minutes: 13
+updated: 2026-06-30
+---
+
+import { MCQ, Callout, FillBlank, Reveal, StockFlowBathtub, LoopSimulator } from '@/components/react';
+
+Stop deforesting tomorrow and the forest does not spring back tomorrow — trees grow at tree speed. Slash a country's birth rate to the floor and its population keeps growing for *decades*. Betray someone's trust and a single heartfelt apology does not refill the tank. In each case a flow changed *instantly* and the stock answered *slowly*, dragging its feet for years. That foot-dragging is the most practically important property of stocks, the reason so many well-aimed fixes feel like they "aren't working," and — surprisingly — the source of one of the weirdest behaviors in all of systems thinking. This lesson is about why stocks are slow, how slow exactly, and what that slowness does.
+
+## Stocks have inertia
+
+We saw in Lesson 2 that a stock is the integral — the accumulated memory — of its flows. That memory is precisely why a stock *can't turn on a dime*. **You can change a flow in an instant, but the stock can only follow as fast as the flows allow.** Crank a tub's drain wide open and the tub *still* takes minutes to empty, because there's a whole accumulated history of water that has to leave one drain's-worth at a time.
+
+This is **inertia**: the stock's resistance to sudden change, inherited from the fact that it's a big pile of the past. A flow is nimble — it's just a current setting, and you can flip it now. A stock is ponderous — it's the sum of everything that current ever was. That mismatch, nimble flows dragging a ponderous stock behind them, is the seed of every lag, delay, and overshoot in the rest of the lesson.
+
+<Callout variant="tip" title="Flows are nimble; stocks are ponderous">
+A **flow** can change instantly — it's just a rate you set right now. A **stock** can only change as fast as its flows carry it, because it's the accumulated memory of all past flows. So after you change a flow, the level keeps coasting on its history. *Stocks lag their flows, always.*
+</Callout>
+
+## How slow, exactly? A back-of-envelope for inertia
+
+"Slow" isn't good enough — you want a number. The accumulation rule hands you one for free. If you want to move a stock by some **gap** in the level, and your net flow toward the target is some **rate**, then:
+
+> **Time to get there ≈ size of the gap ÷ net flow toward it.**
+
+It's just the accumulation rule run backwards. Want to drain a reservoir of 140 ML down to 0, with a net outflow of 7 ML/day? Time $\approx 140 / 7 = 20$ days. Want to grow a team from 30 to 50 people, netting +2 people a month? Time $\approx 20 / 2 = 10$ months. The bigger the stock you need to move and the weaker the net flow you can muster, the longer it takes — and there's no shortcut, because the stock *only* changes through its flows.
+
+This little formula is a quiet superpower. It tells you when impatience is justified and when it's delusional. If a city wants to refill a depleted aquifer that took 50 years to drain, and the natural recharge net flow is a trickle, then "we'll restore it in five years" is arithmetic-illiterate, not ambitious. The gap divided by the flow says decades. Stocks set the timetable, and the timetable is rarely up for negotiation.
+
+<StockFlowBathtub
+  client:visible
+  title="Feel the inertia: instant flow, slow level"
+  caption="Fill the tub by setting the faucet above the drain. Then, at some time, drop the faucet far below the drain. The flow changed in one notch — but scrub forward and watch the level take many minutes to come down. The drain's rate sets the pace; impatience doesn't."
+/>
+
+<FillBlank
+  client:visible
+  question="Estimate the timetable."
+  text="A stock changes only as fast as its {{flows|labels}} allow, so it has inertia. To estimate how long a change takes, divide the size of the gap in the level by the {{net flow|stock size}} pushing toward the target. A bigger stock to move, or a weaker net flow, means a {{longer|shorter}} wait — and there is no way to rush it except through the flows."
+  explanation="Inertia comes from the stock being an accumulation. Time-to-target ≈ gap ÷ net flow: a large gap or a feeble net flow means a long wait, and the only lever is the flows themselves. This is why depleted aquifers, national debt, and population take years or decades to turn."
+/>
+
+## Worked example: the hiring pipeline overshoots
+
+Inertia is annoying. The behavior it *causes* is genuinely treacherous, and the cleanest place to see it is hiring — because hiring has a built-in delay that turns a sensible plan into an overshoot.
+
+A startup wants to grow from **40 to 60 engineers.** Leadership opens a pile of job postings. But here's the catch: from posting a job to a hire actually starting takes about **three months** — sourcing, interviews, offers, notice periods. So there's a hidden stock in the middle: **candidates in the pipeline**, who've been hired-on-paper but haven't started yet. Trace the trap:
+
+- **Months 1–3:** Postings are open, but almost nobody has *started* yet. Leadership stares at the headcount — still ~40 — concludes "this isn't working," and *doubles down*, opening even more reqs.
+- **Months 4–6:** Now the original wave *and* the panic wave of hires all start landing. Headcount blows past 60 — to 75, say — because three months of over-ordering is now arriving all at once.
+- **Months 7+:** The team is overstaffed and over budget. Leadership slams on a hiring freeze, which over-corrects the *other* way, and the cycle threatens to repeat.
+
+Nobody here was stupid. The overshoot came from a **balancing loop with a delay**: they were trying to close the gap to a target (60 engineers), but they kept reacting to a *stale* reading of the stock — the headcount from before the pipeline had delivered — so they over-ordered. The fix isn't "try harder"; it's to *account for the in-flight stock*: count the hires already in the pipeline, and stop ordering once the pipeline plus current staff will reach the target, even though the headcount hasn't caught up yet.
+
+## Why a delay turns a stabilizer into an oscillator
+
+That hiring story is a specific case of a completely general rule you met in the feedback course, and it's worth seeing the machine directly. A **balancing loop** tries to close the gap between a stock and a goal. With no delay, it glides smoothly to the target and stops. Add a **delay** — make the loop react to where the stock *was*, not where it *is* — and it overshoots, swings back, overshoots again, and oscillates. The delay is almost always a stock's inertia in disguise: the level you're reading lags the flows you already changed.
+
+Here's the machine. Switch it to **balancing**, and with no delay watch it glide to its goal. Then add a delay and watch the same loop sail past the target and ring back and forth — the hiring overshoot, the scalding shower, the bullwhip in a supply chain, all the same shape:
+
+<LoopSimulator
+  client:visible
+  title="Add a delay, get an overshoot"
+  caption="Balancing loop, no delay: a smooth glide to the goal. Add a delay and the loop corrects on stale information — exactly like reading last quarter's headcount — so it overshoots and oscillates. Inertia is what makes the delay, and the delay is what makes the overshoot."
+/>
+
+This is also where stocks shake hands with **bottlenecks**. A stock can drain or fill no faster than its flows, and a flow can be capped by its slowest stage — its bottleneck. So a clogged warehouse doesn't clear at the speed you wish; it clears at the speed of its narrowest exit. Inventory piling up in front of a bottleneck *is* a stock; the bottleneck's rate *is* the outflow that caps how fast that stock can move. The two models are the same picture from two angles.
+
+<Callout variant="warning" title="The overshoot trap">
+When a stock has inertia and you react to its current level, you over-correct — because the stock keeps coasting after you act, and more is already 'in the pipeline.' The fix is to **account for what's in transit** (the in-flight stock and the delay) and to **ease off the correction**, not to push harder. Pushing harder on a delayed system makes the swings *bigger*, not smaller.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A warehouse manager sees inventory has dropped to 200 units (target: 500) and places a big rush order. Deliveries take three weeks. Each of the next two weeks she still sees low stock and orders big again. What's the most likely result?"
+  options={[
+    { text: 'Inventory overshoots far past 500 in week 3+, because three weeks of panic orders all arrive at once — she kept reacting to stale stock and ignored what was already in transit', correct: true },
+    { text: 'Inventory rises smoothly to exactly 500 and stays there' },
+    { text: 'Inventory stays at 200, because the orders cancel out' },
+    { text: 'Inventory falls to zero, because ordering has no effect' },
+  ]}
+  explanation="This is the classic delayed-balancing overshoot. The inventory she sees lags the orders she's placed by the three-week shipping delay — a stock of in-transit goods she's not counting. So she keeps ordering against a stale reading, and when all three waves land, inventory blows past the 500 target. The fix is to count the goods already on the way (the pipeline stock) and stop ordering once in-stock plus in-transit will hit the target."
+/>
+
+## Inertia cuts both ways — and that's sometimes a gift
+
+It would be easy to file inertia under "annoying," but a stock's sluggishness is also what makes the world *stable and survivable*. Because stocks smooth and lag, they act as **buffers** that absorb shocks instead of passing them straight through.
+
+A reservoir buffers a city against a dry week — the *stock* of stored water means a brief drop in the *inflow* doesn't instantly become a drought at the tap. Your body's fat reserves buffer you against a skipped meal. A company's cash balance buffers it against one bad month. A warehouse of inventory buffers a store against a delivery truck breaking down. In every case, the stock's inertia — the very thing that makes it slow to *change* — is what makes it reliable to *depend on*. A system with no buffering stocks is brittle: every flicker in a flow hits the output immediately. The lag you curse when you want fast change is the lag you bless when you want stability.
+
+<Reveal client:visible label="Why does adding a big buffer stock often make a system MORE sluggish to fix?" buttonLabel="Reveal the answer">
+Because a buffer is a stock, and stocks have inertia — so the bigger the buffer, the more accumulated history there is to overcome before any change in the flows shows up in the output. A huge inventory smooths out supply shocks beautifully (the upside), but it also means that when you finally *fix* the upstream problem, the system keeps running on old stock for ages before anyone downstream notices the fix (the downside). It's the same trade-off as a flywheel: a heavy one is wonderfully steady and miserably slow to speed up or slow down. So buffers buy you *stability* at the price of *responsiveness*. The art is sizing them — big enough to absorb the shocks you care about, small enough that you're not dragging a giant ponderous stock behind every change you make. There's no free lunch: every gram of buffering inertia is both a shock-absorber and an anchor.
+</Reveal>
+
+## Where this goes next
+
+You now understand the most practical fact about stocks: they're **slow**, with an inertia inherited from being a giant accumulated memory — and you can put a *number* on the slowness (time ≈ gap ÷ net flow). You've seen the treachery that slowness causes: a delayed reading makes you over-correct, so systems **overshoot** and oscillate — the hiring blowout, the warehouse whipsaw, the scalding shower. And you've seen the flip side: that same inertia makes stocks into **buffers** that keep the world stable, a gift and an anchor in one.
+
+That's the full mechanics of accumulation: the rule, the trap, and the inertia. In the final teaching lesson we put it to work. **Lesson 5, "Stock-Flow Thinking,"** turns everything into a portable *debugging tool* — a short checklist you run on any messy problem, plus the threads tying stocks and flows back to compounding, bottlenecks, and the feedback loops where you first met the tub.
