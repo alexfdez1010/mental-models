@@ -165,3 +165,6 @@ export type { MoatErosionProps } from '@/components/react/MoatErosion';
 
 export { NicheOverlap, default as NicheOverlapDefault } from '@/components/react/NicheOverlap';
 export type { NicheOverlapProps } from '@/components/react/NicheOverlap';
+
+export { LeverageLadder, default as LeverageLadderDefault } from '@/components/react/LeverageLadder';
+export type { LeverageLadderProps, LeverageRung } from '@/components/react/LeverageLadder';

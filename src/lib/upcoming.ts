@@ -85,38 +85,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Advanced systems / economics / strategy / biology / psychology tier ────
-  // `externalities` (order 20), `moats` (order 21) and `ecosystems-and-niches`
-  // (the advanced biology-evolution rung, order 22) have graduated and been
-  // removed; their topic MDX is now the record. The lowest-order entry below
-  // (`leverage-points`, order 23) is built next.
+  // `externalities` (order 20), `moats` (order 21), `ecosystems-and-niches` (the
+  // advanced biology-evolution rung, order 22) and `leverage-points` (the
+  // advanced systems-thinking rung, order 23) have graduated and been removed;
+  // their topic MDX is now the record. The lowest-order entry below
+  // (`lollapalooza-effect`, order 24) is built next.
   // ── Breadth re-seed ────────────────────────────────────────────────────────
-  // A systems-thinking rung and a psychology rung, plus (appended as
-  // `ecosystems-and-niches` graduated) a probability rung and a
-  // science-engineering rung — kept tag-diverse so no single roadmap tag races
-  // ahead of the others.
-  // Appended as `externalities` (order 20) graduates, to keep the queue ≥3 and
-  // tag-diverse: a systems-thinking rung and a psychology rung — the two tags
-  // the remaining advanced tier (strategy, economics, biology-evolution) was
-  // missing.
-  {
-    slug: 'leverage-points',
-    icon: '🎯',
-    difficulty: 'advanced',
-    order: 23,
-    accent: 'accent',
-    title: {
-      en: 'Leverage Points',
-      es: 'Puntos de Apalancamiento',
-    },
-    description: {
-      en: 'In any system, some places to push are almost useless and a few are astonishingly powerful — and our intuition usually reaches for the weak ones. Donella Meadows’ ladder of where to intervene, from tweaking numbers to changing the goal of the whole system.',
-      es: 'En cualquier sistema, algunos lugares donde empujar son casi inútiles y unos pocos son asombrosamente potentes — y nuestra intuición suele agarrar los débiles. La escalera de Donella Meadows sobre dónde intervenir, desde ajustar números hasta cambiar el objetivo de todo el sistema.',
-    },
-    dependencies: ['feedback-loops', 'stocks-and-flows'],
-    tags: ['systems-thinking'],
-    buildNotes:
-      'Leverage points — the advanced systems-thinking rung built on feedback loops and stocks & flows: where to push a complex system to change its behaviour, and why the obvious places are usually the weak ones. Frame around Donella Meadows’ famous ordered list (places to intervene, in increasing order of power), but teach the *idea* not a memorised rank: low-leverage points (constants, parameters, numbers — tweaking a tax rate or a thermostat setpoint) vs. high-leverage points (the strength and structure of feedback loops, the rules of the system, the information flows, the goal of the system, and the paradigm/mindset out of which the system arises). Sections: the counterintuition — Meadows’ insight that people reliably push hardest on low-leverage parameters (numbers) while the powerful levers (loop structure, rules, goals, paradigms) sit ignored; a worked walk *up* the ladder on one concrete system (e.g. a city’s traffic, an overdrawn aquifer, or a company’s culture) showing how the same problem yields to a higher lever; negative vs positive feedback as levers (strengthening a balancing loop vs weakening a runaway reinforcing loop — tie back to the feedback-loops course); rules, information flows, and "the goal of the system" as progressively deeper levers (add a missing feedback of information — e.g. making people see their own energy use — as a classic mid-ladder win); paradigms as the highest leverage and the hardest to shift. Pitfalls: pushing a lever in the wrong direction (Meadows’ warning that high leverage points are "not intuitive, and when found, often pushed the wrong way"); mistaking activity at a low leverage point for progress. Build an interactive leverage-ladder island: a system with a few intervention sliders/levers at different ladder heights; the learner applies effort at a chosen level and sees how much the system’s output actually moves, making "same effort, wildly different result" visible. Ties to feedback-loops, stocks-and-flows, bottlenecks, second-order thinking. Recap Quiz + MindMap. en + es twin.',
-  },
+  // A psychology rung (`lollapalooza-effect`), a probability rung
+  // (`regression-to-the-mean`) and a science-engineering rung (`critical-mass`)
+  // — kept tag-diverse so no single roadmap tag races ahead of the others.
   {
     slug: 'lollapalooza-effect',
     icon: '🎰',
