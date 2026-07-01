@@ -39,14 +39,15 @@
  *
  * ── Mental Models build queue ───────────────────────────────────────────────
  * The zero-to-expert ladder of models still to build (see TOPIC.md). The whole
- * beginner→intermediate breadth pass and the first advanced rungs
+ * beginner→intermediate breadth pass and the earlier advanced rungs
  * (`what-are-mental-models`, `natural-selection`, `supply-and-demand`,
- * `tragedy-of-the-commons`, `externalities`, …) have graduated and been removed.
+ * `tragedy-of-the-commons`, `externalities`, `moats`, `ecosystems-and-niches`,
+ * `leverage-points`, `lollapalooza-effect`, …) have graduated and been removed.
  * Lowest `order` is built next. The remaining entries are the **advanced tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * biology-evolution (`ecosystems-and-niches`), systems-thinking
- * (`leverage-points`), and psychology (`lollapalooza-effect`). The strategy rung
- * (`moats`) has graduated and been removed; its topic MDX is now the record.
+ * probability (`regression-to-the-mean`), science-engineering / systems
+ * (`critical-mass`), strategy (`nash-equilibrium`), decision-making
+ * (`asymmetry-and-optionality`) and biology-evolution (`fitness-landscapes`).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -84,39 +85,15 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced systems / economics / strategy / biology / psychology tier ────
-  // `externalities` (order 20), `moats` (order 21), `ecosystems-and-niches` (the
-  // advanced biology-evolution rung, order 22) and `leverage-points` (the
-  // advanced systems-thinking rung, order 23) have graduated and been removed;
-  // their topic MDX is now the record. The lowest-order entry below
-  // (`lollapalooza-effect`, order 24) is built next.
-  // ── Breadth re-seed ────────────────────────────────────────────────────────
-  // A psychology rung (`lollapalooza-effect`), a probability rung
-  // (`regression-to-the-mean`) and a science-engineering rung (`critical-mass`)
-  // — kept tag-diverse so no single roadmap tag races ahead of the others.
-  {
-    slug: 'lollapalooza-effect',
-    icon: '🎰',
-    difficulty: 'advanced',
-    order: 24,
-    accent: 'brand',
-    title: {
-      en: 'The Lollapalooza Effect',
-      es: 'El Efecto Lollapalooza',
-    },
-    description: {
-      en: 'Biases rarely strike one at a time. When several psychological tendencies point the same way at once, they don’t add — they multiply, tipping ordinary people into bubbles, cults, and manias. Munger’s name for the moment many models combine into one overwhelming force.',
-      es: 'Los sesgos rara vez actúan de uno en uno. Cuando varias tendencias psicológicas apuntan a la vez en la misma dirección, no se suman: se multiplican, empujando a gente normal hacia burbujas, sectas y manías. El nombre que dio Munger al momento en que muchos modelos se combinan en una sola fuerza arrolladora.',
-    },
-    dependencies: ['confirmation-bias', 'incentives', 'loss-aversion'],
-    tags: ['psychology'],
-    buildNotes:
-      'The Lollapalooza effect — the advanced psychology rung where the major cognitive biases stop acting in isolation and *combine*: Charlie Munger’s term for when several psychological tendencies all push in the same direction at once and produce an extreme, nonlinear outcome (the effects compound and reinforce rather than merely add). Assumes the intermediate bias courses (confirmation bias, availability, loss aversion, incentives, social proof). Sections: the core idea — most real-world disasters and manias aren’t one bias but a *confluence* (Munger: "you get lollapalooza effects when two, three or four forces are all operating in the same direction"); why combination is multiplicative not additive (each bias lowers resistance to the next; reinforcing feedback — tie to feedback-loops); worked case studies pulled apart bias-by-bias — e.g. an open-outcry auction or bidding war (social proof + commitment/consistency + deprivation-superreaction/loss aversion + reciprocation), a market bubble (social proof + incentive-caused bias + envy + over-optimism + confirmation), a cult or high-pressure sales close (authority + social proof + commitment + reciprocation + scarcity); the defensive use — building a mental "checklist" of biases to run against a decision precisely because no single one announces itself; the connection to the latticework thesis of the whole site (models combine — this is that idea turned on the psychology tag). Pitfalls: hindsight over-fitting (don’t just label everything "lollapalooza" after the fact — name the *specific* tendencies and show they pointed the same way); assuming biases always compound (sometimes they offset). Build an interactive island: a scenario (auction or bubble) with toggles for each contributing bias; as the learner switches biases on, a "pressure"/likelihood meter climbs nonlinearly, and turning several on at once spikes it — making the multiplicative stacking visible vs. the sum of the parts. Recap Quiz + MindMap. en + es twin.',
-  },
-  // Appended as `ecosystems-and-niches` (order 22) graduated, to keep the queue
-  // ≥3 and tag-diverse: a probability rung and a science-engineering rung — the
-  // two tags the remaining advanced tier (systems-thinking, psychology) was
-  // missing.
+  // ── Advanced tier — kept tag-diverse ───────────────────────────────────────
+  // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
+  // `leverage-points` (23) and `lollapalooza-effect` (the advanced psychology
+  // rung, order 24) have graduated and been removed; their topic MDX is now the
+  // record. The lowest-order entry below (`regression-to-the-mean`, order 25) is
+  // built next. The queue spans probability (`regression-to-the-mean`),
+  // science-engineering / systems (`critical-mass`), strategy (`nash-equilibrium`),
+  // decision-making (`asymmetry-and-optionality`) and biology-evolution
+  // (`fitness-landscapes`) so no single roadmap tag races ahead of the others.
   {
     slug: 'regression-to-the-mean',
     icon: '🎯',
@@ -154,6 +131,69 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['science-engineering', 'systems-thinking'],
     buildNotes:
       'Critical mass & tipping points — the advanced science-engineering rung borrowed from nuclear physics and generalized: the idea of a *threshold* below which a self-amplifying process dies out and above which it runs away, because the amplification factor crosses 1. Assumes feedback-loops (reinforcing loops) and emergence. Sections: the origin — nuclear fission, where each split atom releases neutrons that split more; below the critical mass too many neutrons escape and the reaction fizzles, at/above it each split causes ≥1 more and the chain reaction explodes (the "k-factor" crossing 1); the general model — any system with a reinforcing loop has a threshold where per-step gain crosses 1, flipping "peters out" into "runs away" (tie hard to feedback-loops); worked examples across domains — a disease’s R0 (spread crossing 1 person infecting >1), viral content, the adoption S-curve and network effects (a phone network / social app worthless below a user threshold, unstoppable above it — tie to moats), a crowd/riot or a standing ovation, autocatalytic chemistry, even a meeting where nobody speaks until a threshold of willingness breaks; nonlinearity and suddenness — why thresholds make change feel abrupt ("nothing then everything") and why the long quiet phase fools people into thinking nothing is happening; hysteresis / lock-in briefly (once over the top it’s hard to reverse). Pitfalls: assuming linear extrapolation near a threshold (small push → giant or zero effect, unpredictably), confusing "slow = failing" with "sub-critical build-up", and the reverse error of expecting every trend to tip (many never reach critical mass and just die). Build an interactive island: a grid/pool of "nodes" with a contagion or neutron-style spread and a slider for the amplification factor (k) or the seed density; below threshold the activation fizzles out, above it a chain reaction sweeps the whole grid — the learner hunts for the tipping point and sees the sharp phase change. Recap Quiz + MindMap. en + es twin.',
+  },
+  // ── Breadth appends (queue would otherwise fall below 3) ─────────────────────
+  // With `lollapalooza-effect` graduated, only `regression-to-the-mean`
+  // (probability) and `critical-mass` (science-engineering/systems) remained.
+  // Add the strategy, decision-making and biology-evolution advanced rungs so
+  // the queue stays ≥3 and no roadmap tag runs empty. Each sits a notch further
+  // up the ladder and stays strictly within TOPIC.md scope.
+  {
+    slug: 'nash-equilibrium',
+    icon: '♟️',
+    difficulty: 'advanced',
+    order: 27,
+    accent: 'accent',
+    title: {
+      en: 'Nash Equilibrium',
+      es: 'El Equilibrio de Nash',
+    },
+    description: {
+      en: 'A situation where no player can do better by changing strategy alone — so everyone stays put, even when everyone would be better off somewhere else. The still point of a strategic game, and why stable outcomes are so often the bad ones.',
+      es: 'Una situación en la que ningún jugador puede mejorar cambiando de estrategia por su cuenta — así que nadie se mueve, aunque a todos les fuera mejor en otro sitio. El punto de reposo de un juego estratégico, y por qué los resultados estables son con tanta frecuencia los malos.',
+    },
+    dependencies: ['game-theory-basics'],
+    tags: ['strategy'],
+    buildNotes:
+      'Nash equilibrium — the advanced strategy rung that puts a precise fixed point under game-theory-basics: a set of strategies, one per player, where no single player can improve their own payoff by unilaterally changing (holding everyone else fixed). Assumes game-theory-basics (payoff matrices, dominant strategies, the prisoner’s dilemma). Sections: the core definition — a "no-regret-given-what-others-did" resting point; the intuition that an equilibrium is where best-responses meet (each player is already best-responding to the others); why a game can have one, several, or no *pure*-strategy equilibria, and the reassurance of John Nash’s theorem that a *mixed*-strategy equilibrium always exists in finite games; worked examples — the prisoner’s dilemma (mutual defection is the unique Nash equilibrium and it is Pareto-inferior: the deep lesson that stable ≠ good), coordination games with multiple equilibria (driving on the left vs right, the stag hunt, focal points / Schelling points), and a simple mixed-strategy game (matching pennies / penalty kicks, where you must randomize to be unexploitable); best-response reasoning as the solution method; the connection to systems and incentives (an equilibrium is what a system of self-interested agents settles into, so if you dislike the outcome you must change the payoffs, not scold the players — tie to incentives and leverage-points). Pitfalls: assuming an equilibrium is efficient or fair (it need not be — see the dilemma); assuming players actually reach it (equilibrium selection, bounded rationality); confusing a Nash equilibrium with a dominant-strategy outcome. Build an interactive island (or reuse/extend the payoff-matrix island): a 2×2 game where the learner toggles each player’s strategy and the island highlights each player’s best response and flags the cell(s) that are Nash equilibria, with presets for the dilemma, a coordination game and matching pennies; a mixed-strategy slider showing how randomizing removes the opponent’s ability to exploit you. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'asymmetry-and-optionality',
+    icon: '🎢',
+    difficulty: 'advanced',
+    order: 28,
+    accent: 'brand',
+    title: {
+      en: 'Asymmetry & Optionality',
+      es: 'Asimetría y Opcionalidad',
+    },
+    description: {
+      en: 'Some bets lose you a little and win you a lot; others do the reverse. When the downside is capped and the upside is open, you can be wrong most of the time and still come out far ahead. The model behind options, experiments, and antifragile decisions.',
+      es: 'Algunas apuestas te hacen perder poco y ganar mucho; otras, al revés. Cuando la pérdida está acotada y la ganancia es abierta, puedes equivocarte casi siempre y aun así salir muy por delante. El modelo tras las opciones, los experimentos y las decisiones antifrágiles.',
+    },
+    dependencies: ['margin-of-safety', 'fat-tails'],
+    tags: ['decision-making'],
+    buildNotes:
+      'Asymmetry & optionality — the advanced decision-making rung: shifting attention from "how likely?" to "how lopsided are the payoffs?". Builds on expected value, margin-of-safety and fat-tails. Sections: the core idea — a decision’s value is probability *times magnitude*, and when magnitudes are wildly asymmetric the magnitude dominates; a convex ("smile") payoff has limited downside and open-ended upside, a concave ("frown") payoff the reverse; worked examples — a capped-loss / uncapped-gain bet where you lose small on 80% of tries and win big on 20% and still profit hugely (show the arithmetic), versus the mirror trap of "picking up pennies in front of a steamroller" (small steady gains, rare catastrophic loss — tie to fat-tails and the tail-risk lesson); optionality — paying a small, known cost for the *right but not the obligation* to a large upside (financial options, but also a cheap experiment, an option to renew, keeping several paths open); why optionality thrives on volatility and uncertainty (more variance = more valuable the capped-downside upside — the antifragile idea, Taleb) and why fragility is hidden negative optionality; the barbell strategy (combine very safe with very risky, avoid the fragile middle); Jensen’s inequality stated in words (for a convex payoff, the average outcome beats the outcome of the average) without heavy math; the decision heuristic — "cut the downside, keep the upside open," seek convex bets, run many small reversible experiments and let the winners run. Pitfalls: ignoring the *cost* of optionality (options aren’t free; over-paying for lottery tickets); mistaking a capped-downside story for one whose downside is actually unbounded; confusing high variance with good asymmetry. Build an interactive island: a payoff-shape explorer where the learner sets downside cap, upside slope and win-probability and watches the expected value and the full outcome distribution, with a toggle between a convex bet, a concave bet and a barbell — and a "run 100 trials" button that shows the convex bet winning despite a low hit-rate. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'fitness-landscapes',
+    icon: '🏔️',
+    difficulty: 'advanced',
+    order: 29,
+    accent: 'accent',
+    title: {
+      en: 'Fitness Landscapes',
+      es: 'Paisajes Adaptativos',
+    },
+    description: {
+      en: 'Picture every possible design as a point on a terrain, with height = how well it works. Evolution — and any trial-and-error search — climbs uphill, which means it can get marooned on a low peak with a taller summit hidden across an unclimbable valley. The map of why "good enough" gets stuck.',
+      es: 'Imagina cada diseño posible como un punto de un terreno, con la altura = lo bien que funciona. La evolución — y cualquier búsqueda por ensayo y error — sube cuesta arriba, lo que significa que puede quedar varada en un pico bajo con una cima más alta oculta al otro lado de un valle infranqueable. El mapa de por qué lo "suficientemente bueno" se atasca.',
+    },
+    dependencies: ['natural-selection', 'red-queen-effect'],
+    tags: ['biology-evolution'],
+    buildNotes:
+      'Fitness landscapes — the advanced biology-evolution rung that turns natural-selection into a search-over-a-terrain model (Sewall Wright, 1932) and generalizes far beyond biology. Assumes natural-selection (variation, selection, heredity) and pairs well with red-queen-effect. Sections: the core picture — arrange all possible genotypes/designs on a plane so that similar designs are neighbours, and plot "fitness" (reproductive success, or any performance measure) as height, giving a landscape of peaks, valleys and ridges; hill-climbing — selection only ever moves uphill (small heritable improvements accumulate), so evolution is a *local* search with no foresight; the central consequence — **local optima**: a population can climb to the top of a modest hill and be trapped there, because every single step toward the far taller mountain must first go *downhill* (less fit) across a valley selection won’t cross (why "good enough" beats "best", why the eye’s blind spot and the recurrent laryngeal nerve persist); ruggedness — smooth single-peak landscapes are easy, rugged many-peaked ones trap searchers; what crosses valleys — mutation/drift in small populations, recombination, and a *changing* landscape (the peak moves — tie hard to red-queen: co-evolution means the terrain deforms under you, so there is no final summit); transfer of the model — the same map explains local optima in engineering/design, machine-learning training, business strategy (a firm stuck on a local peak disrupted by someone on a different one), skill acquisition, and the explore-vs-exploit trade-off (exploit = climb the current hill; explore = jump to look for a higher one). Pitfalls: treating evolution as goal-directed "progress toward perfection" (it’s myopic hill-climbing, no goal); assuming the global optimum is reachable or even fixed; over-literal single-peak thinking when real landscapes are high-dimensional and shifting. Build an interactive island: a 1-D or 2-D fitness landscape where the learner drops a population and watches it hill-climb to the nearest peak, with a ruggedness slider (smooth → many-peaked) and a "mutate/jump" control that occasionally lets it cross a valley to a higher summit — plus a toggle that slowly reshapes the terrain (red-queen) so a conquered peak sinks. Recap Quiz + MindMap. en + es twin.',
   },
 ];
 

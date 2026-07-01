@@ -168,3 +168,6 @@ export type { NicheOverlapProps } from '@/components/react/NicheOverlap';
 
 export { LeverageLadder, default as LeverageLadderDefault } from '@/components/react/LeverageLadder';
 export type { LeverageLadderProps, LeverageRung } from '@/components/react/LeverageLadder';
+
+export { BiasStack, default as BiasStackDefault } from '@/components/react/BiasStack';
+export type { BiasStackProps, BiasStackItem } from '@/components/react/BiasStack';
