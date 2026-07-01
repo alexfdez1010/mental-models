@@ -162,3 +162,6 @@ export type { ExternalityChartProps } from '@/components/react/ExternalityChart'
 
 export { MoatErosion, default as MoatErosionDefault } from '@/components/react/MoatErosion';
 export type { MoatErosionProps } from '@/components/react/MoatErosion';
+
+export { NicheOverlap, default as NicheOverlapDefault } from '@/components/react/NicheOverlap';
+export type { NicheOverlapProps } from '@/components/react/NicheOverlap';

@@ -85,31 +85,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Advanced systems / economics / strategy / biology / psychology tier ────
-  // `externalities` (order 20) and `moats` (the advanced strategy rung, order 21)
-  // have graduated and been removed; their topic MDX is now the record. The
-  // lowest-order entry below (`ecosystems-and-niches`, order 22) is built next.
-  // ── Breadth re-seed (orders 22–24) ────────────────────────────────────────
-  // A biology-evolution rung, a systems-thinking rung, and a psychology rung,
-  // kept tag-diverse so no single roadmap tag races ahead.
-  {
-    slug: 'ecosystems-and-niches',
-    icon: '🌳',
-    difficulty: 'advanced',
-    order: 22,
-    accent: 'accent',
-    title: {
-      en: 'Ecosystems & Niches',
-      es: 'Ecosistemas y Nichos',
-    },
-    description: {
-      en: "No species wins everywhere — each survives by fitting a niche the others can't exploit. The model behind competitive exclusion, specialization, and why crowded markets push every player to differentiate or die.",
-      es: 'Ninguna especie gana en todas partes — cada una sobrevive ocupando un nicho que las demás no pueden explotar. El modelo tras la exclusión competitiva, la especialización y por qué los mercados saturados empujan a cada jugador a diferenciarse o morir.',
-    },
-    dependencies: ['natural-selection', 'red-queen-effect'],
-    tags: ['biology-evolution', 'strategy'],
-    buildNotes:
-      'Ecosystems & niches — the advanced biology-evolution rung built on natural selection: how many species coexist by dividing up the environment rather than all fighting for the same resource. Sections: the niche — the specific role/resource-space a species occupies (what it eats, where, when), not just its habitat; the competitive exclusion principle (Gause) — two species competing for the exact same limiting resource can’t coexist; one wins, so survivors differentiate; resource partitioning & specialization with worked examples (Darwin’s finches and beak size, warblers feeding in different parts of the same tree); generalist vs specialist trade-offs (broad-but-shallow vs narrow-but-efficient, and when each wins); keystone species, food webs, and how removing one node cascades (tie to systems-thinking/feedback and second-order effects); the powerful business/strategy transfer — markets are ecosystems, "find an unoccupied niche", differentiation as avoiding head-to-head competitive exclusion (tie to moats and comparative advantage); invasive species & disturbance as the failure modes. Build an interactive niche / competitive-exclusion island (e.g. two or more species on overlapping resource axes; a slider for niche overlap that shows coexistence when overlap is low and one competitor driven extinct when overlap is high). Pitfall: assuming "most competitive wins everything" (it wins its niche, not all niches); confusing habitat with niche. Recap Quiz + MindMap. en + es twin.',
-  },
+  // `externalities` (order 20), `moats` (order 21) and `ecosystems-and-niches`
+  // (the advanced biology-evolution rung, order 22) have graduated and been
+  // removed; their topic MDX is now the record. The lowest-order entry below
+  // (`leverage-points`, order 23) is built next.
+  // ── Breadth re-seed ────────────────────────────────────────────────────────
+  // A systems-thinking rung and a psychology rung, plus (appended as
+  // `ecosystems-and-niches` graduated) a probability rung and a
+  // science-engineering rung — kept tag-diverse so no single roadmap tag races
+  // ahead of the others.
   // Appended as `externalities` (order 20) graduates, to keep the queue ≥3 and
   // tag-diverse: a systems-thinking rung and a psychology rung — the two tags
   // the remaining advanced tier (strategy, economics, biology-evolution) was
@@ -151,6 +135,48 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['psychology'],
     buildNotes:
       'The Lollapalooza effect — the advanced psychology rung where the major cognitive biases stop acting in isolation and *combine*: Charlie Munger’s term for when several psychological tendencies all push in the same direction at once and produce an extreme, nonlinear outcome (the effects compound and reinforce rather than merely add). Assumes the intermediate bias courses (confirmation bias, availability, loss aversion, incentives, social proof). Sections: the core idea — most real-world disasters and manias aren’t one bias but a *confluence* (Munger: "you get lollapalooza effects when two, three or four forces are all operating in the same direction"); why combination is multiplicative not additive (each bias lowers resistance to the next; reinforcing feedback — tie to feedback-loops); worked case studies pulled apart bias-by-bias — e.g. an open-outcry auction or bidding war (social proof + commitment/consistency + deprivation-superreaction/loss aversion + reciprocation), a market bubble (social proof + incentive-caused bias + envy + over-optimism + confirmation), a cult or high-pressure sales close (authority + social proof + commitment + reciprocation + scarcity); the defensive use — building a mental "checklist" of biases to run against a decision precisely because no single one announces itself; the connection to the latticework thesis of the whole site (models combine — this is that idea turned on the psychology tag). Pitfalls: hindsight over-fitting (don’t just label everything "lollapalooza" after the fact — name the *specific* tendencies and show they pointed the same way); assuming biases always compound (sometimes they offset). Build an interactive island: a scenario (auction or bubble) with toggles for each contributing bias; as the learner switches biases on, a "pressure"/likelihood meter climbs nonlinearly, and turning several on at once spikes it — making the multiplicative stacking visible vs. the sum of the parts. Recap Quiz + MindMap. en + es twin.',
+  },
+  // Appended as `ecosystems-and-niches` (order 22) graduated, to keep the queue
+  // ≥3 and tag-diverse: a probability rung and a science-engineering rung — the
+  // two tags the remaining advanced tier (systems-thinking, psychology) was
+  // missing.
+  {
+    slug: 'regression-to-the-mean',
+    icon: '🎯',
+    difficulty: 'advanced',
+    order: 25,
+    accent: 'brand',
+    title: {
+      en: 'Regression to the Mean',
+      es: 'Regresión a la Media',
+    },
+    description: {
+      en: 'Extremes don’t last. After a record-shattering result — a stellar quarter, a career-best game, a terrible test — the next one tends to drift back toward average, for no reason but chance. The model that explains why punishment "works", praise "backfires", and star performers fade.',
+      es: 'Los extremos no duran. Tras un resultado excepcional — un trimestre estelar, el mejor partido de una carrera, un examen desastroso — el siguiente tiende a acercarse a la media, sin más causa que el azar. El modelo que explica por qué el castigo "funciona", el elogio "sale mal" y las estrellas se apagan.',
+    },
+    dependencies: ['thinking-in-probabilities', 'bayesian-updating'],
+    tags: ['probability'],
+    buildNotes:
+      'Regression to the mean — the advanced probability rung: whenever an outcome mixes skill and luck, an extreme observation is usually extreme partly by luck, so the *next* observation from the same source drifts back toward the average — with no cause, intervention, or explanation required. Assumes thinking-in-probabilities and (helpfully) base rates / Bayesian updating. Sections: the core mechanic — any measured result = stable signal + transient noise; select on an extreme and you’ve selected for extreme noise, which won’t repeat (tie to sample size and fat tails); Galton’s original discovery (tall parents → shorter (on average) children, and vice versa — the "regression" that named the whole field of regression analysis); worked numeric example with a skill+luck model (e.g. exam or sales scores drawn as true-ability + random-luck; show the top decile’s average dropping on retest while the population mean holds); the enormous decision-making payoff — the "regression fallacy" of crediting a treatment for improvement that would have happened anyway (sports-team "curse" of the magazine cover, the speed-camera / worst-sites-first illusion, feeling better after seeing a doctor); the cruel training anecdote (Kahneman: praising a great landing is followed by a worse one, scolding a bad one by a better one — so instructors "learn" punishment works and praise fails, when it’s pure regression); why this fuels superstition, quack cures, and manager over-reaction; how to defend — control groups, larger samples, expecting reversion. Pitfalls: seeing a *cause* where there is only reversion; confusing regression with a real trend or with "the gambler’s fallacy" (distinguish them carefully). Build an interactive island: a scatter of performers each with a hidden true-skill + fresh random luck each round; the learner selects the top performers in round 1 and watches their round-2 average fall back toward the mean, with sliders for how much luck vs skill drives the outcome (more luck → more regression). Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'critical-mass',
+    icon: '⚛️',
+    difficulty: 'advanced',
+    order: 26,
+    accent: 'accent',
+    title: {
+      en: 'Critical Mass & Tipping Points',
+      es: 'Masa Crítica y Puntos de Inflexión',
+    },
+    description: {
+      en: 'Some things do nothing, nothing, nothing — then everything, all at once. Below a threshold a chain reaction fizzles; one atom past it, it runs away. The physics model behind tipping points, viral spread, network effects, and why change so often arrives suddenly after a long, quiet build-up.',
+      es: 'Algunas cosas no hacen nada, nada, nada — y de pronto, todo a la vez. Bajo un umbral la reacción en cadena se apaga; un átomo más allá, se dispara. El modelo físico tras los puntos de inflexión, la difusión viral, los efectos de red y por qué el cambio suele llegar de golpe tras una larga acumulación silenciosa.',
+    },
+    dependencies: ['feedback-loops', 'emergence'],
+    tags: ['science-engineering', 'systems-thinking'],
+    buildNotes:
+      'Critical mass & tipping points — the advanced science-engineering rung borrowed from nuclear physics and generalized: the idea of a *threshold* below which a self-amplifying process dies out and above which it runs away, because the amplification factor crosses 1. Assumes feedback-loops (reinforcing loops) and emergence. Sections: the origin — nuclear fission, where each split atom releases neutrons that split more; below the critical mass too many neutrons escape and the reaction fizzles, at/above it each split causes ≥1 more and the chain reaction explodes (the "k-factor" crossing 1); the general model — any system with a reinforcing loop has a threshold where per-step gain crosses 1, flipping "peters out" into "runs away" (tie hard to feedback-loops); worked examples across domains — a disease’s R0 (spread crossing 1 person infecting >1), viral content, the adoption S-curve and network effects (a phone network / social app worthless below a user threshold, unstoppable above it — tie to moats), a crowd/riot or a standing ovation, autocatalytic chemistry, even a meeting where nobody speaks until a threshold of willingness breaks; nonlinearity and suddenness — why thresholds make change feel abrupt ("nothing then everything") and why the long quiet phase fools people into thinking nothing is happening; hysteresis / lock-in briefly (once over the top it’s hard to reverse). Pitfalls: assuming linear extrapolation near a threshold (small push → giant or zero effect, unpredictably), confusing "slow = failing" with "sub-critical build-up", and the reverse error of expecting every trend to tip (many never reach critical mass and just die). Build an interactive island: a grid/pool of "nodes" with a contagion or neutron-style spread and a slider for the amplification factor (k) or the seed density; below threshold the activation fizzles out, above it a chain reaction sweeps the whole grid — the learner hunts for the tipping point and sees the sharp phase change. Recap Quiz + MindMap. en + es twin.',
   },
 ];
 
