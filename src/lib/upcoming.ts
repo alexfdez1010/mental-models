@@ -87,32 +87,14 @@ export interface UpcomingCourse {
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Advanced tier — kept tag-diverse ───────────────────────────────────────
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
-  // `leverage-points` (23) and `lollapalooza-effect` (the advanced psychology
-  // rung, order 24) have graduated and been removed; their topic MDX is now the
-  // record. The lowest-order entry below (`regression-to-the-mean`, order 25) is
-  // built next. The queue spans probability (`regression-to-the-mean`),
-  // science-engineering / systems (`critical-mass`), strategy (`nash-equilibrium`),
-  // decision-making (`asymmetry-and-optionality`) and biology-evolution
-  // (`fitness-landscapes`) so no single roadmap tag races ahead of the others.
-  {
-    slug: 'regression-to-the-mean',
-    icon: '🎯',
-    difficulty: 'advanced',
-    order: 25,
-    accent: 'brand',
-    title: {
-      en: 'Regression to the Mean',
-      es: 'Regresión a la Media',
-    },
-    description: {
-      en: 'Extremes don’t last. After a record-shattering result — a stellar quarter, a career-best game, a terrible test — the next one tends to drift back toward average, for no reason but chance. The model that explains why punishment "works", praise "backfires", and star performers fade.',
-      es: 'Los extremos no duran. Tras un resultado excepcional — un trimestre estelar, el mejor partido de una carrera, un examen desastroso — el siguiente tiende a acercarse a la media, sin más causa que el azar. El modelo que explica por qué el castigo "funciona", el elogio "sale mal" y las estrellas se apagan.',
-    },
-    dependencies: ['thinking-in-probabilities', 'bayesian-updating'],
-    tags: ['probability'],
-    buildNotes:
-      'Regression to the mean — the advanced probability rung: whenever an outcome mixes skill and luck, an extreme observation is usually extreme partly by luck, so the *next* observation from the same source drifts back toward the average — with no cause, intervention, or explanation required. Assumes thinking-in-probabilities and (helpfully) base rates / Bayesian updating. Sections: the core mechanic — any measured result = stable signal + transient noise; select on an extreme and you’ve selected for extreme noise, which won’t repeat (tie to sample size and fat tails); Galton’s original discovery (tall parents → shorter (on average) children, and vice versa — the "regression" that named the whole field of regression analysis); worked numeric example with a skill+luck model (e.g. exam or sales scores drawn as true-ability + random-luck; show the top decile’s average dropping on retest while the population mean holds); the enormous decision-making payoff — the "regression fallacy" of crediting a treatment for improvement that would have happened anyway (sports-team "curse" of the magazine cover, the speed-camera / worst-sites-first illusion, feeling better after seeing a doctor); the cruel training anecdote (Kahneman: praising a great landing is followed by a worse one, scolding a bad one by a better one — so instructors "learn" punishment works and praise fails, when it’s pure regression); why this fuels superstition, quack cures, and manager over-reaction; how to defend — control groups, larger samples, expecting reversion. Pitfalls: seeing a *cause* where there is only reversion; confusing regression with a real trend or with "the gambler’s fallacy" (distinguish them carefully). Build an interactive island: a scatter of performers each with a hidden true-skill + fresh random luck each round; the learner selects the top performers in round 1 and watches their round-2 average fall back toward the mean, with sliders for how much luck vs skill drives the outcome (more luck → more regression). Recap Quiz + MindMap. en + es twin.',
-  },
+  // `leverage-points` (23), `lollapalooza-effect` (order 24) and
+  // `regression-to-the-mean` (the advanced probability rung, order 25) have
+  // graduated and been removed; their topic MDX is now the record. The
+  // lowest-order entry below (`critical-mass`, order 26) is built next. The queue
+  // spans science-engineering / systems (`critical-mass`), strategy
+  // (`nash-equilibrium`), decision-making (`asymmetry-and-optionality`) and
+  // biology-evolution (`fitness-landscapes`) so no single roadmap tag races ahead
+  // of the others.
   {
     slug: 'critical-mass',
     icon: '⚛️',

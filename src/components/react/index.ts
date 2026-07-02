@@ -171,3 +171,6 @@ export type { LeverageLadderProps, LeverageRung } from '@/components/react/Lever
 
 export { BiasStack, default as BiasStackDefault } from '@/components/react/BiasStack';
 export type { BiasStackProps, BiasStackItem } from '@/components/react/BiasStack';
+
+export { RegressionScatter, default as RegressionScatterDefault } from '@/components/react/RegressionScatter';
+export type { RegressionScatterProps } from '@/components/react/RegressionScatter';
