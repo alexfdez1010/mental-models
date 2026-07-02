@@ -174,3 +174,6 @@ export type { BiasStackProps, BiasStackItem } from '@/components/react/BiasStack
 
 export { RegressionScatter, default as RegressionScatterDefault } from '@/components/react/RegressionScatter';
 export type { RegressionScatterProps } from '@/components/react/RegressionScatter';
+
+export { CriticalMass, default as CriticalMassDefault } from '@/components/react/CriticalMass';
+export type { CriticalMassProps } from '@/components/react/CriticalMass';

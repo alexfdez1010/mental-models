@@ -42,12 +42,12 @@
  * beginner→intermediate breadth pass and the earlier advanced rungs
  * (`what-are-mental-models`, `natural-selection`, `supply-and-demand`,
  * `tragedy-of-the-commons`, `externalities`, `moats`, `ecosystems-and-niches`,
- * `leverage-points`, `lollapalooza-effect`, …) have graduated and been removed.
- * Lowest `order` is built next. The remaining entries are the **advanced tier**,
- * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * probability (`regression-to-the-mean`), science-engineering / systems
- * (`critical-mass`), strategy (`nash-equilibrium`), decision-making
- * (`asymmetry-and-optionality`) and biology-evolution (`fitness-landscapes`).
+ * `leverage-points`, `lollapalooza-effect`, `regression-to-the-mean`,
+ * `critical-mass`, …) have graduated and been removed. Lowest `order` is built
+ * next. The remaining entries are the **advanced tier**, deliberately kept
+ * tag-diverse so no single roadmap tag races ahead: strategy
+ * (`nash-equilibrium`), decision-making (`asymmetry-and-optionality`) and
+ * biology-evolution (`fitness-landscapes`).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -87,39 +87,14 @@ export interface UpcomingCourse {
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Advanced tier — kept tag-diverse ───────────────────────────────────────
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
-  // `leverage-points` (23), `lollapalooza-effect` (order 24) and
-  // `regression-to-the-mean` (the advanced probability rung, order 25) have
-  // graduated and been removed; their topic MDX is now the record. The
-  // lowest-order entry below (`critical-mass`, order 26) is built next. The queue
-  // spans science-engineering / systems (`critical-mass`), strategy
-  // (`nash-equilibrium`), decision-making (`asymmetry-and-optionality`) and
-  // biology-evolution (`fitness-landscapes`) so no single roadmap tag races ahead
-  // of the others.
-  {
-    slug: 'critical-mass',
-    icon: '⚛️',
-    difficulty: 'advanced',
-    order: 26,
-    accent: 'accent',
-    title: {
-      en: 'Critical Mass & Tipping Points',
-      es: 'Masa Crítica y Puntos de Inflexión',
-    },
-    description: {
-      en: 'Some things do nothing, nothing, nothing — then everything, all at once. Below a threshold a chain reaction fizzles; one atom past it, it runs away. The physics model behind tipping points, viral spread, network effects, and why change so often arrives suddenly after a long, quiet build-up.',
-      es: 'Algunas cosas no hacen nada, nada, nada — y de pronto, todo a la vez. Bajo un umbral la reacción en cadena se apaga; un átomo más allá, se dispara. El modelo físico tras los puntos de inflexión, la difusión viral, los efectos de red y por qué el cambio suele llegar de golpe tras una larga acumulación silenciosa.',
-    },
-    dependencies: ['feedback-loops', 'emergence'],
-    tags: ['science-engineering', 'systems-thinking'],
-    buildNotes:
-      'Critical mass & tipping points — the advanced science-engineering rung borrowed from nuclear physics and generalized: the idea of a *threshold* below which a self-amplifying process dies out and above which it runs away, because the amplification factor crosses 1. Assumes feedback-loops (reinforcing loops) and emergence. Sections: the origin — nuclear fission, where each split atom releases neutrons that split more; below the critical mass too many neutrons escape and the reaction fizzles, at/above it each split causes ≥1 more and the chain reaction explodes (the "k-factor" crossing 1); the general model — any system with a reinforcing loop has a threshold where per-step gain crosses 1, flipping "peters out" into "runs away" (tie hard to feedback-loops); worked examples across domains — a disease’s R0 (spread crossing 1 person infecting >1), viral content, the adoption S-curve and network effects (a phone network / social app worthless below a user threshold, unstoppable above it — tie to moats), a crowd/riot or a standing ovation, autocatalytic chemistry, even a meeting where nobody speaks until a threshold of willingness breaks; nonlinearity and suddenness — why thresholds make change feel abrupt ("nothing then everything") and why the long quiet phase fools people into thinking nothing is happening; hysteresis / lock-in briefly (once over the top it’s hard to reverse). Pitfalls: assuming linear extrapolation near a threshold (small push → giant or zero effect, unpredictably), confusing "slow = failing" with "sub-critical build-up", and the reverse error of expecting every trend to tip (many never reach critical mass and just die). Build an interactive island: a grid/pool of "nodes" with a contagion or neutron-style spread and a slider for the amplification factor (k) or the seed density; below threshold the activation fizzles out, above it a chain reaction sweeps the whole grid — the learner hunts for the tipping point and sees the sharp phase change. Recap Quiz + MindMap. en + es twin.',
-  },
-  // ── Breadth appends (queue would otherwise fall below 3) ─────────────────────
-  // With `lollapalooza-effect` graduated, only `regression-to-the-mean`
-  // (probability) and `critical-mass` (science-engineering/systems) remained.
-  // Add the strategy, decision-making and biology-evolution advanced rungs so
-  // the queue stays ≥3 and no roadmap tag runs empty. Each sits a notch further
-  // up the ladder and stays strictly within TOPIC.md scope.
+  // `leverage-points` (23), `lollapalooza-effect` (24), `regression-to-the-mean`
+  // (the advanced probability rung, 25) and `critical-mass` (the advanced
+  // science-engineering / systems rung, 26) have graduated and been removed;
+  // their topic MDX is now the record. The lowest-order entry below
+  // (`nash-equilibrium`, order 27) is built next. The remaining queue spans
+  // strategy (`nash-equilibrium`), decision-making (`asymmetry-and-optionality`)
+  // and biology-evolution (`fitness-landscapes`) so no single roadmap tag races
+  // ahead of the others.
   {
     slug: 'nash-equilibrium',
     icon: '♟️',

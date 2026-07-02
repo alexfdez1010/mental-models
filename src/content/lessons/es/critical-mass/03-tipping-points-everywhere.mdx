@@ -1,0 +1,321 @@
+---
+title: "Puntos de inflexión por todas partes"
+description: "Un umbral, muchos disfraces: epidemias y R0, coeficientes virales, efectos de red y la curva en S de adopción, multitudes y pánicos, autocatálisis e incendios forestales. Aprende a leer cualquier fenómeno de propagación con la misma pregunta — ¿cuál es la unidad amplificadora, cuál es su k y en qué lado del 1 estamos?"
+topic: "es/critical-mass"
+order: 4
+minutes: 12
+updated: 2026-07-02
+---
+
+import { MCQ, Quiz, Callout, Categorize, MatchConcepts, CriticalMass } from '@/components/react';
+
+Hace dos lecciones nos plantamos sobre un pedazo de uranio y vimos a un solo kilogramo decidir el destino de una ciudad. La última lección hicimos lo atrevido: levantamos la idea limpiamente del suelo del reactor y mostramos que *cualquier* bucle reforzador tiene una ganancia por paso — llámala **k**, el número medio de eventos nuevos que provoca cada evento — y que **la masa crítica no es más que k cruzando el 1**. Por debajo de 1, el proceso pierde más de lo que gana y se apaga; por encima de 1, gana más de lo que pierde y se desboca.
+
+Eso era la abstracción. Esta lección es la recompensa: el gran recorrido. Vamos a pasear el mismo umbral por epidemias, startups, mercados, multitudes, química, bosques y una reunión dolorosamente incómoda — y cada vez es la *misma forma con un disfraz distinto*. Al terminar deberías ser ligeramente incapaz de dejar de verlo.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — adivina"
+  question="Una enfermedad tiene un número básico de reproducción de R0 = 3 — cada persona infectada, en una población totalmente susceptible, contagia a unas tres más de media. Sanidad pública quiere empujar el brote por debajo del umbral inmunizando a suficiente gente. ¿Aproximadamente qué fracción de la población necesita ser inmune para volcarlo por debajo del umbral?"
+  options={[
+    { text: "En torno al 33% — uno de cada tres basta porque R0 es solo 3", },
+    { text: "En torno al 67% — hay que dejar fuera de la cadena más o menos 1 - 1/R0, y 1 - 1/3 son dos tercios", correct: true },
+    { text: "100% — el único brote seguro es aquel en el que todo el mundo es inmune", },
+    { text: "No se puede calcular solo a partir de R0; los umbrales de inmunidad son pura adivinanza", },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Sin penalización en un pretest — solo capta la forma. La inmunidad de grupo funciona eliminando susceptibles hasta que cada infección provoca, de media, menos de una infección nueva: empujando el número de reproducción efectivo por debajo de 1. La fracción umbral que hay que inmunizar es más o menos 1 - 1/R0. Para R0 = 3 eso es 1 - 1/3 ≈ 0,67, así que en torno al 67%. Es exactamente el argumento del uranio — estás 'fugando' suficiente de la reacción en cadena como para que cada evento no logre reproducirse — solo que con personas en el papel de los átomos."
+/>
+
+Ese pretest es toda la lección en miniatura: razonaste sobre un virus usando una regla que conociste por primera vez en una bomba. Hagámoslo bien ahora, un dominio a la vez.
+
+## Epidemias — el número de reproducción $R_0$
+
+Empecemos por el dominio que convirtió el "número R" en una expresión de sobremesa. La unidad amplificadora es **una infección**, y su k tiene un nombre famoso: el **número básico de reproducción (basic reproduction number)**, escrito $R_0$ (se dice "erre sub cero"). Responde exactamente a la pregunta de la k — *de media, ¿a cuántas personas nuevas contagia una persona infectada, en una población totalmente susceptible?*
+
+- **La unidad amplificadora:** una persona infectada.
+- **k aquí:** $R_0$ — infecciones secundarias por caso.
+- **Por debajo de 1:** cada caso produce menos de un caso nuevo, así que cada generación del brote es más pequeña que la anterior. Se encoge hasta cero. El brote se apaga.
+- **Por encima de 1:** cada caso produce más de un caso nuevo, las generaciones crecen y — al componerse — obtienes una epidemia.
+
+La jugada astuta de la salud pública es que no tienes que tocar el propio $R_0$ para ganar. Solo necesitas empujar el número de reproducción *efectivo* — llámalo $R_t$, el que realmente se alcanza una vez que parte de la gente es inmune — por debajo de 1. Cada persona inmune es un callejón sin salida para la cadena: un neutrón que escapa en vez de partir el siguiente átomo. Inmuniza a suficiente población y la infección media no encuentra suficientes anfitriones frescos para reproducirse. Eso es la **inmunidad de grupo (herd immunity)** — no todos protegidos, solo suficientes callejones sin salida como para que la reacción en cadena no se sostenga.
+
+¿Cuántos son "suficientes"? Aquí va la versión trabajada. La cadena se sostiene cuando $R_0 \times (\text{fracción aún susceptible}) \geq 1$. Iguálalo a 1 y la fracción susceptible crítica es $1/R_0$; todo lo que esté por encima debe ser inmune. Así que el **umbral de inmunidad de grupo** es $1 - 1/R_0$:
+
+| $R_0$ | Fracción susceptible que justo lo sostiene ($1/R_0$) | Fracción que debes inmunizar ($1 - 1/R_0$) |
+|---|---|---|
+| 2 | 1/2 = 50% | ~50% |
+| 3 | 1/3 ≈ 33% | ~67% |
+| 4 | 1/4 = 25% | ~75% |
+| 5 | 1/5 = 20% | ~80% |
+| 12–18 (sarampión) | ~6–8% | ~92–95% |
+
+Lee la última fila y entiendes por qué el sarampión es el jefe final de la vacunación: su $R_0$ es tan alto que necesitas a casi todo el mundo inmune para mantener el número efectivo por debajo de 1. Deja que la cobertura resbale unos pocos puntos y $R_t$ vuelve a asomar por encima del umbral — el mismo filo de navaja por el que arrastraste el control deslizante hace dos lecciones.
+
+<Callout variant="info" title="R0 no es el destino — es un número de partida">
+$R_0$ describe un virus que se encuentra con una población *totalmente susceptible*. El número bajo el que de verdad vives es el número de reproducción **efectivo** $R_t$, que la conducta, la inmunidad y la estación doblan. La distancia, las mascarillas y las vacunas no bajan el $R_0$ intrínseco del virus; bajan la k *alcanzada* por debajo de 1. El mismo umbral, distinta palanca.
+</Callout>
+
+## Contenido viral y crecimiento — el coeficiente viral
+
+Cambia átomos por veces que se comparte algo y obtienes la versión del growth-hacker. La unidad amplificadora es **quien comparte** (o quien invita), y su k es el **coeficiente viral (viral coefficient)**: de media, ¿a cuántos *nuevos* que comparten recluta cada uno que comparte?
+
+- **k por debajo de 1:** cada ola de veces que se comparte es más pequeña que la anterior. La cosa se propaga solo hasta donde *pagas* por empujarla — apaga el gasto en anuncios y muere. Esto es la mayoría del contenido.
+- **k por encima de 1:** cada ola es mayor que la anterior, así que se propaga sola, sin combustible. Esto es el raro éxito genuinamente "viral".
+
+La diferencia entre "tenemos que seguir comprando alcance para siempre" y "creció mientras dormíamos" es, una vez más, un número que se sienta un pelo por encima o por debajo de 1. Los marketeros obsesionan con el coeficiente viral por exactamente la razón por la que los físicos obsesionan con la k: es el interruptor entre el apagado y el desbocamiento.
+
+## Efectos de red, fosos defensivos y la curva en S de adopción
+
+Aquí la masa crítica deja de ir sobre *lo rápido* que se propaga algo y empieza a ir sobre *si la cosa vale algo siquiera*. Un **efecto de red (network effect)** significa que el producto se vuelve más valioso para cada usuario a medida que se suman más usuarios — un teléfono es un pisapapeles, un millón de teléfonos es infraestructura.
+
+- **La unidad amplificadora:** un usuario que, al sumarse, hace el producto más valioso y así atrae a más usuarios.
+- **k aquí:** cuántos usuarios adicionales arrastra cada usuario nuevo (a través del valor que aporta).
+- **Por debajo de la masa crítica de usuarios:** el producto casi no vale nada — nadie a quien escribir, nada que comprar — así que la gente se marcha más rápido de lo que llega. k < 1, y se desangra hasta morir.
+- **Por encima de la masa crítica:** cada usuario lo hace lo bastante valioso como para atraer a más de uno más, que atraen a más aún. k > 1, y se compone en algo que la gente no puede abandonar.
+
+Ese "no puede abandonar" es de donde salen los **fosos defensivos (moats)** duraderos (un modelo con su propio curso cerca): una vez que una red ha pasado la masa crítica, un competidor tiene que atraer usuarios lejos de algo que es valioso *precisamente porque todo el mundo ya está ahí* — un problema de coordinación que protege al incumbente. El foso no es una característica; es el otro lado de un punto de inflexión.
+
+Pero nada se compone para siempre, y esta es la parte que la gente olvida. Traza los adoptantes a lo largo del tiempo y no obtienes una línea recta hacia el infinito — obtienes la **curva en S (S-curve)** de adopción: un arrastre largo y lento mientras eres subcrítico, luego una subida explosiva casi vertical una vez que k supera el 1, y luego un **aplanamiento** a medida que el depósito de aún-no-adoptantes se seca. Ese último recodo es la misma física que la rejilla de fisión saturándose una vez que casi todo el combustible ya está gastado: el crecimiento desbocado necesita combustible sin quemar, y al final no queda ninguno. k vuelve a caer por debajo de 1 no porque el bucle se rompiera sino porque se quedó sin cosas que amplificar.
+
+<Callout variant="tip" title="Tres fases, una curva">
+La curva en S es la masa crítica contada como una historia en el tiempo. **Arrastre subcrítico** (k < 1, o apenas por encima y hambriento de adoptantes) → **explosión supercrítica** (k > 1, combustible de sobra) → **meseta de saturación** (combustible gastado, k vuelve a caer bajo 1). La lección 4 vive dentro de las dos primeras fases — por qué ese largo arrastre plano nos engaña para dar por muerto a un ganador.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Una app de mensajería y una app de noticias de solo difusión se lanzan en la misma ciudad. La app de mensajería es inútil con 200 usuarios e imparable con 2 millones; la de noticias es exactamente igual de útil para su primerísimo lector que para el número un millón. ¿Cuál tiene un umbral genuino de masa crítica / efecto de red, y por qué?"
+  options={[
+    { text: "La app de mensajería — su valor para cada usuario sube con el número de otros usuarios, así que por debajo de una masa crítica k < 1 (la gente se marcha) y por encima k > 1 (cada usuario atrae a más de uno más)", correct: true },
+    { text: "La app de noticias — difundir alcanza a más gente, así que debe tener el efecto de red más fuerte", },
+    { text: "Ambas por igual — toda app tiene un efecto de red por el mero hecho de tener usuarios", },
+    { text: "Ninguna — los efectos de red son un mito de marketing sin ningún umbral detrás", },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Un efecto de red existe solo cuando el valor de un usuario depende de otros usuarios. La app de mensajería lo tiene: nadie a quien escribir significa valor casi nulo, así que por debajo de una masa crítica pierde usuarios (k < 1); pasado el umbral cada usuario la hace lo bastante valiosa como para atraer a más de uno más (k > 1), y se compone en un foso. La app de noticias es igual de útil para un lector o para un millón — su valor no depende de la multitud — así que no tiene umbral de recuento de usuarios. Más alcance no es lo mismo que un efecto de red."
+/>
+
+## Multitudes — el modelo de umbrales de Granovetter
+
+Ahora el disfraz más humano, y el que mejor recompensa el estudio. En 1978 el sociólogo **Mark Granovetter** preguntó por qué dos multitudes casi idénticas pueden comportarse de forma completamente distinta — una estalla en disturbio, la otra se va a casa — y construyó **el modelo de umbrales de Granovetter (Granovetter's threshold model)** para responder.
+
+La idea: cada persona lleva un **umbral** personal — el número (o fracción) de *otros* que deben actuar antes de que ella se sume. Un exaltado tiene un umbral de 0 (no necesita a nadie). Un alma cauta tiene un umbral de 50 (no se mueve hasta que la mitad de la sala ya lo haya hecho). La unidad amplificadora es **una persona sumándose**, y k es aproximadamente cuántas personas *adicionales* vuelca cada uno que se suma por encima de su propio umbral. Lo que decide si una chispa cae en cascada o se apaga no es el temperamento medio — es la **distribución** de los umbrales.
+
+El contraste clásico de Granovetter lo hace vívido. Imagina 100 personas en una plaza:
+
+- **Multitud A:** los umbrales son 0, 1, 2, 3, … 99 — una persona en cada nivel. La persona con umbral 0 empieza. Eso hace un actor, que dispara a la persona de umbral 1, haciendo dos, que dispara a la persona de umbral 2… y se descose todo el camino hasta un disturbio en toda regla.
+- **Multitud B:** *idéntica* salvo que la única persona con umbral 1 se cambia por una segunda persona con umbral 2. Ahora la persona de umbral 0 empieza — un actor — pero nadie tiene umbral 1, así que la cadena se atasca en uno. El instigador se queda solo y para avergonzado. Sin disturbio.
+
+Las mismas 100 personas, disposiciones casi idénticas, el umbral de una sola persona distinto por un único punto — y una plaza arde mientras la otra bosteza. La conclusión inquietante es pura masa crítica con un guiño a la emergencia: **el agregado ("una persona media de militancia moderada") no te dice nada sobre el resultado, porque el comportamiento vive en la cadena de interacciones, no en los individuos.** No puedes leer el disturbio en la gente; tienes que ejecutar la cascada.
+
+La misma forma lleva muchos disfraces de multitud:
+
+- Una **ovación en pie** necesita una masa crítica de los primeros en levantarse antes de que la mayoría sentada sienta el tirón; por debajo, los pocos valientes se vuelven a sentar.
+- Un **pánico bancario** es una cascada de umbrales sobre "retira antes de que se derrumbe" — cada retirada hace el derrumbe más probable, disparando al siguiente depositante.
+- Un **disturbio**, un **efecto arrastre**, una **moda** — todos lo mismo: umbrales personales, una chispa, y una distribución que o bien lleva la cascada o la deja varada.
+
+<Callout variant="warning" title="No leas la multitud en la gente">
+El error seductor es inferir el temperamento a partir del resultado: "se amotinaron, así que deben de ser una turba furiosa". El argumento de Granovetter es que una turba y una multitud dócil pueden ser estadísticamente idénticas en disposición — el resultado depende de la *disposición* de los umbrales, es decir, de la estructura de interacción, no de lo militante que sea la gente de media. La misma trampa que leer la ciudad segregada de Schelling como prueba de intolerancia. El patrón macro no es una copia ampliada de la intención micro.
+</Callout>
+
+## Autocatálisis — el fuego que se enciende solo de la química
+
+La química tiene la versión más pura de todas. Una reacción **autocatalítica (autocatalysis)** es aquella cuyo *producto cataliza su propia formación*: hacer algo de la sustancia X acelera la producción de más X. La unidad amplificadora es una molécula de producto; k es cuántas reacciones adicionales acelera cada molécula de producto para que existan. Por debajo del umbral la reacción se arrastra; una vez que se acumula suficiente producto como para catalizarse a sí mismo, despega — una reacción en cadena química. Este es un candidato destacado para explicar cómo se arrancó la vida: un conjunto de moléculas que colectivamente catalizan la formación de las demás es un bucle que se autoamplifica y que, una vez sobre la masa crítica, se sostiene y crece por sí mismo sin necesidad de diseñador — masa crítica en el origen de todo.
+
+## Incendios forestales — el umbral de percolación
+
+De vuelta a algo que puedes imaginarte ardiendo. Toma un paisaje y varía la **densidad de árboles**. Un fuego empieza en un árbol y solo puede saltar a vecinos que estén a su alcance.
+
+- **La unidad amplificadora:** un árbol ardiendo.
+- **k aquí:** cuántos árboles nuevos prende cada árbol ardiendo — lo que depende casi por completo de lo apretados que estén los árboles.
+- **Por debajo de una densidad crítica:** los huecos entre árboles son demasiado anchos, el fuego no puede saltar de forma fiable, cada árbol ardiendo prende menos de uno más, y el fuego muere en una pequeña mancha chamuscada. k < 1.
+- **Por encima de la densidad crítica:** los vecinos están lo bastante cerca como para que el fuego salte de forma fiable de árbol en árbol, cada árbol ardiendo prende más de uno más, y el incendio barre de borde a borde. k > 1.
+
+La línea nítida en la densidad de árboles donde "pequeña quemadura" se vuelca en "incendio total" es un **umbral de percolación (percolation)** — el punto donde las conexiones locales de pronto se enlazan en un único clúster que abarca todo el sistema. Es exactamente el mismo cambio de fase que la rejilla de fisión, solo que la perilla es *lo conectado que está el combustible* en vez de lo fisible que es cada unidad. Por eso los gestores forestales aclaran árboles y abren cortafuegos: están arrastrando deliberadamente el paisaje de vuelta por debajo de su umbral de percolación, rompiendo la conectividad para que k se quede bajo 1.
+
+Puedes sentir esto en la rejilla de la lección 1. Siémbrala dispersa y ejecuta — la reacción no puede salvar los huecos y muere. Siémbrala densa y ejecuta — percola por todo el tablero. La misma regla, la misma fuerza de semilla; solo cambió la conectividad.
+
+<CriticalMass
+  client:visible
+  eyebrow="Bajo el umbral, sobre el umbral"
+  title="Percolación: la conectividad es la perilla"
+  caption="Lee la rejilla como un bosque. Una semilla dispersa con k baja no puede salvar los huecos entre árboles, así que el fuego muere en una pequeña mancha (subcrítico). Sube la densidad y la k y el mismo fuego de pronto percola de borde a borde (supercrítico). El punto de inflexión en la conectividad es el umbral de percolación — aclarar árboles y abrir cortafuegos no es más que arrastrar un paisaje de vuelta por debajo de él. (Movimiento reducido: las celdas cambian de color sin latir.)"
+  initialSeed={3}
+  initialK={115}
+  kLabel="Factor de amplificación k (nuevas activaciones por celda)"
+  seedLabel="Densidad inicial de semilla"
+  stepLabel="Paso ▸"
+  runLabel="Ejecutar ▸"
+  pauseLabel="Pausa"
+  resetLabel="Reiniciar"
+  stepWord="Paso"
+  readoutTemplate="{step}: {active} celdas reaccionando ahora; {burned} activadas en total ({share}% de la rejilla)."
+  fizzleVerdict="Subcrítico — la reacción se apagó."
+  chainVerdict="Supercrítico — la reacción en cadena se disparó."
+  edgeVerdict="Justo en el filo — se propagó a medias y luego se estancó."
+  runningVerdict="Reaccionando…"
+  dormantLabel="Latente"
+  activeLabel="Reaccionando"
+  spentLabel="Consumida"
+/>
+
+## El cotidiano — la reunión silenciosa
+
+No sea que creas que todo esto es de bombas y epidemias: te sentaste dentro de un punto de inflexión en tu última mala reunión. El ponente termina, pregunta "¿alguna pregunta?", y nadie habla — no porque nadie tenga una, sino porque cada persona tiene un umbral privado de *cuántos otros deben hablar primero* antes de arriesgarse a parecer tonta. La sala es subcrítica: todos esperan a la unidad amplificadora que aún no ha disparado.
+
+Entonces una persona hace la pregunta incómoda. De repente una segunda se siente segura, luego una tercera, y la sala que estaba en silencio de muerte no para de hablar. Un alma valiente con un umbral de cero volcó a toda la sala por encima de la masa crítica — la ovación en pie, corrida al revés y en miniatura. El modelo no es solo para físicos; es la razón de que "simplemente di lo que piensas" tenga de verdad mucha palanca, y de que la primera voz honesta en una sala nerviosa valga por diez de las posteriores.
+
+## La misma forma, muchos disfraces — la tabla maestra
+
+Cada dominio de arriba es la máquina idéntica con las etiquetas cambiadas. Ponlos en fila y el patrón es imposible de dejar de ver:
+
+| Dominio | La unidad amplificadora | Qué es "k" | Por debajo de 1 (se apaga) | Por encima de 1 (se desboca) |
+|---|---|---|---|---|
+| Fisión nuclear | Un átomo que se parte | Neutrones que van a partir otro átomo | Pedazo subcrítico — la reacción muere | Bomba / reactor autosostenido |
+| Epidemia | Una persona infectada | $R_0$ / $R_t$ — nuevas infecciones por caso | El brote se encoge hasta cero | La epidemia crece |
+| Contenido viral | Quien comparte | Coeficiente viral — nuevos que comparten por cada uno que comparte | Necesita empuje pagado constante | Se propaga solo |
+| Producto de red | Un usuario | Usuarios extra que atrae cada usuario | Producto sin valor, los usuarios se marchan | Se compone en un foso |
+| Acción de multitud | Una persona sumándose | Personas que vuelca cada uno que se suma por encima de su umbral | El instigador se queda solo | Disturbio / ovación / pánico bancario |
+| Autocatálisis | Una molécula de producto | Reacciones que acelera cada producto | La reacción se arrastra y se atasca | Reacción en cadena química |
+| Incendio forestal | Un árbol ardiendo | Árboles que prende cada árbol ardiendo | El fuego muere en una pequeña mancha | Percola de borde a borde |
+| La reunión silenciosa | Una persona que habla | Personas que envalentona cada uno que habla | El silencio incómodo aguanta | La sala no para de hablar |
+
+La heurística de transferencia cae directamente de la tabla. Siempre que te encuentres con *cualquier cosa* que pueda propagarse — una enfermedad, un rumor, un producto, una protesta, un hábito, un fuego, una moda — pasa la misma sonda de tres partes:
+
+1. **¿Cuál es la unidad amplificadora?** (La cosa que, por existir, tiende a crear más de sí misma.)
+2. **¿Cuál es su k?** (De media, ¿cuántas unidades nuevas provoca cada unidad?)
+3. **¿En qué lado del 1 estamos?** (Por debajo → muere; por encima → se desboca; cerca de 1 → está en un filo de navaja y los pequeños cambios lo deciden todo.)
+
+Consigue esas tres y podrás predecir la *forma* de la trayectoria antes de conocer un solo detalle específico del dominio. Ese es todo el sentido de un modelo mental: la portabilidad.
+
+<Categorize
+  client:visible
+  title="¿En qué lado del umbral?"
+  instructions="Cada escenario es un proceso que se autoamplifica. Clasifícalo según si su k está por debajo de 1 (se apagará) o por encima de 1 (se desbocará)."
+  buckets={['Subcrítico — se apagará (k < 1)', 'Supercrítico — se desbocará (k > 1)']}
+  items={[
+    { text: "Una enfermedad con número de reproducción efectivo Rt = 0,8 en la población actual.", bucket: 'Subcrítico — se apagará (k < 1)' },
+    { text: "Un brote de sarampión (R0 ≈ 15) que golpea a una comunidad con solo un 60% de cobertura vacunal.", bucket: 'Supercrítico — se desbocará (k > 1)' },
+    { text: "Una app cuyo cada usuario, de media, invita a 1,4 amigos que se suman y también invitan.", bucket: 'Supercrítico — se desbocará (k > 1)' },
+    { text: "Un boletín que solo crece cuando compras anuncios; cada suscriptor refiere a 0,3 nuevos.", bucket: 'Subcrítico — se apagará (k < 1)' },
+    { text: "Un bosque disperso tras un aclareo intenso, con los árboles demasiado separados para que el fuego salte de forma fiable.", bucket: 'Subcrítico — se apagará (k < 1)' },
+    { text: "Un parqué donde cada vendedor desencadena, de media, dos vendedores más presa del pánico.", bucket: 'Supercrítico — se desbocará (k > 1)' },
+    { text: "Una plaza de protesta donde el instigador solitario no encuentra a nadie más con un umbral lo bastante bajo como para seguirle.", bucket: 'Subcrítico — se apagará (k < 1)' },
+    { text: "Un mercado más allá de su masa crítica, donde cada nuevo comprador atrae a más de un vendedor.", bucket: 'Supercrítico — se desbocará (k > 1)' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  explanation="La única prueba es siempre la misma: ¿provoca cada evento, de media, más de un evento adicional? Rt = 0,8, una tasa de referencia de 0,3, un bosque aclarado y un instigador varado están todos por debajo de 1 y decaen. Un brote de sarampión infravacunado, un coeficiente viral de 1,4, una cascada de ventas de pánico 2x y un mercado más allá de la masa crítica están todos por encima de 1 y se componen. Fíjate en que nunca necesitaste los detalles del dominio — solo k frente a 1."
+/>
+
+<MatchConcepts
+  client:visible
+  title="Detecta la k en cada dominio"
+  instructions="Todo proceso que se autoamplifica tiene un 'factor de amplificación' — el número medio de eventos nuevos que provoca cada evento. Empareja cada dominio con lo que hace el papel de k allí."
+  pairs={[
+    { term: "Epidemia", definition: "El número básico de reproducción R0 — nuevas infecciones que provoca cada caso" },
+    { term: "Crecimiento viral de una app", definition: "El coeficiente viral — nuevos que comparten reclutados por cada uno que comparte" },
+    { term: "Producto de red", definition: "El número de usuarios extra que atrae cada nuevo usuario vía el valor añadido" },
+    { term: "Multitud / disturbio", definition: "Cuántas personas vuelca cada uno que se suma por encima de su umbral personal de acción" },
+    { term: "Incendio forestal", definition: "Cuántos árboles vecinos prende cada árbol ardiendo (fijado por la densidad)" },
+    { term: "Autocatálisis", definition: "Cuántas reacciones adicionales cataliza cada molécula de producto para que existan" },
+    { term: "Fisión nuclear", definition: "Cuántos neutrones libres de una fisión van a partir otro átomo" },
+  ]}
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  checkLabel="Comprobar"
+  allCorrectLabel="✓ Todo emparejado"
+/>
+
+<Quiz
+  client:visible
+  title="Prueba de transferencia de puntos de inflexión"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  seeResultsLabel="Ver resultados"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  gateLabel="Comprueba tu respuesta para continuar."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: "Un virus tiene R0 = 5. Una autoridad sanitaria quiere llevar el número de reproducción efectivo por debajo de 1 mediante vacunación. ¿Aproximadamente qué fracción de la población debe ser inmune, y cuál es la lógica subyacente?",
+      options: [
+        { text: "En torno al 80% — el umbral de inmunidad de grupo es 1 - 1/R0 = 1 - 1/5 = 0,8, es decir, debes eliminar suficientes susceptibles como para que cada caso infecte a menos de una persona nueva", correct: true },
+        { text: "En torno al 20% — solo necesitas inmunizar a 1/R0 de la población", },
+        { text: "En torno al 50% — la mitad siempre basta, sin importar R0", },
+        { text: "100% — con R0 tan alto como 5, nada por debajo de la inmunidad total funciona", },
+      ],
+      explanation: "La cadena se sostiene mientras R0 por la fracción susceptible sea al menos 1, así que la fracción susceptible crítica es 1/R0 = 20% y la fracción inmune que necesitas es 1 - 1/R0 = 80%. Es el argumento del uranio en una clínica: crea suficientes callejones sin salida como para que la infección media no logre reproducirse. 1/R0 es la fracción que puede seguir siendo susceptible, no la fracción que hay que inmunizar.",
+    },
+    {
+      question: "El modelo de umbrales de Granovetter muestra que dos multitudes con disposiciones individuales casi idénticas pueden comportarse de forma completamente distinta — una se amotina, otra no. ¿Cuál es la lección más profunda que esto enseña sobre los sistemas que se autoamplifican?",
+      options: [
+        { text: "El resultado vive en la distribución de umbrales y en la cadena de interacciones, no en el temperamento medio — así que no puedes leer el resultado macro en los individuos", correct: true },
+        { text: "Las multitudes son fundamentalmente aleatorias y ningún modelo puede decir nada útil sobre ellas", },
+        { text: "Un disturbio prueba que la multitud era, de media, más agresiva que una tranquila", },
+        { text: "Cambiar a una sola persona nunca importa en una multitud lo bastante grande", },
+      ],
+      explanation: "Cambiar el umbral de una sola persona por un punto puede ser la diferencia entre una cascada que descose a toda la multitud y una que deja varado al instigador. El comportamiento es una propiedad de la estructura de interacción, no una copia ampliada de la disposición media — el mismo argumento de 'no leas el macro en el micro' que la segregación de Schelling. Y cerca de un umbral, una sola persona sin duda puede importar.",
+    },
+    {
+      question: "Una startup de mercado crece dolorosamente despacio durante dos años, luego explota a lo largo de seis meses, luego el crecimiento se aplana con fuerza. ¿Qué lectura encaja mejor con el modelo de la masa crítica? (Marca todas las que correspondan.)",
+      allowMultiple: true,
+      options: [
+        { text: "La fase lenta fue subcrítica — por debajo de la masa crítica de la red, el valor por usuario era bajo y k rondaba por debajo de 1", correct: true },
+        { text: "La explosión es la fase supercrítica — pasada la masa crítica cada usuario atrajo a más de uno más, así que k > 1 y el crecimiento se compuso", correct: true },
+        { text: "El aplanamiento es saturación — el depósito de aún-no-adoptantes se secó, así que k volvió a caer bajo 1 aunque el bucle nunca se 'rompió'", correct: true },
+        { text: "El aplanamiento prueba que el producto empeoró y el efecto de red era falso", },
+      ],
+      explanation: "Esta es la curva en S de adopción: un arrastre subcrítico, una explosión supercrítica una vez que k supera el 1 con combustible de sobra, y una meseta de saturación a medida que se vacía el depósito de no-adoptantes — exactamente la rejilla de fisión quedándose sin combustible sin quemar. La meseta es quedarse sin adoptantes, no un defecto; el bucle está bien, simplemente tiene menos que amplificar.",
+    },
+    {
+      question: "Te entregan un fenómeno de propagación nuevecito en un dominio del que no sabes nada. Usando la heurística de transferencia de esta lección, ¿qué tres preguntas te dejan predecir la FORMA de su trayectoria antes de aprender ningún detalle específico del dominio?",
+      options: [
+        { text: "¿Cuál es la unidad amplificadora? ¿Cuál es su k (unidades nuevas por unidad)? ¿En qué lado del 1 está k?", correct: true },
+        { text: "¿Quién lo empezó? ¿De qué tamaño es la población total? ¿Cuánto dinero hay detrás?", },
+        { text: "¿Es bueno o malo? ¿Es rápido o lento? ¿Es local o global?", },
+        { text: "¿Cuál es el valor medio de una unidad, y cuánto tiempo lleva existiendo?", },
+      ],
+      explanation: "La sonda portátil es exactamente esas tres: identifica la unidad amplificadora, estima su k y localiza k respecto al 1. Por debajo de 1 decae, por encima de 1 se desboca, y cerca de 1 está en un filo de navaja donde los pequeños empujones lo deciden todo. El tamaño de la población, la financiación y la identidad del instigador son detalles del dominio — pueden mover k, pero no sustituyen a la pregunta k-frente-a-1 que gobierna la forma.",
+    },
+  ]}
+/>
+
+<Callout variant="success" title="Ideas clave">
+- **Una forma, muchos disfraces.** Epidemias ($R_0$), coeficientes virales, efectos de red, multitudes, autocatálisis e incendios forestales son todos el mismo umbral — k, el factor de eventos-nuevos-por-evento, cruzando el 1.
+- **El número de la inmunidad de grupo es $1 - 1/R_0$.** Elimina esa fracción de susceptibles y cada caso provoca menos de un caso nuevo: el brote se vuelve subcrítico. $R_0 = 3 \to 67\%$, $R_0 = 4 \to 75\%$.
+- **Los efectos de red crean fosos pasada la masa crítica**, y la **curva en S** de adopción es la masa crítica contada en el tiempo: arrastre, explosión, y luego una meseta de saturación a medida que el combustible se agota.
+- **No leas la multitud en la gente.** El modelo de umbrales de Granovetter muestra que multitudes casi idénticas pueden amotinarse o dispersarse puramente por la *distribución* de umbrales — el resultado macro no es una copia ampliada de la disposición media.
+- **La heurística de transferencia:** para cualquier cosa que se propague, pregunta *¿cuál es la unidad amplificadora, cuál es su k y en qué lado del 1 estamos?*
+</Callout>
+
+## Adónde va esto a continuación
+
+Ya sabes detectar el umbral en libertad, esté disfrazado de lo que esté. Pero detectarlo y *sentirlo* a tiempo son destrezas distintas — y los humanos somos catastróficamente malos en la segunda. Un proceso supercrítico pasa la mayor parte de su vida pareciendo que no pasa nada, porque el crecimiento exponencial se esconde en el ruido hasta que ya no lo hace, y nuestras intuiciones tercamente **lineales** caen en la emboscada cada vez.
+
+Eso es la lección 4: **Por qué el cambio parece repentino.** Por qué la larga fase tranquila es indistinguible del fracaso, por qué "nada, nada, nada — y luego todo" es el ritmo *nativo* de un umbral y no una sorpresa, y por qué las personas que ven venir el cambio son sencillamente las que aprendieron a fiarse de las matemáticas por encima de su instinto. Nos vemos allí.
