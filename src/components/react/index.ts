@@ -177,3 +177,6 @@ export type { RegressionScatterProps } from '@/components/react/RegressionScatte
 
 export { CriticalMass, default as CriticalMassDefault } from '@/components/react/CriticalMass';
 export type { CriticalMassProps } from '@/components/react/CriticalMass';
+
+export { MixedStrategyExplorer, default as MixedStrategyExplorerDefault } from '@/components/react/MixedStrategyExplorer';
+export type { MixedStrategyExplorerProps, MixCell, MixGrid } from '@/components/react/MixedStrategyExplorer';

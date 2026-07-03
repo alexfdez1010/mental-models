@@ -1,0 +1,364 @@
+---
+title: "Múltiples equilibrios: coordinación y puntos focales"
+description: "Algunos juegos tienen más de un punto de reposo. Cuando ocurre, el concepto de equilibrio te entrega la lista de candidatos, pero no el ganador; así que necesitas convenciones, puntos focales y cierto olfato para la confianza para saber en qué equilibrio acabará aterrizando una pareja de jugadores."
+topic: "es/nash-equilibrium"
+order: 5
+minutes: 13
+updated: 2026-07-02
+---
+
+import { MCQ, PayoffMatrix, Categorize, MatchConcepts, FillBlank, Callout, Reveal } from '@/components/react';
+
+Hasta ahora los juegos que hemos diseccionado han tenido la cortesía de contar con
+exactamente un equilibrio de Nash: una casilla donde para la música, una única predicción
+que hacer. Esa pulcritud estaba haciendo mucho trabajo callado. Buena parte de las
+situaciones estratégicas más importantes en las que te verás alguna vez tienen **varios**
+equilibrios, todos igual de estables, y en cuanto eso ocurre el concepto de equilibrio
+cambia su descripción del puesto. Deja de decirte *qué va a pasar* y empieza a entregarte una
+lista breve de *lo que podría pasar*: los candidatos, no el ganador. Cerrar esa brecha entre
+"aquí están los puntos de reposo" y "aquí está en el que de verdad vamos a reposar" es la
+lección entera. Bienvenido a los **juegos de coordinación**, donde el enemigo no es un rival
+que intenta ganarte: es el riesgo de que ambos adivinéis de forma distinta sobre lo mismo.
+
+## Coordinación pura: el juego del lado de la carretera
+
+Empecemos con la versión más limpia posible, despojada de toda complicación. Dos conductores
+se acercan por una carretera vacía. Cada uno elige un lado de forma independiente: izquierda
+o derecha. Si eligen el *mismo* lado, se cruzan sin peligro y ambos quedan contentos. Si
+eligen lados *distintos*, chocan, y todo el mundo tiene un día pésimo. Y aquí lo crucial: no
+hay **nada inherentemente mejor en la izquierda o la derecha**. Izquierda-izquierda es
+exactamente igual de bueno que derecha-derecha. Lo único que importa en el mundo es que los
+dos *coincidan*.
+
+<PayoffMatrix
+  client:visible
+  editable={false}
+  title="El juego del lado de la carretera: lo único que importa es coincidir"
+  instructions="Ambos conducen por el mismo lado (1, 1) y todos pasan sin peligro. Elige lados distintos y es un choque (0, 0). Ningún lado es 'la respuesta correcta': lo único que importa es ponerse de acuerdo. Encuentra los dos equilibrios con los anillos."
+  rowPlayer="Conductor 1"
+  colPlayer="Conductor 2"
+  rowStrategies={['Conducir por la izquierda', 'Conducir por la derecha']}
+  colStrategies={['Conducir por la izquierda', 'Conducir por la derecha']}
+  payoffs={[
+    [{ row: 1, col: 1 }, { row: 0, col: 0 }],
+    [{ row: 0, col: 0 }, { row: 1, col: 1 }],
+  ]}
+  caption="Dos equilibrios de Nash, ambos en la diagonal: ambos-izquierda (1, 1) y ambos-derecha (1, 1). Son idénticos en valor: coordinación pura. Los desajustes de fuera de la diagonal son choques (0, 0). Nada en los pagos te dice qué lado elegir; algo externo al juego tiene que hacerlo."
+  eyebrow="Matriz de recompensas"
+  analysisLabel="Lo que dice la matriz"
+  dominantLineTemplate="{player} — estrategia dominante: {strategy}"
+  noneLabel="ninguna"
+  nashLabel="Equilibrio de Nash (puro):"
+  noNashLabel="ninguno en estrategias puras"
+  bestResponseLegend="Una recompensa rodeada es la mejor respuesta de ese jugador a la elección del rival. Una celda donde ambas están rodeadas es un equilibrio de Nash."
+  nashBadge="EN"
+  resetLabel="Reiniciar recompensas"
+  increaseLabel="aumentar"
+  decreaseLabel="disminuir"
+/>
+
+Mira lo que dice la matriz. Ambos-izquierda y ambos-derecha son sendos equilibrios de Nash:
+si el otro conductor va por la izquierda, tu mejor respuesta es la izquierda; si va por la
+derecha, la tuya es la derecha. Ninguno puede mejorar cambiando de forma unilateral, así que
+ambos son puntos de reposo genuinos. Pero son **igual de buenos**: un empate perfecto en el
+pago. Esto se llama **juego de coordinación pura**: no hay conflicto de intereses en absoluto,
+ninguna tentación de hacer trampa, ningún trato mejor que aguardar. Todos quieren exactamente
+lo mismo (coincidir); el único problema es *cómo sabemos ambos a qué equilibrio apuntar*.
+
+La respuesta, en el mundo real, casi nunca se encuentra dentro del juego. La aporta la
+**convención**: una regla que todos han aprendido a esperar, normalmente cristalizada por la
+historia y luego congelada en su sitio. Por qué lado de la carretera conduce un país es
+exactamente este juego resuelto por decreto y costumbre: el Reino Unido se decantó por la
+izquierda, Francia por la derecha, y ahora ninguno puede cambiar en solitario aunque nadie
+pueda argumentar en serio que un lado sea superior. La misma forma explica por qué el teclado
+QWERTY sobrevive pese a no ser óptimo, por qué el mundo no logra ponerse de acuerdo entre el
+sistema métrico y el imperial, por qué todos contamos el tiempo en minutos de base 60. Ninguna
+de estas cosas es "la mejor respuesta". Son **equilibrios en los que nos coordinamos y luego
+nos quedamos atascados**, porque, una vez que todo el mundo espera uno, coincidir con él es tu
+mejor jugada.
+
+<Callout variant="info" title="Coordinación frente al dilema del prisionero">
+Estos juegos no se parecen en nada al dilema del prisionero, y la diferencia merece un
+nombre. En un dilema, los intereses de los jugadores **entran en conflicto**: cada uno se ve
+individualmente tentado a traicionar, y el problema es un equilibrio malo pero *único*. En un
+juego de coordinación, los intereses de los jugadores **se alinean** (todos quieren el mismo
+resultado) y el problema son *múltiples* equilibrios igual de buenos sin forma incorporada de
+elegir uno. Uno es un problema de tentación; el otro, un problema de selección. Piden remedios
+completamente distintos.
+</Callout>
+
+## El problema de la selección de equilibrio
+
+Aquí está la verdad incómoda que expone el juego de la carretera. Cuando un juego tiene más de
+un equilibrio de Nash, "predice el equilibrio" se vuelve **indeterminado**: la teoría por sí
+sola literalmente no puede decirte cuál alcanzará una pareja de jugadores racionales. Ambos
+conductores son perfectamente racionales, ambos quieren coordinarse, ambos conocen todos los
+pagos... y las matemáticas se encogen de hombros igual. Este es el **problema de la selección
+de equilibrio**, y durante décadas fue una de las heridas abiertas más embarazosas de la
+teoría de juegos: una teoría preciosa de los resultados estables que no sabía decir *cuál* de
+esos resultados estables obtendrías.
+
+La salida vino del economista **Thomas Schelling**, y es gloriosamente humana. Se dio cuenta de
+que la gente real, ante múltiples equilibrios y *sin posibilidad de comunicarse*, se coordina
+igualmente (con asombrosa frecuencia) gravitando ambos hacia la opción que resulta de algún
+modo **saliente**, obvia o natural dado su contexto compartido. Los llamó **puntos focales**
+(hoy a menudo "puntos de Schelling"): un equilibrio que destaca de los demás por la cultura, la
+convención, la simetría o la pura notoriedad, permitiendo a los jugadores converger en él *sin
+coordinarse nunca de forma explícita*.
+
+Su experimento mental clásico: tienes que reunirte mañana con un desconocido en la ciudad de
+Nueva York. Nunca te dijeron una hora ni un lugar, no podéis contactaros, y ganáis solo si
+ambos os presentáis en el mismo sitio en el mismo momento. ¿Adónde vas, y cuándo? Cuando
+Schelling planteó esto, una proporción llamativa de personas respondió lo mismo: **la
+Grand Central Terminal a mediodía**. Nada en los "pagos" hace que Grand Central sea mejor que
+una esquina cualquiera. Gana puramente porque es la respuesta *obvia*, la que esperas que la
+otra persona espere que tú esperes: un hito tan icónico que se convierte en el lugar natural de
+encuentro, y el mediodía tan naturalmente la hora "por defecto". La saliencia, no el pago, hizo
+la selección.
+
+<Reveal client:visible label="Un acertijo de punto focal" buttonLabel="¿Qué número eliges?">
+Prueba este contigo mismo. Tú y un desconocido debéis **elegir en secreto un número entero
+positivo cada uno**. Ambos ganáis un premio solo si elegís el *mismo*, y no podéis
+comunicaros. Aquí hay infinitos equilibrios (cualquier número, mientras ambos lo nombréis), y
+todos son exactamente igual de buenos entre sí. Entonces, ¿cuál escribes? De forma abrumadora,
+la gente elige el **1**. No porque el 1 pague más (no lo hace; toda coincidencia paga lo mismo),
+sino porque el 1 es *único* de un modo obvio: es el primero, el más pequeño, el entero positivo
+más "distinguido", el que supondrías que un desconocido también señalaría. Ese carácter
+especial es todo el mecanismo. Un punto focal no es la opción con más puntuación; es aquella
+cuya saliencia la convierte en el objetivo común natural, de modo que ambas mentes aterrizan en
+ella sin mediar palabra. La intuición de Schelling fue que este sentido compartido de lo
+"obvio" es un dispositivo de coordinación real y utilizable, a menudo el *único* disponible.
+</Reveal>
+
+## Cuando los equilibrios NO son iguales: el juego de los estándares
+
+El juego de la carretera era amable: ambos equilibrios pagaban lo mismo, así que coordinarse en
+cualquier sitio era una victoria. La realidad rara vez es tan generosa. A menudo los equilibrios
+son genuinamente **desiguales** (uno es mejor para todos) y aun así los jugadores pueden quedar
+**atascados en el peor**. Ese es un problema mucho más doloroso, y tiene su propia forma
+canónica: el **juego de los estándares**.
+
+Imagina dos empresas (o una industria entera) eligiendo entre dos formatos técnicos rivales, A
+y B. Como con la conducción, la necesidad predominante es *coincidir*: un formato que nadie más
+usa no vale nada. Pero aquí el Formato A es la mejor tecnología: si todos se estandarizan en A,
+cada uno obtiene 3; si todos se estandarizan en B, cada uno obtiene solo 2. Ambos siguen siendo
+equilibrios, pero ahora uno es claramente superior.
+
+<PayoffMatrix
+  client:visible
+  editable
+  title="El juego de los estándares: dos equilibrios, uno claramente mejor"
+  instructions="Adoptar el mismo formato es lo que importa, pero el Formato A es la mejor tecnología (3, 3) y el Formato B la peor (2, 2). Ambas coincidencias son equilibrios. Ajusta los pagos y observa cómo quedar atascado en (Formato B, Formato B) sobrevive aunque todos preferirían A."
+  rowPlayer="Empresa 1"
+  colPlayer="Empresa 2"
+  rowStrategies={['Formato A', 'Formato B']}
+  colStrategies={['Formato A', 'Formato B']}
+  payoffs={[
+    [{ row: 3, col: 3 }, { row: 1, col: 1 }],
+    [{ row: 0, col: 0 }, { row: 2, col: 2 }],
+  ]}
+  caption="Dos equilibrios de Nash en la diagonal: (Formato A, Formato A) = (3, 3) es mejor para ambos, pero (Formato B, Formato B) = (2, 2) también es estable. Una pareja atascada en B no puede escapar cambiando en solitario: si vas por libre caes al desajuste (1, 1) o (0, 0). Esa incapacidad de moverse unilateralmente es la trampa."
+  eyebrow="Matriz de recompensas"
+  analysisLabel="Lo que dice la matriz"
+  dominantLineTemplate="{player} — estrategia dominante: {strategy}"
+  noneLabel="ninguna"
+  nashLabel="Equilibrio de Nash (puro):"
+  noNashLabel="ninguno en estrategias puras"
+  bestResponseLegend="Una recompensa rodeada es la mejor respuesta de ese jugador a la elección del rival. Una celda donde ambas están rodeadas es un equilibrio de Nash."
+  nashBadge="EN"
+  resetLabel="Reiniciar recompensas"
+  increaseLabel="aumentar"
+  decreaseLabel="disminuir"
+/>
+
+Aquí está la crueldad. Supón que toda la industria está sentada sobre el Formato B, el *peor*
+equilibrio. Todos estarían mejor en A. ¿Puede alguna empresa aislada arreglarlo cambiándose a
+A? No. Si la Empresa 1 salta a A mientras la Empresa 2 se queda en B, la Empresa 1 aterriza en
+un **desajuste** y cae de 2 a 1: castigada por intentar hacer lo correcto. Ninguna empresa
+puede mejorar moviéndose *unilateralmente* (esa palabra otra vez: el corazón palpitante del
+equilibrio de Nash), y así el estándar inferior persiste, defendido no porque nadie lo
+prefiera, sino puramente por el hecho de que todos los demás ya están en él.
+
+Este es el mecanismo detrás del **atrapamiento** (lock-in) y la **dependencia del camino**: un
+mercado, una tecnología o una costumbre pueden quedar atrapados en un estándar inferior
+simplemente porque se coordinaron ahí primero, y ningún individuo tiene el poder de desviarse
+solo hacia el mejor. Escapar necesita algo que el juego no aporta por su cuenta: un salto
+coordinado, un actor grande que se mueva primero y de forma creíble, o una fecha de cambio
+anunciada que permita a todos saltar juntos.
+
+## La caza del ciervo: coordinación bajo riesgo
+
+Ahora, el juego de coordinación más trascendente de todos, porque añade el ingrediente que rige
+la mitad de la cooperación humana: **el riesgo nacido de no confiar del todo en la otra
+persona.**
+
+Dos cazadores pueden unir fuerzas para abatir un **ciervo** (un festín, mucho más de lo que
+cualquiera obtendría solo), pero *solo si ambos se comprometen*; si vas a por el ciervo y tu
+compañero se distrae por ahí, vuelves a casa con las manos vacías. Alternativamente, cualquiera
+puede desmarcarse y cazar una **liebre** en solitario: una comida modesta y garantizada que no
+depende del otro en absoluto. El ciervo es el gran premio cooperativo; la liebre es la red de
+seguridad autosuficiente.
+
+<PayoffMatrix
+  client:visible
+  editable={false}
+  title="La caza del ciervo: el gran premio necesita confianza"
+  instructions="Cazar el ciervo juntos paga lo mejor (4, 4), pero solo si ambos se comprometen. Cazar la liebre es seguro: 2 haga lo que haga el otro. Encuentra los dos equilibrios con los anillos, y fíjate en cuál te atreverías a elegir."
+  rowPlayer="Cazador 1"
+  colPlayer="Cazador 2"
+  rowStrategies={['Cazar el ciervo', 'Cazar la liebre']}
+  colStrategies={['Cazar el ciervo', 'Cazar la liebre']}
+  payoffs={[
+    [{ row: 4, col: 4 }, { row: 0, col: 2 }],
+    [{ row: 2, col: 0 }, { row: 2, col: 2 }],
+  ]}
+  caption="Dos equilibrios de Nash: ambos-ciervo (4, 4) es mejor para todos; ambos-liebre (2, 2) es más seguro. Ve a por el ciervo en solitario y te llevas 0: todo el riesgo se concentra en esa casilla vacía. El problema no es la tentación de traicionar; es si te atreves a confiar en que tu compañero aparecerá."
+  eyebrow="Matriz de recompensas"
+  analysisLabel="Lo que dice la matriz"
+  dominantLineTemplate="{player} — estrategia dominante: {strategy}"
+  noneLabel="ninguna"
+  nashLabel="Equilibrio de Nash (puro):"
+  noNashLabel="ninguno en estrategias puras"
+  bestResponseLegend="Una recompensa rodeada es la mejor respuesta de ese jugador a la elección del rival. Una celda donde ambas están rodeadas es un equilibrio de Nash."
+  nashBadge="EN"
+  resetLabel="Reiniciar recompensas"
+  increaseLabel="aumentar"
+  decreaseLabel="disminuir"
+/>
+
+Ambos-ciervo y ambos-liebre son sendos equilibrios de Nash: sin estrategia dominante, sin
+tentación de traicionar. Si estás *seguro* de que tu compañero caza el ciervo, tú quieres
+cazar el ciervo sin ninguna duda (4 supera a 2). Todo el problema es la **incertidumbre sobre
+el otro jugador**. Esto nos da dos etiquetas famosas para los dos equilibrios:
+
+- **(Cazar el ciervo, Cazar el ciervo) = (4, 4) es dominante en pago**: el equilibrio que es
+  sencillamente el mejor para todos. Es el que elegirías en un abrir y cerrar de ojos si
+  pudieras confiar en tu compañero.
+- **(Cazar la liebre, Cazar la liebre) = (2, 2) es dominante en riesgo**: el equilibrio
+  *seguro*. Cazar la liebre te garantiza 2 haga lo que haga tu compañero, mientras que cazar
+  el ciervo te expone al temido 0 si te deja tirado. Cuando dudas, la jugada prudente es la
+  liebre.
+
+Todo el drama de la caza del ciervo es la **tensión entre estos dos**: el mejor resultado y el
+resultado seguro son equilibrios distintos, y en cuál aterriza una pareja se reduce a
+**confianza y garantía**. Esto lo convierte en el modelo de un enorme abanico de situaciones en
+las que la cooperación es lo mejor para todos pero exige que todos se la jueguen *juntos*:
+lanzar una startup con cofundadores, un equipo adoptando un proceso nuevo y exigente, un grupo
+decidiendo adoptar un nuevo estándar, ciudadanos que acuden a una acción colectiva arriesgada,
+e incluso la lógica de un **pánico bancario**, donde mantener tu dinero en el banco es el buen
+equilibrio, pero solo si confías en que los demás no se lancen a retirar presa del pánico
+primero.
+
+<Callout variant="warning" title="Una caza del ciervo NO es un dilema del prisionero">
+Esta es la distinción que hace tropezar a casi todo el mundo, así que grábatela a fuego. En un
+**dilema del prisionero**, la cooperación *no* es un equilibrio en absoluto: la traición es
+dominante, así que el buen resultado no es estable y ninguna cantidad de confianza puede
+salvarlo; tienes que cambiar los pagos. En la **caza del ciervo**, la cooperación *sí* es un
+equilibrio: (Ciervo, Ciervo) es un punto de reposo perfectamente estable. El problema aquí no
+es la *dominación*, es la *selección*: dos buenos candidatos y el miedo a que tu compañero no
+elija el ambicioso. Por eso la confianza, la comunicación y las señales creíbles (inútiles en un
+dilema de verdad) son precisamente lo que desbloquea la caza del ciervo.
+</Callout>
+
+## Práctica: selección, no dominación
+
+<Categorize
+  client:visible
+  question="Clasifica cada situación. ¿Es un problema de coordinación (varios equilibrios, resuelto por un punto focal o convención) o un dilema del prisionero genuino, donde la traición es dominante y el problema es la tentación, no la selección?"
+  buckets={['Qué equilibrio: resuelto por un punto focal/convención', 'Un dilema del prisionero genuino (dominación, no selección)']}
+  items={[
+    { text: 'A dos amigos se les corta una llamada a media conversación y cada uno debe decidir si es él quien vuelve a llamar', bucket: 'Qué equilibrio: resuelto por un punto focal/convención' },
+    { text: 'Una industria decidiendo cuál de dos formatos de archivo rivales estandarizar', bucket: 'Qué equilibrio: resuelto por un punto focal/convención' },
+    { text: 'Dos empresas, cada una tentada de bajar en secreto los precios por debajo del precio pactado del cártel', bucket: 'Un dilema del prisionero genuino (dominación, no selección)' },
+    { text: 'Decidir por qué lado de la carretera conducirá un país nuevo', bucket: 'Qué equilibrio: resuelto por un punto focal/convención' },
+    { text: 'Dos naciones, cada una en mejor posición contaminando haga lo que haga la otra', bucket: 'Un dilema del prisionero genuino (dominación, no selección)' },
+    { text: 'Dos desconocidos eligiendo el mismo hito para reunirse, sin forma de hablar', bucket: 'Qué equilibrio: resuelto por un punto focal/convención' },
+  ]}
+  explanation="Los problemas de coordinación tienen múltiples equilibrios igual de estables y todos quieren coincidir, así que la cura es un punto focal o convención que haga de una opción el objetivo obvio (la etiqueta de quién vuelve a llamar, un formato elegido, un lado de la carretera, un hito icónico). Los dilemas del prisionero tienen un único mal equilibrio dominado, impulsado por la tentación individual (bajar por debajo del cártel, contaminar en cualquier caso); ahí hablar y los puntos focales no ayudan, tienes que cambiar los pagos. La pista: pregúntate si el dolor viene de *qué* equilibrio (selección) o de la *tentación de traicionar* de cada jugador (dominación)."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+/>
+
+<MCQ
+  client:visible
+  question="En una caza del ciervo, cazar el ciervo juntos rinde el mejor resultado para ambos, pero cazar la liebre garantiza un pago seguro haga lo que haga tu compañero. No tienes ni idea de si tu compañero es de fiar. ¿Cuál equilibrio es 'dominante en riesgo', y por qué un jugador prudente podría elegirlo aunque sea peor para todos?"
+  options={[
+    { text: 'Ambos-liebre es dominante en riesgo: garantiza un pago decente haga lo que haga el compañero, así que te protege del cero desastroso que obtendrías si cazaras el ciervo y tu compañero te dejara tirado. Bajo incertidumbre, esa seguridad puede pesar más que el premio mayor.', correct: true },
+    { text: 'Ambos-ciervo es dominante en riesgo, porque tiene los pagos más altos y los pagos altos son siempre la elección segura.' },
+    { text: 'Ninguno es dominante en riesgo, porque la caza del ciervo no tiene equilibrios en absoluto.' },
+    { text: 'Ambos-liebre es dominante en riesgo porque cazar la liebre es una estrategia estrictamente dominante que supera al ciervo pase lo que pase.' },
+  ]}
+  explanation="Dominante en riesgo = el equilibrio más seguro bajo incertidumbre sobre el otro jugador, no el de números más altos (ese es el dominante en pago: ambos-ciervo). Cazar la liebre paga una cantidad sólida al margen de la elección de tu compañero, mientras que cazar el ciervo arriesga el catastrófico 0 si no aparece. Así que un jugador prudente y con poca confianza se coordina racionalmente en el equilibrio peor-pero-más-seguro de la liebre. Fíjate en la trampa de la última opción: la liebre NO es una estrategia dominante; si estuvieras seguro de que tu compañero caza el ciervo, tú también cazarías el ciervo. Es dominancia en riesgo, no dominancia."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada idea con su rasgo definitorio."
+  pairs={[
+    { term: 'Juego de coordinación', definition: 'Un juego con múltiples equilibrios donde los jugadores comparten el objetivo de coincidir, así que el reto es la selección, no el conflicto.' },
+    { term: 'Punto focal', definition: 'Un equilibrio hecho saliente por el contexto o la cultura compartidos, que permite a los jugadores coordinarse en él sin comunicarse.' },
+    { term: 'Equilibrio dominante en pago', definition: 'El equilibrio que es mejor para todos: el que elegirías si confiaras plenamente en el otro jugador.' },
+    { term: 'Equilibrio dominante en riesgo', definition: 'El equilibrio más seguro, que te protege del peor caso si el otro jugador no coopera.' },
+    { term: 'Problema de la selección de equilibrio', definition: 'Con varios equilibrios de Nash, la teoría por sí sola no puede decir cuál alcanzarán de verdad los jugadores racionales.' },
+  ]}
+  explanation="Un juego de coordinación se define por intereses alineados más múltiples equilibrios, lo que crea el problema de la selección de equilibrio: las matemáticas enumeran los candidatos pero no el ganador. Los puntos focales lo resuelven mediante la saliencia sin comunicación alguna. Y cuando los equilibrios difieren, la dominancia en pago apunta al resultado mejor-para-todos mientras que la dominancia en riesgo apunta al más-seguro-ante-la-duda: los dos cuernos del dilema de la caza del ciervo."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  allCorrectLabel="✓ Todo emparejado"
+  partialResultWord="correctas"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+/>
+
+<FillBlank
+  client:visible
+  question="Completa el vocabulario básico de la coordinación."
+  text="Un juego con varios equilibrios igual de estables y sin forma incorporada de elegir es un juego de {{coordinación|dominación}}, y elegir entre los candidatos es el problema de {{selección|tentación}}. Los jugadores suelen resolverlo con un {{punto focal|estrategia dominante}}: una opción hecha obvia por el contexto compartido. En una caza del ciervo, el equilibrio mejor-para-todos es {{dominante en pago|dominante en riesgo}}, mientras que el seguro que protege frente a un compañero que te deja tirado es {{dominante en riesgo|dominante en pago}}."
+  explanation="Múltiples equilibrios igual de buenos más intereses alineados = un juego de coordinación, cuyo dolor de cabeza es la selección de equilibrio. Los puntos focales basados en la saliencia lo resuelven sin comunicación. Y los dos equilibrios de la caza del ciervo llevan las dos etiquetas: dominante en pago (mejor para todos, necesita confianza) frente a dominante en riesgo (seguro ante la duda)."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+/>
+
+<Callout variant="tip" title="La palanca estratégica es el punto focal">
+Cuando una situación tiene múltiples equilibrios, la jugada más poderosa normalmente no es ser
+más listo que los demás jugadores: es **crear un punto focal** para que todos converjan en el
+mismo. Fija un valor por defecto, publica un estándar, anuncia un calendario, nombra un lugar de
+encuentro, haz que una opción sea conspicuamente la elección obvia. No estás cambiando los
+incentivos de nadie; estás dando a cada jugador la expectativa compartida que necesita para
+coordinarse. En los juegos de coordinación, quien aporta el punto focal a menudo decide en
+silencio el resultado.
+</Callout>
+
+### Cuándo usarlo
+
+Recurre a la lente de la coordinación siempre que el éxito dependa de **coincidir con otras
+personas en vez de adivinar mejor que ellas**: adoptar un estándar o plataforma compartidos,
+acordar una convención, quedar sin plan previo, lograr que un equipo se comprometa con la misma
+apuesta arriesgada. Pregúntate primero si los intereses están *alineados* (todos queréis lo
+mismo) o *en conflicto* (alguien está tentado de traicionar); si están alineados, estás en un
+juego de coordinación y la cuestión es qué equilibrio, no si fiarte de los pagos. Luego comprueba
+si los equilibrios son iguales (coordinación pura: cualquier convención sirve) o desiguales (un
+juego de estándares: cuidado con quedar atascado en el inferior), y si el riesgo y la confianza
+están en juego (una caza del ciervo: el equilibrio seguro puede ganar incluso cuando no debería).
+En todos los casos, la intervención ganadora tiene la misma forma: **fabricar el punto focal**
+que permita a todos aterrizar juntos en el buen equilibrio.
+
+Todos los juegos de esta lección tenían *al menos una* casilla donde ambos jugadores podían
+reposar felizmente. Pero algunos juegos no tienen **ninguna**: ninguna combinación pura de
+elecciones es estable, porque en lo que sea que los dos jugadores se asienten, al menos uno
+siempre tiene una razón para desviarse. Cuando no hay equilibrio en el que quedarse quieto, los
+jugadores se ven forzados a volverse *impredecibles a propósito*. Ese es el extraño y hermoso
+mundo de la próxima lección, **Sin equilibrio puro: estrategias mixtas**, donde la única manera
+de dejar de ser explotado es mantener a tu rival adivinando.

@@ -1,0 +1,348 @@
+---
+title: "Sin equilibrio puro: estrategias mixtas"
+description: "Algunos juegos no tienen ninguna casilla estable: quien pierde siempre quiere cambiar, para siempre. La salida es aleatorizar. Estrategias mixtas, el principio de indiferencia, la asimetría del penalti y el teorema de Nash que dice que todo juego finito tiene equilibrio."
+topic: "es/nash-equilibrium"
+order: 6
+minutes: 15
+updated: 2026-07-02
+---
+
+import { MCQ, PayoffMatrix, MixedStrategyExplorer, MatchConcepts, FillBlank, Callout } from '@/components/react';
+
+Todos los juegos que has analizado hasta ahora tenían un lugar de reposo: al menos una
+casilla donde ambos jugadores respondían de forma óptima y a nadie le picaba moverse.
+Pero algunos juegos se niegan a asentarse. Busca a fondo una casilla estable y en su
+lugar encontrarás un tiovivo: quien está perdiendo en ese momento siempre quiere
+cambiar, lo que hace que el *otro* jugador quiera cambiar, para siempre. Esta lección
+va sobre esos juegos y sobre el precioso truco que los doma: dejas de intentar elegir
+la jugada correcta y empiezas a tirar los dados a propósito.
+
+## El juego que nunca se asienta: monedas iguales
+
+Aquí tienes el motor más limpio de conflicto puro de toda la teoría de juegos. Tú y un
+rival elegís en secreto Cara o Cruz. Si las dos caras **coinciden**, tú ganas (+1) y él
+pierde (−1); si **difieren**, gana él y pierdes tú. Lo que es bueno para ti es
+exactamente malo para él: un pulso de suma cero sin ningún interés común alrededor del
+cual coordinarse.
+
+Intenta encontrar una casilla estable en la matriz de abajo. El panel de análisis hace
+por ti la contabilidad de las mejores respuestas.
+
+<PayoffMatrix
+  client:visible
+  editable={false}
+  title="Monedas iguales: conflicto puro, sin lugar de reposo"
+  instructions="Un número rodeado es la mejor respuesta de ese jugador a la elección del rival. Una casilla donde ambos estén rodeados sería un equilibrio de Nash, pero mira lo que informa el panel."
+  rowPlayer="Tú"
+  colPlayer="Rival"
+  rowStrategies={['Cara', 'Cruz']}
+  colStrategies={['Cara', 'Cruz']}
+  payoffs={[
+    [{ row: 1, col: -1 }, { row: -1, col: 1 }],
+    [{ row: -1, col: 1 }, { row: 1, col: -1 }],
+  ]}
+  caption="Ninguna casilla tiene los dos números rodeados, así que el panel informa 'ninguno en estrategias puras'. En cada casilla, exactamente un jugador está encantado y el otro se muere por cambiar."
+  eyebrow="Matriz de recompensas"
+  analysisLabel="Lo que dice la matriz"
+  dominantLineTemplate="{player} — estrategia dominante: {strategy}"
+  noneLabel="ninguna"
+  nashLabel="Equilibrio de Nash (puro):"
+  noNashLabel="ninguno en estrategias puras"
+  bestResponseLegend="Una recompensa rodeada es la mejor respuesta de ese jugador a la elección del rival. Una celda donde ambas están rodeadas es un equilibrio de Nash."
+  nashBadge="EN"
+  resetLabel="Reiniciar recompensas"
+  increaseLabel="aumentar"
+  decreaseLabel="disminuir"
+/>
+
+Persíguelo en círculos. Supón que ambos estáis en Cara: una coincidencia, así que ganas
+tú. Eso hace que el rival quiera al instante Cruz para romper la coincidencia. Una vez
+que él está en Cruz (un desajuste), *tú* también quieres cambiar a Cruz, para volver a
+coincidir. Ahora él quiere Cara… y el bucle se cierra sin que nadie esté nunca
+contento. Cada una de las cuatro casillas tiene exactamente un jugador feliz y otro con
+un pie fuera de la puerta. **No hay equilibrio de Nash en estrategias puras**: ninguna
+combinación de jugadas fijas donde ambos respondan de forma óptima a la vez.
+
+Entonces, ¿se rompe aquí sin más todo el concepto de equilibrio? Se rompería, si "una
+estrategia" solo significara siempre "jugar la misma jugada". El arreglo consiste en
+ampliar qué cuenta como estrategia.
+
+## El arreglo: una estrategia mixta
+
+Una **estrategia pura** es lo que has usado hasta ahora: comprometerte con una jugada y
+jugarla siempre ("siempre Cara"). Una **estrategia mixta** es una *distribución de
+probabilidad sobre tus jugadas puras*: una regla como "Cara el 50 % de las veces, Cruz
+el 50 %, decidido al azar en cada partida". No estás eligiendo Cara *o* Cruz; estás
+eligiendo los *dados* —las frecuencias— y luego dejas que el azar genuino escoja la
+jugada real.
+
+<Callout variant="info" title="Aleatorizar es una estrategia real y legítima">
+Es tentador sentir que "lanzar una moneda para decidir" es una escaqueada, una negativa
+a estrategizar. En los juegos de conflicto puro es justo lo contrario: es lo *más*
+sofisticado que puedes hacer. Una estrategia mixta es un plan totalmente especificado;
+"Cara el 50 %" es un compromiso tan concreto como "siempre Cara". La única diferencia es
+que su resultado no es una jugada, es una *lotería*, y contra un oponente listo, una
+lotería impredecible es exactamente lo que quieres tener en la mano.
+</Callout>
+
+En cuanto las estrategias mixtas están sobre la mesa, el tiovivo se detiene. Existe una
+mezcla que ningún rival puede batir, y encontrarla es todo el arte.
+
+## Por qué funciona aleatorizar: inexplotabilidad
+
+El objetivo de mezclar no es confundirte a ti mismo; es hacerte **inexplotable**.
+Piénsalo desde el lado del rival en la mesa. Si juegas cualquier mezcla *desequilibrada*
+—digamos Cara el 80 % de las veces—, un rival agudo simplemente detecta la inclinación
+y se apoya en ella: juega Cruz casi siempre, sacando tajada de tu previsibilidad.
+Cualquier sesgo que tengas es un asa que él puede agarrar.
+
+Arrastra el deslizador de abajo por todo el rango y observa tu pago *garantizado* —la
+línea gruesa, que es lo peor que un rival listo puede hacerte en cada mezcla—. Es una V
+invertida. Las dos líneas tenues son lo que ganarías si el rival se comprometiera a una
+respuesta; un rival racional siempre escoge la que sea *peor* para ti, así que solo
+puedes contar con la más baja de las dos.
+
+<MixedStrategyExplorer
+  client:visible
+  title="Monedas iguales: solo el 50/50 no puede castigarse"
+  eyebrow="Inexplotabilidad"
+  instructions="Arrastra el deslizador para cambiar la frecuencia con la que juegas Cara. Las líneas tenues son tu pago si el rival se compromete a Cara o a Cruz; un rival listo siempre escoge la que es peor para ti, así que la línea gruesa es lo que puedes garantizar de verdad. Encuentra su pico."
+  rowPlayer="Tú"
+  colPlayer="Rival"
+  rowStrategies={['Cara', 'Cruz']}
+  colStrategies={['Cara', 'Cruz']}
+  payoffs={[
+    [{ row: 1, col: -1 }, { row: -1, col: 1 }],
+    [{ row: -1, col: 1 }, { row: 1, col: -1 }],
+  ]}
+  initialMixPercent={80}
+  xAxisLabel="Con qué frecuencia juegas Cara →"
+  yAxisLabel="Pago que puedes garantizar"
+  mixLabel="Con qué frecuencia juegas {s0} (frente a {s1})"
+  optimalTag="Inexplotable: 50/50"
+  caption="En cualquier mezcla desequilibrada, un rival listo explota tu inclinación y tu pago garantizado se hunde por debajo de cero. Solo en Cara 50 % se cruzan las dos líneas de respuesta —el rival queda indiferente, así que no puede castigarte— y tu pago garantizado alcanza su máximo en 0. Ese 50/50 es la mezcla de equilibrio."
+/>
+
+En cada ajuste desequilibrado la línea garantizada se hunde en terreno negativo: el
+rival tiene una respuesta castigadora y la usa. La línea alcanza su pico exactamente en
+**Cara 50 %**, donde tu pago garantizado es 0: lo mejor que puedes forzar en una pelea
+justa y simétrica. En ese único punto las dos líneas tenues de respuesta *se cruzan*: el
+rival gana lo mismo tanto si responde Cara como Cruz, así que no tiene ninguna jugada
+explotadora a la que recurrir. Te has convertido en un blanco móvil sin inclinación que
+agarrar.
+
+## El principio de indiferencia
+
+Fíjate en *por qué* el pico se sitúa donde se cruzan las dos líneas de respuesta. En esa
+mezcla, tu rival está **exactamente indiferente** entre sus opciones: cada respuesta le
+rinde el mismo pago esperado. Y eso no es una coincidencia; es el mecanismo.
+
+> **El principio de indiferencia:** en un equilibrio en estrategias mixtas, cada jugador
+> elige su mezcla precisamente para dejar al *otro* jugador indiferente entre sus
+> opciones.
+
+Léelo dos veces, porque es el "ajá" contraintuitivo de todo el tema: **afinas tu propia
+aleatorización para controlar los incentivos de tu oponente, no los tuyos.** Si tu
+mezcla dejara al rival prefiriendo aunque fuera ligeramente una de sus respuestas, se
+amontonaría sobre ella y te arrastraría hacia abajo: esa preferencia es un exploit. La
+única mezcla sin exploit es la que borra por completo la preferencia del rival,
+dejándolo indiferente. Mata su razón para inclinarse y habrás matado su capacidad de
+castigarte.
+
+<Callout variant="tip" title="De dónde sale la mezcla de equilibrio">
+Esto te da una receta, no solo una imagen. Para encontrar *tu* mezcla de equilibrio, no
+preguntes "¿qué maximiza mi pago?", pregunta "¿qué mezcla mía deja a mi *oponente*
+indiferente entre sus dos jugadas?". Iguala su pago esperado de una respuesta al pago
+esperado de la otra y despeja tus frecuencias. En monedas iguales la simetría hace que
+eso sea el 50/50; en el próximo ejemplo, no lo será.
+</Callout>
+
+## Cuando los bandos no son iguales: penaltis
+
+Las monedas iguales son simétricas, así que la respuesta fue un pulcro 50/50. Los
+conflictos estratégicos reales suelen ser *desequilibrados*, y entonces la mezcla de
+equilibrio se inclina, pero nunca hasta el final.
+
+Imagina un penalti. El **lanzador** tira a izquierda o derecha; el **portero** se lanza
+a izquierda o derecha; se comprometen en el mismo instante. Pero el lanzador no es
+igual de bueno por ambos lados. La cuadrícula de abajo es la *probabilidad de gol sobre
+100* del lanzador en cada una de las cuatro combinaciones: es mucho mejor tirando a su
+lado fuerte que a su lado débil y (como siempre) la parada es más probable cuando el
+portero acierta.
+
+<MixedStrategyExplorer
+  client:visible
+  unit="%"
+  title="Penaltis: inclínate a tu lado fuerte, pero no acampes allí"
+  eyebrow="Conflicto asimétrico"
+  instructions="Arrastra para cambiar con qué frecuencia el lanzador apunta a la izquierda. Las líneas tenues son la probabilidad de gol si el portero siempre se lanza hacia un lado; el portero se lanzará hacia donde más perjudique al lanzador, así que la línea gruesa es la probabilidad de gol garantizada. Encuentra su pico."
+  rowPlayer="Lanzador"
+  colPlayer="Portero"
+  rowStrategies={['Apuntar a la izquierda', 'Apuntar a la derecha']}
+  colStrategies={['Lanzarse a la izquierda', 'Lanzarse a la derecha']}
+  payoffs={[
+    [{ row: 40, col: 60 }, { row: 90, col: 10 }],
+    [{ row: 80, col: 20 }, { row: 50, col: 50 }],
+  ]}
+  initialMixPercent={50}
+  xAxisLabel="Con qué frecuencia el lanzador apunta a la izquierda →"
+  yAxisLabel="Probabilidad de gol"
+  mixLabel="Con qué frecuencia el lanzador juega {s0} (frente a {s1})"
+  optimalTag="Inexplotable: 37,5 %"
+  caption="El pico está en Apuntar-izquierda 37,5 % / Apuntar-derecha 62,5 % —NO en 50/50— y garantiza una probabilidad de gol del 65 % sin importar hacia dónde se lance el portero. Inclínate hacia el lado más fuerte, pero no vayas al 100 % o el portero acampará allí y tu probabilidad se desplomará."
+/>
+
+Deslízalo y el pico aterriza en **Apuntar-izquierda 37,5 %, Apuntar-derecha 62,5 %**:
+decididamente *no* 50/50. El lanzador se inclina hacia el lado más fuerte, exactamente
+como dice la intuición. Pero observa los dos extremos: empuja el deslizador al 100 % y
+el portero simplemente se lanza siempre hacia ese lado, y la probabilidad garantizada se
+desploma. La previsibilidad se castiga incluso cuando previsiblemente juegas tu mejor
+disparo. El equilibrio se inclina sin comprometerse nunca del todo.
+
+Y aquí está la recompensa de jugarlo: en el 37,5 % el lanzador **garantiza una
+probabilidad de gol del 65 % independientemente de lo que haga el portero**. Las dos
+líneas de respuesta se cruzan ahí, así que el portero está indiferente entre lanzarse a
+izquierda y a derecha: no queda ningún exploit.
+
+| Mezcla del lanzador (Apuntar izq.) | Mejor respuesta del portero | Probabilidad de gol garantizada |
+|---|---|---|
+| 0 % (siempre derecha) | Lanzarse a la derecha | 50 % |
+| 25 % | Lanzarse a la derecha | 60 % |
+| **37,5 % (equilibrio)** | **indiferente** | **65 % (pico)** |
+| 50 % | Lanzarse a la izquierda | 60 % |
+| 100 % (siempre izquierda) | Lanzarse a la izquierda | 40 % |
+
+Lee la columna del medio: fuera del 37,5 % el portero siempre tiene un lanzamiento
+favorito que arrastra al lanzador por debajo del 65 %. Solo en la mezcla de equilibrio
+ese favorito desaparece. La lección se generaliza más allá del fútbol: cuando tus
+opciones no son igual de fuertes, pondera tu mezcla *hacia* la fuerte, pero mantén
+suficiente peso en la débil para tener a tu oponente honesto.
+
+<Callout variant="info" title="Esto aparece de verdad en los datos">
+Los economistas han contrastado el juego real con estas predicciones. Estudios de miles
+de penaltis profesionales (Palacios-Huerta, 2003) y de la dirección del primer saque en
+tenis encuentran que los mejores jugadores aleatorizan a frecuencias sorprendentemente
+cercanas a su mezcla teórica de juegos y, lo más importante, que sus secuencias son casi
+*serialmente independientes*: no caen en patrones explotables. Los competidores de élite
+están, en un sentido real, ejecutando este cálculo exacto en los huesos.
+</Callout>
+
+## El teorema de Nash: siempre hay un equilibrio
+
+Podrías temer que tuvimos suerte, que mezclar rescató *estos* juegos pero algún juego
+más desagradable aún podría no tener ningún equilibrio. No puede. En 1950, un estudiante
+de doctorado de Princeton de 21 años llamado **John Nash** demostró el resultado que
+ancla todo este curso (y que después le valió un Premio Nobel y una película, *Una mente
+maravillosa*):
+
+> **Teorema de existencia de Nash:** todo juego finito —cualquier número finito de
+> jugadores, cada uno con un número finito de estrategias puras— tiene *al menos un*
+> equilibrio de Nash, una vez que se permiten las estrategias mixtas.
+
+Así que "este juego no tiene equilibrio" *nunca* es la última palabra. Puede que no
+tenga equilibrio *puro* —las monedas iguales no lo tienen—, pero permite la
+aleatorización y siempre aparece uno, posiblemente varios. Esto es exactamente por qué
+el equilibrio de Nash es el concepto de solución universal de la teoría de juegos: Nash
+no solo definió el punto de reposo, demostró que el punto de reposo siempre existe.
+Siempre hay algún sitio donde el juego racional puede aterrizar.
+
+## Errores comunes
+
+Tres formas en que los estudiantes malinterpretan las estrategias mixtas, cada una vale
+la pena inmunizarse contra ella.
+
+- **Mezclar no es andar con dudas.** Una estrategia mixta no es indecisión, ni cubrirse
+  las espaldas, ni "no me decidía". Es un compromiso *preciso y deliberado* con
+  frecuencias concretas, ejecutado con azar genuino. "Apunta a la izquierda el 37,5 %
+  de las veces, al azar" es una instrucción nítida, no un encogimiento de hombros. La
+  aleatoriedad es el objetivo, no un síntoma de confusión.
+- **Debes ser genuinamente impredecible.** El equilibrio exige azar *real*, no un ritual
+  privado que solo *parece* aleatorio. Alternar Cara, Cruz, Cara, Cruz es técnicamente
+  50/50 por frecuencia, pero es un **patrón** fijo y determinista, así que es una
+  estrategia *pura* disfrazada y un oponente agudo lo descifra en segundos y te despluma.
+  Los humanos somos famosamente malos generando aleatoriedad a mano (evitamos las
+  repeticiones y derivamos hacia ritmos); si importa, usa una fuente aleatoria de verdad.
+- **Contra un oponente débil, no mezcles: explota.** La mezcla de equilibrio es la
+  opción **segura e inexplotable**, no siempre la que *maximiza* el pago. Es lo que
+  juegas contra un rival que también juega de forma óptima. Si tu oponente *no* lo hace
+  —si tiene un tic, un sesgo, una inclinación—, la mejor respuesta es abandonar tu
+  mezcla y *abalanzarte sobre su previsibilidad* con una mejor respuesta pura. El
+  equilibrio es tu suelo frente a un genio, no tu techo frente a un tonto.
+
+<MCQ
+  client:visible
+  question="Juegas tu mezcla de equilibrio exacta de monedas iguales: Cara 50 %, al azar. ¿Qué logra esto concretamente?"
+  options={[
+    { text: 'Deja al rival indiferente entre sus respuestas, así que ninguna inclinación suya puede batirte: te vuelves inexplotable y garantizas tu pago de equilibrio', correct: true },
+    { text: 'Te garantiza que ganas más de la mitad de las veces pase lo que pase' },
+    { text: 'Te confunde sobre tu propio plan, lo que despista al rival' },
+    { text: 'Es la elección que maximiza tu pago contra cualquier oponente posible, incluso uno previsible' },
+  ]}
+  explanation="La mezcla de equilibrio compra inexplotabilidad, no victoria. Al dejar al rival indiferente entre Cara y Cruz, eliminas cualquier respuesta en la que pudiera apoyarse para castigarte, así que puedes garantizar tu valor de equilibrio contra CUALQUIER oponente. Pero eso es un suelo, no un maná: no promete que ganes más de la mitad (en unas monedas iguales justas empatas) y contra un oponente previsible y fuera de equilibrio una mejor respuesta pura lo batiría. Ten en cuenta también que mezclar es un plan deliberado, no autoconfusión."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+<FillBlank
+  client:visible
+  question="Completa el vocabulario básico de esta lección."
+  text="Una estrategia {{pura|mixta}} juega siempre la misma jugada, mientras que una estrategia {{mixta|pura}} es una distribución de probabilidad sobre tus jugadas, elegida al azar. En un equilibrio mixto fijas tus propias frecuencias para dejar al {{oponente|árbitro}} exactamente indiferente entre sus opciones, que es lo que hace que tu juego sea {{inexplotable|aleatorio por sí mismo}}. Y Nash demostró que, una vez permitido mezclar, todo juego finito tiene {{al menos un|exactamente un}} equilibrio."
+  explanation="Pura = una jugada fija; mixta = una aleatorización deliberada sobre las jugadas. El principio de indiferencia es el mecanismo: afinas TU mezcla para borrar la preferencia de tu OPONENTE, y un oponente sin preferencia no tiene exploit: eso es la inexplotabilidad. El teorema de existencia de Nash garantiza al menos un equilibrio (puede haber varios) en cualquier juego finito."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+/>
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada término con su significado preciso."
+  pairs={[
+    { term: 'Estrategia pura', definition: 'Comprometerse con una única jugada y jugarla siempre; p. ej. "siempre Cara".' },
+    { term: 'Estrategia mixta', definition: 'Una distribución de probabilidad sobre tus jugadas, ejecutada con azar genuino; p. ej. "Cara 50 %, al azar".' },
+    { term: 'Principio de indiferencia', definition: 'Elegir tu mezcla para que el OTRO jugador quede exactamente indiferente entre sus opciones, lo que elimina cualquier exploit.' },
+    { term: 'Teorema de existencia de Nash', definition: 'La prueba de que todo juego finito tiene al menos un equilibrio de Nash una vez que se permiten las estrategias mixtas.' },
+  ]}
+  explanation="Una estrategia pura es una jugada fija; una estrategia mixta aleatoriza sobre las jugadas a propósito. El principio de indiferencia explica POR QUÉ un equilibrio mixto es inexplotable —borras la preferencia del oponente— y el teorema de Nash garantiza que tal equilibrio siempre existe en un juego finito, incluso cuando no hay ninguno puro."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  allCorrectLabel="✓ Todo emparejado"
+  partialResultWord="correctas"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+/>
+
+### Cuándo usarlo
+
+Recurre a las estrategias mixtas en cualquier situación **estrictamente competitiva y
+repetida** donde ser previsible te castiga, donde tu oponente te estudia activamente y
+saca provecho de cualquier patrón. Los casos canónicos:
+
+- **Frecuencias de farol en el póker**: farolea demasiado poco y se acumulan los retiros;
+  farolea demasiado y te ven; la frecuencia inexplotable se sitúa en medio y mantiene a
+  los oponentes adivinando.
+- **Selección de inspecciones e inspecciones fiscales**: una regla de auditoría fija y
+  previsible les dice a los tramposos exactamente cuándo están a salvo; la selección
+  aleatorizada mantiene a todos honestos.
+- **Patrullas de seguridad y defensa**: un guardia en una ruta fija es un regalo para un
+  atacante; horarios y rutas aleatorizados eliminan el hueco fiable.
+- **Deportes**: la dirección del saque en tenis, la selección del lanzamiento en béisbol,
+  el lado del penalti de arriba: inclínate hacia tu fuerte, pero sigue siendo un blanco
+  móvil.
+- **Juegos de precios y promociones**: rebajas aleatorizadas y movimientos de precio
+  impredecibles impiden que rivales y cazagangas te anticipen a la perfección.
+
+El hilo conductor: si un adversario listo está mirando y la previsibilidad es una
+vulnerabilidad, la jugada segura no es una jugada fija ingeniosa, es una tirada de dados
+bien afinada.
+
+Hasta ahora hemos tomado los pagos de cada juego como fijos y hemos cazado dónde
+aterriza el juego dentro de ellos. Pero los jugadores más agudos no solo juegan bien el
+juego: *cambian el juego mismo*, editando los pagos, las opciones e incluso quién está en
+la mesa, para que el equilibrio se mueva a su favor. Eso es lo que viene, en **Cambia el
+juego, no a los jugadores**.

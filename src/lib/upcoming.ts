@@ -43,11 +43,12 @@
  * (`what-are-mental-models`, `natural-selection`, `supply-and-demand`,
  * `tragedy-of-the-commons`, `externalities`, `moats`, `ecosystems-and-niches`,
  * `leverage-points`, `lollapalooza-effect`, `regression-to-the-mean`,
- * `critical-mass`, …) have graduated and been removed. Lowest `order` is built
- * next. The remaining entries are the **advanced tier**, deliberately kept
- * tag-diverse so no single roadmap tag races ahead: strategy
- * (`nash-equilibrium`), decision-making (`asymmetry-and-optionality`) and
- * biology-evolution (`fitness-landscapes`).
+ * `critical-mass`, `nash-equilibrium`, …) have graduated and been removed.
+ * Lowest `order` is built next. The remaining entries finish the **advanced
+ * tier** and open the **expert tier**, deliberately kept tag-diverse so no
+ * single roadmap tag races ahead: decision-making (`asymmetry-and-optionality`,
+ * `deciding-under-deep-uncertainty`), biology-evolution (`fitness-landscapes`),
+ * strategy (`mechanism-design`) and foundations (`combining-models-latticework`).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -85,35 +86,17 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Advanced tier — kept tag-diverse ───────────────────────────────────────
+  // ── Advanced → expert tier — kept tag-diverse ──────────────────────────────
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
   // `leverage-points` (23), `lollapalooza-effect` (24), `regression-to-the-mean`
-  // (the advanced probability rung, 25) and `critical-mass` (the advanced
-  // science-engineering / systems rung, 26) have graduated and been removed;
-  // their topic MDX is now the record. The lowest-order entry below
-  // (`nash-equilibrium`, order 27) is built next. The remaining queue spans
-  // strategy (`nash-equilibrium`), decision-making (`asymmetry-and-optionality`)
-  // and biology-evolution (`fitness-landscapes`) so no single roadmap tag races
-  // ahead of the others.
-  {
-    slug: 'nash-equilibrium',
-    icon: '♟️',
-    difficulty: 'advanced',
-    order: 27,
-    accent: 'accent',
-    title: {
-      en: 'Nash Equilibrium',
-      es: 'El Equilibrio de Nash',
-    },
-    description: {
-      en: 'A situation where no player can do better by changing strategy alone — so everyone stays put, even when everyone would be better off somewhere else. The still point of a strategic game, and why stable outcomes are so often the bad ones.',
-      es: 'Una situación en la que ningún jugador puede mejorar cambiando de estrategia por su cuenta — así que nadie se mueve, aunque a todos les fuera mejor en otro sitio. El punto de reposo de un juego estratégico, y por qué los resultados estables son con tanta frecuencia los malos.',
-    },
-    dependencies: ['game-theory-basics'],
-    tags: ['strategy'],
-    buildNotes:
-      'Nash equilibrium — the advanced strategy rung that puts a precise fixed point under game-theory-basics: a set of strategies, one per player, where no single player can improve their own payoff by unilaterally changing (holding everyone else fixed). Assumes game-theory-basics (payoff matrices, dominant strategies, the prisoner’s dilemma). Sections: the core definition — a "no-regret-given-what-others-did" resting point; the intuition that an equilibrium is where best-responses meet (each player is already best-responding to the others); why a game can have one, several, or no *pure*-strategy equilibria, and the reassurance of John Nash’s theorem that a *mixed*-strategy equilibrium always exists in finite games; worked examples — the prisoner’s dilemma (mutual defection is the unique Nash equilibrium and it is Pareto-inferior: the deep lesson that stable ≠ good), coordination games with multiple equilibria (driving on the left vs right, the stag hunt, focal points / Schelling points), and a simple mixed-strategy game (matching pennies / penalty kicks, where you must randomize to be unexploitable); best-response reasoning as the solution method; the connection to systems and incentives (an equilibrium is what a system of self-interested agents settles into, so if you dislike the outcome you must change the payoffs, not scold the players — tie to incentives and leverage-points). Pitfalls: assuming an equilibrium is efficient or fair (it need not be — see the dilemma); assuming players actually reach it (equilibrium selection, bounded rationality); confusing a Nash equilibrium with a dominant-strategy outcome. Build an interactive island (or reuse/extend the payoff-matrix island): a 2×2 game where the learner toggles each player’s strategy and the island highlights each player’s best response and flags the cell(s) that are Nash equilibria, with presets for the dilemma, a coordination game and matching pennies; a mixed-strategy slider showing how randomizing removes the opponent’s ability to exploit you. Recap Quiz + MindMap. en + es twin.',
-  },
+  // (25), `critical-mass` (26) and `nash-equilibrium` (the advanced strategy
+  // rung, 27) have graduated and been removed; their topic MDX is now the
+  // record. The lowest-order entry below (`asymmetry-and-optionality`, order 28)
+  // is built next. The remaining queue finishes the advanced tier and opens the
+  // expert tier, spanning decision-making (`asymmetry-and-optionality`,
+  // `deciding-under-deep-uncertainty`), biology-evolution (`fitness-landscapes`),
+  // strategy (`mechanism-design`) and foundations (`combining-models-latticework`)
+  // so no single roadmap tag races ahead of the others.
   {
     slug: 'asymmetry-and-optionality',
     icon: '🎢',
@@ -151,6 +134,63 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['biology-evolution'],
     buildNotes:
       'Fitness landscapes — the advanced biology-evolution rung that turns natural-selection into a search-over-a-terrain model (Sewall Wright, 1932) and generalizes far beyond biology. Assumes natural-selection (variation, selection, heredity) and pairs well with red-queen-effect. Sections: the core picture — arrange all possible genotypes/designs on a plane so that similar designs are neighbours, and plot "fitness" (reproductive success, or any performance measure) as height, giving a landscape of peaks, valleys and ridges; hill-climbing — selection only ever moves uphill (small heritable improvements accumulate), so evolution is a *local* search with no foresight; the central consequence — **local optima**: a population can climb to the top of a modest hill and be trapped there, because every single step toward the far taller mountain must first go *downhill* (less fit) across a valley selection won’t cross (why "good enough" beats "best", why the eye’s blind spot and the recurrent laryngeal nerve persist); ruggedness — smooth single-peak landscapes are easy, rugged many-peaked ones trap searchers; what crosses valleys — mutation/drift in small populations, recombination, and a *changing* landscape (the peak moves — tie hard to red-queen: co-evolution means the terrain deforms under you, so there is no final summit); transfer of the model — the same map explains local optima in engineering/design, machine-learning training, business strategy (a firm stuck on a local peak disrupted by someone on a different one), skill acquisition, and the explore-vs-exploit trade-off (exploit = climb the current hill; explore = jump to look for a higher one). Pitfalls: treating evolution as goal-directed "progress toward perfection" (it’s myopic hill-climbing, no goal); assuming the global optimum is reachable or even fixed; over-literal single-peak thinking when real landscapes are high-dimensional and shifting. Build an interactive island: a 1-D or 2-D fitness landscape where the learner drops a population and watches it hill-climb to the nearest peak, with a ruggedness slider (smooth → many-peaked) and a "mutate/jump" control that occasionally lets it cross a valley to a higher summit — plus a toggle that slowly reshapes the terrain (red-queen) so a conquered peak sinks. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'mechanism-design',
+    icon: '🛠️',
+    difficulty: 'advanced',
+    order: 30,
+    accent: 'accent',
+    title: {
+      en: 'Mechanism Design',
+      es: 'Diseño de Mecanismos',
+    },
+    description: {
+      en: 'Game theory in reverse: instead of predicting how players will act inside a fixed game, you design the rules so that self-interest produces the outcome you actually want. The engineering discipline behind good auctions, fair splits, and honest incentives.',
+      es: 'Teoría de juegos al revés: en lugar de predecir cómo actuarán los jugadores dentro de un juego fijo, diseñas las reglas para que el interés propio produzca el resultado que de verdad quieres. La disciplina de ingeniería tras las buenas subastas, los repartos justos y los incentivos honestos.',
+    },
+    dependencies: ['nash-equilibrium', 'incentives'],
+    tags: ['strategy', 'economics'],
+    buildNotes:
+      'Mechanism design — the "inverse game theory" rung that follows directly from nash-equilibrium: if an equilibrium is what self-interested players settle into, then changing the rules changes the equilibrium, so you can *engineer* the game to make the outcome you want be the one everyone reaches on their own. Assumes nash-equilibrium (equilibria, best responses) and incentives. Sections: the core flip — analysis predicts play inside fixed rules; design chooses the rules to steer the equilibrium (Hurwicz/Maskin/Myerson, Nobel 2007); incentive-compatibility — a mechanism is incentive-compatible when honest/desired behaviour is itself a best response, so no one gains by gaming it (truthful bidding, truth-telling); worked examples — "I cut, you choose" as the canonical fair-division mechanism (the cutter’s self-interest is redirected to produce fairness); the second-price / Vickrey auction where bidding your true value is a dominant strategy (contrast the first-price auction where it is not, and tie to why eBay-style proxy bidding works); the revelation principle in words (if any mechanism gets a good outcome, a truthful one can too); the connection to leverage-points and externalities (a Pigouvian tax is a mechanism; so are deposit-refunds, cap-and-trade, and matching markets like kidney exchange and school choice). Pitfalls: assuming you can design away all bad incentives (impossibility results — you cannot always have efficiency, honesty and budget-balance at once); mechanisms that are gameable in practice (Goodhart, unraveling); ignoring participation/individual-rationality constraints; over-trusting that people play the intended equilibrium. Build an interactive island (or reuse/extend the payoff-matrix island): an auction sandbox where the learner sets their true value and a rule (first-price vs second-price) and sees why truthful bidding is or isn’t a best response, plus a "cut-and-choose" splitter showing self-interest producing a fair division. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'combining-models-latticework',
+    icon: '🕸️',
+    difficulty: 'expert',
+    order: 31,
+    accent: 'brand',
+    title: {
+      en: 'Combining Models: The Latticework',
+      es: 'Combinar Modelos: El Entramado',
+    },
+    description: {
+      en: 'The capstone skill: holding several models at once and letting them check, complete, and correct one another into a single judgment. When forces stack the same way you get a lollapalooza; when models disagree, the disagreement is the signal. How a latticework actually thinks.',
+      es: 'La habilidad cumbre: sostener varios modelos a la vez y dejar que se comprueben, completen y corrijan entre sí hasta formar un único juicio. Cuando las fuerzas se apilan en el mismo sentido surge un lollapalooza; cuando los modelos discrepan, la discrepancia es la señal. Cómo piensa de verdad un entramado.',
+    },
+    dependencies: ['lollapalooza-effect', 'second-order-thinking', 'circle-of-competence'],
+    tags: ['foundations', 'decision-making'],
+    buildNotes:
+      'Combining models: the latticework — the expert-tier capstone that TOPIC.md names as the whole point of the site: taking a real situation and reasoning with *several* models at once instead of one. Assumes a broad base (lollapalooza-effect, second-order-thinking, circle-of-competence) and should cross-reference many built courses. Sections: why one model is never enough (the man-with-a-hammer tendency — if all you have is one model you force every problem into it); the latticework idea (Munger) — models from different disciplines as an interlocking mesh you hang experience on; three ways models combine — (1) they *stack* the same direction into a lollapalooza (link to lollapalooza-effect: incentives + social proof + commitment all pushing one way), (2) they *check* each other (base rates vs a vivid story; incentives vs stated reasons; second-order effects vs first-order appeal), and (3) they *complete* each other (supply/demand explains the price, game theory explains the players, feedback loops explain the dynamics — one situation, several lenses); a fully worked multi-model case study (e.g. a bank run or a viral product read simultaneously through incentives, critical-mass/tipping, game theory and social proof); the meta-skill of *choosing* which models fit a novel situation and knowing your circle of competence; making a mental checklist/pre-mortem that runs several models over a decision. Pitfalls: forcing a model where it does not apply, double-counting the same effect wearing two names, confirmation-shopping for the model that flatters the answer you already want, and paralysis-by-lattice (more models ≠ better past the point of decision). Build an interactive island: a "decision desk" where the learner is given a scenario and toggles a panel of model-lenses (incentives, base rate, second-order, game theory, feedback loop, social proof), each contributing a note and a directional pull, and the island shows where lenses agree (a stacked lollapalooza reading) versus where they conflict (the flagged tension to investigate). Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'deciding-under-deep-uncertainty',
+    icon: '🌫️',
+    difficulty: 'expert',
+    order: 32,
+    accent: 'accent',
+    title: {
+      en: 'Deciding Under Deep Uncertainty',
+      es: 'Decidir Bajo Incertidumbre Profunda',
+    },
+    description: {
+      en: 'Expected value assumes you know the odds. Deep uncertainty is when you do not — the probabilities themselves are unknown or unknowable. The expert model for choosing well when you cannot compute: seek robustness over optimality, buy margin of safety, and prefer decisions that survive being wrong.',
+      es: 'El valor esperado da por hecho que conoces las probabilidades. La incertidumbre profunda es cuando no las conoces — las probabilidades mismas son desconocidas o incognoscibles. El modelo experto para elegir bien cuando no puedes calcular: busca robustez antes que optimalidad, compra margen de seguridad y prefiere decisiones que sobrevivan a estar equivocado.',
+    },
+    dependencies: ['fat-tails', 'margin-of-safety', 'asymmetry-and-optionality'],
+    tags: ['decision-making', 'probability'],
+    buildNotes:
+      'Deciding under deep uncertainty — the expert decision-making rung: what to do when the clean machinery of expected value breaks because you do not (and cannot) know the probabilities. Assumes fat-tails, margin-of-safety and asymmetry-and-optionality; the honest sequel to expected value. Sections: risk vs uncertainty (Knight) — risk is a known distribution (a dice roll), uncertainty is an unknown one (next decade’s technology); why point-estimate expected value quietly assumes you know the odds and misleads under fat tails and unknown unknowns; the shift from *optimising* to *satisficing* and *robustness* — pick actions that do acceptably across many possible worlds rather than best in your single guessed one (robust decision-making, minimax-regret, the precautionary/ruin-avoidance principle: never risk what you cannot afford to lose, because ergodicity fails and one ruin ends the game); reversibility and option value (keep choices reversible, pay for margin of safety, run small experiments — tie to asymmetry-and-optionality and the barbell); scenario thinking and pre-mortems instead of single forecasts; the role of redundancy, slack and antifragility; calibration humility (you know less than your confidence suggests). Pitfalls: false precision (a detailed spreadsheet is not knowledge; garbage-in dressed as rigour); treating deep uncertainty as if it were mere risk; over-hedging into paralysis or paying so much for safety you never win; confusing robustness with mere pessimism. Build an interactive island: a "many-worlds" decision explorer where the learner picks among strategies (optimise / hedge / barbell / robust) and the island draws each strategy’s outcome across a spread of possible worlds — including rare ruinous ones — showing how the expected-value winner can be the strategy most likely to blow up, while the robust choice trades a little average for surviving every world. Recap Quiz + MindMap. en + es twin.',
   },
 ];
 
