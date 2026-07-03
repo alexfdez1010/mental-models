@@ -1,0 +1,322 @@
+---
+title: "El Modelo en Todas Partes"
+description: "El paisaje adaptativo abandona la biología y se apodera de todo: el aprendizaje automático es escalar colinas con bata de laboratorio, la disrupción empresarial es una montaña más alta, los estancamientos de habilidad son óptimos locales — y toda búsqueda de la Tierra está partida por el mismo gran dilema, explorar vs. explotar."
+topic: "es/fitness-landscapes"
+order: 6
+minutes: 13
+updated: 2026-07-03
+---
+
+import { MCQ, Quiz, Callout, Categorize, FitnessLandscape } from '@/components/react';
+
+Habéis pasado cinco lecciones aprendiendo un solo terreno — el **espacio de diseño** extendido como un mapa, la **altura** que significa aptitud, una **búsqueda local codiciosa y solo cuesta arriba** que sube la colina más cercana y se niega a bajar un paso, los **óptimos locales frente a globales**, la **escarpadura** que decide cuántas trampas hay, y los cruza-valles (mutación, deriva, recombinación) que de vez en cuando salvan a un escalador varado — más el giro de la Reina Roja donde el propio terreno no se queda quieto. Todo eso se contó a través de escarabajos y peces de cueva.
+
+Aquí está la recompensa: **casi nada de ello iba de verdad sobre biología.** El paisaje es una *forma de problema*, no un hecho sobre los genes, y esa forma aparece en todas partes donde algo mejora por ensayo y error — en un centro de datos entrenando una red neuronal, en un consejo de administración decidiendo si apostar la empresa, en tu propio intento estancado de superar una meseta. Esta lección cobra el modelo en los tres ámbitos, y luego aterriza el único dilema que subyace bajo toda búsqueda que exista: **explorar vs. explotar (explore vs. exploit).** Como siempre — adivina antes de espiar.
+
+<MCQ
+  client:visible
+  pretest
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Una nadadora veterana no ha recortado ni un segundo de su marca en dos años. Su entrenador filma su brazada y le dice: «Tu técnica es preciosamente eficiente — para la brazada equivocada. Para ir de verdad más rápida, tenemos que reconstruir tu entrada al agua desde cero, y durante unos tres meses irás MÁS LENTA de lo que vas ahora.» ¿Por qué demonios empeorar deliberadamente sería el camino para mejorar?"
+  options={[
+    { text: 'Su técnica actual es un *óptimo local*: localmente perfecta, así que cada pequeño retoque la empeora, y está varada en una colina baja. Alcanzar una más alta exige cruzar un valle: un paso ABAJO temporal (peores marcas) para reconstruir hacia una técnica capaz de subir más alto de lo que su cima actual podría jamás', correct: true },
+    { text: 'Empeorar nunca sirve de nada — el entrenador se equivoca, y ella debería seguir puliendo su brazada actual con más ahínco' },
+    { text: 'Porque más práctica siempre produce marcas más rápidas, sin importar la técnica' },
+    { text: 'Porque las marcas de natación fluctúan al azar y no tienen nada que ver con la técnica' },
+  ]}
+  explanation="En un test previo no hay nota — solo nota la forma, que ya te sabes de memoria por la biología. «Me he estancado» es un óptimo local vestido de paisano: su brazada está tan bien afinada que cada pequeño cambio la vuelve *más lenta*, así que una búsqueda codiciosa y solo cuesta arriba (conserva lo que ayuda, descarta lo que perjudica) está atascada en lo alto de una colina baja. La única ruta hacia una colina más alta baja *primero cuesta abajo* — tiene que ponerse temporalmente peor (romper y reconstruir la brazada) para cruzar el valle hacia una técnica que corona más alto. Eso no es un dato de natación; es exactamente la misma trampa en la que estaba el pez de cueva. El paisaje hace el trabajo en la piscina igual que lo hizo en la cueva."
+/>
+
+Esa nadadora es la lección entera en un solo cuerpo: una persona genuinamente diestra, con veto permanente para mejorar *por lo mismo que la hizo buena* — una técnica demasiado bien optimizada como para mejorar a pequeños pasos. Predijiste su solución sin saber una sola cosa de natación, porque ya habías visto a la selección quedarse varada en un pico local. Ahora veamos la misma trampa desplegarse en una máquina, un mercado y una carrera profesional.
+
+## El aprendizaje automático es escalar colinas con bata de laboratorio
+
+**La analogía.** Cuando *entrenas* un modelo de aprendizaje automático, estás corriendo una búsqueda por un paisaje de cada ajuste posible que el modelo podría tener — cada combinación posible de sus millones de números internos (sus **pesos**). Cada combinación es un punto del espacio de diseño; la "aptitud" de ese punto es lo *equivocadas* que son las predicciones del modelo. El entrenamiento empuja los pesos, conserva los cambios que ayudan, descarta los que perjudican, y escala. ¿Te suena? Es escalar colinas con bata de laboratorio.
+
+**La versión precisa.** Hay un giro de vocabulario que despista a la gente: el aprendizaje automático suele dibujar el paisaje **del revés.** En vez de una superficie de *aptitud* que escalas (más alto = mejor), los ingenieros usan una **superficie de error (loss surface)** que desciendes (más bajo = menos error = mejor). La búsqueda se llama **descenso de gradiente (gradient descent)** — literalmente "rueda cuesta abajo siguiendo la pendiente". Pero dale la vuelta a la imagen y es *píxel a píxel el paisaje adaptativo de la lección 2*. Ir cuesta abajo para minimizar el error es el mismo acto que ir cuesta arriba para maximizar la aptitud; los picos simplemente se volvieron valles. Todo se traslada con las etiquetas cambiadas:
+
+| Idea del paisaje adaptativo | Nombre en aprendizaje automático |
+|---|---|
+| Espacio de diseño (cada versión posible) | El espacio de todos los **pesos** posibles |
+| Altura = aptitud (más alto es mejor) | Altura = **error (loss)** (más bajo es mejor) — imagen del revés |
+| Búsqueda codiciosa solo cuesta arriba | **Descenso de gradiente** (solo cuesta abajo, siguiendo la pendiente) |
+| Tamaño de paso de cada movimiento | **Tasa de aprendizaje (learning rate)** |
+| Varado en un pico bajo | Atascado en un mal **mínimo local (local minimum)** |
+| Cruzar un valle hacia un pico mejor | Escapar de un mínimo local |
+| Mutación / gran salto al azar | Reinicio aleatorio, **ruido**, momento (momentum) |
+
+**Ejemplo resuelto — los mismos trucos de escape, rebautizados.** En la lección 5 aprendiste que un escalador codicioso escapa de una trampa solo *cruzando un valle*, y los cruza-valles eran la mutación, la deriva y la recombinación. El aprendizaje automático usa exactamente la misma familia de trucos, disfrazada:
+
+- **Reinicios aleatorios (random restarts)** — suelta la búsqueda en un punto nuevo y escala de nuevo, quedándote con el mejor resultado de muchas sueltas. Eso es literalmente "vuelve a soltar la población" de la isla de abajo.
+- **Momento (momentum)** — deja que la búsqueda acumule velocidad como una bola rodando cuesta abajo, para que *pase de largo* por hondonadas poco profundas en vez de pararse en cada pequeña.
+- **Añadir ruido** — sacude los pasos al azar para que la búsqueda pueda vibrar hasta salir de una trampa poco profunda (la versión de software de la mutación).
+- **Recocido simulado (simulated annealing)** — el más elegante de todos: al principio de la búsqueda, cuando está "caliente", el algoritmo a veces *acepta un movimiento peor* (un paso cuesta abajo en la imagen de aptitud) a propósito; a medida que se "enfría", acepta cada vez menos, hasta que al final solo da pasos que mejoran. Es una manera *con principios* de cruzar valles pronto — tolerar empeorar mientras hay tiempo de encontrar algo mucho mejor, y luego asentarse y pulir. (Guárdate esa idea. Está a punto de convertirse en el gran dilema de toda la lección.)
+
+Y los **algoritmos genéticos (genetic algorithms)** no solo toman prestada la metáfora — corren *evolución de verdad* sobre un paisaje: mantén una población de diseños candidatos, mútalos y recombínalos, conserva los más aptos, repite. Los ingenieros los usan para optimizar de todo, desde formas de antenas hasta horarios de fábrica. La biología no era una analogía de la informática; son la misma búsqueda.
+
+<Callout variant="info" title="Por qué «la superficie de error» y «el paisaje adaptativo» son el mismo objeto">
+Si alguna vez lees que un modelo se "quedó atascado en un mínimo local" y que los ingenieros lo arreglaron con "una tasa de aprendizaje más alta" o "recocido simulado", estás leyendo un paisaje de Sewall Wright con los ejes reetiquetados y la imagen dada la vuelta. Mínimo local = el estado de varado-en-un-pico-bajo; tasa de aprendizaje = tamaño de paso; recocido = un calendario disciplinado de cruce de valles. Una vez que lo ves del revés, el curso entero se lee como una larga nota al pie sobre cómo aprenden las máquinas.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Un ingeniero de aprendizaje automático se queja: «Mi modelo se queda clavado en el 88% de acierto por mucho que lo entrene — el error sencillamente no baja más.» Traducido a términos del paisaje adaptativo, ¿qué es lo más probable que haya pasado, y qué clase de solución predice el curso?"
+  options={[
+    { text: 'La búsqueda está atascada en un mínimo local — una trampa en la superficie de error donde cada pequeño paso sube el error, así que el descenso de gradiente se detiene. La solución es un cruza-valles: reinicios aleatorios, ruido añadido, momento o recocido simulado para escapar hacia una cuenca más baja (mejor)', correct: true },
+    { text: 'El modelo ha encontrado la mejor respuesta matemáticamente posible, así que ninguna mejora de ningún tipo es ya posible' },
+    { text: 'Entrenar más tiempo con los mismos ajustes siempre acabará por atravesar cualquier meseta' },
+    { text: 'Las mesetas de acierto son ruido aleatorio y no tienen relación con la forma de la superficie de error' },
+  ]}
+  explanation="Un error que no baja pese a más entrenamiento es la versión-superficie-de-error de un escalador varado: la búsqueda se sienta en el fondo de un mínimo local (un punto bajo que no es el más bajo), donde cada pequeño paso *sube* el error, así que el descenso de gradiente codicioso se para. «Más de lo mismo» no ayudará — esa es la prisión de la búsqueda codiciosa que aprendiste en la lección 3. Lo que ayuda es exactamente el kit de cruce de valles de la lección 5, rebautizado para software: reinicia la búsqueda en otro sitio, inyecta ruido, añade momento para pasar de largo la hondonada, o recuece (acepta algunos movimientos peores pronto). «El 88% es demostrablemente óptimo» es el error de exceso de confianza — una meseta te dice que la pendiente *local* es plana, nunca que has encontrado el mejor global."
+/>
+
+### Cuándo usarlo
+
+Echa mano de esto siempre que un sistema que aprende — un modelo, un optimizador, una herramienta de diseño automática — *deje de mejorar pese al esfuerzo.* El diagnóstico es la pregunta central del curso con etiquetas de software: *¿está esta búsqueda atascada en una cuenca local, y qué cruza-valles la dejaría llegar a una más baja?* Si la respuesta es "sí, y prueba reinicios/ruido/recocido", acabas de hacer ingeniería de aprendizaje automático usando nada más que la imagen de una ladera.
+
+## Estrategia empresarial: la montaña más alta en la que nadie está subido
+
+**La analogía.** Una empresa también es una escaladora. Elige una forma de hacer las cosas — una tecnología, un modelo de negocio, un producto — y la escala: se hace mejor y mejor y *mejor* en esa cosa exacta, afinando cada proceso, recortando cada coste, puliendo la máquina hasta dejarla magnífica. Llega a lo alto de su colina. Y entonces, un día, un rival que nunca estuvo siquiera en la misma montaña — subido a un pico *distinto y más alto* construido sobre una nueva tecnología o un nuevo modelo — vuelve irrelevante toda la primera montaña. La empresa excelente, bien gestionada y localmente óptima queda de pronto obsoleta, y no lo vio venir, porque estaba ocupada escalando *hacia arriba*.
+
+**La versión precisa.** Estar atrapado en un pico local *es lo que se siente la disrupción (disruption) por dentro.* La empresa establecida no es vaga ni tonta — a menudo es la mejor del mundo en lo que hace, sentada orgullosa en su cima. Esa es la trampa, no la excepción. **La mejora incremental — "escalar la colina equivocada más rápido" — no puede salvarte cuando el problema es que estás en la colina equivocada.** Ninguna cantidad de escalada te lleva de un pico bajo a uno más alto cruzando un valle; la única ruta es un paso deliberado *abajo y a través* — una apuesta **radical y exploratoria** por un pico nuevo, hecha *mientras el actual todavía paga las facturas.* Cada fibra de una empresa bien gestionada grita por seguir optimizando la cosa rentable en la que ya es buena. Ese grito es la búsqueda codiciosa solo cuesta arriba hablando, y es exactamente lo que te deja varado.
+
+**Ejemplo resuelto — optimizar una tecnología moribunda.** Imagina una empresa que domina una tecnología madura — pongamos, el mejor y más fiable fabricante de un producto mecánico que el mundo haya visto jamás. Aparece una nueva tecnología discontinua (digital, más barata, al principio *peor* en las métricas que le importan a la empresa establecida). Aquí está el bucle fatal, paso a paso:
+
+| Paso | Lo que hace la empresa establecida | Traducción al paisaje |
+|---|---|---|
+| 1 | La nueva tecnología parece *peor* en las métricas de hoy | Las *laderas bajas* del pico nuevo quedan por debajo de la cima de la empresa — un valle en medio |
+| 2 | "Nuestros clientes no quieren ese juguete" — sigue puliendo el producto mecánico | Búsqueda codiciosa: rechaza el paso cuesta abajo, sigue escalando la colina actual |
+| 3 | Cada año, ganancias incrementales en la tecnología vieja; la nueva escala en silencio su propia colina | Ambas escalan — pero la colina nueva es *más alta* |
+| 4 | La tecnología nueva supera a la vieja en las métricas que importan, y luego se escapa | El pico más alto adelanta; la cima vieja es ahora una colina baja |
+| 5 | La empresa establecida, aún en su precioso pico local, queda obsoleta | Varada en un óptimo local mientras uno global se alza al otro lado del valle |
+
+La empresa establecida hizo todo "bien" según la lógica de la colina en la que estaba. Ese fue el problema. Corrió una búsqueda codiciosa impecable colina arriba en una colina que una montaña más alta estaba a punto de volver inútil.
+
+<Callout variant="warning" title="La disrupción, en una frase">
+**Un óptimo local es un sitio estupendo en el que estar, justo hasta que el paisaje revela un pico más alto al que no puedes escalar.** La mejora incremental ("corre mejor el manual de siempre") escala tu colina más rápido; nunca puede llevarte cruzando el valle hasta una más alta. Escapar exige lo que toda organización bien gestionada está construida para rechazar: una apuesta deliberada, temporalmente-peor y *exploratoria* por un pico distinto — hecha mientras todavía estás subido a tu cima actual, no después de que ya se haya desmoronado.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Una empresa dominante de cámaras de carrete reacciona al auge de la fotografía digital haciendo sus cámaras de carrete cada vez más baratas, nítidas y fiables — superando en optimización a cada rival de carrete — mientras trata lo digital como una moda de baja calidad. Una década después está en quiebra. ¿Qué diagnóstico es exactamente el correcto?"
+  options={[
+    { text: 'Estaba escalando su colina de cámaras-de-carrete cada vez más rápido — una búsqueda local codiciosa y solo cuesta arriba — mientras lo digital era un pico separado y más alto. La mejora incremental no puede cruzar el valle hasta un pico nuevo; solo una costosa apuesta exploratoria por lo digital podría haberlo hecho, y rechazar ese paso es lo que la dejó varada', correct: true },
+    { text: 'Sencillamente no optimizó sus cámaras de carrete lo suficiente — más mejora incremental la habría salvado' },
+    { text: 'La fotografía digital era objetivamente peor, así que la estrategia de la empresa era correcta y su quiebra fue mala suerte' },
+    { text: 'Los mercados son aleatorios, así que ninguna estrategia podría haber cambiado el resultado de forma predecible' },
+  ]}
+  explanation="Esto es la disrupción como paisaje, de manual. La empresa corrió una búsqueda codiciosa soberbia colina arriba en su colina de cámaras-de-carrete — genuinamente la mejor del mundo en ello. Pero lo digital era un pico *distinto y más alto*, que al principio quedaba más bajo en las métricas que le importaban a la empresa (un valle en medio). Escalar codiciosamente, por bueno que sea, no puede cruzar un valle hacia un pico más alto; solo una apuesta deliberada, temporalmente-peor y *exploratoria* por lo digital podría haberlo hecho. «Optimiza más fuerte» es el instinto fatal — escala más rápido la colina condenada. La cuestión no es que lo digital fuera mejor el primer día; es que existía un pico más alto y la búsqueda de la empresa no podía alcanzarlo escalando."
+/>
+
+### Cuándo usarlo
+
+Aplica esto cada vez que una organización sea *excelente y complaciente* — dominando una forma madura de hacer las cosas, descartando a un advenedizo por ser de baja calidad. Hazte la pregunta del curso con ropa de estrategia: *¿Qué colina está escalando esta empresa, hay una más alta en la que no está, y la llevaría hasta allí alguna vez la mejora incremental?* Si el pico más alto es real y solo una apuesta cruza-valles podría alcanzarlo, «somos los mejores en lo que hacemos» no es tranquilizador — es la forma exacta de una empresa a punto de sufrir una disrupción.
+
+## Adquisición de habilidades: la meseta es un pico local
+
+**La analogía.** Esta la has sentido en tu propio cuerpo. Practicas algo — un instrumento, un deporte, un oficio — y mejoras, rápido, durante un tiempo. Luego *paras.* "Me he estancado." Sigues practicando, quizá más fuerte que nunca, y nada se mueve. Ese techo plano no es un misterio y no es falta de esfuerzo. Es un óptimo local, y estás subido justo encima.
+
+**La versión precisa.** "Me he estancado" significa que tu *técnica actual es localmente óptima*: está tan bien afinada que **cada pequeño retoque te empeora.** Un aprendiz codicioso — conserva lo que ayuda, descarta lo que perjudica — no tiene a dónde ir, porque cada dirección es cuesta abajo. Has escalado tu colina hasta la cima. Mejorar *de verdad* desde aquí casi siempre exige el movimiento que el entrenador de la nadadora exigió y que el pez de cueva nunca pudo hacer: un **paso abajo temporal** — romper y reconstruir deliberadamente tu agarre, tu swing, tu proceso, tu digitación — para ponerte *peor antes de ponerte mejor*, cruzando un valle hacia una técnica que corona más alto de lo que la tuya actual podría jamás. Eso es cruce de valles controlado, elegido a propósito, con la previsión que la búsqueda biológica ciega nunca tuvo.
+
+**Ejemplo resuelto — el guitarrista autodidacta.** Un guitarrista autodidacta toca bien usando una mano de pisar tensa y agarrotada que lo llevó sorprendentemente lejos. Se estanca: la velocidad no sube, por muchas horas que ensaye. Un profesor diagnostica la mano agarrotada como el techo y prescribe una reconstrucción total de la posición de la mano. Durante semanas el guitarrista toca *peor* que antes — torpe, lento, frustrado, deslizándose *hacia abajo* dentro del valle. Luego la nueva técnica, relajada, empieza a escalar, y en cuestión de meses rebasa la vieja meseta hasta velocidades que la mano agarrotada nunca podría haber alcanzado. La regresión temporal no fue un fracaso; fue el *precio de entrada* a una colina más alta. Los únicos que nunca atraviesan el techo son los que no toleran el bache — buscadores codiciosos, que rechazan el paso cuesta abajo, varados para siempre en un pico bajo de su propio pulido.
+
+<Callout variant="tip" title="Tu meseta, descifrada">
+Una meseta es un *diagnóstico*, no una sentencia: dice que tu técnica es localmente perfecta y, por tanto, localmente atrapada. La solución rara vez es "esfuérzate más en lo mismo" (eso es escalar una colina ya al máximo) — suele ser "empeora a propósito un rato", rompiendo y reconstruyendo justo aquello en lo que eres bueno para cruzar el valle hacia un pico más alto. El bache es el peaje, no un giro equivocado. Cualquiera que haya subido de verdad de nivel en una habilidad difícil lo ha pagado.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Un mecanógrafo lleva un año clavado en exactamente 70 palabras por minuto. Descubre que su colocación de dedos autodidacta es el cuello de botella, y que cambiar a la técnica correcta lo bajaría a 30 PPM durante un mes antes de (con el tiempo) superar las 90. Un amigo le dice: «No te molestes en reconstruir — sigue practicando a 70 y romperás el techo.» Usando el modelo, ¿quién tiene razón y por qué?"
+  options={[
+    { text: 'El mecanógrafo debería reconstruir. 70 PPM es un óptimo local en su técnica actual — cada pequeño retoque lo empeora, así que más práctica con la misma técnica no puede romper el techo. Alcanzar las 90 exige cruzar un valle: la caída temporal a 30 es el paso cuesta abajo hacia una técnica que corona más alto', correct: true },
+    { text: 'El amigo tiene razón — practicar más con la misma técnica siempre acaba rompiendo cualquier meseta' },
+    { text: 'Nada de esto importa, porque la velocidad de tecleo la fija el talento y no se puede cambiar' },
+    { text: 'El mecanógrafo debería reconstruir solo si la caída temporal es a una velocidad MÁS ALTA que la actual' },
+  ]}
+  explanation="La meseta clavada en 70 es un óptimo local en la colocación de dedos actual: está localmente al máximo, así que cada pequeño cambio lo vuelve más lento, y una búsqueda codiciosa de «solo practica más» no tiene a dónde escalar — el amigo se equivoca. Alcanzar las 90 significa una técnica *distinta* que corona más alto, y la única ruta hasta allí baja primero: la caída a 30 PPM es el paso de cruce de valles, pagado a propósito. La última opción invierte la lógica exactamente al revés — el sentido entero del cruce de valles es que debes aceptar un estado temporal *peor* que donde estás ahora (30 < 70) para alcanzar más tarde un pico más alto (90 > 70)."
+/>
+
+## Mira una búsqueda escalar, atascarse y saltar — todo el dilema en una isla
+
+Ya has visto la misma trampa idéntica en una cueva, un centro de datos, un consejo de administración y una sala de ensayo. Es hora de *ver* la tensión que subyace a las cuatro. Abajo está el paisaje adaptativo de la lección 1, pero léelo ahora como un diagrama de una sola pregunta que gobierna toda búsqueda de la Tierra.
+
+**Escalar la colina en la que estás es explotar** — exprimir más de lo que ya funciona, seguro, con recompensa inmediata. **Disparar el gran salto es explorar** — lanzarse a buscar una colina más alta, arriesgado, quizá derrochador, quizá el descubrimiento que lo cambia todo. Suelta una población, déjala escalar hasta un pico local (explotar puro), y luego pulsa el salto para explorar algo mejor (explorar puro). Sube la escarpadura: en un paisaje dentado lleno de trampas, explotar en solitario te deja varado casi siempre, y explorar se gana su sueldo.
+
+<FitnessLandscape
+  client:visible
+  title="Explorar vs. explotar, en una sola ladera"
+  caption="Escalar = EXPLOTAR: exprime más de la colina en la que estás (seguro, inmediato, pero te deja varado en un pico local). Mutar / gran salto = EXPLORAR: lánzate a cazar una colina más alta (arriesgado — puede malgastar el movimiento o encontrar algo mucho mejor). Suelta una población, déjala explotar cuesta arriba hasta un pico local, y luego explora para buscar algo mejor. Fíjate en que en un paisaje escarpado (escarpadura alta) explotar en solitario casi siempre te deja atascado por debajo de la cima señalada — ahí es cuando explorar compensa. Toda búsqueda que has conocido en este curso está partida entre estos dos movimientos. Equilibrarlos es el gran dilema."
+  designAxisLabel="Cada diseño posible →"
+  fitnessAxisLabel="Aptitud ↑"
+  ruggednessLabel="Escarpadura del paisaje"
+  ruggednessLowLabel="suave — una colina"
+  ruggednessHighLabel="escarpado — muchos picos"
+  dropLabel="Soltar una población"
+  climbLabel="Que escale ▸"
+  pauseLabel="Pausa"
+  stepLabel="Escalar un paso ▸"
+  mutateLabel="Mutar / gran salto"
+  redQueenLabel="Terreno cambiante (Reina Roja)"
+  resetLabel="Reiniciar"
+  summitLabel="cima más alta"
+  statusIdle="Suelta una población en algún punto del paisaje y deja que la selección suba la colina más cercana."
+  statusClimbing="Escalando cuesta arriba — la selección da cada pequeño paso que sube la aptitud, sin previsión."
+  statusTrapped="Atascada en un pico local. Toda dirección desde aquí baja cuesta abajo, y sin embargo una cima más alta se alza {gap} puntos por encima, al otro lado de un valle que la selección no cruzará. Lo «suficientemente bueno» está atrapado por debajo de lo «mejor»."
+  statusGlobal="En el óptimo global — la cima más alta de todo el paisaje. No hay nada más alto."
+  statusSinking="El terreno cambió bajo la población: el pico que conquistó se está hundiendo, así que debe escalar de nuevo. No hay cima final."
+  readout="Aptitud {fitness} de un posible {best}. {status}"
+  initialRuggedness={65}
+/>
+
+Todo hasta aquí conducía a este punto. Explotar es la subida codiciosa cuesta arriba; explorar es el salto de cruce de valles. La biología, el aprendizaje automático, los negocios y la habilidad se enfrentan todos a la *misma* elección sobre la *misma* forma de terreno — y el arte de cada uno de ellos consiste en saber cómo repartir el esfuerzo entre los dos. Ese reparto tiene un nombre.
+
+## Explorar vs. explotar — el gran dilema
+
+**La analogía.** Imagina una fila de máquinas tragaperras (un "**bandido multibrazo (multi-armed bandit)**"), cada una pagando a algún ritmo desconocido. Tienes tiradas limitadas. Cada tirada te obliga a la elección que está en el corazón de toda búsqueda: ¿tiras de la máquina que mejor ha pagado *hasta ahora* — **explotas** la opción conocida-como-buena, cobras la recompensa segura — o tiras de una máquina que apenas has probado — **exploras** lo desconocido, que podría pagar mucho mejor o podría malgastar la tirada? Tira solo de la mejor actual y nunca descubrirás la máquina del premio gordo que sub-muestreaste. Tira solo de máquinas nuevas y nunca cobras de verdad lo que has encontrado. Cada tirada es una pequeña apuesta entre escalar y saltar.
+
+**La versión precisa.** **Explotar** significa invertir esfuerzo en la mejor opción que conoces ahora mismo — escalar la colina en la que estás. Seguro, recompensa inmediata, cero descubrimiento. **Explorar** significa invertir esfuerzo en opciones que *aún no* comprendes — saltar a buscar una colina más alta. Arriesgado, recompensa retrasada o ausente, pero la única forma de encontrar un pico más alto que aquel en el que estás subido. **Toda búsqueda debe repartir su esfuerzo entre los dos, y ninguna estrategia pura funciona:** explotar puro te deja varado en un pico local (nunca encuentras nada mejor); explorar puro nunca te deja escalar nada alto (saltas para siempre y no cobras nada). Una regla práctica común (llamada **epsilon-codiciosa (epsilon-greedy)** en cristiano) es: *la mayor parte del tiempo, toma la opción conocida-como-buena; una pequeña fracción del tiempo, tira los dados por algo nuevo.* Esa rebanadita deliberada de explorar es lo que evita que una búsqueda muera en un pico local.
+
+<Callout variant="success" title="El gran dilema, en una frase">
+**Toda búsqueda de la Tierra está partida entre explotar (escala la colina en la que estás — seguro, inmediato) y explorar (salta a encontrar una más alta — arriesgado, posiblemente transformador), y todo el arte es el *equilibrio* entre ambos — un equilibrio que debería desplazarse con el tiempo.** Explotar puro muere en un pico local; explorar puro no escala nada alto. La biología, el aprendizaje automático, la estrategia empresarial y tu propia habilidad se enfrentan todos a este reparto exacto sobre este terreno exacto.
+</Callout>
+
+**Cómo poner el dial.** El equilibrio no es fijo — depende del terreno y del reloj. Explora *más* cuando:
+
+| Explora más cuando… | Explota más cuando… |
+|---|---|
+| El paisaje es **escarpado** (muchos picos — probablemente no estás en el más alto) | El paisaje es **suave** (una colina — escalar seguro que alcanza la cima) |
+| Los saltos son **baratos** (una exploración malgastada cuesta poco) | Los saltos son **costosos** (una exploración malgastada es cara o peligrosa) |
+| Es **pronto** — queda mucho tiempo para explotar lo que encuentres | Es **tarde** — queda poco tiempo para cobrar un nuevo descubrimiento |
+| La recompensa actual es **pobre** (poco que perder mirando) | La recompensa actual es **excelente** (mucho que proteger) |
+
+Fíjate en que el **recocido simulado** de la sección de aprendizaje automático es *exactamente este dial, automatizado*: explora mucho pronto (acepta movimientos peores mientras está "caliente" y hay tiempo), explota más a medida que se "enfría" y el tiempo se agota. Es el dilema explorar-explotar escrito como un calendario de enfriamiento.
+
+**Ejemplo resuelto — una carrera profesional.** Este es el dilema aplicado a una vida humana, y es por lo que el consejo estándar tiene la forma que tiene. Cuando eres **joven**, el paisaje es escarpado (aún no sabes qué campo es tu pico alto), los saltos son baratos (pocas cargas, poco que perder, fácil cambiar) y es *pronto* (décadas por delante para explotar un buen hallazgo) — así que **explora**: muestrea a lo ancho, prueba muchos campos, coge el trabajo raro, cambia de rumbo, ve primero a lo amplio. A medida que te haces **mayor**, has localizado una colina alta que merece escalar, los saltos se vuelven costosos (un cambio a media carrera sacrifica pericia acumulada, antigüedad, estabilidad) y es *tarde* (menos años para cobrar un nuevo comienzo) — así que **explota**: comprométete, especialízate, ve a lo hondo, escala la colina que encontraste tan alto como llegue. Juventud a lo ancho, madurez a lo hondo. Eso no es sabiduría popular; es el dial explorar-explotar leyendo el terreno y el reloj. La misma lógica gobierna un laboratorio de investigación (fase temprana: muchas apuestas pequeñas y especulativas; maduro: doblar la apuesta por la línea prometedora) y la cartera de I+D de una empresa.
+
+<MCQ
+  client:visible
+  allowMultiple
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Selecciona CADA elemento de abajo que sea genuinamente una búsqueda de paisaje adaptativo — un proceso que mejora moviéndose por un espacio de opciones, conservando lo mejor, y que puede quedar atascado en un óptimo local. (Más de uno es correcto — y uno es un distractor que no es una búsqueda en absoluto.)"
+  options={[
+    { text: 'Una red neuronal siendo entrenada por descenso de gradiente, asentándose en un mínimo local de su superficie de error', correct: true },
+    { text: 'Una empresa optimizando de forma incremental una tecnología madura mientras un pico nuevo, más alto y discontinuo la adelanta', correct: true },
+    { text: 'Un guitarrista estancado en una técnica autodidacta agarrotada y que tiene que reconstruirla para mejorar', correct: true },
+    { text: 'La evolución escalando un pez de cueva por su pico adaptativo local, incapaz de cruzar un valle hacia un diseño mucho mejor', correct: true },
+    { text: 'Un termómetro marcando 21 °C en una habitación que resulta estar a 21 °C', correct: false },
+    { text: 'Un algoritmo genético mutando y recombinando diseños candidatos, conservando los más aptos cada generación', correct: true },
+  ]}
+  explanation="Cinco de estos son la misma búsqueda con distintos disfraces: descenso de gradiente (aprendizaje automático), optimización incremental frente a disrupción (negocios), el guitarrista estancado (habilidad), el pez de cueva (biología) y el algoritmo genético (que literalmente corre evolución sobre un paisaje). Los cinco se mueven por un espacio de opciones, conservan lo mejor y pueden quedar varados en un óptimo local. El distractor es el termómetro: solo está *informando* de una temperatura, no buscando por un espacio de opciones, no conservando-lo-mejor, no escalando nada — no puede quedar «atascado en un óptimo local» porque no está optimizando en absoluto. Distinguir la diferencia — ¿es esto de verdad una búsqueda? — es la mitad de la destreza de aplicar el modelo."
+/>
+
+<Categorize
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  question="Cada acción de abajo es un movimiento en alguna búsqueda. Clasifícala según si es EXPLOTAR (invertir en la mejor opción que ya conoces — escalar la colina en la que estás) o EXPLORAR (invertir en una opción desconocida — saltar a buscar una colina más alta)."
+  buckets={['Explotar (escalar la colina actual)', 'Explorar (saltar a encontrar una más alta)']}
+  items={[
+    { text: 'Hacer un test A/B con un tono ligeramente distinto del color de botón que ya usas', bucket: 'Explotar (escalar la colina actual)' },
+    { text: 'Apostar una parte de la empresa por una línea de negocio completamente nueva', bucket: 'Explorar (saltar a encontrar una más alta)' },
+    { text: 'Ensayar tu saque de tenis actual y fiable una hora más', bucket: 'Explotar (escalar la colina actual)' },
+    { text: 'Reconstruir tu técnica de saque desde cero, peor durante meses primero', bucket: 'Explorar (saltar a encontrar una más alta)' },
+    { text: 'Afinar los ajustes de la arquitectura de modelo que ya tienes', bucket: 'Explotar (escalar la colina actual)' },
+    { text: 'Probar una arquitectura de modelo completamente nueva y no probada', bucket: 'Explorar (saltar a encontrar una más alta)' },
+    { text: 'Un veterano redoblando la apuesta por la especialidad que ya domina', bucket: 'Explotar (escalar la colina actual)' },
+    { text: 'Un estudiante muestreando cinco campos radicalmente distintos en sus primeros años', bucket: 'Explorar (saltar a encontrar una más alta)' },
+  ]}
+  explanation="Explotar es siempre «exprime más de la cosa buena que ya tengo» — un paso pequeño y seguro colina arriba en la colina actual: retocar el tono de un botón, ensayar el saque fiable, afinar la arquitectura actual, redoblar la apuesta por una especialidad probada. Explorar es siempre «deja lo conocido y apuesta por algo desconocido que podría coronar más alto» — un salto arriesgado: una línea de negocio entera nueva, una reconstrucción del saque desde cero (peor antes que mejor), una arquitectura no probada, un estudiante muestreando muchos campos. La pista es la forma riesgo/recompensa: explotar es seguro e inmediato; explorar arriesga un movimiento malgastado a cambio de la posibilidad de un pico más alto. Cada uno de estos es el mismo dilema en un escenario distinto."
+/>
+
+### Las dos formas de equivocarse
+
+Todo el modelo se reduce a matar dos errores opuestos y seductores.
+
+**"Solo explota — sigue optimizando lo que funciona."** Esto se siente como disciplina, foco, profesionalidad. Es una muerte *garantizada* en un pico local. En el momento en que el paisaje se desplaza (un mundo Reina Roja, una tecnología nueva) o simplemente ya existe un pico más alto al otro lado de un valle que nunca comprobaste, el explotador puro queda varado — magnífico, optimizado y obsoleto. La empresa de cámaras de carrete, el atleta estancado que no reconstruye, el modelo atascado en un mínimo local: todos explotadores puros. Optimizar lo que funciona es *necesario*; convertirlo en tu *único* movimiento es fatal.
+
+**"Solo explora — persigue siempre lo nuevo."** Esto se siente como apertura de miras, creatividad, visión. Es el fracaso espejo: la persona, empresa o búsqueda que nunca se compromete con nada el tiempo suficiente para escalarlo alto. Saltando para siempre, muestreando para siempre, empezando de cero para siempre, visitan mil colinas y no coronan ninguna. El diletante que prueba cada instrumento y no domina ninguno; la startup que pivota cada trimestre y no construye nada; la búsqueda que salta tanto que nunca se asienta para cobrar un hallazgo — todos exploradores puros.
+
+**El arte es el equilibrio, y el equilibrio se desplaza.** Ninguna posición del dial es correcta en abstracto; la mezcla correcta depende de la escarpadura de tu terreno, del coste de tus saltos y — crucialmente — de *dónde estás en el tiempo.* Cargado hacia explorar pronto (terreno escarpado, saltos baratos, tiempo para explotar un hallazgo), cargado hacia explotar tarde (has encontrado tu colina, los saltos son costosos, el tiempo escasea). Acertar con este equilibrio cambiante es, más o menos, lo que significa ser bueno en *cualquier cosa* que mejore con el tiempo.
+
+<Callout variant="warning" title="Los dos errores que este modelo entero existe para matar">
+Llevaos estos por la puerta. **(1) "Solo explota."** Sigue optimizando lo que funciona y nada más — esto garantiza que mueras en un pico local en cuanto el paisaje se desplace o se encuentre uno más alto. Los explotadores puros son la empresa establecida disrumpida, el atleta atascado para siempre, el modelo atrapado en un mínimo local. **(2) "Solo explora."** Persigue siempre lo nuevo, no te comprometas nunca — esto garantiza que no escales nada alto, saltando para siempre entre colinas que nunca coronas. La verdad no es ninguna de las dos: el arte es el *equilibrio* entre escalar y saltar, y ese equilibrio debería desplazarse de cargado-hacia-explorar (pronto, escarpado, saltos baratos) a cargado-hacia-explotar (tarde, colina-encontrada, saltos costosos) con el tiempo.
+</Callout>
+
+### Cuándo usarlo
+
+Aplica el chequeo explorar-vs-explotar siempre que estés decidiendo *dónde poner el esfuerzo* en cualquier cosa que mejore por ensayo y error — tu carrera, una agenda de investigación, la hoja de ruta de un producto, un régimen de entrenamiento, una cartera, un modelo. Hazte tres preguntas: *¿Cuán escarpado es este terreno (es probable que esté en el pico más alto)? ¿Cuán costoso es un salto (qué me cuesta una exploración malgastada)? ¿Dónde estoy en el tiempo (cuánto tengo para explotar un hallazgo)?* Escarpado + barato + pronto te inclina hacia explorar; suave + costoso + tarde te inclina hacia explotar. Y hacia el lado que te inclines, conserva al menos una *astillita* del otro — una estrategia pura en cualquier dirección es una forma conocida de fracasar.
+
+## Recapitulación
+
+Entraste con un paisaje que explicaba escarabajos. Te vas con uno que explica máquinas, mercados, habilidades y cómo gastar el esfuerzo de tu única vida:
+
+1. **El aprendizaje automático es escalar colinas con bata de laboratorio.** Entrenar es una búsqueda por el espacio de pesos; dibujada del revés como **descenso de gradiente** sobre una **superficie de error** (cuesta abajo = menos error = la imagen de aptitud volteada). Tamaño de paso = **tasa de aprendizaje**; quedarse atascado = un **mínimo local**; y los escapes son los mismos cruza-valles — reinicios aleatorios, momento, ruido añadido y **recocido simulado** (acepta movimientos peores pronto mientras está "caliente", menos a medida que se "enfría"). Los algoritmos genéticos corren evolución de verdad sobre un paisaje.
+2. **La disrupción empresarial es una montaña más alta.** Una empresa escala su forma de hacer las cosas hasta un pico local; un rival en un pico *distinto y más alto* (nueva tecnología, nuevo modelo) vuelve irrelevante todo el primer pico. La mejora incremental — "escalar la colina equivocada más rápido" — no puede cruzar el valle; solo una apuesta deliberada, temporalmente-peor y *exploratoria* por un pico nuevo puede. Estar atrapado en un pico local *es* lo que se siente la disrupción por dentro.
+3. **Una meseta de habilidad es un óptimo local.** "Me he estancado" significa que tu técnica es localmente perfecta, así que cada pequeño retoque te empeora y la práctica codiciosa no puede romper el techo. La mejora genuina suele necesitar un paso *abajo* temporal — romper y reconstruir tu agarre/swing/proceso, peor antes que mejor — para cruzar el valle hacia una técnica que corona más alto. Cruce de valles controlado.
+4. **Explorar vs. explotar es el gran dilema.** Toda búsqueda reparte el esfuerzo entre **explotar** (escala la colina en la que estás — seguro, inmediato) y **explorar** (salta a encontrar una más alta — arriesgado, posiblemente transformador). Explotar puro muere en un pico local; explorar puro no escala nada alto. Explora más cuando el terreno es escarpado, los saltos son baratos y es pronto; explota más cuando es suave, los saltos son costosos y es tarde — juventud a lo ancho, madurez a lo hondo. El arte es el *equilibrio*, y el equilibrio se desplaza con el tiempo.
+
+<Quiz
+  client:visible
+  title="Compruébate: el modelo en todas partes"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  questions={[
+    {
+      question: 'Un ingeniero dice: «Entrené mi modelo diez veces más tiempo y el error dejó de bajar en el mismo valor — creo que encontró la mejor respuesta posible.» Traducido a los términos de paisaje del curso, ¿cuál es la corrección más afilada?',
+      options: [
+        { text: 'Un error plano lo más probable es que signifique que la búsqueda está atascada en un mínimo local — un punto bajo de la superficie de error que no es el más bajo — donde cada pequeño paso sube el error, así que el descenso de gradiente se para. Señala una trampa, no el mejor global; un cruza-valles como reinicios, ruido o recocido es lo que hay que probar', correct: true },
+        { text: 'Tiene razón — un error que deja de bajar es prueba de que el modelo ha encontrado la respuesta matemáticamente óptima', correct: false },
+        { text: 'Entrenar aún más tiempo con ajustes idénticos siempre acabará por alcanzar la verdadera mejor respuesta', correct: false },
+        { text: 'La meseta no significa nada porque las superficies de error no tienen picos ni valles', correct: false },
+      ],
+      explanation: 'Un error plano solo te dice que la pendiente *local* es plana — la búsqueda se sienta en el fondo de una cuenca donde cada pequeño paso sube el error. Eso es un mínimo local (el gemelo-superficie-de-error de un pico local), no una prueba de optimalidad global; es la prisión de la búsqueda codiciosa de la lección 3 en forma de software. Más de lo mismo no ayudará — la solución es un cruza-valles (reinicios aleatorios, ruido añadido, momento, recocido simulado). Concluir «esta es la mejor respuesta posible» es exactamente el exceso de confianza contra el que advierte todo el curso.',
+    },
+    {
+      question: 'Un artista marcial lleva dos años clavado en el mismo nivel pese a entrenar más fuerte que nunca. ¿Qué respuesta refleja mejor el modelo del paisaje adaptativo sobre las mesetas de habilidad?',
+      options: [
+        { text: 'Su técnica actual es un óptimo local — localmente al máximo, así que cada pequeño retoque lo empeora y más de lo mismo no puede romper el techo. Mejorar probablemente exige un paso ABAJO temporal: reconstruir deliberadamente una técnica central, ponerse peor un rato, para cruzar un valle hacia una que corona más alto', correct: true },
+        { text: 'Sencillamente no entrena lo bastante fuerte — duplicar la misma práctica siempre romperá cualquier meseta', correct: false },
+        { text: 'Ha topado con un techo genético fijo y ningún cambio de técnica podría ayudar jamás', correct: false },
+        { text: 'Las mesetas son aleatorias y no tienen relación con lo bien optimizada que esté la técnica actual', correct: false },
+      ],
+      explanation: 'Una meseta pese a entrenar más fuerte es la firma de un óptimo local: la técnica actual está tan bien afinada que cada pequeño cambio la empeora, así que una búsqueda codiciosa de «solo practica más» no tiene a dónde escalar — entrenar más fuerte en lo mismo no puede romper el techo. La ruta a un pico más alto baja primero: reconstruye una técnica central, ponte temporalmente peor, cruza el valle. «Entrena más fuerte en lo mismo» es la trampa codiciosa; «techo genético fijo» renuncia por completo al cruce de valles, que es exactamente el movimiento que mantiene a la gente atascada.',
+    },
+    {
+      question: 'Un recién graduado pregunta si debería pasar sus veinte muestreando muchos campos distintos o especializarse de inmediato e ir a lo hondo en uno. ¿Qué predice el dilema explorar-vs-explotar, y por qué?',
+      options: [
+        { text: 'Inclínate hacia explorar (muestrear a lo ancho) pronto: el terreno es escarpado (aún no conoces tu pico alto), los saltos son baratos (poco que perder, fácil cambiar) y es pronto (décadas para explotar lo que encuentres). Desplázate hacia explotar (especializarte, ir a lo hondo) más tarde, a medida que los saltos se vuelven costosos y el tiempo para cobrar mengua', correct: true },
+        { text: 'Explota siempre desde el primer día — especialízate de inmediato, porque explorar es una pérdida de tiempo a cualquier edad', correct: false },
+        { text: 'Explora siempre para siempre — no te comprometas nunca con un campo, porque comprometerse siempre te atrapa en un pico local', correct: false },
+        { text: 'La elección es arbitraria; el equilibrio explorar-explotar nunca depende de la edad, el terreno o el coste', correct: false },
+      ],
+      explanation: 'El dial lee el terreno y el reloj. Al principio, el paisaje es escarpado (no has localizado tu pico alto), los saltos son baratos (pocas cargas, fácil cambiar) y queda mucho tiempo para explotar un buen hallazgo — todo lo cual dice *explora*: muestrea a lo ancho, ve primero a lo amplio. Más tarde, has encontrado una colina que merece escalar, cambiar sacrifica pericia acumulada (saltos costosos) y queda menos tiempo para cobrar un nuevo comienzo — todo lo cual dice *explota*: comprométete y ve a lo hondo. «Explota siempre» muere en un pico local que nunca comprobaste; «explora siempre» no corona nada; «es arbitrario» ignora que el equilibrio se desplaza demostrablemente con la escarpadura, el coste del salto y el tiempo.',
+    },
+  ]}
+/>
+
+## Hacia dónde va esto
+
+Ahora posees el modelo entero — no como un hecho sobre biología, sino como una lente que puedes apuntar a cualquier cosa que mejore por ensayo y error. Puedes ver una red neuronal atascada, una empresa establecida disrumpida y tu propia meseta como *la misma búsqueda sobre la misma forma de terreno*, y conoces el único dilema — **explorar vs. explotar** — que decide si alguno de ellos alcanza alguna vez una colina más alta. Incluso puedes poner el dial: cargado hacia explorar cuando el suelo es escarpado, los saltos son baratos y es pronto; cargado hacia explotar cuando es suave, costoso y tarde.
+
+Con eso quedan hechas todas las lecciones de enseñanza. Lo que queda es demostrar que es *tuyo*. Lo siguiente es el **Examen Final** — una tanda calificada, una pregunta cada vez, por todo el curso, desde cartografiar el terreno hasta cruzar valles y explorar-vs-explotar. Es de una sola dirección: en cuanto respondes, se bloquea — sin botón de retroceso, sin reintentos, un 70% para aprobar. Trae contigo al pez de cueva, a la nadadora y el gran dilema.

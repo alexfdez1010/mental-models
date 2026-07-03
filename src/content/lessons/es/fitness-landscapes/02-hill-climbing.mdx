@@ -1,0 +1,282 @@
+---
+title: "Escalar Colinas"
+description: "El motor que mueve a las poblaciones por un paisaje adaptativo, diseccionado: por qué la selección es una búsqueda voraz solo-cuesta-arriba, local y sin previsión — y por qué esa única regla es a la vez su superpoder y la jaula de la que jamás puede escapar."
+topic: "es/fitness-landscapes"
+order: 3
+minutes: 12
+updated: 2026-07-03
+---
+
+import { MCQ, Quiz, Callout, Categorize, FillBlank, FitnessLandscape } from '@/components/react';
+
+Has construido el terreno. Sabes que cada diseño posible es un **punto**, que los puntos que difieren en un pequeño cambio son **vecinos**, que la **altura** es la aptitud (fitness), y que el paisaje está cosido a partir de **picos**, **valles** y **crestas**. Bien. Ahora encendemos el motor — el mecanismo real que toma una población y la *camina* por ese terreno, generación tras generación. Tiene un nombre en informática, porque los ingenieros lo reinventaron mucho antes de darse cuenta de que la biología llevaba cuatro mil millones de años ejecutándolo: **escalar colinas (hill-climbing)**.
+
+Aquí lo tienes entero por adelantado, para que puedas verlo ensamblarse: una población se asienta en algún punto. La variación escupe diseños vecinos — pequeños retoques heredables. La selección conserva los vecinos que son *más aptos* y descarta el resto. Repite. El efecto neto es una población que trepa **cuesta arriba**, un pequeño paso de mejora cada vez, hasta que llega a un lugar donde *todos* los vecinos son peores — y entonces se para, para siempre, porque no tiene ni razón ni capacidad para dar un paso que empeore las cosas ahora mismo. Esa última frase es la lección entera, y también la tragedia entera. Adivina antes de espiar, como siempre.
+
+<MCQ
+  client:visible
+  pretest
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Una población de bacterias está a una pequeña mutación de un diseño que impulsaría su tasa de crecimiento un 30%. También está a una pequeña mutación, en otra dirección, de un diseño que RECORTARÍA su tasa de crecimiento un 5% ahora — pero ese diseño peor resulta estar al pie de una ladera que conduce a un diseño enormemente superior diez mutaciones más allá. Dejada a la selección a secas, ¿hacia qué vecino tenderá a moverse la población?"
+  options={[
+    { text: 'Hacia el vecino del +30% — la selección compara la población solo con sus vecinos inmediatos y conserva al más apto *ahora mismo*. El paso del 5% peor se rechaza en el acto, así que el diseño lejano y superior a diez mutaciones jamás se alcanza, por bueno que sea', correct: true },
+    { text: 'Hacia el camino que lleva al diseño enormemente superior, porque la selección puede ver que conduce a algo mucho mejor' },
+    { text: 'Hacia ninguno — la selección se mueve en dirección aleatoria, así que ambos son igual de probables' },
+    { text: 'Hacia ambos a la vez — la población se divide y persigue todo camino que mejore y que empeore simultáneamente' },
+  ]}
+  explanation="Sin nota en un test previo — solo nota la forma. La selección es voraz (greedy) y corta de vista: mira únicamente los vecinos que puede alcanzar *desde aquí* y se embolsa la mayor ganancia inmediata, el paso del +30%. La ruta hacia el diseño lejano y superior empieza con un paso *peor* (−5% ahora), y la selección no dará un paso que baje la aptitud en el presente, por muy reluciente que sea la cima que aguarda al final de ese camino. Así que la población escala hacia el diseño cercano del +30% y, muy posiblemente, se queda atascada ahí — un diseño bueno, vedado para siempre de uno estupendo, puramente porque el camino hacia allí bajaba primero cuesta abajo. Eso es escalar colinas en una sola bacteria."
+/>
+
+Esa bacteria es la lección entera en miniatura: una población que mejora *y* clausura su propio mejor futuro en el mismísimo movimiento. Lo predijiste sin saber nada de microbiología. Eso es el motor haciendo el trabajo — así que desmontémoslo.
+
+## Cómo escala la selección — el motor voraz
+
+**La analogía.** Imagina que subes una sierra en una niebla tan densa que solo alcanzas a ver el suelo que rodea tus botas a un paso de distancia. Tienes exactamente una regla: palpa alrededor de tus pies y pisa el trozo que esté *más alto* que donde estás. No puedes ver el horizonte, no tienes mapa, no sabes si hay una montaña más grande a un kilómetro al este. Solo das el mejor paso local hacia arriba, una y otra vez. Cuando cada trozo alrededor de tus botas es más bajo que donde estás, te paras — estás en *una* cima, aunque no tengas ni idea de si es la más alta de la sierra o un montículo. Ese excursionista atrapado en la niebla es la selección.
+
+**La definición precisa.** **Escalar colinas** es una búsqueda que repite un movimiento: desde el diseño actual, mira los diseños vecinos; si algún vecino es más apto, muévete al más apto; si ninguno es más apto, detente. En una población, tres ingredientes producen esto automáticamente. La **variación** — mutación, recombinación — propone nuevos diseños vecinos, pequeños cambios heredables respecto al tipo actual. La **selección** conserva a los portadores de las variantes más aptas (dejan más descendencia) y elimina a los peores. La **herencia** pasa la variante ganadora a la siguiente generación, de modo que el *centro de masa* de la población se ha desplazado un pequeño paso cuesta arriba. Repite eso a lo largo de generaciones y la población fluye ladera arriba como agua corriendo al revés.
+
+La palabra que importa es **voraz (greedy)**. En informática, un algoritmo voraz es uno que, en cada paso, agarra la opción que parece mejor *ahora mismo*, sin sopesar jamás si una opción peor ahora podría preparar un mejor resultado después. La selección es voraz hasta la médula: la variante más apta se reproduce más que la menos apta *esta generación*, así que gana *esta generación*, y la siguiente generación la población arranca desde ahí. Nadie tiene en mente un plan a más largo plazo, porque no hay nadie — ni plan. Solo existe "cuál de mis vecinos hace más crías", preguntado y respondido una y otra vez.
+
+**Ejemplo resuelto — un gen, tres generaciones.** Supón que el color de un escarabajo lo fija un único mando, y que los escarabajos más oscuros se camuflan mejor en la corteza en la que vive. Empieza con una población mayormente marrón medio (aptitud, digamos, 5 en cierta escala). Una mutación produce una variante un poco más oscura (aptitud 6). Sus portadores sobreviven a los depredadores un pelín mejor, dejan más descendencia, y en unas pocas generaciones la población es mayormente ese tono más oscuro. Ahora aparece una mutación *aún más* oscurecedora (aptitud 7); misma historia, la población se desplaza de nuevo. En cada paso, la selección simplemente ingresó al vecino más apto. Fíjate en lo que nunca hizo: nunca *apuntó* a "aptitud 7". No podía verla. Solo comparó 5 con 6, luego 6 con 7, dando cada vez el paso local cuesta arriba. La escalada hacia la oscuridad es real, dirigida y absolutamente ciega más allá del propio umbral del escarabajo.
+
+<Callout variant="info" title="Tres ingredientes, un movimiento">
+Escalar colinas necesita exactamente tres cosas y produce exactamente un movimiento. La **variación** propone vecinos (a ciegas). La **selección** conserva al vecino más apto (con voracidad). La **herencia** lleva al ganador hacia adelante (para que las ganancias se acumulen). El único movimiento que resulta: la población se mueve *cuesta arriba*, un pequeño paso de mejora por ronda, y nunca a ninguna otra parte.
+</Callout>
+
+### Cuándo usarlo
+
+Echa mano de "esto es escalar colinas" siempre que veas algo *mejorar mediante ensayos conservados-y-descartados* en vez de mediante un plan: organismos que evolucionan, un modelo de aprendizaje automático en entrenamiento, una empresa retocando su proceso, una persona machacando una habilidad, incluso una línea de fabricación que se optimiza de forma incremental. La señal es que el sistema no tiene ningún oráculo para la mejor respuesta lejana — solo compara "esto" con "un pequeño cambio de esto" y conserva lo mejor. Si esa es la forma, todo lo de esta lección aplica, incluida la trampa.
+
+## "Local" y "sin previsión" — las dos palabras que más cuestan
+
+**La analogía.** Contrasta a nuestro excursionista en la niebla con un arquitecto humano diseñando un edificio. El arquitecto puede tener en mente el diseño *entero* terminado, darse cuenta de que el mejor plan exige primero derribar un muro de carga (un paso temporal *hacia atrás* — el edificio queda brevemente menos funcional, un montón de escombros), y hacerlo de todas formas, porque puede *prever* la estructura mucho mejor al otro lado de la demolición. El arquitecto va **abajo-y-al-otro-lado**: deliberadamente peor ahora, al servicio de mucho mejor después. Escalar colinas estructuralmente no puede hacer esto. No tiene ningún plan de ser peor-ahora-para-mejor-después al que servir, porque no tiene ni plan ni "después".
+
+**La definición precisa.** Escalar colinas es **local** y **sin previsión**. *Local* significa que sus únicas entradas son el diseño actual y sus vecinos inmediatos — tiene cero información sobre regiones lejanas del paisaje. No puede "ver" un pico más alto al otro lado de un valle; desde su punto de vista ese pico no existe, porque queda más allá del horizonte de un paso. *Sin previsión* significa que nunca evalúa adónde lleva después un movimiento — puntúa cada vecino por su aptitud *ahora mismo*, punto. Junta ambas cosas y obtienes la regla que define el motor entero: **no aceptará un paso que baje la aptitud presente, aun cuando ese paso cuesta abajo sea el único camino a una cima mucho más alta.** No hay ningún "confía en mí, luego mejora". Solo existe la aptitud del vecino que tienes delante.
+
+Este es el punto más afilado para separar un *diseñador* de una *búsqueda*. Un diseñador tiene información global (un mapa) y previsión (un plan), así que un diseñador puede cruzar valles a propósito. Escalar colinas no tiene ninguna de las dos, así que está *aprisionado por su propio presente*. Todo lo extraño y defectuoso de los diseños evolucionados — el tema de la próxima lección — se remonta a estas dos palabras.
+
+<Callout variant="warning" title="La regla que gobierna el curso entero">
+**Escalar colinas no dará un paso que empeore la aptitud ahora mismo — aun cuando ese paso sea la única ruta hacia algo mucho mejor.** Un diseñador humano puede ir abajo-y-al-otro-lado (deliberadamente peor ahora para mucho mejor después) porque tiene un mapa y un plan. La selección no tiene ninguno. Solo ve a sus vecinos (local) y los puntúa únicamente por la aptitud presente (sin previsión), así que un valle de aptitud — por poco profundo que sea — es un muro infranqueable. Recuerda esta frase; el resto del curso son sus consecuencias.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="¿Por qué puede un ingeniero humano rediseñar un producto empeorándolo primero temporalmente (desechando una prestación que funciona, reconstruyendo un componente desde cero), mientras que la selección natural esencialmente no puede tomar esa misma ruta abajo-y-luego-arriba?"
+  options={[
+    { text: 'El ingeniero tiene un *mapa y un plan* — información global sobre el espacio de diseño y previsión de adónde conduce una pérdida temporal — así que puede cruzar un valle a propósito. La selección solo tiene información local (sus vecinos) y ninguna previsión, así que rechaza cualquier paso que baje la aptitud presente, haya valle o no', correct: true },
+    { text: 'Porque la selección natural es más lenta, y con tiempo suficiente también daría con gusto pasos cuesta abajo' },
+    { text: 'Porque los ingenieros trabajan sobre cosas no vivas, y el modelo del paisaje adaptativo solo se aplica a organismos vivos' },
+    { text: 'Porque los cambios del ingeniero son aleatorios mientras que los cambios de la selección están planificados' },
+  ]}
+  explanation="La diferencia es información e intención, no velocidad. El ingeniero puede *ver* el espacio de diseño entero y *planear* una ruta, así que puede tragarse una pérdida temporal (arrancar la prestación que funciona) porque prevé el pico más alto al otro lado del valle. La selección no tiene ni mapa ni plan: evalúa solo los vecinos inmediatos (local) por la aptitud presente únicamente (sin previsión), así que un paso cuesta abajo simplemente se rechaza, por corto que sea el valle o grandiosa la cima al otro lado. El tiempo no arregla esto — una búsqueda sin previsión nunca *elige* descender, así que más generaciones solo significan más escalada en la misma colina. Y la última opción lo tiene del revés: los *cambios* de la selección son aleatorios; su *movimiento* es dirigido. La previsión es exactamente lo que le falta."
+/>
+
+## Por qué la regla solo-cuesta-arriba es a la vez poder y prisión
+
+**La analogía.** Una regla de viaje barato — "toma siempre el siguiente vuelo de conexión más barato" — te llevará fiablemente a *algún sitio* sin agencia de viajes, sin itinerario, sin planificación y casi sin coste. Ese es su poder: *funciona*, barato, con cero inteligencia. Es también por lo que acabas en un aeropuerto regional cualquiera en vez de la ciudad que de verdad querías: la regla no tiene noción de destino, solo del siguiente salto barato. Misma regla, ambos hechos.
+
+**El poder.** La regla solo-cuesta-arriba es asombrosa precisamente porque exige *tan poco*. No necesita ningún diseñador, ningún objetivo, ningún mapa, ninguna previsión, ninguna inteligencia de ningún tipo — solo variación, una diferencia de aptitud y herencia. Y *entrega fiablemente*: apúntala a casi cualquier paisaje y encontrará **un** pico, barato y sin supervisión. Así es como la naturaleza construye ojos y alas y sistemas inmunitarios sin nadie al volante. Es también por lo que el mismo bucle de tres líneas entrena modelos de aprendizaje automático y optimiza fábricas. Escalar colinas es la forma más barata que se conoce de sacar diseños genuinamente buenos de un proceso sin cerebro.
+
+**La prisión.** La mismísima regla que la hace barata la deja atascada. Como solo da pasos cuesta arriba, el pico que alcanza es solo la cima de *cualquier colina en la que le tocara empezar* — un pico **local**. No tiene forma de saber que existe una cima más alta, ni forma de cruzar el valle para alcanzarla aunque lo supiera. La baratura y el atrapamiento no son dos características; son una sola característica vista desde dos lados. La ausencia de mapa es *por lo que* es barata y *por lo que* está atrapada. No puedes quedarte con la primera y borrar la segunda.
+
+<Callout variant="tip" title="Una regla, dos caras">
+La regla solo-cuesta-arriba es **poder** porque encuentra un buen diseño sin diseñador, sin objetivo y sin previsión — barata y fiablemente. Es **prisión** porque el diseño que encuentra es solo un pico *local*, la cima de cualquier colina en la que empezó. Estos no son un pro y un contra que sopesar el uno contra el otro; son el mismo hecho. El mapa ausente es exactamente lo que hace que escalar colinas sea a la vez tan barato y tan fácilmente atrapado.
+</Callout>
+
+Pasaremos la *próxima* lección entera viviendo dentro de la prisión — el óptimo local (local optimum), con el expediente biológico real (el punto ciego, el nervio laríngeo recurrente). Por ahora quédate solo con la forma: la fortaleza y la debilidad están soldadas juntas.
+
+## Escarpadura y gradiente — a qué velocidad va la escalada
+
+**La analogía.** A qué velocidad escalas una colina depende de lo *escarpada* que esté bajo tus botas. En una ladera pronunciada, cada paso hacia arriba te gana mucha altura rápido — la dirección a seguir es obvia y el progreso es veloz. En una repisa casi plana — una **meseta** o a lo largo de una **cresta** nivelada — todas las direcciones tienen más o menos la misma altura, así que apenas hay "arriba" que te empuje a ningún lado. Deambulas de lado, a la deriva, porque la selección casi no tiene *gradiente* sobre el que empujar.
+
+**La definición precisa.** El **gradiente** es la escarpadura local del paisaje adaptativo — cuánto cambia la aptitud por pequeño paso. Donde el gradiente es pronunciado, la diferencia de aptitud entre vecinos es grande, la selección entre ellos es fuerte, y la población escala rápido y con decisión. Donde el gradiente es suave — una meseta o cresta plana — los vecinos son casi iguales en aptitud, la selección apenas los distingue, y la población **deriva** de lado por azar (deriva genética) con poco empuje dirigido. La escarpadura fija la *velocidad y decisión* de la escalada; no cambia la única regla innegociable de que el movimiento neto nunca es cuesta abajo.
+
+**Ejemplo resuelto — el escalador voraz aterriza en el pico más bajo.** Aquí tienes un paisaje minúsculo inventado. Alinea siete diseños vecinos, de la A a la G, cada uno a un pequeño paso del siguiente, y lee su aptitud:
+
+| Diseño | A | B | C | D | E | F | G |
+|---|---|---|---|---|---|---|---|
+| Aptitud | 3 | 5 | 6 | 4 | 7 | 9 | 8 |
+
+Aquí hay dos picos. El **pico pequeño** está en **C** (aptitud 6): sus vecinos B (5) y D (4) son ambos más bajos. El **pico grande** está en **F** (aptitud 9): el punto más alto de toda la tira. Ahora suelta un escalador voraz en **A** (aptitud 3) y déjalo escalar colinas:
+
+- **A (3) → B (5).** B es más alto. Paso.
+- **B (5) → C (6).** C es más alto que B. Paso.
+- **C (6) → ?** Los vecinos de C son B (5) y D (4). *Ambos son más bajos que C.* Toda dirección es cuesta abajo. **Detente.**
+
+El escalador se para en **C, aptitud 6** — y *nunca alcanza F, aptitud 9*, aunque F esté justo ahí en la misma tira, claramente más alto, a solo unos diseños a la derecha. ¿Por qué? Porque el único camino de C a F pasa *por D (aptitud 4)* — un paso *hacia abajo* de 6 a 4. La selección lo rechaza. La cima más alta es visible para *nosotros*, que leemos la tabla desde arriba, pero invisible e inalcanzable para el escalador voraz atrapado en C. Ese hueco cuesta abajo en D es un **valle**, y un valle — por poco profundo que sea — es un muro para una búsqueda solo-cuesta-arriba. (Suelta al escalador en G en su lugar, y camina alegremente G(8) → F(9) y corona la verdadera cima. Mismo motor, distinta colina de partida, destino opuesto — exactamente el punto de la introducción.)
+
+<Callout variant="info" title="El valle en D es de solo dos unidades de aptitud — y sigue siendo infranqueable">
+Fíjate en que la trampa no necesita un valle *profundo*. El hundimiento en D es una mera caída de 6 a 4 — dos unidades — y la recompensa por cruzarlo es enorme (aptitud 9 frente a 6). Un diseñador cruzaría esa zanja sin pensarlo dos veces. Escalar colinas no puede cruzarlo en absoluto, porque "cruzarlo" empieza con un paso cuesta abajo, y un paso cuesta abajo es uno de más. La *altura* del muro es irrelevante; el hecho de que sea un muro siquiera es lo que detiene la escalada.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="En un paisaje adaptativo, una población se asienta en una MESETA ancha y casi plana donde todos los diseños vecinos tienen una aptitud casi idéntica. Comparada con una población en una ladera pronunciada, ¿cómo se verá su comportamiento?"
+  options={[
+    { text: 'Derivará de lado casi sin rumbo — con los vecinos casi iguales en aptitud, el gradiente es minúsculo, así que la selección tiene poco sobre lo que empujar y el azar (la deriva) domina el movimiento', correct: true },
+    { text: 'Escalará más rápido que en una ladera pronunciada, porque el terreno plano es más fácil de recorrer' },
+    { text: 'Dará inmediatamente un gran paso cuesta abajo para escapar de la meseta', correct: false },
+    { text: 'Se congelará por completo y no podrá cambiar en absoluto hasta que el paisaje se vuelva pronunciado' },
+  ]}
+  explanation="La escarpadura es el *gradiente* — cuánto cambia la aptitud por paso — y fija lo fuerte y dirigida que es la selección. En una ladera pronunciada los vecinos difieren mucho en aptitud, así que la selección es decisiva y la escalada es rápida. En una meseta plana los vecinos son casi iguales, así que casi no hay diferencia de aptitud sobre la que seleccionar: la población deriva de lado por azar, con poco empuje dirigido. No escala *más rápido* (plano significa que no hay 'arriba' que ganar), no da un gran paso cuesta abajo (lo solo-cuesta-arriba sigue rigiendo — solo que tampoco tiene un 'arriba' fuerte), y no está congelada (la deriva sigue moviéndola por ahí). Gradiente suave es igual a deriva sin rumbo."
+/>
+
+<Categorize
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  question="Clasifica cada afirmación según si es VERDADERA de escalar colinas (la selección natural a secas) o FALSA de ello."
+  buckets={['Verdadera de escalar colinas', 'Falsa de escalar colinas']}
+  items={[
+    { text: 'Solo compara un diseño con sus vecinos inmediatos', bucket: 'Verdadera de escalar colinas' },
+    { text: 'Aceptará un paso que baje la aptitud ahora si conduce a algo mucho mejor después', bucket: 'Falsa de escalar colinas' },
+    { text: 'El pico que alcanza es la cima de cualquier colina en la que empezó — un pico local', bucket: 'Verdadera de escalar colinas' },
+    { text: 'Tiene un mapa de todo el paisaje y planea una ruta hasta la cima más alta', bucket: 'Falsa de escalar colinas' },
+    { text: 'Conserva al vecino más apto y descarta al peor (es voraz)', bucket: 'Verdadera de escalar colinas' },
+    { text: 'Escala más rápido donde el gradiente (la pendiente) es más pronunciado', bucket: 'Verdadera de escalar colinas' },
+    { text: 'Encuentra fiablemente el único mejor diseño posible con tiempo suficiente', bucket: 'Falsa de escalar colinas' },
+    { text: 'No necesita diseñador, objetivo ni previsión para encontrar un buen diseño', bucket: 'Verdadera de escalar colinas' },
+  ]}
+  explanation="VERDADERO: escalar colinas es local (compara solo con los vecinos), voraz (conserva al más apto, descarta al peor), sensible al gradiente (pendiente más pronunciada, escalada más rápida), corona en un pico *local* (la colina en la que empezó), y no necesita diseñador, objetivo ni previsión — esa es toda su magia barata. FALSO: NO dará un paso cuesta abajo por un premio posterior (sin previsión, sin mapa), NO tiene plan ni visión global, y NO encuentra el único mejor diseño posible — solo el pico local suficientemente bueno más cercano. Cada elemento FALSO es en realidad el mismo error: atribuir a una búsqueda sin previsión y local el mapa y el plan de un diseñador."
+/>
+
+## Dos ideas equivocadas que conviene matar en cuanto se ven
+
+El modelo entero se recuerda mal de dos formas concretas y opuestas. Mata ambas ahora.
+
+**Idea equivocada 1: "La supervivencia del más apto significa que la evolución encuentra el diseño más apto *posible*."** Esta es la lectura errónea más común de Darwin, y escalar colinas es exactamente por qué es falsa. La selección conserva al más apto de los vecinos *disponibles ahora mismo* — no al diseño más apto que podría existir jamás. Encuentra la cima de la colina *local*, que es meramente "más apto que todo lo que está a un paso", no "lo mejor que hay". La frase inglesa "survival of the fittest" cuela en silencio "más apto en cualquier parte", pero el mecanismo solo certifica "más apto *por aquí cerca*". Ese hueco — entre el pico local que alcanza y el pico global que no puede — *es* el modelo del paisaje adaptativo, y es por lo que los diseños evolucionados son tan fiablemente excelentes-pero-defectuosos. La evolución optimiza; no perfecciona.
+
+**Idea equivocada 2: "Escalar colinas es aleatorio."** También falsa, pero en la dirección opuesta. Es tentador, una vez oyes "las mutaciones son aleatorias", concluir que todo el proceso es un paseo aleatorio. Pero mira qué es aleatorio y qué no. La *variación* es aleatoria — las mutaciones surgen a ciegas, sin ningún miramiento por lo que ayudaría. **La selección no lo es.** La selección es un filtro despiadado y direccional: conserva sistemáticamente las variantes más aptas y descarta las peores, lo que hace que el *movimiento* de la población sea dirigido — fiable e implacablemente **cuesta arriba**. Así que el proceso es ciego pero no aleatorio: ciego *más allá de sus vecinos* (no puede ver el paisaje lejano), pero fuertemente *dirigido en adónde va* (siempre por el gradiente local hacia arriba). Propuesta aleatoria, selección no aleatoria, movimiento dirigido. Confundir "la materia prima es aleatoria" con "el resultado es aleatorio" tira por la borda la intuición entera.
+
+<Callout variant="warning" title="Ciego no es lo mismo que aleatorio">
+Dilo con precisión: **la variación es aleatoria; la selección es dirigida; el movimiento de la población es dirigido pero ciego.** Las mutaciones surgen sin previsión (aleatorio). La selección conserva entonces las más aptas cada vez (dirigido), así que la población se mueve fiablemente cuesta arriba (movimiento dirigido) — pero es *ciega* más allá de sus vecinos inmediatos, así que no puede ver ni apuntar a una cima lejana. "Ciego" (no puede ver lejos) y "aleatorio" (se mueve en cualquier dirección) son fallos completamente distintos. Escalar colinas es ciego, no aleatorio — que es exactamente por lo que escala tan fiablemente y se atasca tan fiablemente.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Un estudiante objeta: 'Si las mutaciones son aleatorias, entonces la evolución es solo un proceso aleatorio — no puede ir de verdad a ningún sitio en particular.' ¿Cuál es el error preciso?"
+  options={[
+    { text: 'Confunde la *materia prima* aleatoria con la *dirección* del proceso. La mutación es aleatoria, pero la selección es un filtro direccional que conserva a la variante más apta cada vez — así que el movimiento de la población es fiablemente dirigido cuesta arriba, no aleatorio. Es ciego (no puede ver lejos) pero no sin rumbo', correct: true },
+    { text: 'No hay error — la evolución es genuinamente un paseo puramente aleatorio sin ninguna dirección en absoluto' },
+    { text: 'El error es que las mutaciones en realidad no son aleatorias sino perfectamente planificadas por adelantado' },
+    { text: 'El error es que la selección también mueve a la población aleatoriamente, cancelando la dirección' },
+  ]}
+  explanation="Se están mezclando dos cosas distintas: la aleatoriedad de la *variación* y la dirección del *proceso*. Las mutaciones sí son aleatorias (propuestas a ciegas). Pero la selección es lo opuesto a aleatoria — conserva sistemáticamente a la variante más apta y elimina el resto, lo que le da a la población una *dirección* fuerte y fiable: cuesta arriba. Así que 'materia prima aleatoria' NO implica 'resultado aleatorio'. El proceso es *ciego* (no puede ver picos lejanos) pero firmemente *dirigido* (siempre escala el gradiente local). Las otras opciones o niegan el papel director de la selección o afirman erróneamente que las mutaciones están planificadas — ambas tiran por la borda el mecanismo real."
+/>
+
+## Mira al motor escalar — y negarse a descender
+
+Basta de palabras. Abajo está el paisaje en vivo de la introducción, pero ahora míralo con el motor fresco en la mente. El eje horizontal es cada diseño posible extendido de izquierda a derecha; la altura es la aptitud; la bandera de puntos marca la cima más alta — el mejor diseño que hay.
+
+Pulsa **Soltar una población** y mira la única regla dispararse, una y otra vez: el escalador palpa a sus vecinos, pisa el más alto, y repite — *solo cuesta arriba* — hasta que todos los vecinos son más bajos y se detiene en un pico. Fíjate en cuántas veces ese pico es uno *bajo*, con la verdadera cima señalada al otro lado de un valle en el que el escalador se niega rotundamente a descender. Sube la **escarpadura** y la trampa salta casi cada vez; bájala a una única colina suave y el escalador siempre encuentra la cima (una colina, sin valles que la veten). La regla solo-cuesta-arriba nunca cambia — solo la *forma* del terreno decide si esa regla te hace ganar o te condena.
+
+<FitnessLandscape
+  client:visible
+  eyebrow="El motor voraz"
+  title="Mira a escalar colinas detenerse en un pico — sin descender jamás"
+  caption="Suelta una población y escala: vecino a vecino, siempre al más alto, nunca hacia abajo — hasta que toda dirección apunta hacia abajo y se para en un pico, a menudo uno bajo con la cima más alta (la bandera de puntos) varada al otro lado de un valle que no cruzará. Esa negativa a dar jamás un paso cuesta abajo es el motor entero: barato y fiable como para encontrar un pico sin diseñador, pero ciego y local como para quedar atrapado en el equivocado. Sube la escarpadura para sepultar el terreno en trampas; suavízalo para ver la escalada triunfar."
+  instructions="Cada diseño posible se sitúa en el eje inferior; su aptitud es la altura. Suelta una población y deja que la selección escale: solo da pasos cuesta arriba. Observa dónde se atasca, sube la escarpadura y prueba un gran salto de mutación para escapar."
+  designAxisLabel="Cada diseño posible →"
+  fitnessAxisLabel="Aptitud ↑"
+  ruggednessLabel="Escarpadura del paisaje"
+  ruggednessLowLabel="suave — una colina"
+  ruggednessHighLabel="escarpado — muchos picos"
+  dropLabel="Soltar una población"
+  climbLabel="Que escale ▸"
+  pauseLabel="Pausa"
+  stepLabel="Escalar un paso ▸"
+  mutateLabel="Mutar / gran salto"
+  redQueenLabel="Terreno cambiante (Reina Roja)"
+  resetLabel="Reiniciar"
+  summitLabel="cima más alta"
+  statusIdle="Suelta una población en algún punto del paisaje y deja que la selección suba la colina más cercana."
+  statusClimbing="Escalando cuesta arriba — la selección da cada pequeño paso que sube la aptitud, sin previsión."
+  statusTrapped="Atascada en un pico local. Toda dirección desde aquí baja cuesta abajo, y sin embargo una cima más alta se alza {gap} puntos por encima, al otro lado de un valle que la selección no cruzará. Lo «suficientemente bueno» está atrapado por debajo de lo «mejor»."
+  statusGlobal="En el óptimo global — la cima más alta de todo el paisaje. No hay nada más alto."
+  statusSinking="El terreno cambió bajo la población: el pico que conquistó se está hundiendo, así que debe escalar de nuevo. No hay cima final."
+  readout="Aptitud {fitness} de un posible {best}. {status}"
+  initialRuggedness={45}
+/>
+
+Dos cosas que grabar a fuego mientras juegas. Primero, **el escalador nunca baja** — esa única negativa es el motor entero, y es por lo que se atasca. Segundo, **la forma del terreno decide su destino**: la *misma* regla voraz es impecable en un paisaje suave de una sola colina y está condenada en uno escarpado de muchos picos. Quédate con eso: la mitad de si escalar colinas triunfa es la *forma del problema*, no el buscador.
+
+<FillBlank
+  client:visible
+  checkLabel="Comprobar"
+  question="Consolida el motor rellenando sus cuatro palabras definitorias:"
+  text="Escalar colinas es una búsqueda {{voraz|generosa|paciente}}: en cada paso conserva al vecino más apto y descarta al peor. Es {{local|global|planificada}}, porque compara un diseño solo con sus vecinos inmediatos y no tiene visión del terreno lejano. No tiene {{previsión|previsión total|un mapa detallado}}, así que nunca sopesa adónde lleva después un movimiento — solo la aptitud presente. Y su única regla de hierro es que es {{solo-cuesta-arriba|solo-cuesta-abajo|sin-dirección}}: rechaza cualquier paso que baje la aptitud ahora mismo, aun cuando ese paso sea el único camino a una cima mucho más alta. Juntas, estas significan que el pico que alcanza es solo uno {{local|global|el mejor garantizado}} — la cima de cualquier colina en la que empezó."
+  explanation="Voraz: agarra la mejor ganancia inmediata, sin planificar nunca. Local: sus únicas entradas son el diseño actual y sus vecinos. Sin previsión: puntúa a los vecinos solo por la aptitud presente, nunca por adónde conducen. Solo-cuesta-arriba: no dará un paso cuesta abajo, así que un valle es un muro infranqueable. Juntas, garantizan que corona en un pico *local* — la cima de su colina de partida — no en el mejor global. Ese hueco entre lo local y lo global es el modelo entero, y el tema de la próxima lección."
+/>
+
+## Recapitulación
+
+Entraste sabiendo el terreno. Sales sabiendo el motor que lo camina — y exactamente por qué ese motor queda varado:
+
+1. **Escalar colinas es el motor de la selección.** La variación propone diseños vecinos (a ciegas), la selección conserva al más apto y descarta al peor (con voracidad), la herencia lleva al ganador hacia adelante — y el resultado neto es una población que se mueve *cuesta arriba*, un pequeño paso de mejora cada vez.
+2. **Es local y sin previsión.** Compara un diseño solo con sus vecinos inmediatos (local) y los puntúa solo por la aptitud presente (sin previsión), así que *no dará* un paso que baje la aptitud ahora — aun cuando ese paso cuesta abajo sea la única ruta a una cima mucho más alta. Un diseñador humano puede ir abajo-y-al-otro-lado; la selección no.
+3. **La regla solo-cuesta-arriba es poder y prisión a la vez.** Poder: encuentra un buen diseño sin diseñador, objetivo ni previsión — barata y fiablemente. Prisión: el diseño que encuentra es solo un pico *local*, la cima de cualquier colina en la que empezó. El mapa ausente causa ambos; no puedes quedarte con uno sin el otro.
+4. **La escarpadura fija la velocidad; un valle es un muro.** Un gradiente pronunciado significa una escalada rápida y decisiva; una meseta plana significa una deriva de lado sin rumbo. Pero da igual la escarpadura, el escalador voraz se detiene en cuanto todos los vecinos son más bajos — aterrizando, como mostró la tabla de la A a la G, en un pico más bajo mientras uno más alto se yergue visible e inalcanzable al otro lado de un valle de solo dos unidades de profundidad.
+
+<Quiz
+  client:visible
+  title="Compruébate: el motor voraz"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  questions={[
+    {
+      question: 'Un conservacionista dice: «Como estos peces han estado bajo selección durante millones de años, podemos estar seguros de que la evolución ha producido el mejor diseño de pez posible para este lago.» Usando escalar colinas, ¿cuál es la corrección más afilada?',
+      options: [
+        { text: 'La selección produce al más apto de los diseños *cercanos y alcanzables* — la cima de la colina local — no al diseño más apto que podría existir jamás. Optimiza hacia un pico local, no perfecciona hacia el global, así que «el mejor posible» exagera lo que el mecanismo puede entregar', correct: true },
+        { text: 'Nada que corregir — con tiempo suficiente, la selección siempre encuentra el único mejor diseño posible', correct: false },
+        { text: 'La corrección es que la selección mueve a la población aleatoriamente, así que ningún diseño se ve favorecido sobre otro', correct: false },
+        { text: 'La corrección es que la selección puede dar libremente grandes pasos cuesta abajo para alcanzar mejores diseños', correct: false },
+      ],
+      explanation: 'Esta es la idea equivocada nº1: leer «la supervivencia del más apto» como «el más apto posible». Escalar colinas conserva al más apto de los *vecinos disponibles*, así que alcanza un pico *local* — «más apto que todo lo que está a un paso» — no el mejor global. El tiempo no lo arregla (una búsqueda sin previsión solo sigue escalando la misma colina), la selección es dirigida en vez de aleatoria, y precisamente NO da pasos cuesta abajo. «Optimiza hacia un pico local, no perfecciona hacia el global» es la corrección exacta.',
+    },
+    {
+      question: 'En la tira de siete diseños A(3) B(5) C(6) D(4) E(7) F(9) G(8), se suelta un escalador voraz en A. ¿Dónde acaba, y por qué no alcanza el diseño más alto, F?',
+      options: [
+        { text: 'Escala A→B→C y se detiene en C (aptitud 6), porque ambos vecinos de C (B=5, D=4) son más bajos. Alcanzar F exigiría bajar por D (aptitud 4), y escalar colinas rechaza cualquier paso cuesta abajo — así que el pico más alto, F, se queda inalcanzable', correct: true },
+        { text: 'Alcanza F (aptitud 9), porque un escalador de colinas siempre encuentra el único diseño más alto del paisaje', correct: false },
+        { text: 'Se detiene inmediatamente en A, porque un escalador nunca se mueve de donde lo sueltan', correct: false },
+        { text: 'Oscila para siempre entre C y F sin asentarse en ninguna parte', correct: false },
+      ],
+      explanation: 'Desde A(3) el escalador pasa a B(5), luego a C(6) — cada uno un movimiento cuesta arriba. En C, ambos vecinos (B=5 y D=4) son más bajos, así que toda dirección es cuesta abajo y se detiene en C, un pico *local* de solo 6. El pico global F(9) está justo a la derecha, pero el único camino hasta allí se hunde por D(4) — un paso cuesta abajo desde C — y la regla solo-cuesta-arriba lo prohíbe. Así que el escalador queda varado por debajo de la cima visible. (No encuentra F por arte de magia, no se congela en A, y no oscila — escalar con voracidad es decisivo y de un solo sentido.)',
+    },
+    {
+      question: '¿Qué única afirmación captura con más precisión por qué escalar colinas es «ciego pero no aleatorio»?',
+      options: [
+        { text: 'La variación es aleatoria (las mutaciones surgen sin previsión), pero la selección es un filtro direccional que conserva a la variante más apta cada vez — así que el movimiento de la población es fiablemente dirigido cuesta arriba; solo que no puede ver más allá de sus vecinos inmediatos (ciego), en vez de moverse en direcciones aleatorias', correct: true },
+        { text: 'Tanto la variación como la selección son aleatorias, así que el proceso entero es un paseo aleatorio sin rumbo', correct: false },
+        { text: 'Tanto la variación como la selección están perfectamente planificadas por adelantado hacia el óptimo global', correct: false },
+        { text: 'La selección es aleatoria pero la variación es dirigida, lo que se promedia a ningún movimiento neto', correct: false },
+      ],
+      explanation: 'La precisión está en separar las dos etapas. La variación es genuinamente aleatoria — propuestas a ciegas. La selección es genuinamente dirigida — retiene sistemáticamente a la variante más apta, dando a la población una dirección fiable cuesta arriba. Así que materia prima aleatoria más un filtro direccional produce movimiento *dirigido*, no un paseo aleatorio. «Ciego» nombra un límite distinto: la búsqueda no puede ver más allá de sus vecinos hacia una cima lejana. Ciego (no puede ver lejos) y aleatorio (se mueve en cualquier dirección) son cosas distintas — escalar colinas es lo primero, no lo segundo. Las otras opciones o aleatorizan la selección o planifican las mutaciones, y ambas borran el mecanismo.',
+    },
+  ]}
+/>
+
+## Hacia dónde va esto
+
+Ahora posees el motor por completo: una búsqueda voraz, local, sin previsión y solo-cuesta-arriba que camina a una población colina arriba en cualquier colina en la que empieza y se detiene en cuanto todos los vecinos son más bajos. Lo has visto escalar, lo has visto negarse a descender, y lo has visto vararse en un pico bajo con uno más alto a plena vista al otro lado de un valle de dos unidades. Sabes distinguir su aleatoriedad (variación) de su dirección (selección), y sabes que la regla solo-cuesta-arriba es su superpoder y su jaula en una.
+
+Lo siguiente es la lección 4, **Atrapado en un Pico Bajo**, donde entramos en la jaula y nos quedamos un rato. Esa detención-en-un-pico-local que acabas de ver tiene un nombre — el **óptimo local (local optimum)** — y es el hecho más consecuente de todo este modelo. Lo cobraremos con el expediente biológico real: el cableado del revés del ojo de los vertebrados y su punto ciego, el rodeo absurdo del nervio laríngeo recurrente, el "pulgar" del panda — cada uno un pico local que la selección subió y del que no puede volver a bajar jamás. Conoceremos la idea de la **fijación (lock-in)**, y por fin entenderemos por qué lo "suficientemente bueno" le gana tan fiablemente a lo "mejor" y luego se niega a moverse. El motor que acabas de construir está a punto de explicar buena parte de la hermosa y permanente imperfección del mundo vivo.

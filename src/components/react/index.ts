@@ -183,3 +183,6 @@ export type { MixedStrategyExplorerProps, MixCell, MixGrid } from '@/components/
 
 export { PayoffExplorer, default as PayoffExplorerDefault } from '@/components/react/PayoffExplorer';
 export type { PayoffExplorerProps, PayoffShape, PayoffShapeOption } from '@/components/react/PayoffExplorer';
+
+export { FitnessLandscape, default as FitnessLandscapeDefault } from '@/components/react/FitnessLandscape';
+export type { FitnessLandscapeProps } from '@/components/react/FitnessLandscape';

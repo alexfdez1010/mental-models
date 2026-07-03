@@ -1,0 +1,275 @@
+---
+title: "Cartografiar el Terreno"
+description: "Cómo construir de verdad un paisaje adaptativo desde cero: extiende cada diseño posible como puntos ordenados por parecido, apila la aptitud como altura y aprende el vocabulario de picos, valles, crestas y la cima global — para que la imagen sea tuya en vez de solo prestada."
+topic: "es/fitness-landscapes"
+order: 2
+minutes: 12
+updated: 2026-07-03
+---
+
+import { MCQ, Quiz, Callout, Categorize, FillBlank, FitnessLandscape } from '@/components/react';
+
+En la introducción tomaste prestada la imagen — un terreno ondulante donde la altura significa aptitud y toda búsqueda solo puede caminar cuesta arriba — y viste a un escalador quedarse varado en un pico bajo. Tomar prestada una imagen está bien para un primer vistazo. Pero para *usar* el modelo, para aplicarlo a tus propios problemas, tienes que ser capaz de dibujar el cacharro desde cero: tomar "cada versión posible de una cosa" y convertirla en un terreno honesto que puedas señalar con el dedo.
+
+De eso va toda esta lección. La buena noticia por adelantado — el paisaje se construye a partir de solo **dos ideas**. Ni cinco, ni una docena. Dos. Ten claras esas dos y los picos, valles, crestas y trampas caen solos, gratis. Así que antes de nombrar nada, asegurémonos de que puedas *sentir* la primera idea, porque es la que hace tropezar a todo el mundo.
+
+<MCQ
+  client:visible
+  pretest
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Imagina un candado con cuatro ruedas, cada una del 0 al 9 — 10.000 combinaciones posibles. Ahora imagina extender las 10.000 combinaciones sobre una mesa de modo que dos ajustes que difieran en un solo clic de una sola rueda queden justo al lado, como vecinos. Estás de pie sobre la combinación 4-4-4-4. ¿Cuál de estos ajustes es *vecino* tuyo — a un pequeño cambio de distancia?"
+  options={[
+    { text: '4-4-4-5 — un solo clic de la última rueda. Queda justo a tu lado; puedes dar un paso hasta ahí en un solo movimiento', correct: true },
+    { text: '7-1-9-2 — es una combinación válida, así que tiene que estar cerca en la mesa' },
+    { text: '4-4-4-4 al revés, 4-4-4-4 — el mismo ajuste es su propio vecino' },
+    { text: 'Ninguno — las combinaciones no tienen vecinos, son solo números separados' },
+  ]}
+  explanation="Sin nota en un test previo — solo siente la forma. Todo el truco de un paisaje es que no extendemos los diseños al azar; los ordenamos de modo que los *parecidos* queden al lado. Aquí «parecido» significa «a un clic de distancia», así que 4-4-4-5 es tu vecino inmediato, y 4-4-4-4 podría dar un paso hasta él en un solo movimiento. 7-1-9-2 es una combinación perfectamente válida, pero está *muy lejos* en la mesa — tendrías que cambiar todas las ruedas para alcanzarla. Ese ordenar-por-parecido es lo que convierte un saco de posibilidades en un terreno que puedes recorrer a pie. Quédate con la palabra vecino; es la mitad de todo."
+/>
+
+Ese candado nos va a acompañar toda la lección, porque es el caso más limpio posible de la primera gran idea: un conjunto vastísimo de posibilidades, ordenadas de modo que *un pequeño cambio* te lleve a un *vecino*. Acabas de hacer el movimiento conceptual más difícil de todo el modelo — decidir quién se sienta al lado de quién — sin que te dijeran las reglas. Hagámoslo preciso.
+
+## El eje horizontal: el espacio de diseño, ordenado por parecido
+
+**La analogía.** Piensa en un hotel colosal donde cada versión posible de tu cosa tiene su propia habitación. Cada ajuste posible del candado, cada proteína posible, cada distribución posible de teclado, cada estrategia posible de empresa — cada una tiene su habitación. Y aquí va la regla sobre la que está construido el hotel: las habitaciones se asignan de modo que **los diseños que están a un pequeño cambio de distancia son vecinos de puerta con puerta**. Cambia una sola rueda, intercambia una sola letra, ajusta un solo mando, y ya has caminado hasta la habitación de al lado. Cámbialo todo a la vez y estás en el extremo opuesto del hotel. Ese hotel — cada posibilidad, ordenada por parecido — es el **eje horizontal** de un paisaje adaptativo. Al conjunto entero lo llamamos el **espacio de diseño (design space)**: el conjunto completo de todas las versiones posibles de la cosa, extendidas de modo que la cercanía en el mapa signifique parecido en el diseño.
+
+**La definición precisa.** El **espacio de diseño** es el conjunto de *cada configuración posible* de aquello que estés estudiando, extendido de modo que dos configuraciones quedan cerca exactamente cuando una puede transformarse en la otra mediante un cambio *pequeño* (una sola mutación, una sola edición, un solo ajuste). "Cambio pequeño" es lo que cuente como un paso para tu problema. El eje no es una recta numérica que midas — es un *mapa de posibilidades*, y lo único que importa de la posición de un diseño es **quiénes son sus vecinos**.
+
+**Ejemplo resuelto — el candado de cuatro ruedas.** Volvamos al candado. Cuatro ruedas, cada una del 0 al 9, dan 10 × 10 × 10 × 10 = **10.000 ajustes posibles** — ese es tu espacio de diseño, diez mil habitaciones. Un "cambio pequeño" es un clic de una rueda. Así que el ajuste 4-4-4-4 tiene vecinos como 4-4-4-5, 4-4-4-3, 4-4-5-4, 3-4-4-4 — cada ajuste alcanzable moviendo una sola rueda un clic. Fíjate en dos cosas. Primero, el espacio es *finito pero grande*: solo cuatro ruedas, y aun así diez mil habitaciones, y los diseños reales tienen muchísimos más mandos que cuatro. Segundo, los vecinos se definen *por los movimientos que permites*, no por que los números se parezcan — 4-4-4-4 y 4-4-4-5 son vecinos porque un clic los conecta, mientras que 4-4-4-4 y 7-1-9-2 están muy lejos aunque ambos sean solo números de cuatro cifras.
+
+**Ejemplo resuelto — deletrear una palabra.** ¿Prefieres letras a ruedas? Toma cada cadena posible de cinco letras como tu espacio de diseño (los 26⁵ ≈ 12 millones que hay). Deja que "un pequeño cambio" signifique "intercambiar una sola letra". Entonces `CASA` es vecina de `CASO` (cambia la última letra) y de `MASA` (cambia la primera), pero no está *ni cerca* de `PINTO`, que necesita cambiar todas las letras. Ordena los 12 millones de cadenas de modo que las palabras a una letra de distancia queden lado con lado, y habrás construido un espacio de diseño que, en principio, podrías recorrer una letra cada vez.
+
+<Callout variant="warning" title="El eje NO es el tiempo y NO es el progreso">
+La lectura errónea más común de un paisaje adaptativo es tratar el eje horizontal como una línea temporal o una barra de progreso de "cuánto he avanzado" — como si moverse a la derecha significara más tarde, o mejor, o más evolucionado. No significa nada de eso. **El eje horizontal es el espacio de *posibilidades*, no una marcha a través del tiempo.** Izquierda y derecha son solo *direcciones postales* — diseños distintos que resulta que se dibujan al lado porque son parecidos. Una población puede vagar a la izquierda, a la derecha o en círculos por este eje a lo largo de las generaciones. Nada de la posición horizontal de un diseño te dice cuándo existió ni lo bueno que es. "Lo bueno que es" es el *otro* eje por completo — que viene ahora.
+</Callout>
+
+### Cuándo usarlo
+
+Echa mano de "espacio de diseño" en cuanto te pilles pensando en *todas las formas en que algo podría ser* en vez de en la única forma en que es ahora mismo. Siempre que haya un conjunto de versiones posibles y una noción de "un pequeño cambio desde aquí", puedes extenderlo como un espacio de diseño: mutaciones de un gen, retoques a una receta, ediciones a un currículum, jugadas de una partida, ajustes de parámetros de un modelo. La contrapartida es que tienes que *comprometerte con qué cuenta como un pequeño paso* — cambia eso, y recableas quién es vecino y remodelas todo el terreno. Elegir el tamaño del paso con honestidad es casi toda la destreza; el resto de la imagen simplemente se apoya encima.
+
+## El eje vertical: la aptitud es la altura
+
+Ahora la segunda — y última — idea. Tenemos un hotel plano de posibilidades. Es hora de darle altitud.
+
+**La analogía.** Vuelve al hotel e imagina levantar cada habitación sobre un pilote cuya altura sea *lo bien que funciona ese diseño*. Un diseño brillante consigue un pilote altísimo; uno desesperado apenas se despega del suelo. Recorre ahora los pasillos y el suelo se ondula bajo tus pies — hacia arriba hacia los diseños excelentes, hacia abajo hacia los penosos. Ese suelo ondulante es el terreno. La altura del suelo bajo cualquier habitación es la **aptitud (fitness)** de ese diseño.
+
+**La definición precisa.** La **aptitud** es un único número asociado a cada punto del espacio de diseño que dice **lo bien que se desempeña ese diseño** en aquello por lo que se le juzgue. En biología es el éxito reproductivo — cuánta descendencia superviviente tiende a dejar un diseño (supervivencia y reproducción en uno). Pero al modelo le da igual *cuál* sea la medida de desempeño, solo que cada diseño tenga una: la aptitud de una distribución de teclado podría ser la velocidad de escritura, la de una proteína lo fuerte que se une, la de una estrategia de empresa el beneficio, la de una jugada de ajedrez su tasa de victorias. Sea cual sea tu vara de medir, la aptitud es la lectura de esa vara, y en el paisaje se convierte en **altura**. Alto = bueno, bajo = malo, y ese es el eje vertical entero.
+
+**Ejemplo resuelto — el candado, puntuado.** Supón que la combinación real del candado es 7-2-7-2, y puntuamos cada uno de los 10.000 ajustes por cuántas ruedas acierta. Entonces la aptitud va de 0 (todas las ruedas mal) a 4 (el premio gordo, 7-2-7-2). El ajuste 7-2-7-2 es la única torre más alta del paisaje. 7-2-7-9 queda un peldaño por debajo (tres ruedas bien). 4-4-4-4 está abajo, a altura 0, en la llanura. Ahora el terreno tiene forma: *sube* a medida que clicas ruedas hacia 7-2-7-2 y *baja* a medida que las clicas hacia otro lado. Cada diseño tiene una dirección horizontal (qué ajuste es) y una altura (cuántas ruedas acertó) — vecinos más altura, nada más.
+
+<Callout variant="tip" title="Dos ideas son toda la máquina">
+Todo en este curso se construye a partir de exactamente dos cosas: **vecinos** (qué diseños quedan al lado de cuáles — el orden horizontal por parecido) y **altura** (lo bueno que es cada diseño — su aptitud). Eso es todo. Los picos, los valles, las crestas, las trampas, la razón por la que la evolución se atasca — todo ello son solo consecuencias de estas dos. Si alguna vez un paisaje te confunde, hazte las dos preguntas: *¿quién está al lado de quién?* y *¿cómo de alto es cada uno?* Contéstalas y habrás especificado el terreno por completo.
+</Callout>
+
+**La idea equivocada que hay que matar: la altura no es complejidad, y no es tamaño.** Es tremendamente tentador leer las torres altas como los diseños *grandes, sofisticados, complicados* y las bajas como los simples y primitivos. Resístete con fuerza. La altura es **solo desempeño** en tu medida elegida. Un diseño de lo más simple puede ser el pico más alto del paisaje, y uno elaborado y ornamentado puede sentarse en un valle porque funciona fatal. Una bacteria es muchísimo menos compleja que un humano y, sin embargo, por la medida del éxito reproductivo en su nicho, es asombrosamente apta — un pico altísimo. La altura responde a una pregunta y solo a una: *¿lo bien que hace este diseño el trabajo?* No lo grande, no lo intrincado, no lo avanzado. Solo lo bien.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="¿Qué afirmación sobre los dos ejes de un paisaje adaptativo es VERDADERA?"
+  options={[
+    { text: 'El eje horizontal coloca los diseños por *parecido* (los vecinos están a un pequeño cambio de distancia) y el eje vertical es la *aptitud* — lo bien que se desempeña cada diseño', correct: true },
+    { text: 'El eje horizontal es el tiempo, y moverse a la derecha significa que un diseño evolucionó más recientemente' },
+    { text: 'El eje vertical es la complejidad de un diseño — los diseños más altos son siempre más elaborados' },
+    { text: 'El eje horizontal es el tamaño de un diseño y el eje vertical es su edad' },
+  ]}
+  explanation="Los dos ejes, y solo estos dos: horizontal = espacio de diseño ordenado de modo que los vecinos están a un pequeño cambio de distancia; vertical = aptitud, es decir, desempeño en la medida que estés usando. Las demás opciones cuelan los errores clásicos. El horizontal *no* es el tiempo (es el espacio de posibilidades — una población puede vagarlo en cualquier dirección). El vertical *no* es complejidad ni tamaño — un diseño de lo más simple puede ser el pico más alto si es el que mejor se desempeña, y uno ornamentado puede sentarse en un valle. Vecinos y altura. Esa es la máquina."
+/>
+
+<Categorize
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  question="Cada hecho sobre un diseño aterriza en uno de los dos ejes. Clasifica cada afirmación según qué eje describe: el eje HORIZONTAL (la posición de un diseño en el espacio de diseño — quiénes son sus vecinos) o el eje VERTICAL (su aptitud — lo bien que se desempeña)."
+  buckets={['Eje horizontal (posición / vecinos)', 'Eje vertical (aptitud / altura)']}
+  items={[
+    { text: 'Este ajuste del candado está a un clic de aquel otro', bucket: 'Eje horizontal (posición / vecinos)' },
+    { text: 'Este diseño deja más descendencia superviviente que aquel', bucket: 'Eje vertical (aptitud / altura)' },
+    { text: 'Estas dos distribuciones de teclado difieren en una sola tecla intercambiada', bucket: 'Eje horizontal (posición / vecinos)' },
+    { text: 'Esta proteína se une a su diana con más fuerza (funciona mejor)', bucket: 'Eje vertical (aptitud / altura)' },
+    { text: 'Puedes llegar a esta palabra desde aquella cambiando una letra', bucket: 'Eje horizontal (posición / vecinos)' },
+    { text: 'Esta estrategia gana más beneficio que su rival', bucket: 'Eje vertical (aptitud / altura)' },
+  ]}
+  explanation="Cualquier cosa sobre *quién está al lado de quién* — un clic, una tecla intercambiada, una letra cambiada — es el eje horizontal: es el orden del espacio de diseño por parecido. Cualquier cosa sobre *lo bien que se desempeña un diseño* — más descendencia, unión más fuerte, más beneficio — es el eje vertical: la aptitud, dibujada como altura. Toda afirmación sobre un paisaje se reduce a una de estas dos. Clava la clasificación y habrás interiorizado que todo el terreno es solo vecinos (horizontal) más altura (vertical)."
+/>
+
+## El vocabulario del terreno
+
+Dos ejes te dan un terreno ondulante. Ahora nombramos sus rasgos — porque una vez que el paisaje tiene colinas y hondonadas, un vocabulario pequeño y preciso te permite *decir lo que ves*, y estas palabras reaparecen en cada lección de aquí en adelante.
+
+**Picos.** Un **pico** es un diseño que es más apto que *todos sus vecinos inmediatos* — una habitación cuyo suelo está más alto que el de todas las habitaciones de al lado. Ponte de pie en un pico y cada paso que podrías dar (cada pequeño cambio) lleva *cuesta abajo*, a un diseño peor. Esa es la definición de estar atascado: no hay adónde ir salvo hacia abajo. Un pico más alto que sus vecinos pero que no es lo más alto de todo el mapa es un **óptimo local (local optimum)** (te encontraste con el término en la introducción) — localmente el mejor, globalmente quizá mediocre. El ajuste con las cuatro ruedas bien, 7-2-7-2, es un pico: todo cambio de un clic desde él baja tu puntuación.
+
+**Valles.** Un **valle** es una región de baja aptitud — diseños que funcionan fatal, asentados en las hondonadas entre colinas. Y lo crucial: un valle no es solo "malo", es que está *en medio*: para ir de un pico a otro más alto, normalmente tienes que *descender primero a un valle* y volver a subir por el otro lado. Como una búsqueda que solo va cuesta arriba se niega a bajar, los valles son los muros de la prisión. En el candado, un ajuste con cero ruedas bien se asienta en lo hondo de un valle.
+
+**Crestas.** Una **cresta** es una tirada *conectada* de diseños de alta aptitud — un camino por las alturas donde puedes moverte de vecino en vecino *sin caer nunca a un valle*. Las crestas son preciosas: son las rutas raras que permiten a una búsqueda viajar una gran distancia por el paisaje sin dejar de estar arriba, alcanzando diseños lejanos que jamás podría alcanzar si las únicas alturas fueran picos aislados. Piénsalo como un sendero de montaña que se mantiene cerca de la línea de cumbres en vez de obligarte a bajar y volver a subir.
+
+**El óptimo global.** El **óptimo global (global optimum)** es *el único pico más alto de todo el paisaje* — el mejor diseño que existe, y punto. Todo otro pico, por orgulloso que sea, es un óptimo local en comparación. En la isla de la introducción, es la cima marcada con la bandera de puntos. Todo el drama del curso es la brecha entre *el pico que una búsqueda alcanza de verdad* (algún óptimo local que escaló) y *el óptimo global* (la bandera al otro lado del valle que no puede cruzar). 7-2-7-2, el único ajuste con las cuatro ruedas bien, es el óptimo global del candado.
+
+Aquí tienes todo el vocabulario en un solo sitio — palabra del terreno a la izquierda, qué significa de vuelta en términos de diseño a la derecha:
+
+| Palabra del terreno | Qué significa en términos de diseño |
+|---|---|
+| **Pico** | Un diseño más apto que *todos* sus vecinos inmediatos — cada pequeño cambio lo empeora |
+| **Óptimo local** | Un pico que es el mejor *por aquí* pero no el mejor en conjunto — una trampa de la que no puedes salir |
+| **Valle** | Una región de diseños de baja aptitud (malos); la zona baja que una búsqueda debe cruzar para alcanzar un pico mejor |
+| **Cresta** | Una tirada *conectada* de diseños de alta aptitud — un camino alto de vecino en vecino que nunca cae a un valle |
+| **Óptimo global** | El único pico más alto de todo el paisaje — el mejor diseño que existe (la cima con la bandera) |
+| **Pendiente / gradiente** | Lo empinadamente que sube o baja la aptitud al dar un paso hacia un vecino — hacia dónde está "arriba" |
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Un equipo de software ha afinado su app hasta un ajuste en el que *cada* pequeño retoque que prueban — a la interfaz, al precio, al onboarding — empeora ligeramente su métrica clave. Concluyen que han encontrado el mejor diseño posible. Detecta la trampa en esa conclusión."
+  options={[
+    { text: 'Han encontrado un óptimo *local*, no necesariamente el *global* — "cada pequeño cambio es peor" solo significa que están en un pico, que podría ser una colina baja con un diseño mucho más alto al otro lado de un valle al que tendrían que empeorar temporalmente para llegar', correct: true },
+    { text: 'Tienen razón — si cada pequeño cambio empeora las cosas, este tiene que ser el único mejor diseño que existe' },
+    { text: 'Han encontrado un valle, porque no poder mejorar significa que están en el fondo' },
+    { text: 'Han encontrado una cresta, porque las crestas son donde cada vecino es peor' },
+  ]}
+  explanation="«Cada pequeño cambio lo empeora» es *exactamente* la definición de estar de pie en un pico — pero un pico solo tiene garantizado ser un óptimo *local*, el mejor de su vecindario inmediato. No dice nada sobre si existe en otra parte un pico más alto (el óptimo global). Alcanzar ese pico más alto implicaría cruzar un valle — empeorar temporalmente — cosa que su búsqueda de solo-pequeños-retoques nunca hará. Así que «no podemos mejorar localmente, por tanto este es el mejor diseño» es la trampa emblemática de todo el curso. (No es un valle — los valles son zona *baja*; y una cresta es un *camino alto*, no un único punto atascado.)"
+/>
+
+### Cuándo usarlo
+
+Usa este vocabulario como una lista de comprobación diagnóstica cada vez que estés mirando algo que parece atascado u "optimizado". Pregunta: *¿Es esto un pico?* (¿empeora cada pequeño cambio?) *¿Es el óptimo global o solo uno local?* (¿hay claramente un diseño mejor en algún lugar que la búsqueda no puede alcanzar?) *¿Qué valle está en medio?* (¿en qué tendrías que empeorar temporalmente para escapar?) *¿Hay una cresta* — una secuencia inteligente de cambios que se mantenga arriba todo el rato? La contrapartida es que en un problema real de altas dimensiones normalmente *no puedes ver* todo el paisaje, así que no puedes estar seguro de que exista un pico más alto — pero conocer el vocabulario significa que al menos haces la pregunta correcta en vez de declarar la victoria sobre una topera.
+
+## Wright, 1932: de dónde salió la imagen
+
+El genetista **Sewall Wright** introdujo esta imagen en un artículo de 1932 con el título gloriosamente poco glamuroso "Los papeles de la mutación, la endogamia, el cruzamiento y la selección en la evolución". Estaba lidiando con un problema difícil — cómo podían las poblaciones alcanzar alguna vez combinaciones de genes *muy buenas* cuando llegar hasta ahí a veces exigía pasar por combinaciones intermedias peores — y necesitaba una forma de *pensar* sobre ello visualmente. Así que dibujó un campo de líneas de contorno, como un mapa topográfico, donde cada punto era una combinación de genes y los contornos marcaban la aptitud. Ese boceto permitió a los biólogos de pronto *ver* algo que las ecuaciones habían enterrado: que una población que escala hacia mejores combinaciones de genes podía quedar atrapada en una colina modesta, bloqueada frente a una más alta por un valle de intermedios poco aptos. Casi un siglo después, la misma imagen la han tomado prestada el aprendizaje automático, la ciencia de proteínas, la ingeniería y la estrategia — pero empezó como el intento de un genetista de dibujar un problema que de otro modo no podía sostener en la cabeza. Esa es toda la razón por la que vale la pena aprender el modelo: hace *visible* una dificultad invisible.
+
+## Lee un paisaje de verdad
+
+Has construido el terreno conceptualmente — ahora practica *leer* uno. Abajo hay un paisaje adaptativo en vivo. Esta vez, no te apresures a soltar una población; primero solo **lee la imagen** usando todo lo de esta lección. Traza el **eje horizontal**: ese es el espacio de diseño, cada diseño posible extendido de modo que los vecinos quedan lado con lado. Traza el **eje vertical**: esa es la aptitud — la altura del terreno es lo bueno que es cada diseño. Luego encuentra los rasgos del terreno por su nombre: los **picos** (puntos más altos que sus vecinos), los **valles** entre ellos, cualquier **cresta** donde las alturas se conectan, y la **bandera de puntos** que marca el **óptimo global**, la única cima más alta.
+
+<FitnessLandscape
+  client:visible
+  eyebrow="Léelo antes de ejecutarlo"
+  title="Nombra lo que ves: ejes, picos, valles, la cima global"
+  initialRuggedness={30}
+  caption="Lee el terreno primero. De izquierda a derecha es el espacio de diseño (cada diseño posible, vecinos lado con lado) — NO el tiempo y NO el progreso. Arriba y abajo es la aptitud — lo bueno que es cada diseño, NO su complejidad ni su tamaño. Ahora detecta los rasgos por su nombre: los picos (más aptos que todos sus vecinos = óptimos locales), los valles entre ellos (la zona baja que una búsqueda debe cruzar), cualquier cresta de altura conectada, y la bandera de puntos sobre la única cima más alta — el óptimo global. Una vez que puedas nombrar cada rasgo, la imagen es tuya. Luego, si quieres, suelta una población y mira a un escalador quedarse varado en un pico local con la bandera pinchándolo al otro lado de un valle."
+  designAxisLabel="Cada diseño posible →"
+  fitnessAxisLabel="Aptitud ↑"
+  ruggednessLabel="Escarpadura del paisaje"
+  ruggednessLowLabel="suave — una colina"
+  ruggednessHighLabel="escarpado — muchos picos"
+  dropLabel="Soltar una población"
+  climbLabel="Que escale ▸"
+  pauseLabel="Pausa"
+  stepLabel="Escalar un paso ▸"
+  mutateLabel="Mutar / gran salto"
+  redQueenLabel="Terreno cambiante (Reina Roja)"
+  resetLabel="Reiniciar"
+  summitLabel="cima más alta"
+  statusIdle="Suelta una población en algún punto del paisaje y deja que la selección suba la colina más cercana."
+  statusClimbing="Escalando cuesta arriba — la selección da cada pequeño paso que sube la aptitud, sin previsión."
+  statusTrapped="Atascada en un pico local. Toda dirección desde aquí baja cuesta abajo, y sin embargo una cima más alta se alza {gap} puntos por encima, al otro lado de un valle que la selección no cruzará. Lo «suficientemente bueno» está atrapado por debajo de lo «mejor»."
+  statusGlobal="En el óptimo global — la cima más alta de todo el paisaje. No hay nada más alto."
+  statusSinking="El terreno cambió bajo la población: el pico que conquistó se está hundiendo, así que debe escalar de nuevo. No hay cima final."
+  readout="Aptitud {fitness} de un posible {best}. {status}"
+/>
+
+Dilo en voz alta mientras miras: "de izquierda a derecha es *qué diseño*; de arriba abajo es *lo bueno que es*; ese bulto es un *pico*, el mejor de su pequeño vecindario; la hondonada de al lado es un *valle*; el de la bandera es el *óptimo global*." Cuando esas palabras salgan automáticas, habrás dejado de tomar prestada la imagen y habrás empezado a hacerla tuya.
+
+## La advertencia de la dimensionalidad: la caricatura frente a la cosa real
+
+Una confesión honesta antes de irnos, porque el modelo se sobrevende a menudo. El paisaje que has estado mirando — una sola línea ondulante, o a lo sumo una superficie 3-D de colinas onduladas — es una **caricatura**. Los espacios de diseño reales tienen tantas dimensiones como mandos independientes tenga la cosa que girar.
+
+**Por qué.** Nuestro candado tenía cuatro ruedas, así que su *verdadero* espacio de diseño es tetradimensional — necesitarías cuatro ejes solo para colocar un ajuste, más un quinto para su altura. Una proteína de 100 aminoácidos tiene un espacio de diseño de 20-opciones-en-cada-una-de-100-posiciones; un genoma tiene miles de genes; una empresa tiene incontables palancas estratégicas. No puedes dibujar un terreno de 100 dimensiones. Así que lo *aplanamos* a una o dos dimensiones para la página — que es exactamente como dibujar una cordillera como una sola línea en un gráfico. La línea es una mentira útil: descarta casi todas las direcciones en las que de verdad podrías moverte.
+
+**Qué sobrevive al aplanado, y qué no.** Aquí va la parte tranquilizadora. La *lógica* del modelo — la parte que de verdad vas a usar — sobrevive a la caricatura completamente intacta, porque depende solo de las dos ideas a las que les da igual el número de dimensiones: **vecinos** (un diseño sigue teniendo vecinos a un pequeño cambio de distancia, haya las dimensiones que haya) y **altura** (cada diseño sigue teniendo una aptitud). Y así el remate también sobrevive: una búsqueda que solo va cuesta arriba sigue escalando hasta un pico local y parándose, tenga el paisaje 1 dimensión o 10.000. Lo que *no* debes hacer es sobreinterpretar la *forma* de la caricatura — contar sus picos, calcular a ojo la "distancia" entre colinas o suponer que los valles son tan estrechos como parecen en una línea. En altas dimensiones suele haber muchísimas más direcciones en las que moverse (lo que puede significar *más* rutas de escape, ya que un muro en la imagen 1-D puede tener una puerta que no puedes dibujar) y la geometría se vuelve genuinamente rara. Así que fíate de la *lógica* del paisaje; desconfía de la *forma literal* de cualquier dibujo suyo en pocas dimensiones.
+
+<Callout variant="info" title="Fíate de la lógica, no de la forma literal">
+Los paisajes 1-D y 2-D de este curso son caricaturas didácticas de espacios con muchísimas más dimensiones. Quédate con las *ideas* — vecinos, altura, solo-cuesta-arriba, picos locales frente a globales — porque se sostienen en cualquier número de dimensiones. Pero no te tomes la *imagen* al pie de la letra: no cuentes sus picos y concluyas que el problema real tiene esos, y no supongas que un valle que parece un muro infranqueable en una línea no tenga una puerta en alguna dirección que el dibujo no pudo mostrar. La caricatura es cómo sostenemos el modelo en la cabeza; el terreno real es más grande y más extraño que cualquier línea suelta.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Un colega mira un dibujo 2-D de un paisaje adaptativo con tres picos y dice: 'Entonces el problema real del plegamiento de proteínas tiene exactamente tres buenas soluciones, y los dos valles entre ellas son infranqueables.' ¿Qué tiene de malo leer la caricatura tan al pie de la letra?"
+  options={[
+    { text: 'El dibujo 2-D es una caricatura aplanada de un espacio con cientos de dimensiones — su recuento exacto de picos y la anchura de sus valles son artefactos del aplanado, no rasgos reales. La *lógica* (la búsqueda de solo-cuesta-arriba se atasca en picos locales) sobrevive, pero la forma literal no', correct: true },
+    { text: 'Nada tiene de malo — un dibujo 2-D de un paisaje muestra el número real de picos y la anchura real de cada valle' },
+    { text: 'El dibujo está mal porque los paisajes adaptativos reales son siempre perfectamente suaves con un único pico' },
+    { text: 'El problema es que los paisajes adaptativos solo se aplican a candados, nunca a proteínas' },
+  ]}
+  explanation="El espacio de diseño de una proteína real tiene una dimensión por posición (cientos de ellas), así que una imagen 2-D es un aplanado drástico — sus tres picos y dos valles son artefactos del dibujo, no un censo de soluciones reales. Lo que *sí* se traslada de la caricatura es la lógica que depende solo de vecinos y altura: una búsqueda que solo va cuesta arriba escala hasta un pico local y se para, en cualquier dimensión. Lo que *no* se traslada es la geometría literal — en altas dimensiones un valle que parece un muro en una línea puede tener una ruta transitable en una dirección que el dibujo no puede mostrar. Fíate de la lógica; desconfía de la forma exacta."
+/>
+
+<FillBlank
+  client:visible
+  checkLabel="Comprobar"
+  question="Fija todo el vocabulario del terreno rellenando cada hueco:"
+  text="Un paisaje adaptativo se construye a partir de dos ideas: el eje horizontal es el {{espacio de diseño|una línea temporal|la complejidad}}, donde los diseños a un pequeño cambio de distancia son {{vecinos|opuestos|duplicados}}, y el eje vertical es la {{aptitud|edad|el tamaño}} — lo bien que se desempeña cada diseño, dibujado como altura. Un diseño más apto que todos sus vecinos inmediatos es un {{pico|valle|cresta}}; si es el mejor solo en su propio vecindario es un {{óptimo local|óptimo global|callejón sin salida}}. El único pico más alto de todo el paisaje es el {{óptimo global|óptimo local|pendiente}}. Las regiones de baja aptitud que una búsqueda debe cruzar para alcanzar un pico mejor son {{valles|crestas|cimas}}, mientras que una tirada conectada de diseños de alta aptitud que se mantiene arriba es una {{cresta|valle|acantilado}}. La imagen la dibujó {{Sewall Wright|Charles Darwin|Gregor Mendel}} en 1932, y cualquier dibujo suyo en pocas dimensiones es una {{caricatura|fotografía|un plano}} de un espacio de dimensión mucho mayor."
+  explanation="El espacio de diseño (horizontal) ordena cada posibilidad de modo que los diseños a un pequeño cambio de distancia sean vecinos; la aptitud (vertical) es el desempeño dibujado como altura. Un punto más apto que todos sus vecinos es un pico; un pico que solo es el mejor localmente es un óptimo local; el pico más alto en conjunto es el óptimo global. Los valles son la zona baja que una búsqueda debe cruzar; una cresta es un camino alto conectado que nunca cae a un valle. Sewall Wright dibujó el conjunto entero en 1932, y cualquier representación 1-D o 2-D es una caricatura de un espacio de dimensión muchísimo mayor — quédate con su lógica, no con su forma literal."
+/>
+
+## Recapitulación
+
+Entraste sabiendo tomar prestada la imagen del paisaje adaptativo. Sales sabiendo *construir* uno desde cero y nombrar cada rasgo que tenga:
+
+1. **El espacio de diseño es el eje horizontal** — cada versión posible de la cosa, extendida de modo que los diseños a un pequeño cambio de distancia sean **vecinos**. *No* es el tiempo y *no* es el progreso; la posición horizontal es solo una dirección, decidida por *quién se sienta al lado de quién*.
+2. **La aptitud es el eje vertical** — lo bien que se desempeña cada diseño (supervivencia y reproducción en biología, o cualquier medida de desempeño que elijas), dibujada como **altura**. *No* es complejidad y *no* es tamaño: un diseño de lo más simple puede ser el pico más alto, uno ornamentado un valle.
+3. **Dos ideas gobiernan toda la máquina** — *vecinos* (el orden horizontal) y *altura* (la aptitud vertical). Cada pico, valle, cresta y trampa es solo una consecuencia de esas dos.
+4. **El vocabulario del terreno:** un **pico** es más apto que todos sus vecinos (cada pequeño cambio lo empeora); un **óptimo local** es un pico que solo es el mejor por aquí; el **óptimo global** es la única cima más alta; los **valles** son la zona baja que una búsqueda debe cruzar para alcanzar un pico mejor; una **cresta** es un camino alto conectado que nunca cae. **Sewall Wright** lo dibujó en 1932 para hacer visible una dificultad invisible.
+5. **La advertencia de la caricatura:** los paisajes reales tienen tantas dimensiones como mandos tenga la cosa, así que cualquier dibujo 1-D o 2-D es una caricatura aplanada. Quédate con su *lógica* (vecinos, altura, solo-cuesta-arriba, picos locales frente a globales — todo a prueba de dimensiones); desconfía de su *forma literal* (los recuentos de picos y las anchuras de valles son artefactos del dibujo).
+
+<Quiz
+  client:visible
+  title="Compruébate: cartografiar el terreno"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  questions={[
+    {
+      question: 'Quieres extender todas las contraseñas posibles de cinco letras como un espacio de diseño. ¿Cuál es la forma correcta de decidir qué contraseñas son *vecinas* (quedan una al lado de la otra)?',
+      options: [
+        { text: 'Dos contraseñas son vecinas cuando una puede convertirse en la otra mediante un solo cambio pequeño — p. ej., intercambiar una letra — de modo que la cercanía en el mapa signifique parecido de diseño', correct: true },
+        { text: 'Las contraseñas son vecinas cuando se crearon más o menos al mismo tiempo', correct: false },
+        { text: 'Las contraseñas son vecinas cuando contienen el mismo número de caracteres, sin importar las letras', correct: false },
+        { text: 'Las contraseñas son vecinas cuando tienen la misma aptitud (son igual de fuertes)', correct: false },
+      ],
+      explanation: 'El eje horizontal ordena los diseños por *parecido*: dos son vecinos cuando un pequeño cambio (aquí, intercambiar una sola letra) los conecta. Eso es lo que hace del eje un mapa transitable en vez de un montón al azar. Los vecinos no tienen nada que ver con *cuándo* se hizo un diseño (esa es la confusión con el tiempo que el eje NO es) ni con tener la misma aptitud (eso es el eje vertical). La misma longitud importa solo porque define el espacio; dentro de él, la vecindad va de estar a un cambio de distancia.',
+    },
+    {
+      question: 'Dos diseños quedan justo uno al lado del otro en el paisaje, pero uno se alza muy por encima del otro en altura. ¿Qué te dice esa diferencia de altura?',
+      options: [
+        { text: 'Un diseño se desempeña mucho mejor que el otro (mayor aptitud) aunque sean casi idénticos — un cambio diminuto en el diseño produjo un gran cambio en lo bien que funciona', correct: true },
+        { text: 'Un diseño es mucho más complejo o elaborado que el otro', correct: false },
+        { text: 'Un diseño es mucho más viejo que el otro', correct: false },
+        { text: 'Un diseño es físicamente mucho más grande que el otro', correct: false },
+      ],
+      explanation: 'La altura es la aptitud y nada más — lo bien que se desempeña un diseño. Dos vecinos casi idénticos con alturas muy distintas significa que un pequeño cambio provocó un gran vaivén de desempeño (pendiente pronunciada). No dice nada sobre complejidad, edad o tamaño: esas son exactamente las lecturas falsas del eje vertical. Una proteína ligeramente distinta que se une muchísimo mejor, o un currículum a una palabra de distancia que consigue muchas más entrevistas — la misma idea. Los vecinos pueden diferir salvajemente en altura, y la altura solo significa "lo bueno que es".',
+    },
+    {
+      question: 'Una ingeniera de aprendizaje automático entrena un modelo hasta que ningún pequeño retoque a sus ajustes mejora la precisión, y declara el modelo óptimo. Usando el vocabulario del terreno, ¿qué ha demostrado en realidad — y qué sigue sin saberse?',
+      options: [
+        { text: 'Ha mostrado que el modelo está en un *pico* (un óptimo local) — cada pequeño cambio baja la precisión. Lo que sigue sin saberse es si es el óptimo *global*; un ajuste mucho mejor podría existir al otro lado de un valle que su búsqueda de pequeños-retoques no cruzará', correct: true },
+        { text: 'Ha demostrado que el modelo es el óptimo global, puesto que ningún cambio lo mejora', correct: false },
+        { text: 'Ha mostrado que el modelo está en un valle, puesto que no se puede mejorar', correct: false },
+        { text: 'Ha encontrado una cresta, porque ningún ajuste vecino es mejor', correct: false },
+      ],
+      explanation: '«Ningún pequeño retoque lo mejora» es precisamente la definición de un pico / óptimo local: cada vecino es peor. Pero eso garantiza solo la mejoría *local* — no dice nada sobre si existe en otra parte un pico más alto (el óptimo global), alcanzable solo empeorando temporalmente primero (cruzando un valle), cosa que su búsqueda de pequeños-retoques se niega a hacer. Declararlo el óptimo *global* se pasa de frenada; llamarlo valle es al revés (los valles son zona baja); una cresta es un *camino* alto, no un punto atascado. La afirmación honesta: «en un pico, no se sabe si es el más alto».',
+    },
+  ]}
+/>
+
+## Hacia dónde va esto
+
+Ya puedes construir un paisaje adaptativo desde la nada — el espacio de diseño abajo, la aptitud como altura, y todo el vocabulario de picos, valles, crestas y la cima global para describirlo. Conoces las dos ideas que gobiernan toda la máquina (vecinos y altura), las lecturas erróneas clásicas que evitar (el eje no es el tiempo, la altura no es complejidad), y los límites honestos de la caricatura.
+
+Lo siguiente es la lección 3, **Escalar Colinas** — el *motor* que se mueve por este terreno. Hemos construido el mapa; ahora vemos cómo una búsqueda lo recorre de verdad. Verás exactamente por qué la selección es un paseo *solo cuesta arriba, local y sin previsión*, qué significa de verdad "local" cuando solo puedes palpar alrededor de tus propios pies, y por qué esa única regla — nunca dar un paso cuesta abajo — es a la vez la fuente de todo el poder del modelo y la razón por la que se atasca tan fiable, tan trágicamente.

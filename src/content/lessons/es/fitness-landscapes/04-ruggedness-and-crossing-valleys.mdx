@@ -1,0 +1,290 @@
+---
+title: "Escarpadura y Cruzar Valles"
+description: "Qué hace que un paisaje adaptativo sea suave (fácil de buscar) o escarpado (un laberinto de trampas) — y las fuerzas que dejan a una búsqueda cruzar un valle hacia un pico más alto: mutación, deriva, recombinación y crestas neutrales. Además, el giro de la Reina Roja donde el propio terreno no se queda quieto."
+topic: "es/fitness-landscapes"
+order: 5
+minutes: 13
+updated: 2026-07-03
+---
+
+import { MCQ, Quiz, Callout, Categorize, FillBlank, FitnessLandscape } from '@/components/react';
+
+Hasta ahora la historia ha sido sombría a propósito. Una **búsqueda voraz, solo cuesta arriba** — la evolución, el descenso de gradiente, tu propio ensayo y error — sube la colina más cercana y *se para*, varada en un **óptimo local** con un **óptimo global** más alto señalado al otro lado de un valle al que se niega a bajar. Tres lecciones dentro, ya predices esa trampa de un vistazo. Esta es la lección donde por fin hacemos algo al respecto.
+
+Dos preguntas gobiernan toda la hora. Primera: *¿por qué algunos paisajes son trampas mortales y otros un paseo suave hasta la cima?* Algunos problemas los resuelve la escalada tonta de colinas todas las veces; otros se la tragan entera. La diferencia tiene un nombre — **escarpadura (ruggedness)** — y una causa que podemos señalar. Segunda, y esta es la recompensa de todo el curso: *¿qué deja de verdad a una búsqueda cruzar un valle hacia un pico mejor?* Hay una lista corta de movimientos de escape, y cada uno es una forma de dar un paso que la escalada voraz nunca daría. Luego, al final, un giro que replantea toda la trampa: qué pasa cuando el suelo no se queda quieto. Como siempre — adivina antes de espiar.
+
+<MCQ
+  client:visible
+  pretest
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Un criador está seleccionando bacterias para un crecimiento más rápido. La colonia está atascada: cada mutación de un solo gen que el criador prueba hace el crecimiento *más lento*, así que la selección la mantiene exactamente donde está. Existe de verdad una combinación de tres genes que crecería el doble de rápido — pero solo la alcanzas pasando primero por las versiones intermedias, cada una de las cuales crece más lento que la colonia ahora. ¿Puede la selección simple, dando pasos solo hacia vecinos más aptos, llevar alguna vez la colonia hasta allí?"
+  options={[
+    { text: 'No — cada ruta hacia la mejor combinación baja *cuesta abajo primero* (a través de los intermedios más lentos), y una búsqueda que solo da pasos hacia vecinos más aptos rechaza esos pasos. Se queda atascada salvo que algo la haga moverse a un diseño *peor* de forma temporal', correct: true },
+    { text: 'Sí — como existe un diseño el doble de rápido, la selección acabará alcanzándolo con suficientes generaciones' },
+    { text: 'Sí — la selección puede sostener dos mutaciones dañinas a la vez mientras el resultado final sea beneficioso' },
+    { text: 'No — porque las bacterias no pueden cambiar en absoluto su tasa de crecimiento por selección' },
+  ]}
+  explanation="Sin nota en un test previo — solo nota la forma del asunto. El mejor diseño es real, pero los *únicos caminos hacia él bajan primero*, a través de intermedios menos aptos que donde la colonia está ahora. Una búsqueda que solo da pasos hacia un vecino más apto no dará ni uno solo de esos pasos cuesta abajo, así que se sienta en su pico local para siempre. Alcanzar el pico más alto exige algo que deje al linaje moverse a un diseño *peor* de forma temporal — un gran salto mutacional, un afortunado paseo cuesta abajo, una recombinación, un rodeo llano. Ese «algo» es todo el tema de esta lección. (La última opción se pasa de frenada: la tasa de crecimiento sí puede evolucionar — la barrera no es la capacidad de cambiar, es el valle que hay en medio.)"
+/>
+
+Esa colonia atascada es esta lección en miniatura: existe de verdad un diseño mejor, y lo *único* que se interpone entre él y la población es un valle — un tramo de diseños peores por el que el escalador voraz no pasará. Todo lo de abajo va sobre qué pasa por ahí a pesar de todo.
+
+## Suave vs. escarpado: por qué la forma del terreno decide tu destino
+
+**La analogía.** Imagina dos paisajes uno junto al otro. El primero es un solitario **monte Fuji** — un cono enorme y suave alzándose sobre una llanura. Suelta un escalador en cualquier punto y pasea directo hasta la cima; no hay ningún otro sitio donde atascarse, porque solo hay un pico y cada paso hacia arriba es un paso hacia *la* cima. El segundo es una **sierra dentada** — los Alpes, digamos — miles de picos y collados apiñados, de modo que dar un metro de lado puede hacerte caer por un precipicio o trepar por un espolón de una montaña totalmente distinta. Suelta al mismo escalador aquí y corona el primer risquito que toca y lo deja, con la verdadera cima alta perdida en algún lugar al otro lado de un laberinto de valles.
+
+El mismo escalador. Una suerte radicalmente distinta. Lo único que cambió fue la **forma del terreno**.
+
+**La definición precisa.** La **escarpadura (ruggedness)** mide lo *correlacionada* que está la aptitud entre diseños vecinos — cuánto cambia la aptitud un pequeño cambio en el diseño. En un paisaje **suave**, los vecinos tienen aptitud *parecida* (la aptitud está muy correlacionada por el terreno): un pequeño retoque mueve la calidad un poco, así que «cuesta arriba» apunta de forma fiable hacia la única cima real, y hay **pocos picos** — a menudo solo uno. En un paisaje **escarpado**, los vecinos tienen aptitud *radicalmente distinta* (la aptitud no está correlacionada): un pequeño retoque puede oscilar la calidad de excelente a letal, así que el terreno es un caos de **muchos picos**, y la escalada de colinas queda clavada en el que le toque tocar. La suavidad es una promesa de que la información *local* («¿qué paso cercano sube?») te apunta hacia el *mejor global*. La escarpadura rompe esa promesa.
+
+**¿Y qué hace escarpado a un paisaje?** Esta es la parte que merece grabarse en piedra, porque te dice *de antemano* qué problemas atraparán a una búsqueda voraz. La escarpadura viene de las **interacciones entre las partes** del diseño. Cuando cada parte contribuye a la aptitud por sí sola — de forma independiente — el paisaje es suave: puedes optimizar cada mando por separado y los buenos ajustes nunca se pelean entre sí, así que hay un único pico ancho. Pero cuando las partes **interactúan** — cuando el mejor ajuste de una parte *depende de cómo estén puestas las demás* — el paisaje se abolla en crestas y trampas, porque mejorar una parte puede arruinar la contribución de otra.
+
+En genética esta interacción tiene un nombre: **epistasia (epistasis)** — cuánto depende el efecto de un gen de qué otros genes están presentes. Poca epistasia (los genes actúan de forma independiente) significa un paisaje suave; mucha epistasia (los genes solo tienen sentido en combinación) significa uno escarpado. En ingeniería y diseño lo mismo se llama **acoplamiento (coupling)**: componentes poco acoplados (cambias uno sin perturbar el resto) dan un espacio de diseño suave; muy acoplados (cada parte constriñe a las demás) dan uno escarpado, plagado de trampas. Es el *mismo hecho* con dos disfraces — **más interacción entre las partes significa más escarpadura significa más óptimos locales en los que atascarse.**
+
+| | **Paisaje suave** | **Paisaje escarpado** |
+|---|---|---|
+| **Aptitud de los vecinos** | Parecida — muy correlacionada | Radicalmente distinta — sin correlación |
+| **Número de picos** | Pocos (a menudo uno) | Muchos — un laberinto de óptimos locales |
+| **¿Funciona escalar colinas?** | Sí — encuentra de forma fiable el mejor global | No — queda atrapada casi siempre |
+| **Qué lo causa** | Las partes actúan de forma *independiente* (poca epistasia / acoplamiento flojo) | Las partes *interactúan* (mucha epistasia / acoplamiento fuerte) |
+| **Se siente como** | Un solitario monte Fuji | Una sierra dentada |
+
+**Ejemplo resuelto — el ala y el teclado.** Supón que la aptitud es «lo bien que vuela un ala», y el diseño tiene diez mandos independientes (longitud, curvatura, grosor…), cada uno de los cuales ayuda un poco por sí solo y no le importa mucho cómo estén puestos los demás. Eso es un espacio *suave*: ajusta cada mando hacia su mejor valor y subes un único pico ancho — fácil. Ahora supón que el diseño es una distribución de teclado, donde el valor de una tecla depende *enteramente* de dónde estén todas las demás (una letra común está bien junto a otra letra común solo si tus dedos alcanzan ambas). Cada parte interactúa con todas las demás — epistasia máxima — así que el espacio es salvajemente escarpado: QWERTY y Dvorak y otras mil distribuciones son todas picos locales separados, cada uno inmejorable moviendo una tecla, ninguno alcanzable desde otro sin ponerse *peor* primero. Por eso las distribuciones de teclado quedan fijadas (lock-in) y las alas no: un problema es suave, el otro escarpado, puramente por cuánto interactúan las partes.
+
+<Callout variant="warning" title="La idea equivocada: «una búsqueda difícil significa un buscador débil»">
+Cuando una búsqueda se atasca, el instinto es culpar al *buscador* — no fue lo bastante listo, no lo intentó lo suficiente. A menudo el verdadero culpable es la **forma del problema**. El *mismo* escalador de colinas que resuelve un paisaje suave sin fallos queda atrapado sin remedio en uno escarpado. La mitad de conseguir buenos resultados es diagnosticar el *terreno* — ¿cuánto interactúan las partes? — no afilar al escalador. Una búsqueda brillante en un paisaje escarpado y una tonta en uno suave pueden intercambiar resultados con toda facilidad.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Dos problemas de diseño aterrizan en tu mesa. Problema A: cada uno de 20 componentes contribuye a la calidad por sí solo, y el mejor ajuste de cada uno apenas depende de los demás. Problema B: los 20 componentes son muy interdependientes — el mejor ajuste de cada uno depende mucho de todos los demás. ¿Qué paisaje de problema es más escarpado, y qué predice eso para una búsqueda voraz de escalada de colinas?"
+  options={[
+    { text: 'El problema B es más escarpado — la fuerte interacción entre las partes (mucha epistasia / acoplamiento) abolla el paisaje en muchos picos locales, así que la escalada voraz muy probablemente quedará atrapada en uno subóptimo', correct: true },
+    { text: 'El problema A es más escarpado, porque más partes independientes significa más formas de equivocarse' },
+    { text: 'Ambos son igual de escarpados, ya que la escarpadura depende solo del número de partes, no de cómo interactúan' },
+    { text: 'Ninguno es escarpado — la escarpadura va sobre el buscador, no sobre el paisaje' },
+  ]}
+  explanation="La escarpadura la causa la *interacción* entre las partes, no su número. En el problema A las partes actúan de forma independiente — un paisaje suave con un único pico ancho, donde la escalada camina directa hasta el mejor. En el problema B las partes están muy acopladas (mucha epistasia), así que mejorar una arruina otra: el paisaje se fractura en muchos óptimos locales y una búsqueda voraz queda clavada en el que toque primero. El número de partes no es el motor (ambos tienen 20); el *acoplamiento* sí. Y la escarpadura es una propiedad del terreno, no del escalador — que es exactamente por qué el mismo escalador puede bordar A y fallar B."
+/>
+
+### Cuándo usarlo
+
+Echa mano de suave-vs-escarpado en el instante en que estés decidiendo cuánto fiarte de una búsqueda voraz de mejora-lo-que-tienes-delante. Hazte una pregunta: *¿cuánto interactúan las partes de este diseño?* Si son en su mayoría independientes, el paisaje es suave — fíate de la búsqueda local, encontrará el mejor. Si están muy acopladas, el paisaje es escarpado — espera óptimos locales, y planea gastar esfuerzo en *escapar* de ellos, no solo en escalar. El diagnóstico corre sobre genomas, sobre problemas de aprendizaje automático, sobre organigramas, sobre tus propias habilidades. La interacción es la señal.
+
+## Qué cruza de verdad un valle
+
+Aquí está — el corazón del curso. Un escalador voraz está atrapado porque cruzar un valle significa dar un paso *cuesta abajo*, y no lo dará. Así que cada escape es, en el fondo, una forma de *dar un paso que el escalador voraz rechaza* — moverse a un diseño temporalmente peor para alcanzar uno permanentemente mejor. Hay cuatro de esos movimientos. Apréndelos como un conjunto; la evolución real (y la optimización real) usa los cuatro.
+
+### (1) Mutación — un gran salto a través del valle
+
+**El movimiento.** La mayor parte del tiempo, la variación es pequeña: cambia una sola base, el diseño se desplaza un paso, y la selección juzga si ese vecino es más apto. Pero de vez en cuando una **mutación grande** — un cambio grande y aleatorio — lanza el diseño muy lejos por el terreno de un solo salto. Ocasionalmente aterriza en la *ladera de una colina distinta* por completo — una que la escalada local nunca podría haber alcanzado, porque el camino hasta allí bajaba cuesta abajo. Desde esa nueva ladera, la escalada cuesta arriba ordinaria toma el relevo y corona un pico más alto.
+
+**El coste.** Aquí está el truco, y es brutal: **la mayoría de los grandes saltos aterrizan en un valle y mueren.** Un cambio grande y aleatorio a un diseño que funciona es mucho más probable que lo rompa a que lo mejore — saltas, y te estrellas en la tierra baja, un diseño peor que la selección descarta al instante. Los grandes saltos son una lotería: victorias raras y espectaculares compradas con un montón de boletos perdedores. Por eso la evolución mantiene las tasas de mutación *bajas pero no nulas* — lo bastante altas para lanzar ocasionalmente un linaje a una colina nueva, lo bastante bajas para no fundir cada buen diseño que ya ha encontrado.
+
+### (2) Deriva genética en poblaciones pequeñas — vagar cuesta abajo por accidente
+
+**El movimiento.** En una **población pequeña**, el azar domina. Qué individuos resultan reproducirse es en parte suerte — uno apto podría acabar comido antes de criar, uno corriente podría tener suerte — así que las frecuencias génicas **derivan (drift)** al azar de generación en generación, *sin importar la aptitud*. Y la deriva aleatoria puede llevar a una población pequeña **cuesta abajo**, cruzando un valle poco profundo, puramente por accidente — porque la selección no es lo bastante fuerte para detenerla. Una vez que la deriva ha bajado a la población hasta la *base de un pico más alto*, la selección ordinaria la agarra y escala. Una población **grande** no puede hacer esto: con números enormes, la suerte se promedia, la selección domina cada paso, y la población queda clavada a su pico local, incapaz de dar ni un solo paso cuesta abajo por azar.
+
+Este es exactamente el argumento **del propio Sewall Wright** — el mismo Wright que dibujó el paisaje. Su **teoría del equilibrio cambiante (shifting balance theory)** sostenía que la evolución escapa de los picos locales precisamente porque las poblaciones reales están *subdivididas en grupos pequeños*, donde la deriva puede empujar a un grupo a cruzar un valle que una sola población enorme nunca podría cruzar. El tamaño pequeño, normalmente una desventaja, se convierte en la vía de escape.
+
+### (3) Recombinación — combinar buenas subsoluciones
+
+**El movimiento.** El sexo baraja bloques de construcción. La **recombinación (recombination)** toma la mitad de un genoma de un progenitor y la mitad de otro y las cose juntas — y si cada progenitor se sienta cerca de un *pico bueno distinto*, su descendencia puede heredar las *buenas subsoluciones de ambos* y aterrizar en algún sitio que ninguno de los dos progenitores podría alcanzar solo por mutación. En vez de cruzar el valle paso a paso, la recombinación *salta entre picos* mezclando las mitades que funcionan. Cuando las partes buenas de un diseño son algo modulares — trozos separables que cada uno ayuda — barajarlas es una forma pasmosamente eficaz de explorar nuevas combinaciones sin descender por cada intermedio.
+
+### (4) Crestas neutrales — el valle que nunca tienes que cruzar
+
+**El movimiento.** A veces no cruzas ningún valle — porque no hay ninguno. Los paisajes reales están plagados de **crestas neutrales (neutral ridges)**: conexiones llanas, de *igual aptitud*, entre regiones, donde muchos diseños distintos tienen todos la *misma* aptitud. Toda una red de estos diseños de igual altura es una **red neutral (neutral network)**. Un linaje puede **vagar de lado por la cresta sin coste alguno** — cada paso no es ni mejor ni peor, así que la selección ni lo empuja ni lo bloquea — desplazándose por el terreno hasta llegar a un punto desde el cual una *nueva colina, más alta,* está de pronto a un solo paso cuesta arriba. Nunca bajó; caminó por lo llano, y luego escaló. Las redes neutrales convierten muchos paisajes que *parecen* plagados de trampas en unos que una búsqueda puede cruzar en silencio, porque el «valle» entre picos a menudo está salvado por una calzada llana.
+
+<Callout variant="tip" title="Los cuatro escapes, uno al lado del otro">
+Cada uno de estos da un paso que el escalador voraz no dará. La **gran mutación** salta a través del valle (y normalmente muere en él). La **deriva** en una población *pequeña* vaga cuesta abajo por suerte hasta la base de un pico más alto. La **recombinación** mezcla buenas subsoluciones de dos picos en una descendencia. Las **crestas neutrales** dejan a un linaje caminar por un sendero *llano* entre picos, así que nunca desciende. El hilo común: *escapar de un óptimo local exige tolerar algo distinto de la mejora inmediata* — un riesgo, un paseo cuesta abajo, un barajado, o un paciente paseo de lado.
+</Callout>
+
+Juega con todo esto ahora. El paisaje de abajo tiene un **control de escarpadura** — arrástralo de suave (un Fuji suave) a escarpado (una sierra dentada de trampas) y mira explotar el número de picos. Suelta una población, deja que escale y se atasque, luego pulsa **Mutar / gran salto** para lanzarla a un sitio nuevo — a veces a la ladera de una colina más alta a la que nunca habría podido escalar, a menudo a un valle donde muere. E ignora el interruptor **Terreno cambiante (Reina Roja)** un minuto más — estamos a punto de ganárnoslo.
+
+<FitnessLandscape
+  client:visible
+  title="Terreno escarpado, y los saltos que escapan de él"
+  caption="Desliza la escarpadura de suave a escarpado: en un Fuji suave el escalador siempre encuentra la cima; súbela y el terreno se fractura en trampas. Dispara Mutar / gran salto cuando el escalador esté atascado — salta a un sitio nuevo, a veces a una colina más alta (¡un escape!), a menudo a un valle letal (el coste de los grandes saltos). El interruptor Terreno cambiante (Reina Roja) hunde el pico bajo los pies del escalador — el giro de la última sección."
+  designAxisLabel="Cada diseño posible →"
+  fitnessAxisLabel="Aptitud ↑"
+  ruggednessLabel="Escarpadura del paisaje"
+  ruggednessLowLabel="suave — una colina"
+  ruggednessHighLabel="escarpado — muchos picos"
+  dropLabel="Soltar una población"
+  climbLabel="Que escale ▸"
+  pauseLabel="Pausa"
+  stepLabel="Escalar un paso ▸"
+  mutateLabel="Mutar / gran salto"
+  redQueenLabel="Terreno cambiante (Reina Roja)"
+  resetLabel="Reiniciar"
+  summitLabel="cima más alta"
+  statusIdle="Suelta una población en algún punto del paisaje y deja que la selección suba la colina más cercana."
+  statusClimbing="Escalando cuesta arriba — la selección da cada pequeño paso que sube la aptitud, sin previsión."
+  statusTrapped="Atascada en un pico local. Toda dirección desde aquí baja cuesta abajo, y sin embargo una cima más alta se alza {gap} puntos por encima, al otro lado de un valle que la selección no cruzará. Lo «suficientemente bueno» está atrapado por debajo de lo «mejor»."
+  statusGlobal="En el óptimo global — la cima más alta de todo el paisaje. No hay nada más alto."
+  statusSinking="El terreno cambió bajo la población: el pico que conquistó se está hundiendo, así que debe escalar de nuevo. No hay cima final."
+  readout="Aptitud {fitness} de un posible {best}. {status}"
+  initialRuggedness={70}
+/>
+
+Dos cosas para grabarse a fuego mientras juegas. Primero, **la escarpadura es el enemigo de la búsqueda voraz** — en el ajuste suave el escalador es impecable, y cada muesca de escarpadura que añades entierra otra trampa. Segundo, **el escape siempre cuesta algo**: el gran salto normalmente aterriza en un valle y muere, y ese riesgo *es* el precio de alcanzar ocasionalmente un pico más alto. No hay forma gratis de cruzar un valle. Si la hubiera, no sería un valle.
+
+<MCQ
+  client:visible
+  allowMultiple
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Selecciona TODOS los mecanismos de abajo que puedan ayudar de verdad a una búsqueda a CRUZAR un valle de aptitud para alcanzar un pico más alto. (Más de uno es correcto.)"
+  options={[
+    { text: 'Una mutación grande que lanza el diseño a través del valle, aterrizando ocasionalmente en la ladera de una colina distinta y más alta', correct: true },
+    { text: 'Deriva genética en una población pequeña, dejándola vagar cuesta abajo por azar hasta la base de un pico más alto', correct: true },
+    { text: 'Recombinación combinando buenas subsoluciones de dos progenitores cerca de picos distintos', correct: true },
+    { text: 'Una cresta neutral — un sendero llano de igual aptitud — que conecta la región actual con una cerca de una colina más alta', correct: true },
+    { text: 'Escalada de colinas voraz estricta que solo da pasos hacia un vecino estrictamente más apto', correct: false },
+    { text: 'Una población muy grande en la que la selección domina a la perfección cada paso y nunca deja caer la aptitud', correct: false },
+  ]}
+  explanation="Las cuatro respuestas correctas son exactamente los movimientos de escape: una gran mutación salta el valle, la deriva en una población *pequeña* vaga cuesta abajo por suerte, la recombinación mezcla buenas mitades de dos picos, y una cresta neutral deja a un linaje caminar por una calzada llana. Cada uno funciona tolerando algo distinto de la mejora inmediata cuesta arriba. Las dos respuestas equivocadas son la *causa* de la trampa, no la cura: la escalada voraz estricta rechaza cada paso cuesta abajo (así que nunca puede dejar un pico local), y una población *enorme* hace la selección tan dominante que la deriva no puede empujarla cuesta abajo en absoluto — que es precisamente por qué las poblaciones pequeñas, no las grandes, escapan."
+/>
+
+<Categorize
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  question="Clasifica cada factor según si tiende a AYUDAR a una búsqueda a cruzar un valle (escapar de un pico local) o a MANTENERLA atascada en su pico local actual."
+  buckets={['Ayuda a cruzar un valle', 'Mantiene la búsqueda atascada']}
+  items={[
+    { text: 'Una mutación grande y aleatoria que salta lejos a través del terreno', bucket: 'Ayuda a cruzar un valle' },
+    { text: 'Deriva genética en una población pequeña', bucket: 'Ayuda a cruzar un valle' },
+    { text: 'Recombinación que mezcla buenos bloques de construcción de dos linajes', bucket: 'Ayuda a cruzar un valle' },
+    { text: 'Una cresta neutral llana, de igual aptitud, entre dos regiones', bucket: 'Ayuda a cruzar un valle' },
+    { text: 'Escalada de colinas estricta, solo cuesta arriba y sin previsión', bucket: 'Mantiene la búsqueda atascada' },
+    { text: 'Una población enorme donde la selección domina cada paso', bucket: 'Mantiene la búsqueda atascada' },
+    { text: 'Mutación cero — el diseño nunca varía en absoluto', bucket: 'Mantiene la búsqueda atascada' },
+    { text: 'Un paisaje perfectamente suave, de un solo pico', bucket: 'Ayuda a cruzar un valle' },
+  ]}
+  explanation="Escapes (cajón de arriba): una gran mutación salta el valle; la deriva en una población *pequeña* vaga cuesta abajo por suerte; la recombinación cose buenas mitades; una cresta neutral ofrece un rodeo llano; y un paisaje suave de un solo pico no necesita cruzar nada — no hay dónde atascarse. Trampas (cajón de abajo): la escalada voraz estricta rechaza los pasos cuesta abajo; una población *enorme* deja que la selección clave al linaje para que la deriva no lo mueva; y la mutación cero es la prisión definitiva — sin variación, el linaje literalmente no puede moverse de su pico por ningún medio. Fíjate en que las dos entradas de población tiran hacia lados opuestos: pequeña ayuda (deriva), grande perjudica (la selección domina)."
+/>
+
+### Cuándo usarlo
+
+Siempre que una búsqueda esté atascada — un linaje evolutivo estancado, un entrenamiento encajado en un mal óptimo, una carrera o una empresa que llegó a una meseta — repasa la lista de cuatro. *¿Puede dar un gran salto* (una apuesta audaz y arriesgada lejos del diseño actual)? *¿Es lo bastante pequeña para derivar* (puede permitirse ponerse peor de forma temporal sin morir)? *¿Puede recombinar* (tomar prestadas y mezclar buenas piezas de otro sitio)? *¿Hay un sendero neutral* (un movimiento lateral sin coste inmediato que abre terreno nuevo)? Cada escape real de un óptimo local es uno de estos disfrazado. Y cada uno pide lo mismo, incómodo: tolerar lo no-inmediatamente-mejor a cambio de lo quizá-mucho-mejor.
+
+## El giro de la Reina Roja: un paisaje que no se queda quieto
+
+Todo lo de arriba supuso que el terreno se está quieto mientras lo escalas. Suelta ese supuesto, y toda la imagen cambia.
+
+**La analogía.** Estás escalando un pico. Casi has coronado un magnífico óptimo local — y entonces el suelo empieza a *deformarse bajo tus pies*. El pico sobre el que estás se está **hundiendo**, sumergiéndose en la llanura, mientras una colina en la que apenas te habías fijado enfrente *se está alzando*. Levantas la vista y la cima — el mejor diseño — se ha **movido**. Te apresuras a seguirla, y para cuando te acercas se ha movido otra vez. No hay lugar final de descanso, porque el propio paisaje está vivo.
+
+**Qué está pasando de verdad.** En un ecosistema real, tu aptitud no depende solo de la física fija del mundo — depende de **qué está haciendo todo el mundo**, y todo el mundo está escalando también. Cuando tu presa se vuelve más rápida, tu pico de «diseño actual de caza» se hunde; cuando un parásito evoluciona rodeando tu defensa, tu pico de «diseño inmune actual» se derrumba; cuando un competidor se adapta para explotar tu nicho, el suelo que conquistaste se hunde bajo tus pies. La escalada de tus rivales **remodela tu paisaje**. Esto es la **coevolución (coevolution)**, y es exactamente el mismo motor que el **[efecto de la Reina Roja (Red Queen effect)](/es/red-queen-effect)** — el modelo donde, porque tu entorno se adapta de vuelta hacia ti, *«hace falta correr todo lo que puedas para quedarte en el mismo sitio».* Allí, lo que se movía era tu *posición relativa*; aquí, es la *forma del propio terreno*. Un pico que conquistas no sigue siendo un pico. La cima no para de moverse, así que **no hay ningún óptimo final y fijo que encontrar.**
+
+Activa **Terreno cambiante (Reina Roja)** en el paisaje de arriba y míralo: en el momento en que tu población conquista un pico, ese pico empieza a hundirse bajo sus pies, y tiene que escalar de nuevo — persiguiendo una cima que no para de escurrirse. Eso no es un fallo de la búsqueda. Eso es lo que optimizar contra un oponente vivo *es*.
+
+<Callout variant="info" title="El replanteamiento: a veces el suelo se mueve antes de que te atasques">
+Todo lo anterior a esta sección trató «atascarse en un pico local» como el peligro central. La Reina Roja le da la vuelta. En un paisaje coevolutivo, a menudo *no* llegas a disfrutar tu pico local el tiempo suficiente para quedar atrapado en él — el suelo se deforma primero. Un pico que escalaste se hunde a medida que los competidores escalan los suyos; todo el terreno se agita y se remodela; el blanco que optimizabas no para de *moverse*. Por esto la búsqueda biológica (y competitiva) real nunca se asienta de verdad: no está cazando un mejor diseño fijo, está corriendo sobre un paisaje que corre de vuelta. La trampa («atascado en un pico bajo») y la cinta de correr («el pico no se queda quieto») son los dos grandes modos de fallo — y el segundo suele ser el más profundo.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  question="Un linaje de depredadores ha pasado milenios perfeccionando su diseño de caza y ahora se sienta en un pico local alto: cada pequeño retoque lo vuelve peor cazador de su presa actual. Entonces la presa evoluciona para ser mucho más difícil de atrapar. En términos de paisaje adaptativo, ¿qué le acaba de pasar al depredador?"
+  options={[
+    { text: 'Su pico se ha *hundido* — la adaptación de la presa remodeló el paisaje del depredador, así que el diseño que era una cima ahora es una mera ladera. No hay ningún óptimo fijo; el blanco se movió, y debe escalar de nuevo para mantenerse', correct: true },
+    { text: 'Nada — un óptimo local es fijo una vez alcanzado, así que el depredador sigue siendo óptimo pase lo que pase con la presa' },
+    { text: 'El depredador encuentra al instante el óptimo global, porque la evolución de la presa siempre simplifica el paisaje' },
+    { text: 'El paisaje del depredador se vuelve perfectamente suave, garantizando que puede escalar hasta el mejor diseño posible' },
+  ]}
+  explanation="Este es el giro de la Reina Roja en lenguaje de paisaje. La aptitud del depredador depende de la presa, y la presa es una parte viva y adaptable del entorno — así que cuando la presa se vuelve más difícil de atrapar, el *paisaje del depredador se deforma*: el pico que conquistó se hunde en una ladera, y debe escalar de nuevo solo para mantener su posición. No hay ninguna cima fija que alcanzar porque el terreno no se queda quieto. Las respuestas equivocadas suponen todas un paisaje estático (un óptimo fijo, una simplificación automática, una escalada suave garantizada) — exactamente el supuesto que la coevolución destruye. Referencia cruzada con el curso de la Reina Roja: esto es «todo lo que puedas correr para quedarte en el mismo sitio», dibujado como un terreno cambiante."
+/>
+
+## Tres ideas equivocadas que merece la pena matar
+
+La historia de cruzar valles atrae tres conclusiones tentadoras y erróneas. Mátalas las tres ahora.
+
+**«La mutación es dañina, así que la evolución debería minimizarla.»** Es cierto que *la mayoría* de las mutaciones son neutrales o dañinas — un cambio aleatorio a un diseño que funciona normalmente lo rompe. Así que el arreglo ingenuo es: lleva la mutación a cero, conserva solo los buenos diseños que has encontrado. Pero eso es una sentencia de muerte disfrazada: **la variación es lo *único* que puede cruzar un valle.** Un linaje con mutación cero está *permanentemente* congelado en cualquier pico local en el que esté — nunca puede saltar a una colina mejor, nunca derivar, nunca explorar. La mutación es el precio de entrada a cada pico más alto. La tasa correcta no es cero; es *ajustada* — lo bastante baja para no fundir los buenos diseños, lo bastante alta para seguir lanzando ocasionalmente un linaje a terreno nuevo.
+
+**«Los saltos más grandes siempre son mejores — si un salto pequeño puede escapar, uno enorme escapa más.»** No — hay un **compromiso (trade-off)**, y muerde fuerte. Un salto **más grande** te deja *más lejos* de tu diseño actual, lo que significa que es mucho *más* probable que aterrice en un **valle letal** que en una ladera útil, sencillamente porque la mayor parte de un paisaje escarpado es tierra baja. Los saltos diminutos rara vez escapan pero rara vez matan; los saltos enormes ocasionalmente escapan pero normalmente matan. El tamaño óptimo de salto es *intermedio* y depende del terreno — un problema de ajuste, no de «más es mejor». La evolución, y todo buen optimizador, ajusta su tamaño de paso en vez de maximizarlo.
+
+**«Siempre hay ahí fuera un mejor diseño fijo que encontrar.»** La Reina Roja dice: no necesariamente. En un paisaje coevolutivo, la cima **no para de moverse** — un pico que conquistas se hunde a medida que los rivales escalan, y el blanco que optimizas se escurre. Buscar «el único mejor diseño» en tal paisaje es perseguir un espejismo. A veces la meta honesta no es *alcanzar el óptimo* sino *mantenerse al día con uno que se mueve*.
+
+<FillBlank
+  client:visible
+  checkLabel="Comprobar"
+  question="Consolida toda la lección rellenando el vocabulario:"
+  text="Un paisaje cuyos diseños vecinos tienen aptitud parecida es {{suave|escarpado|neutral}} y fácil de buscar; uno donde un pequeño cambio oscila la aptitud radicalmente es {{escarpado|suave|llano}} y está lleno de trampas. La escarpadura la causa {{la interacción entre las partes|el número de partes por sí solo|la astucia del buscador}} — en genética esto se llama {{epistasia|entropía|homología}}. Para escapar de un pico local, una gran {{mutación|presión de selección|paso neutral}} puede saltar a través del valle (aunque normalmente aterriza en uno y muere), la {{deriva|selección}} en una población *pequeña* puede vagar cuesta abajo por azar, y la {{recombinación|mutación}} puede mezclar buenas subsoluciones de dos picos. Un sendero llano, de igual aptitud, es una {{cresta neutral|escarpa pronunciada|óptimo global}}, que deja a un linaje cruzar sin coste. Y cuando los rivales también se adaptan, el giro de la {{Reina Roja|escalada voraz|cima suave}} significa que el propio paisaje no se queda quieto — no hay ningún mejor diseño fijo."
+  explanation="Suave = vecinos correlacionados (fácil); escarpado = vecinos sin correlación (plagado de trampas). La escarpadura la causa la *interacción entre las partes* — epistasia en genética, acoplamiento en diseño — no el número de partes ni el buscador. Los escapes: una gran *mutación* salta el valle (normalmente de forma fatal), la *deriva* en una población pequeña vaga cuesta abajo por suerte, la *recombinación* mezcla buenas mitades de dos picos, y una *cresta neutral* ofrece un cruce llano sin coste. El giro de la *Reina Roja*: cuando tu entorno coevoluciona, tu pico se hunde bajo tus pies y la cima no para de moverse — no hay ningún óptimo fijo que encontrar."
+/>
+
+## Un adelanto: explorar vs. explotar
+
+Fíjate en la tensión que zumba bajo cada movimiento de escape. Escalar tu colina actual cada vez más alto — exprimir hasta la última pizca de aptitud del diseño que ya tienes — es **explotar** lo que funciona. Cruzar un valle en busca de una colina mejor — dar el salto arriesgado, el paseo cuesta abajo, el barajado — es **explorar** algo mejor. Y las dos *se pelean*: cada paso que gastas explorando es un paso que no gastaste perfeccionando lo que tienes, y viceversa. Explota demasiado fuerte y estás atrapado para siempre en un pico bajo, magníficamente optimizado para la mediocridad. Explora demasiado fuerte y nunca escalas nada, saltando eternamente a valles. Toda búsqueda — la evolución, el aprendizaje automático, los negocios, una vida — está en secreto eligiendo un equilibrio entre las dos, en cada paso. Ese compromiso, el dilema **explorar-vs-explotar (explore vs. exploit)**, es el tema maestro de la próxima lección, donde el paisaje por fin escapa de la biología por completo.
+
+## Recapitulación
+
+Llegaste sabiendo ver una trampa; te vas sabiendo *escapar* de una — y ver cuándo la propia trampa no se queda quieta:
+
+1. **La escarpadura lo decide todo.** Un paisaje *suave* (vecinos correlacionados, pocos picos — un solitario Fuji) deja a la escalada voraz encontrar el mejor global; uno *escarpado* (vecinos sin correlación, muchos picos — una sierra dentada) la atrapa casi siempre. El mismo escalador, destino opuesto.
+2. **La escarpadura la causa la interacción entre las partes** — **epistasia** en genética, **acoplamiento** en diseño. Partes independientes dan un espacio suave; partes muy interactivas lo fracturan en óptimos locales. Diagnostica el *terreno*, no el buscador.
+3. **Cuatro movimientos cruzan un valle,** cada uno tolerando algo distinto de la mejora inmediata: una gran **mutación** lo salta (normalmente muriendo en él — el coste), la **deriva** en una población *pequeña* vaga cuesta abajo por suerte (el equilibrio cambiante de Wright), la **recombinación** mezcla buenas subsoluciones de dos picos, y una **cresta neutral** ofrece un cruce llano sin coste.
+4. **Tres trampas que evitar:** no lleves la mutación a cero (la variación es lo *único* que puede cruzar un valle — mutación cero es prisión permanente); no supongas que los saltos más grandes son mejores (los saltos más grandes aterrizan más a menudo en valles letales — el tamaño de paso es un problema de ajuste); y no supongas que hay un mejor diseño fijo (la Reina Roja dice que el blanco puede seguir moviéndose).
+5. **El giro de la Reina Roja:** cuando tus rivales, presas y parásitos también se adaptan, el paisaje *se deforma bajo tus pies* — un pico conquistado se hunde a medida que los competidores escalan, la cima no para de moverse, y no hay ningún óptimo final y fijo. A veces el suelo se mueve antes de que siquiera te atasques.
+
+<Quiz
+  client:visible
+  title="Compruébate: escarpadura y cruzar valles"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  checkLabel="Comprobar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  questions={[
+    {
+      question: 'Quieres predecir si la escalada de colinas voraz simple resolverá de forma fiable un problema de diseño, o quedará atrapada en un óptimo local. ¿Cuál es lo más útil que comprobar sobre el problema?',
+      options: [
+        { text: 'Cuánto interactúan las partes del diseño — mucha interacción (epistasia / acoplamiento fuerte) vuelve el paisaje escarpado y atrapa la búsqueda; poca interacción lo vuelve suave y deja a la búsqueda encontrar el mejor global', correct: true },
+        { text: 'Cuántas partes tiene el diseño — más partes siempre significa un paisaje más escarpado, sin importar cómo interactúen', correct: false },
+        { text: 'Lo listo y bien ajustado que esté el algoritmo de escalada — un buscador lo bastante bueno nunca queda atrapado en ningún paisaje', correct: false },
+        { text: 'Lo grande que sea la población o el presupuesto de búsqueda — una búsqueda lo bastante grande siempre encuentra el óptimo global en cualquier terreno', correct: false },
+      ],
+      explanation: 'La escarpadura — lo que determina si la búsqueda voraz queda atrapada — la causa la *interacción entre las partes*, no su número. Partes independientes dan un paisaje suave de un solo pico que una búsqueda voraz resuelve con facilidad; partes muy acopladas (mucha epistasia) lo fracturan en óptimos locales. El número de partes por sí solo no impulsa la escarpadura (un problema de 20 partes puede ser suave o escarpado según el acoplamiento). Y ningún buscador es a prueba de trampas en un paisaje escarpado solo por astucia o presupuesto — que es precisamente por qué necesitamos los movimientos de escape.',
+    },
+    {
+      question: 'Una población pequeña y aislada de escarabajos deriva al azar — a veces incluso hacia diseños ligeramente *peores* — y acaba llegando a la base de, y luego escalando, un pico de aptitud más alto que una población enorme de los mismos escarabajos nunca alcanzó. ¿Qué cruzó el valle, y por qué pudo hacerlo la población pequeña cuando la grande no?',
+      options: [
+        { text: 'La deriva genética lo cruzó: en una población pequeña, el muestreo azaroso domina y puede llevarla cuesta abajo a través de un valle poco profundo, porque la selección es demasiado débil para impedirlo. En una población enorme, la selección domina cada paso y la clava a su pico local — la esencia del equilibrio cambiante de Wright', correct: true },
+        { text: 'La selección lo cruzó: la selección fuerte en la población pequeña eligió activamente los pasos cuesta abajo porque podía prever el pico más alto por delante', correct: false },
+        { text: 'La población pequeña tenía un paisaje más suave que la grande, así que no había ningún valle que cruzar', correct: false },
+        { text: 'La recombinación sola lo cruzó, y el tamaño de la población fue irrelevante para el resultado', correct: false },
+      ],
+      explanation: 'Esto es deriva genética, y el tamaño de la población es todo el quid. En una población *pequeña*, la suerte de quién se reproduce vence a la selección, así que las frecuencias génicas pueden derivar cuesta abajo a través de un valle poco profundo por puro azar — alcanzando la base de un pico más alto, donde la selección escala entonces. En una población *grande*, la suerte se promedia, la selección domina cada paso, y nunca puede dar un paso cuesta abajo, así que se queda clavada. Esa dependencia del tamaño es exactamente la idea del equilibrio cambiante de Wright. La selección no tiene previsión (no puede elegir pasos cuesta abajo por un pago futuro), el paisaje no cambió con el tamaño, y la deriva — no la recombinación — es lo que el tamaño de la población regula.',
+    },
+    {
+      question: 'Un linaje de tiburones se sienta en un pico local alto — un diseño soberbio para cazar su presa actual. En la siguiente era la presa evoluciona para ser mucho más difícil de atrapar, aunque el tiburón mismo no cambia nada. Un colega dice: «Da igual — un óptimo local es fijo una vez que lo alcanzas, así que el tiburón sigue estando óptimamente diseñado.» ¿Dónde falla esto?',
+      options: [
+        { text: 'En un paisaje coevolutivo el terreno no es fijo: la adaptación de la presa remodela el paisaje del tiburón de modo que su antiguo pico se *hunde* en una ladera. El óptimo se movió, así que el tiburón debe escalar de nuevo solo para mantenerse — la Reina Roja dibujada como un terreno cambiante, sin ningún mejor diseño fijo', correct: true },
+        { text: 'El colega tiene razón — una vez que un linaje alcanza un óptimo local, ese diseño sigue siendo óptimo pase lo que pase con otras especies', correct: false },
+        { text: 'El tiburón salta automáticamente al óptimo global en el momento en que su presa evoluciona, así que acaba mejor que antes', correct: false },
+        { text: 'La evolución de la presa siempre suaviza el paisaje del depredador en un único pico fácil, así que el tiburón puede alcanzar ahora el verdadero mejor diseño sin esfuerzo', correct: false },
+      ],
+      explanation: 'El colega supone un paisaje *estático*, que es exactamente lo que la coevolución destruye. La aptitud del tiburón depende de la presa, y la presa es una parte viva y adaptable de su entorno — así que cuando la presa se vuelve más difícil de atrapar, el paisaje del tiburón se *deforma*: el pico que conquistó se hunde en una mera ladera, y debe escalar de nuevo solo para mantener su posición. No hay ningún óptimo fijo en el que descansar. Esto es el efecto de la Reina Roja en forma de paisaje — «todo lo que puedas correr para quedarte en el mismo sitio». Las otras opciones inventan comodidades (un salto automático al mejor global, un suavizado automático) que la coevolución nunca proporciona.',
+    },
+  ]}
+/>
+
+## Hacia dónde va esto
+
+Ahora posees ambas mitades de la historia de la búsqueda: qué *atrapa* a un escalador voraz (la escarpadura, nacida de partes que interactúan) y qué lo *libera* (los cuatro movimientos de cruzar valles), más el replanteamiento de la Reina Roja donde el terreno ni siquiera se queda quieto. Puedes mirar cualquier búsqueda atascada y correr el diagnóstico — *¿qué escarpadura tiene esto, y qué escape necesita?* — y has conocido la tensión que gobierna todo el asunto: explotar la colina en la que estás, o explorar una mejor.
+
+Lo siguiente es la lección 6, **El Modelo en Todas Partes**, donde el paisaje adaptativo se despoja de su biología y aparece con la misma forma en cada campo que busca. Lo dibujaremos como **descenso de gradiente** sobre una superficie de error de aprendizaje automático (el paisaje, del revés), como **disrupción empresarial** (una empresa perfeccionando su pico mientras un rival escala una montaña más alta que vuelve irrelevante la primera) y como tus propios **estancamientos de habilidad** (el óptimo local del que tienes que ponerte *peor* para escapar). Y por fin cobraremos el gran compromiso que zumba bajo todo ello — **explorar vs. explotar** — el único dial que cada búsqueda, evolucionada o diseñada o vivida, está girando para siempre.

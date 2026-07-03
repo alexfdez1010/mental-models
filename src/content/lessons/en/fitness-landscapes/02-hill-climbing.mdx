@@ -1,0 +1,237 @@
+---
+title: "Hill-Climbing"
+description: "The engine that moves populations across a fitness landscape, dissected: why selection is an uphill-only, local, foresight-free greedy search — and why that single rule is at once its superpower and the cage it can never escape."
+topic: "en/fitness-landscapes"
+order: 3
+minutes: 12
+updated: 2026-07-03
+---
+
+import { MCQ, Quiz, Callout, Categorize, FillBlank, FitnessLandscape } from '@/components/react';
+
+You've built the terrain. You know that every possible design is a **point**, that points which differ by one small change are **neighbours**, that **height** is fitness, and that the landscape is stitched together out of **peaks**, **valleys** and **ridges**. Good. Now we turn on the engine — the actual mechanism that takes a population and *walks* it across that terrain, generation after generation. It has a name in computer science, because engineers reinvented it long before they realized biology had been running it for four billion years: **hill-climbing**.
+
+Here's the whole thing in advance, so you can watch it assemble: a population sits on some point. Variation coughs up neighbouring designs — small heritable tweaks. Selection keeps whichever neighbours are *fitter* and discards the rest. Repeat. The net effect is a population that creeps **uphill**, one small improving step at a time, until it reaches a spot where *every* neighbour is worse — and then it stops, forever, because it has no reason and no ability to take a step that makes things worse right now. That last sentence is the entire lesson, and also the entire tragedy. Guess before you peek, as always.
+
+<MCQ
+  client:visible
+  pretest
+  question="A population of bacteria is one small mutation away from a design that would boost its growth rate by 30%. It is also one small mutation away, in a different direction, from a design that would CUT its growth rate by 5% now — but that worse design happens to sit at the foot of a slope leading to a vastly superior design ten mutations further on. Left to plain selection, which neighbour will the population tend to move toward?"
+  options={[
+    { text: 'The +30% neighbour — selection compares the population only to its immediate neighbours and keeps the fitter one *right now*. The 5%-worse step is refused on the spot, so the far-superior design ten mutations away is never reached, however good it is', correct: true },
+    { text: 'The path toward the vastly superior design, because selection can see that it leads somewhere much better' },
+    { text: 'Neither — selection moves in a random direction, so both are equally likely' },
+    { text: 'Both at once — the population splits and pursues every improving and worsening path simultaneously' },
+  ]}
+  explanation="No grade on a pretest — just feel the shape. Selection is greedy and near-sighted: it looks only at the neighbours it can reach *from here* and pockets the biggest immediate gain, the +30% step. The route to the far-superior design starts with a *worse* step (−5% now), and selection will not take a step that lowers fitness in the present, no matter what glittering summit waits at the end of that road. So the population climbs toward the nearby +30% design and, quite possibly, gets stuck there — a good design, permanently barred from a great one, purely because the road there dipped downhill first. That's hill-climbing in one bacterium."
+/>
+
+That bacterium is the whole lesson in miniature: a population that improves *and* forecloses its own best future in the very same move. You predicted it without knowing any microbiology. That's the engine doing the work — so let's take it apart.
+
+## How selection climbs — the greedy engine
+
+**The analogy.** Imagine hiking a mountain range in dense fog so thick you can see only the ground within one step of your boots. You have exactly one rule: feel around your feet, and step onto whichever patch is *higher* than where you stand. You can't see the horizon, you have no map, you don't know if there's a bigger mountain a mile east. You just take the best local upward step, again and again. When every patch around your boots is lower than where you're standing, you stop — you're on *a* summit, though you've no idea whether it's the tallest one in the range or a molehill. That fog-bound hiker is selection.
+
+**The precise definition.** **Hill-climbing** is a search that repeats one move: from the current design, look at the neighbouring designs; if any neighbour is fitter, move to the fittest one; if none is fitter, halt. In a population, three ingredients grind this out automatically. **Variation** — mutation, recombination — proposes new neighbouring designs, small heritable changes off the current type. **Selection** keeps the carriers of fitter variants (they leave more offspring) and culls the worse. **Inheritance** passes the winning variant to the next generation, so the population's *centre of mass* has shifted one small step uphill. Loop that over generations and the population flows up the slope like water running in reverse.
+
+The word that matters is **greedy**. In computer science, a greedy algorithm is one that, at every step, grabs the choice that looks best *right now*, never weighing whether a worse choice now might set up a better outcome later. Selection is greedy to the bone: the fitter variant out-reproduces the less-fit one *this generation*, so it wins *this generation*, and next generation the population starts from there. Nobody is keeping a longer-term plan in mind, because there is nobody — and no plan. There is only "which of my neighbours makes more babies," asked and answered over and over.
+
+**Worked example — one gene, three generations.** Suppose a beetle's colour is set by a single knob, and darker beetles hide better on the bark it lives on. Start a population that's mostly medium-brown (fitness, say, 5 on some scale). A mutation produces a slightly darker variant (fitness 6). Its carriers survive predators a touch better, leave more offspring, and within a few generations the population is mostly that darker shade. Now a *further* darkening mutation appears (fitness 7); same story, the population shifts again. Each step, selection simply banked the fitter neighbour. Notice what it never did: it never *aimed* at "fitness 7." It couldn't see it. It only ever compared 5 to 6, then 6 to 7, taking the local uphill step each time. The climb toward darkness is real, directed, and utterly blind past the beetle's own doorstep.
+
+<Callout variant="info" title="Three ingredients, one motion">
+Hill-climbing needs exactly three things and produces exactly one motion. **Variation** proposes neighbours (blindly). **Selection** keeps the fitter neighbour (greedily). **Inheritance** carries the winner forward (so gains accumulate). The single motion that results: the population moves *uphill*, one small improving step per round, and never anywhere else.
+</Callout>
+
+### When to use it
+
+Reach for "this is hill-climbing" whenever you see something *improving through kept-and-discarded trials* rather than through a plan: evolving organisms, a machine-learning model in training, a company tweaking its process, a person grinding at a skill, even a manufacturing line getting incrementally optimized. The tell is that the system has no oracle for the far-off best answer — it only ever compares "this" to "a small change of this" and keeps the better. If that's the shape, everything in this lesson applies, including the trap.
+
+## "Local" and "no foresight" — the two words that cost the most
+
+**The analogy.** Contrast our fog-bound hiker with a human architect designing a building. The architect can hold the *entire* finished design in mind, notice that the best plan requires first tearing down a load-bearing wall (a temporary step *backward* — the building is briefly less functional, a heap of rubble), and do it anyway, because they can *foresee* the far better structure on the other side of the demolition. The architect goes **down-and-over**: deliberately worse now, in service of much better later. Hill-climbing structurally cannot do this. It has no plan to be worse-now-for-better-later in service of, because it has no plan and no "later."
+
+**The precise definition.** Hill-climbing is **local** and **foresight-free**. *Local* means its only inputs are the current design and its immediate neighbours — it has zero information about distant regions of the landscape. It cannot "see" a taller peak across a valley; from its point of view that peak does not exist, because it lies beyond the one-step horizon. *Foresight-free* means it never evaluates where a move leads next — it scores each neighbour by its fitness *right now*, full stop. Put those together and you get the rule that defines the whole engine: **it will not accept a step that lowers present fitness, even when that downhill step is the only road to a far higher summit.** There is no "trust me, it gets better." There is only the fitness of the neighbour in front of you.
+
+This is the sharpest place to separate a *designer* from a *search*. A designer has global information (a map) and foresight (a plan), so a designer can cross valleys on purpose. Hill-climbing has neither, so it is *imprisoned by its own present*. Everything strange and flawed about evolved designs — the topic of the very next lesson — traces back to these two words.
+
+<Callout variant="warning" title="The rule that runs the whole course">
+**Hill-climbing will not take a step that makes fitness worse right now — even when that step is the only route to something far better.** A human designer can go down-and-over (deliberately worse now for much better later) because they have a map and a plan. Selection has neither. It sees only its neighbours (local) and scores them only by present fitness (no foresight), so a fitness valley — however shallow — is an impassable wall. Remember this sentence; the rest of the course is its consequences.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Why can a human engineer redesign a product by first making it temporarily WORSE (scrapping a working feature, rebuilding a component from scratch), while natural selection essentially cannot take that same down-then-up route?"
+  options={[
+    { text: 'The engineer has a *map and a plan* — global information about the design space and foresight about where a temporary loss leads — so she can cross a valley on purpose. Selection has only local information (its neighbours) and no foresight, so it refuses any step that lowers present fitness, valley or not', correct: true },
+    { text: 'Because natural selection is slower, and with enough time it would happily take downhill steps too' },
+    { text: 'Because engineers work on non-living things, and the fitness-landscape model only applies to living organisms' },
+    { text: 'Because the engineer\'s changes are random while selection\'s changes are planned' },
+  ]}
+  explanation="The difference is information and intent, not speed. The engineer can *see* the whole design space and *plan* a route, so she can eat a temporary loss (tear out the working feature) because she foresees the taller peak on the far side of the valley. Selection has neither map nor plan: it evaluates only immediate neighbours (local) by present fitness only (no foresight), so a downhill step is simply refused, however short the valley or grand the summit beyond it. Time doesn't fix this — a foresight-free search never *chooses* to descend, so more generations just mean more climbing on the same hill. And the last option has it backwards: selection's *changes* are random; its *movement* is directed. Foresight is exactly what it lacks."
+/>
+
+## Why the uphill-only rule is both power and prison
+
+**The analogy.** A budget travel rule — "always take the next cheapest connecting flight" — will reliably get you *somewhere* with no travel agent, no itinerary, no planning, and almost no cost. That's its power: it *works*, cheaply, with zero intelligence. It's also why you end up in a random regional airport instead of the city you actually wanted: the rule has no notion of a destination, only of the next cheap hop. Same rule, both facts.
+
+**The power.** The uphill-only rule is astonishing precisely because it demands *so little*. It needs no designer, no goal, no map, no foresight, no intelligence of any kind — just variation, a fitness difference, and inheritance. And it *reliably delivers*: point it at almost any landscape and it will find **a** peak, cheaply and without supervision. This is how nature builds eyes and wings and immune systems with nobody at the wheel. It is also why the same three-line loop trains machine-learning models and optimizes factories. Hill-climbing is the cheapest known way to get genuinely good designs out of a process with no brain.
+
+**The prison.** The very rule that makes it cheap makes it stuck. Because it only ever steps uphill, the peak it reaches is only ever the top of *whatever hill it happened to start on* — a **local** peak. It has no way to know a taller summit exists, and no way to cross the valley to reach it even if it did. Cheapness and entrapment are not two features; they are one feature seen from two sides. The absence of a map is *why* it's cheap and *why* it's trapped. You cannot keep the first and delete the second.
+
+<Callout variant="tip" title="One rule, two faces">
+The uphill-only rule is **power** because it finds a good design with no designer, no goal and no foresight — cheaply and reliably. It is **prison** because the design it finds is only ever a *local* peak, the top of whatever hill it started on. These aren't a pro and a con to weigh against each other; they're the same fact. The missing map is exactly what makes hill-climbing both so cheap and so easily trapped.
+</Callout>
+
+We'll spend the entire *next* lesson living inside the prison — the local optimum, with the real biological rap sheet (the blind spot, the recurrent laryngeal nerve). For now just hold the shape: the strength and the weakness are welded together.
+
+## Steepness and gradient — how fast the climb goes
+
+**The analogy.** How fast you climb a hill depends on how *steep* it is under your boots. On a sharp slope, every step upward gains you a lot of height fast — the direction to go is obvious, and progress is quick. On a nearly flat shelf — a **plateau** or along a level **ridge** — every direction is about the same height, so there's barely any "up" to pull you anywhere. You wander sideways, drifting, because selection has almost no *gradient* to push on.
+
+**The precise definition.** The **gradient** is the local steepness of the fitness landscape — how much fitness changes per small step. Where the gradient is steep, the fitness difference between neighbours is large, selection between them is strong, and the population climbs fast and decisively. Where the gradient is shallow — a plateau or flat ridge — neighbours are nearly equal in fitness, selection barely distinguishes them, and the population **drifts** sideways under chance (genetic drift) with little directed push. Steepness sets the *speed and decisiveness* of the climb; it does not change the one non-negotiable rule that the net move is never downhill.
+
+**Worked example — the greedy climber lands on the lower peak.** Here's a tiny made-up landscape. Line up seven neighbouring designs, A through G, each one small step from the next, and read off their fitness:
+
+| Design | A | B | C | D | E | F | G |
+|---|---|---|---|---|---|---|---|
+| Fitness | 3 | 5 | 6 | 4 | 7 | 9 | 8 |
+
+There are two peaks here. The **little peak** is at **C** (fitness 6): its neighbours B (5) and D (4) are both lower. The **big peak** is at **F** (fitness 9): the tallest point on the whole strip. Now drop a greedy climber at **A** (fitness 3) and let it hill-climb:
+
+- **A (3) → B (5).** B is higher. Step.
+- **B (5) → C (6).** C is higher than B. Step.
+- **C (6) → ?** C's neighbours are B (5) and D (4). *Both are lower than C.* Every direction is downhill. **Halt.**
+
+The climber stops on **C, fitness 6** — and it *never reaches F, fitness 9*, even though F is right there on the same strip, plainly taller, just a few designs to the right. Why? Because the only road from C to F runs *through D (fitness 4)* — a step *down* from 6 to 4. Selection refuses it. The taller summit is visible to *us*, reading the table from above, but invisible and unreachable to the greedy climber trapped at C. That downhill notch at D is a **valley**, and a valley — however shallow — is a wall to an uphill-only search. (Start the climber at G instead, and it happily walks G(8) → F(9) and tops out on the true summit. Same engine, different starting hill, opposite fate — exactly the point from the intro.)
+
+<Callout variant="info" title="The valley at D is only two fitness units deep — and it's still impassable">
+Notice the trap doesn't need a *deep* valley. The dip at D is a mere drop from 6 to 4 — two units — and the reward for crossing it is enormous (fitness 9 versus 6). A designer would cross that ditch without a second thought. Hill-climbing cannot cross it at all, because "cross it" begins with one downhill step, and one downhill step is one too many. The *height* of the wall is irrelevant; the fact that it's a wall at all is what stops the climb.
+</Callout>
+
+<MCQ
+  client:visible
+  question="On a fitness landscape, a population sits on a wide, nearly flat PLATEAU where all neighbouring designs have almost identical fitness. Compared to a population on a steep slope, what will its behaviour look like?"
+  options={[
+    { text: 'It will drift sideways almost aimlessly — with neighbours nearly equal in fitness, the gradient is tiny, so selection has little to push on and chance (drift) dominates the movement', correct: true },
+    { text: 'It will climb faster than on a steep slope, because flat ground is easier to move across' },
+    { text: 'It will immediately take a large downhill step to escape the plateau', correct: false },
+    { text: 'It will freeze completely and cannot change at all until the landscape becomes steep' },
+  ]}
+  explanation="Steepness is the *gradient* — how much fitness changes per step — and it sets how strong and directed selection is. On a steep slope neighbours differ a lot in fitness, so selection is decisive and the climb is fast. On a flat plateau neighbours are nearly equal, so there's almost no fitness difference to select on: the population drifts sideways under chance, with little directed push. It doesn't climb *faster* (flat means no 'up' to gain), it doesn't take a big downhill step (uphill-only still holds — it just has no strong 'up' either), and it isn't frozen (drift still moves it around). Shallow gradient equals aimless drift."
+/>
+
+<Categorize
+  client:visible
+  question="Sort each statement into whether it is TRUE of hill-climbing (plain natural selection) or FALSE of it."
+  buckets={['True of hill-climbing', 'False of hill-climbing']}
+  items={[
+    { text: 'It only ever compares a design to its immediate neighbours', bucket: 'True of hill-climbing' },
+    { text: 'It will accept a step that lowers fitness now if it leads somewhere much better later', bucket: 'False of hill-climbing' },
+    { text: 'The peak it reaches is the top of whatever hill it started on — a local peak', bucket: 'True of hill-climbing' },
+    { text: 'It has a map of the whole landscape and plans a route to the tallest summit', bucket: 'False of hill-climbing' },
+    { text: 'It keeps the fitter neighbour and discards the worse one (it is greedy)', bucket: 'True of hill-climbing' },
+    { text: 'It climbs faster where the gradient (slope) is steeper', bucket: 'True of hill-climbing' },
+    { text: 'It reliably finds the single best possible design given enough time', bucket: 'False of hill-climbing' },
+    { text: 'It needs no designer, goal or foresight to find a good design', bucket: 'True of hill-climbing' },
+  ]}
+  explanation="TRUE: hill-climbing is local (compares only to neighbours), greedy (keeps the fitter, discards the worse), gradient-sensitive (steeper slope, faster climb), tops out on a *local* peak (the hill it started on), and needs no designer, goal or foresight — that's its whole cheap magic. FALSE: it will NOT take a downhill step for a later payoff (no foresight, no map), it has NO plan or global view, and it does NOT find the single best possible design — only the nearest good-enough local peak. Every FALSE item is really the same mistake: crediting a foresight-free, local search with the map and plan of a designer."
+/>
+
+## Two misconceptions worth killing on sight
+
+The whole model gets misremembered in two specific, opposite ways. Kill both now.
+
+**Misconception 1: "Survival of the fittest means evolution finds the fittest *possible* design."** This is the single most common misreading of Darwin, and hill-climbing is exactly why it's false. Selection keeps the fittest of the neighbours *currently available* — not the fittest design that could ever exist. It finds the top of the *local* hill, which is merely "fitter than everything one step away," not "the best there is." The English phrase "survival of the fittest" quietly smuggles in "fittest anywhere," but the mechanism only ever certifies "fittest *around here*." That gap — between the local peak it reaches and the global peak it can't — *is* the fitness-landscape model, and it's why evolved designs are so reliably excellent-but-flawed. Evolution optimizes; it does not perfect.
+
+**Misconception 2: "Hill-climbing is random."** Also false, but in the opposite direction. It's tempting, once you hear "mutations are random," to conclude the whole process is a random walk. But look at what's random and what isn't. *Variation* is random — mutations arise blindly, with no regard for what would help. **Selection is not.** Selection is a ruthless, directional filter: it systematically keeps the fitter variants and discards the worse, which makes the population's *movement* directed — reliably, relentlessly **uphill**. So the process is blind but not random: blind *beyond its neighbours* (it can't see the far landscape), yet strongly *directed in where it goes* (always up the local gradient). Random proposal, non-random selection, directed motion. Confusing "the raw material is random" with "the outcome is random" throws away the entire insight.
+
+<Callout variant="warning" title="Blind is not the same as random">
+Say it precisely: **variation is random; selection is directed; the population's motion is directed but blind.** Mutations arise with no foresight (random). Selection then keeps the fitter ones every single time (directed), so the population reliably moves uphill (directed motion) — but it's *blind* past its immediate neighbours, so it can't see or aim at a distant summit. "Blind" (can't see far) and "random" (moves any direction) are completely different failures. Hill-climbing is blind, not random — which is exactly why it climbs so reliably and gets trapped so reliably.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A student objects: 'If mutations are random, then evolution is just a random process — it can't really be going anywhere in particular.' What's the precise error?"
+  options={[
+    { text: 'They conflate the random *raw material* with the process\'s *direction*. Mutation is random, but selection is a directional filter that keeps the fitter variant every time — so the population\'s movement is reliably directed uphill, not random. It\'s blind (can\'t see far) but not directionless', correct: true },
+    { text: 'There is no error — evolution genuinely is a purely random walk with no direction at all' },
+    { text: 'The error is that mutations are actually not random but perfectly planned in advance' },
+    { text: 'The error is that selection also moves the population randomly, cancelling the direction out' },
+  ]}
+  explanation="Two different things are being run together: the randomness of *variation* and the direction of the *process*. Mutations really are random (blind proposals). But selection is the opposite of random — it systematically keeps the fitter variant and culls the rest, which gives the population a strong, reliable *direction*: uphill. So 'random raw material' does NOT imply 'random outcome.' The process is *blind* (it can't see distant peaks) but firmly *directed* (it always climbs the local gradient). The other options either deny selection's directing role or wrongly claim mutations are planned — both throw away the actual mechanism."
+/>
+
+## Watch the engine climb — and refuse to descend
+
+Enough words. Below is the live landscape from the intro, but now watch it with the engine fresh in mind. The horizontal axis is every possible design laid out left to right; height is fitness; the dashed flag marks the tallest summit — the best design there is.
+
+Press **Drop a population** and watch the one rule fire, over and over: the climber feels its neighbours, steps onto the higher one, and repeats — *only ever uphill* — until every neighbour is lower and it halts on a peak. Watch how often that peak is a *low* one, with the true summit flagged across a valley the climber flatly refuses to descend into. Crank **ruggedness** up and the trap springs almost every time; smooth it down to a single gentle hill and the climber always finds the top (one hill, no valleys to bar it). The uphill-only rule never changes — only the *shape* of the terrain decides whether that rule wins or dooms you.
+
+<FitnessLandscape
+  client:visible
+  eyebrow="The greedy engine"
+  title="Watch hill-climbing halt on a peak — never descending"
+  caption="Drop a population and it climbs: neighbour by neighbour, always to the higher one, never down — until every direction points down and it stops on a peak, often a low one with the tallest summit (dashed flag) stranded across a valley it won't cross. That refusal to ever step downhill is the entire engine: cheap and reliable enough to find a peak with no designer, but blind and local enough to be trapped on the wrong one. Crank ruggedness to bury the terrain in traps; smooth it to watch the climb succeed."
+  initialRuggedness={45}
+/>
+
+Two things to burn in while you play. First, **the climber never goes downhill** — that single refusal is the whole engine, and it's why it gets stuck. Second, **the terrain's shape decides its fate**: the *same* greedy rule is flawless on a smooth one-hill landscape and doomed on a rugged, many-peaked one. Hold onto that: half of whether hill-climbing succeeds is the *shape of the problem*, not the searcher.
+
+<FillBlank
+  client:visible
+  question="Consolidate the engine by filling in its four defining words:"
+  text="Hill-climbing is a {{greedy|generous|patient}} search: at each step it keeps the fitter neighbour and discards the worse. It is {{local|global|planned}}, because it compares a design only to its immediate neighbours and has no view of distant terrain. It has {{no foresight|full foresight|a detailed map}}, so it never weighs where a move leads next — only present fitness. And its one iron rule is that it is {{uphill-only|downhill-only|direction-free}}: it refuses any step that lowers fitness right now, even when that step is the only road to a far taller summit. Together these mean the peak it reaches is only ever a {{local|global|guaranteed-best}} one — the top of whatever hill it started on."
+  explanation="Greedy: it grabs the best immediate gain, never planning. Local: its only inputs are the current design and its neighbours. No foresight: it scores neighbours by present fitness alone, never by where they lead. Uphill-only: it will not take a downhill step, so a valley is an impassable wall. Put together, these guarantee it tops out on a *local* peak — the summit of its starting hill — not the global best. That gap between local and global is the whole model, and the subject of the next lesson."
+/>
+
+## Recap
+
+You came in knowing the terrain. You're leaving knowing the engine that walks across it — and exactly why that engine gets marooned:
+
+1. **Hill-climbing is the engine of selection.** Variation proposes neighbouring designs (blindly), selection keeps the fitter and discards the worse (greedily), inheritance carries the winner forward — and the net result is a population that moves *uphill*, one small improving step at a time.
+2. **It is local and foresight-free.** It compares a design only to its immediate neighbours (local) and scores them only by present fitness (no foresight), so it *will not* take a step that lowers fitness now — even when that downhill step is the only route to a far higher summit. A human designer can go down-and-over; selection cannot.
+3. **The uphill-only rule is power and prison at once.** Power: it finds a good design with no designer, goal or foresight — cheaply and reliably. Prison: the design it finds is only ever a *local* peak, the top of whatever hill it started on. The missing map causes both; you can't keep one without the other.
+4. **Steepness sets the speed; a valley is a wall.** A steep gradient means a fast, decisive climb; a flat plateau means aimless sideways drift. But no matter the steepness, the greedy climber halts the moment every neighbour is lower — landing, as the A-through-G table showed, on a lower peak while a taller one sits visible and unreachable across a valley just two units deep.
+
+<Quiz
+  client:visible
+  title="Check yourself: the greedy engine"
+  questions={[
+    {
+      question: 'A conservationist says: "Because these fish have been under selection for millions of years, we can be confident evolution has produced the best possible fish design for this lake." Using hill-climbing, what is the sharpest correction?',
+      options: [
+        { text: 'Selection produces the fittest of the *nearby, reachable* designs — the top of the local hill — not the fittest design that could possibly exist. It optimizes toward a local peak, it does not perfect toward the global one, so "best possible" overstates what the mechanism can deliver', correct: true },
+        { text: 'Nothing to correct — given enough time, selection always finds the single best possible design', correct: false },
+        { text: 'The correction is that selection moves the population randomly, so no design is favoured over another', correct: false },
+        { text: 'The correction is that selection can freely take large downhill steps to reach better designs', correct: false },
+      ],
+      explanation: 'This is misconception #1: reading "survival of the fittest" as "fittest possible." Hill-climbing keeps the fittest of the *available neighbours*, so it reaches a *local* peak — "fitter than everything one step away" — not the global best. Time doesn\'t fix it (a foresight-free search just keeps climbing the same hill), selection is directed rather than random, and it precisely does NOT take downhill steps. "Optimizes toward a local peak, does not perfect toward the global one" is the exact correction.',
+    },
+    {
+      question: 'On the seven-design strip A(3) B(5) C(6) D(4) E(7) F(9) G(8), a greedy climber is dropped at A. Where does it end up, and why doesn\'t it reach the tallest design F?',
+      options: [
+        { text: 'It climbs A→B→C and halts at C (fitness 6), because both of C\'s neighbours (B=5, D=4) are lower. Reaching F would require stepping down through D (fitness 4), and hill-climbing refuses any downhill step — so the taller peak F stays unreachable', correct: true },
+        { text: 'It reaches F (fitness 9), because a hill-climber always finds the single tallest design on the landscape', correct: false },
+        { text: 'It halts immediately at A, because a climber never moves from where it is dropped', correct: false },
+        { text: 'It oscillates forever between C and F without settling anywhere', correct: false },
+      ],
+      explanation: 'From A(3) the climber steps to B(5), then C(6) — each an uphill move. At C, both neighbours (B=5 and D=4) are lower, so every direction is downhill and it halts on C, a *local* peak of only 6. The global peak F(9) sits just to the right, but the only road there dips through D(4) — a downhill step from C — and the uphill-only rule forbids it. So the climber is stranded below the visible summit. (It doesn\'t magically find F, it doesn\'t freeze at A, and it doesn\'t oscillate — greedy climbing is decisive and one-way.)',
+    },
+    {
+      question: 'Which single statement most precisely captures why hill-climbing is "blind but not random"?',
+      options: [
+        { text: 'Variation is random (mutations arise without foresight), but selection is a directional filter that keeps the fitter variant every time — so the population\'s movement is reliably directed uphill; it just can\'t see beyond its immediate neighbours (blind), rather than moving in random directions', correct: true },
+        { text: 'Both variation and selection are random, so the whole process is a directionless random walk', correct: false },
+        { text: 'Both variation and selection are perfectly planned in advance toward the global optimum', correct: false },
+        { text: 'Selection is random but variation is directed, which averages out to no net movement', correct: false },
+      ],
+      explanation: 'The precision is in splitting the two stages. Variation is genuinely random — blind proposals. Selection is genuinely directed — it systematically retains the fitter variant, giving the population a reliable uphill direction. So random raw material plus a directional filter yields *directed* motion, not a random walk. "Blind" names a different limit: the search can\'t see past its neighbours to a distant summit. Blind (can\'t see far) and random (moves any direction) are separate things — hill-climbing is the first, not the second. The other options either randomize selection or plan away the mutations, both of which erase the mechanism.',
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You now own the engine in full: a greedy, local, foresight-free, uphill-only search that walks a population up whatever hill it starts on and halts the instant every neighbour is lower. You've watched it climb, watched it refuse to descend, and watched it strand itself on a low peak with a taller one in plain sight across a two-unit valley. You can tell its randomness (variation) from its direction (selection), and you know the uphill-only rule is its superpower and its cage in one.
+
+Next is lesson 4, **Trapped on a Low Peak**, where we move into the cage and stay a while. That halting-on-a-local-peak you just watched has a name — the **local optimum** — and it is the single most consequential fact in this whole model. We'll cash it out with the real biological rap sheet: the vertebrate eye's backwards wiring and its blind spot, the recurrent laryngeal nerve's absurd detour, the panda's "thumb" — each one a local peak that selection climbed and can never climb back down from. We'll meet the idea of **lock-in**, and finally understand why "good enough" so reliably beats "best" and then refuses to budge. The engine you just built is about to explain a great deal of the living world's beautiful, permanent imperfection.

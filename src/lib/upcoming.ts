@@ -90,33 +90,14 @@ export const upcomingCourses: UpcomingCourse[] = [
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
   // `leverage-points` (23), `lollapalooza-effect` (24), `regression-to-the-mean`
   // (25), `critical-mass` (26), `nash-equilibrium` (the advanced strategy rung,
-  // 27) and `asymmetry-and-optionality` (the advanced decision-making rung, 28)
-  // have graduated and been removed; their topic MDX is now the record. The
-  // lowest-order entry below (`fitness-landscapes`, order 29) is built next. The
-  // remaining queue finishes the advanced tier and opens the expert tier,
-  // spanning biology-evolution (`fitness-landscapes`), strategy
+  // 27), `asymmetry-and-optionality` (the advanced decision-making rung, 28) and
+  // `fitness-landscapes` (the advanced biology-evolution rung, 29) have graduated
+  // and been removed; their topic MDX is now the record. The lowest-order entry
+  // below (`mechanism-design`, order 30) is built next. The remaining queue
+  // finishes the advanced tier and opens the expert tier, spanning strategy
   // (`mechanism-design`), foundations (`combining-models-latticework`) and
   // decision-making/probability (`deciding-under-deep-uncertainty`) so no single
   // roadmap tag races ahead of the others.
-  {
-    slug: 'fitness-landscapes',
-    icon: '🏔️',
-    difficulty: 'advanced',
-    order: 29,
-    accent: 'accent',
-    title: {
-      en: 'Fitness Landscapes',
-      es: 'Paisajes Adaptativos',
-    },
-    description: {
-      en: 'Picture every possible design as a point on a terrain, with height = how well it works. Evolution — and any trial-and-error search — climbs uphill, which means it can get marooned on a low peak with a taller summit hidden across an unclimbable valley. The map of why "good enough" gets stuck.',
-      es: 'Imagina cada diseño posible como un punto de un terreno, con la altura = lo bien que funciona. La evolución — y cualquier búsqueda por ensayo y error — sube cuesta arriba, lo que significa que puede quedar varada en un pico bajo con una cima más alta oculta al otro lado de un valle infranqueable. El mapa de por qué lo "suficientemente bueno" se atasca.',
-    },
-    dependencies: ['natural-selection', 'red-queen-effect'],
-    tags: ['biology-evolution'],
-    buildNotes:
-      'Fitness landscapes — the advanced biology-evolution rung that turns natural-selection into a search-over-a-terrain model (Sewall Wright, 1932) and generalizes far beyond biology. Assumes natural-selection (variation, selection, heredity) and pairs well with red-queen-effect. Sections: the core picture — arrange all possible genotypes/designs on a plane so that similar designs are neighbours, and plot "fitness" (reproductive success, or any performance measure) as height, giving a landscape of peaks, valleys and ridges; hill-climbing — selection only ever moves uphill (small heritable improvements accumulate), so evolution is a *local* search with no foresight; the central consequence — **local optima**: a population can climb to the top of a modest hill and be trapped there, because every single step toward the far taller mountain must first go *downhill* (less fit) across a valley selection won’t cross (why "good enough" beats "best", why the eye’s blind spot and the recurrent laryngeal nerve persist); ruggedness — smooth single-peak landscapes are easy, rugged many-peaked ones trap searchers; what crosses valleys — mutation/drift in small populations, recombination, and a *changing* landscape (the peak moves — tie hard to red-queen: co-evolution means the terrain deforms under you, so there is no final summit); transfer of the model — the same map explains local optima in engineering/design, machine-learning training, business strategy (a firm stuck on a local peak disrupted by someone on a different one), skill acquisition, and the explore-vs-exploit trade-off (exploit = climb the current hill; explore = jump to look for a higher one). Pitfalls: treating evolution as goal-directed "progress toward perfection" (it’s myopic hill-climbing, no goal); assuming the global optimum is reachable or even fixed; over-literal single-peak thinking when real landscapes are high-dimensional and shifting. Build an interactive island: a 1-D or 2-D fitness landscape where the learner drops a population and watches it hill-climb to the nearest peak, with a ruggedness slider (smooth → many-peaked) and a "mutate/jump" control that occasionally lets it cross a valley to a higher summit — plus a toggle that slowly reshapes the terrain (red-queen) so a conquered peak sinks. Recap Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'mechanism-design',
     icon: '🛠️',

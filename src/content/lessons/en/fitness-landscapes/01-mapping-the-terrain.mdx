@@ -1,0 +1,231 @@
+---
+title: "Mapping the Terrain"
+description: "How to actually build a fitness landscape from scratch: lay out every possible design as points arranged by similarity, stack fitness as height, and learn the vocabulary of peaks, valleys, ridges and the global summit — so you own the picture instead of just borrowing it."
+topic: "en/fitness-landscapes"
+order: 2
+minutes: 12
+updated: 2026-07-03
+---
+
+import { MCQ, Quiz, Callout, Categorize, FillBlank, FitnessLandscape } from '@/components/react';
+
+In the intro you borrowed the picture — a rolling terrain where height means fitness and every search can only walk uphill — and you watched a climber get marooned on a low peak. Borrowing a picture is fine for a first look. But to *use* the model, to run it on your own problems, you need to be able to draw the thing from scratch: to take "every possible version of some thing" and turn it into an honest terrain you can point at.
+
+That's this whole lesson. Good news up front — the landscape is built from only **two ideas**. Not five, not a dozen. Two. Get those two clear and the peaks, valleys, ridges and traps all fall out for free. So before we name anything, let's make sure you can *feel* the first idea, because it's the one that trips everyone.
+
+<MCQ
+  client:visible
+  pretest
+  question="Picture a padlock with four dials, each running 0–9 — 10,000 possible combinations. Now imagine laying all 10,000 combinations out on a table so that any two settings differing by a single click of a single dial sit right next to each other as neighbours. You're standing on the combination 4-4-4-4. Which of these settings is a *neighbour* of yours — one small change away?"
+  options={[
+    { text: '4-4-4-5 — a single click of the last dial. It sits right beside you; you can step to it in one move', correct: true },
+    { text: '7-1-9-2 — it is a valid combination, so it must be close by on the table' },
+    { text: '4-4-4-4 backwards, 4-4-4-4 — the same setting is its own neighbour' },
+    { text: 'None — combinations do not have neighbours, they are just separate numbers' },
+  ]}
+  explanation="No grade on a pretest — just feel the shape. The whole trick of a landscape is that we don't lay designs out at random; we arrange them so that *similar* ones sit next to each other. Here 'similar' means 'one click away', so 4-4-4-5 is your immediate neighbour, and 4-4-4-4 could step to it in a single move. 7-1-9-2 is a perfectly valid combination but it's *far away* on the table — you'd have to change every dial to reach it. That arrangement-by-similarity is what turns a bag of possibilities into a terrain you can walk across. Hold onto the word neighbour; it's half of everything."
+/>
+
+That padlock is going to follow us through the lesson, because it's the cleanest possible case of the first big idea: a vast set of possibilities, arranged so that *one small change* takes you to a *neighbour*. You just did the hardest conceptual move in the whole model — deciding who sits next to whom — without being told the rules. Let's make it precise.
+
+## The horizontal axis: design space, laid out by similarity
+
+**The analogy.** Think of a colossal hotel where every possible version of your thing gets its own room. Every possible padlock setting, every possible protein, every possible keyboard layout, every possible business strategy — each one has a room. Now here's the rule the hotel is built on: rooms are assigned so that **designs one small change apart are next-door neighbours**. Change a single dial, swap a single letter, tweak one knob, and you've walked to the room next door. Change everything at once and you're on the far side of the hotel. That hotel — every possibility, arranged by similarity — is the **horizontal axis** of a fitness landscape. We call the whole thing the **design space**: the complete set of all possible versions of the thing, spread out so that nearness on the map means similarity in the design.
+
+**The precise definition.** The **design space** is the set of *every possible configuration* of whatever you're studying, laid out so that two configurations sit close together exactly when one can be turned into the other by a *small* change (a single mutation, a single edit, a single adjustment). "Small change" is whatever counts as one step for your problem. The axis isn't a number line you measure — it's a *map of possibilities*, and the only thing that matters about a design's position is **who its neighbours are**.
+
+**Worked example — the four-dial padlock.** Back to the lock. Four dials, each 0–9, gives 10 × 10 × 10 × 10 = **10,000 possible settings** — that's your design space, ten thousand rooms. A "small change" is one click of one dial. So the setting 4-4-4-4 has neighbours like 4-4-4-5, 4-4-4-3, 4-4-5-4, 3-4-4-4 — every setting reachable by nudging a single dial by one. Notice two things. First, the space is *finite but large*: only four dials, yet ten thousand rooms, and real designs have vastly more knobs than four. Second, neighbours are defined *by the moves you allow*, not by the numbers looking similar — 4-4-4-4 and 4-4-4-5 are neighbours because one click connects them, while 4-4-4-4 and 7-1-9-2 are far apart even though both are just four-digit numbers.
+
+**Worked example — spelling out a word.** Prefer letters to dials? Take every possible five-letter string as your design space (all 26⁵ ≈ 12 million of them). Let "one small change" mean "swap a single letter." Then `HOUSE` is a neighbour of `MOUSE` (change the first letter) and of `HORSE` (change the third), but it is *nowhere near* `PLANT`, which needs every letter changed. Arrange all 12 million strings so that one-letter-apart words sit side by side, and you've built a design space you could, in principle, walk across one letter at a time.
+
+<Callout variant="warning" title="The axis is NOT time and NOT progress">
+The single most common misreading of a fitness landscape is treating the horizontal axis like a timeline or a "how far along am I" progress bar — as if moving right means later, or better, or more evolved. It means none of those. **The horizontal axis is the space of *possibilities*, not a march through time.** Left and right are just *addresses* — different designs that happen to be drawn next to each other because they're similar. A population can wander left, right, or in circles across this axis over generations. Nothing about a design's horizontal position tells you when it existed or how good it is. "How good" is the *other* axis entirely — that's next.
+</Callout>
+
+### When to use it
+
+Reach for "design space" the moment you catch yourself thinking about *all the ways something could be* rather than the one way it currently is. Any time there's a set of possible versions and a notion of "a small change from here," you can lay it out as a design space: mutations of a gene, tweaks to a recipe, edits to a résumé, moves in a game, parameter settings for a model. The trade-off is that you have to *commit to what counts as one small step* — change that, and you rewire who's a neighbour and reshape the whole terrain. Choosing the step size honestly is most of the skill; the rest of the picture just sits on top of it.
+
+## The vertical axis: fitness is height
+
+Now the second — and final — idea. We have a flat hotel of possibilities. Time to give it altitude.
+
+**The analogy.** Go back to the hotel and imagine raising each room up on a stilt whose height is *how well that design works*. A brilliant design gets a towering stilt; a hopeless one barely leaves the ground. Walk the corridors now and the floor rolls beneath you — up toward the excellent designs, down toward the awful ones. That rolling floor is the terrain. The height of the floor under any room is that design's **fitness**.
+
+**The precise definition.** **Fitness** is a single number attached to each point in design space that says **how well that design performs** at whatever it's being judged on. In biology it's reproductive success — how many surviving offspring a design tends to leave (survival and reproduction rolled into one). But the model doesn't care what the performance measure *is*, only that each design gets one: a keyboard layout's fitness could be typing speed, a protein's could be how tightly it binds, a business strategy's could be profit, a chess move's could be its win rate. Whatever your yardstick, fitness is that yardstick's reading, and on the landscape it becomes **height**. Tall = good, short = bad, and that's the entire vertical axis.
+
+**Worked example — the padlock, scored.** Suppose the lock's actual combination is 7-2-7-2, and we score each of the 10,000 settings by how many dials it gets *right*. Then fitness runs from 0 (every dial wrong) to 4 (the jackpot, 7-2-7-2). The setting 7-2-7-2 is the single tallest tower on the landscape. 7-2-7-9 stands one notch lower (three dials right). 4-4-4-4 is down at height 0, in the flatlands. Now the terrain has shape: it *rises* as you click dials toward 7-2-7-2 and *falls* as you click them away. Every design has a horizontal address (which setting it is) and a height (how many dials it got right) — neighbours plus height, nothing more.
+
+<Callout variant="tip" title="Two ideas are the whole machine">
+Everything in this course is built from exactly two things: **neighbours** (which designs sit next to which — the horizontal arrangement by similarity) and **height** (how good each design is — its fitness). That's it. Peaks, valleys, ridges, traps, the reason evolution gets stuck — all of it is just consequences of these two. If a landscape ever confuses you, ask the two questions: *who's next to whom?* and *how tall is each one?* Answer those and you've fully specified the terrain.
+</Callout>
+
+**The misconception to kill: height is not complexity, and not size.** It is deeply tempting to read the tall towers as the *big, fancy, complicated* designs and the short ones as the simple, primitive ones. Resist it hard. Height is **only performance** on your chosen measure. A dead-simple design can be the tallest peak on the landscape, and an elaborate, ornate one can sit in a valley because it works badly. A bacterium is vastly less complex than a human and yet is, by the measure of reproductive success in its niche, staggeringly fit — a towering peak. Height answers one question and one only: *how well does this design do the job?* Not how big, not how intricate, not how advanced. Just how well.
+
+<MCQ
+  client:visible
+  question="Which statement about the two axes of a fitness landscape is TRUE?"
+  options={[
+    { text: 'The horizontal axis places designs by *similarity* (neighbours are one small change apart) and the vertical axis is *fitness* — how well each design performs', correct: true },
+    { text: 'The horizontal axis is time, and moving right means a design evolved more recently' },
+    { text: 'The vertical axis is a design\'s complexity — taller designs are always more elaborate' },
+    { text: 'The horizontal axis is a design\'s size and the vertical axis is its age' },
+  ]}
+  explanation="The two axes, and only these two: horizontal = design space arranged so neighbours are one small change apart; vertical = fitness, meaning performance on whatever measure you're using. The other options smuggle in the classic errors. Horizontal is *not* time (it's the space of possibilities — a population can wander it in any direction). Vertical is *not* complexity or size — a dumb-simple design can be the tallest peak if it performs best, and an ornate one can sit in a valley. Neighbours and height. That's the machine."
+/>
+
+<Categorize
+  client:visible
+  question="Every fact about a design lands on one of the two axes. Sort each statement by which axis it describes: the HORIZONTAL axis (a design's position in design space — who its neighbours are) or the VERTICAL axis (its fitness — how well it performs)."
+  buckets={['Horizontal axis (position / neighbours)', 'Vertical axis (fitness / height)']}
+  items={[
+    { text: 'This padlock setting is one click away from that one', bucket: 'Horizontal axis (position / neighbours)' },
+    { text: 'This design leaves more surviving offspring than that one', bucket: 'Vertical axis (fitness / height)' },
+    { text: 'These two keyboard layouts differ by a single swapped key', bucket: 'Horizontal axis (position / neighbours)' },
+    { text: 'This protein binds its target more tightly (works better)', bucket: 'Vertical axis (fitness / height)' },
+    { text: 'You can reach this word from that word by changing one letter', bucket: 'Horizontal axis (position / neighbours)' },
+    { text: 'This strategy earns higher profit than its rival', bucket: 'Vertical axis (fitness / height)' },
+  ]}
+  explanation="Anything about *who sits next to whom* — one click, one swapped key, one changed letter — is the horizontal axis: it's the arrangement of design space by similarity. Anything about *how well a design performs* — more offspring, tighter binding, higher profit — is the vertical axis: fitness, drawn as height. Every statement about a landscape reduces to one of these two. Nail the sort and you've internalised that the whole terrain is just neighbours (horizontal) plus height (vertical)."
+/>
+
+## The vocabulary of terrain
+
+Two axes give you a rolling terrain. Now we name its features — because once the landscape has hills and hollows, a small, precise vocabulary lets you *say what you see*, and these words recur every single lesson from here on.
+
+**Peaks.** A **peak** is a design that is fitter than *all of its immediate neighbours* — a room whose floor is higher than every room next door. Stand on a peak and every single step you could take (every small change) leads *downhill*, to a worse design. That's the definition of being stuck: nowhere to go but down. A peak that's higher than its neighbours but not the highest thing on the whole map is a **local optimum** (you met the term in the intro) — locally the best, globally maybe mediocre. The four-dials-right setting 7-2-7-2 is a peak: every one-click change from it lowers your score.
+
+**Valleys.** A **valley** is a low-fitness region — designs that work badly, sitting in the hollows between hills. Crucially, a valley isn't just "bad," it's *in the way*: to get from one peak to a taller one, you usually have to *descend into a valley first* and climb back out the other side. Since an uphill-only search refuses to go down, valleys are the walls of the prison. In the padlock, a setting with zero dials right sits deep in a valley.
+
+**Ridges.** A **ridge** is a *connected* run of high-fitness designs — a path along the high ground where you can move from neighbour to neighbour *without ever dropping down into a valley*. Ridges are precious: they're the rare routes that let a search travel a long way across the landscape while staying up high, reaching distant designs it could never get to if the only high ground were isolated peaks. Think of it as a mountain trail that stays near the summit line instead of forcing you down and back up.
+
+**The global optimum.** The **global optimum** is *the single tallest peak on the entire landscape* — the best design there is, full stop. Every other peak, however proud, is a local optimum by comparison. In the intro island, this is the summit marked with the dashed flag. The whole drama of the course is the gap between *the peak a search actually reaches* (some local optimum it climbed) and *the global optimum* (the flag across the valley it can't cross). 7-2-7-2, the only setting with all four dials right, is the padlock's global optimum.
+
+Here's the whole vocabulary in one place — terrain word on the left, what it means back in design terms on the right:
+
+| Terrain word | What it means in design terms |
+|---|---|
+| **Peak** | A design fitter than *all* its immediate neighbours — every small change makes it worse |
+| **Local optimum** | A peak that's the best *around here* but not the best overall — a trap you can't step off of |
+| **Valley** | A region of low-fitness (bad) designs; the low ground a search must cross to reach a better peak |
+| **Ridge** | A *connected* run of high-fitness designs — a high path from neighbour to neighbour that never drops into a valley |
+| **Global optimum** | The single tallest peak on the whole landscape — the best design there is (the flagged summit) |
+| **Slope / gradient** | How steeply fitness rises or falls as you step to a neighbour — which way is "up" |
+
+<MCQ
+  client:visible
+  question="A software team has tuned their app to a setting where *every* small tweak they try — to the layout, the pricing, the onboarding — makes their key metric slightly *worse*. They conclude they've found the best possible design. Spot the trap in that conclusion."
+  options={[
+    { text: 'They\'ve found a *local* optimum, not necessarily the *global* one — "every small change is worse" only means they\'re on a peak, which could be a low hill with a far taller design across a valley they\'d have to get temporarily worse to reach', correct: true },
+    { text: 'They\'re right — if every small change makes things worse, this must be the single best design that exists' },
+    { text: 'They\'ve found a valley, because being unable to improve means they\'re at the bottom' },
+    { text: 'They\'ve found a ridge, because ridges are where every neighbour is worse' },
+  ]}
+  explanation="'Every small change makes it worse' is *exactly* the definition of standing on a peak — but a peak is only guaranteed to be a *local* optimum, the best in its immediate neighbourhood. It says nothing about whether a taller peak (the global optimum) exists elsewhere. Reaching that taller peak would mean crossing a valley — getting temporarily worse — which their small-tweaks-only search will never do. So 'we can't improve locally, therefore this is the best design' is the signature trap of the whole course. (It's not a valley — valleys are *low* ground; and a ridge is a *high path*, not a lone stuck point.)"
+/>
+
+### When to use it
+
+Use this vocabulary as a diagnostic checklist whenever you're staring at something that seems stuck or "optimised." Ask: *Is this a peak?* (does every small change make it worse?) *Is it the global optimum or just a local one?* (is there clearly a better design somewhere the search can't reach?) *What valley is in the way?* (what would you have to get temporarily worse at to escape?) *Is there a ridge* — a clever sequence of changes that stays high the whole way? The trade-off is that in a real, high-dimensional problem you usually *can't see* the whole landscape, so you can't be sure a taller peak exists — but knowing the vocabulary means you at least ask the right question instead of declaring victory on a molehill.
+
+## Wright, 1932: where the picture came from
+
+The geneticist **Sewall Wright** introduced this picture in a 1932 paper with the gloriously unglamorous title "The Roles of Mutation, Inbreeding, Crossbreeding and Selection in Evolution." He was wrestling with a hard problem — how populations could ever reach *very good* combinations of genes when getting there sometimes required passing through worse intermediate combinations — and he needed a way to *think* about it visually. So he drew a field of contour lines, like a topographic map, where each point was a combination of genes and the contours marked fitness. That sketch let biologists suddenly *see* something that equations had buried: that a population climbing toward better gene combinations could get trapped on a modest hill, blocked from a higher one by a valley of unfit intermediates. Nearly a century later the same picture has been borrowed by machine learning, protein science, engineering, and strategy — but it started as one geneticist's attempt to draw a problem he couldn't otherwise hold in his head. That's the whole reason the model is worth learning: it makes an invisible difficulty *visible*.
+
+## Read a real landscape
+
+You've built the terrain conceptually — now practice *reading* one. Below is a live fitness landscape. This time, don't rush to drop a population; first just **read the picture** using everything from this lesson. Trace the **horizontal axis**: that's design space, every possible design laid out so neighbours sit side by side. Trace the **vertical axis**: that's fitness — the height of the terrain is how good each design is. Then find the terrain features by name: the **peaks** (points higher than their neighbours), the **valleys** between them, any **ridge** where high ground connects, and the **dashed flag** marking the **global optimum**, the single tallest summit.
+
+<FitnessLandscape
+  client:visible
+  eyebrow="Read it before you run it"
+  title="Name what you see: axes, peaks, valleys, the global summit"
+  initialRuggedness={30}
+  caption="Read the terrain first. Left-to-right is design space (every possible design, neighbours side by side) — NOT time and NOT progress. Up-and-down is fitness — how good each design is, NOT its complexity or size. Now spot the features by name: the peaks (fitter than all their neighbours = local optima), the valleys between them (the low ground a search must cross), any ridge of connected high ground, and the dashed flag on the single tallest summit — the global optimum. Once you can name every feature, you own the picture. Then, if you like, drop a population and watch a climber get stranded on a local peak with the flag taunting it across a valley."
+/>
+
+Say it out loud as you look: "left-to-right is *which design*; up-and-down is *how good*; that bump is a *peak*, the best in its little neighbourhood; the dip beside it is a *valley*; the flagged one is the *global optimum*." When those words come automatically, you've stopped borrowing the picture and started owning it.
+
+## The dimensionality caveat: the cartoon vs. the real thing
+
+One honest confession before we go, because the model is often oversold. The landscape you've been looking at — a single wavy line, or at most a 3-D surface of rolling hills — is a **cartoon**. Real design spaces have as many dimensions as the thing has independent knobs to turn.
+
+**Why.** Our padlock had four dials, so its *true* design space is four-dimensional — you'd need four axes just to place a setting, plus a fifth for its height. A protein 100 amino acids long has a 20-choices-at-each-of-100-positions design space; a genome has thousands of genes; a business has countless strategic levers. You cannot draw a 100-dimensional terrain. So we *flatten* it down to one or two dimensions for the page — which is exactly like drawing a mountain range as a single line on a chart. The line is a useful lie: it throws away almost all the directions you could actually move.
+
+**What survives the flattening, and what doesn't.** Here's the reassuring part. The *logic* of the model — the part you'll actually use — survives the cartoon completely intact, because it depends only on the two ideas that don't care about dimension count: **neighbours** (a design still has neighbours one small change away, however many dimensions there are) and **height** (each design still has a fitness). And so the punchline survives too: an uphill-only search still climbs to a local peak and stops, whether the landscape has 1 dimension or 10,000. What you must *not* do is over-read the cartoon's *shape* — count its peaks, eyeball the "distance" between hills, or assume valleys are as narrow as they look on a line. In high dimensions there are usually vastly more directions to move (which can mean *more* escape routes, since a wall in the 1-D picture may have a door you can't draw) and the geometry gets genuinely weird. So trust the *logic* of the landscape; distrust the *literal shape* of any low-dimensional drawing of it.
+
+<Callout variant="info" title="Trust the logic, not the literal shape">
+The 1-D and 2-D landscapes in this course are teaching cartoons of spaces with far more dimensions. Keep the *ideas* — neighbours, height, uphill-only, local vs. global peaks — because those hold in any number of dimensions. But don't take the *picture* literally: don't count its peaks and conclude the real problem has that many, and don't assume a valley that looks like an impassable wall on a line has no door in some direction the drawing couldn't show. The cartoon is how we hold the model in our heads; the real terrain is bigger and stranger than any single line.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A colleague looks at a 2-D fitness-landscape drawing with three peaks and says: 'So the real protein-folding problem has exactly three good solutions, and the two valleys between them are impassable.' What's wrong with reading the cartoon that literally?"
+  options={[
+    { text: 'The 2-D drawing is a flattened cartoon of a space with hundreds of dimensions — its exact peak-count and valley-widths are artifacts of the flattening, not real features. The *logic* (uphill-only search gets stuck on local peaks) survives, but the literal shape does not', correct: true },
+    { text: 'Nothing is wrong — a 2-D landscape drawing shows the real number of peaks and the real width of every valley' },
+    { text: 'The drawing is wrong because real fitness landscapes are always perfectly smooth with a single peak' },
+    { text: 'The problem is that fitness landscapes only apply to padlocks, never to proteins' },
+  ]}
+  explanation="A real protein's design space has one dimension per position (hundreds of them), so a 2-D picture is a drastic flattening — its three peaks and two valleys are drawing artifacts, not a census of real solutions. What *does* carry over from the cartoon is the logic that depends only on neighbours and height: an uphill-only search climbs to a local peak and stops, in any dimension. What does *not* carry over is the literal geometry — in high dimensions a valley that looks like a wall on a line may have a passable route in a direction the drawing can't show. Trust the logic; distrust the exact shape."
+/>
+
+<FillBlank
+  client:visible
+  question="Lock in the whole vocabulary of terrain by filling each blank:"
+  text="A fitness landscape is built from two ideas: the horizontal axis is {{design space|a timeline|complexity}}, where designs one small change apart are {{neighbours|opposites|duplicates}}, and the vertical axis is {{fitness|age|size}} — how well each design performs, drawn as height. A design fitter than all its immediate neighbours is a {{peak|valley|ridge}}; if it's the best only in its own neighbourhood it's a {{local optimum|global optimum|dead end}}. The single tallest peak on the whole landscape is the {{global optimum|local optimum|slope}}. Low-fitness regions a search must cross to reach a better peak are {{valleys|ridges|summits}}, while a connected run of high-fitness designs that stays up high is a {{ridge|valley|cliff}}. The picture was drawn by {{Sewall Wright|Charles Darwin|Gregor Mendel}} in 1932, and any low-dimensional drawing of it is a {{cartoon|photograph|blueprint}} of a much higher-dimensional space."
+  explanation="Design space (horizontal) arranges every possibility so that one-small-change-apart designs are neighbours; fitness (vertical) is performance drawn as height. A point fitter than all its neighbours is a peak; a peak that's only locally best is a local optimum; the tallest peak overall is the global optimum. Valleys are the low ground a search must cross; a ridge is a connected high path that never drops into a valley. Sewall Wright drew the whole thing in 1932, and any 1-D or 2-D rendering is a cartoon of a far higher-dimensional space — keep its logic, not its literal shape."
+/>
+
+## Recap
+
+You walked in able to borrow the fitness-landscape picture. You're walking out able to *build* one from scratch and name every feature on it:
+
+1. **Design space is the horizontal axis** — every possible version of the thing, laid out so that designs one small change apart are **neighbours**. It is *not* time and *not* progress; horizontal position is just an address, decided by *who sits next to whom*.
+2. **Fitness is the vertical axis** — how well each design performs (survival and reproduction in biology, or any performance measure you choose), drawn as **height**. It is *not* complexity and *not* size: a dead-simple design can be the tallest peak, an ornate one a valley.
+3. **Two ideas run the whole machine** — *neighbours* (the horizontal arrangement) and *height* (the vertical fitness). Every peak, valley, ridge and trap is just a consequence of those two.
+4. **The vocabulary of terrain:** a **peak** is fitter than all its neighbours (every small change makes it worse); a **local optimum** is a peak that's only best around here; the **global optimum** is the single tallest summit; **valleys** are the low ground a search must cross to reach a better peak; a **ridge** is a connected high path that never dips down. **Sewall Wright** drew it in 1932 to make an invisible difficulty visible.
+5. **The cartoon caveat:** real landscapes have as many dimensions as the thing has knobs, so any 1-D or 2-D drawing is a flattened cartoon. Keep its *logic* (neighbours, height, uphill-only, local vs. global peaks — all dimension-proof); distrust its *literal shape* (peak counts and valley widths are drawing artifacts).
+
+<Quiz
+  client:visible
+  title="Check yourself: mapping the terrain"
+  questions={[
+    {
+      question: 'You want to lay out all possible five-letter passwords as a design space. What is the correct way to decide which passwords are *neighbours* (sit next to each other)?',
+      options: [
+        { text: 'Two passwords are neighbours when one can be turned into the other by a single small change — e.g. swapping one letter — so that nearness on the map means similarity of design', correct: true },
+        { text: 'Passwords are neighbours when they were created at around the same time', correct: false },
+        { text: 'Passwords are neighbours when they contain the same number of characters, regardless of the letters', correct: false },
+        { text: 'Passwords are neighbours when they have the same fitness (are equally strong)', correct: false },
+      ],
+      explanation: 'The horizontal axis arranges designs by *similarity*: two are neighbours when one small change (here, swapping a single letter) connects them. That\'s what makes the axis a walkable map rather than a random pile. Neighbours have nothing to do with *when* a design was made (that\'s the time confusion the axis is NOT) or with having equal fitness (that\'s the vertical axis). Same length matters only because it defines the space; within it, neighbourliness is about one-change-apart.',
+    },
+    {
+      question: 'Two designs sit right next to each other on the landscape, but one towers far above the other in height. What does that difference in height tell you?',
+      options: [
+        { text: 'One design performs far better than the other (higher fitness) even though they are nearly identical — a tiny change in design produced a big change in how well it works', correct: true },
+        { text: 'One design is far more complex or elaborate than the other', correct: false },
+        { text: 'One design is much older than the other', correct: false },
+        { text: 'One design is physically much larger than the other', correct: false },
+      ],
+      explanation: 'Height is fitness and nothing else — how well a design performs. Two near-identical neighbours with very different heights means one small change caused a big performance swing (steep slope). It says nothing about complexity, age, or size: those are exactly the false readings of the vertical axis. A slightly different protein that binds vastly better, or a résumé one word away that lands far more interviews — same idea. Neighbours can differ wildly in height, and height only ever means "how good."',
+    },
+    {
+      question: 'A machine-learning engineer trains a model until no small tweak to its settings improves accuracy, and declares the model optimal. Using the terrain vocabulary, what has she actually demonstrated — and what remains unknown?',
+      options: [
+        { text: 'She has shown the model sits on a *peak* (a local optimum) — every small change lowers accuracy. What remains unknown is whether it\'s the *global* optimum; a far better setting could exist across a valley her small-tweak search won\'t cross', correct: true },
+        { text: 'She has proven the model is the global optimum, since no change improves it', correct: false },
+        { text: 'She has shown the model is in a valley, since it cannot be improved', correct: false },
+        { text: 'She has found a ridge, because no neighbouring setting is better', correct: false },
+      ],
+      explanation: '"No small tweak improves it" is precisely the definition of a peak / local optimum: every neighbour is worse. But that guarantees only *local* bestness — it says nothing about whether a taller peak (the global optimum) exists elsewhere, reachable only by first getting temporarily worse (crossing a valley), which her small-tweak search refuses to do. Declaring it the *global* optimum overclaims; calling it a valley is backwards (valleys are low ground); a ridge is a high *path*, not a stuck point. The honest statement: "on a peak, unknown whether it\'s the tallest one."',
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You can now build a fitness landscape from nothing — design space along the bottom, fitness as height, and the full vocabulary of peaks, valleys, ridges and the global summit to describe it. You know the two ideas that run the whole machine (neighbours and height), the classic misreadings to avoid (the axis isn't time, the height isn't complexity), and the honest limits of the cartoon.
+
+Next is lesson 3, **Hill-Climbing** — the *engine* that moves across this terrain. We've built the map; now we watch how a search actually travels it. You'll see exactly why selection is an *uphill-only, local, foresight-free* walk, what "local" really means when you can only feel around your own feet, and why that single rule — never step downhill — is at once the source of all the model's power and the reason it gets so reliably, so tragically stuck.
