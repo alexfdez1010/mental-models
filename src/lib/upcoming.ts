@@ -46,9 +46,9 @@
  * `critical-mass`, `nash-equilibrium`, …) have graduated and been removed.
  * Lowest `order` is built next. The remaining entries finish the **advanced
  * tier** and open the **expert tier**, deliberately kept tag-diverse so no
- * single roadmap tag races ahead: decision-making (`asymmetry-and-optionality`,
- * `deciding-under-deep-uncertainty`), biology-evolution (`fitness-landscapes`),
- * strategy (`mechanism-design`) and foundations (`combining-models-latticework`).
+ * single roadmap tag races ahead: biology-evolution (`fitness-landscapes`),
+ * strategy (`mechanism-design`), foundations (`combining-models-latticework`)
+ * and decision-making/probability (`deciding-under-deep-uncertainty`).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -89,33 +89,15 @@ export const upcomingCourses: UpcomingCourse[] = [
   // ── Advanced → expert tier — kept tag-diverse ──────────────────────────────
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
   // `leverage-points` (23), `lollapalooza-effect` (24), `regression-to-the-mean`
-  // (25), `critical-mass` (26) and `nash-equilibrium` (the advanced strategy
-  // rung, 27) have graduated and been removed; their topic MDX is now the
-  // record. The lowest-order entry below (`asymmetry-and-optionality`, order 28)
-  // is built next. The remaining queue finishes the advanced tier and opens the
-  // expert tier, spanning decision-making (`asymmetry-and-optionality`,
-  // `deciding-under-deep-uncertainty`), biology-evolution (`fitness-landscapes`),
-  // strategy (`mechanism-design`) and foundations (`combining-models-latticework`)
-  // so no single roadmap tag races ahead of the others.
-  {
-    slug: 'asymmetry-and-optionality',
-    icon: '🎢',
-    difficulty: 'advanced',
-    order: 28,
-    accent: 'brand',
-    title: {
-      en: 'Asymmetry & Optionality',
-      es: 'Asimetría y Opcionalidad',
-    },
-    description: {
-      en: 'Some bets lose you a little and win you a lot; others do the reverse. When the downside is capped and the upside is open, you can be wrong most of the time and still come out far ahead. The model behind options, experiments, and antifragile decisions.',
-      es: 'Algunas apuestas te hacen perder poco y ganar mucho; otras, al revés. Cuando la pérdida está acotada y la ganancia es abierta, puedes equivocarte casi siempre y aun así salir muy por delante. El modelo tras las opciones, los experimentos y las decisiones antifrágiles.',
-    },
-    dependencies: ['margin-of-safety', 'fat-tails'],
-    tags: ['decision-making'],
-    buildNotes:
-      'Asymmetry & optionality — the advanced decision-making rung: shifting attention from "how likely?" to "how lopsided are the payoffs?". Builds on expected value, margin-of-safety and fat-tails. Sections: the core idea — a decision’s value is probability *times magnitude*, and when magnitudes are wildly asymmetric the magnitude dominates; a convex ("smile") payoff has limited downside and open-ended upside, a concave ("frown") payoff the reverse; worked examples — a capped-loss / uncapped-gain bet where you lose small on 80% of tries and win big on 20% and still profit hugely (show the arithmetic), versus the mirror trap of "picking up pennies in front of a steamroller" (small steady gains, rare catastrophic loss — tie to fat-tails and the tail-risk lesson); optionality — paying a small, known cost for the *right but not the obligation* to a large upside (financial options, but also a cheap experiment, an option to renew, keeping several paths open); why optionality thrives on volatility and uncertainty (more variance = more valuable the capped-downside upside — the antifragile idea, Taleb) and why fragility is hidden negative optionality; the barbell strategy (combine very safe with very risky, avoid the fragile middle); Jensen’s inequality stated in words (for a convex payoff, the average outcome beats the outcome of the average) without heavy math; the decision heuristic — "cut the downside, keep the upside open," seek convex bets, run many small reversible experiments and let the winners run. Pitfalls: ignoring the *cost* of optionality (options aren’t free; over-paying for lottery tickets); mistaking a capped-downside story for one whose downside is actually unbounded; confusing high variance with good asymmetry. Build an interactive island: a payoff-shape explorer where the learner sets downside cap, upside slope and win-probability and watches the expected value and the full outcome distribution, with a toggle between a convex bet, a concave bet and a barbell — and a "run 100 trials" button that shows the convex bet winning despite a low hit-rate. Recap Quiz + MindMap. en + es twin.',
-  },
+  // (25), `critical-mass` (26), `nash-equilibrium` (the advanced strategy rung,
+  // 27) and `asymmetry-and-optionality` (the advanced decision-making rung, 28)
+  // have graduated and been removed; their topic MDX is now the record. The
+  // lowest-order entry below (`fitness-landscapes`, order 29) is built next. The
+  // remaining queue finishes the advanced tier and opens the expert tier,
+  // spanning biology-evolution (`fitness-landscapes`), strategy
+  // (`mechanism-design`), foundations (`combining-models-latticework`) and
+  // decision-making/probability (`deciding-under-deep-uncertainty`) so no single
+  // roadmap tag races ahead of the others.
   {
     slug: 'fitness-landscapes',
     icon: '🏔️',

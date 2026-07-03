@@ -1,0 +1,449 @@
+---
+title: "Perder casi todas las apuestas y ganar la guerra"
+description: "Mira cómo una apuesta convexa pierde el 80% de sus intentos y aun así termina muy por delante — desarrollado con toda la aritmética — y luego mira cómo su espejo cóncavo gana casi todos los intentos y se desangra hasta la ruina. Aquí es donde 'recoger monedas delante de una apisonadora' se encuentra con las colas anchas."
+topic: "es/asymmetry-and-optionality"
+order: 3
+minutes: 11
+updated: 2026-07-03
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, Callout } from '@/components/react';
+
+La lección anterior os dio las dos formas: la sonrisa **convexa (convex)** (pérdida
+acotada, ganancia abierta) y el ceño **cóncavo (concave)** (ganancia acotada, pérdida
+abierta). La idea era elegante. Esta lección la vuelve *aritmética*. Vamos a tomar una
+apuesta convexa y una apuesta cóncava, ejecutar cada una cien veces y sumar cada euro
+por el camino. Nada de vaguedades, nada de "confía en mí, sale a cuenta". Un libro de
+cuentas.
+
+Y el remate te parecerá mal la primera vez que lo veas: la apuesta convexa va a
+**perder cuatro de cada cinco veces** y terminar el año con **\$120** de más, mientras
+que la apuesta cóncava **gana nueve de cada diez veces** y termina con **\$110** de
+menos. El que gana la mayoría de las batallas pierde la guerra. Para cuando hayas
+contado el último euro, "¿con qué frecuencia gané?" te parecerá la pregunta de aficionado
+que es.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una apuesta te hace perder $1 el 80% de las veces y te hace ganar $10 el otro 20%. A lo largo de 100 intentos, ¿aproximadamente dónde terminas?"
+  options={[
+    { text: "Con unos $120 de más — las 20 ganancias de $10 (+$200) cubren de sobra las 80 pérdidas de $1 (−$80)", correct: true },
+    { text: "Con unos $60 de menos — perder el 80% de las veces tiene que dejarte en números rojos" },
+    { text: "Justo en el punto de equilibrio — las ganancias y las pérdidas se cancelan" },
+    { text: "Imposible saberlo sin conocer el orden exacto de ganancias y pérdidas" },
+  ]}
+  explanation="No hay penalización en un pretest — pero esto es toda la lección en una sola suma. 80 pérdidas × −$1 = −$80. 20 ganancias × +$10 = +$200. Neto: +$120. Te equivocaste el 80% de las veces y terminaste con $120 de más, porque la ganancia rara (10×) empequeñece la pérdida frecuente (1×). El orden no afecta al total — la suma es conmutativa. La tasa de aciertos no te dijo nada; la magnitud te lo dijo todo."
+/>
+
+## La apuesta convexa, con toda la aritmética
+
+Aquí tienes la analogía a la que aferrarte: una apuesta convexa es una **cartera de
+capital riesgo en tu bolsillo**. La mayoría de las pequeñas empresas que respaldas se
+van a cero y te cuestan tu pequeña participación; una de ellas es un cohete. No
+necesitas acertar a menudo. Necesitas *sobrevivir a equivocarte* hasta que aparezca el
+cohete.
+
+Hagámoslo concreto y contable. La apuesta:
+
+- **Pierde \$1** el **80%** de las veces.
+- **Gana \$10** el otro **20%**.
+
+Ejecútala **100 veces** y despliega el libro de cuentas. Nada oculto — cada intento está
+en una de dos filas:
+
+| Resultado | Cuántos intentos | Resultado por intento | Total de la columna |
+|---|---|---|---|
+| Pérdida (el caso común) | 80 | −\$1 | **−\$80** |
+| Ganancia (el caso raro) | 20 | +\$10 | **+\$200** |
+| **Neto en 100 intentos** | 100 | — | **+\$120** |
+
+Lee esa celda de abajo a la derecha y deja que escueza un poco: **+\$120**, ganados por
+alguien que se **equivocó 80 de cada 100 veces**. Las 20 ganancias no solo cubrieron las
+80 pérdidas; las enterraron. El evento raro era diez veces el tamaño del común, y ese
+tamaño hizo todo el trabajo.
+
+Podemos comprimir todo el libro de cuentas en un único número — el **valor esperado
+(EV)**, la media de euros por intento. Pondera cada resultado según la frecuencia con
+que ocurre:
+
+$$\text{EV} = (0.20 \times \$10) + (0.80 \times -\$1) = \$2.00 - \$0.80 = +\$1.20$$
+
+Esos **+\$1,20 por intento** son el motor. Multiplica por 100 intentos y obtienes los
++\$120 que contamos a mano — el mismo número por dos vías, que es como sabes que la
+aritmética es honesta. El EV por intento es positivo, así que cuanto más juegas, más
+te alejas hacia delante, *aunque la mayoría de las jugadas individuales pierdan*.
+
+### ¿Cuántas ganancias te puedes permitir fallar?
+
+Aquí viene la parte que muestra cuánto colchón tiene realmente una apuesta convexa.
+Asumimos una tasa de aciertos del 20% — ¿pero y si eres peor que eso? ¿Y si el cohete es
+más raro de lo que esperabas? Sea `w` tu tasa de aciertos real. Cada ganancia paga \$10 y
+cada una de las `1 − w` pérdidas cuesta \$1, así que el EV por intento es:
+
+$$\text{EV} = (w \times \$10) + \big((1 - w) \times -\$1\big) = 11w - 1$$
+
+Ahora baja la tasa de aciertos *hacia abajo* y observa cómo la apuesta sigue viva:
+
+| Tasa de aciertos `w` | Ganancias por 100 | EV por intento (11w − 1) | Neto en 100 intentos |
+|---|---|---|---|
+| 20% | 20 | +\$1,20 | +\$120 |
+| 15% | 15 | +\$0,65 | +\$65 |
+| 12% | 12 | +\$0,32 | +\$32 |
+| 10% | 10 | +\$0,10 | +\$10 |
+| **~9,1%** | ~9 | **\$0,00** | **equilibrio** |
+| 5% | 5 | −\$0,45 | −\$45 |
+
+La apuesta sigue siendo **rentable con una tasa de aciertos del 15%**. Sigue siendo
+rentable al 12%. Sigue apenas por delante al 10%. Solo se vuelve negativa cuando tu tasa
+de aciertos cae por debajo del **punto de equilibrio**, que podemos resolver con
+exactitud igualando el EV a cero:
+
+$$11w - 1 = 0 \quad\Rightarrow\quad w = \tfrac{1}{11} \approx 0.091 = 9.1\%$$
+
+Así que esta apuesta sigue ganando dinero mientras aciertes **más de 1 vez de cada 11**.
+Podrías equivocarte el *noventa por ciento de las veces* y aun así no perder. Ese enorme
+margen entre "con qué frecuencia aciertas realmente" (20%) y "con qué frecuencia
+*necesitas* acertar" (9,1%) es el colchón de la apuesta convexa — y existe enteramente
+porque la ganancia es 10× la pérdida.
+
+<Callout variant="tip" title="La versión de una frase">
+Cuando la ganancia es diez veces la pérdida, solo tienes que acertar unas **1 vez de
+cada 11** para quedar en equilibrio — así que equivocarte el 80% de las veces puede
+dejarte con **\$120** de más en 100 intentos. La *magnitud* desequilibrada, no la tasa de
+aciertos, es lo que produce las ganancias.
+</Callout>
+
+### Cuándo usarlo
+
+Echa mano de esta aritmética en cuanto alguien descarte una idea porque "suele fallar".
+Experimentos baratos, apuestas de fase temprana, contacto en frío, plantar muchas
+semillas, presentarte a oportunidades poco probables — cualquier cosa donde el coste de
+un fallo sea pequeño y fijo pero el premio de un acierto sea grande y abierto. Antes de
+juzgarla por su tasa de aciertos, calcula la tasa de aciertos de equilibrio. Si tus
+probabilidades reales superan esa vara incluso con margen de sobra, la racha perdedora es
+una característica, no un fallo.
+
+## Por qué la racha perdedora es brutal — y por qué ignorarla
+
+Hay una trampa que el libro de cuentas esconde, y es psicológica, no matemática. Los
++\$120 están garantizados *en el total* — pero el total llega en un orden feo. Una tasa de
+aciertos del 20% significa que, de media, cuatro de cada cinco intentos duelen. Vas a
+aguantar largas cadenas de puras pérdidas esperando una ganancia que pague por todas
+ellas.
+
+Haz los números de las rachas. Con una tasa de aciertos del 20%, la probabilidad de
+perder varias seguidas no es pequeña:
+
+| Racha perdedora | Probabilidad (0,8 elevado a la longitud de la racha) |
+|---|---|
+| 3 pérdidas seguidas | 0,8³ ≈ **51%** — mejor que una moneda al aire |
+| 5 pérdidas seguidas | 0,8⁵ ≈ **33%** — ocurre un tercio de las veces |
+| 10 pérdidas seguidas | 0,8¹⁰ ≈ **11%** — una racha de cada nueve |
+
+Diez pérdidas seguidas sin una ganancia a la vista te ocurrirán aproximadamente **una
+tanda de cada nueve**, puramente por azar, en una apuesta que es *matemáticamente
+excelente*. Aquí es donde realmente se pierde el dinero — no en la aritmética, sino en el
+humano que se sienta encima de ella.
+
+Dos fuerzas conspiran para hacerte abandonar en el momento exacto equivocado. La primera
+es la **aversión a la pérdida (loss aversion)** — el hecho bien documentado de que una
+pérdida escuece aproximadamente el doble de lo que sienta bien una ganancia equivalente.
+Diez pequeñas pérdidas de \$1 seguidas no se sienten como −\$10; se sienten como un
+veredicto: *esto no funciona, soy un idiota, para la hemorragia.* La segunda es pura
+impaciencia: la ganancia es *rara por diseño*, así que la recompensa a tu disciplina está
+siempre en algún punto del futuro, nunca en la fila que estás mirando ahora mismo.
+
+El aprendiz que entiende la aritmética pero no la psicología abandona la apuesta convexa
+tres pérdidas antes de la ganancia que lo habría pagado todo — y luego, sal en la herida,
+ve cómo alguien con más paciencia la recoge.
+
+Entonces, ¿cuál es la disciplina? **Dimensiona cada pérdida tan pequeña que la racha no
+pueda hacerte daño.** Aquí es donde el modelo que ya aprendiste — el **margen de
+seguridad (margin of safety)** — entra directo en la asimetría. La razón entera por la
+que fijamos la pérdida en **\$1** y no en \$50 es para que una racha brutal de diez
+pérdidas cueste unos supervivientes **\$10**, no unos ruinosos \$500. Acota la pérdida por
+intento lo bastante bajo y la racha perdedora se convierte en un inconveniente que puedes
+superar en lugar de un golpe de gracia. El margen de seguridad es lo que te mantiene *en
+la mesa* el tiempo suficiente para que la convexidad rinda.
+
+<Callout variant="warning" title="La trampa: abandonar la buena apuesta">
+La larga racha perdedora de una apuesta convexa es una certeza matemática, no una señal
+de que la apuesta esté rota. Juzgada por la racha — por *con qué frecuencia* gana —
+parece un fracaso. Juzgada por la forma del premio, funciona exactamente como se diseñó.
+Si no puedes soportar la racha, tu única jugada segura es **encoger cada apuesta**, nunca
+abandonar la forma.
+</Callout>
+
+<FillBlank
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+  question="Completa por qué la racha perdedora de la apuesta convexa es superable:"
+  text="Una apuesta convexa te entrega largas cadenas de pérdidas porque la ganancia es {{rara por diseño|un fallo aleatorio|imposible}}. Como una pérdida escuece aproximadamente el doble de lo que sienta bien una ganancia — un sesgo llamado {{aversión a la pérdida|la falacia del coste hundido|la regresión a la media}} — te tientas a abandonar justo antes del premio. La solución no es abandonar la apuesta sino dimensionar cada pérdida {{lo bastante pequeña para sobrevivir a la racha|tan grande como sea posible|igual a la ganancia}}, que es la idea del margen de seguridad aplicada a la asimetría."
+  explanation="La ganancia es rara a propósito — eso es lo que es un premio convexo. La aversión a la pérdida (las pérdidas se sienten aproximadamente el doble de pesadas que las ganancias equivalentes) es la psicología concreta que te hace plegarte durante la racha. La disciplina es acotar la pérdida por intento tan pequeña que incluso una mala racha te deje en pie, para que sigas en la mesa cuando aterrice la ganancia rara. Eso es el margen de seguridad haciendo su trabajo."
+/>
+
+## El espejo cóncavo: monedas delante de una apisonadora
+
+Ahora invierte todos los signos y observa el espectáculo de horror. Si la apuesta
+convexa era una cartera de capital riesgo, la apuesta cóncava es **suscribir un seguro
+contra un desastre que aún no ha ocurrido** — cobras una prima cómoda casi todos los
+días, y un día pagas una reclamación que se come una década de primas en una tarde.
+
+La apuesta imagen especular:
+
+- **Gana \$1** el **90%** de las veces.
+- **Pierde \$20** el otro **10%**.
+
+Fíjate primero en esa tasa de aciertos, porque es la trampa entera: **90%**. Nueve de
+cada diez veces ganas. *Parece* una máquina que imprime dinero. Ahora ejecuta el libro
+de cuentas en 100 intentos y observa cómo la máquina se revela:
+
+| Resultado | Cuántos intentos | Resultado por intento | Total de la columna |
+|---|---|---|---|
+| Ganancia (el caso común) | 90 | +\$1 | **+\$90** |
+| Pérdida (el caso raro) | 10 | −\$20 | **−\$200** |
+| **Neto en 100 intentos** | 100 | — | **−\$110** |
+
+Ahí lo tienes: una **tasa de aciertos del 90% que te hace perder \$110**. Las diez
+pérdidas raras, a \$20 cada una, borraron las noventa ganancias cómodas y luego se
+llevaron otros \$110 por encima. Como un único número por intento:
+
+$$\text{EV} = (0.90 \times \$1) + (0.10 \times -\$20) = \$0.90 - \$2.00 = -\$1.10$$
+
+Un EV por intento de **−\$1,10**. Cada jugada, de media, te cuesta \$1,10 — y sin embargo
+nueve jugadas de cada diez *te ponen un euro en la mano y una sonrisa.* Esta es la imagen
+de Nassim Taleb hecha literal: **recoger monedas delante de una apisonadora (picking up
+pennies in front of a steamroller).** Las monedas son reales y frecuentes (las ganancias
+de +\$1). La apisonadora es real y rara (las pérdidas de −\$20). Te agachas, recoges una
+moneda, y parece dinero gratis — justo hasta que deja de serlo.
+
+Pon las dos apuestas una al lado de la otra y la simetría es casi cruel:
+
+| | Convexa (sonrisa) | Cóncava (ceño) |
+|---|---|---|
+| Tasa de aciertos | 20% (pierde casi todos los intentos) | 90% (gana casi todos los intentos) |
+| Cómo se siente | Desmoralizante — perder constantemente | Maravillosa — ganar constantemente |
+| EV por intento | **+\$1,20** | **−\$1,10** |
+| Neto en 100 intentos | **+\$120** | **−\$110** |
+| Veredicto | Equivocado casi siempre, más rico | Acertado casi siempre, arruinado |
+
+La apuesta que *se sentía* horrible era la que ganaba dinero. La apuesta que *se sentía*
+increíble era la que te desangraba. La comodidad y la corrección apuntaban en direcciones
+opuestas — que es exactamente por qué la tasa de aciertos es un marcador tan traicionero.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una estrategia gana $1 el 90% de las veces y pierde $20 el otro 10%. A lo largo de 100 intentos, ¿dónde termina?"
+  options={[
+    { text: "Con $110 de menos — las 10 pérdidas de $20 (−$200) sepultan las 90 ganancias de $1 (+$90)", correct: true },
+    { text: "Con $90 de más — ganar el 90% de las veces tiene que dejarte por delante" },
+    { text: "Con $70 de más — las ganancias superan a las pérdidas nueve a uno" },
+    { text: "En equilibrio, porque los números se cancelan más o menos" },
+  ]}
+  explanation="90 ganancias × +$1 = +$90. 10 pérdidas × −$20 = −$200. Neto: −$110. La tasa de aciertos del 90% es un señuelo: cada pérdida rara es 20× el tamaño de cada ganancia frecuente, así que diez de ellas (−$200) aplastan las noventa ganancias (+$90). Este es el ceño cóncavo — monedas delante de una apisonadora — y es el espejo exacto de la apuesta convexa, que pierde casi todos los intentos y aun así termina en +$120."
+/>
+
+### Ordena las formas: ¿convexa o cóncava?
+
+Cada decisión real esconde una de estas dos formas. Aquí tienes seis salidas de la vida
+real — deja caer cada una en el cubo que coincida con su premio. Hazte la pregunta
+diagnóstica cada vez: *cuando me equivoco, ¿la pérdida está acotada y es pequeña, o es
+abierta y enorme?*
+
+<Categorize
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  question="Ordena cada apuesta del mundo real según la forma de su premio."
+  instructions="Convexa (sonrisa) = pérdida acotada, ganancia abierta — pierdes poco y a menudo, ganas mucho y rara vez. Cóncava (ceño) = ganancia acotada, pérdida abierta — ganas poco y a menudo, pierdes mucho y rara vez."
+  buckets={["Convexa (sonrisa)", "Cóncava (ceño)"]}
+  items={[
+    { text: "Meter $500 que te puedes permitir en una startup de fase temprana que probablemente quiebre pero podría devolver 50×", bucket: "Convexa (sonrisa)" },
+    { text: "Vender un seguro contra inundaciones por una prima mensual estable, con un pago raro que podría llevarte a la quiebra", bucket: "Cóncava (ceño)" },
+    { text: "Enviar 100 correos en frío baratos con la esperanza de que uno pesque un cliente que te cambie la vida", bucket: "Convexa (sonrisa)" },
+    { text: "Endeudarte fuerte para exprimir un 2% extra de una operación 'segura' que de vez en cuando lo pierde todo", bucket: "Cóncava (ceño)" },
+    { text: "Probar una habilidad nueva durante un fin de semana antes de decidir si dedicarle años", bucket: "Convexa (sonrisa)" },
+    { text: "Llevar un negocio con un colchón de caja finísimo para impulsar los retornos en los meses normales", bucket: "Cóncava (ceño)" },
+  ]}
+  explanation="Todas las sonrisas comparten una forma: una pérdida pequeña y acotada (la participación de $500, el correo casi gratis, el fin de semana) bajo una ganancia abierta. Los ceños son el espejo: una ganancia pequeña, estable y acotada (la prima, el 2% extra, los meses más tranquilos) sentada encima de una pérdida abierta y potencialmente ruinosa. Hazte la pregunta diagnóstica cada vez — cuando me equivoco, ¿la pérdida está acotada y es pequeña, o es abierta y enorme?"
+/>
+
+## Por qué las colas anchas hacen inevitable la apisonadora
+
+Podrías pensar que la apuesta cóncava está bien mientras tengas cuidado — basta con
+evitar la gran pérdida, ¿no? Error, y aquí es donde el curso de **colas anchas (fat
+tails)** que ya hiciste viene a cobrar. Dos fuerzas separadas, ambas de ese curso, hacen
+que la apisonadora no solo sea posible sino *inevitable* con suficientes intentos.
+
+**Fuerza uno: la pérdida rara es más grande y más común de lo que dice una campana de
+Gauss.** En un mundo de colas finas, de campana de Gauss, los eventos extremos son
+astronómicamente raros — una pérdida de "20 sigmas" esencialmente nunca ocurre. Pero casi
+nada de lo que importa vive en ese mundo. Los mercados, las guerras, las pandemias, los
+éxitos virales, los fallos en cascada — todos de **colas anchas**, donde el extremo es
+mucho más frecuente *y* mucho más grande de lo que predice la campana. Así que el
+apostante cóncavo que modeló su peor caso como "−\$20, de vez en cuando" está usando la
+regla equivocada. En un mundo de colas anchas el verdadero peor caso podría ser −\$200, o
+−\$2.000, y llega antes de lo que sugería el pulcro 10%. El lado malo de una apuesta
+cóncava está **sistemáticamente subestimado** precisamente porque nuestros instintos
+están calibrados para una campana que el mundo no obedece.
+
+**Fuerza dos: con suficientes intentos, el evento raro se vuelve casi seguro.** Supón que
+una pérdida ruinosa tiene solo una probabilidad `p` en cualquier intento individual. La
+probabilidad de que la *evites* durante `n` intentos seguidos es `(1 − p)ⁿ`, así que la
+probabilidad de que **acabe golpeando** es:
+
+$$P(\text{ruina en el intento } n) = 1 - (1 - p)^n$$
+
+Alimenta esto con una `p` pequeña y observa cómo la ruina trepa a medida que se acumulan
+los intentos. Toma un 2% de probabilidad de pérdida ruinosa por intento:
+
+| Intentos `n` | Probabilidad de que la ruina haya golpeado (1 − 0,98ⁿ) |
+|---|---|
+| 10 | 18% |
+| 35 | 51% — ahora más probable que no |
+| 100 | 87% |
+| 200 | 98% |
+
+Un riesgo del 2% suena ignorable. Juega la apuesta **100 veces** y hay un **87% de
+probabilidad** de que el evento ruinoso ya haya aterrizado. Sigue jugando y se convierte
+en una casi certeza. Esta es la aritmética cruel bajo cada estrategia del "nunca ha
+pasado antes": los eventos raros no son seguros, solo son *tempranos.* Con suficientes
+intentos, la cola siempre llega.
+
+Ahora junta los dos cursos. La larga racha ganadora verde del apostante cóncavo no es
+prueba de seguridad — es la **cola cargándose.** Cada cómoda ganancia de +\$1 es un
+intento más en el reloj, un tirado de dados más contra esa `p`, llevándolo en silencio
+hacia la pérdida que borra todo. El pavo alimentado cada mañana durante mil días crece
+*más* confiado en el granjero justo hasta la tarde antes de Acción de Gracias. Un
+historial impecable en una apuesta cóncava no es la ausencia de la apisonadora. Es el
+sonido de su acercamiento.
+
+Y aquí está el curso entero en un contraste. El apostante convexo también se enfrenta a
+colas anchas — pero para él la cola ancha está en el lado *bueno*, y su lado malo está
+**acotado por diseño** para que ningún intento individual pueda terminar el juego. Las
+colas anchas son un regalo para la sonrisa y una sentencia de muerte para el ceño. Por
+eso ingenias la convexidad: acota tu lado malo tan estrechamente que el peor intento sea
+superable, y deja tu lado bueno abierto para que la rara ganancia gigante pueda
+encontrarte.
+
+<Callout variant="info" title="Dos cursos, una conclusión">
+Las **colas anchas** te dijeron que el extremo raro es más grande y más frecuente de lo
+que adivina una campana de Gauss — y que con suficientes intentos es casi seguro que
+llegue. La **asimetría** te dice qué *hacer* con ese hecho: nunca te sientes bajo un lado
+malo abierto (el ceño cóncavo), porque la cola acabará encontrándolo. Acota la pérdida,
+mantén el lado bueno abierto, y deja que las mismas colas anchas que arruinan al ceño
+enriquezcan a la sonrisa.
+</Callout>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una estrategia cóncava lleva un 2% de probabilidad de pérdida ruinosa en cada intento. Se ejecuta 100 veces. ¿Qué concluye un estudiante de colas anchas?"
+  options={[
+    { text: "Hay alrededor de un 87% de probabilidad de que la pérdida ruinosa ya haya golpeado (1 − 0,98¹⁰⁰) — con suficientes intentos un evento raro se vuelve casi seguro", correct: true },
+    { text: "Es esencialmente segura, ya que el 2% es una probabilidad pequeña en cualquier intento dado" },
+    { text: "El riesgo se mantiene plano en el 2% sin importar cuántas veces juegues" },
+    { text: "La larga racha ganadora demuestra que la pérdida ruinosa nunca llegará" },
+  ]}
+  explanation="El riesgo por intento es pequeño, pero la ruina se acumula: la probabilidad de evitarla durante 100 intentos es 0,98¹⁰⁰ ≈ 13%, así que la probabilidad de que haya golpeado es de alrededor del 87%. Los eventos raros no son seguros — son tempranos. Y en un mundo de colas anchas la pérdida real es probablemente más grande y más frecuente de lo que asumió el modelo del 2%. La racha verde no es seguridad; es la cola cargándose."
+/>
+
+## Repaso
+
+<Quiz
+  client:visible
+  title="Comprueba tú mismo: perder casi todas las apuestas y ganar la guerra"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  completeTitleLabel="Cuestionario completado"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: "Una apuesta pierde $1 el 80% de las veces y gana $10 el 20%. En 100 intentos, ¿cuál es el neto y cuál es el EV por intento?",
+      options: [
+        { text: "Neto +$120; EV = 0,2 × 10 − 0,8 × 1 = +$1,20 por intento — equivocado el 80% de las veces y aun así muy por delante.", correct: true },
+        { text: "Neto −$80; la tasa de pérdidas del 80% domina el resultado.", correct: false },
+        { text: "Neto +$200; solo cuentan las ganancias para el total.", correct: false },
+        { text: "Neto $0; la apuesta es justa por construcción.", correct: false },
+      ],
+      explanation: "80 pérdidas × −$1 = −$80; 20 ganancias × +$10 = +$200; neto +$120. Como media por intento: 0,2 × 10 − 0,8 × 1 = +$1,20, que por 100 da los mismos +$120. La magnitud vence a la frecuencia.",
+    },
+    {
+      question: "Para la apuesta convexa (gana $10, pierde $1), ¿aproximadamente qué tasa de aciertos es el punto de equilibrio?",
+      options: [
+        { text: "Alrededor del 9,1% (1 de cada 11) — resuelve 11w − 1 = 0, así que w = 1/11. Por debajo pierde dinero; por encima, es rentable.", correct: true },
+        { text: "Exactamente el 50% — necesitas ganar al menos la mitad de las veces.", correct: false },
+        { text: "Alrededor del 20% — la apuesta solo funciona a la tasa de aciertos asumida.", correct: false },
+        { text: "Alrededor del 80% — necesitas ganar mucho más a menudo de lo que pierdes.", correct: false },
+      ],
+      explanation: "EV = 11w − 1, así que el equilibrio es w = 1/11 ≈ 9,1%. La enorme brecha entre necesitar ganar ~9% y ganar realmente el 20% es el colchón de la apuesta convexa — sigue siendo rentable incluso a una tasa de aciertos del 15% o el 12%.",
+    },
+    {
+      question: "La apuesta cóncava gana $1 el 90% de las veces y pierde $20 el 10%. ¿Por qué una tasa de aciertos del 90% aun así pierde dinero?",
+      options: [
+        { text: "Cada pérdida rara es 20× una ganancia, así que 10 pérdidas (−$200) sepultan 90 ganancias (+$90): neto −$110, EV −$1,10 por intento. La frecuencia de acierto es un señuelo.", correct: true },
+        { text: "No lo hace — una tasa de aciertos del 90% siempre gana dinero.", correct: false },
+        { text: "Porque las ganancias tributan y las pérdidas no.", correct: false },
+        { text: "Porque no puedes ganar realmente el 90% de las veces en la práctica.", correct: false },
+      ],
+      explanation: "90 × +$1 = +$90; 10 × −$20 = −$200; neto −$110. La magnitud de la pérdida rara (20×) desborda la frecuencia de la pequeña ganancia. Ese es el ceño cóncavo — monedas delante de una apisonadora.",
+    },
+    {
+      question: "Una estrategia cóncava tiene una pequeña probabilidad por intento de pérdida ruinosa y ha ganado sin sobresaltos durante una larga racha. ¿Qué dicen las colas anchas sobre esa racha?",
+      options: [
+        { text: "La racha es la cola cargándose, no seguridad — con suficientes intentos una pérdida rara se vuelve casi segura (1 − (1−p)ⁿ), y en un mundo de colas anchas la pérdida es más grande y más frecuente de lo que predice una campana de Gauss.", correct: true },
+        { text: "La racha demuestra que la estrategia es segura y que la pérdida nunca llegará.", correct: false },
+        { text: "El riesgo por intento cae a medida que la racha se alarga.", correct: false },
+        { text: "Las colas anchas solo afectan a las apuestas convexas, no a las cóncavas.", correct: false },
+      ],
+      explanation: "Los eventos raros no son seguros, son tempranos: 1 − (1−p)ⁿ sube hacia la certeza a medida que se acumulan los intentos, y las colas anchas hacen la pérdida más grande y más frecuente de lo que asume el instinto. La racha impecable es cada intento extra tirando los dados contra la ruina — la apisonadora acercándose, no retirándose.",
+    },
+  ]}
+/>
+
+## A continuación
+
+Ya has visto, con toda la aritmética, cómo la sonrisa gana la guerra perdiendo la mayoría
+de sus batallas, y cómo el ceño lo pierde todo ganando casi todas las suyas. La lección
+es un hábito: **acota el lado malo, mantén el lado bueno abierto, y cuenta en valor
+esperado, no en tasa de aciertos.** Pero hasta ahora solo hemos *encontrado* apuestas
+convexas en la vida real. La verdadera jugada maestra es *construirlas* a propósito. A
+continuación: **Opcionalidad: el derecho sin la obligación** — cómo pagar un coste
+pequeño y conocido por el *derecho pero no la obligación* a un gran lado bueno,
+fabricando la forma de sonrisa en lugar de esperar a tropezarte con ella.

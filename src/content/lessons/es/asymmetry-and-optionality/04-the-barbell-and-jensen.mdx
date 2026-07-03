@@ -1,0 +1,361 @@
+---
+title: "La estrategia de barra y la desigualdad de Jensen"
+description: "Cómo poner la convexidad a trabajar: combina lo muy seguro con lo muy arriesgado y rehúye el frágil punto medio — la estrategia de barra. Además, la única pieza de matemáticas que hay detrás, en palabras llanas: para un pago convexo, la media de los resultados le gana al resultado de la media."
+topic: "es/asymmetry-and-optionality"
+order: 5
+minutes: 11
+updated: 2026-07-03
+---
+
+import { MCQ, Quiz, FillBlank, Callout } from '@/components/react';
+
+Habéis pasado tres lecciones aprendiendo a *reconocer* la sonrisa — el pago convexo con
+su pérdida acotada y su ganancia sin techo — y a *fabricarla* con opcionalidad. Reconocerla
+está bien. Pero tarde o temprano una pregunta de verdad aterriza en vuestra mesa: tenéis un
+montón de dinero, o de tiempo, o de atención, y hay que *colocarlo* de verdad. ¿Adónde va?
+
+El instinto al que casi todo el mundo recurre es "en algún punto medio" — ni demasiado seguro,
+ni demasiado salvaje, un equilibrio sensato. Ese instinto es la forma más fiable que existe de
+construir una cartera silenciosamente frágil. Esta lección os entrega el movimiento contrario —
+la **estrategia de barra** (barbell strategy) — y luego, por primera y única vez en este curso,
+la única pieza de matemáticas que demuestra *por qué* funciona: la **desigualdad de Jensen**
+(Jensen's inequality), que enunciaremos enteramente en palabras llanas. Al final veréis el remate
+que ata todo el curso: para una forma convexa, **la variabilidad es combustible, no ruido.**
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  question="Tienes $10,000 para desplegar. ¿Qué asignación es una 'barra' en el sentido que esta lección quiere decir?"
+  options={[
+    { text: "Poner $9,000 en efectivo casi sin riesgo y $1,000 en una apuesta de pérdida acotada y ganancia sin techo — y no poner nada en el punto medio de riesgo moderado", correct: true },
+    { text: "Poner los $10,000 en un único fondo 'equilibrado' de riesgo moderado que aspira a un 8% anual constante", correct: false },
+    { text: "Repartir los $10,000 a partes iguales entre diez acciones de riesgo moderado para diversificar", correct: false },
+    { text: "Poner los $10,000 en la única apuesta más arriesgada que encuentres, para maximizar la ganancia", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Sin penalización en un pretest — esta es toda la lección en una sola pregunta. Una barra pone peso en los dos extremos de la barra (muy seguro + muy arriesgado) y deja el centro deliberadamente vacío. Las otras tres son todas jugadas 'del medio': el fondo equilibrado y las diez acciones moderadas son el propio punto medio frágil, y la apuesta a todo o nada no tiene un núcleo seguro que sobreviva al mundo malo. Al final verás por qué el centro vacío es justamente el objetivo."
+/>
+
+## La estrategia de barra
+
+Imaginad la **barra** de un halterófilo: dos discos pesados, uno en cada extremo lejano de la
+barra, y una varilla desnuda y vacía en el medio. Ahora trasladad eso a cómo asignáis un recurso
+escaso. La **estrategia de barra** (barbell strategy) consiste en poner la gran mayoría de vuestros
+recursos — pongamos un **85–90%** — en lo **muy seguro** (efectivo, activos casi sin riesgo, cosas
+que sencillamente no pueden esfumarse), y una pequeña porción — el **10–15%** restante — en lo
+**muy arriesgado** con una ganancia genuinamente convexa (apuestas que pueden perder *solo* la
+porción pero podrían devolver muchas veces más). Y luego el movimiento definitorio: no ponéis
+**nada** en el punto medio de "riesgo moderado".
+
+¿Por qué demonios saltarse el medio? Porque los dos extremos os dan algo que el medio nunca puede.
+El extremo seguro garantiza que vuestro peor caso es pequeño y *conocido* — no os pueden aniquilar.
+El extremo arriesgado os da una oportunidad de una ganancia *sin límite*. Juntos construyen un pago
+que está desequilibrado en la dirección correcta: **acotado por abajo, abierto por arriba.** El medio
+no ofrece ninguna de las dos cosas — como muestra la siguiente sección, suele esconder una pérdida
+sin límite bajo una ganancia con techo, que es exactamente la forma de la que os habéis pasado todo
+el curso aprendiendo a huir.
+
+### Un ejemplo resuelto: la barra frente al sensato punto medio
+
+Pongámosle números reales. Tenéis **\$100,000**. Comparad dos carteras a través de dos mundos — un
+**mundo bueno** donde el riesgo compensa, y un **mundo malo** donde llega la cola.
+
+- **La barra:** \$90,000 en efectivo (que da un aburrido y seguro 2%) y \$10,000 en una apuesta convexa
+  que o bien **se multiplica por 10** (hasta \$100,000) en el mundo bueno o **se va a cero** en el mundo malo.
+- **El medio:** los \$100,000 enteros en una estrategia "de riesgo moderado" equilibrada que gana un
+  suave **8%** en el mundo bueno pero — porque el riesgo moderado monta apalancamiento en silencio —
+  pierde un **35%** cuando llega la cola.
+
+| | Barra (\$90k seguro + \$10k apuesta convexa) | El medio (los \$100k, "riesgo moderado") |
+|---|---|---|
+| Mundo bueno | \$90k → \$91,800 **más** \$10k → \$100,000 = **\$191,800** | \$100k → **\$108,000** |
+| Mundo malo | \$90k → \$91,800 **más** \$10k → \$0 = **\$91,800** | \$100k → **\$65,000** |
+| Peor caso | Una pérdida pequeña y **conocida** (unos \$8k menos del crecimiento seguro que habrías tenido) | Una **gran** pérdida de \$35k — y podría ser peor |
+| Mejor caso | **Sin techo** — la porción arriesgada no tiene tope | Con tope en un mediocre 8% |
+
+Leed las dos columnas una al lado de la otra y la asimetría salta a la vista. El *peor* caso de la
+barra es una caída leve y plenamente conocida — la porción de \$10k era todo lo que jamás arriesgasteis,
+y el núcleo de \$90k no se movió. Su *mejor* caso no tiene techo. La cartera del medio hace lo contrario:
+su mejor caso es un olvidable 8%, y su peor caso pierde en silencio un *tercio* de todo — porque
+"riesgo moderado" era apalancamiento con rebeca. La barra se equivocó sobre la porción arriesgada en
+el mundo malo y *aun así* salió casi entera. El medio fue "sensato" y perdió \$35,000.
+
+<Callout variant="tip" title="La versión de una frase">
+Una **barra** carga los dos extremos de la barra — la mayoría de vuestros recursos en lo **muy seguro**,
+una pequeña porción en lo **muy arriesgado con ganancia convexa** — y deja el punto medio de riesgo
+moderado **vacío**, de modo que vuestra pérdida es pequeña y conocida mientras vuestra ganancia sigue
+completamente abierta.
+</Callout>
+
+### Un peligro: la barra no es "sacar la media"
+
+La tentación es pensar que una barra es solo una manera elegante de alcanzar un riesgo *medio* moderado
+— un 90% seguro y un 10% salvaje "promedia" algo intermedio, así que ¿por qué no quedarse directamente
+con la cosa intermedia? Porque **el riesgo medio no es la cuestión; la forma sí lo es.** Una barra 90/10
+y un único fondo moderado podrían compartir la misma rentabilidad esperada en una hoja de cálculo, pero
+sus *formas de pago* son opuestas. La barra acota la pérdida en la porción del 10% y deja la ganancia
+abierta. El fondo único acota la ganancia y deja la pérdida abierta. La misma media, colas en espejo — y
+las colas son donde vivís o morís. Nunca colapséis una barra hasta su media y las llaméis equivalentes.
+
+### Cuándo usarla
+
+Recurrid a la barra siempre que tengáis que comprometer un recurso escaso bajo **incertidumbre profunda**
+y un **mal resultado pudiera arruinaros.** El dinero es el caso obvio, pero la forma viaja: una carrera
+profesional (un empleo estable como núcleo seguro, un proyecto paralelo salvaje como la porción convexa),
+un presupuesto de investigación (la mayoría en métodos probados, una porción en ideas improbables),
+vuestra agenda (la mayoría de horas en trabajo fiable, unas pocas en apuestas especulativas que podrían
+cambiarlo todo). Siempre que la opción del medio prometa "equilibrio" pero no podáis ver realmente su cola,
+la barra es el movimiento: rechazad el medio, comprad seguridad de verdad con el grueso, y comprad
+convexidad de verdad con el resto.
+
+## Por qué el medio es una trampa
+
+Entonces, ¿por qué es tan peligroso el sensato punto medio? Porque **el "riesgo moderado" suele ser una
+ganancia con techo asentada encima de una pérdida sin techo y oculta** — un ceño cóncavo (concave) con
+traje sensato. *Parece* equilibrado. Anuncia rentabilidades constantes y anodinas. Y por debajo, donde no
+podéis verlo, está expuesto a una pérdida rara y sin límite que ninguna ficha técnica reluciente menciona.
+No obtenéis ninguna de las dos cosas que merece la pena tener: ni la seguridad real del extremo seguro
+(vuestra pérdida no está realmente acotada), ni la convexidad real del extremo arriesgado (vuestra ganancia
+*sí* tiene techo). Obtenéis la peor geometría disponible, disfrazada de prudencia.
+
+### Un ejemplo resuelto: el fondo "equilibrado" que salta por los aires
+
+Considerad un fondo comercializado como **moderado, equilibrado, sin dramas.** Para alcanzar su prometido
+"7% constante" pide prestado en silencio — digamos que mantiene \$100 de activos respaldados por solo \$25
+de capital real, un apalancamiento de 4 a 1 que nunca pone en primera página. Mirad lo que un pequeño
+movimiento en los activos subyacentes le hace a *vuestro* capital:
+
+| Movimiento en los activos subyacentes | Efecto sobre los \$25 de capital real del fondo | Cómo se siente |
+|---|---|---|
+| +2% (un buen trimestre) | +\$2 sobre \$25 = **+8%** | "¿Veis? Ganancias constantes y moderadas." |
+| +1% (un trimestre normal) | +\$1 sobre \$25 = **+4%** | Tranquilo, anodino, "equilibrado" |
+| −5% (un mes duro) | −\$5 sobre \$25 = **−20%** | Ay — pero sobrevivible |
+| −25% (un auténtico evento de cola) | −\$25 sobre \$25 = **−100%** | **Aniquilado.** Todo desaparece |
+
+La ganancia tiene techo y es sosa: incluso un buen trimestre es una modesta ganancia de un dígito. Pero la
+*pérdida está abierta* — un movimiento de solo −25% en el subyacente, que los mercados entregan más a menudo
+de lo que admite el modelo de nadie, lleva vuestro capital no a una pérdida dolorosa sino a **cero.** Eso es
+un ceño cóncavo. La etiqueta "moderado" describía los buenos trimestres; no decía nada de la cola, porque la
+cola es precisamente lo que el medio esconde. Estabais recogiendo céntimos — un constante 4-8% — justo delante
+de la apisonadora.
+
+<Callout variant="warning" title="Moderado es una descripción solo de los buenos días">
+Cuando algo os lo venden como riesgo "moderado" o "equilibrado", preguntad qué le hace su **peor día plausible**
+a vuestro capital. Si la respuesta es "una caída pequeña y conocida", es genuinamente moderado. Si la respuesta
+es "bueno, en una crisis de verdad…" y la frase se apaga — eso es una pérdida sin techo escondida bajo una
+ganancia con techo. El medio no es un compromiso entre lo seguro y lo arriesgado. A menudo es la forma frágil
+con mejor marketing.
+</Callout>
+
+### Cuándo usarla
+
+Desplegad "el medio es una trampa" como un *filtro* activo siempre que una opción os la vendan por su
+**comportamiento medio** — su año típico, su rendimiento constante, su ratio de Sharpe, su historial de calma.
+El comportamiento medio es exactamente lo que un pago cóncavo os muestra justo hasta la apisonadora. En cuanto
+notéis que os están vendiendo el suave punto medio, parad y buscad la cola: encontrad el peor caso y comprobad
+si está acotado o abierto. Si está abierto, el medio "moderado" es frágil, y el centro vacío de la barra es
+donde os corresponde estar.
+
+## La desigualdad de Jensen, en palabras llanas
+
+Ahora la única pieza de matemáticas — y se gana el sueldo, porque *demuestra* por qué la forma convexa adora
+la mismísima incertidumbre que destruye a la frágil. Se llama **desigualdad de Jensen** (Jensen's inequality),
+y despojada de sus símbolos dice algo que podéis tener en la cabeza:
+
+> **Para un pago convexo, la media de los resultados es mayor que el resultado de la media.**
+
+Leedlo dos veces, porque el orden de las operaciones es todo el truco. Por un lado, dejáis que la entrada
+*varíe*, calculáis el pago para cada caso variable y promediáis esos pagos — eso es "la media de los resultados".
+Por el otro lado, primero promediáis la entrada hasta un único valor intermedio y calculáis el pago *una sola vez*
+sobre esa media — "el resultado de la media". Jensen dice que cuando el pago es convexo (la sonrisa), el primero
+es **mayor**. Escrito en prosa, para un pago convexo $f$ y una entrada variable $X$: $E[f(X)] \ge f(E[X])$.
+Repartir vuestra exposición a través de una entrada *variable* le gana a congelarla en la única entrada media.
+
+### Un ejemplo resuelto: la volatilidad literalmente añade valor
+
+Tomad el pago convexo más limpio que existe: $f(x) = x^2$, una sonrisa de manual. Supongamos que la entrada
+$x$ va a aterrizar o bien en **+10** o bien en **−10**, cada una igual de probable. Dos maneras de puntuarlo:
+
+| Enfoque | Cálculo | Resultado |
+|---|---|---|
+| **Resultado de la media** — promedia primero la entrada, luego aplica f | la media de +10 y −10 es 0, así que f(0) = 0² | **0** |
+| **Media de los resultados** — aplica f a cada una, luego promedia | f(+10) = 100, f(−10) = 100, media = (100 + 100) / 2 | **100** |
+
+Mirad fijamente esa brecha. Los dos enfoques usaron *exactamente las mismas entradas*, +10 y −10. La única
+diferencia es **cuándo promediasteis** — antes de aplicar el pago convexo, o después. Promediad primero y el
++10 y el −10 se cancelan a nada: resultado **0.** Aplicad primero el pago y ambos extremos se doblan *hacia
+arriba* (100 y 100, ya que elevar al cuadrado mata el signo), así que su media es un gordo **100.** La
+variabilidad no se lavó. En una forma convexa, **la variabilidad valía 100 puntos de puro valor.**
+
+Ese es el remate de todo el curso, en un número. En un pago convexo (sonrisa), **la variabilidad es
+combustible, no ruido.** Los vaivenes que os enseñaron a temer son, en esta forma, precisamente lo que paga.
+Congelad la entrada en su aburrida media y obtenéis el aburrido resultado (0). Dejadla oscilar salvajemente
+hacia ambos extremos y el pago convexo cosecha ambos vaivenes (100). Por esto es *exactamente* por lo que una
+posición antifrágil (antifragile), convexa, de barra secretamente **quiere** un mundo incierto: un mundo
+incierto entrega los grandes vaivenes, y un pago convexo convierte los grandes vaivenes en gran valor. Una
+posición frágil y cóncava quiere lo contrario — reza por la calma, porque en un ceño esos mismísimos vaivenes
+se doblan *hacia abajo* y la destruyen.
+
+<Callout variant="info" title="Hacia dónde se dobla la forma lo decide todo">
+La desigualdad de Jensen se invierte para el ceño. Para un pago **cóncavo** (concave), la media de los
+resultados es *menor* que el resultado de la media — la variabilidad *resta* valor. Las mismas matemáticas,
+el signo opuesto. Así que la única pregunta "¿es mi pago convexo o cóncavo?" decide si la incertidumbre es
+vuestra amiga o vuestra verdugo. Convexo: los vaivenes ayudan. Cóncavo: los vaivenes matan. No hay terreno
+neutral — que es, una vez más, por qué el medio no es refugio.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Usando el pago convexo f(x) = x², supón que la entrada será o bien +6 o bien −6, igual de probables. Compara el 'resultado de la media' con la 'media de los resultados'. ¿Qué es cierto?"
+  options={[
+    { text: "Resultado de la media = f(0) = 0; media de los resultados = (36 + 36) / 2 = 36 — así que el caso variable le gana al caso promediado por 36", correct: true },
+    { text: "Ambos igualan 36, porque las entradas son las mismas de una manera u otra", correct: false },
+    { text: "Resultado de la media = 36 y media de los resultados = 0 — promediar primero da más", correct: false },
+    { text: "Ambos igualan 0, porque +6 y −6 se cancelan", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Promedia primero la entrada: (+6 y −6) promedian a 0, así que f(0) = 0. Aplica primero el pago: f(+6) = 36 y f(−6) = 36 (elevar al cuadrado mata el signo), así que su media es 36. El caso variable gana por 36 — la desigualdad de Jensen en acción. Las entradas son idénticas; la única diferencia es que promediar antes de un pago convexo tira el valor que crean los vaivenes, mientras que promediar después lo conserva."
+/>
+
+<FillBlank
+  client:visible
+  question="Completa la desigualdad de Jensen en palabras llanas:"
+  text="Para un pago {{convexo|cóncavo|lineal}}, la {{media de los resultados|resultado de la media|menor resultado}} es mayor que el {{resultado de la media|media de los resultados|mayor resultado}} — lo que significa que en esta forma, la variabilidad {{añade|resta|no tiene efecto sobre}} valor, así que una posición convexa en realidad {{quiere|teme|ignora}} un mundo incierto."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+  explanation="En un pago convexo (sonrisa), aplicar el pago antes de promediar captura el doblez hacia arriba en ambos extremos, así que la media de los resultados le gana al resultado de la media — E[f(X)] ≥ f(E[X]). Eso significa que la variabilidad añade valor, que es exactamente por qué una posición convexa/antifrágil quiere la incertidumbre en lugar de temerla. Para un pago cóncavo la desigualdad se invierte y la variabilidad resta valor."
+/>
+
+## Barra = convexidad fabricada
+
+Ahora observad cómo encajan las dos mitades de esta lección. Todo lo que hace la barra está al servicio de
+construir **una única forma convexa a nivel de vuestra cartera entera.** El núcleo seguro (el 85–90%) acota
+vuestra pérdida: por muy mal que se comporte la porción arriesgada, no podéis perder más que la porción, así
+que la pérdida está acotada y es conocida — ese es el *suelo* de la sonrisa. La porción arriesgada (el 10–15%)
+suministra la ganancia sin techo y sin límite — esa es la *rampa* de la sonrisa. Acotada por abajo, abierta
+por arriba: la barra es una máquina para **fabricar convexidad** a partir de dos ingredientes que, por sí
+solos, son solo "muy seguro" y "muy arriesgado".
+
+Y Jensen os dice la recompensa por construir esa forma. Como el pago ensamblado es convexo, está **ayudado por
+la mismísima volatilidad que hundiría a una posición frágil.** El mundo incierto que machaca contra el suelo al
+apalancado fondo del punto medio es el mismo mundo que entrega los grandes vaivenes que vuestra porción convexa
+convierte en grandes ganancias. No solo sobrevivisteis a la incertidumbre — en una forma convexa, según Jensen,
+*os beneficiasteis de ella.* Esa es la razón profunda por la que la barra no es meramente "seguro con un boleto
+de lotería grapado". Es una posición antifrágil deliberadamente ingeniada: cuanto más se tambalea el mundo, más
+tiene con lo que trabajar el extremo convexo, mientras que el extremo seguro garantiza que los bandazos nunca
+pueden alcanzar vuestro núcleo.
+
+<Callout variant="success" title="Tres lecciones, una forma">
+Aquí es donde converge el curso. La **opcionalidad** (optionality) (lección 3) es cómo *adquirís* pagos convexos
+— pagáis un pequeño coste conocido por una ganancia sin techo. La **barra** es cómo *construís una cartera entera*
+con ellos, de modo que la forma convexa gobierna todo lo que tenéis. Y el núcleo seguro de la barra *es* un
+**margen de seguridad** (margin of safety) — el suelo acotado que garantiza que seguís en pie para cobrar la
+ganancia. Recortad la pérdida, mantened la ganancia abierta: la barra es esa heurística hecha concreta, y Jensen
+es la prueba de que la forma resultante convierte un mundo incierto de amenaza en combustible.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Una amiga describe su plan: 'El 85% de mis ahorros está en efectivo asegurado que no puedo perder. El otro 15% lo reparto entre un puñado de participaciones diminutas en startups — cada una solo puede costarme lo que puse, pero cualquiera podría multiplicarse por 50 si acierta.' ¿Qué describe mejor lo que ha construido?"
+  options={[
+    { text: "Una barra — una pérdida acotada y conocida del núcleo seguro más una ganancia sin techo de la porción arriesgada, es decir, un pago convexo fabricado que se beneficia de un mundo incierto", correct: true },
+    { text: "Una posición frágil y cóncava, porque las startups son arriesgadas y el riesgo siempre es cóncavo", correct: false },
+    { text: "Una cartera de riesgo moderado del medio, porque 85/15 promedia algo equilibrado", correct: false },
+    { text: "Una apuesta sin diversificar, porque hay demasiado parado en efectivo", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Esto es una barra de manual: un gran núcleo muy seguro (efectivo asegurado, pérdida acotada) más una pequeña porción muy arriesgada y convexa (la pérdida de cada participación está acotada en lo que ella puso, la ganancia está abierta en x50), sin nada en el frágil punto medio. Esa combinación fabrica un pago convexo a nivel de cartera — acotado por abajo, abierto por arriba — que, por Jensen, la ayuda un mundo incierto en lugar de perjudicarla. No es cóncava (la pérdida está acotada, no abierta), y colapsarla a su 'media' se pierde toda la cuestión: la forma, no la media, es lo que importa."
+/>
+
+## Repaso
+
+<Quiz
+  client:visible
+  title="Ponte a prueba: la barra y Jensen"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  completeTitleLabel="Cuestionario completado"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: "¿Qué es la estrategia de barra?",
+      options: [
+        { text: "Poner la gran mayoría de los recursos en lo muy seguro y una pequeña porción en lo muy arriesgado con ganancia convexa, y evitar deliberadamente el punto medio de riesgo moderado.", correct: true },
+        { text: "Repartir todo al 50/50 entre dos fondos de riesgo moderado para equilibrarlos.", correct: false },
+        { text: "Poner todo en la única apuesta más arriesgada disponible para maximizar la ganancia.", correct: false },
+        { text: "Tener solo efectivo para no poder perder nunca nada.", correct: false },
+      ],
+      explanation: "Una barra carga los dos extremos — la mayoría en lo muy seguro (pérdida acotada y conocida) y una pequeña porción en lo muy arriesgado con ganancia sin techo — y deja el centro vacío. Peso en los dos extremos de la barra, nada en el medio.",
+    },
+    {
+      question: "¿Por qué el 'punto medio de riesgo moderado' es tan a menudo una trampa?",
+      options: [
+        { text: "Normalmente empareja una ganancia con techo con una pérdida sin techo y oculta — un ceño cóncavo con traje sensato — así que no obtienes ni seguridad real ni convexidad real.", correct: true },
+        { text: "Es demasiado seguro, así que nunca gana nada en absoluto.", correct: false },
+        { text: "Tiene una ganancia sin techo que es sencillamente demasiado tentadora.", correct: false },
+        { text: "Es ilegal en la mayoría de los mercados.", correct: false },
+      ],
+      explanation: "El medio anuncia rentabilidades constantes y modestas mientras carga en silencio con una pérdida rara y sin techo (a menudo vía apalancamiento oculto). Ganancia con techo encima de pérdida sin techo es la forma cóncava — precisamente lo que hay que evitar. No obtienes ni la seguridad acotada del extremo seguro ni la ganancia abierta del extremo arriesgado.",
+    },
+    {
+      question: "La desigualdad de Jensen, en palabras llanas, dice que para un pago convexo:",
+      options: [
+        { text: "La media de los resultados es mayor que el resultado de la media — así que repartir la exposición a través de una entrada variable le gana a congelarla en la media, y la variabilidad añade valor.", correct: true },
+        { text: "El resultado de la media siempre iguala a la media de los resultados.", correct: false },
+        { text: "El resultado de la media es mayor, así que siempre deberías promediar tus entradas primero.", correct: false },
+        { text: "La variabilidad siempre reduce el valor, sin importar la forma del pago.", correct: false },
+      ],
+      explanation: "Para f convexa, E[f(X)] ≥ f(E[X]): aplica el pago antes de promediar y el doblez hacia arriba en ambos extremos queda capturado, así que la media de los resultados le gana al resultado de la media. La variabilidad añade valor en una forma convexa. (Para un pago cóncavo la desigualdad se invierte y la variabilidad resta valor.)",
+    },
+    {
+      question: "Para f(x) = x² con la entrada igual de probable en +10 o −10, ¿por qué la 'media de los resultados' (100) le gana al 'resultado de la media' (0)?",
+      options: [
+        { text: "Promediar primero las entradas cancela +10 y −10 a 0, dando f(0) = 0; aplicar primero el pago convexo dobla ambos extremos hacia arriba hasta 100 cada uno, así que su media es 100 — los vaivenes se convierten en valor en lugar de cancelarse.", correct: true },
+        { text: "Porque 100 es sencillamente un número mayor que 0 por casualidad.", correct: false },
+        { text: "Porque las entradas eran distintas en los dos cálculos.", correct: false },
+        { text: "Porque f(x) = x² es un pago cóncavo que castiga la variabilidad.", correct: false },
+      ],
+      explanation: "Mismas entradas, orden distinto. Promedia primero: +10 y −10 se cancelan a 0, así que f(0) = 0. Aplica f primero: f(+10) = 100 y f(−10) = 100 (elevar al cuadrado mata el signo), media = 100. En una forma convexa los vaivenes se doblan hacia arriba y se cosechan, así que la variabilidad es combustible — que es exactamente por qué una posición convexa/de barra quiere un mundo incierto.",
+    },
+  ]}
+/>
+
+## Lo que viene
+
+Ahora tenéis las dos mitades de la maquinaria: la **barra** que fabrica un pago convexo a partir de un núcleo
+seguro y una porción arriesgada, y la **desigualdad de Jensen** que demuestra que tal forma está *ayudada* por
+la mismísima incertidumbre que arruina al frágil punto medio. Lo que queda es convertir todo esto en un hábito
+de decisión que podáis ejecutar en la cabeza, en todas partes, sin una hoja de cálculo. En la lección final de
+enseñanza, **Recorta la pérdida, mantén la ganancia abierta**, destilamos todo el curso en una sola heurística —
+buscad apuestas convexas, corred muchos experimentos pequeños y reversibles, dejad correr a los ganadores — y
+recorremos las trampas que aún pillan a los expertos: pagar demasiado por la opcionalidad, confundir una pérdida
+acotada con una sin límite, y confundir la simple varianza con una buena asimetría.

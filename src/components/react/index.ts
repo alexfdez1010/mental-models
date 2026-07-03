@@ -180,3 +180,6 @@ export type { CriticalMassProps } from '@/components/react/CriticalMass';
 
 export { MixedStrategyExplorer, default as MixedStrategyExplorerDefault } from '@/components/react/MixedStrategyExplorer';
 export type { MixedStrategyExplorerProps, MixCell, MixGrid } from '@/components/react/MixedStrategyExplorer';
+
+export { PayoffExplorer, default as PayoffExplorerDefault } from '@/components/react/PayoffExplorer';
+export type { PayoffExplorerProps, PayoffShape, PayoffShapeOption } from '@/components/react/PayoffExplorer';
