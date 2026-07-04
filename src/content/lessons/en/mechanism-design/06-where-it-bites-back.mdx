@@ -1,0 +1,190 @@
+---
+title: "Where the Craft Bites Back"
+description: "Mechanism design is powerful, not omnipotent. The safety briefing: impossibility results, Goodhart-style gaming, market unravelling, participation limits, and the quiet assumption that people actually play the equilibrium you designed."
+topic: "en/mechanism-design"
+order: 7
+minutes: 15
+updated: 2026-07-04
+---
+
+import { MCQ, Quiz, MatchConcepts, Callout } from '@/components/react';
+
+Five lessons in, you can do the trick. You can take a bad situation, spot the outcome you want, and *design the rules* so that self-interest walks itself there — cut-and-choose for a fair split, a second-price auction that makes honesty a dominant strategy, a Pigouvian tax that makes the polluter clean up because it's now their own best move. It feels like a superpower, and it nearly is. Which is exactly why this final teaching lesson is the safety briefing.
+
+Every model is a lie that's *usefully* wrong, and the mark of someone who understands a tool — rather than merely wields it — is that they can say precisely where it stops being trustworthy. Mechanism design is unusual here, and in a way that's actually a point of pride: it can *prove* its own limits. Not "sometimes this is hard" — actual theorems that say *you cannot have everything at once, and here's the exact tradeoff.* So we'll walk the five honest limits of the craft, one by one, then close the whole course with a recap. After that: the exam.
+
+## 1. Impossibility results — you can't have everything
+
+The first limit isn't a bug you can engineer around. It's math. There are things the world would obviously love from a mechanism — that it be efficient (the good stuff ends up with whoever values it most), honest (nobody profits by lying), fair, budget-balanced (money in equals money out, no outside subsidy), and voluntary (nobody's forced to join). The uncomfortable discovery of the field is that several of these clash *provably*. You can pick a subset. You can't have the lot.
+
+Three landmark results, in words:
+
+- **Myerson–Satterthwaite.** Take the simplest possible market: one seller who privately knows what the thing is worth to them, one buyer who privately knows what it's worth to *them*. You'd love a mechanism that trades whenever the buyer values it more than the seller (efficiency), that nobody can game by lying about their value (incentive compatibility), that neither party is forced into (individual rationality), and that doesn't need an outside sponsor writing checks (budget balance). The theorem says: **you cannot have all four at once.** Something must give. Real bilateral bargaining leaves money on the table — trades that *should* happen don't, because both sides are strategically shading their true value — and no clever rule fully fixes it.
+- **Gibbard–Satterthwaite.** Turn to voting over three or more options. You'd want a rule that's *strategyproof* — where honestly ranking your true preferences is always your best move, never something you can improve on by voting tactically. The theorem says: **any non-dictatorial voting rule over three or more options is manipulable.** Unless you let a single dictator decide (which is not a voting rule anyone wants), there will always be situations where a voter can get a better outcome by lying about their preferences. Tactical voting isn't a flaw in your particular system; it's baked into the mathematics of choice.
+- **Arrow's impossibility theorem.** Go one level deeper, to ranked voting as a way of aggregating everyone's preference orderings into one collective ranking. Arrow wrote down a short list of eminently reasonable fairness conditions — no dictator, respect unanimity, and independence of irrelevant alternatives (adding a losing option shouldn't flip who beats whom). The theorem says: **no ranked-voting rule satisfies all of them at once.** The very idea of a "perfectly fair" way to combine rankings is, in a precise sense, incoherent.
+
+Notice the pattern. None of these says mechanism design *fails*. They say it faces a **tradeoff frontier** — and the discipline is honest enough to hand you the map of exactly where you have to give something up. That's not a weakness. A field that can prove its own boundaries is a field you can trust *inside* them.
+
+<Callout variant="warning" title="The impossibility mindset">
+When someone promises a mechanism that is efficient AND strategyproof AND fair AND budget-balanced AND voluntary, all at once, your first move should be **suspicion, not admiration.** In several important settings, that combination is *provably* unavailable. The competent designer doesn't chase the impossible bundle — they decide *which* property they're willing to sacrifice, sacrifice it on purpose, and tell you they did. "Which one did you give up?" is the sharpest question you can ask of any proposed rule.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A consultant pitches a used-goods marketplace whose rules will, they promise, always let a trade happen exactly when the buyer values the item more than the seller (full efficiency), never let anyone profit by misreporting their true value (incentive compatibility), never force anyone to trade (individual rationality), AND run with no outside money at all (budget balance) — all four, guaranteed, for private-value bilateral trade. What should you conclude?"
+  options={[
+    { text: "The pitch is impossible as stated — Myerson–Satterthwaite proves you cannot have all four of those properties simultaneously in private-value bilateral trade; at least one must be sacrificed", correct: true },
+    { text: "It's plausible and impressive; skilled designers routinely achieve all four together", correct: false },
+    { text: "It's fine as long as the consultant is honest and well-intentioned", correct: false },
+    { text: "It only works if both traders are perfectly rational, but is otherwise sound", correct: false },
+  ]}
+  explanation="This is a textbook Myerson–Satterthwaite trap. For private-value bilateral trade, efficiency, incentive compatibility, individual rationality, and budget balance cannot ALL hold at once — it's a proven impossibility, not a matter of skill or good intentions. A trustworthy pitch would name which property it sacrifices (usually a bit of efficiency, or it leans on an outside subsidy to balance the books). A pitch that promises the whole bundle is promising something the math forbids — the right response is suspicion, and the right question is 'which one did you actually give up?'"
+/>
+
+## 2. Goodhart's law — when a measure becomes a target
+
+Here's the second limit, and it's the one that quietly wrecks the most real-world mechanisms. **Goodhart's law:** *when a measure becomes a target, it ceases to be a good measure.* A mechanism rewards exactly what it *measures* — never what you actually *meant*. Players are relentless optimisers of the letter of your rule, and supremely indifferent to its spirit. So if you reward a proxy instead of the real thing, you'll get the proxy, maximised, often at the expense of the real thing you cared about.
+
+The examples are a rogues' gallery:
+
+- **Teaching to the test.** You wanted educated kids, so you measured test scores and rewarded schools for raising them. Rational response: drill the exact test format, narrow the curriculum to what's tested, coach for the metric. Scores rise; education doesn't necessarily follow. You optimised the measure and lost the thing the measure was standing in for.
+- **Sales quotas by channel-stuffing.** You wanted more sales, so you paid reps on units shipped this quarter. Rational response: "sell" enormous volumes to distributors near the deadline — shove product into the channel — booking revenue that hasn't really happened and often comes back as returns next quarter. The number hit target. The business got worse.
+- **The cobra effect.** The apocryphal-but-perfect parable: a colonial government wanted fewer cobras, so it paid a bounty per dead cobra. Rational response: *breed* cobras to collect bounties. When the scheme was scrapped, the now-worthless snakes were released — leaving *more* cobras than before the bounty existed. You measured "dead cobras produced," not "wild cobras reduced," and got exactly, catastrophically, what you paid for.
+
+The through-line: a mechanism is a wish-granting genie that takes your words with murderous literalism. It does not know what you meant. It rewards what you measured, and the players — being rational, which is the *entire assumption* the field is built on — find the cheapest way to make that measure go up. Measure the wrong proxy and you don't get a bit of the wrong behaviour; you get the wrong behaviour, industrialised, delivered with total confidence.
+
+<MCQ
+  client:visible
+  question="A support team is told that their bonus depends entirely on one number: the count of support tickets marked 'resolved' per day. Within a month, average resolution time plummets and 'resolved' counts soar — but repeat contacts and customer complaints climb sharply. What is the most likely explanation?"
+  options={[
+    { text: "Goodhart's law: 'tickets marked resolved' became the target, so agents optimise that measure — closing tickets fast (even prematurely) rather than actually solving problems, which the metric doesn't capture", correct: true },
+    { text: "The agents suddenly became lazier and less competent than before the bonus", correct: false },
+    { text: "The metric is working perfectly and the rising complaints are unrelated noise", correct: false },
+    { text: "Customers coincidentally got harder to satisfy the same month the bonus launched", correct: false },
+  ]}
+  explanation="Classic Goodhart. 'Resolved-ticket count' was a decent proxy for 'problems solved' — right up until it became the target. Then rational agents optimised the letter of the rule: close tickets fast, mark them resolved whether or not the underlying problem is fixed, because the bonus rewards the mark, not the fix. Repeat contacts and complaints rise precisely because tickets are being closed prematurely — the real goal the proxy was standing in for. The agents aren't lazier; they're responding exactly as designed to a mechanism that measures the wrong thing. The fix is a better-aligned measure (e.g. resolution that STAYS resolved), not a lecture about caring more."
+/>
+
+## 3. Unravelling — markets that jump the gun
+
+The third limit is about *timing*, and it's sneaky because it can wreck a market that has no other problem at all. **Unravelling** is what happens when the *when* of a transaction collapses earlier and earlier, each participant trying to jump the queue, until deals are struck absurdly far ahead of when they should be — often before anyone has the information that would let them choose well.
+
+The mechanism is a race. If I can lock in a good counterparty by moving *before* my rivals, I do — so I make my offer a little earlier. Seeing that, everyone else moves earlier too, to not be left with the leftovers. There's no stable stopping point on the way down, so the whole market's timing slides, sometimes by *years*.
+
+The classic cases:
+
+- **Exploding job offers.** An employer, fearing the best candidates get snapped up, issues an offer that expires in 48 hours — take it now or lose it. Candidates, facing exploding offers everywhere, must accept before they've heard from other firms or even finished interviewing. Everyone is worse-matched; nobody can unilaterally stop, because slowing down means losing out.
+- **Medical residencies made years early.** Before the modern centralized match, US hospitals competed to hire residents earlier and earlier, until offers were being made *two years* before graduation — long before anyone knew how the students would actually turn out. The market had unravelled so badly that it became nearly useless, which is precisely why a mechanism (a centralized clearinghouse match) was introduced to *hold the timing in place.*
+- **College admissions creep.** Early-decision deadlines, ever-earlier applications, recruiting athletes and courting students further and further ahead — the same jump-the-gun logic, nudging the whole calendar forward.
+
+The lesson for a designer: **timing is not automatically self-stabilising.** Left to itself, a market's clock can run away, with every rational participant making it worse. A mechanism — typically a centralized match that fixes *when* everyone commits — isn't bureaucratic overhead here; it's the thing holding the market's timing together. Take it away and the market can eat itself before a single price is even discussed.
+
+## 4. Participation — people can just walk away
+
+The fourth limit is the humblest and the most easily forgotten: **a mechanism only works on the people who agree to be in it.** This is the **individual rationality** (or participation) constraint — the requirement that being inside your mechanism leaves each player at least as well off as their **outside option**, the best they can do by declining. Violate it and they don't grumble and comply. They *leave.*
+
+You cannot design a rule that squeezes players harder than they'll tolerate, because the "or else" is always available: *or else I opt out.* A tax so punishing it drives the activity underground or offshore; an auction whose entry fee exceeds the expected winnings, so nobody bids; a "voluntary" scheme whose terms are worse than doing nothing, so no one volunteers. In each case the mechanism's beautiful incentive properties are irrelevant, because the mechanism is *empty.* A rule that no one joins achieves precisely nothing, no matter how elegant it is on paper.
+
+This is also the deep reason behind part of the Myerson–Satterthwaite result from limit 1: one of the four properties you can't simultaneously guarantee is exactly *individual rationality* — you can't force the trade *and* keep it voluntary *and* keep it honest *and* balance the budget. Participation isn't a footnote; it's a live constraint that bites against your other goals. Always ask: **compared to walking away, is every player I need actually better off inside my mechanism?** If not, they'll be somewhere else, and your rules will govern an empty room.
+
+## 5. The equilibrium assumption — people have to actually play it
+
+The fifth limit is the quietest and, for that reason, the most dangerous. Every mechanism we've built in this course carries a hidden clause in the fine print: *...assuming the players find and play the intended equilibrium.* We proved that in a second-price auction, truthful bidding is a dominant strategy. We proved cut-and-choose forces a fair split. But "there exists a dominant strategy" and "an actual human will find it and use it" are two different claims — and real people are **boundedly rational.** They don't always read the fine print of the game they're in.
+
+Studies of real second-price auctions find people *overbidding* — paying above their true value — even though truthful bidding is provably optimal and beating it is impossible. Why? Because the *reason* it's optimal is subtle (you set the price you might pay only when you don't win it), and if a bidder doesn't grasp that, the mathematically watertight incentive does them no good. A mechanism that is strategyproof *on paper* but too convoluted for its users to understand is, in practice, not strategyproof at all. The incentive only works if the player perceives it.
+
+This flips a whole design value into view: **simplicity and transparency are not niceties — they're load-bearing.** A rule people can *see through* — where it's obvious that honesty pays — will actually elicit honesty. A rule that's technically optimal but opaque invites confusion, superstition, and gaming, because players fall back on rules of thumb when the real logic is beyond them. The best mechanisms in the wild (eBay's proxy bidding presented as "just tell us your max"; the residency match with its "just rank your true preferences" promise) work partly *because* someone did the hard job of making the honest move also the *obvious* one. Design for the humans you have, not the flawless optimisers your proof assumed.
+
+<MatchConcepts
+  client:visible
+  question="Match each of the five honest limits of mechanism design to what it actually says."
+  pairs={[
+    { term: 'Myerson–Satterthwaite', definition: 'In private-value bilateral trade you cannot have efficiency, incentive compatibility, individual rationality, and budget balance all at once — something must give.' },
+    { term: 'Gibbard–Satterthwaite', definition: 'Any non-dictatorial voting rule over three or more options is manipulable — no non-trivial voting mechanism is perfectly strategyproof.' },
+    { term: "Goodhart's law", definition: 'When a measure becomes a target it stops being a good measure — players optimise the letter of the rule, not its spirit.' },
+    { term: 'Unravelling', definition: 'Without a mechanism to hold timing in place, a market can jump the gun — deals struck earlier and earlier, before anyone can choose well.' },
+    { term: 'Individual rationality', definition: 'People opt out if the mechanism leaves them worse than their outside option — a rule no one joins achieves nothing.' },
+  ]}
+  explanation="Two of the five are impossibility THEOREMS: Myerson–Satterthwaite (the four-way clash in bilateral trade) and Gibbard–Satterthwaite (every non-dictatorial voting rule is manipulable). Goodhart's law is the gaming trap — reward a proxy and rational players maximise the proxy, not your intent. Unravelling is a failure of TIMING that a centralized match exists to prevent. Individual rationality is the participation floor: outside options cap how hard any mechanism can squeeze, because players can always walk. Together they're the honest fine print on the whole craft."
+/>
+
+## Recap
+
+You've walked the entire course — from the great flip through incentive compatibility, the second-price auction, the revelation principle, mechanisms in the wild, and now the limits. Here's a mixed quiz that reaches back across all of it. Six questions, no penalties, just a final tune-up before the exam.
+
+<Quiz
+  client:visible
+  title="The whole-course recap"
+  questions={[
+    {
+      question: "What is the single defining move of mechanism design — the 'flip' the whole field is built on?",
+      options: [
+        { text: "It runs game theory backwards: instead of taking the rules as fixed and predicting behaviour, you start from the outcome you want and DESIGN the rules so self-interested play produces it.", correct: true },
+        { text: "It teaches players to be more cooperative and honest than they naturally are." },
+        { text: "It removes self-interest from the players so they behave fairly." },
+        { text: "It predicts the equilibrium of a fixed game more accurately than ordinary game theory." },
+      ],
+      explanation: "Forward game theory asks 'given the game, what happens?' Mechanism design asks the inverse: 'given the outcome I want, what game produces it?' Crucially it never asks players to be better than they are — it assumes they're exactly as self-interested as ever and designs rules that make the good outcome their own best move. Cut-and-choose is the emblem: greed in, fairness out, no referee.",
+    },
+    {
+      question: "A mechanism is called 'incentive-compatible' when...",
+      options: [
+        { text: "honest, cooperative behaviour is itself a best response, so no player can profit by gaming or lying.", correct: true },
+        { text: "it produces the outcome with the highest total payoff summed across players." },
+        { text: "every player is legally required to tell the truth." },
+        { text: "it treats all players exactly equally regardless of their preferences." },
+      ],
+      explanation: "Incentive compatibility is the central prize: the rules are arranged so that telling the truth / behaving well is each player's own best response, meaning nobody can do better by gaming the system. It's cut-and-choose made precise — the cutter's honesty about the split is forced by the rule, not by their character. Note it's about aligned INCENTIVES, not legal compulsion or equal treatment.",
+    },
+    {
+      question: "In a sealed-bid SECOND-PRICE (Vickrey) auction — highest bidder wins but pays the second-highest bid — what is your optimal bidding strategy, and why?",
+      options: [
+        { text: "Bid your true value: it's a dominant strategy, because the price you'd pay is set by someone else's bid, so shading your own bid can only cost you wins you wanted, never lower the price you pay when you win.", correct: true },
+        { text: "Bid well below your true value to make sure you get a bargain." },
+        { text: "Bid well above your true value to guarantee you win." },
+        { text: "Bid exactly the second-highest bid you expect others to make." },
+      ],
+      explanation: "In a second-price auction, truthful bidding is a DOMINANT strategy — best no matter what others do. Because the price you pay (when you win) is the second-highest bid, not your own, your bid only decides WHETHER you win, not how much you pay. Bidding below your value forfeits wins that were worth having; bidding above risks winning at a price above your value. Telling the truth is uniquely safe. eBay's proxy bidding is quietly this exact mechanism — 'just enter your max.'",
+    },
+    {
+      question: "What does the Revelation Principle let a mechanism designer do?",
+      options: [
+        { text: "Search only among honest, truth-telling mechanisms: if ANY mechanism can achieve a given outcome, then a direct mechanism where truth-telling is optimal can achieve it too.", correct: true },
+        { text: "Guarantee that every mechanism is efficient, fair, and budget-balanced at once." },
+        { text: "Force players to reveal information they would rather keep private." },
+        { text: "Eliminate the need to know anyone's payoffs or preferences." },
+      ],
+      explanation: "The Revelation Principle is the field's great organising shortcut: whatever outcome some clever mechanism can implement in equilibrium, an equivalent DIRECT, truth-telling mechanism can implement too. So designers can restrict their search to honest mechanisms without losing anything — a massive simplification. It does NOT dissolve the impossibility results (limit 1) or make payoffs knowable; it just says 'you only ever need to look among the honest rules.'",
+    },
+    {
+      question: "Which of these real-world systems is an example of a matching mechanism placing people WITHOUT using a price?",
+      options: [
+        { text: "A centralized kidney-exchange or medical-residency match that assigns based on ranked preferences and compatibility rather than who pays most.", correct: true },
+        { text: "A Pigouvian pollution tax set equal to the marginal harm." },
+        { text: "A sealed-bid first-price auction for radio spectrum." },
+        { text: "A cap-and-trade market where firms buy and sell emission permits." },
+      ],
+      explanation: "Kidney exchange and residency/school matching are matching markets: the right rule places people using preferences and compatibility, with no price doing the allocation — you can't (and shouldn't) buy a kidney. The other three ARE mechanism-design tools, but they work THROUGH prices: a Pigouvian tax is a price on harm, a spectrum auction sells to the highest bidder, and cap-and-trade creates a price for permits. Same discipline, different toolbox.",
+    },
+    {
+      question: "A city offers a cash bounty for every rat tail turned in, hoping to reduce its rat population. Soon people are farming rats to collect bounties, and the wild population is no smaller. Which limit does this illustrate?",
+      options: [
+        { text: "Goodhart's law / gaming: the mechanism rewarded 'rat tails produced,' a proxy, so rational players maximised the proxy (breeding rats) instead of the real goal (fewer wild rats).", correct: true },
+        { text: "The Revelation Principle, which guarantees honest reporting." },
+        { text: "Individual rationality, because participants opted out of the scheme." },
+        { text: "Myerson–Satterthwaite, because bilateral trade can't be efficient." },
+      ],
+      explanation: "This is the cobra effect wearing a rat costume — pure Goodhart. The bounty measured 'tails turned in,' not 'wild rats reduced,' so rational players optimised the measure by BREEDING rats, and the real target barely moved (or got worse). It's not a revelation-principle or Myerson–Satterthwaite issue, and participation is high, not low — the problem is that the mechanism rewards a proxy, and players game the proxy with total, rational confidence.",
+    },
+  ]}
+/>
+
+### When to use it
+
+Reach for this safety briefing **every time you're tempted to trust a mechanism — your own or someone else's — a little too much.** Before you deploy a rule, run the five checks like a pre-flight list. *Am I promising properties that some impossibility theorem forbids together — which one am I really sacrificing? What proxy am I rewarding, and how will a rational player game its letter instead of my intent? Is the timing self-stabilising, or will this market unravel without something holding the clock? Is every player I need actually better off inside than walking away? And is the honest move not just optimal on paper, but simple and obvious enough that a real, distractible human will actually find it?* A designer who asks these five isn't being pessimistic — they're being the kind of engineer whose bridges stay up. The craft is powerful precisely *because* it knows where it isn't.
+
+## Where this goes next
+
+That's the course. You started with two children and a slice of cake, and you can now do the whole trick: flip a helpless "how do I make people behave?" into a solvable "what rule makes good behaviour their own best move?", build in incentive compatibility so honesty pays, reach for a second-price auction when you want truthful bids, invoke the revelation principle to search only among honest rules, spot mechanism design running the world from spectrum auctions to kidney exchange — and, as of today, name the five places the craft bites back so you never oversell it. Knowing where a tool lies is the difference between wielding it and being fooled by it.
+
+One thing stands between you and the certificate: the **Final Exam.** Fair warning — it plays by different rules than the friendly practice quizzes. It runs **one question at a time**, and once you submit an answer it **locks for good**: no Back button, no retry, no Restart. Your score appears **only at the end**, and you need **70%** to pass. It's the rigour you'd want from anyone who claims to *understand* mechanism design rather than just having read about it. You've done the work across six lessons — trust the questions you've learned to ask, then go take it.

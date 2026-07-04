@@ -186,3 +186,9 @@ export type { PayoffExplorerProps, PayoffShape, PayoffShapeOption } from '@/comp
 
 export { FitnessLandscape, default as FitnessLandscapeDefault } from '@/components/react/FitnessLandscape';
 export type { FitnessLandscapeProps } from '@/components/react/FitnessLandscape';
+
+export { AuctionSandbox, default as AuctionSandboxDefault } from '@/components/react/AuctionSandbox';
+export type { AuctionSandboxProps } from '@/components/react/AuctionSandbox';
+
+export { CutAndChoose, default as CutAndChooseDefault } from '@/components/react/CutAndChoose';
+export type { CutAndChooseProps } from '@/components/react/CutAndChoose';

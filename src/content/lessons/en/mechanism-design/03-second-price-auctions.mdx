@@ -1,0 +1,191 @@
+---
+title: "Auctions and the Second-Price Trick"
+description: "In a sealed-bid auction, how much should you bid? One clever rule makes bidding your honest true value the dominant strategy — the showpiece of mechanism design, and why eBay works the way it does."
+topic: "en/mechanism-design"
+order: 4
+minutes: 14
+updated: 2026-07-04
+---
+
+import { MCQ, Quiz, AuctionSandbox, Callout } from '@/components/react';
+
+Picture a sealed-bid auction for a painting. Everyone scribbles a number on a slip, folds it, and drops it in a box. No shouting, no paddles, no watching the room — just your one private guess against a field of strangers you can't see. You've quietly decided the painting is worth \$100 to you. So write the slip. How much do you bid?
+
+If your gut said "\$100, obviously — that's what it's worth to me," hold that thought. In the ordinary version of this auction, writing your true value is a way to *guarantee* you walk away with nothing. And in the version this lesson is really about, writing your true value is the single smartest thing you can possibly do — no guessing, no strategy, no reading the room. Same painting, same \$100, opposite advice. The gap between those two auctions is one small rule, and it's the most beautiful trick in the whole field of mechanism design.
+
+We spent the last two lessons on the idea of **incentive compatibility**: a mechanism is well-designed when honest behaviour is itself a best response, so nobody profits by gaming it. This lesson is that idea in its cleanest, most famous form. Let's meet the auction that lies to you first.
+
+<MCQ
+  client:visible
+  pretest
+  question="A painting is worth exactly $100 to you. In a sealed-bid auction where the highest bidder wins and pays their OWN bid, you bid $100 and win. How much money did you gain?"
+  options={[
+    { text: "Nothing — you paid $100 for a $100 painting, so your net surplus is zero even though you 'won'", correct: true },
+    { text: "$100 — you got a painting worth $100" },
+    { text: "It depends on what the second-highest bidder wrote" },
+    { text: "You can't win by bidding your true value; someone always bids more" },
+  ]}
+  explanation="No penalty on a pretest — just feel the shape. Surplus is what the thing is worth to you MINUS what you paid. If you value the painting at $100 and you pay $100, the two cancel: you gain zero. Winning feels good, but a win with zero surplus is no better than not showing up. That's the trap of the first-price auction — bidding your honest value hands the entire prize to the seller. To make any profit, you'd have to bid LESS than $100 and gamble that it's still enough to win. Notice the third option: in THIS auction you pay your own bid, so the runner-up's number never touches your wallet — but hold onto that idea, because in a moment it will matter enormously."
+/>
+
+## The first-price auction and the lying it invites
+
+Start with the auction most people picture. It's called a **first-price sealed-bid auction**, and the rule is exactly what it sounds like: everyone submits one secret bid, the **highest bid wins**, and the winner **pays the amount they themselves bid**. First price, meaning the top price — your own.
+
+Here's the analogy: it's like a silent auction at a charity gala, but with a cruel twist. Whatever number you write on your card is the number you'll be charged if you win. So the card is doing two jobs at once — it decides *whether* you win and *how much* you pay — and those two jobs pull in opposite directions.
+
+Watch what that does to honesty. Suppose the painting is worth \$100 to you.
+
+- **Bid \$100 (your true value).** If you win, you pay \$100 for a thing worth \$100. Your surplus — value minus price — is exactly **zero**. You've handed every penny of the prize to the seller. Winning bought you nothing.
+- **Bid \$70 (shade below).** Now *if* you win, you pay \$70 for a thing worth \$100, netting **\$30** of pure surplus. But you might not win — if some rival bid \$80, your \$70 loses and you get nothing.
+
+So to make any money at all, you are *forced* to **shade**: bid strictly below your true value. Bidding honestly is strictly dumb. But how far to shade? Shade a little and you keep a thin sliver of profit but usually win; shade a lot and you keep a fat margin but usually lose. The right shade depends entirely on **guessing the rest of the field** — how many rivals, how aggressive, how much they value the thing. You're not really bidding on the painting anymore. You're bidding on your *forecast of everyone else's bids*.
+
+| Your bid | If you win, you pay | Surplus if you win | Chance you win |
+|---|---|---|---|
+| \$100 (true value) | \$100 | \$0 | high |
+| \$85 | \$85 | \$15 | medium-high |
+| \$70 | \$70 | \$30 | medium |
+| \$40 | \$40 | \$60 | low |
+
+Every row is a gamble on the field. There's no dominant answer — the best shade for one set of rivals is the wrong shade for another. The first-price auction has quietly turned a simple question ("what's it worth to me?") into a strategic guessing game about strangers. **Bidding is a form of lying**, and worse, lying you have to be *good* at.
+
+<Callout variant="warning" title="The pitfall hiding in first-price">
+Because your best bid depends on second-guessing everyone else, a first-price auction rewards **sophistication, information, and nerve** — not honest valuation. The bidder who wins is often not the one who values the item most, but the one who guessed the shading best. That's a mechanism leaking effort into mind-games instead of revealing what things are actually worth. Fixing that leak is the whole point of what comes next.
+</Callout>
+
+## The second-price trick
+
+Now change one rule, and one only. The **highest bidder still wins** — same as before. But the winner **pays the *second*-highest bid**: the amount the runner-up submitted, not their own number. This is the **second-price sealed-bid auction**, and it looks like a typo the first time you see it. Why would a seller ever *choose* to charge less than the winner offered?
+
+Because that one change performs magic. The claim — and it is one of the most celebrated results in economics — is this:
+
+<Callout variant="success" title="The headline result">
+In a **second-price sealed-bid auction**, bidding **your true value** is a **dominant strategy**: it is your best move *no matter what everyone else bids*. No shading, no guessing the field, no strategy at all — just write down what the thing is honestly worth to you, and you can never do better by writing anything else.
+</Callout>
+
+A **dominant strategy**, recall, is one that beats or ties every alternative in *every* situation — you never need to know what rivals do. Let's prove that truthful bidding is dominant, in plain words, by checking the only two ways you could deviate from honesty. Keep your true value at \$100 and let the highest *rival* bid be some number R.
+
+**Deviation 1 — overbid (bid above \$100, say \$120).** Overbidding can only ever change the outcome in one specific case: when a rival's bid R lands *between* your true value and your inflated bid, say R = \$110. Bidding \$100 honestly, you'd have lost — fine, you didn't want it at \$110 anyway. But by bidding \$120 you now *win*... and pay the second-highest bid, which is R = \$110, for a painting worth \$100. You bought \$100 of value for \$110: **negative \$10 surplus.** Overbidding never helps and sometimes drags you into a winning bid you'll regret. When R is below \$100, you'd have won and paid R either way, so the extra bid changes nothing.
+
+**Deviation 2 — underbid (bid below \$100, say \$70).** Underbidding can only change the outcome when R lands *between* your shaded bid and your true value, say R = \$85. Bidding \$100 honestly, you'd have won and paid R = \$85, pocketing **\$15** of surplus. But by shading to \$70, you now *lose* — you walked away from \$15 of free money. Underbidding never lets you pay less than you would have (the price is R, not your bid); it only risks *losing an item you'd have profited from.* When R is above \$100, you'd have lost either way, so shading changes nothing.
+
+Put the two together: overbidding risks a purchase at a loss, underbidding risks skipping a profit, and **truthful bidding never does worse than either, in any state of the world.** That's the definition of dominant. Notice the crucial fact doing all the work: **the price you pay is R, the runner-up's bid — never your own.** Your bid only decides *whether* you cross the finish line, not what you're charged for crossing it. So there's no reason on earth to write anything but the truth.
+
+This mechanism has a name: the **Vickrey auction**, after economist **William Vickrey**, who described it in 1961 and won the **Nobel Prize in 1996** partly for this idea. It's the poster child of strategyproof design — a rule so cleverly built that the honest move and the smart move are the same move.
+
+## Why it's beautiful: the decoupling
+
+Here's the deepest way to see why the second-price trick works, and it's worth slowing down for. In a first-price auction, your bid did **two jobs at once** — it set whether you win *and* what you pay — and those two jobs fought each other, which is exactly what forced you to shade and guess.
+
+The second-price rule **surgically separates the two jobs**:
+
+- **Whether you win** depends on your bid (you win if you're highest).
+- **How much you pay** depends *only on your rivals' bids* (you pay the runner-up's number), and is completely **independent of your own bid.**
+
+Because your bid can't move your own price by even a penny, the entire question "how much should I bid?" becomes **decoupled** from "how much will I pay?" And once those come apart, honesty is simply *safe* — there's no longer any lever your bid could pull to lower your cost, so there's nothing to be gained by distorting it. The only thing your bid still controls is whether you win at a price you didn't set, so you might as well bid exactly the highest price at which you'd still be glad to win: your true value.
+
+That is **incentive compatibility** from the previous lesson in its purest, most elegant instance. In the cut-and-choose game, the rule made fairness the cutter's own best move. Here, the rule makes *honesty* the bidder's own best move — and it does it by the same trick every good mechanism uses: it arranges the incentives so that telling the truth is never punished. The seller didn't lecture bidders to be honest. The seller **built a room where lying has no payoff.**
+
+<AuctionSandbox
+  client:visible
+  title="Feel the trick in your hands"
+  initialRule="second"
+  initialValue={70}
+  initialBid={70}
+  initialRival={50}
+  caption="Start in second-price mode. Your true value is 70; your bid starts truthful at 70. Now try to cheat the rule: slide your bid ABOVE 70 and above the rival — you win, but watch your surplus go negative because you pay the rival's bid, which can exceed what the item is worth to you. Then slide your bid BELOW 70 while the rival sits between your bid and 70 — now you LOSE an item you'd have profited from. Truthful bidding at 70 never does worse. THEN flip the toggle to first-price and notice the opposite: bidding your value of 70 earns you nothing when you win, so you're forced to shade down and gamble on the rival. One rule makes honesty safe; the other makes it a trap."
+/>
+
+Play with that sandbox until the two worlds feel different in your fingertips. In second-price you'll never find a bid that beats honesty. In first-price you'll always be tempted to lie — and you'll be guessing.
+
+<Quiz
+  client:visible
+  title="Checkpoint: the overbid and underbid logic"
+  questions={[
+    {
+      question: "In a second-price auction, your true value for a lamp is $60. You consider OVERBIDDING at $90. In which case does this overbid actually change your outcome — and is the change good or bad?",
+      options: [
+        { text: "When the top rival bid lands between $60 and $90 (say $75): you now win but pay $75 for a $60 lamp — a $15 loss. Overbidding only ever helps you win purchases you'll regret", correct: true },
+        { text: "It's always better — a higher bid means a higher chance of winning at a good price" },
+        { text: "It changes nothing ever, because you pay the second price regardless of your bid" },
+        { text: "When the rival bid is below $60: you win and pay less, so overbidding is free money" },
+      ],
+      explanation: "Overbidding matters only when a rival's bid falls in the gap between your true value ($60) and your inflated bid ($90). There, you're dragged into winning at a price ABOVE what the item is worth to you — pure loss. When the rival is below $60 you'd have won and paid the same either way, so the overbid does nothing useful. It can hurt and can never help.",
+    },
+    {
+      question: "Same lamp, true value $60. Now you consider UNDERBIDDING at $40. What's the risk?",
+      options: [
+        { text: "When the top rival bids between $40 and $60 (say $50): you lose the lamp — but had you bid honestly you'd have won it for $50 and netted $10. Underbidding forfeits profitable wins and never lowers your price", correct: true },
+        { text: "You pay less when you win, so underbidding is smart if you're patient" },
+        { text: "There's no risk; a lower bid can only help you" },
+        { text: "You risk paying $40 instead of the second price" },
+      ],
+      explanation: "In a second-price auction your price is the RUNNER-UP's bid, not your own — so shading down to $40 never reduces what you pay when you win. All it does is knock you out of the race when a rival lands between $40 and $60, costing you a lamp you'd have profitably won for $50. Underbidding sacrifices good wins and buys you nothing in return.",
+    },
+    {
+      question: "Why is 'bid your true value' called a DOMINANT strategy in the second-price auction?",
+      options: [
+        { text: "Because it does at least as well as any other bid no matter what every rival does — so you never need to guess the field to play it correctly", correct: true },
+        { text: "Because it always wins the auction" },
+        { text: "Because it always earns the highest possible profit" },
+        { text: "Because most experienced bidders happen to use it" },
+      ],
+      explanation: "A dominant strategy is one that beats or ties every alternative in EVERY situation, so you can play it without knowing anything about your rivals. Truthful bidding is dominant because both deviations — overbidding and underbidding — can only hurt or do nothing, never help. It doesn't always win (a rival may value the item more) and doesn't always maximise profit in some cosmic sense; it's simply never beaten by lying.",
+    },
+  ]}
+/>
+
+## eBay is a second-price auction in disguise
+
+You've almost certainly used a Vickrey auction without knowing it. When you bid on eBay, the site doesn't ask for one number and charge you that. It uses **proxy bidding**: you enter the **maximum** you're willing to pay, and eBay's robot bids *on your behalf*, raising your bid only as far as it needs to — just **one increment above the current runner-up** — to keep you in the lead. It never volunteers your full maximum. It only spends what it must to beat second place.
+
+That is a second-price auction wearing a friendly interface. You reveal your true maximum (your value), and you end up paying roughly the **second-highest bid** plus a tiny increment — not your own maximum. Which is exactly why every eBay help page tells you to "bid your maximum amount" and stop fiddling: the mechanism is built so that honesty is optimal, and manual sniping-and-nudging just wastes your time.
+
+**Worked example.** A vintage camera. Three bidders set their proxy maximums:
+
+| Bidder | True value / max entered |
+|---|---|
+| You | \$200 |
+| Rival A | \$150 |
+| Rival B | \$90 |
+
+You have the highest maximum, so eBay's proxy keeps you winning. But it never bids your full \$200. It only outbids Rival A's \$150 — so it lifts your bid to about **\$151** (one \$1 increment above the runner-up) and stops. You **win the camera and pay \$151**, pocketing **\$49** of surplus, even though you were willing to go to \$200. Your bid of \$200 decided *that* you won; Rival A's \$150 decided *what you paid.* Whether-you-win and how-much-you-pay, cleanly decoupled — the second-price trick, live.
+
+<MCQ
+  client:visible
+  question="On eBay you enter a proxy maximum of $200 for a camera. The next-highest bidder's maximum is $150. Roughly what do you pay, and why is entering your honest $200 the right move?"
+  options={[
+    { text: "About $151 — one increment above the runner-up's $150. eBay only bids as high as it needs to, so your $200 max sets whether you win but the runner-up's $150 sets your price; entering your true max can only help you win and never inflates what you pay", correct: true },
+    { text: "$200 — eBay charges you the maximum you entered, so you should enter less to save money" },
+    { text: "$150 exactly, and you should have entered $151 to be safe" },
+    { text: "$175 — the average of the two maximums" },
+  ]}
+  explanation="Proxy bidding is a second-price rule: you pay one increment above the second-highest maximum, NOT your own. Your $200 never gets spent — it only guarantees you outrank rivals up to $200. So entering your honest maximum can only ever help you win items you'd profit from, and it never raises your price above the runner-up's number. Entering LESS than your true max just risks losing a camera you'd happily have paid more for. Honesty is dominant, exactly as the theory promised."
+/>
+
+## When the beautiful theory meets the ugly world
+
+Before you go crown the Vickrey auction king of all auctions, a dose of honesty of our own. **Pure second-price auctions are rarer in the wild than the theory's elegance suggests**, and it's worth knowing why — because the reasons are themselves lessons in mechanism design.
+
+- **Shill bidding.** The whole scheme rests on the second-highest bid being *real*. But a dishonest seller can plant a **shill bid** — a fake runner-up, secretly their own — to inflate the price the true winner pays. If your \$200 max would have paid \$151, a seller who sneaks in a phantom \$190 bid makes you pay \$191. The mechanism is strategyproof for *bidders* but assumes an honest *seller*, and that assumption doesn't always hold. eBay bans shilling for exactly this reason.
+- **Bidders distrust a sealed rule they can't verify.** Telling someone "bid your true value and trust me, you'll pay less" asks for faith. In a sealed auction, you can't watch the second price being determined; you just receive a bill. Many bidders find that *psychologically* unbearable — it feels like being asked to reveal your top number to a stranger who promises to be nice about it. First-price auctions, for all their gamesmanship, at least let people feel in control.
+- **Collusion is easier.** Because truthful bids are common knowledge among a colluding ring, a cartel of bidders can more easily agree to hold their bids down and split the spoils, confident nobody has a private incentive to break ranks and overbid.
+
+<Callout variant="info" title="Revenue equivalence — the twist that makes the choice about honesty, not money">
+You might expect the seller to *lose* money by charging the second price instead of the first. Remarkably, they don't — on average. The **revenue equivalence theorem** says that under standard assumptions (bidders are risk-neutral, values are private and drawn independently), the first-price and second-price auctions yield the seller **the same expected revenue.** The intuition: in the first-price auction bidders shade *down* toward the second-highest value anyway, so on average the seller collects about the same as if they'd simply charged it. So the seller isn't trading money for honesty. The choice between the two auctions is really a choice about **simplicity, honesty, and strategyproofness** — the second-price auction just makes bidders' lives easier and reveals true values — not about squeezing out more revenue.
+</Callout>
+
+That last point is the quiet moral of the lesson. The second-price auction's gift isn't a bigger payday for the seller — it's an auction where nobody has to be a strategist, where the honest number is the winning number, and where the thing usually ends up with the person who values it most. That's mechanism design doing its finest work: not extracting more, but **making the good outcome the effortless one.**
+
+### When to use it
+
+Reach for a **second-price / Vickrey-style rule** whenever you want people to **reveal how much something is truly worth to them** without turning your process into a guessing contest — and when you can guarantee the runner-up's bid is honest.
+
+- **Use it when truthful revelation is the goal.** Ad auctions (Google's ad slots run on Vickrey-style pricing), spectrum sales, and any setting where you'd rather learn real valuations than reward the shrewdest shader.
+- **Use it when you can trust the price-setting side.** The mechanism is strategyproof for bidders but *assumes an honest seller* — deploy it where shill bids can be detected or the auctioneer is neutral (a platform, a government body, an audited exchange).
+- **Think twice when bidders can't verify the second price, when collusion is likely, or when the seller can secretly plant bids.** There, a transparent first-price rule may be more robust despite its gamesmanship.
+
+The single most important thing to carry away: **a good rule decouples "do you win" from "what you pay," and honesty becomes free.** That decoupling is a specific, clever *construction* — but it hints at something far more general. If a second-price auction can make truth-telling optimal, could *every* good mechanism be rebuilt as one where honesty is the winning move?
+
+That astonishing "yes" is the subject of lesson 4, **The Revelation Principle** — the deep organising idea that lets designers stop hunting through every possible rulebook and search only among the honest ones.

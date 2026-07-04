@@ -1,0 +1,158 @@
+---
+title: "The Revelation Principle"
+description: "There are infinitely many rulebooks a designer could write, so how could anyone ever search them all? One theorem says you never need to — you only ever have to consider the honest ones."
+topic: "en/mechanism-design"
+order: 5
+minutes: 12
+updated: 2026-07-04
+---
+
+import { MCQ, MatchConcepts, Reveal, Callout } from '@/components/react';
+
+Imagine you're negotiating the sale of a car in a country whose language you don't speak, so you hire a translator. Here's the twist: this translator is a *shark*. You tell them, in your own tongue, exactly how much the car is worth to you and exactly how you'd love to play the negotiation — and the translator does all the lying, bluffing, and strategic footwork on your behalf, in the other language, better than you ever could. You never have to bluff. You never have to shade the truth. You just tell your translator the honest facts and your honest wishes, and *they* produce whatever cunning performance the situation calls for.
+
+Now ask yourself: sitting across from your own translator, do you have any reason to lie to *them*? None. They're on your side, they already do all the strategising, and lying to your own agent only sabotages the very person working for you. So you're perfectly honest with the translator — even though the translator, out in the world, is as slippery as the game demands.
+
+That translator is the entire idea of this lesson wearing a disguise. It is the intuition behind one of the deepest results in mechanism design — a theorem that takes an impossible-looking search and quietly collapses it down to something a mathematician can actually finish. It's called the **revelation principle**, and by the end of this page you'll see why theorists treat it as the master key to the whole field.
+
+## The search problem: infinitely many rulebooks
+
+Back in lesson 1 we defined a **mechanism** as a set of rules: who moves, what they're allowed to say or do, and how those choices map to an outcome. So far so tidy. The horror only starts when you ask a designer to find the *best* mechanism — because the space of possible mechanisms is monstrously, unmanageably large.
+
+Think about how many different rulebooks you could write just to sell one painting. Sealed bids in envelopes. Open outcry where people shout over each other. An English auction where a price ticks upward and bidders drop out. A Dutch auction where a price ticks *downward* until someone snaps. Multi-round formats. Formats where you submit a whole *strategy* rather than a number. Formats with side payments, entry fees, reserve prices, weird tie-breaking rituals, and message spaces where bidders send haikus. Each of these is a legitimate mechanism, and there are **infinitely many more** — the messages players can send are unbounded, so the set of conceivable games has no edge to it.
+
+<Callout variant="warning" title="The nightmare a designer wakes up to">
+To find the *best* mechanism, you'd apparently have to consider **every conceivable set of rules** — every message space, every mapping from messages to outcomes, every number of rounds. That's not a big list. It's an *infinite* space with no natural way to enumerate it. Brute force is hopeless before you've written the first envelope.
+</Callout>
+
+This is genuinely paralysing. You can't check infinitely many games one at a time, and you can't even neatly *describe* the space you'd be searching. If mechanism design stopped here, it would be a field of clever one-off tricks with no way to prove that any trick was the best available. What the designer desperately needs is a way to shrink the search — some argument that says *"you can safely ignore almost all of these rulebooks."* That argument exists. But to state it we first need to isolate one very special, very boring-looking family of mechanisms.
+
+## Direct mechanisms and truthful mechanisms
+
+Among all those baroque rulebooks, one family is stripped down to the bone.
+
+A **direct mechanism** is a mechanism whose only move is: *each player reports their private information directly.* No paddles, no rounds, no bluffing rituals. If your private information is how much the painting is worth to you, a direct mechanism just asks, "How much is it worth to you?" — you write a number, everyone submits at once, and a fixed rule maps the reported numbers to an outcome (who wins, who pays what). Whatever secret a player holds — their value, their preference ranking, their priority, their type — a direct mechanism simply asks them to *state it*.
+
+Now, asking people to state their secret is not the same as expecting them to state it *honestly*. That's a separate, precious property:
+
+<Callout variant="tip" title="Two definitions to nail down">
+- A **direct mechanism** asks each player to **report their private information (their "type")**, then maps the reports to an outcome.
+- A direct mechanism is **truthful** (equivalently, **incentive-compatible** — the star of lesson 2) when **reporting honestly is an equilibrium**: given that everyone else reports honestly, no player can do better by lying about their type.
+</Callout>
+
+Contrast this with an **indirect mechanism**, where players never state their type at all — they reveal it only *through their actions*. In an **English auction** you don't announce "the painting is worth \$900 to me"; you just keep raising your paddle until the price passes your limit, and your willingness to bid one more time silently leaks information about your value. On eBay, you don't declare your true maximum out loud in a way anyone can read directly off the screen — the bidding war reveals it move by move. Indirect mechanisms are the flashy, familiar ones. Direct truthful mechanisms are the plain ones where everybody just tells the truth and a formula does the rest.
+
+<MCQ
+  client:visible
+  pretest
+  question="A city runs a construction contract using an English-style auction: firms shout progressively lower price offers until only one is left willing to do the job at that price. Is this a DIRECT mechanism?"
+  options={[
+    { text: "No — it's indirect. Firms never state their private cost of doing the job; their true cost is revealed only through the actions they take (how long they keep bidding), not by reporting it", correct: true },
+    { text: "Yes — it's direct, because at the end exactly one firm is chosen and a price is set, and any mechanism that produces an outcome is direct" },
+    { text: "Yes — it's direct, because the firms are communicating openly rather than through sealed envelopes" },
+    { text: "No — it's not a mechanism at all, because no one reports a number" },
+  ]}
+  explanation="No penalty on a pretest — just feel the shape. 'Direct' has a precise meaning: each player REPORTS their private information (here, their true cost), and a rule maps the reports to an outcome. In an open bidding war nobody reports their cost — they keep bidding, drop out, and their true cost only leaks out through when they stop. That's the signature of an INDIRECT mechanism. Producing an outcome doesn't make a mechanism direct (every mechanism produces an outcome), and open vs. sealed communication is about format, not directness. It is very much still a mechanism — just an indirect one."
+/>
+
+Why isolate this dull-looking family? Because it's about to become the entire search space. Hold onto one nagging question: those indirect mechanisms produce *real outcomes* in the world every day. If we throw them all away and look only at direct truthful mechanisms, aren't we giving something up? The answer — and it's the whole point of the lesson — is *no*.
+
+## The revelation principle
+
+Here is the theorem, due to Roger Myerson (and it's a big part of why he shares a Nobel Prize).
+
+<Callout variant="success" title="The revelation principle">
+Take **any** mechanism and **any** equilibrium of it. There exists a **direct, truthful mechanism** that produces **exactly the same outcome** — the same winner, the same payments, the same allocation — for every combination of player types.
+</Callout>
+
+Read that slowly, because it's astonishing. It says every outcome that *any* rulebook can achieve in equilibrium — every clever multi-round, paddle-raising, envelope-shuffling contraption — can *also* be achieved by a plain mechanism where players simply tell the truth. Nothing an indirect mechanism can do is beyond the reach of an honest direct one.
+
+And the proof is exactly our shark translator. Suppose some elaborate indirect mechanism has an equilibrium: in it, a player of type *"the painting is worth \$900 to me"* follows some optimal strategy — maybe that strategy is *"raise my paddle until the price hits \$740, then stop,"* i.e. a strategic shading of their true value. Now build a new, direct mechanism with a **trusted intermediary**, an honest broker, bolted on:
+
+1. Each player quietly tells the broker their **true type** — the honest \$900.
+2. The broker, who knows the original game inside out, plays the **original equilibrium strategy on that player's behalf** — it raises the imaginary paddle to \$740, executes exactly the bluff the player would have executed themselves.
+3. The mechanism produces whatever the original game would have produced.
+
+<Callout variant="info" title="Why nobody lies to the broker">
+The broker does **all** the strategising. It already turns your honest \$900 into whatever clever, shaded play the original game rewarded. So what would you gain by lying to the broker and telling it \$740 instead? Nothing — you'd only make it do the *wrong* strategising for your true situation. Since the broker already performs the optimal lie *for* you, you have no reason to lie *to* it. Honesty to the broker is now an equilibrium. The whole indirect game has been folded into a direct, truthful one.
+</Callout>
+
+That folding-in is the revelation principle in a sentence: **any outcome reachable by any mechanism is reachable by a truthful direct mechanism**, because you can always absorb the players' strategising into the mechanism itself. And it licenses one glorious simplification:
+
+> **Without loss of generality, a designer can restrict attention to truthful direct mechanisms.**
+
+That phrase — *without loss of generality* — is the treasure. It means the infinite, unsearchable space of all conceivable rulebooks can be replaced, for the purpose of asking "what outcomes are achievable?", by the small, well-behaved space of mechanisms where everyone just reports honestly. You lose nothing. Every outcome still on the table.
+
+<MCQ
+  client:visible
+  question="The revelation principle guarantees that for any mechanism and equilibrium, a truthful direct mechanism reaches the same outcome. What is the single best summary of what this buys a mechanism designer?"
+  options={[
+    { text: "It shrinks an impossible search over ALL conceivable games down to a tractable search over truthful direct mechanisms, without giving up any achievable outcome", correct: true },
+    { text: "It proves that truthful direct mechanisms always give players higher payoffs than indirect mechanisms do" },
+    { text: "It proves that honesty is the morally correct policy, so designers should require players to be honest" },
+    { text: "It eliminates the need for players to have any private information at all" },
+  ]}
+  explanation="The principle is a search-space collapse. Because any outcome achievable by any mechanism is also achievable by a truthful direct one, the designer can ignore the infinite zoo of indirect rulebooks and study only truthful direct mechanisms — losing no achievable outcome. It says nothing about payoffs being higher (the SAME outcome is reproduced, not a better one), it's an analytical fact, not a moral claim about honesty, and players still very much have private information — the mechanism just asks them to report it, and arranges things so they'll do so honestly."
+/>
+
+## Why it's a power tool
+
+The revelation principle is not a design recommendation you hand to a policymaker — it's the crowbar theorists use to pry open the whole subject. Two jobs it does:
+
+**It makes possibility and impossibility results provable.** Suppose you want to know whether *any* mechanism can achieve some goal — say, "always sell to the highest-value bidder while never running a deficit." Checking every possible rulebook is hopeless. But thanks to the revelation principle, you only have to ask: *is there a truthful direct mechanism that does it?* If yes, one exists. If you can prove that *no* truthful direct mechanism can do it, then — because a truthful direct version could always be built from any successful mechanism — *no mechanism of any kind* can do it either. That's how the famous impossibility theorems get proved: you show the honest version can't exist, and the principle extends the verdict to *every* rulebook at once. (We'll meet exactly those "you can't have it all" results in lesson 6.)
+
+**It turns the auction zoo into two examples of one animal.** Here's the payoff for everything you learned in lesson 3.
+
+<Reveal client:visible title="Spot the truthful equivalent: first-price vs. second-price">
+Recall the two headline auctions:
+
+- **First-price sealed-bid:** highest bidder wins and pays *their own bid*. Because paying your full value would leave you zero profit, every bidder **shades** — bids *below* their true value. Your written bid is a strategic lie about what the item is worth to you. This is an **indirect** mechanism: your true value never appears; it hides behind the shaded bid.
+- **Second-price sealed-bid (Vickrey):** highest bidder wins but pays the *second*-highest bid. As lesson 3 showed, this makes **bidding your true value a dominant strategy** — no shading, no lying. This is a **truthful direct** mechanism: you report your value honestly and a rule does the rest.
+
+Now watch the revelation principle click into place. **Both auctions implement the same outcome** — "the highest-value bidder wins the item" — and (under standard assumptions) they even raise the same expected revenue. But the first-price auction gets there by making bidders lie in a disciplined way, while the second-price auction gets there by letting them tell the truth.
+
+**The second-price auction is precisely the truthful direct version of the first-price auction.** The shark translator is baked right into the rules: the "pay the second-highest bid" rule does the strategic shading *for* you, so you're free to just report your honest value. Same winner, same logic, but the strategising has been absorbed into the mechanism. That is the revelation principle made concrete — an indirect, shade-your-bid game folded into an honest one that reaches the identical outcome.
+</Reveal>
+
+Once you've seen the second-price auction *as* the truthful twin of the first-price auction, the abstract theorem stops feeling abstract. Every messy indirect mechanism out there has a plain honest doppelgänger sitting quietly beside it, reaching the same place — and it's that honest twin the theorist studies.
+
+<MatchConcepts
+  client:visible
+  question="Match each term from this lesson to its precise meaning."
+  pairs={[
+    { term: "Direct mechanism", definition: "Asks each player to report their private information (their type) directly, then maps the reports to an outcome" },
+    { term: "Indirect mechanism", definition: "Reveals players' private information only through their actions — like raising a paddle in an English auction — never by having them state it" },
+    { term: "Truthful (incentive-compatible)", definition: "A property of a direct mechanism: reporting your type honestly is an equilibrium, so no one can profit by lying" },
+    { term: "Revelation principle", definition: "For any mechanism and equilibrium, a truthful direct mechanism exists that produces the exact same outcome" },
+    { term: "Honest broker", definition: "The trusted intermediary in the proof: players report their true type, and it plays the original equilibrium strategy — the very lie they'd have told — on their behalf" },
+  ]}
+  explanation="Direct = you report your type; indirect = your type leaks out through your actions. Truthful (incentive-compatible) is the property that honest reporting is an equilibrium. The revelation principle is the theorem tying it together — any outcome from any mechanism is reachable by a truthful direct one — and the honest broker is the construction that proves it by absorbing each player's strategising into the mechanism."
+/>
+
+## Honest caveats: what the principle does NOT promise
+
+This is a subtle theorem, and it's easy to over-claim. Three things it emphatically does *not* say:
+
+- **It is analytical, not a design recommendation.** The revelation principle tells you a truthful direct mechanism *exists* that matches any given outcome. It does **not** say that mechanism is a good one to actually deploy. The guaranteed honest version can be fiendishly complex, opaque, or otherwise undesirable — sometimes the messy indirect auction is far nicer to run in a real room. The principle says nothing is lost *in principle* by studying the truthful versions; it says nothing about which mechanism you should *build*.
+- **"Truthful" doesn't mean "better."** Reproducing an outcome is not improving it. The honest twin reaches the *same* result, not a superior one — no one gets richer, the pie doesn't grow. The principle is about the *reach* of what's achievable, never about ranking mechanisms by how good their outcomes are.
+- **It leans on assumptions you must not forget.** The construction quietly requires that the designer **can commit to the rules** (the broker won't secretly change the mapping after hearing your type), that players actually **play the equilibrium** the mechanism is built around, and that the mechanism **computes the outcome correctly**. Break commitment — let players suspect the broker will exploit their honest report — and the reason to tell the truth evaporates. These are the same load-bearing assumptions we'll interrogate in lesson 6.
+
+<MCQ
+  client:visible
+  question="A policymaker reads about the revelation principle and concludes: 'Great — so we should always run truthful direct mechanisms, because the theorem proves they're the best kind.' Which correction is right?"
+  options={[
+    { text: "The theorem is analytical, not prescriptive: it proves a truthful direct mechanism can MATCH any outcome, not that it's the best to deploy — the honest version may be complex or otherwise worse to run in practice", correct: true },
+    { text: "The policymaker is exactly right; the theorem proves truthful direct mechanisms are always the best choice" },
+    { text: "The correction is that truthful mechanisms are actually always worse than indirect ones, so the policymaker has it backwards" },
+    { text: "The theorem only applies to auctions, so the policymaker shouldn't generalise it to policy at all" },
+  ]}
+  explanation="The revelation principle guarantees a truthful direct mechanism can reproduce any achievable outcome — it's a statement about what's REACHABLE, used to prove possibility and impossibility results. It does not rank mechanisms as best or worst, and the honest version it guarantees can be complex, opaque, or awkward to run in reality. Truthful mechanisms aren't universally worse either (that overcorrects), and the principle is fully general, not auction-only. The one true correction: it's an analytical tool, not a deployment recommendation."
+/>
+
+### When to use it
+
+Reach for the revelation principle whenever you catch yourself asking **"could *any* set of rules possibly achieve X?"** — a question that otherwise drowns you in infinitely many rulebooks. The principle hands you a lifeline: instead of searching every conceivable game, search only the truthful direct ones. If an honest mechanism can do X, then X is achievable; if you can prove no honest mechanism can do X, then *nothing* can. It's the standard first move in any proof about the *limits* of what mechanisms can accomplish — the tool that converts "search all games" into "check the honest ones."
+
+Just keep the caveats bolted on: it tells you what's *possible*, never what's *best to build*, and it leans on commitment, equilibrium play, and correct computation. Use it to map the frontier of the achievable — then use judgment to pick which real mechanism to actually run.
+
+Next up: lesson 5, **Mechanisms Everywhere** — we leave the theory bench and go hunting in the wild, where the same design logic quietly runs pollution taxes, deposit-refund schemes, cap-and-trade, and the matching markets that place kidneys with patients and students with schools, often without any price changing hands at all.

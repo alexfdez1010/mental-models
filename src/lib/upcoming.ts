@@ -89,34 +89,17 @@ export const upcomingCourses: UpcomingCourse[] = [
   // ── Advanced → expert tier — kept tag-diverse ──────────────────────────────
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
   // `leverage-points` (23), `lollapalooza-effect` (24), `regression-to-the-mean`
-  // (25), `critical-mass` (26), `nash-equilibrium` (the advanced strategy rung,
-  // 27), `asymmetry-and-optionality` (the advanced decision-making rung, 28) and
-  // `fitness-landscapes` (the advanced biology-evolution rung, 29) have graduated
-  // and been removed; their topic MDX is now the record. The lowest-order entry
-  // below (`mechanism-design`, order 30) is built next. The remaining queue
-  // finishes the advanced tier and opens the expert tier, spanning strategy
-  // (`mechanism-design`), foundations (`combining-models-latticework`) and
-  // decision-making/probability (`deciding-under-deep-uncertainty`) so no single
-  // roadmap tag races ahead of the others.
-  {
-    slug: 'mechanism-design',
-    icon: '🛠️',
-    difficulty: 'advanced',
-    order: 30,
-    accent: 'accent',
-    title: {
-      en: 'Mechanism Design',
-      es: 'Diseño de Mecanismos',
-    },
-    description: {
-      en: 'Game theory in reverse: instead of predicting how players will act inside a fixed game, you design the rules so that self-interest produces the outcome you actually want. The engineering discipline behind good auctions, fair splits, and honest incentives.',
-      es: 'Teoría de juegos al revés: en lugar de predecir cómo actuarán los jugadores dentro de un juego fijo, diseñas las reglas para que el interés propio produzca el resultado que de verdad quieres. La disciplina de ingeniería tras las buenas subastas, los repartos justos y los incentivos honestos.',
-    },
-    dependencies: ['nash-equilibrium', 'incentives'],
-    tags: ['strategy', 'economics'],
-    buildNotes:
-      'Mechanism design — the "inverse game theory" rung that follows directly from nash-equilibrium: if an equilibrium is what self-interested players settle into, then changing the rules changes the equilibrium, so you can *engineer* the game to make the outcome you want be the one everyone reaches on their own. Assumes nash-equilibrium (equilibria, best responses) and incentives. Sections: the core flip — analysis predicts play inside fixed rules; design chooses the rules to steer the equilibrium (Hurwicz/Maskin/Myerson, Nobel 2007); incentive-compatibility — a mechanism is incentive-compatible when honest/desired behaviour is itself a best response, so no one gains by gaming it (truthful bidding, truth-telling); worked examples — "I cut, you choose" as the canonical fair-division mechanism (the cutter’s self-interest is redirected to produce fairness); the second-price / Vickrey auction where bidding your true value is a dominant strategy (contrast the first-price auction where it is not, and tie to why eBay-style proxy bidding works); the revelation principle in words (if any mechanism gets a good outcome, a truthful one can too); the connection to leverage-points and externalities (a Pigouvian tax is a mechanism; so are deposit-refunds, cap-and-trade, and matching markets like kidney exchange and school choice). Pitfalls: assuming you can design away all bad incentives (impossibility results — you cannot always have efficiency, honesty and budget-balance at once); mechanisms that are gameable in practice (Goodhart, unraveling); ignoring participation/individual-rationality constraints; over-trusting that people play the intended equilibrium. Build an interactive island (or reuse/extend the payoff-matrix island): an auction sandbox where the learner sets their true value and a rule (first-price vs second-price) and sees why truthful bidding is or isn’t a best response, plus a "cut-and-choose" splitter showing self-interest producing a fair division. Recap Quiz + MindMap. en + es twin.',
-  },
+  // (25), `critical-mass` (26), `nash-equilibrium` (27), `asymmetry-and-optionality`
+  // (28), `fitness-landscapes` (29) and `mechanism-design` (the advanced
+  // strategy/economics rung, 30) have graduated and been removed; their topic MDX
+  // is now the record. The lowest-order entry below
+  // (`combining-models-latticework`, order 31) is built next. The remaining queue
+  // finishes the expert tier and refills the breadth the last removal opened up,
+  // spanning foundations/decision-making (`combining-models-latticework`),
+  // decision-making/probability (`deciding-under-deep-uncertainty`), psychology
+  // (`influence-and-persuasion`), biology-evolution/strategy
+  // (`evolution-of-cooperation`) and strategy (`credible-commitment-and-deterrence`)
+  // so no single roadmap tag races ahead of the others.
   {
     slug: 'combining-models-latticework',
     icon: '🕸️',
@@ -154,6 +137,63 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['decision-making', 'probability'],
     buildNotes:
       'Deciding under deep uncertainty — the expert decision-making rung: what to do when the clean machinery of expected value breaks because you do not (and cannot) know the probabilities. Assumes fat-tails, margin-of-safety and asymmetry-and-optionality; the honest sequel to expected value. Sections: risk vs uncertainty (Knight) — risk is a known distribution (a dice roll), uncertainty is an unknown one (next decade’s technology); why point-estimate expected value quietly assumes you know the odds and misleads under fat tails and unknown unknowns; the shift from *optimising* to *satisficing* and *robustness* — pick actions that do acceptably across many possible worlds rather than best in your single guessed one (robust decision-making, minimax-regret, the precautionary/ruin-avoidance principle: never risk what you cannot afford to lose, because ergodicity fails and one ruin ends the game); reversibility and option value (keep choices reversible, pay for margin of safety, run small experiments — tie to asymmetry-and-optionality and the barbell); scenario thinking and pre-mortems instead of single forecasts; the role of redundancy, slack and antifragility; calibration humility (you know less than your confidence suggests). Pitfalls: false precision (a detailed spreadsheet is not knowledge; garbage-in dressed as rigour); treating deep uncertainty as if it were mere risk; over-hedging into paralysis or paying so much for safety you never win; confusing robustness with mere pessimism. Build an interactive island: a "many-worlds" decision explorer where the learner picks among strategies (optimise / hedge / barbell / robust) and the island draws each strategy’s outcome across a spread of possible worlds — including rare ruinous ones — showing how the expected-value winner can be the strategy most likely to blow up, while the robust choice trades a little average for surviving every world. Recap Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'influence-and-persuasion',
+    icon: '🎯',
+    difficulty: 'advanced',
+    order: 33,
+    accent: 'brand',
+    title: {
+      en: 'Influence & Persuasion',
+      es: 'Influencia y Persuasión',
+    },
+    description: {
+      en: 'The handful of psychological levers that reliably move a "yes" — reciprocity, commitment, social proof, authority, liking, and scarcity. How compliance is engineered, why these shortcuts usually serve us, and how to spot when they are being turned against you.',
+      es: 'El puñado de palancas psicológicas que arrancan un "sí" de forma fiable — reciprocidad, compromiso, prueba social, autoridad, simpatía y escasez. Cómo se fabrica el cumplimiento, por qué estos atajos suelen servirnos y cómo detectar cuándo se vuelven contra ti.',
+    },
+    dependencies: ['incentives', 'confirmation-bias'],
+    tags: ['psychology', 'decision-making'],
+    buildNotes:
+      'Influence & persuasion — the advanced psychology rung that turns "cognitive biases" from a list of errors into a system of levers other people can pull. Assumes incentives and the bias courses (confirmation-bias). The organising canon is Robert Cialdini’s principles of influence, taught as mental models of how a mind is moved to comply. Sections, each with the mechanism (why the shortcut normally works), a fully worked real example, and a defence against misuse: reciprocity (the pull to repay a gift/concession — the free sample, the door-in-the-face); commitment & consistency (once we take a stand we defend it — foot-in-the-door, written pledges, why small yeses precede big ones); social proof (we copy the many, especially under uncertainty and similarity — canned laughter, "best-seller", queues); authority (we defer to credible expertise and its mere symbols — titles, uniforms, the Milgram shadow); liking (we say yes to those we like — similarity, compliments, cooperation, the halo effect); scarcity (we want what is rare or vanishing — deadlines, "only 3 left", loss-aversion tie-in); and unity (shared identity, the "we"). Frame each as incentives + a bias working together, and connect to lollapalooza-effect (several levers stacking multiplicatively). A full section on ethics: persuasion vs manipulation, and how to inoculate yourself (name the lever, ask "would I want this if the tactic were removed?"). Pitfalls: over-attributing outcomes to a single lever, assuming the tactics always work (they backfire when transparent or clumsy), and confusing influence with coercion. Build an interactive island (a "compliance meter" that lets the learner toggle the six/seven levers on a sales or campaign scenario and watch the modelled likelihood of a yes climb — and over-toggle into obvious manipulation), plus a Categorize (tactic → principle) and a MatchConcepts, Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'evolution-of-cooperation',
+    icon: '🤝',
+    difficulty: 'advanced',
+    order: 34,
+    accent: 'accent',
+    title: {
+      en: 'The Evolution of Cooperation',
+      es: 'La Evolución de la Cooperación',
+    },
+    description: {
+      en: 'If nature is red in tooth and claw and every player is out for itself, why is the world so full of cooperation? How self-interested agents evolve to help each other — repeated games, tit-for-tat, reciprocity, and kinship — and the conditions that make being nice the winning strategy.',
+      es: 'Si la naturaleza es despiadada y cada jugador va a lo suyo, ¿por qué está el mundo tan lleno de cooperación? Cómo agentes egoístas evolucionan para ayudarse — juegos repetidos, donde-las-dan-las-toman, reciprocidad y parentesco — y las condiciones que hacen de ser amable la estrategia ganadora.',
+    },
+    dependencies: ['natural-selection', 'nash-equilibrium'],
+    tags: ['biology-evolution', 'strategy'],
+    buildNotes:
+      'The evolution of cooperation — the advanced rung that resolves the apparent paradox left by natural-selection and nash-equilibrium: the one-shot prisoner’s dilemma says defect, yet cooperation is everywhere in nature and society. Assumes natural-selection (fitness, selection) and nash-equilibrium (the dilemma, repeated play). Sections: the paradox stated (selfish genes, defect-dominant games, but real cooperation); the shadow of the future — repeating the dilemma changes the equilibrium, so a long enough future makes cooperating self-interested (tie back to nash "change the game"); Axelrod’s computer tournaments and why tit-for-tat won — be nice (never defect first), retaliatory (punish defection), forgiving (return to cooperation), and clear (simple to read); refinements — generous/contrite tit-for-tat surviving noise, win-stay-lose-shift; direct reciprocity ("I help you, you help me") vs indirect reciprocity and reputation ("I help you, someone helps me" — the role of gossip and status); kin selection and Hamilton’s rule rB > C in words (why we sacrifice most for close relatives); a brief, honest note on the group-selection debate; and the conditions that grow cooperation (repetition, reputation, relatedness, clustering of cooperators). Pitfalls: cooperation is fragile (defector invasions, one-shot vs repeated confusion), tit-for-tat’s vulnerability to noise/echo, and the naturalistic fallacy (what evolves is not what is moral). Reuse the IteratedDilemma island (repeated prisoner’s dilemma with selectable strategies) and add a tournament/populations visual if useful; Categorize (strategy traits: nice/retaliatory/forgiving), Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'credible-commitment-and-deterrence',
+    icon: '🔒',
+    difficulty: 'expert',
+    order: 35,
+    accent: 'brand',
+    title: {
+      en: 'Credible Commitment & Deterrence',
+      es: 'Compromiso Creíble y Disuasión',
+    },
+    description: {
+      en: 'The strategic paradox that less freedom can mean more power: by visibly burning your own options — a binding contract, a burned bridge, a doomsday device — you change what rivals expect and bend the game your way. The logic of credible threats, promises, and deterrence.',
+      es: 'La paradoja estratégica de que menos libertad puede significar más poder: al quemar visiblemente tus propias opciones —un contrato vinculante, un puente quemado, un dispositivo apocalíptico— cambias lo que esperan los rivales y doblas el juego a tu favor. La lógica de las amenazas y promesas creíbles y la disuasión.',
+    },
+    dependencies: ['nash-equilibrium', 'mechanism-design'],
+    tags: ['strategy'],
+    buildNotes:
+      'Credible commitment & deterrence — the expert strategy rung built on Schelling’s "strategy of conflict": a first-mover can change the equilibrium not by having more options but by visibly destroying their own. Assumes nash-equilibrium (equilibria, best responses, changing the game) and mechanism-design (commitment as a designed rule). Sections: the core paradox — tying your hands can strengthen your position, because it changes rivals’ best responses (the general who burns the bridges behind his army so retreat is impossible, and the enemy, knowing it, does not attack); credibility is everything — a threat or promise only works if the other side believes you will actually carry it out, so the skill is making commitments believable (contracts with penalties, public promises, delegating to an agent who *must* follow through, automaticity/"doomsday machines"); credible threats vs credible promises (deterrence stops an action, compellence/promise induces one); brinkmanship — deliberately raising shared risk to force a blink (Cuban missile crisis, labour strikes), and why the "threat that leaves something to chance" can be more credible than a precise one; deterrence and MAD (mutually assured destruction), second-strike capability, why vulnerability can be destabilising; commitment devices in ordinary life (Ulysses and the mast, Christmas savings clubs, staking your reputation). Tie to mechanism-design (a commitment is a self-imposed rule that moves the equilibrium) and incentives. Pitfalls: bluffs that aren’t credible get called; commitment traps (you can lock yourself into a disaster you can no longer exit — sunk-cost escalation, doomsday devices that fire by accident); the difficulty of un-committing when the world changes; and commitments that are read as bluffs because the cost of following through is obviously too high. Build an interactive island (a commitment game: the learner toggles whether they can pre-commit / remove their own fallback option and watches the equilibrium and their payoff shift, showing how throwing away a choice improves the outcome), plus a Categorize (credible vs empty commitments) and MatchConcepts, Quiz + MindMap. en + es twin.',
   },
 ];
 

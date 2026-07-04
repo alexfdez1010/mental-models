@@ -1,0 +1,235 @@
+---
+title: "Las subastas y el truco del segundo precio"
+description: "En una subasta a sobre cerrado, ¿cuánto deberías pujar? Una regla ingeniosa convierte pujar tu valor verdadero y honesto en la estrategia dominante — la joya del diseño de mecanismos, y la razón de que eBay funcione como funciona."
+topic: "es/mechanism-design"
+order: 4
+minutes: 14
+updated: 2026-07-04
+---
+
+import { MCQ, Quiz, AuctionSandbox, Callout } from '@/components/react';
+
+Imagina una subasta a sobre cerrado por un cuadro. Cada uno garabatea un número en un papelito, lo dobla y lo echa en una caja. Sin gritos, sin paletas, sin observar la sala — solo tu única conjetura privada contra un campo de desconocidos a los que no puedes ver. Has decidido en silencio que el cuadro vale \$100 para ti. Así que escribe el papelito. ¿Cuánto pujas?
+
+Si tu instinto ha dicho "\$100, obviamente — es lo que vale para mí", quédate con esa idea. En la versión corriente de esta subasta, escribir tu valor verdadero es una forma de *garantizar* que te vas con las manos vacías. Y en la versión de la que trata de verdad esta lección, escribir tu valor verdadero es lo más inteligente que puedes hacer — sin adivinar, sin estrategia, sin leer la sala. El mismo cuadro, los mismos \$100, el consejo opuesto. La diferencia entre esas dos subastas es una pequeña regla, y es el truco más bello de todo el campo del diseño de mecanismos (mechanism design).
+
+Dedicamos las dos últimas lecciones a la idea de la **compatibilidad de incentivos (incentive compatibility)**: un mecanismo está bien diseñado cuando el comportamiento honesto es en sí mismo una mejor respuesta, de modo que nadie sale ganando por manipularlo. Esta lección es esa idea en su forma más limpia y famosa. Conozcamos primero la subasta que te miente.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un cuadro vale exactamente $100 para ti. En una subasta a sobre cerrado donde gana el mejor postor y paga SU PROPIA puja, pujas $100 y ganas. ¿Cuánto dinero ganaste?"
+  options={[
+    { text: "Nada — pagaste $100 por un cuadro de $100, así que tu excedente neto es cero aunque hayas 'ganado'", correct: true },
+    { text: "$100 — conseguiste un cuadro que vale $100" },
+    { text: "Depende de lo que escribiera el segundo mejor postor" },
+    { text: "No puedes ganar pujando tu valor verdadero; siempre hay quien puja más" },
+  ]}
+  explanation="Sin penalización en un pretest — solo intuye la forma. El excedente es lo que la cosa vale para ti MENOS lo que pagaste. Si valoras el cuadro en $100 y pagas $100, ambos se cancelan: ganas cero. Ganar sienta bien, pero una victoria con excedente cero no es mejor que no presentarse. Esa es la trampa de la subasta a primer precio — pujar tu valor honesto entrega el premio entero al vendedor. Para sacar cualquier beneficio, tendrías que pujar MENOS de $100 y apostar a que aun así basta para ganar. Fíjate en la tercera opción: en ESTA subasta pagas tu propia puja, así que el número del segundo nunca toca tu cartera — pero quédate con esa idea, porque en un momento importará enormemente."
+/>
+
+## La subasta a primer precio y la mentira que invita
+
+Empieza por la subasta que la mayoría imagina. Se llama **subasta a sobre cerrado a primer precio (first-price sealed-bid auction)**, y la regla es exactamente lo que suena: cada uno envía una puja secreta, la **puja más alta gana**, y el ganador **paga la cantidad que él mismo pujó**. Primer precio, es decir, el precio más alto — el tuyo.
+
+Aquí va la analogía: es como una subasta silenciosa en una gala benéfica, pero con un giro cruel. El número que escribas en tu tarjeta es el número que te cobrarán si ganas. Así que la tarjeta hace dos trabajos a la vez — decide *si* ganas y *cuánto* pagas — y esos dos trabajos tiran en direcciones opuestas.
+
+Mira lo que eso le hace a la honestidad. Supón que el cuadro vale \$100 para ti.
+
+- **Puja \$100 (tu valor verdadero).** Si ganas, pagas \$100 por algo que vale \$100. Tu excedente — valor menos precio — es exactamente **cero**. Le has entregado hasta el último céntimo del premio al vendedor. Ganar no te compró nada.
+- **Puja \$70 (por debajo).** Ahora *si* ganas, pagas \$70 por algo que vale \$100, embolsándote **\$30** de puro excedente. Pero podrías no ganar — si algún rival pujó \$80, tus \$70 pierden y no consigues nada.
+
+Así que para sacar algo de dinero, estás *obligado* a **pujar por debajo**: pujar estrictamente por debajo de tu valor verdadero. Pujar honestamente es estrictamente tonto. Pero ¿cuánto bajar? Baja poco y conservas una fina astilla de beneficio pero sueles ganar; baja mucho y conservas un margen gordo pero sueles perder. La rebaja correcta depende enteramente de **adivinar el resto del campo** — cuántos rivales, cómo de agresivos, cuánto valoran la cosa. Ya no estás pujando de verdad por el cuadro. Estás pujando por tu *pronóstico de las pujas de los demás*.
+
+| Tu puja | Si ganas, pagas | Excedente si ganas | Probabilidad de ganar |
+|---|---|---|---|
+| \$100 (valor verdadero) | \$100 | \$0 | alta |
+| \$85 | \$85 | \$15 | media-alta |
+| \$70 | \$70 | \$30 | media |
+| \$40 | \$40 | \$60 | baja |
+
+Cada fila es una apuesta sobre el campo. No hay respuesta dominante — la mejor rebaja para un conjunto de rivales es la rebaja equivocada para otro. La subasta a primer precio ha convertido en silencio una pregunta sencilla ("¿cuánto vale para mí?") en un juego estratégico de adivinar sobre desconocidos. **Pujar es una forma de mentir**, y peor aún, mentir en lo que tienes que ser *bueno*.
+
+<Callout variant="warning" title="La trampa oculta en el primer precio">
+Como tu mejor puja depende de adivinar la de todos los demás, una subasta a primer precio premia la **sofisticación, la información y el temple** — no la valoración honesta. El postor que gana a menudo no es quien más valora el objeto, sino quien mejor adivinó la rebaja. Eso es un mecanismo que desperdicia esfuerzo en juegos mentales en vez de revelar lo que las cosas valen de verdad. Tapar esa fuga es todo el sentido de lo que viene después.
+</Callout>
+
+## El truco del segundo precio
+
+Ahora cambia una regla, y solo una. La **puja más alta sigue ganando** — igual que antes. Pero el ganador **paga la *segunda* puja más alta**: la cantidad que envió el segundo, no su propio número. Esta es la **subasta a sobre cerrado a segundo precio (second-price / Vickrey auction)**, y parece una errata la primera vez que la ves. ¿Por qué iba un vendedor a *elegir* cobrar menos de lo que ofreció el ganador?
+
+Porque ese único cambio hace magia. La afirmación — y es uno de los resultados más celebrados de la economía — es esta:
+
+<Callout variant="success" title="El resultado estrella">
+En una **subasta a sobre cerrado a segundo precio**, pujar **tu valor verdadero** es una **estrategia dominante**: es tu mejor jugada *sin importar lo que puje nadie más*. Sin rebajas, sin adivinar el campo, sin estrategia alguna — solo escribe lo que la cosa honestamente vale para ti, y nunca podrás hacerlo mejor escribiendo otra cosa.
+</Callout>
+
+Una **estrategia dominante**, recuerda, es la que gana o empata a toda alternativa en *toda* situación — nunca necesitas saber lo que hacen los rivales. Demostremos que pujar con sinceridad es dominante, en lenguaje llano, comprobando las dos únicas formas en que podrías desviarte de la honestidad. Mantén tu valor verdadero en \$100 y deja que la puja *rival* más alta sea algún número R.
+
+**Desviación 1 — pujar de más (pujar por encima de \$100, digamos \$120).** Pujar de más solo puede cambiar el resultado en un caso concreto: cuando la puja de un rival R cae *entre* tu valor verdadero y tu puja inflada, digamos R = \$110. Pujando \$100 honestamente, habrías perdido — bien, no lo querías a \$110 de todos modos. Pero al pujar \$120 ahora *ganas*... y pagas la segunda puja más alta, que es R = \$110, por un cuadro que vale \$100. Compraste \$100 de valor por \$110: **excedente de menos \$10.** Pujar de más nunca ayuda y a veces te arrastra a una puja ganadora de la que te arrepentirás. Cuando R está por debajo de \$100, habrías ganado y pagado R de cualquier modo, así que la puja extra no cambia nada.
+
+**Desviación 2 — pujar de menos (pujar por debajo de \$100, digamos \$70).** Pujar de menos solo puede cambiar el resultado cuando R cae *entre* tu puja rebajada y tu valor verdadero, digamos R = \$85. Pujando \$100 honestamente, habrías ganado y pagado R = \$85, embolsándote **\$15** de excedente. Pero al rebajar a \$70, ahora *pierdes* — renunciaste a \$15 de dinero gratis. Pujar de menos nunca te deja pagar menos de lo que habrías pagado (el precio es R, no tu puja); solo arriesga *perder un objeto con el que habrías ganado dinero.* Cuando R está por encima de \$100, habrías perdido de cualquier modo, así que rebajar no cambia nada.
+
+Junta las dos: pujar de más arriesga una compra con pérdidas, pujar de menos arriesga saltarte un beneficio, y **pujar con sinceridad nunca lo hace peor que ninguna de las dos, en ningún estado del mundo.** Esa es la definición de dominante. Fíjate en el hecho crucial que hace todo el trabajo: **el precio que pagas es R, la puja del segundo — nunca la tuya.** Tu puja solo decide *si* cruzas la línea de meta, no lo que te cobran por cruzarla. Así que no hay razón alguna para escribir otra cosa que la verdad.
+
+Este mecanismo tiene un nombre: la **subasta de Vickrey**, por el economista **William Vickrey**, que la describió en 1961 y ganó el **Premio Nobel en 1996** en parte por esta idea. Es el emblema del diseño a prueba de estrategias (strategyproof) — una regla tan ingeniosamente construida que la jugada honesta y la jugada inteligente son la misma jugada.
+
+## Por qué es bella: el desacoplamiento
+
+Aquí está la forma más profunda de ver por qué funciona el truco del segundo precio, y vale la pena ir despacio. En una subasta a primer precio, tu puja hacía **dos trabajos a la vez** — fijaba si ganabas *y* cuánto pagabas — y esos dos trabajos peleaban entre sí, que es exactamente lo que te obligaba a rebajar y adivinar.
+
+La regla del segundo precio **separa quirúrgicamente los dos trabajos**:
+
+- **Si ganas** depende de tu puja (ganas si eres el más alto).
+- **Cuánto pagas** depende *solo de las pujas de tus rivales* (pagas el número del segundo), y es completamente **independiente de tu propia puja.**
+
+Como tu puja no puede mover tu propio precio ni un céntimo, toda la pregunta "¿cuánto debería pujar?" queda **desacoplada** de "¿cuánto pagaré?". Y una vez que esas dos cosas se separan, la honestidad es sencillamente *segura* — ya no hay ninguna palanca que tu puja pueda tirar para bajar tu coste, así que no hay nada que ganar distorsionándola. Lo único que tu puja sigue controlando es si ganas a un precio que no fijaste tú, así que bien puedes pujar exactamente el precio más alto al que aún te alegrarías de ganar: tu valor verdadero.
+
+Eso es la **compatibilidad de incentivos** de la lección anterior en su instancia más pura y elegante. En el juego de cortar y elegir, la regla hacía de la equidad la propia mejor jugada del cortador. Aquí, la regla hace de la *honestidad* la propia mejor jugada del postor — y lo hace con el mismo truco que usa todo buen mecanismo: dispone los incentivos de modo que decir la verdad nunca se castigue. El vendedor no sermoneó a los postores para que fueran honestos. El vendedor **construyó una sala donde mentir no tiene recompensa.**
+
+<AuctionSandbox
+  client:visible
+  eyebrow="Laboratorio de subastas"
+  ruleLabel="Regla de la subasta"
+  firstPriceLabel="Primer precio (pagas tu propia puja)"
+  secondPriceLabel="Segundo precio (pagas la puja del segundo)"
+  valueLabel="Tu valor verdadero"
+  bidLabel="Tu puja"
+  rivalLabel="Puja rival más alta"
+  winWord="ganas"
+  loseWord="pierdes"
+  resultLabel="Resultado"
+  outcomeWinTemplate="{win} el objeto y pagas {price} por algo que vale {value} — un excedente de {surplus}."
+  outcomeLoseTemplate="{lose}: la puja rival más alta {rival} supera tu {bid}, así que te vas con un excedente de {surplus}."
+  analysisLabel="¿Es tu puja una mejor respuesta?"
+  secondPriceTruthfulNote="Pujar exactamente tu valor es una estrategia dominante. Ganas justo cuando es rentable, y el precio que pagas (la puja del segundo) nunca depende de tu propia puja, así que nunca pagas de más ni renuncias a una victoria rentable."
+  secondPriceOverbidNote="Pujar por encima de tu valor solo puede perjudicarte. Arriesga ganar a un precio (el del segundo) por encima de lo que vale el objeto (excedente negativo), y nunca te hace ganar nada que de verdad quisieras."
+  secondPriceUnderbidNote="Pujar por debajo de tu valor solo puede perjudicarte. Arriesga perder un objeto con el que habrías ganado dinero, y nunca baja el precio que pagas cuando sí ganas: ese precio lo fija el segundo, no tú."
+  firstPriceNote="En una subasta a primer precio pagas tu propia puja, así que pujar tu valor verdadero garantiza excedente cero. Debes pujar por debajo de tu valor, cambiando una menor probabilidad de ganar por un margen cuando ganas."
+  title="Siente el truco en tus manos"
+  initialRule="second"
+  initialValue={70}
+  initialBid={70}
+  initialRival={50}
+  caption="Empieza en modo segundo precio. Tu valor verdadero es 70; tu puja arranca sincera en 70. Ahora intenta burlar la regla: desliza tu puja POR ENCIMA de 70 y por encima del rival — ganas, pero observa cómo tu excedente se vuelve negativo porque pagas la puja del rival, que puede superar lo que el objeto vale para ti. Luego desliza tu puja POR DEBAJO de 70 mientras el rival se sitúa entre tu puja y 70 — ahora PIERDES un objeto con el que habrías ganado dinero. Pujar sincero a 70 nunca lo hace peor. LUEGO cambia el interruptor a primer precio y fíjate en lo contrario: pujar tu valor de 70 no te reporta nada cuando ganas, así que te ves obligado a rebajar y apostar sobre el rival. Una regla hace la honestidad segura; la otra la convierte en una trampa."
+/>
+
+Juega con ese laboratorio hasta que los dos mundos se sientan distintos en la yema de tus dedos. En el segundo precio nunca encontrarás una puja que supere a la honestidad. En el primer precio siempre estarás tentado de mentir — y estarás adivinando.
+
+<Quiz
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  completeTitleLabel="Cuestionario completado"
+  title="Punto de control: la lógica de pujar de más y de menos"
+  questions={[
+    {
+      question: "En una subasta a segundo precio, tu valor verdadero por una lámpara es $60. Te planteas PUJAR DE MÁS a $90. ¿En qué caso cambia realmente tu resultado este exceso de puja — y el cambio es bueno o malo?",
+      options: [
+        { text: "Cuando la puja rival más alta cae entre $60 y $90 (digamos $75): ahora ganas pero pagas $75 por una lámpara de $60 — una pérdida de $15. Pujar de más solo sirve para ganar compras de las que te arrepentirás", correct: true },
+        { text: "Siempre es mejor — una puja más alta significa más probabilidad de ganar a buen precio" },
+        { text: "No cambia nunca nada, porque pagas el segundo precio sin importar tu puja" },
+        { text: "Cuando la puja rival está por debajo de $60: ganas y pagas menos, así que pujar de más es dinero gratis" },
+      ],
+      explanation: "Pujar de más solo importa cuando la puja de un rival cae en el hueco entre tu valor verdadero ($60) y tu puja inflada ($90). Ahí te arrastran a ganar a un precio POR ENCIMA de lo que el objeto vale para ti — pura pérdida. Cuando el rival está por debajo de $60, habrías ganado y pagado lo mismo de cualquier modo, así que el exceso de puja no hace nada útil. Puede perjudicar y nunca puede ayudar.",
+    },
+    {
+      question: "La misma lámpara, valor verdadero $60. Ahora te planteas PUJAR DE MENOS a $40. ¿Cuál es el riesgo?",
+      options: [
+        { text: "Cuando la puja rival más alta está entre $40 y $60 (digamos $50): pierdes la lámpara — pero de haber pujado honestamente la habrías ganado por $50 y embolsado $10. Pujar de menos renuncia a victorias rentables y nunca baja tu precio", correct: true },
+        { text: "Pagas menos cuando ganas, así que pujar de menos es astuto si tienes paciencia" },
+        { text: "No hay riesgo; una puja más baja solo puede ayudarte" },
+        { text: "Arriesgas pagar $40 en vez del segundo precio" },
+      ],
+      explanation: "En una subasta a segundo precio tu precio es la puja del SEGUNDO, no la tuya — así que rebajar a $40 nunca reduce lo que pagas cuando ganas. Lo único que hace es sacarte de la carrera cuando un rival cae entre $40 y $60, costándote una lámpara que habrías ganado rentablemente por $50. Pujar de menos sacrifica buenas victorias y no te compra nada a cambio.",
+    },
+    {
+      question: "¿Por qué 'puja tu valor verdadero' se llama estrategia DOMINANTE en la subasta a segundo precio?",
+      options: [
+        { text: "Porque lo hace al menos tan bien como cualquier otra puja sin importar lo que hagan los rivales — así que nunca necesitas adivinar el campo para jugarla correctamente", correct: true },
+        { text: "Porque siempre gana la subasta" },
+        { text: "Porque siempre reporta el máximo beneficio posible" },
+        { text: "Porque la mayoría de los postores experimentados la usan" },
+      ],
+      explanation: "Una estrategia dominante es la que gana o empata a toda alternativa en TODA situación, así que puedes jugarla sin saber nada de tus rivales. Pujar con sinceridad es dominante porque ambas desviaciones — pujar de más y pujar de menos — solo pueden perjudicar o no hacer nada, nunca ayudar. No siempre gana (un rival puede valorar más el objeto) y no siempre maximiza el beneficio en algún sentido cósmico; sencillamente nunca la supera la mentira.",
+    },
+  ]}
+/>
+
+## eBay es una subasta a segundo precio disfrazada
+
+Casi con seguridad has usado una subasta de Vickrey sin saberlo. Cuando pujas en eBay, el sitio no te pide un número y te cobra ese. Usa la **puja delegada (proxy bidding)**: introduces el **máximo** que estás dispuesto a pagar, y el robot de eBay puja *en tu nombre*, subiendo tu puja solo lo que necesita — justo **un incremento por encima del segundo** — para mantenerte en cabeza. Nunca ofrece voluntariamente tu máximo completo. Solo gasta lo que debe para superar al segundo puesto.
+
+Eso es una subasta a segundo precio con una interfaz amable. Revelas tu máximo verdadero (tu valor), y acabas pagando aproximadamente la **segunda puja más alta** más un pequeño incremento — no tu propio máximo. Que es exactamente por lo que toda página de ayuda de eBay te dice que "pujes tu cantidad máxima" y dejes de trastear: el mecanismo está construido para que la honestidad sea óptima, y el francotirar y ajustar a mano solo malgasta tu tiempo.
+
+**Ejemplo resuelto.** Una cámara antigua. Tres postores fijan sus máximos delegados:
+
+| Postor | Valor verdadero / máximo introducido |
+|---|---|
+| Tú | \$200 |
+| Rival A | \$150 |
+| Rival B | \$90 |
+
+Tienes el máximo más alto, así que el delegado de eBay te mantiene ganando. Pero nunca puja tus \$200 completos. Solo supera los \$150 del Rival A — así que sube tu puja a unos **\$151** (un incremento de \$1 por encima del segundo) y se detiene. **Ganas la cámara y pagas \$151**, embolsándote **\$49** de excedente, aunque estabas dispuesto a llegar a \$200. Tu puja de \$200 decidió *que* ganabas; los \$150 del Rival A decidieron *lo que pagabas.* Si-ganas y cuánto-pagas, limpiamente desacoplados — el truco del segundo precio, en directo.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En eBay introduces un máximo delegado de $200 por una cámara. El máximo del siguiente mejor postor es $150. ¿Aproximadamente cuánto pagas, y por qué introducir tus honestos $200 es la jugada correcta?"
+  options={[
+    { text: "Unos $151 — un incremento por encima de los $150 del segundo. eBay solo puja lo que necesita, así que tu máximo de $200 fija si ganas pero los $150 del segundo fijan tu precio; introducir tu máximo verdadero solo puede ayudarte a ganar y nunca infla lo que pagas", correct: true },
+    { text: "$200 — eBay te cobra el máximo que introdujiste, así que deberías introducir menos para ahorrar dinero" },
+    { text: "$150 exactos, y deberías haber introducido $151 por si acaso" },
+    { text: "$175 — la media de los dos máximos" },
+  ]}
+  explanation="La puja delegada es una regla a segundo precio: pagas un incremento por encima del segundo máximo más alto, NO el tuyo. Tus $200 nunca se gastan — solo garantizan que superas a los rivales hasta $200. Así que introducir tu máximo honesto solo puede ayudarte a ganar objetos de los que sacarías beneficio, y nunca sube tu precio por encima del número del segundo. Introducir MENOS de tu máximo verdadero solo arriesga perder una cámara que habrías pagado con gusto por más. La honestidad es dominante, exactamente como prometió la teoría."
+/>
+
+## Cuando la bella teoría se topa con el feo mundo
+
+Antes de que corones a la subasta de Vickrey reina de todas las subastas, una dosis de honestidad propia. **Las subastas puras a segundo precio son más raras en la naturaleza de lo que sugiere la elegancia de la teoría**, y vale la pena saber por qué — porque las razones son en sí mismas lecciones de diseño de mecanismos.
+
+- **Pujas fantasma (shill bidding).** Todo el esquema descansa en que la segunda puja más alta sea *real*. Pero un vendedor deshonesto puede plantar una **puja fantasma** — un segundo falso, en secreto suyo propio — para inflar el precio que paga el verdadero ganador. Si tu máximo de \$200 habría pagado \$151, un vendedor que cuela una puja fantasma de \$190 te hace pagar \$191. El mecanismo es a prueba de estrategias para los *postores* pero presupone un *vendedor* honesto, y esa suposición no siempre se cumple. eBay prohíbe las pujas fantasma precisamente por esto.
+- **Los postores desconfían de una regla sellada que no pueden verificar.** Decirle a alguien "puja tu valor verdadero y confía en mí, pagarás menos" pide fe. En una subasta sellada, no puedes ver cómo se determina el segundo precio; simplemente recibes una factura. Muchos postores encuentran eso *psicológicamente* insoportable — se siente como que te pidan revelar tu número más alto a un desconocido que promete portarse bien. Las subastas a primer precio, con todo su tejemaneje, al menos dejan que la gente se sienta al mando.
+- **La colusión es más fácil.** Como las pujas sinceras son de dominio común entre un anillo que se coordina, un cártel de postores puede acordar más fácilmente mantener sus pujas bajas y repartirse el botín, seguros de que nadie tiene un incentivo privado para romper filas y pujar de más.
+
+<Callout variant="info" title="Equivalencia de ingresos — el giro que hace que la elección vaya de honestidad, no de dinero">
+Podrías esperar que el vendedor *pierda* dinero cobrando el segundo precio en vez del primero. Sorprendentemente, no lo hace — en promedio. El **teorema de equivalencia de ingresos (revenue equivalence theorem)** dice que bajo supuestos estándar (los postores son neutrales al riesgo, los valores son privados y extraídos de forma independiente), las subastas a primer y a segundo precio le rinden al vendedor **el mismo ingreso esperado.** La intuición: en la subasta a primer precio los postores rebajan *hacia abajo* hacia el segundo valor más alto de todos modos, así que en promedio el vendedor recauda más o menos lo mismo que si simplemente lo hubiera cobrado. Así que el vendedor no está cambiando dinero por honestidad. La elección entre las dos subastas es en realidad una elección sobre **sencillez, honestidad y ser a prueba de estrategias** — la subasta a segundo precio solo les facilita la vida a los postores y revela los valores verdaderos — no sobre exprimir más ingresos.
+</Callout>
+
+Ese último punto es la moraleja callada de la lección. El regalo de la subasta a segundo precio no es un día de paga mayor para el vendedor — es una subasta donde nadie tiene que ser un estratega, donde el número honesto es el número ganador, y donde la cosa suele acabar con la persona que más la valora. Eso es el diseño de mecanismos haciendo su mejor trabajo: no extraer más, sino **hacer del buen resultado el resultado sin esfuerzo.**
+
+### Cuándo usarlo
+
+Recurre a una **regla al estilo segundo precio / Vickrey** siempre que quieras que la gente **revele cuánto vale de verdad algo para ella** sin convertir tu proceso en un concurso de adivinanzas — y cuando puedas garantizar que la puja del segundo es honesta.
+
+- **Úsalo cuando la revelación sincera sea el objetivo.** Las subastas de anuncios (los espacios publicitarios de Google funcionan con precios al estilo Vickrey), las ventas de espectro, y cualquier entorno donde prefieras conocer valoraciones reales en vez de premiar al que mejor rebaja.
+- **Úsalo cuando puedas confiar en el lado que fija el precio.** El mecanismo es a prueba de estrategias para los postores pero *presupone un vendedor honesto* — despliégalo donde se puedan detectar las pujas fantasma o el subastador sea neutral (una plataforma, un organismo público, una lonja auditada).
+- **Piénsalo dos veces cuando los postores no puedan verificar el segundo precio, cuando la colusión sea probable, o cuando el vendedor pueda plantar pujas en secreto.** Ahí, una regla transparente a primer precio puede ser más robusta pese a su tejemaneje.
+
+Lo más importante que llevarte: **una buena regla desacopla "¿ganas?" de "¿cuánto pagas?", y la honestidad se vuelve gratis.** Ese desacoplamiento es una *construcción* concreta e ingeniosa — pero insinúa algo mucho más general. Si una subasta a segundo precio puede hacer óptimo decir la verdad, ¿podría *todo* buen mecanismo reconstruirse como uno donde la honestidad sea la jugada ganadora?
+
+Ese asombroso "sí" es el tema de la lección 4, **El principio de revelación (revelation principle)** — la profunda idea organizadora que permite a los diseñadores dejar de rastrear cada libro de reglas posible y buscar solo entre los honestos.

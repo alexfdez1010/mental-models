@@ -1,0 +1,180 @@
+---
+title: "Compatibilidad de incentivos"
+description: "El sueño de una regla que nadie quiera hacer trampa: un mecanismo donde decir la verdad y cooperar es en sí la jugada más inteligente, de modo que intentar burlarlo solo te perjudica."
+topic: "es/mechanism-design"
+order: 3
+minutes: 13
+updated: 2026-07-04
+---
+
+import { MCQ, CutAndChoose, Categorize, Callout } from '@/components/react';
+
+En la lección anterior viste cómo un niño cuchillo en mano, al que solo se le pidió que fuera egoísta, cortaba un pastel en dos trozos escrupulosamente iguales. Ningún árbitro entró en la sala. Nadie le soltó un sermón sobre compartir. La *regla* —uno corta, el otro elige— hizo todo el trabajo, porque la única forma de que un cortador egoísta protegiera su parte era hacer los trozos iguales. La equidad salió del interés propio como una moneda de una máquina.
+
+Aquello fue una demostración. Esta lección es el *diagnóstico*: **por qué** funciona el truco del pastel, dicho con la precisión suficiente para que puedas detectar la misma magia —o su ausencia— en cualquier regla que te encuentres. La propiedad que obligó al cortador a cortar de forma justa tiene un nombre, y es lo más importante que puede tener un mecanismo. Consigue esta propiedad y la regla se ejecuta sola. Piérdela y todo lo ingenioso que construiste aguas abajo estará calculando una respuesta a partir de mentiras.
+
+Vamos a ponerle nombre.
+
+## Qué significa realmente la compatibilidad de incentivos
+
+Un mecanismo es **compatible con los incentivos (incentive-compatible, IC)** cuando el comportamiento que *quieres* de cada jugador —normalmente decir la verdad o hacer lo cooperativo— es en sí una **mejor respuesta**. Es decir: dado cómo juegan todos los demás, la honestidad es para ti al menos tan buena como cualquier mentira o esquiva. No cooperas porque seas virtuoso; cooperas porque, dentro de esta regla, cooperar es lo que más te paga. (Recuerda de la vertiente de teoría de juegos que una *mejor respuesta* es simplemente la jugada que maximiza tu propia recompensa, manteniendo fija la jugada de los demás. La IC solo dice: deja que la honestidad sea esa jugada.)
+
+<Callout variant="tip" title="La versión de una sola frase">
+Un mecanismo es **compatible con los incentivos** cuando hacer lo honesto y cooperativo es una **mejor respuesta**, de modo que ningún jugador puede ganar burlándolo. La regla está construida para que el interés propio y el buen comportamiento apunten en la misma dirección.
+</Callout>
+
+Ahora bien, «mejor respuesta» viene en dos intensidades, y la diferencia importa lo bastante como para que los diseñadores de mecanismos se obsesionen con ella.
+
+La forma fuerte es **a prueba de estrategias (strategyproof)**, también llamada **compatible con los incentivos en estrategias dominantes (dominant-strategy incentive-compatible, DSIC)**. Aquí, decir la verdad es una **estrategia dominante**: la mejor jugada *hagan lo que hagan los demás*. No necesitas adivinar si los otros jugadores son honestos, listos, están confundidos o coludiendo; no necesitas modelarlos en absoluto. Sea lo que sea lo que tramen, tu mejor jugada es ser honesto. Este es el estándar de oro, porque hace el mecanismo *robusto*: funciona incluso si los demás jugadores son desconocidos, ingenuos o tiburones. (Una **estrategia dominante** es una jugada que supera a tus alternativas en cualquier situación que puedas afrontar: un lujo raro que la mayoría de los juegos nunca te concede.)
+
+La forma más débil es **compatible con los incentivos en sentido bayesiano (Bayesian incentive-compatible)**. Aquí la honestidad solo es una mejor respuesta *bajo el supuesto de que todos los demás también son honestos* (más precisamente, que juegan su parte del equilibrio previsto). Sigue siendo un equilibrio —nadie quiere desviarse *dado* que los demás no lo hacen—, pero es frágil: se apoya en una creencia compartida sobre cómo se comportarán todos los demás. Si dudas de que los otros jueguen limpio, tu incentivo para jugar limpio puede tambalearse.
+
+<Callout variant="info" title="Dos intensidades de la misma promesa">
+**A prueba de estrategias / DSIC:** la honestidad es tu mejor jugada *hagan lo que hagan los demás*. Robusta, sin supuestos, la garantía más fuerte. **IC bayesiana:** la honestidad es tu mejor jugada *solo cuando esperas que todos los demás también sean honestos*. Más débil, porque depende de fiarte de la sala. Cuando alguien diga que un mecanismo es «compatible con los incentivos», pregunta siempre *cuál*: en estrategias dominantes o meramente bayesiana.
+</Callout>
+
+La diferencia práctica es enorme. Un mecanismo a prueba de estrategias te permite decirle a cada participante la verdad sobre cómo funciona —«la honestidad es literalmente tu mejor jugada, lo hemos comprobado»— y decirlo en serio, sin letra pequeña sobre lo que hacen los demás. Uno meramente bayesiano es un castillo de naipes que solo se mantiene mientras todos creen que se mantiene.
+
+## Cortar y elegir, con precisión
+
+Ahora podemos decir *exactamente* por qué el truco del pastel es a prueba de balas, y resulta ser el tipo de a prueba de balas más fuerte.
+
+Tú eres el cortador. Tu estrategia es un solo número: dónde colocas el cuchillo. La regla del elector es fija y conocida por ti: se llevará el trozo que sea mayor. Así que sigue la lógica. Supón que cortas el pastel en un reparto 70/30, con la esperanza de quedarte el gordo 70. El elector, racional y codicioso, agarra el 70 y te deja el 30. Querías más; el corte te castigó. Ahora supón que haces 55/45: el elector se lleva el 55, te quedas con el 45. Mejor, pero aún corto. El único corte que te deja lo máximo posible es aquel en que los dos trozos son iguales —50/50—, porque ese es el reparto en que «el trozo que sea mayor» te cuesta lo menos posible.
+
+Aquí está lo agudo: **no necesitabas saber nada sobre el humor, la astucia o las intenciones del elector.** Cualquier elector racional se lleva el trozo mayor, así que 50/50 es tu mejor corte *pase lo que pase*. Eso es una **estrategia dominante** para el cortador. Cortar de forma justa no es la mejor respuesta *dado* que el elector es codicioso hoy: es la mejor respuesta frente a todo elector posible. Así que cortar y elegir no es solo compatible con los incentivos; es **a prueba de estrategias**. Y como el reparto resultante hace que ningún niño prefiera el trozo del otro, también es **libre de envidia (envy-free)**: equidad y honestidad, ambas forzadas por nada más que el interés propio.
+
+Arrastra tú mismo el cuchillo y siente cómo muerde la estrategia dominante. Cada corte desigual es una herida autoinfligida.
+
+<CutAndChoose
+  client:visible
+  title="Dónde se ve forzado a cortar un cortador egoísta"
+  caption="Eres el cortador, y tan codicioso como siempre, pero el elector siempre agarra el trozo mayor, sea quien sea y piense lo que piense. Desliza hacia cualquier corte desigual y observa cómo cae tu propia parte. No hay elector al que pudieras enfrentarte que dejara que un corte 70/30 acabara bien para ti, así que 50/50 es tu mejor jugada frente a TODOS ellos. Eso es lo que significa «estrategia dominante», y por eso cortar y elegir es a prueba de estrategias."
+  initialCut={35}
+  eyebrow="Reparto justo"
+  cutterLabel="Cortador (tú)"
+  chooserLabel="Elector"
+  cutLabel="Dónde cortas la tarta"
+  pieceALabel="Trozo izquierdo"
+  pieceBLabel="Trozo derecho"
+  chooserTakesLabel="El elector se lleva"
+  cutterGetsLabel="Te quedas con"
+  analysisLabel="Lo que hace tu interés propio"
+  readout="Cortas {a}% / {b}%. El elector, racional, agarra el trozo mayor ({taken}%), dejándote {kept}%. {verdict}"
+  verdictFair="cortas casi exactamente por la mitad: es lo mejor que puedes hacer; tome el trozo que tome el elector, te quedas con ~la mitad, así que tu propia codicia te empujó directo a un reparto justo."
+  verdictLopsided="cortaste de forma desigual, y el elector simplemente se llevó la mitad mayor, así que cortar desigual solo TE perjudicó. Tu mejor jugada es cortar al 50/50."
+/>
+
+Fíjate en lo que el interactivo está mostrando de verdad: no hay posición del deslizador, ni oponente imaginable, para el que mentirte a ti mismo sobre dónde cortar salga rentable. La regla cerró todas las salidas. Esa ausencia total de una desviación rentable —para cada jugador, frente a cada oponente— es la firma de un mecanismo a prueba de estrategias, y es lo que buscamos cada vez que diseñamos una regla.
+
+<MCQ
+  client:visible
+  pretest
+  question="Una profesora reparte los aperitivos del recreo con una variante de cortar y elegir: un alumno divide el montón en dos, pero ahora es el QUE DIVIDE quien elige primero qué montón se queda. Un divisor puramente egoísta se enfrenta a esta regla. ¿Qué le pasa a la honestidad que cortar y elegir suele forzar?"
+  options={[
+    { text: "Se derrumba: como el divisor ahora se queda el montón que prefiera, hará uno enorme y otro diminuto y se llevará el enorme. Ya nada fuerza un reparto justo", correct: true },
+    { text: "No cambia nada: el reparto sigue siendo justo, porque dividir cosas es de por sí un acto de mente justa", correct: false },
+    { text: "Se vuelve aún más justo, porque dar la elección al divisor recompensa su honestidad", correct: false },
+    { text: "El divisor se niega a dividir, porque ninguna persona egoísta divide un montón", correct: false },
+  ]}
+  explanation="Sin penalización en un pretest: solo capta la forma. La magia de cortar y elegir vive por completo en QUIÉN elige. Cuando elige la OTRA persona, cualquier desequilibrio que crees te lo quitan, así que tu codicia te fuerza a equilibrar. Pasa la elección al divisor y todo el motor se invierte: ahora el desequilibrio se RECOMPENSA, así que un divisor egoísta hace un montón gigante y lo agarra. El mismo acto de dividir, incentivo opuesto. La equidad nunca estuvo en las personas ni en el acto: estuvo en la regla, concretamente en el hecho de que el interés propio y la equidad apuntaban en la misma dirección. Rompe esa alineación y la compatibilidad de incentivos muere."
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Ese pretest es toda la lección en miniatura: la honestidad no es una propiedad de las personas, es una propiedad de las *reglas*, y un cambio diminuto en quién-hace-qué puede convertir un mecanismo a prueba de estrategias en una barra libre. Que es justo por lo que la siguiente idea importa tanto.
+
+## Por qué la compatibilidad de incentivos es todo el juego
+
+Aquí está la razón contundente por la que la IC ocupa el centro del campo: **un mecanismo funciona con los datos que le dan los jugadores, y si mentir paga, los jugadores mienten, así que el mecanismo calcula su hermoso resultado a partir de basura.** Basura entra, basura sale, disfrazada de ecuaciones. Puedes diseñar la regla más elegante imaginable para repartir algo de forma justa o eficiente, pero si recompensa reportar en falso, todos reportan en falso, y tu regla ahora reparte basándose en ficción. La compatibilidad de incentivos es la propiedad que mantiene los datos de entrada *verdaderos*, que es la única razón por la que las salidas significan algo.
+
+Veamos cómo una regla suspende esta prueba de dos sabores distintos.
+
+### Fallo uno: «di tu valor, el mejor postor gana y paga lo que dijo»
+
+Supón que vendo un cuadro con esta regla: cada uno escribe en privado lo que el cuadro vale para él, el número más alto gana el cuadro, y el ganador paga exactamente el número que escribió. Suena honesto, incluso noble: «¡solo dime lo que vale para ti!». Es un desastre para la honestidad.
+
+Digamos que el cuadro vale de verdad \$1,000 para ti. Si escribes \$1,000 y ganas, pagas \$1,000 y te embolsas cero excedente: obtuviste exactamente lo que pagaste, nada mejor. Así que no escribes \$1,000. Rebajas tu puja *hacia abajo*: escribes \$700, apostando a que aún basta para ganar, y si basta, te embolsas \$300 de excedente. Todos razonan igual, así que todos mienten a la baja, y cuánto rebaja cada uno depende de adivinar nerviosamente las pujas de los demás. Este es el sabor de una **subasta a sobre cerrado a primer precio (sealed first-price auction)**, y su rasgo definitorio es que *pujar con sinceridad nunca es óptimo*: decir la verdad te hace ganar el objeto a un precio que borra tu ganancia, así que siempre rebajas. La regla, enfáticamente, **no** es compatible con los incentivos. Sean cuales sean los números que recoge, no son los valores verdaderos de la gente; son estimaciones deshinchadas estratégicamente, y cualquier «eficiencia» que calcules a partir de ellas es ficticia.
+
+<Callout variant="warning" title="La señal de una regla no-IC">
+Si un mecanismo *castiga* la honestidad —si reportar tu valor verdadero o tu prioridad verdadera te deja peor que rebajar, exagerar o cubrirte—, entonces los jugadores no reportarán con sinceridad, y punto. Recibirás datos de entrada distorsionados estratégicamente y producirás un resultado distorsionado estratégicamente. La regla no recoge información; recoge la mentira que la regla hizo rentable.
+</Callout>
+
+### Fallo dos: los compañeros de piso que dividen cada cuenta de la cena a partes iguales
+
+Cuatro compañeros de piso salen a cenar y acuerdan, de antemano, **dividir cada cuenta a partes iguales**: se suma el total y se divide entre cuatro. Parece justo, parece amistoso. Ahora mira lo que la regla le hace a un comensal egoísta. Estás mirando una langosta de \$40 frente a una pasta de \$12. Pide la langosta y añade \$40 al total, pero tú personalmente pagas solo una *cuarta parte*, \$10, porque los otros tres cubren cada uno \$10 de tu langosta. Así que un capricho de \$40 *te* cuesta \$10. Por supuesto que pides la langosta. Y el entrante. Y el segundo cóctel. Y lo mismo hacen todos, exactamente por la misma razón, y los cuatro salís habiendo pedido un festín que ninguno habría comprado solo, cada uno atascado pagando una cuarta parte del exceso de los demás.
+
+Esta regla **no es compatible con los incentivos** porque rompe el vínculo entre *quién pide* y *quién paga*: cada comensal se lleva todo el placer de pedir más pero soporta solo una fracción del coste, así que pedir de más es la mejor respuesta de todos. El comportamiento «cooperativo» que la regla quería —pide lo que pagarías por ti mismo— *no* es una mejor respuesta, así que nadie lo hace. (Puede que reconozcas esto como la forma de un problema de los comunes: un coste compartido que invita a cada persona a abusar de él.) Contrástalo con cortar y elegir, donde la regla hizo del buen comportamiento la mejor respuesta. El mismo universo de personas interesadas; resultado opuesto, porque una regla alineó los incentivos con el objetivo y la otra los apuntó en la dirección equivocada.
+
+<Callout variant="success" title="El arreglo siempre tiene la misma forma">
+Ambos fallos se curan del mismo modo: haz que la jugada honesta/cooperativa sea la que más paga. La subasta a primer precio se arregla con el **truco del segundo precio** (próxima lección) para que pujar tu valor verdadero se convierta en una estrategia dominante. La cena a partes iguales se arregla con **«cada uno paga lo que pidió»**, que re-vincula el coste a la elección, de modo que pedir la langosta vuelve a costar*te* los \$40 enteros, y de repente pides lo que de verdad vale para ti. Realinea las recompensas, y la honestidad deja de ser un sacrificio.
+</Callout>
+
+## Leer una regla en busca de compatibilidad de incentivos
+
+Ahora tienes una prueba portátil que puedes aplicar a cualquier regla que te encuentres, sin ecuaciones. Anúnciate la regla a ti mismo y hazte una pregunta:
+
+> **«Ahora que conozco esta regla, ¿es ser honesto / cooperativo mi mejor jugada, o puedo hacerlo mejor burlándola?»**
+
+Si la honestidad es tu mejor jugada, el mecanismo es compatible con los incentivos y puedes fiarte de los datos que recoge. Si puedes nombrar una mentira —rebajar la puja, exagerar la necesidad, reportar por debajo para esquivar un coste, sobreconsumir un fondo compartido— que te deje *mejor*, el mecanismo es **burlable**, y lo que produzca está construido sobre datos distorsionados. Lleva la prueba un paso más allá para el estándar de oro: ¿es la honestidad mi mejor jugada *hagan lo que hagan los demás* (a prueba de estrategias), o solo *si supongo que también son honestos* (meramente bayesiano)?
+
+Aplica la prueba a cada regla de abajo y ordénalas.
+
+<Categorize
+  client:visible
+  title="¿Compatible con los incentivos, o burlable?"
+  instructions="Para cada regla, hazte la prueba: una vez anunciada esta regla, ¿es ser honesto o cooperativo mi mejor jugada, o puedo sacar provecho reportando en falso? Ordena en consecuencia."
+  buckets={['Compatible con los incentivos (la honestidad es una mejor respuesta)', 'Burlable (sacas provecho reportando en falso)']}
+  items={[
+    { text: "Cortar y elegir: una persona corta el pastel, la OTRA elige su trozo primero.", bucket: 'Compatible con los incentivos (la honestidad es una mejor respuesta)' },
+    { text: "Una subasta a sobre cerrado donde el mejor postor gana pero paga solo la SEGUNDA puja más alta.", bucket: 'Compatible con los incentivos (la honestidad es una mejor respuesta)' },
+    { text: "Una subasta a sobre cerrado donde el mejor postor gana y paga exactamente el número que escribió.", bucket: 'Burlable (sacas provecho reportando en falso)' },
+    { text: "Los compañeros de piso acuerdan dividir cada cuenta de restaurante a partes iguales, entre cuatro.", bucket: 'Burlable (sacas provecho reportando en falso)' },
+    { text: "Cada uno paga solo los platos que pidió personalmente.", bucket: 'Compatible con los incentivos (la honestidad es una mejor respuesta)' },
+    { text: "La ayuda de emergencia se entrega a quien alegue la mayor necesidad, sin verificación.", bucket: 'Burlable (sacas provecho reportando en falso)' },
+    { text: "Una nevera de oficina compartida donde cualquiera puede coger cualquier comida, y el coste se divide a partes iguales a fin de mes.", bucket: 'Burlable (sacas provecho reportando en falso)' },
+    { text: "Un límite de velocidad con multas automáticas e inevitables: obedecer el límite es tu mejor jugada hagan lo que hagan los demás conductores.", bucket: 'Compatible con los incentivos (la honestidad es una mejor respuesta)' },
+  ]}
+  explanation="La prueba es siempre la misma: tras anunciarse la regla, ¿paga más la honestidad o la cooperación? Cortar y elegir (elige la otra persona), la subasta a segundo precio, pagar-lo-que-pediste y los límites de velocidad con multa inevitable convierten todos el buen comportamiento en una mejor respuesta, así que son compatibles con los incentivos. La subasta de paga-lo-que-dijiste recompensa rebajar tu puja; las cuentas a partes iguales y la nevera compartida recompensan sobreconsumir porque pagas solo una fracción de tu propio exceso; las alegaciones de necesidad sin verificar recompensan exagerar. Cada una de esas te tiende una mentira rentable, así que los datos de entrada —y los resultados— quedan distorsionados. La señal nunca cambia: si una regla CASTIGA la honestidad, la gente no será honesta."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+/>
+
+## Las dos trampas que hacen tropezar a todo el mundo
+
+La compatibilidad de incentivos es poderosa, pero dos malentendidos la convierten en una promesa falsa si no estás atento.
+
+**Trampa uno: la IC no garantiza eficiencia ni equidad.** Un mecanismo puede ser perfectamente compatible con los incentivos y aun así producir un resultado pésimo. La IC solo garantiza que los *datos de entrada son veraces* y que nadie saca provecho burlando la regla; no dice nada sobre si el *resultado* construido a partir de esos datos veraces es eficiente, justo o deseable. Podrías diseñar una regla a prueba de estrategias que recoja con honestidad las preferencias de todos y luego haga algo derrochador con ellas; sigue siendo IC, solo que IC al servicio de un mal objetivo. Los datos veraces son necesarios para un buen resultado, no suficientes. Así que conseguir la IC es el paso uno, no la meta: aún tienes que asegurarte de que la regla *haga lo correcto* con los datos honestos que ahora recibe.
+
+**Trampa dos: la resistencia a estrategias (DSIC) es un listón muy alto, y a menudo imposible.** Es tentador exigir el estándar de oro en todas partes: «¡haz que todo mecanismo sea a prueba de estrategias!». Pero la compatibilidad de incentivos en estrategias dominantes pide mucho —la honestidad debe superar toda mentira frente a *cualquier* oponente posible— y para muchísimos objetivos que podrías querer (resultados eficientes, resultados justos, un presupuesto equilibrado, dejar que todos voten su preferencia verdadera), **está demostrado que no existe ningún mecanismo a prueba de estrategias que los cumpla.** No son fallos de ingenio; son **resultados de imposibilidad** matemáticos: muros que el campo ha cartografiado con precisión. Los afrontaremos de frente más adelante en el curso, pero planta la bandera ahora: la resistencia a estrategias es una propiedad maravillosa cuando puedes conseguirla, y hay situaciones importantes y bien entendidas donde simplemente *no puedes*, y debes conformarte con la promesa bayesiana, más débil, o cambiar un objetivo por otro.
+
+<MCQ
+  client:visible
+  question="Una ciudad asigna plazas en su mejor colegio público pidiendo a las familias que ordenen sus colegios preferidos, y luego ejecuta un algoritmo de emparejamiento. Los funcionarios anuncian con orgullo que el proceso es «a prueba de estrategias»: ordenar tus preferencias verdaderas es tu mejor jugada sin importar cómo las ordenen las demás familias. Un amigo concluye: «Genial, entonces la asignación final debe de ser la más justa y eficiente posible». ¿Qué falla en el salto del amigo?"
+  options={[
+    { text: "La resistencia a estrategias solo garantiza que las familias reporten sus preferencias VERDADERAS; no dice nada sobre si el resultado construido a partir de esas ordenaciones verdaderas es justo o eficiente. La IC asegura datos honestos, no un buen resultado.", correct: true },
+    { text: "No falla nada: un mecanismo a prueba de estrategias es por definición el más justo y eficiente, ya que la honestidad siempre produce el mejor resultado.", correct: false },
+    { text: "El amigo se equivoca porque los mecanismos a prueba de estrategias no pueden existir para el emparejamiento escolar en absoluto, así que los funcionarios deben de estar mintiendo.", correct: false },
+    { text: "El amigo se equivoca porque la resistencia a estrategias significa que las familias mentirán de verdad, dejando las ordenaciones inútiles.", correct: false },
+  ]}
+  explanation="Esto es exactamente la trampa uno. La resistencia a estrategias es una promesa sobre los DATOS DE ENTRADA: hace de ordenar con sinceridad una estrategia dominante, así que el algoritmo recibe las preferencias reales de las familias. Pero datos veraces no es lo mismo que un buen resultado: la regla de emparejamiento aún podría dejar sobre la mesa alguna reasignación eficiente o justa (de hecho, un resultado célebre dice que a menudo no puedes tener resistencia a estrategias Y eficiencia plena a la vez). Así que el amigo confundió «datos honestos» con «mejor resultado posible». La IC te consigue datos veraces; que el resultado sea bueno es un trabajo aparte. Y ojo: los mecanismos a prueba de estrategias para el emparejamiento sí existen, y hacen de la honestidad la mejor jugada, no una razón para mentir."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+### Cuándo usarlo
+
+Echa mano de la prueba de compatibilidad de incentivos **en el instante en que te entreguen cualquier regla que pida a la gente reportar algo** —un valor, una prioridad, una necesidad, una preferencia, una ordenación— o hacer voluntariamente lo cooperativo. Antes de fiarte de un solo número que la regla recoja, aplica la única pregunta: *ahora que esta regla está anunciada, ¿es la honestidad la mejor jugada de cada persona, o paga burlarla?* Si la honestidad paga, los datos son reales y puedes construir sobre ellos; si mentir paga, trata cada número reportado como una distorsión estratégica y espera que el resultado refleje las mentiras, no la verdad. Insiste en la forma fuerte —a prueba de estrategias, la-honestidad-gana-hagan-lo-que-hagan-los-demás— siempre que puedas conseguirla, porque no necesita fe en los otros jugadores; acepta la forma bayesiana, más débil, solo cuando la fuerte esté demostradamente fuera de alcance. Y nunca dejes que «es compatible con los incentivos» te adormezca hasta pensar que el trabajo está hecho: la IC te compra datos honestos, y aún tienes que asegurarte de que la regla haga algo bueno con ellos.
+
+El ejemplo más limpio y hermoso de fabricar resistencia a estrategias a propósito no es un pastel: es una subasta. Hay un único ajuste, casi mágico, de la regla de subasta que transforma pujar de un nervioso juego de adivinar, donde debes rebajar y mentir, en uno donde escribir tu valor verdadero es tu **estrategia dominante**: la mejor jugada sin importar lo que puje nadie. Se llama el **truco del segundo precio**, hace funcionar eBay silenciosamente, y es lo siguiente: lección 3, **Subastas y el truco del segundo precio**.
