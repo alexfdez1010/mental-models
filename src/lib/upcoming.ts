@@ -90,35 +90,16 @@ export const upcomingCourses: UpcomingCourse[] = [
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
   // `leverage-points` (23), `lollapalooza-effect` (24), `regression-to-the-mean`
   // (25), `critical-mass` (26), `nash-equilibrium` (27), `asymmetry-and-optionality`
-  // (28), `fitness-landscapes` (29) and `mechanism-design` (the advanced
-  // strategy/economics rung, 30) have graduated and been removed; their topic MDX
-  // is now the record. The lowest-order entry below
-  // (`combining-models-latticework`, order 31) is built next. The remaining queue
-  // finishes the expert tier and refills the breadth the last removal opened up,
-  // spanning foundations/decision-making (`combining-models-latticework`),
+  // (28), `fitness-landscapes` (29), `mechanism-design` (the advanced
+  // strategy/economics rung, 30) and `combining-models-latticework` (the
+  // foundations/decision-making capstone, 31) have graduated and been removed;
+  // their topic MDX is now the record. The lowest-order entry below
+  // (`deciding-under-deep-uncertainty`, order 32) is built next. The remaining
+  // queue finishes the expert tier and keeps the breadth tag-diverse, spanning
   // decision-making/probability (`deciding-under-deep-uncertainty`), psychology
   // (`influence-and-persuasion`), biology-evolution/strategy
   // (`evolution-of-cooperation`) and strategy (`credible-commitment-and-deterrence`)
   // so no single roadmap tag races ahead of the others.
-  {
-    slug: 'combining-models-latticework',
-    icon: '🕸️',
-    difficulty: 'expert',
-    order: 31,
-    accent: 'brand',
-    title: {
-      en: 'Combining Models: The Latticework',
-      es: 'Combinar Modelos: El Entramado',
-    },
-    description: {
-      en: 'The capstone skill: holding several models at once and letting them check, complete, and correct one another into a single judgment. When forces stack the same way you get a lollapalooza; when models disagree, the disagreement is the signal. How a latticework actually thinks.',
-      es: 'La habilidad cumbre: sostener varios modelos a la vez y dejar que se comprueben, completen y corrijan entre sí hasta formar un único juicio. Cuando las fuerzas se apilan en el mismo sentido surge un lollapalooza; cuando los modelos discrepan, la discrepancia es la señal. Cómo piensa de verdad un entramado.',
-    },
-    dependencies: ['lollapalooza-effect', 'second-order-thinking', 'circle-of-competence'],
-    tags: ['foundations', 'decision-making'],
-    buildNotes:
-      'Combining models: the latticework — the expert-tier capstone that TOPIC.md names as the whole point of the site: taking a real situation and reasoning with *several* models at once instead of one. Assumes a broad base (lollapalooza-effect, second-order-thinking, circle-of-competence) and should cross-reference many built courses. Sections: why one model is never enough (the man-with-a-hammer tendency — if all you have is one model you force every problem into it); the latticework idea (Munger) — models from different disciplines as an interlocking mesh you hang experience on; three ways models combine — (1) they *stack* the same direction into a lollapalooza (link to lollapalooza-effect: incentives + social proof + commitment all pushing one way), (2) they *check* each other (base rates vs a vivid story; incentives vs stated reasons; second-order effects vs first-order appeal), and (3) they *complete* each other (supply/demand explains the price, game theory explains the players, feedback loops explain the dynamics — one situation, several lenses); a fully worked multi-model case study (e.g. a bank run or a viral product read simultaneously through incentives, critical-mass/tipping, game theory and social proof); the meta-skill of *choosing* which models fit a novel situation and knowing your circle of competence; making a mental checklist/pre-mortem that runs several models over a decision. Pitfalls: forcing a model where it does not apply, double-counting the same effect wearing two names, confirmation-shopping for the model that flatters the answer you already want, and paralysis-by-lattice (more models ≠ better past the point of decision). Build an interactive island: a "decision desk" where the learner is given a scenario and toggles a panel of model-lenses (incentives, base rate, second-order, game theory, feedback loop, social proof), each contributing a note and a directional pull, and the island shows where lenses agree (a stacked lollapalooza reading) versus where they conflict (the flagged tension to investigate). Recap Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'deciding-under-deep-uncertainty',
     icon: '🌫️',

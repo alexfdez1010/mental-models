@@ -192,3 +192,6 @@ export type { AuctionSandboxProps } from '@/components/react/AuctionSandbox';
 
 export { CutAndChoose, default as CutAndChooseDefault } from '@/components/react/CutAndChoose';
 export type { CutAndChooseProps } from '@/components/react/CutAndChoose';
+
+export { DecisionDesk, default as DecisionDeskDefault } from '@/components/react/DecisionDesk';
+export type { DecisionDeskProps, DecisionScenario, DecisionLens } from '@/components/react/DecisionDesk';
