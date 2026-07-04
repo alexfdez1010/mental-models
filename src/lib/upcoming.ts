@@ -44,11 +44,10 @@
  * `tragedy-of-the-commons`, `externalities`, `moats`, `ecosystems-and-niches`,
  * `leverage-points`, `lollapalooza-effect`, `regression-to-the-mean`,
  * `critical-mass`, `nash-equilibrium`, …) have graduated and been removed.
- * Lowest `order` is built next. The remaining entries finish the **advanced
- * tier** and open the **expert tier**, deliberately kept tag-diverse so no
- * single roadmap tag races ahead: biology-evolution (`fitness-landscapes`),
- * strategy (`mechanism-design`), foundations (`combining-models-latticework`)
- * and decision-making/probability (`deciding-under-deep-uncertainty`).
+ * Lowest `order` is built next. The remaining entries sit in the **expert
+ * tier**, deliberately kept tag-diverse so no single roadmap tag races ahead:
+ * psychology (`influence-and-persuasion`), biology-evolution/strategy
+ * (`evolution-of-cooperation`) and strategy (`credible-commitment-and-deterrence`).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -93,32 +92,14 @@ export const upcomingCourses: UpcomingCourse[] = [
   // (28), `fitness-landscapes` (29), `mechanism-design` (the advanced
   // strategy/economics rung, 30) and `combining-models-latticework` (the
   // foundations/decision-making capstone, 31) have graduated and been removed;
-  // their topic MDX is now the record. The lowest-order entry below
-  // (`deciding-under-deep-uncertainty`, order 32) is built next. The remaining
-  // queue finishes the expert tier and keeps the breadth tag-diverse, spanning
-  // decision-making/probability (`deciding-under-deep-uncertainty`), psychology
-  // (`influence-and-persuasion`), biology-evolution/strategy
-  // (`evolution-of-cooperation`) and strategy (`credible-commitment-and-deterrence`)
-  // so no single roadmap tag races ahead of the others.
-  {
-    slug: 'deciding-under-deep-uncertainty',
-    icon: '🌫️',
-    difficulty: 'expert',
-    order: 32,
-    accent: 'accent',
-    title: {
-      en: 'Deciding Under Deep Uncertainty',
-      es: 'Decidir Bajo Incertidumbre Profunda',
-    },
-    description: {
-      en: 'Expected value assumes you know the odds. Deep uncertainty is when you do not — the probabilities themselves are unknown or unknowable. The expert model for choosing well when you cannot compute: seek robustness over optimality, buy margin of safety, and prefer decisions that survive being wrong.',
-      es: 'El valor esperado da por hecho que conoces las probabilidades. La incertidumbre profunda es cuando no las conoces — las probabilidades mismas son desconocidas o incognoscibles. El modelo experto para elegir bien cuando no puedes calcular: busca robustez antes que optimalidad, compra margen de seguridad y prefiere decisiones que sobrevivan a estar equivocado.',
-    },
-    dependencies: ['fat-tails', 'margin-of-safety', 'asymmetry-and-optionality'],
-    tags: ['decision-making', 'probability'],
-    buildNotes:
-      'Deciding under deep uncertainty — the expert decision-making rung: what to do when the clean machinery of expected value breaks because you do not (and cannot) know the probabilities. Assumes fat-tails, margin-of-safety and asymmetry-and-optionality; the honest sequel to expected value. Sections: risk vs uncertainty (Knight) — risk is a known distribution (a dice roll), uncertainty is an unknown one (next decade’s technology); why point-estimate expected value quietly assumes you know the odds and misleads under fat tails and unknown unknowns; the shift from *optimising* to *satisficing* and *robustness* — pick actions that do acceptably across many possible worlds rather than best in your single guessed one (robust decision-making, minimax-regret, the precautionary/ruin-avoidance principle: never risk what you cannot afford to lose, because ergodicity fails and one ruin ends the game); reversibility and option value (keep choices reversible, pay for margin of safety, run small experiments — tie to asymmetry-and-optionality and the barbell); scenario thinking and pre-mortems instead of single forecasts; the role of redundancy, slack and antifragility; calibration humility (you know less than your confidence suggests). Pitfalls: false precision (a detailed spreadsheet is not knowledge; garbage-in dressed as rigour); treating deep uncertainty as if it were mere risk; over-hedging into paralysis or paying so much for safety you never win; confusing robustness with mere pessimism. Build an interactive island: a "many-worlds" decision explorer where the learner picks among strategies (optimise / hedge / barbell / robust) and the island draws each strategy’s outcome across a spread of possible worlds — including rare ruinous ones — showing how the expected-value winner can be the strategy most likely to blow up, while the robust choice trades a little average for surviving every world. Recap Quiz + MindMap. en + es twin.',
-  },
+  // their topic MDX is now the record — and `deciding-under-deep-uncertainty`
+  // (the expert decision-making/probability rung, order 32) has now graduated and
+  // been removed too. The lowest-order entry below (`influence-and-persuasion`,
+  // order 33) is built next. The remaining queue finishes the expert tier and
+  // keeps the breadth tag-diverse, spanning psychology (`influence-and-persuasion`),
+  // biology-evolution/strategy (`evolution-of-cooperation`) and strategy
+  // (`credible-commitment-and-deterrence`) so no single roadmap tag races ahead of
+  // the others.
   {
     slug: 'influence-and-persuasion',
     icon: '🎯',

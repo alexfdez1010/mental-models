@@ -195,3 +195,6 @@ export type { CutAndChooseProps } from '@/components/react/CutAndChoose';
 
 export { DecisionDesk, default as DecisionDeskDefault } from '@/components/react/DecisionDesk';
 export type { DecisionDeskProps, DecisionScenario, DecisionLens } from '@/components/react/DecisionDesk';
+
+export { ManyWorldsExplorer, default as ManyWorldsExplorerDefault } from '@/components/react/ManyWorldsExplorer';
+export type { ManyWorldsExplorerProps, WorldStrategy } from '@/components/react/ManyWorldsExplorer';

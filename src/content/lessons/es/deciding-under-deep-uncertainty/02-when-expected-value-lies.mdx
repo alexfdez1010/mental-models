@@ -1,0 +1,229 @@
+---
+title: "Cuando el valor esperado miente: colas gruesas, ruina y la trampa de la ergodicidad"
+description: "El valor esperado (expected value) es el caballo de batalla de toda la red de modelos — y bajo incertidumbre profunda puede traicionarte sin hacer ruido. Las estimaciones puntuales esconden colas gruesas, las medias asumen que conoces las probabilidades, y el corte más profundo de todos: la media entre muchos apostadores paralelos es una mentira sobre el destino de una sola persona apostando a lo largo del tiempo."
+topic: "es/deciding-under-deep-uncertainty"
+order: 3
+minutes: 13
+updated: 2026-07-04
+---
+
+import { MCQ, Callout, Reveal, ManyWorldsExplorer, MindMap } from '@/components/react';
+
+El valor esperado (expected value) es el héroe de toda esta red de modelos. Multiplica
+cada resultado por su probabilidad, súmalos, quédate con el número más grande: así
+sopesas una apuesta, tarificas una póliza de seguro y eliges entre opciones. Por eso
+esta lección va a saber a traición, porque trata de los tres lugares donde ese héroe
+se vuelve contra ti. No porque la aritmética sea incorrecta —es impecable—, sino por
+las suposiciones que cuela de contrabando cuando el futuro es profundamente incierto.
+Al final seguirás queriendo al valor esperado. Solo sabrás exactamente cuándo *no*
+confiarle tu vida.
+
+## Mentira n.º 1: la estimación puntual esconde la dispersión
+
+La primera traición es la compresión. Un valor esperado es un único número, y un
+único número solo puede ser un resumen: tira a la basura la *forma* de lo que podría
+pasar. Dos apuestas pueden compartir un valor esperado idéntico de "+5" siendo
+animales radicalmente distintos: una te paga entre +4 y +6 siempre (todos los
+resultados abrazan la media), la otra paga +6 casi siempre pero −1.000 una vez cada
+muerte de obispo (una catástrofe rara agazapada bajo una media de aspecto amable). La
+media es la misma. La experiencia no se parece ni de lejos.
+
+Bajo **colas gruesas (fat tails)** —el mundo que ya conociste, donde un único extremo
+raro lo domina todo— esto es letal. La media es arrastrada de aquí para allá por
+sucesos de cola tan raros que puede que nunca hayas visto uno en tus datos, de modo
+que un valor esperado de aspecto seguro puede estar apoyándose por completo en una
+catástrofe que aún no has muestreado. La estimación puntual dice "+5, tranquilo". La
+distribución dice "…salvo que aparezca el mundo de una vez por siglo, en cuyo caso
+estás acabado". Un número no puede advertirte de una forma que ya ha promediado hasta
+hacerla desaparecer.
+
+<Callout variant="warning" title="La media es un resumen, y los resúmenes esconden la cola">
+Bajo incertidumbre profunda y colas gruesas, un valor esperado puede estar
+*dominado por sucesos raros que no puedes estimar y que quizá nunca hayas observado*.
+Dos apuestas con la misma media pueden diferir entre "perder un poco" y "perderlo
+todo". Pregunta siempre qué esconde el número: la dispersión, y sobre todo el peor
+mundo alcanzable.
+</Callout>
+
+## Mentira n.º 2: las probabilidades se las inventó alguien para empezar
+
+La segunda traición ya la conocimos en la lección anterior: el valor esperado
+**requiere probabilidades**, y bajo incertidumbre profunda no tienes probabilidades
+de verdad. Así que las adivinas, y luego la máquina blanquea tu conjetura
+convirtiéndola en un veredicto con coma decimal que parece conocimiento. Esto es
+**falsa precisión (false precision)**. Un modelo detallado con datos de entrada
+inventados no es más fiable que una conjetura burda; es una conjetura burda con bata
+de laboratorio. El peligro es que la hoja de cálculo elaborada *parece* rigurosa, así
+que confías más en ella y te cubres menos: exactamente lo contrario de lo que exige la
+incertidumbre profunda.
+
+El fallo tiene nombre en el gremio: **basura entra, evangelio sale.** Cuanto más
+elaborado el modelo, más autoridad parece cargar, y más fácil es olvidar que cada
+salida "precisa" es solo tan sólida como las probabilidades inventadas del fondo. Una
+respuesta con siete decimales construida sobre un encogimiento de hombros sigue siendo
+un encogimiento de hombros.
+
+<MCQ
+  client:visible
+  question="Un modelo de 40 pestañas pronostica el rendimiento de un proyecto con dos decimales, pero tres de sus datos de entrada clave son puras conjeturas sobre una situación sin precedentes. ¿Qué ha producido en realidad el modelo?"
+  options={[
+    { text: 'Falsa precisión: una respuesta segura y con coma decimal que solo es tan sólida como las conjeturas que la sustentan', correct: true },
+    { text: 'Una estimación fiable, porque el enorme detalle del modelo compensa los datos de entrada débiles', correct: false },
+    { text: 'Un rendimiento garantizado, ya que las cuentas han sido revisadas', correct: false },
+    { text: 'Una decisión sin riesgo, porque todo ha sido cuantificado', correct: false },
+  ]}
+  explanation="El detalle no es conocimiento. Cuando los datos de entrada clave son conjeturas sobre una situación única, el modelo elaborado se limita a blanquear esas conjeturas en un número de aspecto autoritario: falsa precisión. El pulido lo hace MÁS peligroso, porque te invita a confiar en él y a cubrirte menos. Basura entra, evangelio sale."
+/>
+
+## Mentira n.º 3: la trampa de la ergodicidad — la media que no es la tuya
+
+Esta es la traición más profunda y menos intuitiva, y es la que replantea el curso
+entero. El valor esperado es una **media entre muchos mundos paralelos**: una especie
+de "si mil copias de ti tomaran esta apuesta una vez cada una, ¿cuál sería la media de
+la multitud?". Pero tú no eres mil copias. Eres **una** persona, tomando tus apuestas
+**una tras otra, a lo largo del tiempo.** Y cuando existe alguna posibilidad de
+**ruina (ruin)** —de tocar cero, de quebrar, de ser eliminado del juego—, esas dos
+medias no son la misma. Esta brecha tiene nombre: **ergodicidad (ergodicity)** (un
+sistema es *ergódico* cuando la media entre la multitud iguala a la media a lo largo
+del tiempo para un individuo, y apostar-con-ruina *no* es ergódico).
+
+Aquí va el golpe clásico al estómago. Una apuesta paga **+50 % de tu riqueza si la
+moneda sale cara y −40 % si sale cruz**. La media del *conjunto* —entre muchos
+apostadores paralelos— es positiva: ganas 50, pierdes 40, media +5 % por ronda, una
+apuesta "estupenda" según el valor esperado. Así que deberías seguir jugando para
+siempre, ¿verdad? Ahora traza a **una** persona jugándola ronda tras ronda. Gana y
+luego pierde: 1,5 × 0,6 = 0,9 — te quedas con el 90 % de donde empezaste. Cada par
+cara-luego-cruz *multiplica* tu riqueza por 0,9, así que con el tiempo, casi con toda
+seguridad, un jugador real se erosiona hacia **cero**. La media de la multitud se
+dispara mientras el individuo típico se arruina, porque la media de la multitud está
+inflada por un puñado de trayectorias absurdamente afortunadas que una sola persona
+nunca vivirá.
+
+<Callout variant="warning" title="La ergodicidad, en una línea">
+El valor esperado es la media entre **muchos apostadores paralelos**. Tu vida es un
+apostador a lo largo del **tiempo**. Cuando una pérdida puede ser *multiplicativa* y
+la ruina está sobre la mesa, la media temporal puede ser catastrófica aun cuando la
+media del conjunto tenga muy buena pinta. **No te toca ser la media de tus yoes
+paralelos: solo te toca ser el que vive tu secuencia.**
+</Callout>
+
+La moraleja voltea una piedra angular del pensamiento ingenuo del valor esperado: una
+apuesta con media positiva puede seguir siendo un camino casi seguro a la ruina para
+la persona que la vive de verdad. La supervivencia no es una consideración entre
+muchas: es la precondición de *todas* las apuestas futuras que se suponía que iban a
+hacerte rico. El cero es una trampilla, no un número bajo, porque después de él ya no
+queda nada que componer.
+
+## Míralo: la mesa de los muchos mundos
+
+Basta de palabras: ve a manejarlo. Abajo, cada estrategia se enfrenta a todo un
+*abanico de mundos posibles*: la mayoría ordinarios, unos pocos raros y ruinosos
+(catástrofes a la izquierda) o raros y maravillosos (auges a la derecha). No sabes qué
+mundo te tocará, así que observa cómo le va a cada estrategia en *todos* ellos a la
+vez. Empieza en **Optimizar** —el campeón del valor esperado, que apuesta todo al
+único mundo más probable— y arrastra el deslizador de turbulencia de calmado hacia
+incertidumbre profunda.
+
+<ManyWorldsExplorer
+  client:visible
+  title="Una estrategia, muchos mundos posibles"
+  eyebrow="La mesa de los muchos mundos"
+  instructions="No sabes qué mundo te tocará, así que juzga una estrategia por cómo le va en todos ellos, no solo en el probable. Elige una estrategia y luego arrastra el futuro de calmado a profundamente incierto, y observa la media, el peor caso y en cuántos mundos sobrevive."
+  strategies={[
+    { key: 'optimise', label: 'Optimizar', blurb: 'Apuéstalo todo al único mundo más probable. La mejor media con diferencia, y ruina ilimitada en cuanto la realidad caiga en la cola mala.', calm: 7, upSlope: 13, downSlope: 32, floor: -40, cap: null },
+    { key: 'hedge', label: 'Cubrirse', blurb: 'Recorta ambas colas: cede algo de ganancia para suavizar la caída. Vaivenes más suaves, pero un mundo bastante severo aún puede hacer daño.', calm: 4, upSlope: 7, downSlope: 11, floor: -13, cap: null },
+    { key: 'barbell', label: 'Barra', blurb: 'Un núcleo muy seguro más una pequeña apuesta convexa: una caída modesta y con suelo, y un lado bueno abierto que gana con un mundo salvaje.', calm: 1, upSlope: 11, downSlope: 4, floor: -3, cap: null },
+    { key: 'robust', label: 'Robusta', blurb: 'Aspira a ir aceptablemente en todos los mundos en vez de a lo mejor en uno. Nunca espectacular, nunca arruinada: siempre vuelve a casa con vida.', calm: 3, upSlope: 2, downSlope: 2, floor: 0, cap: 5 },
+  ]}
+  turbulenceLabel="¿Cómo de turbulento es el futuro?"
+  calmEndLabel="Calmado"
+  wildEndLabel="Incertidumbre profunda"
+  bustAxisLabel="Mundos catastróficos"
+  boomAxisLabel="Mundos de auge"
+  ruinLabel="Ruina: estás fuera del juego"
+  meanLabel="Resultado medio"
+  worstLabel="Peor mundo"
+  survivedLabel="Mundos sobrevividos"
+  strategyColLabel="Estrategia"
+  readoutTemplate="En {total} mundos posibles, la estrategia {strategy} promedia {mean}, pero su peor mundo es {worst} y sobrevive en {survived} de {total}. Con un {turbulence}% de turbulencia, la media más alta no es lo mismo que seguir en el juego."
+  caption="Empieza en Optimizar y sube la turbulencia. Su media sigue siendo tentadora, pero observa cómo la barra del peor mundo perfora la línea de ruina — los mundos ✕ son futuros donde esta estrategia queda aniquilada. En un mundo calmado el optimizador gana; en uno profundamente incierto, es el que muere."
+/>
+
+Fíjate en lo que hacen los números. En un futuro **calmado** (turbulencia baja),
+*Optimizar* registra la mejor media con muchísima diferencia: justo por eso es tan
+seductora. Ahora sube la turbulencia a tope. Su media quizá aún parezca respetable,
+pero su **peor mundo** se hunde bajo la línea de ruina y su cuenta de **mundos
+sobrevividos** empieza a caer: ahora hay futuros en los que esta estrategia
+simplemente estalla. Mientras tanto, la aburrida estrategia **Robusta** nunca toca la
+línea de ruina: cambia la media llamativa por lo único que importa cuando el futuro es
+desconocido: *vuelve a casa con vida en todos los mundos.* Ese intercambio es el curso
+entero, y acabas de verlo suceder.
+
+<MCQ
+  client:visible
+  question="En la mesa de los muchos mundos, a medida que empujas la turbulencia hacia 'incertidumbre profunda', ¿por qué la estrategia Optimizar se convierte en la peligrosa pese a su media alta?"
+  options={[
+    { text: 'Apuesta todo al mundo probable, así que cuando aparece un mundo de catástrofe raro su pérdida no tiene suelo: atraviesa la línea de ruina y queda eliminada del juego', correct: true },
+    { text: 'Su resultado medio cae a cero, volviéndola idéntica a las demás estrategias', correct: false },
+    { text: 'Deja de funcionar porque el deslizador la desactiva por encima del 50 %', correct: false },
+    { text: 'La turbulencia baja todas las estrategias por igual, así que Optimizar no es peor que el resto', correct: false },
+  ]}
+  explanation="Optimizar está afinada para ganar en el único mundo más probable y no tiene suelo en su lado malo. A medida que la turbulencia engorda las colas, los mundos de catástrofe se vuelven alcanzables, y en esos mundos su pérdida es abierta: revienta la línea de ruina y queda eliminada. Una media alta es un consuelo frío si algunos de los mundos que la componen son mortales. La elección robusta acepta una media menor para mantener su peor mundo sobrevivible."
+/>
+
+<Reveal client:visible label="Si una apuesta tiene valor esperado positivo, ¿cómo puede ser mala idea seguir tomándola?" buttonLabel="Mostrar la respuesta">
+Porque el valor esperado es la media del *conjunto* —la media entre muchas copias
+paralelas de ti— y a ti solo te toca vivir **una** secuencia a lo largo del tiempo.
+Cuando las pérdidas se componen y la ruina es alcanzable, la media temporal se separa
+de la media del conjunto: la media de la multitud está apuntalada por unas pocas
+trayectorias absurdamente afortunadas que tú nunca recorrerás, mientras el jugador
+único típico deriva hacia cero. Así que una apuesta con una media positiva encantadora
+(como +5 % por ronda en la moneda 50/−40) puede aun así arruinar a la persona que la
+juega de verdad. El arreglo no es abandonar el valor esperado, sino añadirle encima una
+restricción lateral innegociable: **nunca tomes una apuesta que pueda arruinarte, por
+buena que parezca su media.** Primero la supervivencia, segundo la optimización.
+</Reveal>
+
+## El hilo conductor
+
+Las tres mentiras comparten una raíz: el valor esperado asume calladamente un mundo
+*bien portado, conocible y sobrevivible* — colas finas, probabilidades reales, sin
+trampilla en el cero. Bajo incertidumbre profunda las tres suposiciones tambalean. Las
+colas son gruesas y esconden catástrofes que no has muestreado; las probabilidades
+están inventadas; y la ruina convierte la media reconfortante en una mentira sobre tu
+destino real. Eso no significa tirar la herramienta: significa **acotar su autoridad**.
+Usa el valor esperado como una entrada, nunca como el veredicto, y pon por encima una
+regla irrompible: *primero, no te dejes aniquilar.* Esa regla es la puerta a la
+siguiente lección.
+
+<MindMap
+  client:visible
+  title="Tres maneras en que el valor esperado miente bajo incertidumbre profunda"
+  root={{
+    label: 'Cuando el VE miente',
+    children: [
+      {
+        label: 'La estimación puntual esconde la dispersión',
+        children: [{ label: 'Una sola media tira a la basura la forma; bajo colas gruesas puede apoyarse por entero en una catástrofe rara que nunca has muestreado. Misma media, "perder un poco" frente a "perderlo todo".' }],
+      },
+      {
+        label: 'Las probabilidades estaban inventadas',
+        children: [{ label: 'El VE necesita probabilidades; bajo incertidumbre profunda las adivinas, y el modelo blanquea la conjetura en falsa precisión. Basura entra, evangelio sale.' }],
+      },
+      {
+        label: 'La trampa de la ergodicidad',
+        children: [{ label: 'El VE promedia entre apostadores paralelos; tú vives una secuencia a lo largo del tiempo. Con pérdidas multiplicativas y ruina posible, la media temporal puede ir a cero mientras la del conjunto luce estupenda. La moneda 50/−40: media +5 %, quiebra casi segura.' }],
+      },
+      {
+        label: 'El arreglo',
+        children: [{ label: 'No descartes el VE: acota su autoridad. Una entrada, nunca el veredicto, con una regla irrompible encima: primero, no dejes que te aniquilen. La supervivencia es la precondición de toda apuesta futura.' }],
+      },
+    ],
+  }}
+/>
+
+A continuación: **Robustez frente a optimalidad** — tras ver por qué optimizar una
+media frágil puede matarte, construimos el objetivo alternativo desde cero: satisfacer
+(satisficing), toma de decisiones robusta, minimizar el arrepentimiento máximo
+(minimax-regret) y el principio de evitar la ruina que se sienta por encima de todo
+cálculo.
