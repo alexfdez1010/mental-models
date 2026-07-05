@@ -263,7 +263,11 @@ async function main() {
     browser = await chromium.launch();
     const context = await browser.newContext({
       viewport: { width: WIDTH, height: HEIGHT },
-      deviceScaleFactor: 2, // crisp 2x output
+      // 1x output → PNG is exactly 1200×630, matching the og:image:width/height
+      // meta tags. A 2x scale produced 2400×1260 files that mismatched the
+      // declared size and were large enough (300–740KB) that some scrapers
+      // (WhatsApp, etc.) dropped the preview.
+      deviceScaleFactor: 1,
     });
 
     // Shared work queue; a pool of pages pulls from it concurrently so capture
