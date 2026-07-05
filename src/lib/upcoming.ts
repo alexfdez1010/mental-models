@@ -43,10 +43,10 @@
  * (`what-are-mental-models`, `natural-selection`, `supply-and-demand`,
  * `tragedy-of-the-commons`, `externalities`, `moats`, `ecosystems-and-niches`,
  * `leverage-points`, `lollapalooza-effect`, `regression-to-the-mean`,
- * `critical-mass`, `nash-equilibrium`, …) have graduated and been removed.
- * Lowest `order` is built next. The remaining entries sit in the **expert
- * tier**, deliberately kept tag-diverse so no single roadmap tag races ahead:
- * psychology (`influence-and-persuasion`), biology-evolution/strategy
+ * `critical-mass`, `nash-equilibrium`, `influence-and-persuasion`, …) have
+ * graduated and been removed. Lowest `order` is built next. The remaining
+ * entries sit in the **expert tier**, deliberately kept tag-diverse so no single
+ * roadmap tag races ahead: biology-evolution/strategy
  * (`evolution-of-cooperation`) and strategy (`credible-commitment-and-deterrence`).
  */
 
@@ -93,32 +93,14 @@ export const upcomingCourses: UpcomingCourse[] = [
   // strategy/economics rung, 30) and `combining-models-latticework` (the
   // foundations/decision-making capstone, 31) have graduated and been removed;
   // their topic MDX is now the record — and `deciding-under-deep-uncertainty`
-  // (the expert decision-making/probability rung, order 32) has now graduated and
-  // been removed too. The lowest-order entry below (`influence-and-persuasion`,
-  // order 33) is built next. The remaining queue finishes the expert tier and
-  // keeps the breadth tag-diverse, spanning psychology (`influence-and-persuasion`),
+  // (the expert decision-making/probability rung, order 32) and
+  // `influence-and-persuasion` (the advanced psychology/decision-making rung,
+  // order 33) have now graduated and been removed too. The lowest-order entry
+  // below (`evolution-of-cooperation`, order 34) is built next. The remaining
+  // queue finishes the expert tier and keeps the breadth tag-diverse, spanning
   // biology-evolution/strategy (`evolution-of-cooperation`) and strategy
   // (`credible-commitment-and-deterrence`) so no single roadmap tag races ahead of
   // the others.
-  {
-    slug: 'influence-and-persuasion',
-    icon: '🎯',
-    difficulty: 'advanced',
-    order: 33,
-    accent: 'brand',
-    title: {
-      en: 'Influence & Persuasion',
-      es: 'Influencia y Persuasión',
-    },
-    description: {
-      en: 'The handful of psychological levers that reliably move a "yes" — reciprocity, commitment, social proof, authority, liking, and scarcity. How compliance is engineered, why these shortcuts usually serve us, and how to spot when they are being turned against you.',
-      es: 'El puñado de palancas psicológicas que arrancan un "sí" de forma fiable — reciprocidad, compromiso, prueba social, autoridad, simpatía y escasez. Cómo se fabrica el cumplimiento, por qué estos atajos suelen servirnos y cómo detectar cuándo se vuelven contra ti.',
-    },
-    dependencies: ['incentives', 'confirmation-bias'],
-    tags: ['psychology', 'decision-making'],
-    buildNotes:
-      'Influence & persuasion — the advanced psychology rung that turns "cognitive biases" from a list of errors into a system of levers other people can pull. Assumes incentives and the bias courses (confirmation-bias). The organising canon is Robert Cialdini’s principles of influence, taught as mental models of how a mind is moved to comply. Sections, each with the mechanism (why the shortcut normally works), a fully worked real example, and a defence against misuse: reciprocity (the pull to repay a gift/concession — the free sample, the door-in-the-face); commitment & consistency (once we take a stand we defend it — foot-in-the-door, written pledges, why small yeses precede big ones); social proof (we copy the many, especially under uncertainty and similarity — canned laughter, "best-seller", queues); authority (we defer to credible expertise and its mere symbols — titles, uniforms, the Milgram shadow); liking (we say yes to those we like — similarity, compliments, cooperation, the halo effect); scarcity (we want what is rare or vanishing — deadlines, "only 3 left", loss-aversion tie-in); and unity (shared identity, the "we"). Frame each as incentives + a bias working together, and connect to lollapalooza-effect (several levers stacking multiplicatively). A full section on ethics: persuasion vs manipulation, and how to inoculate yourself (name the lever, ask "would I want this if the tactic were removed?"). Pitfalls: over-attributing outcomes to a single lever, assuming the tactics always work (they backfire when transparent or clumsy), and confusing influence with coercion. Build an interactive island (a "compliance meter" that lets the learner toggle the six/seven levers on a sales or campaign scenario and watch the modelled likelihood of a yes climb — and over-toggle into obvious manipulation), plus a Categorize (tactic → principle) and a MatchConcepts, Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'evolution-of-cooperation',
     icon: '🤝',
@@ -156,6 +138,25 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['strategy'],
     buildNotes:
       'Credible commitment & deterrence — the expert strategy rung built on Schelling’s "strategy of conflict": a first-mover can change the equilibrium not by having more options but by visibly destroying their own. Assumes nash-equilibrium (equilibria, best responses, changing the game) and mechanism-design (commitment as a designed rule). Sections: the core paradox — tying your hands can strengthen your position, because it changes rivals’ best responses (the general who burns the bridges behind his army so retreat is impossible, and the enemy, knowing it, does not attack); credibility is everything — a threat or promise only works if the other side believes you will actually carry it out, so the skill is making commitments believable (contracts with penalties, public promises, delegating to an agent who *must* follow through, automaticity/"doomsday machines"); credible threats vs credible promises (deterrence stops an action, compellence/promise induces one); brinkmanship — deliberately raising shared risk to force a blink (Cuban missile crisis, labour strikes), and why the "threat that leaves something to chance" can be more credible than a precise one; deterrence and MAD (mutually assured destruction), second-strike capability, why vulnerability can be destabilising; commitment devices in ordinary life (Ulysses and the mast, Christmas savings clubs, staking your reputation). Tie to mechanism-design (a commitment is a self-imposed rule that moves the equilibrium) and incentives. Pitfalls: bluffs that aren’t credible get called; commitment traps (you can lock yourself into a disaster you can no longer exit — sunk-cost escalation, doomsday devices that fire by accident); the difficulty of un-committing when the world changes; and commitments that are read as bluffs because the cost of following through is obviously too high. Build an interactive island (a commitment game: the learner toggles whether they can pre-commit / remove their own fallback option and watches the equilibrium and their payoff shift, showing how throwing away a choice improves the outcome), plus a Categorize (credible vs empty commitments) and MatchConcepts, Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'path-dependence-and-lock-in',
+    icon: '🛤️',
+    difficulty: 'expert',
+    order: 36,
+    accent: 'accent',
+    title: {
+      en: 'Path Dependence & Lock-In',
+      es: 'Dependencia del Camino y Bloqueo',
+    },
+    description: {
+      en: 'Why history refuses to be optimised away: small, half-random early choices get amplified by positive feedback until they harden into standards nobody can escape — the QWERTY keyboard, the QWERTY-bad technologies that won, the institutions we are stuck with. How increasing returns lock a system onto one path, why the "best" option often loses, and when a locked-in system can still be broken open.',
+      es: 'Por qué la historia se niega a optimizarse: pequeñas decisiones tempranas medio azarosas se amplifican por realimentación positiva hasta endurecerse en estándares de los que nadie escapa — el teclado QWERTY, las tecnologías peores que ganaron, las instituciones que arrastramos. Cómo los rendimientos crecientes fijan un sistema en un camino, por qué la opción "mejor" suele perder, y cuándo un sistema bloqueado aún puede reventarse.',
+    },
+    dependencies: ['feedback-loops', 'critical-mass'],
+    tags: ['systems-thinking', 'economics'],
+    buildNotes:
+      'Path dependence & lock-in — the expert systems/economics rung that explains why systems get trapped on a route set by their own history rather than settling on the best available option. Assumes feedback-loops (reinforcing loops) and critical-mass (tipping points). The organising idea is increasing returns / positive feedback (Brian Arthur, Paul David): once an option gets a small early lead, adoption makes it more attractive, which brings more adoption, which locks it in. Sections, each with mechanism + a fully worked example: what path dependence is (the outcome depends on the sequence of past states, not just present conditions — "history matters", small events have large permanent consequences); the QWERTY story and the honest debate around it (the canonical example of a possibly-suboptimal standard that stuck; present the standard narrative AND the David-vs-Liebowitz/Margolis critique so the learner sees the model’s limits); the four sources of increasing returns (large set-up/fixed costs, learning effects, coordination/network effects, adaptive expectations); lock-in and switching costs (why a whole system stays on a worse standard because no individual can afford to move first — tie to nash-equilibrium/coordination and tragedy-of-the-commons); the difference between "first-mover advantage", "the best wins", and "an early accident wins" (contingency vs efficiency); network effects and standards wars (VHS vs Betamax, keyboards, driving side, gauge widths, programming ecosystems, metric vs imperial); institutional and career path dependence (why organisations, laws and even your own résumé calcify); and how lock-in breaks (external shocks, a discontinuous better technology that overcomes switching costs, coordinated switching, sponsorship). Pitfalls & where the model lies: the just-so-story trap (declaring any winner "just a historical accident" without evidence it was actually inferior — the Liebowitz/Margolis point that markets often DO correct); confusing path dependence with mere causation ("the past influenced the present" is trivial; the claim is that a small early difference gets amplified into a large, persistent, hard-to-reverse one); and assuming lock-in is permanent. Build an interactive island (a "lock-in explorer": competing standards/technologies with an adjustable increasing-returns strength and a small random early lead; the learner watches market share tip and lock onto one option, sees that raising the feedback strength makes the outcome more contingent and less efficiency-driven, and can fire an external shock to try to break the lock), plus a Categorize (increasing-returns source: set-up cost / learning / coordination / expectations) and MatchConcepts, Quiz + MindMap. en + es twin.',
   },
 ];
 

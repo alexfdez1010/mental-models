@@ -198,3 +198,6 @@ export type { DecisionDeskProps, DecisionScenario, DecisionLens } from '@/compon
 
 export { ManyWorldsExplorer, default as ManyWorldsExplorerDefault } from '@/components/react/ManyWorldsExplorer';
 export type { ManyWorldsExplorerProps, WorldStrategy } from '@/components/react/ManyWorldsExplorer';
+
+export { ComplianceMeter, default as ComplianceMeterDefault } from '@/components/react/ComplianceMeter';
+export type { ComplianceMeterProps, ComplianceLever } from '@/components/react/ComplianceMeter';
