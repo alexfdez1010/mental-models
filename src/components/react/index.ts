@@ -204,3 +204,6 @@ export type { ComplianceMeterProps, ComplianceLever } from '@/components/react/C
 
 export { EvoTournament, default as EvoTournamentDefault } from '@/components/react/EvoTournament';
 export type { EvoTournamentProps, EvoStrategyOption, EvoStrategyKey } from '@/components/react/EvoTournament';
+
+export { CommitmentGame, default as CommitmentGameDefault } from '@/components/react/CommitmentGame';
+export type { CommitmentGameProps } from '@/components/react/CommitmentGame';
