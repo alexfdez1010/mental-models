@@ -530,7 +530,7 @@ export function CourseGraph({
         {/* Edge overlay — measured from the cards, purely decorative. */}
         <svg
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+          className="pointer-events-none absolute inset-0 hidden h-full w-full overflow-visible sm:block"
           width={size.w || undefined}
           height={size.h || undefined}
         >
@@ -561,10 +561,26 @@ export function CourseGraph({
         </svg>
 
         {/* Card layers — plain responsive flow; arrows snap to these. */}
-        <ol className="relative flex list-none flex-col gap-y-12 p-0 sm:gap-y-20">
-          {rows.map((row, layer) => (
-            <li key={layer} className="m-0 p-0">
-              <ul className="flex list-none flex-wrap items-stretch justify-evenly gap-x-6 gap-y-4 p-0 sm:gap-x-12">
+        <ol className="relative flex list-none flex-col gap-y-10 p-0 sm:gap-y-20">
+          {rows.map((row, layer) => {
+            // A lone node (e.g. the single entry course) spans the full width on
+            // mobile; otherwise cards pair up two-per-row. On ≥sm the measured
+            // arrow graph takes over and cards return to their fixed width.
+            const single = row.length === 1;
+            // Width lives on the flex ITEM (<li>), not the card, so the 50%
+            // resolves against the row — not the li's shrink-wrapped content —
+            // and `min-w-0` lets long titles wrap instead of spilling out.
+            const itemW = single ? 'w-full' : 'w-[calc(50%-0.375rem)]';
+            return (
+            <li
+              key={layer}
+              className={cx(
+                'm-0 p-0',
+                // Mobile-only ladder cue between layers (arrows are hidden < sm).
+                layer > 0 && 'border-t border-edge pt-10 sm:border-0 sm:pt-0',
+              )}
+            >
+              <ul className="flex list-none flex-wrap items-stretch justify-center gap-3 p-0 sm:justify-evenly sm:gap-x-12 sm:gap-y-4">
                 {row.map((n) => {
                   const tint =
                     n.accent === 'accent'
@@ -585,39 +601,34 @@ export function CourseGraph({
                   // that still anchors its dependency edges on the ladder.
                   if (n.comingSoon) {
                     return (
-                      <li key={n.slug} className="m-0 p-0">
+                      <li key={n.slug} className={cx('m-0 min-w-0 p-0 sm:w-auto', itemW)}>
                         <div
                           ref={setRef}
                           title={`${n.title} · ${comingSoonLabel}`}
                           aria-label={`${n.title} · ${comingSoonLabel}`}
                           className={cx(
-                            'brutal relative flex h-full w-28 max-w-[40vw] flex-col border-dashed p-2.5 opacity-70 sm:w-44 sm:max-w-[80vw] sm:p-3',
+                            'brutal relative flex h-full w-full flex-col border-dashed p-3 opacity-70 sm:w-44 sm:max-w-[80vw]',
                             edge,
                           )}
                         >
-                          <div className="mb-1.5 flex items-center justify-between gap-2 sm:mb-2">
+                          <div className="mb-2 flex items-center justify-between gap-2">
                             <span
                               className={cx(
-                                'grid h-7 w-7 shrink-0 place-items-center rounded-card text-base grayscale sm:h-9 sm:w-9 sm:text-xl',
+                                'grid h-8 w-8 shrink-0 place-items-center rounded-card text-lg grayscale sm:h-9 sm:w-9 sm:text-xl',
                                 tint,
                               )}
                             >
                               {n.icon}
                             </span>
                             {n.difficulty ? (
-                              <span className={cx('difficulty-badge hidden sm:inline-flex', DIFFICULTY_CLASS[n.difficulty])}>
+                              <span className={cx('difficulty-badge', DIFFICULTY_CLASS[n.difficulty])}>
                                 {difficultyLabels[n.difficulty]}
                               </span>
                             ) : null}
                           </div>
-                          <h3 className="font-display text-sm font-semibold leading-snug text-ink-700">
+                          <h3 className="line-clamp-2 break-words font-display text-sm font-semibold leading-snug text-ink-700">
                             {n.title}
                           </h3>
-                          {n.difficulty ? (
-                            <span className={cx('difficulty-badge mt-1.5 self-start sm:hidden', DIFFICULTY_CLASS[n.difficulty])}>
-                              {difficultyLabels[n.difficulty]}
-                            </span>
-                          ) : null}
                           <p className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-ink-400">
                             <span aria-hidden="true">⏳</span>
                             {comingSoonLabel}
@@ -630,13 +641,13 @@ export function CourseGraph({
                   const prog = courseProgress(n.slug, n.lessonSlugs, finishedLessons, legacyCourses);
                   const isDone = prog.finished;
                   return (
-                    <li key={n.slug} className="m-0 p-0">
+                    <li key={n.slug} className={cx('m-0 min-w-0 p-0 sm:w-auto', itemW)}>
                       <a
                         ref={setRef}
                         href={n.href}
                         title={`${n.title} · ${prog.completed}/${prog.total} ${lessonsLabel}${isDone ? ` · ${finishedLabel}` : ''}`}
                         className={cx(
-                          'brutal brutal-interactive group relative flex h-full w-28 max-w-[40vw] flex-col p-2.5 sm:w-44 sm:max-w-[80vw] sm:p-3',
+                          'brutal brutal-interactive group relative flex h-full w-full flex-col p-3 sm:w-44 sm:max-w-[80vw]',
                           edge,
                           isDone && 'ring-2 ring-brand-400 ring-offset-1',
                         )}
@@ -652,34 +663,29 @@ export function CourseGraph({
                             <span className="sr-only">{finishedLabel}</span>
                           </span>
                         ) : null}
-                        <div className="mb-1.5 flex items-center justify-between gap-2 sm:mb-2">
+                        <div className="mb-2 flex items-center justify-between gap-2">
                           <span
                             className={cx(
-                              'grid h-7 w-7 shrink-0 place-items-center rounded-card text-base sm:h-9 sm:w-9 sm:text-xl',
+                              'grid h-8 w-8 shrink-0 place-items-center rounded-card text-lg sm:h-9 sm:w-9 sm:text-xl',
                               tint,
                             )}
                           >
                             {n.icon}
                           </span>
                           {n.difficulty ? (
-                            <span className={cx('difficulty-badge hidden sm:inline-flex', DIFFICULTY_CLASS[n.difficulty])}>
+                            <span className={cx('difficulty-badge', DIFFICULTY_CLASS[n.difficulty])}>
                               {difficultyLabels[n.difficulty]}
                             </span>
                           ) : null}
                         </div>
                         <h3
                           className={cx(
-                            'font-display text-sm font-semibold leading-snug text-ink-900',
+                            'line-clamp-2 break-words font-display text-sm font-semibold leading-snug text-ink-900',
                             tintText,
                           )}
                         >
                           {n.title}
                         </h3>
-                        {n.difficulty ? (
-                          <span className={cx('difficulty-badge mt-1.5 self-start sm:hidden', DIFFICULTY_CLASS[n.difficulty])}>
-                            {difficultyLabels[n.difficulty]}
-                          </span>
-                        ) : null}
                         <p
                           className={cx(
                             'mt-1.5 text-xs font-medium',
@@ -694,7 +700,8 @@ export function CourseGraph({
                 })}
               </ul>
             </li>
-          ))}
+            );
+          })}
         </ol>
       </div>
 
