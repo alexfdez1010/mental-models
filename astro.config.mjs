@@ -11,7 +11,7 @@ import { roadmapTags } from './src/lib/roadmap-meta';
 
 // Canonical production origin. Override per-environment with PUBLIC_SITE_URL
 // (Vercel deploys, previews). Drives sitemap, canonical tags and OG URLs.
-const SITE = process.env.PUBLIC_SITE_URL ?? 'https://mentalmodels.alejandrofernandezcamello.me';
+const SITE = process.env.PUBLIC_SITE_URL ?? 'https://mental-models.alejandrofernandezcamello.me';
 
 // https://astro.build/config
 export default defineConfig({
