@@ -43,11 +43,13 @@
  * (`what-are-mental-models`, `natural-selection`, `supply-and-demand`,
  * `tragedy-of-the-commons`, `externalities`, `moats`, `ecosystems-and-niches`,
  * `leverage-points`, `lollapalooza-effect`, `regression-to-the-mean`,
- * `critical-mass`, `nash-equilibrium`, `influence-and-persuasion`, …) have
- * graduated and been removed. Lowest `order` is built next. The remaining
- * entries sit in the **expert tier**, deliberately kept tag-diverse so no single
- * roadmap tag races ahead: biology-evolution/strategy
- * (`evolution-of-cooperation`) and strategy (`credible-commitment-and-deterrence`).
+ * `critical-mass`, `nash-equilibrium`, `influence-and-persuasion`,
+ * `evolution-of-cooperation`, …) have graduated and been removed. Lowest `order`
+ * is built next. The remaining entries sit in the **expert tier**, deliberately
+ * kept tag-diverse so no single roadmap tag races ahead: strategy
+ * (`credible-commitment-and-deterrence`), systems-thinking/economics
+ * (`path-dependence-and-lock-in`) and economics/psychology
+ * (`principal-agent-problem`).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -89,37 +91,16 @@ export const upcomingCourses: UpcomingCourse[] = [
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
   // `leverage-points` (23), `lollapalooza-effect` (24), `regression-to-the-mean`
   // (25), `critical-mass` (26), `nash-equilibrium` (27), `asymmetry-and-optionality`
-  // (28), `fitness-landscapes` (29), `mechanism-design` (the advanced
-  // strategy/economics rung, 30) and `combining-models-latticework` (the
-  // foundations/decision-making capstone, 31) have graduated and been removed;
-  // their topic MDX is now the record — and `deciding-under-deep-uncertainty`
-  // (the expert decision-making/probability rung, order 32) and
-  // `influence-and-persuasion` (the advanced psychology/decision-making rung,
-  // order 33) have now graduated and been removed too. The lowest-order entry
-  // below (`evolution-of-cooperation`, order 34) is built next. The remaining
+  // (28), `fitness-landscapes` (29), `mechanism-design` (30),
+  // `combining-models-latticework` (31), `deciding-under-deep-uncertainty` (32),
+  // `influence-and-persuasion` (33) and `evolution-of-cooperation` (the advanced
+  // biology-evolution/strategy rung, order 34) have graduated and been removed;
+  // their topic MDX is now the record. The lowest-order entry below
+  // (`credible-commitment-and-deterrence`, order 35) is built next. The remaining
   // queue finishes the expert tier and keeps the breadth tag-diverse, spanning
-  // biology-evolution/strategy (`evolution-of-cooperation`) and strategy
-  // (`credible-commitment-and-deterrence`) so no single roadmap tag races ahead of
-  // the others.
-  {
-    slug: 'evolution-of-cooperation',
-    icon: '🤝',
-    difficulty: 'advanced',
-    order: 34,
-    accent: 'accent',
-    title: {
-      en: 'The Evolution of Cooperation',
-      es: 'La Evolución de la Cooperación',
-    },
-    description: {
-      en: 'If nature is red in tooth and claw and every player is out for itself, why is the world so full of cooperation? How self-interested agents evolve to help each other — repeated games, tit-for-tat, reciprocity, and kinship — and the conditions that make being nice the winning strategy.',
-      es: 'Si la naturaleza es despiadada y cada jugador va a lo suyo, ¿por qué está el mundo tan lleno de cooperación? Cómo agentes egoístas evolucionan para ayudarse — juegos repetidos, donde-las-dan-las-toman, reciprocidad y parentesco — y las condiciones que hacen de ser amable la estrategia ganadora.',
-    },
-    dependencies: ['natural-selection', 'nash-equilibrium'],
-    tags: ['biology-evolution', 'strategy'],
-    buildNotes:
-      'The evolution of cooperation — the advanced rung that resolves the apparent paradox left by natural-selection and nash-equilibrium: the one-shot prisoner’s dilemma says defect, yet cooperation is everywhere in nature and society. Assumes natural-selection (fitness, selection) and nash-equilibrium (the dilemma, repeated play). Sections: the paradox stated (selfish genes, defect-dominant games, but real cooperation); the shadow of the future — repeating the dilemma changes the equilibrium, so a long enough future makes cooperating self-interested (tie back to nash "change the game"); Axelrod’s computer tournaments and why tit-for-tat won — be nice (never defect first), retaliatory (punish defection), forgiving (return to cooperation), and clear (simple to read); refinements — generous/contrite tit-for-tat surviving noise, win-stay-lose-shift; direct reciprocity ("I help you, you help me") vs indirect reciprocity and reputation ("I help you, someone helps me" — the role of gossip and status); kin selection and Hamilton’s rule rB > C in words (why we sacrifice most for close relatives); a brief, honest note on the group-selection debate; and the conditions that grow cooperation (repetition, reputation, relatedness, clustering of cooperators). Pitfalls: cooperation is fragile (defector invasions, one-shot vs repeated confusion), tit-for-tat’s vulnerability to noise/echo, and the naturalistic fallacy (what evolves is not what is moral). Reuse the IteratedDilemma island (repeated prisoner’s dilemma with selectable strategies) and add a tournament/populations visual if useful; Categorize (strategy traits: nice/retaliatory/forgiving), Quiz + MindMap. en + es twin.',
-  },
+  // strategy (`credible-commitment-and-deterrence`), systems-thinking/economics
+  // (`path-dependence-and-lock-in`) and economics/psychology
+  // (`principal-agent-problem`) so no single roadmap tag races ahead of the others.
   {
     slug: 'credible-commitment-and-deterrence',
     icon: '🔒',
@@ -157,6 +138,25 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['systems-thinking', 'economics'],
     buildNotes:
       'Path dependence & lock-in — the expert systems/economics rung that explains why systems get trapped on a route set by their own history rather than settling on the best available option. Assumes feedback-loops (reinforcing loops) and critical-mass (tipping points). The organising idea is increasing returns / positive feedback (Brian Arthur, Paul David): once an option gets a small early lead, adoption makes it more attractive, which brings more adoption, which locks it in. Sections, each with mechanism + a fully worked example: what path dependence is (the outcome depends on the sequence of past states, not just present conditions — "history matters", small events have large permanent consequences); the QWERTY story and the honest debate around it (the canonical example of a possibly-suboptimal standard that stuck; present the standard narrative AND the David-vs-Liebowitz/Margolis critique so the learner sees the model’s limits); the four sources of increasing returns (large set-up/fixed costs, learning effects, coordination/network effects, adaptive expectations); lock-in and switching costs (why a whole system stays on a worse standard because no individual can afford to move first — tie to nash-equilibrium/coordination and tragedy-of-the-commons); the difference between "first-mover advantage", "the best wins", and "an early accident wins" (contingency vs efficiency); network effects and standards wars (VHS vs Betamax, keyboards, driving side, gauge widths, programming ecosystems, metric vs imperial); institutional and career path dependence (why organisations, laws and even your own résumé calcify); and how lock-in breaks (external shocks, a discontinuous better technology that overcomes switching costs, coordinated switching, sponsorship). Pitfalls & where the model lies: the just-so-story trap (declaring any winner "just a historical accident" without evidence it was actually inferior — the Liebowitz/Margolis point that markets often DO correct); confusing path dependence with mere causation ("the past influenced the present" is trivial; the claim is that a small early difference gets amplified into a large, persistent, hard-to-reverse one); and assuming lock-in is permanent. Build an interactive island (a "lock-in explorer": competing standards/technologies with an adjustable increasing-returns strength and a small random early lead; the learner watches market share tip and lock onto one option, sees that raising the feedback strength makes the outcome more contingent and less efficiency-driven, and can fire an external shock to try to break the lock), plus a Categorize (increasing-returns source: set-up cost / learning / coordination / expectations) and MatchConcepts, Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'principal-agent-problem',
+    icon: '🎭',
+    difficulty: 'expert',
+    order: 37,
+    accent: 'brand',
+    title: {
+      en: 'The Principal–Agent Problem',
+      es: 'El Problema del Principal y el Agente',
+    },
+    description: {
+      en: 'You hire someone to act for you — an employee, a fund manager, a contractor, a politician — but they have their own interests and know things you don’t. Why "getting someone to do what you want" is one of the deepest problems in economics: hidden action, hidden information, and the incentives that (imperfectly) realign them.',
+      es: 'Contratas a alguien para que actúe por ti —un empleado, un gestor de fondos, un contratista, un político— pero tiene sus propios intereses y sabe cosas que tú no. Por qué "conseguir que alguien haga lo que quieres" es uno de los problemas más profundos de la economía: acción oculta, información oculta y los incentivos que (imperfectamente) los realinean.',
+    },
+    dependencies: ['incentives', 'mechanism-design'],
+    tags: ['economics', 'psychology'],
+    buildNotes:
+      'The principal–agent problem — the expert economics/psychology rung on the friction that appears the moment one party (the principal) delegates to another (the agent) whose interests diverge and whose actions or knowledge the principal cannot fully observe. Assumes incentives (people respond to the rewards they face) and mechanism-design (designing rules/contracts to get desired behaviour under private information). Sections, each with mechanism + worked example: the core setup (principal wants an outcome, hires an agent to produce it, but the agent has their own goals — shareholders vs CEO, patient vs doctor, voters vs politician, you vs your contractor/mechanic/financial adviser); the two informational asymmetries — HIDDEN ACTION / moral hazard (you can’t watch the agent’s effort, so they shirk or take risks you’d veto — the insured driver, the salaried worker, the bailed-out bank) and HIDDEN INFORMATION / adverse selection (the agent knows things you don’t before you even contract — the used-car "market for lemons", insurance, hiring); agency costs (the value bled away by misalignment plus what you spend monitoring and bonding against it); the incentive-alignment toolkit and its own failures — pay-for-performance and equity (and how it backfires: gaming metrics, teaching-to-the-test, Goodhart’s law, excessive risk-taking on stock options), monitoring and audits, screening and signalling (warranties, credentials, deductibles that make agents self-sort), reputation and repeated dealing (tie to evolution-of-cooperation), and efficiency wages; the impossibility of perfect contracts (incomplete contracts, unobservable effort, the trade-off between risk and incentives — loading all risk onto a risk-averse agent is costly). Pitfalls & where the model lies: assuming money is the only motive (intrinsic motivation, professional norms and crowding-out — sometimes paying MORE gets you LESS); strong incentives amplifying measurement error and inviting manipulation (multitasking problem — reward the measurable and the unmeasurable gets dropped); and treating monitoring as free. Build an interactive island (an "incentive-contract designer": the learner slides the mix between fixed salary and performance pay for an agent whose hidden effort and risk-taking respond to the contract; they watch effort, gaming/risk, agency cost and the principal’s net payoff move, discovering there’s an interior optimum — neither pure salary nor pure commission — and that pushing incentives too hard backfires), plus a Categorize (hidden action / moral hazard vs hidden information / adverse selection) and MatchConcepts, Quiz + MindMap. en + es twin.',
   },
 ];
 

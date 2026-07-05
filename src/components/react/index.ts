@@ -201,3 +201,6 @@ export type { ManyWorldsExplorerProps, WorldStrategy } from '@/components/react/
 
 export { ComplianceMeter, default as ComplianceMeterDefault } from '@/components/react/ComplianceMeter';
 export type { ComplianceMeterProps, ComplianceLever } from '@/components/react/ComplianceMeter';
+
+export { EvoTournament, default as EvoTournamentDefault } from '@/components/react/EvoTournament';
+export type { EvoTournamentProps, EvoStrategyOption, EvoStrategyKey } from '@/components/react/EvoTournament';
