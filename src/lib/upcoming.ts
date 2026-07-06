@@ -45,14 +45,13 @@
  * `leverage-points`, `lollapalooza-effect`, `regression-to-the-mean`,
  * `critical-mass`, `nash-equilibrium`, `mechanism-design`,
  * `influence-and-persuasion`, `evolution-of-cooperation`,
- * `credible-commitment-and-deterrence`, …) have graduated and been removed;
- * their topic MDX is now the record. Lowest `order` is built next. The remaining
- * entries all sit in the **expert tier**, deliberately kept tag-diverse so no
- * single roadmap tag races ahead: systems-thinking/economics
- * (`path-dependence-and-lock-in`, order 36), economics/psychology
- * (`principal-agent-problem`, 37), probability/science-engineering
- * (`cumulative-advantage-and-power-laws`, 38) and psychology
- * (`debiasing-and-the-bias-blind-spot`, 39).
+ * `credible-commitment-and-deterrence`, `path-dependence-and-lock-in`, …) have
+ * graduated and been removed; their topic MDX is now the record. Lowest `order`
+ * is built next. The remaining entries all sit in the **expert tier**,
+ * deliberately kept tag-diverse so no single roadmap tag races ahead:
+ * economics/psychology (`principal-agent-problem`, 37),
+ * probability/science-engineering (`cumulative-advantage-and-power-laws`, 38)
+ * and psychology (`debiasing-and-the-bias-blind-spot`, 39).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -96,34 +95,15 @@ export const upcomingCourses: UpcomingCourse[] = [
   // (25), `critical-mass` (26), `nash-equilibrium` (27), `asymmetry-and-optionality`
   // (28), `fitness-landscapes` (29), `mechanism-design` (30),
   // `combining-models-latticework` (31), `deciding-under-deep-uncertainty` (32),
-  // `influence-and-persuasion` (33), `evolution-of-cooperation` (34) and
-  // `credible-commitment-and-deterrence` (the expert strategy rung, order 35)
-  // have graduated and been removed; their topic MDX is now the record. The
-  // lowest-order entry below (`path-dependence-and-lock-in`, order 36) is built
-  // next. The remaining queue finishes the expert tier and keeps the breadth
-  // tag-diverse, spanning systems-thinking/economics (`path-dependence-and-lock-in`),
+  // `influence-and-persuasion` (33), `evolution-of-cooperation` (34),
+  // `credible-commitment-and-deterrence` (35) and `path-dependence-and-lock-in`
+  // (the expert systems/economics rung, order 36) have graduated and been
+  // removed; their topic MDX is now the record. The lowest-order entry below
+  // (`principal-agent-problem`, order 37) is built next. The remaining queue
+  // finishes the expert tier and keeps the breadth tag-diverse, spanning
   // economics/psychology (`principal-agent-problem`), probability/science-engineering
   // (`cumulative-advantage-and-power-laws`) and psychology
   // (`debiasing-and-the-bias-blind-spot`) so no single roadmap tag races ahead.
-  {
-    slug: 'path-dependence-and-lock-in',
-    icon: '🛤️',
-    difficulty: 'expert',
-    order: 36,
-    accent: 'accent',
-    title: {
-      en: 'Path Dependence & Lock-In',
-      es: 'Dependencia del Camino y Bloqueo',
-    },
-    description: {
-      en: 'Why history refuses to be optimised away: small, half-random early choices get amplified by positive feedback until they harden into standards nobody can escape — the QWERTY keyboard, the QWERTY-bad technologies that won, the institutions we are stuck with. How increasing returns lock a system onto one path, why the "best" option often loses, and when a locked-in system can still be broken open.',
-      es: 'Por qué la historia se niega a optimizarse: pequeñas decisiones tempranas medio azarosas se amplifican por realimentación positiva hasta endurecerse en estándares de los que nadie escapa — el teclado QWERTY, las tecnologías peores que ganaron, las instituciones que arrastramos. Cómo los rendimientos crecientes fijan un sistema en un camino, por qué la opción "mejor" suele perder, y cuándo un sistema bloqueado aún puede reventarse.',
-    },
-    dependencies: ['feedback-loops', 'critical-mass'],
-    tags: ['systems-thinking', 'economics'],
-    buildNotes:
-      'Path dependence & lock-in — the expert systems/economics rung that explains why systems get trapped on a route set by their own history rather than settling on the best available option. Assumes feedback-loops (reinforcing loops) and critical-mass (tipping points). The organising idea is increasing returns / positive feedback (Brian Arthur, Paul David): once an option gets a small early lead, adoption makes it more attractive, which brings more adoption, which locks it in. Sections, each with mechanism + a fully worked example: what path dependence is (the outcome depends on the sequence of past states, not just present conditions — "history matters", small events have large permanent consequences); the QWERTY story and the honest debate around it (the canonical example of a possibly-suboptimal standard that stuck; present the standard narrative AND the David-vs-Liebowitz/Margolis critique so the learner sees the model’s limits); the four sources of increasing returns (large set-up/fixed costs, learning effects, coordination/network effects, adaptive expectations); lock-in and switching costs (why a whole system stays on a worse standard because no individual can afford to move first — tie to nash-equilibrium/coordination and tragedy-of-the-commons); the difference between "first-mover advantage", "the best wins", and "an early accident wins" (contingency vs efficiency); network effects and standards wars (VHS vs Betamax, keyboards, driving side, gauge widths, programming ecosystems, metric vs imperial); institutional and career path dependence (why organisations, laws and even your own résumé calcify); and how lock-in breaks (external shocks, a discontinuous better technology that overcomes switching costs, coordinated switching, sponsorship). Pitfalls & where the model lies: the just-so-story trap (declaring any winner "just a historical accident" without evidence it was actually inferior — the Liebowitz/Margolis point that markets often DO correct); confusing path dependence with mere causation ("the past influenced the present" is trivial; the claim is that a small early difference gets amplified into a large, persistent, hard-to-reverse one); and assuming lock-in is permanent. Build an interactive island (a "lock-in explorer": competing standards/technologies with an adjustable increasing-returns strength and a small random early lead; the learner watches market share tip and lock onto one option, sees that raising the feedback strength makes the outcome more contingent and less efficiency-driven, and can fire an external shock to try to break the lock), plus a Categorize (increasing-returns source: set-up cost / learning / coordination / expectations) and MatchConcepts, Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'principal-agent-problem',
     icon: '🎭',

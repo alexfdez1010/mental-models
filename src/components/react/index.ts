@@ -210,3 +210,6 @@ export type { CommitmentGameProps } from '@/components/react/CommitmentGame';
 
 export { ReframeLab, default as ReframeLabDefault } from '@/components/react/ReframeLab';
 export type { ReframeLabProps, ReframeSolution, ReframeAssumption } from '@/components/react/ReframeLab';
+
+export { LockInExplorer, default as LockInExplorerDefault } from '@/components/react/LockInExplorer';
+export type { LockInExplorerProps } from '@/components/react/LockInExplorer';
