@@ -45,13 +45,13 @@
  * `leverage-points`, `lollapalooza-effect`, `regression-to-the-mean`,
  * `critical-mass`, `nash-equilibrium`, `mechanism-design`,
  * `influence-and-persuasion`, `evolution-of-cooperation`,
- * `credible-commitment-and-deterrence`, `path-dependence-and-lock-in`, …) have
- * graduated and been removed; their topic MDX is now the record. Lowest `order`
- * is built next. The remaining entries all sit in the **expert tier**,
- * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * economics/psychology (`principal-agent-problem`, 37),
- * probability/science-engineering (`cumulative-advantage-and-power-laws`, 38)
- * and psychology (`debiasing-and-the-bias-blind-spot`, 39).
+ * `credible-commitment-and-deterrence`, `path-dependence-and-lock-in`,
+ * `principal-agent-problem`, …) have graduated and been removed; their topic MDX
+ * is now the record. Lowest `order` is built next. The remaining entries all sit
+ * in the **expert tier**, deliberately kept tag-diverse so no single roadmap tag
+ * races ahead: probability/science-engineering
+ * (`cumulative-advantage-and-power-laws`, 38) and psychology
+ * (`debiasing-and-the-bias-blind-spot`, 39).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -96,33 +96,15 @@ export const upcomingCourses: UpcomingCourse[] = [
   // (28), `fitness-landscapes` (29), `mechanism-design` (30),
   // `combining-models-latticework` (31), `deciding-under-deep-uncertainty` (32),
   // `influence-and-persuasion` (33), `evolution-of-cooperation` (34),
-  // `credible-commitment-and-deterrence` (35) and `path-dependence-and-lock-in`
-  // (the expert systems/economics rung, order 36) have graduated and been
+  // `credible-commitment-and-deterrence` (35), `path-dependence-and-lock-in`
+  // (the expert systems/economics rung, order 36) and `principal-agent-problem`
+  // (the expert economics/psychology rung, order 37) have graduated and been
   // removed; their topic MDX is now the record. The lowest-order entry below
-  // (`principal-agent-problem`, order 37) is built next. The remaining queue
-  // finishes the expert tier and keeps the breadth tag-diverse, spanning
-  // economics/psychology (`principal-agent-problem`), probability/science-engineering
+  // (`cumulative-advantage-and-power-laws`, order 38) is built next. The
+  // remaining queue finishes the expert tier and keeps the breadth tag-diverse,
+  // spanning probability/science-engineering
   // (`cumulative-advantage-and-power-laws`) and psychology
   // (`debiasing-and-the-bias-blind-spot`) so no single roadmap tag races ahead.
-  {
-    slug: 'principal-agent-problem',
-    icon: '🎭',
-    difficulty: 'expert',
-    order: 37,
-    accent: 'brand',
-    title: {
-      en: 'The Principal–Agent Problem',
-      es: 'El Problema del Principal y el Agente',
-    },
-    description: {
-      en: 'You hire someone to act for you — an employee, a fund manager, a contractor, a politician — but they have their own interests and know things you don’t. Why "getting someone to do what you want" is one of the deepest problems in economics: hidden action, hidden information, and the incentives that (imperfectly) realign them.',
-      es: 'Contratas a alguien para que actúe por ti —un empleado, un gestor de fondos, un contratista, un político— pero tiene sus propios intereses y sabe cosas que tú no. Por qué "conseguir que alguien haga lo que quieres" es uno de los problemas más profundos de la economía: acción oculta, información oculta y los incentivos que (imperfectamente) los realinean.',
-    },
-    dependencies: ['incentives', 'mechanism-design'],
-    tags: ['economics', 'psychology'],
-    buildNotes:
-      'The principal–agent problem — the expert economics/psychology rung on the friction that appears the moment one party (the principal) delegates to another (the agent) whose interests diverge and whose actions or knowledge the principal cannot fully observe. Assumes incentives (people respond to the rewards they face) and mechanism-design (designing rules/contracts to get desired behaviour under private information). Sections, each with mechanism + worked example: the core setup (principal wants an outcome, hires an agent to produce it, but the agent has their own goals — shareholders vs CEO, patient vs doctor, voters vs politician, you vs your contractor/mechanic/financial adviser); the two informational asymmetries — HIDDEN ACTION / moral hazard (you can’t watch the agent’s effort, so they shirk or take risks you’d veto — the insured driver, the salaried worker, the bailed-out bank) and HIDDEN INFORMATION / adverse selection (the agent knows things you don’t before you even contract — the used-car "market for lemons", insurance, hiring); agency costs (the value bled away by misalignment plus what you spend monitoring and bonding against it); the incentive-alignment toolkit and its own failures — pay-for-performance and equity (and how it backfires: gaming metrics, teaching-to-the-test, Goodhart’s law, excessive risk-taking on stock options), monitoring and audits, screening and signalling (warranties, credentials, deductibles that make agents self-sort), reputation and repeated dealing (tie to evolution-of-cooperation), and efficiency wages; the impossibility of perfect contracts (incomplete contracts, unobservable effort, the trade-off between risk and incentives — loading all risk onto a risk-averse agent is costly). Pitfalls & where the model lies: assuming money is the only motive (intrinsic motivation, professional norms and crowding-out — sometimes paying MORE gets you LESS); strong incentives amplifying measurement error and inviting manipulation (multitasking problem — reward the measurable and the unmeasurable gets dropped); and treating monitoring as free. Build an interactive island (an "incentive-contract designer": the learner slides the mix between fixed salary and performance pay for an agent whose hidden effort and risk-taking respond to the contract; they watch effort, gaming/risk, agency cost and the principal’s net payoff move, discovering there’s an interior optimum — neither pure salary nor pure commission — and that pushing incentives too hard backfires), plus a Categorize (hidden action / moral hazard vs hidden information / adverse selection) and MatchConcepts, Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'cumulative-advantage-and-power-laws',
     icon: '📈',
@@ -160,6 +142,25 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['psychology'],
     buildNotes:
       'Debiasing & the bias blind spot — the expert psychology rung and the meta-skill the whole psychology track builds toward: not naming biases but actually reducing their grip on your own judgment. Assumes the learner has met specific biases (confirmation-bias) and calibration-and-confidence (overconfidence, Brier scores). The uncomfortable organising fact: knowing about a bias does NOT immunise you against it, and worse, the "bias blind spot" (Pronin) means you readily spot bias in others while feeling objective yourself — introspection tells you nothing, because biases operate below awareness. Sections, each with mechanism + worked example: the bias blind spot itself (people rate themselves less biased than average — a bias about biases; why "I know about anchoring so it won\'t get me" is false); why education alone barely debiases (you can recite the sunk-cost fallacy and still escalate; awareness ≠ correction); the two families of fixes — CHANGE THE THINKER vs CHANGE THE ENVIRONMENT. Thinker-side (weaker but real): the outside view / reference-class forecasting (Kahneman & Lovallo — ask "how did similar cases go?" instead of reasoning from the inside of this one), consider-the-opposite / actively-open-minded thinking, pre-mortems (imagine the project has failed and explain why), and calibration training with feedback (tie to calibration course). Environment/structure-side (stronger, because it doesn\'t rely on willpower): checklists (Gawande — offload judgment to a list so you can\'t skip the step), red teams / devil\'s advocates and structured dissent (institutionalise the disagreement so it doesn\'t depend on a brave individual), decision hygiene and independent estimates before discussion (stop anchoring and cascades — tie to social proof), algorithms/simple rules over clinical judgment where data allows (Meehl), and pre-commitment / binding your future self (tie explicitly to credible-commitment-and-deterrence — a commitment device IS a debiasing tool aimed at your own future distortions). The debiasing hierarchy: structure > incentives > training > mere awareness. Pitfalls & where the model lies: debiasing-the-debiasing (using "you\'re just biased" as a rhetorical weapon while exempting yourself — the blind spot again); over-correction (fixing overconfidence by becoming uselessly wishy-washy, or treating every intuition as suspect when expert intuition in high-validity environments is real); the cost of hygiene (checklists and red teams add friction — worth it for high-stakes, irreversible calls, overkill for reversible ones); and the fact that no technique fully removes bias, it only reduces it. Build an interactive island (a "debiasing bench": a set of realistic judgment scenarios each carrying a lurking bias — the learner first makes a snap inside-view call, then applies a chosen debiasing tool (outside view / pre-mortem / red team / checklist / independent-estimate) and watches an accuracy-or-calibration meter update, discovering that structural tools move the needle more than "just be aware" and that some tools fit some biases better than others). Plus a Categorize (does this fix change the THINKER or the ENVIRONMENT? / weak-awareness vs strong-structural fix) and MatchConcepts (bias blind spot, outside view, pre-mortem, red team, decision hygiene), Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'signaling-and-costly-signals',
+    icon: '🦚',
+    difficulty: 'expert',
+    order: 40,
+    accent: 'accent',
+    title: {
+      en: 'Signalling & Costly Signals',
+      es: 'Señalización y Señales Costosas',
+    },
+    description: {
+      en: 'A peacock’s absurd tail, a diploma, a firm’s deep warranty, a nation’s show of force — all the same move: when you know something others can’t verify, you prove it by doing something that would be too expensive to fake. Why only costly signals are believed, and where the cost is pure waste.',
+      es: 'La cola absurda de un pavo real, un diploma, la garantía generosa de una empresa, la exhibición de fuerza de una nación — todo el mismo movimiento: cuando sabes algo que otros no pueden verificar, lo demuestras haciendo algo demasiado caro de fingir. Por qué solo se creen las señales costosas, y dónde ese coste es puro despilfarro.',
+    },
+    dependencies: ['natural-selection', 'principal-agent-problem', 'credible-commitment-and-deterrence'],
+    tags: ['biology-evolution', 'strategy'],
+    buildNotes:
+      'Signalling & costly signals — the expert biology-evolution/strategy rung on how hidden quality gets credibly revealed across biology, markets, and strategy, and why the credibility must be PAID FOR. Assumes natural-selection (traits shaped by differential fitness), principal-agent-problem (information asymmetry, adverse selection, and the screening-vs-signalling pair introduced there) and credible-commitment-and-deterrence (a threat/promise is only believed if backed by something costly and hard to reverse). Organising idea: when one party has private information about their quality/type and others cannot verify it, cheap talk is ignored (anyone can claim anything) — so the informed party proves it with a SIGNAL that is only worth sending for the genuine type. The separating condition (Spence): a signal credibly separates types when its cost is lower for high types than for low types, so the good type sends it and the bad type finds it not worth faking. Sections, each with mechanism + worked example: cheap talk vs costly signals (why "trust me" carries no information at a separating equilibrium); the HANDICAP PRINCIPLE (Zahavi) and honest signalling in biology — the peacock’s tail, the gazelle’s stotting, bright colours — costly precisely so they cannot be faked by the weak; Spence’s JOB-MARKET SIGNALLING (education as a signal that may certify pre-existing ability more than it adds skill — the sheepskin effect) and the wasteful side (credential inflation, arms races in signalling); market signals that resolve the lemons problem (warranties, brands, money-back guarantees, a founder’s own capital at risk — echo the principal-agent screening/signalling toolkit); strategic/deterrence signals (burning bridges, sunk-cost commitments, military displays, "tying hands" and "sinking costs" — tie to credible commitment); social signals (conspicuous consumption/Veblen goods, virtue signalling, costly initiation rites that bind groups). Separating vs pooling vs semi-separating equilibria in plain language; countersignalling (the very top skip the signal because they have nothing to prove). Pitfalls & where the model lies: signals can be dishonestly mimicked when the cost gap narrows (deceptive mimicry in biology, fake luxury, diploma mills) so honesty is only maintained while faking stays expensive; the deadweight WASTE of pure signalling arms races (everyone spends more to stand still — tie to the Red Queen and to positional/zero-sum competition); confusing correlation-with-quality for causation (does the degree build the skill or just reveal it?); and over-reading signals in noisy one-shot settings. Build an interactive island (a "signalling separator": a population of high- and low-quality senders choosing how much to spend on a signal, with sliders for the signal’s cost-to-high vs cost-to-low and the receiver’s prior; the learner watches the equilibrium flip between POOLING (no one separates, receivers can’t tell types apart) and SEPARATING (only high types signal and are believed), sees the honest-but-wasteful zone, and a readout of who-signals / receiver belief / total signalling cost burned). Plus a Categorize (honest costly signal vs cheap talk vs dishonest mimicry, or biology/market/strategy/social signal) and MatchConcepts (handicap principle, separating equilibrium, cheap talk, countersignalling, credential inflation), Quiz + MindMap. en + es twin.',
   },
 ];
 

@@ -1,0 +1,271 @@
+---
+title: "El planteamiento"
+description: "La anatomía de toda delegación: un principal que quiere un resultado, un agente que actúa por él y un muro construido con exactamente dos ladrillos: intereses desalineados e información oculta. Por qué necesitas ambos para que el problema muerda, cómo se apilan las cadenas de agencia y cuándo una delegación no es ningún problema."
+topic: "es/principal-agent-problem"
+order: 2
+minutes: 12
+updated: 2026-07-06
+---
+
+import { MCQ, Categorize, MatchConcepts, MindMap, Callout } from '@/components/react';
+
+Cada vez que le pasas una tarea a otra persona, construyes una pequeña economía. Hay un **principal** (la parte que quiere un resultado y no puede —o no quiere— producirlo sola) y un **agente** (la parte que actúa en nombre del principal). Contratas a un fontanero, eliges a un senador, compras un fondo de inversión, le dices a un adolescente que corte el césped: en cada caso has delegado, y ahora son las manos de otro las que hacen tu trabajo. La delegación es uno de los grandes motores de la civilización. También es donde vive un tipo específico y recurrente de problema.
+
+El curso de introducción te dio los dos ingredientes: un principal, un agente y la fricción entre ambos. Esta lección te da la *anatomía* de esa fricción. Aquí va la tesis, y merece la pena memorizarla porque de ella cuelga el curso entero: **el muro entre tú y tu agente está construido con exactamente dos ladrillos.** Un ladrillo es que los intereses de tu agente no son tus intereses. El otro es que no puedes ver del todo lo que tu agente sabe o hace. Quita cualquiera de los dos ladrillos y el muro cae: la delegación se vuelve segura. Solo cuando *ambos* ladrillos están apilados tienes un genuino **problema principal–agente**: una situación en la que un agente interesado, al que no puedes vigilar del todo, puede beneficiarse a tu costa.
+
+Ya sabes por el curso de `incentives` que la gente responde a las recompensas que realmente afronta, y por `mechanism-design` que el arreglo consiste en ordenar las reglas para que el comportamiento que quieres sea la mejor jugada del propio agente. Guárdate ambas ideas. Esta lección trata de diagnosticar la enfermedad con precisión, para que las lecciones posteriores puedan recetar la cura.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Le pagas a un contratista un precio fijo de 12.000 euros para reformar tu cocina, e inspeccionas el trabajo en detalle todas y cada una de las tardes. Al contratista le encantaría escatimar para ahorrar mano de obra. ¿Es esto un problema principal–agente serio?"
+  options={[
+    "No — como puedes ver el trabajo, pillas cualquier atajo antes de pagar, así que la tentación del contratista queda con la correa puesta.",
+    "Sí — los intereses del contratista difieren de los tuyos, y esa diferencia por sí sola garantiza un problema serio.",
+    "Sí — cada vez que cambia dinero de manos entre dos partes, es un problema de agencia por definición.",
+    "No — como pagaste un precio fijo, el contratista comparte ahora tus objetivos exactos."
+  ]}
+  correct={0}
+  explanation="Los intereses divergen (el contratista quiere ahorrar mano de obra), pero puedes observar la acción a la perfección. Falta un ladrillo, así que el muro no se sostiene. Esta es exactamente la intuición que el resto de la lección precisa."
+/>
+
+## Ladrillo uno: los intereses divergen
+
+**La analogía.** Imagina que coges un taxi en una ciudad que no conoces, donde la tarifa se mide por distancia. Tú quieres la ruta corta. El sueldo del taxista crece con la ruta *larga*. Ninguno de los dos es un monstruo: el taxímetro simplemente apunta vuestros bolsillos en direcciones opuestas. Esa oposición es el primer ladrillo.
+
+**La definición precisa.** Los intereses divergen cuando **la recompensa del agente no es una función fiel del resultado del principal**, es decir, cuando al agente le va mejor haciéndolo peor para ti. El nombre técnico de esa brecha entre lo que tu agente maximiza y lo que tú querrías que maximizara es **desalineamiento de incentivos (incentive misalignment)**. No es la *sensación* de conflicto; es la *estructura* de las recompensas.
+
+**Un ejemplo trabajado.** Supón que inviertes 500.000 € con un gestor de fondos al que le pagan un **1,5 % fijo de los activos bajo gestión** al año, sin parte de tus ganancias ni de tus pérdidas. Alinea las dos recompensas:
+
+| Tu resultado (rentabilidad del año) | Tu dinero tras el año | Comisión del gestor (1,5 % de 500.000 €) | Incentivo del gestor |
+|---|---|---|---|
+| +20 % | 600.000 € | 7.500 € | La misma comisión pase lo que pase |
+| 0 % | 500.000 € | 7.500 € | La misma comisión pase lo que pase |
+| −20 % | 400.000 € | 7.500 € | La misma comisión pase lo que pase |
+
+El gestor gana 7.500 € tanto si haces una fortuna como si pierdes una quinta parte de tu capital. Lo que de verdad mueve *su* paga es el tamaño de la olla, no su crecimiento; así que su trabajo real, perseguido racionalmente, es **captar más activos y retener los tuyos**, no batir al mercado para ti. Su mejor jugada podría ser abrazar un índice de referencia, evitar cualquier cosa que pudiera asustarte hasta el punto de retirar el dinero, y volcar su energía en el marketing. Nada de eso es fraude. Es solo el taxímetro corriendo en la dirección equivocada.
+
+<Callout variant="warning" title="La divergencia no es villanía: es estructura">
+El error más común al leer problemas de agencia es moralizarlos. Te imaginas a un agente maquinador y codicioso retorciéndose el bigote. Descarta esa imagen. El gestor de fondos de arriba se comporta *razonablemente* dado el contrato que firmaste. El desalineamiento es una propiedad de la estructura de incentivos, no del carácter de la persona. Esto importa enormemente para el arreglo: no puedes curar un problema estructural contratando a "mejores personas". Lo curas cambiando la estructura. Culpar al agente es reconfortante e inútil.
+</Callout>
+
+### Cuándo usarlo
+
+Echa mano de la lente "los intereses divergen" siempre que detectes un **desajuste de recompensas**: la persona que actúa por ti cobra, asciende o recibe elogios según una métrica que no es tu verdadero objetivo. Comerciales pagados por trato (no por *buen* trato), cirujanos reembolsados por procedimiento (no por *curación*), un empleado asalariado que no soporta ninguna de las pérdidas de una tarde floja: todos muestran el primer ladrillo. Pero detectar la divergencia por sí sola no prueba que exista un problema. Retén esa idea; también necesitas el segundo ladrillo.
+
+## Ladrillo dos: la asimetría de información
+
+**La analogía.** Llevas el coche a un mecánico que te dice que la caja de cambios está fallando. Tal vez sea así. Tal vez sea un sensor de 40 € y le apetece un trabajo de 2.000 €. *No puedes saberlo*, porque él conoce el interior de tu caja de cambios y tú conoces el interior de tu guantera. El conocimiento está en su lado del mostrador, no en el tuyo. Esa brecha es el segundo ladrillo.
+
+**La definición precisa.** La **asimetría de información (information asymmetry)** es cualquier situación en la que una de las partes de una transacción sabe algo relevante que la otra parte no sabe, y no puede verificar de forma barata. En una relación de agencia la asimetría corre a favor del agente: el agente típicamente sabe más sobre su propio esfuerzo, su propia competencia y el verdadero estado de la tarea de lo que el principal puede observar.
+
+Esa asimetría viene en **dos sabores distintos**, ordenados según *cuándo* surge lo oculto respecto al momento en que contratas:
+
+- **Acción oculta** — no puedes observar lo que el agente *hace después de contratarlo*. El comercial que juega al golf en una "visita a cliente"; el directivo que coge el proyecto seguro porque el fracaso lo avergonzaría. La acción está oculta. Este es el motor del **riesgo moral (moral hazard)**, el tema de la lección 2.
+- **Información oculta** — no puedes observar lo que el agente *sabía antes de contratarlo*, o una cualidad que lleva consigo y que no puedes inspeccionar. El vendedor de coches usados que sabe que el coche es una tartana; el candidato a un puesto que sabe que no encaja. El tipo está oculto. Este es el motor de la **selección adversa (adverse selection)**, el tema de la lección 3.
+
+Ten clara la cronología —*la acción oculta trata del comportamiento después del trato, la información oculta trata del tipo antes del trato*— y ya tienes medio curso organizado en la cabeza.
+
+<Callout variant="info" title="Asimetría, no ignorancia">
+La asimetría de información es *relativa*, no absoluta. El problema no es que nadie sepa si la caja de cambios está fallando: el mecánico lo sabe perfectamente. El problema es que el conocimiento está repartido de forma desigual. Si pudieras pagar 5 € por una segunda opinión fiable que leyera la caja de cambios al instante, la asimetría se derrumbaría y con ella el problema. Por eso la "verificación barata" no deja de aparecer como vía de escape más adelante.
+</Callout>
+
+### Cuándo usarlo
+
+Despliega la lente de la asimetría de información cuando te pilles pensando *"solo tengo que fiarme de ellos"*, porque confianza es la palabra que usamos para la brecha donde debería haber verificación. Médicos, abogados, fontaneros, asesores financieros y contratistas de software son **agentes expertos** clásicos: los contratamos precisamente *porque* saben cosas que nosotros no sabemos, que es el mismo hecho que nos impide comprobarlos. Cuanto más experto es el agente, más profunda es la asimetría, más afilado el segundo ladrillo.
+
+## Necesitas AMBOS ladrillos
+
+Aquí está el meollo de toda la lección, y la parte que la mayoría se equivoca. Ningún ladrillo, por sí solo, es un problema. Necesitas los dos apilados juntos. Demostrémoslo con dos experimentos mentales limpios.
+
+**Experimento mental A: intereses desalineados, pero observación perfecta.** Recuerda el taxi con taxímetro, pero ahora imagina que tienes un mapa GPS en vivo de toda la ciudad y *sabes* cuál es la ruta más corta. El taxista todavía quiere el camino largo: los intereses divergen, el ladrillo uno está firmemente colocado. Pero puedes ver cada giro. En el instante en que se desvía hacia el lado equivocado, protestas y le rebajas la tarifa. Sabiéndolo, el taxista racional coge la ruta corta desde el principio. **Ningún problema.** Cuando puedes vigilar la acción, puedes simplemente pagar por la acción que quieres, y el desalineamiento no tiene dónde esconderse.
+
+**Experimento mental B: acción oculta, pero intereses perfectamente alineados.** Ahora supón que tu agente es tu propia madre gestionando tu dinero, y quiere genuinamente exactamente lo que tú quieres: vuestros intereses son *idénticos*, el ladrillo dos del comportamiento está oculto pero el ladrillo uno ha desaparecido. No puedes ver ni una sola cosa de lo que hace con la cartera. ¿Importa? En absoluto. Sin ser observada, hace lo correcto de todos modos, porque *lo correcto para ti* es *lo correcto para ella*. **Ningún problema.** Cuando los objetivos coinciden, vigilar no sirve de nada: no hay brecha que explotar.
+
+La lección es tajante: **el desalineamiento es inofensivo si puedes vigilar, y la acción oculta es inofensiva si los objetivos coinciden.** Solo el *producto* de los dos muerde. Ponlos en una cuadrícula:
+
+|  | **Intereses alineados** | **Intereses desalineados** |
+|---|---|---|
+| **Acción observable** | Ningún problema (nada que arreglar) | Ningún problema — paga por la acción observada |
+| **Acción oculta** | Ningún problema — hacen lo correcto sin vigilancia | ⚠️ **El problema de agencia** |
+
+Tres de las cuatro celdas son seguras. Exactamente una celda —desalineada **y** oculta— es donde vive el problema principal–agente. Todo remedio de este curso es, en el fondo, una manera de sacar una delegación *fuera* de la celda inferior derecha: bien alineando los intereses (para que te deslices a la izquierda) o bien comprando observación (para que te deslices hacia arriba).
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un hospital quiere que sus cirujanos elijan el tratamiento que sea mejor para cada paciente. A los cirujanos les pagan un salario fijo con independencia de qué procedimiento realicen, y cada caso es revisado por una junta independiente que ve el historial completo. Según el modelo de los dos ladrillos, ¿por qué es débil aquí el problema de agencia?"
+  options={[
+    "Ambos ladrillos son débiles: el salario fijo mella la brecha de intereses, y la revisión independiente perfora la brecha de información, así que la delegación se sitúa en una celda segura.",
+    "Porque los cirujanos son profesionales, y los profesionales nunca tienen intereses desalineados.",
+    "Porque pagar un salario fijo siempre alinea perfectamente al agente con el verdadero objetivo del principal.",
+    "Porque la asimetría de información es imposible en medicina, donde el experto sabe más que el paciente."
+  ]}
+  correct={0}
+  explanation="No es que ninguna característica aislada sea mágica. El salario reduce el incentivo a sobretratar (el ladrillo uno encoge) Y la revisión independiente del historial reduce la acción oculta (el ladrillo dos encoge). Debilita ambos ladrillos y el muro apenas se sostiene. La opción 3 es la trampa: un salario fijo puede desalinear igual de fácilmente —elimina la recompensa por el esfuerzo extra—, así que 'siempre alinea' es falso."
+/>
+
+<Categorize
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  question="Clasifica cada delegación. Pertenece a 'Un problema de agencia real' solo si están presentes AMBOS ladrillos: intereses desalineados E información/acción oculta. Si los intereses ya están alineados, o la observación es barata y el resultado es perfectamente medible, ponla en 'Sin brecha de agencia real'."
+  buckets={["Un problema de agencia real", "Sin brecha de agencia real"]}
+  items={[
+    { text: "Un broker que solo cobra comisión te recomienda los fondos que le pagan la mayor mordida, algo que no puedes ver.", bucket: "Un problema de agencia real" },
+    { text: "Un mecánico que se beneficia de las grandes reparaciones diagnostica tu caja de cambios, que no puedes inspeccionar.", bucket: "Un problema de agencia real" },
+    { text: "Un trabajador asalariado al que le pagan lo mismo se esfuerce o vaguee, y al que nadie vigila en toda la tarde.", bucket: "Un problema de agencia real" },
+    { text: "Un concesionario de coches usados te vende un coche cuyo historial de fallos oculto solo conoce el concesionario.", bucket: "Un problema de agencia real" },
+    { text: "Tu madre invierte tu dinero y quiere precisamente el resultado que tú quieres, aunque nunca la controles.", bucket: "Sin brecha de agencia real" },
+    { text: "Un destajista al que le pagan estrictamente por unidad impecable enviada, donde la calidad de cada unidad se mide automáticamente.", bucket: "Sin brecha de agencia real" },
+    { text: "Un cajero cuya caja se cuenta y se cuadra contra la cinta de tickets al final de cada turno.", bucket: "Sin brecha de agencia real" }
+  ]}
+  explanation="Los primeros cuatro apilan ambos ladrillos: alguien gana haciéndolo peor para ti, y no puedes verlo. Los tres últimos les falta un ladrillo: la madre comparte tus objetivos (intereses alineados), mientras que el destajista y el cajero tienen un resultado que se mide de forma barata y perfecta (la observación derrota a la acción oculta). Falta un ladrillo, no hay muro."
+/>
+
+## Cadenas de agencia: son principales y agentes hasta el fondo
+
+**La analogía.** Piensa en una carrera de relevos donde el testigo es *tu intención*. Se lo pasas a un corredor, que se lo pasa al siguiente, que se lo pasa al siguiente. En cada intercambio el testigo puede caerse, y peor aún, cada corredor tiene sus propias razones para correr a su manera. La delegación rara vez es un único traspaso. Es una cadena, y cada eslabón es una nueva brecha principal–agente.
+
+**La definición precisa.** Una **cadena de agencia (agency chain)** es una secuencia anidada de delegaciones en la que cada agente es, a su vez, el principal del siguiente agente por debajo. La brecha de un eslabón no cancela la del siguiente; las brechas se *acumulan*, y cada intermediario puede recortarse un poco de tu intención para sí mismo.
+
+**Un ejemplo trabajado — el Estado.** Sigue el testigo bajando por un gobierno:
+
+| Eslabón | Principal | Agente | La brecha en este eslabón |
+|---|---|---|---|
+| 1 | Ciudadanos | Políticos | Los votantes quieren buenas políticas; los políticos quieren la reelección, que no es lo mismo. |
+| 2 | Políticos | Funcionarios | Los políticos quieren que se ejecute su programa; los organismos quieren presupuestos, plantilla y una vida tranquila. |
+| 3 | Funcionarios | Contratistas | El organismo quiere el puente bien construido; el contratista quiere que le paguen la factura rápido. |
+
+Para cuando "los ciudadanos quieren un puente seguro y asequible" llega al soldador, ha pasado por tres brechas de intereses y tres brechas de información. Por eso las grandes intenciones llegan a la planta baja retorcidas: no porque nadie traicionara a nadie, sino porque cada eslabón optimizó calladamente para sí mismo.
+
+La versión corporativa funciona igual: **accionistas → consejo → CEO → directores de división → trabajadores de primera línea.** Los accionistas quieren valor a largo plazo; el consejo quiere conservar sus asientos; el CEO quiere un imperio más grande y un paquete jugoso; los directores quieren que su unidad quede bien; los trabajadores quieren un turno fácil. Cinco eslabones, cinco brechas.
+
+<Callout variant="tip" title="¿Quién vigila a los guardianes?">
+El arreglo obvio para una cadena es añadir un *supervisor*: un auditor, un inspector, una oficina de cumplimiento. Pero fíjate en lo que has hecho: el supervisor es un nuevo agente, contratado por ti (el principal) para vigilar a otro agente. El supervisor tiene sus propios intereses y sus propias acciones ocultas. *Quis custodiet ipsos custodes?* — ¿quién vigila a los guardianes? Vigilar a los vigilantes es en sí mismo un problema principal–agente, un nivel más arriba. No puedes escapar de la estructura apilando más de ella; solo puedes gestionar dónde se sitúa la brecha residual. Por eso "simplemente añade supervisión" es un principio, nunca un final.
+</Callout>
+
+### Cuándo usarlo
+
+Siempre que una decisión llegue destrozada hasta ti —una política vaciada, una estrategia farfullada en el taller—, resiste el impulso de encontrar al único villano. Recorre la cadena eslabón a eslabón y pregunta, en cada traspaso: *¿de quién son los intereses y qué no puede ver el eslabón de encima?* La distorsión suele ser la suma de muchos recortes pequeños, individualmente racionales, no un único acto de sabotaje. Arreglarlo significa arreglar el peor eslabón, no despedir a la última persona que tocó el testigo.
+
+## Agencia común: un agente, muchos principales
+
+**La analogía.** Imagina a un agente inmobiliario que representa *tanto* al comprador como al vendedor de la misma casa: "doble agencia". ¿De qué lado está? De ambos, oficialmente. De ninguno, en la práctica. El agente se sienta en el centro de un tira y afloja sujetando las dos cuerdas, y la jugada racional es soltar la cuerda que tire más flojo.
+
+**La definición precisa.** La **agencia común (common agency)** es la imagen espejo de la cadena: en lugar de un principal delegando hacia abajo en una línea, *múltiples principales* delegan en un *único agente* a la vez. El agente sirve ahora a varios amos cuyos objetivos chocan, y el agente puede elegir —a menudo de forma invisible— a qué amo servir realmente.
+
+**Un ejemplo trabajado.** Un directivo corporativo responde, simultáneamente, ante al menos tres principales:
+
+| Principal | Qué quieren del directivo | La tentación del directivo |
+|---|---|---|
+| Accionistas | Maximizar el beneficio a largo plazo | Reportar un buen trimestre, aplazar la inversión difícil |
+| Clientes | Un producto seguro y honesto | Recortar calidad donde no se note antes de la venta |
+| Reguladores | Cumplimiento de las reglas | Hacer el mínimo, o el mínimo que no le pillen |
+
+Cuando estos tiran en direcciones distintas, el directivo puede **enfrentar a los principales entre sí**: decirles a los accionistas que el regulador forzó un cambio costoso, decirle al regulador que los accionistas no permiten más, decirles a los clientes que la culpa es de ambos. Cada principal oye una historia en la que *otro* es el obstáculo, y el agente conserva la discreción.
+
+<Callout variant="warning" title="El modo de fallo de 'servir al que más grita'">
+Con muchos principales y ningún amo único y claro, la estrategia más fácil para el agente es servir a quien más duro vigile y más alto se queje, no a quien tenga el reclamo legítimo más fuerte. Un doble agente favorece calladamente a la parte que se marchará frente a la parte que ya está comprometida. Un directivo apacigua al inversor activista y descuida al cliente difuso y sin voz. La trampa: añadir principales no promedia el problema de agencia, le entrega al agente una *nueva palanca*: el poder de enfrentar a sus principales entre sí y no responder ante ninguno.
+</Callout>
+
+<MatchConcepts
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  allCorrectLabel="✓ Todo emparejado"
+  partialResultWord="correctas"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  question="Empareja cada término con su definición."
+  pairs={[
+    { term: "Principal", definition: "La parte que quiere un resultado y delega el trabajo de producirlo en otra persona." },
+    { term: "Agente", definition: "La parte que actúa en nombre de otro, cuyas manos hacen el trabajo delegado." },
+    { term: "Asimetría de información", definition: "Una parte sabe algo relevante que la otra no puede verificar de forma barata: el segundo ladrillo." },
+    { term: "Cadena de agencia", definition: "Una línea anidada de delegaciones donde cada agente es el principal del siguiente por debajo." },
+    { term: "Agencia común", definition: "Un agente sirviendo a varios principales en conflicto a la vez, libre para enfrentarlos entre sí." }
+  ]}
+  explanation="Principal y agente son los dos roles. La asimetría de información es el ladrillo del conocimiento (la brecha de intereses es el otro ladrillo). La cadena recorre la delegación en vertical —principales y agentes hasta el fondo—, mientras que la agencia común la recorre en horizontal: muchos principales convergiendo en un solo agente."
+/>
+
+## Cuándo NO es un problema
+
+Lo más útil que hace una buena lente es decirte dónde *no* gastar tu preocupación. El modelo de los dos ladrillos hace exactamente eso: una delegación deja de ser un problema en el momento en que falta un ladrillo. Existen dos vías de escape limpias.
+
+**Vía uno — los intereses ya estaban alineados.** A veces no tienes que fabricar la alineación porque viene gratis. Un padre que gestiona el bienestar de un hijo, un fundador-propietario que dirige la empresa cuya ventaja heredará, una contratación con genuina afinidad de misión que haría el trabajo por amor: aquí la recompensa del agente ya sigue la tuya, así que el ladrillo uno nunca llega a colocarse. El caso clásico es el **propietario-operador (owner-operator)**: cuando la persona que hace el trabajo *es* el acreedor residual que se queda el beneficio y se come la pérdida, principal y agente colapsan en un mismo cuerpo. No hay brecha porque ya no hay dos partes.
+
+**Vía dos — la observación es barata o el resultado es perfectamente medible.** A veces puedes simplemente *ver* todo lo que importa, así que el ladrillo dos nunca llega a colocarse. Un destajista pagado por artilugio impecable, donde una máquina cuenta y califica cada artilugio; un teleoperador de call-center cuya llamada se graba y puntúa entera; un administrativo de introducción de datos cuyas pulsaciones se registran y comprueban. Cuando el resultado es un número duro y barato de verificar, la acción oculta no tiene dónde esconderse, y hasta un agente muy desalineado queda con la correa puesta por la medición.
+
+<Callout variant="success" title="La lente te dice dónde gastar la preocupación">
+Este es el rédito práctico de todo el modelo. Ante cualquier delegación, hazte dos preguntas: *¿Apuntan ya nuestros intereses en la misma dirección?* y *¿Puedo ver o medir de forma barata lo que importa?* Si cualquiera de las respuestas es sí, relájate: el muro no puede sostenerse sobre un solo ladrillo. Reserva tu esfuerzo de diseño, tus esquemas de incentivos y tu presupuesto de supervisión para las delegaciones donde **ambas** respuestas sean no. La preocupación es un recurso escaso; el test de los dos ladrillos te dice exactamente dónde gastarla.
+</Callout>
+
+### El compromiso
+
+Cuidado con forzar una vía de escape que en realidad no está ahí. "Simplemente mide el resultado" suena a cura universal, pero muchos trabajos tienen un resultado *genuinamente* difícil de medir (investigación, docencia, estrategia a largo plazo), y ponerles una métrica burda encima no derrota el problema de agencia, lo *reubica*: el agente juega con la métrica en vez de hacerlo. Del mismo modo, "simplemente contrata a gente alineada" solo funciona donde la alineación es real y duradera, no meramente afirmada en una entrevista. Las vías de escape son reales, pero solo cuando el ladrillo *falta de verdad*, no cuando te gustaría que faltara.
+
+## Repaso
+
+- Toda delegación es un **principal** (quiere el resultado) y un **agente** (hace el trabajo).
+- El muro entre ambos está construido con exactamente **dos ladrillos**: **intereses desalineados** (la recompensa del agente no es tu resultado) y **asimetría de información** (no puedes ver del todo lo que el agente sabe o hace).
+- El **desalineamiento no es villanía**: es la estructura de las recompensas. Arreglas la estructura cambiando la estructura, no contratando a gente más maja.
+- La asimetría de información se divide en **acción oculta** (comportamiento después de contratar → riesgo moral, lección 2) e **información oculta** (tipo antes de contratar → selección adversa, lección 3).
+- Necesitas **ambos ladrillos**. El desalineamiento con observación perfecta es seguro; la acción oculta con intereses alineados es segura. Solo la *combinación* —desalineada **y** oculta— es el problema de agencia.
+- Las **cadenas de agencia** apilan la brecha eslabón a eslabón (ciudadanos → políticos → funcionarios → contratistas), y vigilar a los vigilantes es en sí mismo un problema de agencia.
+- La **agencia común** —un agente, muchos principales— deja que el agente enfrente a los principales entre sí y sirva al que más grita.
+- Una delegación **no es un problema** cuando falta un ladrillo: intereses ya alineados, u observación barata y resultado perfectamente medible. La lente te dice dónde gastar la preocupación.
+
+<MindMap
+  client:visible
+  title="El planteamiento principal–agente"
+  root={{
+    label: "Problema principal–agente",
+    children: [
+      {
+        label: "Dos ladrillos (necesitas AMBOS)",
+        children: [
+          { label: "Los intereses divergen (estructura, no villanía)" },
+          { label: "Asimetría de información (no se puede verificar)" }
+        ]
+      },
+      {
+        label: "La asimetría se divide por cronología",
+        children: [
+          { label: "Acción oculta → riesgo moral (L2)" },
+          { label: "Información oculta → selección adversa (L3)" }
+        ]
+      },
+      {
+        label: "Cómo se apila",
+        children: [
+          { label: "Cadena de agencia: brechas hasta el fondo" },
+          { label: "Agencia común: un agente, muchos principales" }
+        ]
+      },
+      {
+        label: "Cuándo se disuelve",
+        children: [
+          { label: "Intereses ya alineados (propietario-operador)" },
+          { label: "Observación barata / resultado medible" }
+        ]
+      }
+    ]
+  }}
+/>
+
+A continuación — **Acción oculta (riesgo moral)**: qué ocurre en esa peligrosa celda inferior derecha cuando no puedes ver lo que hace tu agente después de firmar el trato.

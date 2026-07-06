@@ -213,3 +213,6 @@ export type { ReframeLabProps, ReframeSolution, ReframeAssumption } from '@/comp
 
 export { LockInExplorer, default as LockInExplorerDefault } from '@/components/react/LockInExplorer';
 export type { LockInExplorerProps } from '@/components/react/LockInExplorer';
+
+export { ContractDesigner, default as ContractDesignerDefault } from '@/components/react/ContractDesigner';
+export type { ContractDesignerProps } from '@/components/react/ContractDesigner';
