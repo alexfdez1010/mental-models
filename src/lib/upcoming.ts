@@ -90,28 +90,6 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Priority beginner build ─────────────────────────────────────────────────
-  // Built next (lowest order). A foundational problem-solving model that assumes
-  // no prior knowledge — deliberately easy so it slots early on the ladder.
-  {
-    slug: 'lateral-thinking',
-    icon: '💡',
-    difficulty: 'beginner',
-    order: 1,
-    accent: 'accent',
-    title: {
-      en: 'Lateral Thinking',
-      es: 'Pensamiento Lateral',
-    },
-    description: {
-      en: 'When banging harder on the front door never works, walk around the building. Lateral thinking is the deliberate art of sidestepping the obvious, "logical" line of attack to reach a solution the straight-ahead path would never find — reframing the problem, challenging the assumptions everyone forgot they were making, and generating ideas on purpose instead of waiting for a flash of genius.',
-      es: 'Cuando aporrear más fuerte la puerta principal no funciona, rodea el edificio. El pensamiento lateral es el arte deliberado de esquivar la vía de ataque obvia y "lógica" para llegar a una solución que el camino recto jamás encontraría — replantear el problema, desafiar las suposiciones que todos olvidaron que hacían y generar ideas a propósito en vez de esperar un chispazo de genialidad.',
-    },
-    dependencies: ['first-principles-thinking', 'inversion'],
-    tags: ['problem-solving'],
-    buildNotes:
-      'Lateral thinking — the beginner problem-solving rung (Edward de Bono, who coined the term in 1967) on breaking out of the single, obvious line of reasoning to reach solutions the "logical" straight-ahead path can\'t. Assumes no prior knowledge; leans lightly on first-principles-thinking (stripping a problem to its base truths) and inversion (attacking from the opposite end) as sibling reframing tools. Contrast VERTICAL thinking (deepening one correct line, each step justified, digging the same hole deeper) with LATERAL thinking (moving sideways to a different starting point, provocations allowed to be "wrong" on the way to being useful). Sections, each with an intuitive analogy + a fully worked example + a pitfall: what lateral thinking is and why the brain resists it (the mind is a self-organising pattern system — it makes grooves and then can only fall back into them, which is why obvious solutions feel inevitable and alternatives feel invisible); reframing / challenging assumptions (the classic "the answer changes when you question the question" — the nine-dots puzzle and "think outside the box", the candle problem / functional fixedness, the elevator-is-too-slow problem solved by mirrors not engineering); de Bono\'s tools rendered plainly — PO / provocation (deliberately state something absurd to j-ump the pattern, then harvest the useful movement from it), random-entry (feed in an unrelated word to force a new association), the concept of "movement" vs "judgment" (in the generative phase you extract what an idea leads to instead of ruling it out); challenging the dominant idea and escaping functional fixedness; when to switch modes — divergent (generate wide, defer judgment) vs convergent (then evaluate and pick), and why mixing the two kills ideas early (tie to brainstorming done right). Practical drills: alternatives-quota (force yourself to N solutions before choosing), assumption-reversal, "what would have to be true", and asking "what problem am I actually solving?". Pitfalls & where the model over-promises: lateral thinking is not a substitute for expertise or rigour (you still need vertical thinking to test and build the idea — it complements, doesn\'t replace); "outside the box" as an empty slogan; confusing being contrarian/weird with being genuinely useful (movement must eventually pay out in a workable idea); and survivorship bias in the famous anecdotes. Build an interactive island (a "reframe lab": a stuck problem is shown with its hidden assumption highlighted; the learner toggles assumptions off / applies a random-word provocation and watches the set of reachable solutions expand — demonstrating that removing an assumption, not thinking harder, is what unlocks the new answer). Plus a Categorize (is this move VERTICAL / deepen-one-line vs LATERAL / change-the-starting-point — or: generative/divergent vs evaluative/convergent) and MatchConcepts (provocation/PO, random entry, functional fixedness, reframing, movement-not-judgment), Quiz + MindMap. Keep it beginner-friendly and playful — lots of puzzles the reader can actually try. en + es twin.',
-  },
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
   // `externalities` (20), `moats` (21), `ecosystems-and-niches` (22),
   // `leverage-points` (23), `lollapalooza-effect` (24), `regression-to-the-mean`

@@ -207,3 +207,6 @@ export type { EvoTournamentProps, EvoStrategyOption, EvoStrategyKey } from '@/co
 
 export { CommitmentGame, default as CommitmentGameDefault } from '@/components/react/CommitmentGame';
 export type { CommitmentGameProps } from '@/components/react/CommitmentGame';
+
+export { ReframeLab, default as ReframeLabDefault } from '@/components/react/ReframeLab';
+export type { ReframeLabProps, ReframeSolution, ReframeAssumption } from '@/components/react/ReframeLab';
