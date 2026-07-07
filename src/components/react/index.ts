@@ -219,3 +219,6 @@ export type { ContractDesignerProps } from '@/components/react/ContractDesigner'
 
 export { CumulativeAdvantageEngine, default as CumulativeAdvantageEngineDefault } from '@/components/react/CumulativeAdvantageEngine';
 export type { CumulativeAdvantageEngineProps } from '@/components/react/CumulativeAdvantageEngine';
+
+export { DebiasingBench, default as DebiasingBenchDefault } from '@/components/react/DebiasingBench';
+export type { DebiasingBenchProps, DebiasingTool, DebiasingScenario, FixKind } from '@/components/react/DebiasingBench';
