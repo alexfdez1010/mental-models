@@ -1,0 +1,315 @@
+---
+title: "Dónde miente el modelo"
+description: "El aviso de honestidad intelectual sobre las leyes de potencia: por qué una recta más o menos limpia en ejes log–log no demuestra casi nada, cómo las log-normales se disfrazan de leyes de potencia, por qué el genio del ganador está inflado por el sesgo de supervivencia, por qué el exponente de la cola es más frágil de lo que parece — y por qué 'es una ley de potencia' nunca significa que la desigualdad sea inevitable."
+topic: "es/cumulative-advantage-and-power-laws"
+order: 7
+minutes: 12
+updated: 2026-07-07
+---
+
+import { MCQ, Quiz, Categorize, Reveal, Callout, MindMap } from '@/components/react';
+
+Hace cinco lecciones te pusieron en la mano una lente que parece explicarlo todo: la ventaja acumulativa fabricando leyes de potencia, un puñado de ganadores que se lo llevan casi todo, la media volviéndose inútil en la cola. Una lente tan afilada merece un aviso de seguridad antes de que salgas del taller — porque una mente recién armada con "ley de potencia (power law)" empieza a ver leyes de potencia en *cada* gráfico torcido, a reconstruir un genio sobrehumano a partir de cada gran ganador, y a citar exponentes de cola con dos decimales a los que no tiene ningún derecho. Esta lección es donde te contamos dónde **miente** el modelo: los supuestos que fallan calladamente, las afirmaciones que suelen ser exageraciones, y el juicio de valor al que le gusta colarse disfrazado de bata de laboratorio.
+
+Nada de esto desenseña el curso. La ventaja acumulativa es real, las leyes de potencia son reales, y la tiranía de la cola es real. Pero la diferencia entre una persona que *entiende* el modelo y una que simplemente está prendada de él es la lista de salvedades de abajo. Ten a mano la distinción `luck-vs-skill` de la lección 5 y el curso de colas gruesas — aquí es donde vienen a cobrar sus deudas.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un investigador dibuja los tamaños de 500 empresas en ejes log–log, ve una línea descendente más o menos recta, y anuncia 'los tamaños de empresa siguen una ley de potencia — es apego preferencial, el rico se hace más rico'. Un estadístico frunce el ceño. ¿Cuál es la razón más fuerte para desconfiar?"
+  options={[
+    { text: "Una línea casi recta en ejes log–log es compatible con varias distribuciones distintas (log-normal, exponencial estirada y otras), así que el ajuste a ojo por sí solo no puede establecer que sea una ley de potencia — y menos aún que el apego preferencial la haya producido.", correct: true },
+    { text: "Los tamaños de empresa nunca pueden seguir una ley de potencia, porque las empresas tienen un tamaño máximo posible.", correct: false },
+    { text: "El gráfico está bien; una línea recta en ejes log–log es prueba matemática de una ley de potencia y de su causa.", correct: false },
+    { text: "500 puntos de datos son siempre demasiado pocos para dibujar algo con sentido.", correct: false },
+  ]}
+  explanation="Sin penalización en un pretest — solo palpa la trampa. Una línea log–log más o menos recta es *necesaria* para una ley de potencia pero ni de lejos *suficiente*: las distribuciones log-normal y exponencial estirada producen líneas que se ven igual de rectas en un rango limitado. Así que el ajuste a ojo no puede distinguir una ley de potencia de sus imitadoras, y aunque lo fuera, la FORMA nunca revela el MECANISMO — una cola gruesa puede construirse con crecimiento multiplicativo sin ningún apego preferencial. El investigador dio dos saltos: de una línea a una ley de potencia, y de una ley de potencia a su causa. Ninguno se lo ha ganado."
+/>
+
+## El test a ojo no demuestra casi nada
+
+**La analogía.** Desde un coche en marcha, una curva suave y una carretera totalmente recta se ven idénticas durante el segundo que las miras. Tienes que frenar, bajarte y medir para notar la diferencia. Un gráfico log–log es esa mirada desde el coche: en un *rango limitado* — y todo conjunto de datos real es un rango limitado — toda una familia de curvas de cola gruesa se aplana en algo que el ojo llama alegremente "una línea recta".
+
+**La jugada ingenua.** Dibujas el rango contra el tamaño en ejes log–log, entornas los ojos, ves una línea y cantas victoria: *ley de potencia.* Este es fácilmente el error más común de todo el campo, cometido en entradas de blog, presentaciones de inversores y más de un artículo revisado por pares. La línea *parece* una prueba.
+
+**La visión corregida.** Una línea log–log recta es la *firma* de una ley de potencia, pero las firmas se pueden falsificar. Para establecer de verdad una ley de potencia necesitas estadística, no ojímetro:
+
+- **Ajusta por máxima verosimilitud, no dibujando una línea.** Estimar una pendiente a ojo (o peor, ajustar una recta de regresión a un histograma log–log) está sesgado y es notoriamente poco fiable. El estándar moderno — el método de **Clauset–Shalizi–Newman** — estima el exponente (exponent) por máxima verosimilitud y encuentra dónde *empieza* siquiera la cola.
+- **Contrasta el ajuste.** Un test de bondad de ajuste (usan un estadístico de Kolmogorov–Smirnov con bootstrap) pregunta si la ley de potencia es siquiera una descripción *plausible* de los datos — y con frecuencia la respuesta es "no".
+- **Compara candidatas cara a cara.** El paso decisivo es un **test de razón de verosimilitudes** contra las rivales: ¿es una ley de potencia *mejor* que una log-normal (log-normal), una exponencial, una exponencial estirada? Clauset, Shalizi y Newman reexaminaron dos docenas de conjuntos de datos famosamente "de ley de potencia" y hallaron que, para la mayoría, una ley de potencia *no* era claramente el mejor ajuste — una log-normal a menudo lo hacía igual de bien o mejor.
+
+<Callout variant="warning" title="'¡Es una ley de potencia!' es una hipótesis, no una observación">
+Ver una línea más o menos recta y anunciar una ley de potencia es como oír una tos y diagnosticar tuberculosis. La línea es un síntoma compartido por muchas afecciones. La afirmación honesta casi siempre es más débil de lo que la gente quiere que sea: *"la cola es gruesa, y una ley de potencia es uno de varios modelos plausibles que no he descartado."* Si alguien te enseña una línea log–log como *prueba*, se ha saltado todos los pasos que la convertirían en prueba.
+</Callout>
+
+## Imitadoras log-normales: misma forma, distinta historia
+
+**La analogía.** Dos ríos pueden tallar cañones casi idénticos — uno por un goteo lento y constante durante eones, el otro por unas pocas inundaciones catastróficas. Misma forma en la roca; historia completamente distinta que la creó. Una ley de potencia y una **log-normal** pueden dejar casi la misma silueta en un gráfico siendo generadas por motores genuinamente distintos.
+
+**De dónde viene una log-normal.** Toma una cantidad y multiplícala, una y otra vez, por factores aleatorios — crece un 3 % un año, encoge un 5 % al siguiente, salta un 20 %, y así. El crecimiento aleatorio multiplicativo, **sin apego preferencial** — sin ventaja de "más engendra más", con la *tasa* de crecimiento de cada unidad extraída del mismo bote independientemente del tamaño — produce una distribución **log-normal**: el *logaritmo* del resultado tiene forma de campana. Y una log-normal tiene una **cola derecha gruesa** y puede generar una desigualdad enorme por sí sola. Parece, a primera vista, la gemela de una ley de potencia.
+
+Pero es un animal distinto:
+
+| | Ley de potencia (apego preferencial) | Log-normal (crecimiento multiplicativo) |
+|---|---|---|
+| Historia generadora | El rico se hace más rico — *el tamaño impulsa tu crecimiento* | Crecimiento aleatorio en %, *tasa independiente del tamaño* |
+| Cola lejana | Más gruesa — decae polinómicamente, los verdaderos monstruos | Más ligera — al final decae más rápido que cualquier ley de potencia |
+| Escala "típica" | Ninguna — genuinamente sin escala (scale-free) | *Sí* hay una escala característica (una mediana) |
+| Gráfico log–log en un rango limitado | Recta | También parece casi recta — esa es la trampa |
+
+**Por qué importa.** Muchas de las "leyes de potencia" más citadas del campo — rentas, riqueza personal, tamaños de empresa, **tamaños de ciudad** (sí, hasta las adoradas ciudades de Zipf) — son, tras un reanálisis riguroso, *log-normales en disputa*, o se describen mejor como log-normal en el cuerpo con una cola de ley de potencia solo en el extremo. La lección no es que estas cantidades sean aburridas; siguen siendo tremendamente desiguales y de cola gruesa. La lección es más afilada: **la forma no revela unívocamente el mecanismo.** No puedes mirar un histograma de cola gruesa y leer "apego preferencial" — un simple proceso multiplicativo sin retroalimentación de rico-se-hace-más-rico produce algo que parece casi lo mismo.
+
+<Reveal client:visible summary="Entonces, ¿cómo podrías distinguir los dos motores, si las imágenes parecen idénticas?">
+No a partir de una sola instantánea de la distribución — a menudo *no puedes* separarlos con un único histograma estático, que es precisamente por lo que el debate persiste durante décadas. Necesitas pruebas extra: (1) **más datos de cola**, porque los dos solo divergen muy afuera, en el extremo donde los datos escasean más; (2) **la dinámica**, no solo el punto final — ¿depende realmente la *tasa de crecimiento* de una entidad de su tamaño actual (apego preferencial) o no (log-normal pura)? Observar el sistema evolucionar en el tiempo discrimina los mecanismos mucho mejor que ajustar la forma final. (3) **comparación rigurosa de modelos** (los tests de razón de verosimilitudes de arriba). La verdad incómoda: para muchos conjuntos de datos famosos, genuinamente no sabemos qué motor está funcionando, y las afirmaciones seguras en cualquier dirección son exageraciones.
+</Reveal>
+
+## El currículum del ganador está inflado
+
+**La analogía.** Tras un torneo de póker, el campeón da una entrevista sobre sus lecturas sin miedo y su disciplina de hierro, y todo suena a genialidad — porque *ganó*. Los siete jugadores igual de hábiles a los que les cayó una mala carta en el river y quebraron pronto no dan entrevistas. Estudiamos el juego del campeón como prueba de talento, olvidamos el cementerio de jugadores idénticos que perdieron, y concluimos que ganar requiere una capacidad sobrehumana. En su mayoría requirió el mismo talento *más* las cartas.
+
+**La jugada ingenua.** Miras a un ganador desbocado — un multimillonario, un superventas descomunal, una superestrella — y reconstruyes su talento a partir de su resultado: acabó 1.000 veces por delante, así que debe de ser 1.000 veces mejor. Su currículum, en retrospectiva, parece sobrehumano.
+
+**Por qué está inflado — dos ilusiones que se componen.** La lección 5 ya avisó de que los resultados son suerte-*compuesta*, no proporcionales al mérito. Dos fuerzas hacen que el aparente genio del ganador sea aún mayor de lo que es:
+
+- **El efecto Mateo (Matthew effect) infla el propio historial.** Como el ganador acumuló ventaja, su *historial* está rellenado por la composición, no solo por el talento. Las victorias tempranas compraron recursos, atención y mejores oportunidades, que compraron victorias mayores — así que el currículum es en parte una *transcripción del bucle de retroalimentación*, malinterpretada como transcripción de la persona. El crédito de un artículo escrito con colaboradores desconocidos fluye hacia el nombre famoso; la plataforma amplifica el siguiente movimiento de la estrella al margen de su calidad.
+- **El sesgo de supervivencia (survivorship bias) esconde el grupo de control.** Estudiamos abrumadoramente a los ganadores — los fundadores que lo lograron, los fondos que batieron al mercado, los artistas que despuntaron. La vasta población de gente igual de hábil que tomó los mismos riesgos y perdió es invisible, porque a los perdedores no les hacen biografías. Leyendo solo a los supervivientes, *cualquier* rasgo que compartan se lee como un secreto del éxito, cuando ese mismo rasgo era igual de común en el cementerio.
+
+**La regla.** *No reconstruyas un talento enorme a partir de resultados enormes.* En un mundo de ventaja acumulativa, el mapa del talento al resultado es empinado, ruidoso y autoamplificado: ventajas modestas se vuelven brechas gigantescas, y la brecha da demasiado crédito al ganador mientras la cola igual de merecedora queda sin estudiar. La regresión a la media es la señal — el fondo "genial", la mano caliente o el niño prodigio que se enfría de forma fiable hacia la media llevaba más suerte de la que la historia admitía.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un superventas de negocios estudia 20 empresas que crecieron 50 veces y destila sus hábitos compartidos (visión audaz, un fundador carismático, una 'cultura de excelencia') en principios de éxito. ¿Cuál es el problema metodológico más profundo?"
+  options={[
+    { text: "Sesgo de supervivencia: estudia solo a los ganadores y nunca comprueba si esos mismos 'hábitos' eran igual de comunes entre las muchas empresas similares que intentaron lo mismo y fracasaron — así que los 'principios' quizá no distingan en absoluto a ganadores de perdedores.", correct: true },
+    { text: "20 empresas es una muestra demasiado pequeña, pero el método sería sólido con 200 ganadoras.", correct: false },
+    { text: "Los hábitos son la causa real; el único fallo es no haberlos patentado.", correct: false },
+    { text: "La visión audaz y el carisma son imposibles de medir, así que no cabe ninguna conclusión.", correct: false },
+  ]}
+  explanation="Esto es sesgo de supervivencia de manual, y añadir más ganadoras (opción 2) no lo arregla — 200 supervivientes siguen sin el grupo de control. Sin las empresas fracasadas que TAMBIÉN tenían visiones audaces, fundadores carismáticos y discurso de 'excelencia', no puedes saber si esos rasgos separan el éxito del fracaso o son solo comunes por todas partes. Súmale el efecto Mateo (los historiales de los ganadores están inflados por la ventaja compuesta) y la regresión a la media (los valores atípicos fueron en parte afortunados y derivan de vuelta hacia la media), y los confiados 'principios' son en su mayoría una historia que contamos sobre quienquiera que resultó sobrevivir."
+/>
+
+## El exponente es más frágil de lo que parece
+
+**La analogía.** Estimar el exponente de una ley de potencia a partir de su cola es como estimar el edificio más alto de la historia de un país a partir de los tres rascacielos construidos la última década. Toda la respuesta descansa sobre un puñado de puntos de datos extremos y raros — y un puñado es una cosa pésima sobre la que basar un número seguro.
+
+**La jugada ingenua.** Lees que "el exponente de la riqueza es 1,4" o "los tamaños de ciudad van como α = 2,1", lo citas con dos decimales, y lo tratas como una constante fija de la naturaleza.
+
+**Por qué es frágil.** El exponente α se estima a partir de la **cola lejana** — las pocas observaciones más extremas — y esa cola es exactamente donde los datos escasean más:
+
+- **Datos escasos, barras de error anchas.** Por definición hay muy pocos multimillonarios, megaciudades o empresas de billones. Estimar una pendiente a partir de una docena de puntos te compra un intervalo de confianza ancho, no una constante precisa. La estimación puntual reportada esconde una incertidumbre genuina.
+- **Sensibilidad al corte.** El exponente depende de dónde decides que *empieza* la cola (el `x_min` en Clauset–Shalizi–Newman). Mueve el corte y el número se mueve. Elígelo a ojo y prácticamente puedes marcar a mano el α que esperabas.
+- **Inestabilidad en el tiempo.** Los exponentes de cola derivan a medida que el sistema subyacente cambia — las distribuciones de riqueza se empinan y se aplanan a lo largo de décadas, el riesgo de cola del mercado cambia con el régimen. Un número medido en 1990 no tiene por qué valer en 2020.
+
+**La regla.** La precisión segura sobre un exponente de cola suele ser *exceso* de confianza. Trata α como una estimación difusa, cambiante y dependiente del corte con barras de error reales — útil como indicador aproximado de régimen ("cola fina vs. cola gruesa vs. tan gruesa que la media no existe"), no como una constante física que puedas llevar a tres decimales.
+
+## No todo es una ley de potencia
+
+**La analogía.** Compra un martillo y de pronto el mundo entero parece clavos. Aprende la ventaja acumulativa y de pronto cada desigualdad parece sin escala, cada brecha parece rico-se-hace-más-rico, cada distribución parece de cola gruesa. La mayoría de las cosas siguen teniendo forma de clavo — pero muchas no, y darle con el martillo a un tornillo solo lo estropea.
+
+**La jugada ingenua.** Sobreaplicación: ver apego preferencial *por todas partes*, tratar cada resultado sesgado como una ley de potencia y — el error más profundo — suponer que toda desigualdad es por tanto inevitable e inamovible porque es "sin escala".
+
+**La visión corregida.** Muchos procesos reales **no** son de ley de potencia y nunca lo serán, porque algo detiene el desbocamiento:
+
+- **Cantidades acotadas.** La altura humana, la esperanza de vida, la velocidad al correr, el CI — techos físicos o biológicos duros. Ningún bucle de retroalimentación te hace diez veces más alto. Estas tienen forma de campana, cola fina, y la media significa exactamente lo que esperarías.
+- **Retroalimentación negativa / saturación.** Donde el crecimiento *suprime* más crecimiento — la congestión frena una ciudad abarrotada, la competencia erosiona los márgenes de una empresa dominante, los depredadores se hunden cuando la presa se acaba — obtienes dinámicas autolimitantes, no autorreforzantes. El bucle que hace las leyes de potencia corre en el sentido *contrario*.
+- **Reinicios y mezcla.** Los procesos que borran la pizarra periódicamente (mortalidad, obsolescencia, límites de mandato, rotación forzosa) impiden la acumulación ilimitada y mantienen la cola fina.
+
+La jugada madura es el interruptor de la lección 5, aplicado con honestidad en *ambas* direcciones: **¿en qué mundo estoy?** Algunos son mundos de ley de potencia donde la cola es toda la historia. Otros son mundos de campana de Gauss donde manda la media. Suponer ley de potencia en todas partes es exactamente igual de equivocado que la mente de campana de la que pasaste el curso escapando — es solo el error opuesto.
+
+## La trampa normativa
+
+**La analogía.** "El agua fluye cuesta abajo, por tanto las inundaciones son buenas" es un salto lógico obvio — una descripción de *cómo* pasa algo colada en una afirmación sobre si *debería*. "Es una ley de potencia, así que la desigualdad es natural e inevitable" es la misma jugada con bata de laboratorio. Describir un mecanismo no es respaldar su resultado.
+
+**La jugada ingenua.** El fallo más sutil no está en ningún estadístico — está en el juicio de valor que se sube al modelo. Empapada en ventaja acumulativa, una empieza a tratar la desigualdad extrema como una *ley de la naturaleza*: es sin escala, es el efecto Mateo, es cómo el universo reparte las cosas, así que es inevitable y no hay nada que hacer (y, calladamente, nada que se *deba* hacer).
+
+**La visión corregida.** El modelo **describe un mecanismo; no justifica un resultado.** Dos errores separados van empaquetados en la trampa:
+
+- **El colado del ser/deber.** Que una distribución *sea* generada por apego preferencial no dice nada sobre si esa distribución es *buena, justa o aceptable* — esas son preguntas de valor sobre las que las matemáticas guardan silencio.
+- **El colado de la inevitabilidad.** Las leyes de potencia no están grabadas en la física; las producen *mecanismos* — la estructura de la red, las reglas del mercado, la fuerza del bucle de retroalimentación. Y **los mecanismos se pueden cambiar.** La fiscalidad progresiva, el antimonopolio, la redistribución, los estándares abiertos, los mandatos de interoperabilidad, los límites de mandato, los topes y los suelos — todas son intervenciones que reconfiguran o amortiguan el bucle. El parámetro que arrastraste en el motor de la introducción *es una palanca de política en el mundo real.* Baja la fuerza del "más engendra más" y el Gini cae; eso no es solo un deslizador, es lo que el antimonopolio y la redistribución hacen literalmente.
+
+<Callout variant="info" title="Potencia descriptiva, silencio normativo">
+La ventaja acumulativa es un modelo *descriptivo* soberbio — te dice por qué el ganador ganó y por qué la cola es gruesa. *No* es normativo. "Así se creó la brecha" es una frase completamente distinta de "esta brecha está bien" o "esta brecha no se puede cerrar". Cualquiera que resbale de la primera a la segunda — normalmente alguien a quien la brecha trata bien — ha dejado atrás las matemáticas y ha empezado a hacer política usando tu modelo como atrezo.
+</Callout>
+
+<Categorize
+  client:visible
+  title="¿Razonamiento sólido o exageración?"
+  instructions="Cada afirmación usa el modelo de ley de potencia / ventaja acumulativa. Separa los usos disciplinados de los excesos."
+  buckets={["Razonamiento sólido sobre leyes de potencia", "Exageración / mal uso"]}
+  items={[
+    { text: "Ajusté la cola por máxima verosimilitud y corrí un test de razón de verosimilitudes; una ley de potencia ajusta, pero no mejor que una log-normal, así que no afirmo que sea definitivamente una ley de potencia.", bucket: "Razonamiento sólido sobre leyes de potencia" },
+    { text: "El gráfico log–log parece más o menos recto, así que es una ley de potencia y por tanto el apego preferencial es la causa.", bucket: "Exageración / mal uso" },
+    { text: "El historial del ganador es impresionante, pero mucho es ventaja compuesta y solo veo a los supervivientes, así que no voy a inferir 1.000 veces el talento a partir de 1.000 veces el resultado.", bucket: "Razonamiento sólido sobre leyes de potencia" },
+    { text: "El exponente estimado ronda 2 pero la cola solo tiene una docena de puntos y cambia cuando muevo el corte, así que reportaré un rango amplio, no una constante precisa.", bucket: "Razonamiento sólido sobre leyes de potencia" },
+    { text: "Esta desigualdad es una ley de potencia, así que es una ley de la naturaleza y completamente inevitable — no tiene sentido tratar de cambiarla.", bucket: "Exageración / mal uso" },
+    { text: "Las alturas están un poco sesgadas, así que probablemente sean sin escala y de cola gruesa como la riqueza.", bucket: "Exageración / mal uso" },
+    { text: "El crecimiento aquí parece cambios porcentuales aleatorios multiplicativos sin ventaja de tamaño, así que una log-normal puede explicar la cola gruesa sin ningún bucle de rico-se-hace-más-rico.", bucket: "Razonamiento sólido sobre leyes de potencia" },
+    { text: "El exponente salió 1,43 con los datos de esta década, así que 1,43 es la constante permanente de este sistema.", bucket: "Exageración / mal uso" },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo clasificado"
+  partialResultWord="correctas"
+  explanation="Los usos disciplinados comparten un hábito: contrastan en vez de mirar a ojo, separan la forma del mecanismo, descuentan el currículum inflado del ganador, ponen barras de error honestas sobre el exponente, y mantienen la descripción separada del 'por tanto es inevitable/está bien'. Las exageraciones se saltan todas un paso — línea-igual-a-ley-de-potencia, ley-de-potencia-igual-a-causa, sesgado-igual-a-sin-escala, el-α-de-esta-década-es-una-constante, y la grande: 'es una ley de potencia, así que no se puede hacer nada', que cuela un juicio de valor dentro de un trozo de matemáticas."
+/>
+
+## Todo el modelo, en un solo aliento
+
+Aquí va el curso entero, exhalado de una vez. **Una ley de potencia es una distribución sin escala** — unos pocos ganadores gigantescos y una larga cola que se adelgaza, recta en ejes log–log, un animal distinto de la campana de Gauss sin caso "típico". La fabrica un **motor — apego preferencial, el efecto Mateo, "más engendra más"** — donde tener más te hace más probable conseguir más, así que ventajas tempranas minúsculas y casi aleatorias se **componen** en brechas enormes. Su cara amable es el **principio 80/20** (los pocos vitales dominan a los muchos triviales, y anida dentro de sí mismo), su filo afilado es el **el ganador se lo lleva todo** (una ventaja de calidad finísima, hecha escalable por la tecnología y las redes, paga cien a uno), y su consecuencia peligrosa es la **tiranía de la cola** (la media carece de sentido, la media muestral nunca se asienta, un evento puede pesar más que toda la historia, y los resultados son suerte-compuesta mucho más que proporcionales al mérito). Y por último, **dónde miente el modelo**: el test a ojo del log–log no demuestra casi nada, las log-normales imitan las leyes de potencia con un mecanismo distinto, la supervivencia y el efecto Mateo inflan el aparente genio del ganador, el exponente de la cola es frágil y cambiante, no todo es sin escala, y "es una ley de potencia" nunca significa que la desigualdad sea natural, justa o inmutable. Esa es la máquina entera, salvedades incluidas.
+
+<Quiz
+  client:visible
+  title="Repaso de todo el curso: el modelo completo"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  completeTitleLabel="Cuestionario completado"
+  questions={[
+    {
+      question: 'Alguien te enseña una línea más o menos recta en ejes log–log como prueba de una ley de potencia. ¿Cuál es la respuesta más rigurosa?',
+      options: [
+        { text: 'Una línea log–log más o menos recta es necesaria pero no suficiente — las distribuciones log-normal y exponencial estirada también parecen casi rectas, así que necesitas un ajuste por máxima verosimilitud, un test de bondad de ajuste y una comparación por razón de verosimilitudes contra las distribuciones rivales antes de afirmar una ley de potencia', correct: true },
+        { text: 'Acéptalo — una línea recta en ejes log–log es prueba matemática de una ley de potencia', correct: false },
+        { text: 'Recházalo — los tamaños de empresa o de ciudad nunca pueden distribuirse según una ley de potencia', correct: false },
+        { text: 'Da igual, porque la forma te dice el mecanismo exacto de todos modos', correct: false },
+      ],
+      explanation: 'El test a ojo no demuestra casi nada. Una línea es la firma de una ley de potencia, pero una firma falsificable; el estándar moderno (Clauset–Shalizi–Newman) ajusta por máxima verosimilitud, contrasta la bondad de ajuste y — de forma decisiva — compara la ley de potencia cara a cara contra la log-normal y otras candidatas, que con frecuencia ajustan igual de bien.',
+    },
+    {
+      question: 'Una cantidad crece en cantidades porcentuales aleatorias cada periodo, con la tasa de crecimiento INDEPENDIENTE del tamaño actual (sin ventaja de rico-se-hace-más-rico). ¿Qué distribución tiende a producir esto, y qué enseña?',
+      options: [
+        { text: 'Una log-normal — de cola gruesa y muy desigual, pero generada SIN apego preferencial; enseña que una forma de cola gruesa no revela unívocamente un mecanismo de rico-se-hace-más-rico', correct: true },
+        { text: 'Una campana de Gauss perfecta, probando que la cantidad es de cola fina', correct: false },
+        { text: 'Siempre una ley de potencia, probando que hay apego preferencial', correct: false },
+        { text: 'Una distribución uniforme sin ninguna desigualdad', correct: false },
+      ],
+      explanation: 'El crecimiento aleatorio multiplicativo con tasas independientes del tamaño hace que el logaritmo del resultado tenga forma de campana — una log-normal, que es de cola gruesa y desigual pero no tiene apego preferencial dentro. Como imita una ley de potencia en un rango limitado, la forma por sí sola no puede decirte el mecanismo. Muchas "leyes de potencia" famosas (rentas, tamaños de empresa y de ciudad) son log-normales en disputa.',
+    },
+    {
+      question: 'Un gestor de fondos batió al mercado siete años seguidos. Un tertuliano lo llama prueba de genialidad. ¿Qué combinación de ideas del curso modera mejor esa afirmación?',
+      options: [
+        { text: 'El sesgo de supervivencia (solo estudiamos a los ganadores, no a los muchos gestores igual de hábiles que perdieron), el efecto Mateo (las victorias tempranas compraron ventajas que rellenaron el historial) y la regresión a la media (la racha probablemente llevaba suerte y tiende a enfriarse hacia la media)', correct: true },
+        { text: 'La ley de Goodhart y la multitarea', correct: false },
+        { text: 'La regla del 80/20 prueba que el gestor hizo el 80 % del trabajo', correct: false },
+        { text: 'Nada lo modera — siete años son prueba concluyente de talento', correct: false },
+      ],
+      explanation: 'No reconstruyas un talento enorme a partir de resultados enormes. Solo vemos supervivientes, el historial del ganador está inflado por la ventaja compuesta, y los valores atípicos regresan hacia la media a medida que el componente de suerte se lava. Un resultado enorme en un mundo de ventaja acumulativa da demasiado crédito al ganador y esconde la cola igual de merecedora que quedó sin estudiar.',
+    },
+    {
+      question: '¿Qué afirmación cruza de una DESCRIPCIÓN legítima a una afirmación normativa/de inevitabilidad ilegítima?',
+      options: [
+        { text: '"Esta desigualdad es una ley de potencia, así que es una ley de la naturaleza y no puede ni debe cambiarse."', correct: true },
+        { text: '"El apego preferencial puede generar esta distribución a partir de arranques casi iguales."', correct: false },
+        { text: '"La fuerza del bucle reforzante controla cuán desiguales acaban los resultados."', correct: false },
+        { text: '"El antimonopolio, la fiscalidad y los estándares abiertos son intervenciones que pueden amortiguar el bucle."', correct: false },
+      ],
+      explanation: 'El modelo describe un mecanismo; no justifica un resultado. La trampa cuela dos cosas a la vez: un salto del ser al deber (que una distribución sea de ley de potencia no dice nada sobre si es justa) y una afirmación de inevitabilidad (las leyes de potencia vienen de mecanismos — estructura de red, reglas, la fuerza del bucle — y los mecanismos se pueden cambiar). El deslizador que arrastraste en la introducción es una palanca de política del mundo real.',
+    },
+  ]}
+/>
+
+<Callout variant="success" title="Ideas clave — el modelo completo">
+La lente de la ventaja acumulativa y las leyes de potencia, entera:
+
+- **Qué es una ley de potencia.** Una distribución sin escala — unos pocos ganadores gigantes, una larga cola fina, recta en ejes log–log, sin caso "típico". Un animal distinto de la campana de Gauss.
+- **El motor.** Apego preferencial / el efecto Mateo / "más engendra más" — tener más te hace más probable conseguir más, así que ventajas tempranas minúsculas y casi aleatorias se **componen** en brechas enormes.
+- **Sus caras.** El **principio 80/20** (los pocos vitales, los muchos triviales, anidando dentro de sí mismo); **el ganador se lo lleva todo** (una ventaja finísima, hecha escalable, paga 100 a 1); la **tiranía de la cola** (sin media con sentido, media inestable, un evento pesa más que la historia, resultados suerte-compuesta).
+- **Dónde miente el modelo.** El **test a ojo del log–log no demuestra casi nada**; las **log-normales imitan** las leyes de potencia con un mecanismo distinto; la **supervivencia + el efecto Mateo inflan** el aparente genio del ganador; el **exponente de la cola es frágil y cambiante**; **no todo es sin escala**; y "es una ley de potencia" es una **descripción, no una justificación** — el bucle es una palanca, y las palancas se pueden accionar.
+</Callout>
+
+## Resumen
+
+- **El test a ojo no demuestra casi nada.** Una línea log–log más o menos recta es necesaria pero no suficiente; establecer una ley de potencia necesita ajuste por máxima verosimilitud, tests de bondad de ajuste y comparaciones por razón de verosimilitudes contra las rivales (Clauset–Shalizi–Newman). El "¡es una ley de potencia!" casual suele ser una exageración.
+- **Las log-normales son imitadoras.** El crecimiento aleatorio multiplicativo *sin* apego preferencial también hace una cola derecha gruesa — misma forma, motor distinto. La forma no revela unívocamente el mecanismo, y muchas "leyes de potencia" famosas son log-normales en disputa.
+- **El currículum del ganador está inflado.** El efecto Mateo rellena el historial con composición, y el sesgo de supervivencia esconde a los perdedores igual de hábiles. No reconstruyas un talento enorme a partir de resultados enormes; espera regresión a la media.
+- **El exponente es frágil.** α se estima a partir de los pocos puntos extremos de la cola — datos escasos, barras de error anchas, sensible al corte, cambiante en el tiempo. La precisión segura sobre exponentes de cola es exceso de confianza.
+- **No todo es una ley de potencia.** Las cantidades acotadas, la retroalimentación negativa y los reinicios producen distribuciones de cola fina. Pregunta "¿en qué mundo estoy?" — ley-de-potencia-por-todas-partes es solo la imagen especular del error de la campana de Gauss.
+- **La trampa normativa.** "Es una ley de potencia, así que la desigualdad es natural/inevitable" cuela un juicio de valor dentro de un trozo de matemáticas. El modelo describe un mecanismo; no justifica el resultado — y los mecanismos (estructura de red, reglas, impuestos, antimonopolio) se pueden cambiar.
+
+<MindMap
+  client:visible
+  title="Ventaja acumulativa y leyes de potencia — todo el curso"
+  outlineLabel="Esquema en texto"
+  eyebrow="Panorama general"
+  root={{
+    label: "Ventaja acumulativa y leyes de potencia",
+    children: [
+      {
+        label: "Qué es una ley de potencia",
+        children: [
+          { label: "Sin escala - unos pocos gigantes, una larga cola fina" },
+          { label: "Línea recta en ejes log-log, sin caso típico" },
+          { label: "Un animal distinto de la campana de Gauss" }
+        ]
+      },
+      {
+        label: "El motor - apego preferencial",
+        children: [
+          { label: "El efecto Mateo - más engendra más" },
+          { label: "Tener más te hace más probable conseguir más" },
+          { label: "Ventajas tempranas casi aleatorias se componen en brechas enormes" }
+        ]
+      },
+      {
+        label: "El principio 80/20",
+        children: [
+          { label: "Los pocos vitales dominan a los muchos triviales" },
+          { label: "Anida dentro de sí mismo - el 80/20 del 80/20" }
+        ]
+      },
+      {
+        label: "El ganador se lo lleva todo",
+        children: [
+          { label: "Una ventaja finísima, hecha escalable" },
+          { label: "Paga 100 a 1, no un 10 por ciento más" },
+          { label: "La tecnología y los efectos de red lo inclinan" }
+        ]
+      },
+      {
+        label: "Tiranía de la cola",
+        children: [
+          { label: "La media carece de sentido aquí" },
+          { label: "Un evento puede pesar más que toda la historia" },
+          { label: "Los resultados son suerte-compuesta, no proporcionales al mérito" }
+        ]
+      },
+      {
+        label: "Dónde miente el modelo",
+        children: [
+          { label: "El test a ojo del log-log no demuestra casi nada" },
+          { label: "Las log-normales imitan leyes de potencia - mecanismo distinto" },
+          { label: "Supervivencia + efecto Mateo inflan al ganador" },
+          { label: "El exponente de la cola es frágil y cambiante" },
+          { label: "No todo es sin escala" },
+          { label: "Describe un mecanismo - no justifica el resultado" }
+        ]
+      }
+    ]
+  }}
+/>
+
+Ese es el modelo completo, salvedades incluidas. Ahora puedes reconocer una ley de potencia, nombrar su motor, usar el 80/20, respetar la cola — y, igual de importante, pillarte a ti mismo y a los demás *exagerándola*. Queda una cosa: el **Examen Final** — una única pasada calificada por todo lo que has aprendido, una pregunta cada vez. Es de sentido único: en cuanto respondes, se bloquea, sin vuelta atrás y sin reintentos, y necesitarás un 70 % para aprobar. Respira hondo, y luego empieza.

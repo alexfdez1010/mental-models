@@ -216,3 +216,6 @@ export type { LockInExplorerProps } from '@/components/react/LockInExplorer';
 
 export { ContractDesigner, default as ContractDesignerDefault } from '@/components/react/ContractDesigner';
 export type { ContractDesignerProps } from '@/components/react/ContractDesigner';
+
+export { CumulativeAdvantageEngine, default as CumulativeAdvantageEngineDefault } from '@/components/react/CumulativeAdvantageEngine';
+export type { CumulativeAdvantageEngineProps } from '@/components/react/CumulativeAdvantageEngine';

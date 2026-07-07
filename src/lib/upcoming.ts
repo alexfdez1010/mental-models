@@ -106,25 +106,6 @@ export const upcomingCourses: UpcomingCourse[] = [
   // (`cumulative-advantage-and-power-laws`) and psychology
   // (`debiasing-and-the-bias-blind-spot`) so no single roadmap tag races ahead.
   {
-    slug: 'cumulative-advantage-and-power-laws',
-    icon: '📈',
-    difficulty: 'expert',
-    order: 38,
-    accent: 'accent',
-    title: {
-      en: 'Cumulative Advantage & Power Laws',
-      es: 'Ventaja Acumulativa y Leyes de Potencia',
-    },
-    description: {
-      en: 'Why a few winners take almost everything while a long tail gets scraps: when success breeds success — the rich get richer, the cited get cited — small early leads compound into staggeringly unequal, "scale-free" outcomes. The generative engine behind power laws, the 80/20 rule, and winner-take-all markets, and where the pattern misleads.',
-      es: 'Por qué unos pocos ganadores se llevan casi todo mientras una larga cola recibe migajas: cuando el éxito engendra éxito —el rico se hace más rico, el citado más citado— pequeñas ventajas tempranas se componen en resultados asombrosamente desiguales y "sin escala". El motor generador tras las leyes de potencia, la regla 80/20 y los mercados de "el ganador se lo lleva todo", y dónde el patrón engaña.',
-    },
-    dependencies: ['fat-tails', 'feedback-loops'],
-    tags: ['probability', 'science-engineering'],
-    buildNotes:
-      'Cumulative advantage & power laws — the expert probability/science-engineering rung on the GENERATIVE process that manufactures extreme inequality and fat-tailed distributions. Assumes fat-tails (distributions where the extremes dominate) and feedback-loops (reinforcing loops). The organising idea: preferential attachment / cumulative advantage / the Matthew effect ("to those who have, more shall be given") — a reinforcing loop where having more of something (wealth, citations, followers, links) makes you more likely to get even more, so small early differences compound into vast, self-perpetuating gaps. Sections, each with mechanism + worked example: what a power law IS (a distribution where P(x) ~ x^-α, scale-free — the same shape at every zoom level — contrasted with the bell curve, where extremes are impossibly rare; city sizes, word frequencies/Zipf, wealth/Pareto, earthquake magnitudes, book/song sales, web-link degree); the generative mechanism — preferential attachment (Yule–Simon, Barabási–Albert): new links attach preferentially to already-popular nodes, so popularity begets popularity; cumulative advantage in careers and science (Merton\'s Matthew effect — the famous get disproportionate credit); the 80/20 Pareto principle as the everyday face of a power law (a few causes drive most effects) and how to USE it (prioritise the vital few); winner-take-all / superstar markets (why the best violinist earns 100x the tenth-best, not 10% more — tiny quality edges plus scalability and network effects compound); the tyranny of the tail — in fat-tailed/power-law worlds the average is meaningless, a single outlier can outweigh the entire rest, and sample averages are unstable (tie back to fat-tails). Contrast luck vs skill: because early leads compound, outcomes are far more sensitive to small initial luck than a proportional-reward intuition suggests (path dependence rhymes here). Pitfalls & where the model lies: seeing power laws everywhere (many "power laws" are really log-normals or exponentials — the eyeball test on a log-log plot is not proof); confusing the compounding of advantage with pure merit (survivorship + Matthew effect inflate the winner\'s apparent skill); and assuming the tail is stable when the exponent is only estimated from scarce extreme data. Build an interactive island (a "cumulative-advantage engine": balls/tokens drop one at a time and attach to existing piles with probability proportional to pile size, a tunable preferential-attachment strength and a small random head-start; the learner watches a runaway winner emerge, sees the resulting rank-size curve go straight on a log-log axis, and can turn the attachment strength down to watch the distribution collapse back toward equality; readout of top-share / Gini-ish inequality / biggest pile). Plus a Categorize (bell-curve/thin-tailed quantity vs power-law/scale-free quantity) and MatchConcepts (preferential attachment, Matthew effect, Pareto 80/20, scale-free, winner-take-all), Quiz + MindMap. en + es twin.',
-  },
-  {
     slug: 'debiasing-and-the-bias-blind-spot',
     icon: '🪞',
     difficulty: 'expert',
