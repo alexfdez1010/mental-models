@@ -222,3 +222,6 @@ export type { CumulativeAdvantageEngineProps } from '@/components/react/Cumulati
 
 export { DebiasingBench, default as DebiasingBenchDefault } from '@/components/react/DebiasingBench';
 export type { DebiasingBenchProps, DebiasingTool, DebiasingScenario, FixKind } from '@/components/react/DebiasingBench';
+
+export { SignallingSeparator, default as SignallingSeparatorDefault } from '@/components/react/SignallingSeparator';
+export type { SignallingSeparatorProps } from '@/components/react/SignallingSeparator';
