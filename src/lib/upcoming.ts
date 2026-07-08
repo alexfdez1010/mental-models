@@ -48,13 +48,13 @@
  * `credible-commitment-and-deterrence`, `path-dependence-and-lock-in`,
  * `principal-agent-problem`, `cumulative-advantage-and-power-laws`,
  * `debiasing-and-the-bias-blind-spot`, `signaling-and-costly-signals`,
- * `reflexivity-and-self-fulfilling-dynamics`, …) have graduated and been removed;
- * their topic MDX is now the record. Lowest `order` is built next. The remaining
- * entries all sit in the **expert tier**, deliberately kept tag-diverse so no
- * single roadmap tag races ahead:
- * decision-making/systems-thinking (`antifragility-and-via-negativa`, 42),
- * probability/decision-making (`ergodicity-and-the-time-average`, 43) and
- * strategy/psychology (`common-knowledge-and-coordination`, 44).
+ * `reflexivity-and-self-fulfilling-dynamics`, `antifragility-and-via-negativa`, …)
+ * have graduated and been removed; their topic MDX is now the record. Lowest
+ * `order` is built next. The remaining entries all sit in the **expert tier**,
+ * deliberately kept tag-diverse so no single roadmap tag races ahead:
+ * probability/decision-making (`ergodicity-and-the-time-average`, 43),
+ * strategy/psychology (`common-knowledge-and-coordination`, 44) and
+ * economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`, 45).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -93,34 +93,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `signaling-and-costly-
-  // signals` (40) and `reflexivity-and-self-fulfilling-dynamics` (41) — have
+  // The earlier expert rungs — `externalities` (20) … `reflexivity-and-self-
+  // fulfilling-dynamics` (41) and `antifragility-and-via-negativa` (42) — have
   // graduated and been removed; their topic MDX is now the record. The lowest-
-  // order entry below (`antifragility-and-via-negativa`, order 42) is built next.
+  // order entry below (`ergodicity-and-the-time-average`, order 43) is built next.
   // The remaining queue finishes the expert tier and keeps the breadth tag-
-  // diverse, spanning decision-making/systems-thinking (`antifragility-and-via-
-  // negativa`), probability/decision-making (`ergodicity-and-the-time-average`)
-  // and strategy/psychology (`common-knowledge-and-coordination`) so no single
-  // roadmap tag races ahead.
-  {
-    slug: 'antifragility-and-via-negativa',
-    icon: '🌱',
-    difficulty: 'expert',
-    order: 42,
-    accent: 'accent',
-    title: {
-      en: 'Antifragility & Via Negativa',
-      es: 'Antifragilidad y Vía Negativa',
-    },
-    description: {
-      en: 'Some things break under stress, some just endure it — and a rare few actually get stronger from it. Muscles, immune systems, and good businesses feed on a little disorder; the fragile ones are quietly wrecked by it. How to tell which is which, and why the surest way to improve most things is to remove, not add.',
-      es: 'Unas cosas se rompen con el estrés, otras solo lo aguantan — y unas pocas y raras se vuelven más fuertes con él. Los músculos, el sistema inmune y los buenos negocios se alimentan de algo de desorden; los frágiles quedan destrozados por él en silencio. Cómo distinguir cuál es cuál, y por qué la vía más segura para mejorar casi todo es quitar, no añadir.',
-    },
-    dependencies: ['asymmetry-and-optionality', 'fat-tails', 'margin-of-safety'],
-    tags: ['decision-making', 'systems-thinking'],
-    buildNotes:
-      'Antifragility & via negativa — the expert decision-making/systems-thinking rung (Nassim Taleb) on how systems respond to volatility, stress, and disorder, and the asymmetric-payoff logic of getting stronger from shocks. Assumes asymmetry-and-optionality (convex vs concave payoffs, capped-downside/open-upside), fat-tails (rare large deviations dominate), and margin-of-safety (buffers/redundancy). Organising idea: the triad — FRAGILE (harmed by volatility, concave payoff to disorder, likes calm — the teacup, the over-optimised supply chain), ROBUST/RESILIENT (unchanged by volatility — the rock, the phoenix), ANTIFRAGILE (improves with volatility up to a point, convex payoff to disorder — muscles under load, the immune system, evolution, a barbell portfolio, a business that gains from chaos). Antifragility = convexity to a stressor; it is asymmetry-and-optionality applied to disorder itself. Sections, each with mechanism + worked example: the triad with a payoff-curvature picture (fragile = concave/negative convexity, antifragile = convex — small stressors help, and it benefits from the disorder that fat tails guarantee); HORMESIS and overcompensation (a little poison/stress triggers a stronger rebuild — exercise, fasting, vaccines, post-traumatic growth); the role of stressors, redundancy, and why depriving an antifragile system of volatility (over-smoothing, suppressing all fire/all fever/all failure) makes it fragile — the "touch of chaos" and the Lucretius/turkey problems; VIA NEGATIVA (robustify by SUBTRACTION — remove the fragilising agent, debt, single points of failure, the smoker’s cigarette — because removing a known harm is more robust than adding a speculative good; the barbell as playing it safe on one end and taking bounded risks on the other; skin in the game as forcing antifragility by aligning downside); how to spot fragility in advance (it’s more predictable than forecasting the shock — anything with hidden concavity, over-optimisation, no slack, or that hates variance). Pitfalls & where the model lies: antifragility has LIMITS (dose matters — enough stress kills even the antifragile; convexity holds only over a range); don’t romanticise chaos or manufacture harmful stress ("what doesn’t kill me" is survivorship bias); not everything fragile should be exposed to volatility (some things you just protect); and the risk of using "antifragile" as a buzzword for any resilience. Build an interactive island (a "fragility tester": pick a system with a payoff-vs-stress curve — fragile (concave), robust (flat), or antifragile (convex) — then crank a VOLATILITY slider and/or fire random shocks and watch cumulative outcome diverge: the fragile one bleeds from the tails while the antifragile one compounds gains from the same disorder, up to the dose limit where it too breaks; readout of curvature, mean outcome, worst tail, and a via-negativa toggle that removes a fragilising element and re-runs). Plus a Categorize (sort real cases into fragile / robust / antifragile, or add-a-good vs remove-a-harm) and MatchConcepts (antifragility, hormesis, via negativa, barbell, convexity), Quiz + MindMap. en + es twin.',
-  },
+  // diverse, spanning probability/decision-making (`ergodicity-and-the-time-
+  // average`), strategy/psychology (`common-knowledge-and-coordination`) and
+  // economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`)
+  // so no single roadmap tag races ahead.
   {
     slug: 'ergodicity-and-the-time-average',
     icon: '⏳',
@@ -158,6 +139,25 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['strategy', 'psychology'],
     buildNotes:
       'Common knowledge & coordination — the expert strategy/psychology rung on the recursive knowledge that lets groups act in concert, and why coordination hinges on what is PUBLICLY shared rather than privately true. Assumes game-theory-basics and nash-equilibrium (coordination games, multiple equilibria, best responses) and critical-mass (tipping thresholds, the fraction that must move before it is safe to move). Organising idea: distinguish (1) private knowledge (I know X), (2) mutual/shared knowledge (we each know X but not that the others know), and (3) COMMON KNOWLEDGE (everyone knows X, everyone knows that everyone knows, ad infinitum). Coordination on a risky joint action requires level 3, not level 1 — you only move against the regime / withdraw from the bank / point at the emperor when you know that enough others know that enough others will too. Sections, each with mechanism + worked example: the ladder of knowledge with the recursion made concrete (the "everyone knows that everyone knows" regress); the emperor’s-new-clothes / the child who says it out loud (the fact was mutual knowledge; the shout made it COMMON, and that is what changed behaviour) — public announcements, focal points (Schelling), and why a PUBLIC signal coordinates where a pile of private signals cannot; coordination games with a safe and a risky equilibrium, and why beliefs about others’ beliefs select which one you land on (tie to nash-equilibrium and critical-mass thresholds); real faces — bank runs and self-fulfilling panics, revolutions and preference falsification (Kuran: private opposition that stays hidden until a public spark makes it common and the dam breaks), protests and the role of visible crowds/media, advertising during major broadcasts as manufactured common knowledge (everyone sees that everyone sees the ad), the Keynesian beauty contest (guess what others guess others will do), traffic conventions and standards; why authoritarian regimes fear PUBLIC gatherings and open dissent far more than private grumbling (they attack the common-knowledge-generating channel). Pitfalls & where the model lies: common knowledge is an idealisation (true infinite recursion is rarely met — approximate/"almost common" knowledge and the electronic-mail / coordinated-attack problem show how fragile it is when confirmation can fail); a visible signal can manufacture FALSE common knowledge (rumour cascades, manufactured consensus); and not every coordination needs full common knowledge — sometimes a focal point or a little critical mass suffices. Build an interactive island (a "common-knowledge coordinator": a population in a coordination game each with a private willingness to act and a threshold "I’ll move only if I believe at least k% of others will"; toggle a PUBLIC SIGNAL (a shared announcement everyone sees everyone see) on or off and watch the same private dispositions either stay frozen (mutual knowledge, everyone waits) or cascade into collective action (common knowledge crosses the critical mass), with a readout of who-knows-what level, the believed participation, and whether the coordinated move succeeds or fizzles). Plus a Categorize (sort cases into private / mutual / common knowledge, or public-signal vs private-signal) and MatchConcepts (common knowledge, mutual knowledge, focal point, preference falsification, coordination equilibrium), Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'spontaneous-order-and-the-knowledge-problem',
+    icon: '🐜',
+    difficulty: 'expert',
+    order: 45,
+    accent: 'brand',
+    title: {
+      en: 'Spontaneous Order & the Knowledge Problem',
+      es: 'Orden Espontáneo y el Problema del Conocimiento',
+    },
+    description: {
+      en: 'No one designs a language, a city’s food supply, or the price of copper — and yet each works, coordinating millions of strangers who never meet. Order can emerge from the bottom up, without a planner, precisely because the knowledge needed to run the whole is scattered in fragments no single mind can gather. Why the market, the anthill, and the footpath across the lawn all solve a problem no committee could.',
+      es: 'Nadie diseña un idioma, el suministro de comida de una ciudad o el precio del cobre — y sin embargo cada uno funciona, coordinando a millones de desconocidos que jamás se encuentran. El orden puede emerger de abajo arriba, sin planificador, precisamente porque el conocimiento necesario para gobernar el todo está disperso en fragmentos que ninguna mente puede reunir. Por qué el mercado, el hormiguero y el sendero pisado en el césped resuelven un problema que ningún comité podría.',
+    },
+    dependencies: ['supply-and-demand', 'emergence', 'incentives'],
+    tags: ['economics', 'systems-thinking'],
+    buildNotes:
+      'Spontaneous order & the knowledge problem — the expert economics/systems-thinking rung (Hayek, Adam Smith’s invisible hand, Michael Polanyi, Leonard Read’s "I, Pencil") on how coherent, adaptive order arises WITHOUT central design, and why it must, because the relevant knowledge is irreducibly dispersed. Assumes supply-and-demand (prices clear markets), emergence (macro-order from local rules with no controller) and incentives (agents act on local payoffs). Organising idea: THE KNOWLEDGE PROBLEM (Hayek, "The Use of Knowledge in Society", 1945) — the data a planner would need (every person’s tacit, local, time-and-place-specific circumstances, preferences and know-how) is never given to a single mind; it exists only in scattered fragments, much of it tacit (Polanyi: "we know more than we can tell"). So the economic problem is not allocating known resources but MOBILISING knowledge no one possesses in full. SPONTANEOUS ORDER (Scottish Enlightenment: "the result of human action but not of human design") is the answer: institutions and patterns — prices, language, common law, money, manners, footpaths, science — that are grown, not built. Sections, each with mechanism + worked example: the knowledge problem stated (the tin-shortage example — a price rise transmits "use less tin" to millions who never learn why, each responding to a single number that summarises the whole world’s change); PRICES AS SIGNALS/telecommunication system (a market as a giant distributed computer aggregating dispersed knowledge into one sufficient statistic, the price; contrast with the socialist-calculation debate — why the planner is blind without prices); "I, PENCIL" and the invisible hand (no one knows how to make a pencil; the order coordinates strangers via self-interest, Smith); ORDER WITHOUT A DESIGNER across domains — language and its grammar, common law, the desire-path/footpath, science as a spontaneous order, ant colonies/stigmergy and the market’s kinship to emergence; the RULES that let it work (property, contract, stable expectations — Hayek’s cosmos vs taxis, grown "nomos" vs made order) and why good institutions are often evolved, not engineered. Pitfalls & where the model lies: spontaneous ≠ optimal or just (path-dependence, lock-in, externalities and tragedies of the commons are ALSO spontaneous orders — bottom-up does not mean benign; tie to externalities/tragedy-of-the-commons); it is not an argument that ALL design is bad (rules themselves are often deliberately set; the claim is about limits on central knowledge, not a blanket anti-planning slogan); the FATAL CONCEIT / planner’s hubris cuts both ways — markets can fail, and "let it emerge" can be its own lazy dogma; and emergence can encode and amplify bad local incentives. Build an interactive island (a "dispersed-knowledge market": a grid/population of agents each holding only PRIVATE local info (a cost, a need) and following a simple local rule; toggle between a CENTRAL PLANNER who must set one quantity/price from aggregate data it cannot see in full versus a PRICE mechanism that lets the number emerge from local trades; introduce a shock (a shortage somewhere) and watch the price-coordinated system re-allocate and clear while the blind-planner system mis-allocates and leaves shortages/gluts; readout of total welfare, unmet need, and how much dispersed knowledge each regime actually used). Plus a Categorize (sort orders into designed/made vs spontaneous/grown, or knowledge-centralisable vs irreducibly-dispersed) and MatchConcepts (spontaneous order, the knowledge problem, tacit knowledge, price signal, invisible hand), Quiz + MindMap. en + es twin.',
   },
 ];
 

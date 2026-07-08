@@ -228,3 +228,6 @@ export type { SignallingSeparatorProps } from '@/components/react/SignallingSepa
 
 export { ReflexivityLoop, default as ReflexivityLoopDefault } from '@/components/react/ReflexivityLoop';
 export type { ReflexivityLoopProps } from '@/components/react/ReflexivityLoop';
+
+export { FragilityTester, default as FragilityTesterDefault } from '@/components/react/FragilityTester';
+export type { FragilityTesterProps, FragilitySystem } from '@/components/react/FragilityTester';
