@@ -47,11 +47,11 @@
  * `influence-and-persuasion`, `evolution-of-cooperation`,
  * `credible-commitment-and-deterrence`, `path-dependence-and-lock-in`,
  * `principal-agent-problem`, `cumulative-advantage-and-power-laws`,
- * `debiasing-and-the-bias-blind-spot`, `signaling-and-costly-signals`, …) have
- * graduated and been removed; their topic MDX is now the record. Lowest `order`
- * is built next. The remaining entries all sit in the **expert tier**,
- * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * economics/systems-thinking (`reflexivity-and-self-fulfilling-dynamics`, 41),
+ * `debiasing-and-the-bias-blind-spot`, `signaling-and-costly-signals`,
+ * `reflexivity-and-self-fulfilling-dynamics`, …) have graduated and been removed;
+ * their topic MDX is now the record. Lowest `order` is built next. The remaining
+ * entries all sit in the **expert tier**, deliberately kept tag-diverse so no
+ * single roadmap tag races ahead:
  * decision-making/systems-thinking (`antifragility-and-via-negativa`, 42),
  * probability/decision-making (`ergodicity-and-the-time-average`, 43) and
  * strategy/psychology (`common-knowledge-and-coordination`, 44).
@@ -93,36 +93,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `principal-agent-problem`
-  // (37), `cumulative-advantage-and-power-laws` (38), `debiasing-and-the-bias-
-  // blind-spot` (39) and `signaling-and-costly-signals` (40) — have graduated and
-  // been removed; their topic MDX is now the record. The lowest-order entry below
-  // (`reflexivity-and-self-fulfilling-dynamics`, order 41) is built next. The
-  // remaining queue finishes the expert tier and keeps the breadth tag-diverse,
-  // spanning economics/systems-thinking (`reflexivity-and-self-fulfilling-
-  // dynamics`), decision-making/systems-thinking (`antifragility-and-via-
+  // The earlier expert rungs — `externalities` (20) … `signaling-and-costly-
+  // signals` (40) and `reflexivity-and-self-fulfilling-dynamics` (41) — have
+  // graduated and been removed; their topic MDX is now the record. The lowest-
+  // order entry below (`antifragility-and-via-negativa`, order 42) is built next.
+  // The remaining queue finishes the expert tier and keeps the breadth tag-
+  // diverse, spanning decision-making/systems-thinking (`antifragility-and-via-
   // negativa`), probability/decision-making (`ergodicity-and-the-time-average`)
   // and strategy/psychology (`common-knowledge-and-coordination`) so no single
   // roadmap tag races ahead.
-  {
-    slug: 'reflexivity-and-self-fulfilling-dynamics',
-    icon: '🔁',
-    difficulty: 'expert',
-    order: 41,
-    accent: 'brand',
-    title: {
-      en: 'Reflexivity & Self-Fulfilling Dynamics',
-      es: 'Reflexividad y Dinámicas Autocumplidas',
-    },
-    description: {
-      en: 'Sometimes believing a thing makes it true. A bank is fine until enough people fear it isn’t; a stock is “worth” whatever the crowd will pay for the story. When beliefs bend the very reality they’re about, the usual arrow from facts to opinions runs both ways — and feedback, not fundamentals, takes the wheel.',
-      es: 'A veces creer algo lo vuelve cierto. Un banco está bien hasta que suficiente gente teme que no lo esté; una acción “vale” lo que la multitud pague por la historia. Cuando las creencias doblan la propia realidad de la que hablan, la flecha habitual de los hechos a las opiniones va en ambos sentidos — y toma el mando la retroalimentación, no los fundamentos.',
-    },
-    dependencies: ['feedback-loops', 'supply-and-demand', 'critical-mass'],
-    tags: ['economics', 'systems-thinking'],
-    buildNotes:
-      'Reflexivity & self-fulfilling dynamics — the expert economics/systems-thinking rung on the two-way street between beliefs and reality: when what people believe about a situation changes the situation itself, so cause and effect loop. Assumes feedback-loops (reinforcing vs balancing loops), supply-and-demand (price as information), and critical-mass (tipping thresholds). Organising idea: in most of nature, facts drive beliefs one way; in social systems, beliefs also drive the facts, closing a loop (George Soros’s REFLEXIVITY; Robert Merton’s SELF-FULFILLING PROPHECY; the Thomas theorem — "if people define situations as real, they are real in their consequences"). Sections, each with mechanism + worked example: self-fulfilling prophecy (the bank run — a solvent bank fails purely because depositors expect it to; tie to game-theory coordination and to critical-mass thresholds); self-defeating/suicidal prophecy (a confident forecast that a road will be jammed empties it; a "safe" reputation breeds the complacency that ends it); reflexivity in markets (Soros — prices are shaped by biased perceptions that then feed back into the fundamentals they price, so bubbles and busts are not anomalies but the loop running hot; boom/bust as reinforcing feedback breaking equilibrium); reflexivity in the social world (stereotype threat, the Pygmalion/Rosenthal effect where expectations change performance, placebo, credit ratings and self-fulfilling confidence/panic); the difference from ordinary feedback — here the loop passes through BELIEFS and EXPECTATIONS, so information and narrative are causal forces. Pitfalls & where the model lies: not everything is reflexive (gravity doesn’t care what you believe — reflexivity needs an agent whose beliefs act back on the system, so don’t over-apply it to purely physical/exogenous facts); reflexive processes are inherently hard to predict and can reverse violently (unfalsifiable "it’s reflexive" storytelling is a trap); confusing a genuine self-fulfilling loop with mere correlation; and the moral hazard of engineering self-fulfilling confidence (talking up a bubble). Build an interactive island (a "reflexivity loop": a slider for how strongly BELIEF feeds back into the underlying FUNDAMENTAL, plus an initial shock/rumour; below a coupling threshold beliefs and reality settle to fundamentals, above it the learner watches a self-fulfilling boom or a bank-run collapse run away, with a readout of belief vs reality vs the gap and whether the prophecy fulfilled or defeated itself). Plus a Categorize (self-fulfilling vs self-defeating vs non-reflexive/exogenous) and MatchConcepts (reflexivity, self-fulfilling prophecy, Thomas theorem, Pygmalion effect, boom-bust loop), Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'antifragility-and-via-negativa',
     icon: '🌱',

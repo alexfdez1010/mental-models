@@ -225,3 +225,6 @@ export type { DebiasingBenchProps, DebiasingTool, DebiasingScenario, FixKind } f
 
 export { SignallingSeparator, default as SignallingSeparatorDefault } from '@/components/react/SignallingSeparator';
 export type { SignallingSeparatorProps } from '@/components/react/SignallingSeparator';
+
+export { ReflexivityLoop, default as ReflexivityLoopDefault } from '@/components/react/ReflexivityLoop';
+export type { ReflexivityLoopProps } from '@/components/react/ReflexivityLoop';
