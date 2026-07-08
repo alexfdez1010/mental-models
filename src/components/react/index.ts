@@ -231,3 +231,6 @@ export type { ReflexivityLoopProps } from '@/components/react/ReflexivityLoop';
 
 export { FragilityTester, default as FragilityTesterDefault } from '@/components/react/FragilityTester';
 export type { FragilityTesterProps, FragilitySystem } from '@/components/react/FragilityTester';
+
+export { ErgodicityEngine, default as ErgodicityEngineDefault } from '@/components/react/ErgodicityEngine';
+export type { ErgodicityEngineProps } from '@/components/react/ErgodicityEngine';

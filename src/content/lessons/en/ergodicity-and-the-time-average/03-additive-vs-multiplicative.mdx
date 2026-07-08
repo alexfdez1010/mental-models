@@ -1,0 +1,236 @@
+---
+title: "Additive vs Multiplicative"
+description: "The fork that decides which average is telling the truth. When wealth changes by adding fixed amounts, the process is ergodic and expected value is safe. When it changes by multiplying — the way real money, portfolios and growth actually work — it turns non-ergodic, and the trick that saves you is a logarithm: multiplication in wealth is addition in log-wealth."
+topic: "en/ergodicity-and-the-time-average"
+order: 4
+minutes: 12
+updated: 2026-07-08
+---
+
+import { MCQ, Quiz, Reveal, Callout } from '@/components/react';
+
+Lessons 01 and 02 handed you the two averages and made a coin misbehave. This lesson finds the *fault line* underneath all of it — the single structural question that decides, in advance, whether the ensemble average is your friend or a con artist. It comes down to one word: does your wealth **add** or does it **multiply**?
+
+That fork is the whole game. On one side of it, the two averages agree and expected value tells the truth. On the other, they split, and the number your intuition trusts is computing somebody else's future. And at the very end there's a small mathematical miracle — a logarithm — that turns the dangerous side back into the safe side, which is exactly the move lesson 04 will optimise.
+
+<MCQ
+  client:visible
+  pretest
+  question="Two games. Game A: each round you WIN or LOSE a fixed number of dollars (say +$10 or −$8), regardless of how much you have. Game B: each round your wealth is MULTIPLIED by some factor (say ×1.5 or ×0.6). Which game is more likely to be non-ergodic — where the time average and the ensemble average disagree?"
+  options={[
+    { text: "Game A, the additive one — fixed dollar swings are the dangerous kind.", correct: false },
+    { text: "Game B, the multiplicative one — when steps scale with your wealth, the path compounds and the two averages can tear apart.", correct: true },
+    { text: "Neither — a fair game is ergodic by definition.", correct: false },
+    { text: "Both equally — the arithmetic is identical, only the numbers differ.", correct: false },
+  ]}
+  explanation="No penalty on a pretest — just feel the shape. Adding a fixed amount doesn't care where you are: +$10 is +$10 whether you hold $50 or $50,000, so the swings never compound and the average behaves. Multiplying does care: ×0.6 costs you $20 at $50 but $20,000 at $50,000, so the effect scales with the path, order-sensitivity creeps in, and the time average peels away from the ensemble average. Additive is the ergodic side of the fork; multiplicative is the non-ergodic side. This whole lesson lives on that fork."
+/>
+
+## Additive dynamics: the swings that don't care where you are
+
+Picture a game where every round you either pocket a fixed **\$10** or pay a fixed **\$8** — and the amount never changes with your bankroll. Rich or broke, a win is exactly \$10 and a loss is exactly \$8. The step is **blind to your current wealth**. That blindness is the whole point.
+
+Formally, an **additive process** updates your wealth $W$ by *adding* an independent random amount each round: $W_{t+1} = W_t + X_t$, where the size of $X_t$ doesn't depend on $W_t$. Because the increments simply pile up, after $n$ rounds your wealth is your starting stake plus a **sum** of $n$ draws — and the long-run per-round change is just the ordinary arithmetic mean of those draws. Sums are the natural home of the arithmetic mean, and the arithmetic mean is exactly what expected value computes.
+
+Here is the additive coin worked out. It's a fair 50/50: heads pays **+\$10**, tails costs **−\$8**. The expected value per round is:
+
+$$\tfrac{1}{2}(+10) + \tfrac{1}{2}(-8) = +1$$
+
+A clean **+\$1 per round**. Now the crucial claim: a *single* player, grinding this coin over time, also nets about **+\$1 per round**. Watch one plausible run:
+
+| Round | Flip | Change | Wealth |
+|---|---|---|---|
+| Start | — | — | \$100 |
+| 1 | Heads | +\$10 | \$110 |
+| 2 | Tails | −\$8 | \$102 |
+| 3 | Heads | +\$10 | \$112 |
+| 4 | Heads | +\$10 | \$122 |
+| 5 | Tails | −\$8 | \$114 |
+| 6 | Tails | −\$8 | \$106 |
+
+Six rounds, three heads and three tails, net change +\$6 — that's **+\$1 per round**, precisely the expected value. The order didn't matter (addition commutes: rearrange the flips and you land on \$106 either way), and no single loss could scale up to swallow you, because a loss is forever just \$8. **The time average equals the ensemble average.** This game is **ergodic**, and expected value is telling you the exact truth about your own future.
+
+### When to use it
+
+Reach for additive thinking — and trust expected value outright — whenever the outcomes are **fixed, bounded amounts that don't scale with your total**: a \$5 side bet among friends, a rounding error, a small fixed fee, a coin for pocket change. If no single step can ever grow large enough to end the game, the crowd's fate really is your fate.
+
+## Multiplicative dynamics: the swings that scale with the path
+
+Now the version that runs the real world. Instead of adding dollars, each round *multiplies* your wealth by a factor: heads is **×1.5** (up 50%), tails is **×0.6** (down 40%) — the flagship coin from lessons 00–02. The step is no longer blind to your wealth; it is a **percentage of wherever you currently stand**, so its dollar size grows and shrinks with you.
+
+Formally, a **multiplicative process** updates wealth by *multiplying* by an independent random factor: $W_{t+1} = W_t \cdot R_t$. After $n$ rounds your wealth is your stake times a **product** of $n$ factors, $W_n = W_0 \cdot R_1 R_2 \cdots R_n$ — not a sum. And products behave nothing like sums: they are order-*insensitive* in value but path-*sensitive* in consequence, a single tiny factor can gut the whole chain, and a factor of exactly zero is an absorbing barrier that no later win can undo.
+
+Put the two coins side by side and the fork snaps into focus:
+
+| | Additive coin | Multiplicative coin |
+|---|---|---|
+| Heads move | +\$10 (fixed) | ×1.5 (scales with wealth) |
+| Tails move | −\$8 (fixed) | ×0.6 (scales with wealth) |
+| Wealth after $n$ rounds | stake **plus a sum** | stake **times a product** |
+| Right average | arithmetic mean | geometric mean |
+| Ensemble = time average? | **Yes** — ergodic | **No** — non-ergodic |
+| Can one step end the game? | No (loss capped at \$8) | Yes (a ×0 is forever) |
+| Expected value tells *you* the truth? | Yes | **No** |
+
+Same 50/50 fairness, same "positive edge" story on paper — and yet the additive coin gently enriches every patient player while the multiplicative coin, as lesson 02 showed, grinds almost everyone toward zero. The only thing that changed is *add versus multiply*. That is the fork, and everything downstream in this course hangs on which side of it you're standing.
+
+## The master illusion: +50% and −40% do not net +10%
+
+Here is the trap that catches nearly everyone, expert and novice alike — the **master illusion** of multiplicative games. Read the coin's two moves — "up 50%, down 40%" — and your additive intuition sums them: $50 - 40 = +10$, so surely one win and one loss leave you **up 10%**. It feels airtight.
+
+It's wrong, and it's not close. Percentages don't add across rounds; the factors *multiply*:
+
+$$1.5 \times 0.6 = 0.9$$
+
+One win and one loss leave you at **×0.9 — down 10%**, not up 10%. A twenty-percentage-point error, in the wrong direction, from a sum your gut swears is obvious. The additive mind sees $+50\% + (-40\%) = +10\%$; the multiplicative reality is $\times 1.5 \times 0.6 = \times 0.9$.
+
+<Reveal client:visible buttonLabel="Why doesn't +50% then −40% get back to even?">
+Because the −40% is charged on a **bigger** balance than the +50% built. Start with \$100. The +50% adds \$50 (that's 50% of \$100) → \$150. Now the −40% is taken from \$150, not from \$100, so it subtracts \$60 (40% of \$150) → \$90. You handed back \$60 to get \$50 — a net loss of \$10. The gain was computed on your old, smaller wealth; the loss was computed on your new, larger wealth, so the loss simply weighs more. Reverse the order and it's identical: \$100 → \$60 (down 40%) → \$90 (up 50% of \$60 is \$30). Multiplication doesn't care about order, but it never forgets that each percentage is charged on a *different base*. This is why a gain and an equal-*percentage* loss never cancel.
+</Reveal>
+
+The asymmetry has a brutal, practical corollary. Because a −50% loss cuts you to half, undoing it takes not a +50% gain but a **+100%** gain — you have to *double* what's left just to get back to where you started. Losses on the multiplicative side are structurally harder to reverse than same-sized gains are to hold, and it gets worse the deeper you fall:
+
+| Loss suffered | Wealth left (from \$100) | Gain needed to recover | 
+|---|---|---|
+| −10% | \$90 | +11.1% |
+| −20% | \$80 | +25% |
+| −50% | \$50 | +100% |
+| −80% | \$20 | +400% |
+| −90% | \$10 | +900% |
+
+The recovery column doesn't just outrun the loss column — it accelerates. That runaway is **volatility drag** in disguise, and it's why big swings quietly bleed a compounding bankroll even when the "average" percentage looks flat.
+
+<MCQ
+  client:visible
+  question="A friend brags that his portfolio 'made 50% one year and lost 40% the next, so I'm still up 10% over the two years.' What actually happened to $1,000 invested at the start?"
+  options={[
+    { text: "It's up ~10% — about $1,100 — just like he said.", correct: false },
+    { text: "It's down ~10% — about $900 — because 1.5 × 0.6 = 0.9, and the percentages multiply, not add.", correct: true },
+    { text: "It's exactly flat at $1,000 — the gain and loss cancel.", correct: false },
+    { text: "You can't tell without knowing which year came first.", correct: false },
+  ]}
+  explanation="Spot the trap: the +50% and −40% are charged on different bases, so they don't sum. $1,000 × 1.5 = $1,500, then × 0.6 = $900 — down 10%, and order doesn't change it (0.6 × 1.5 = 0.9 either way). His additive intuition (+50 − 40 = +10) is exactly the master illusion this lesson is about. Real portfolios multiply; treat every percentage move as a factor, never a summand."
+/>
+
+## The log transform: how multiplication becomes addition
+
+Everything above makes multiplicative games sound like a different, scarier universe with its own broken arithmetic. Here's the beautiful part: **one transformation turns that universe back into the safe, additive one.** Take logarithms.
+
+The whole trick rests on the defining property of the **logarithm**: it converts multiplication into addition.
+
+$$\ln(a \cdot b) = \ln a + \ln b$$
+
+So apply $\ln$ to a multiplicative process and the product of factors becomes a **sum** of log-factors: $\ln W_n = \ln W_0 + \ln R_1 + \ln R_2 + \cdots + \ln R_n$. In **log-wealth**, the process is purely *additive* — the very structure we already proved is ergodic. And because it's now a sum, the honest long-run growth rate is just the **ordinary arithmetic mean of the log-returns**. The scary multiplicative game and the tame additive game are the same game viewed through two different lenses; the logarithm is the lens that makes the time average computable.
+
+Let's derive the flagship coin's true growth rate from scratch — the −5% that lesson 02 asserted, now *earned*. The two factors are 1.5 and 0.6. Their log-returns:
+
+- $\ln(1.5) \approx +0.405$
+- $\ln(0.6) \approx -0.511$
+
+Average them (arithmetic mean, because in log-space it's additive):
+
+$$\tfrac{1}{2}(0.405) + \tfrac{1}{2}(-0.511) = -0.053$$
+
+That −0.053 is the average log-return per round. Convert back out of log-space to get the actual per-round wealth factor:
+
+$$e^{-0.053} \approx 0.949$$
+
+A per-round multiplier of **≈ 0.949 — about −5% per round**, exactly the time-average decay lesson 02 measured, now derived from first principles. And notice what $e^{-0.053}$ *is*: it's the **geometric mean** of 1.5 and 0.6, since $\sqrt{1.5 \times 0.6} = \sqrt{0.9} \approx 0.949$. That's the deep reason the geometric mean (the average taken in log-space) is the *honest per-round factor* for multiplicative growth, while the arithmetic mean of the raw factors (the +5% ensemble number) answers a different question entirely.
+
+<MCQ
+  client:visible
+  question="For a multiplicative game, why is the geometric mean of the factors the right per-round growth rate — while the arithmetic mean of the same factors is not?"
+  options={[
+    { text: "Because taking the log turns the product into a sum, so the time-average growth rate is the arithmetic mean of the LOG-returns — and exp of that mean is exactly the geometric mean.", correct: true },
+    { text: "Because the geometric mean is always smaller, and multiplicative games are always losers.", correct: false },
+    { text: "Because the arithmetic mean ignores the odds, while the geometric mean weights them.", correct: false },
+    { text: "There's no real reason — the two means happen to be interchangeable here.", correct: false },
+  ]}
+  explanation="The mechanism is the log. In log-wealth the process is additive, so its honest long-run rate is the arithmetic mean of the log-returns: ½·ln(1.5) + ½·ln(0.6) = −0.053. Exponentiate to leave log-space and you get e^(−0.053) ≈ 0.949 — which is precisely √(1.5 × 0.6) = √0.9, the geometric mean. The arithmetic mean of the raw factors (½·1.5 + ½·0.6 = 1.05, the +5%) is the ensemble average — real, but not the number you live. Geometric mean = time average = what compounds through you."
+/>
+
+## Why a small side-bet is almost additive: the bridge to Kelly
+
+If multiplication is the poison, here's the antidote in embryo: **stake only a tiny fixed fraction of your wealth, and a multiplicative game starts behaving like an additive one again.** The two averages, torn apart by full-stake compounding, quietly drift back toward each other.
+
+Two things happen when you shrink the bet. First, losses stop being ruinous: if you risk 2% of your wealth per round instead of 100%, no single flip — or even a long cold streak — can push you near the absorbing barrier at zero, so the game never actually ends and you're always around to collect the average. Second, and more subtly, over a *small* range the logarithm is **nearly a straight line**: for tiny moves $x$, $\ln(1+x) \approx x$. In that near-linear zone, "the average of the logs" and "the log of the average" almost coincide — so the geometric mean and the arithmetic mean nearly *re-converge*, and the gap between the time average and the ensemble average shrinks toward zero.
+
+Concretely: our full-stake coin costs about −5%/round (geometric mean 0.949). Cut the stake to a small slice of wealth and the per-round drag collapses toward — and past — zero, turning that same fair coin from a slow bankruptcy into a genuine engine of growth, *without touching the odds*. You didn't fix the coin; you dragged a non-ergodic gamble back toward the ergodic side of the fork by refusing to bet the whole path on any one flip.
+
+That is the exact hinge lesson 04 walks through. **Kelly** betting is precisely the recipe for *how small* — the fraction that maximises the time-average (log) growth rate you actually live, rather than the ensemble average that lures everyone else onto the rocks. This lesson found the disease (multiplication) and named its cure in principle (shrink the bet, restore near-additivity); Kelly turns that principle into a number.
+
+## Pitfall: wearing additive glasses in a multiplicative world
+
+The single most expensive mistake in all of finance and gambling is **importing additive intuition into a multiplicative game** — and you've now met its flagship form. "Up 50%, down 40%, so I'm up 10%" *feels* like arithmetic because your brain was trained on additive childhood examples (allowances, marbles, fixed bets) where it was genuinely true. It stops being true the instant outcomes are **percentages of a moving balance**, because then each move multiplies and $1.5 \times 0.6 = 0.9$, not $1.1$.
+
+The same error wears other costumes. "My fund averaged 10% a year" usually quotes the *arithmetic* mean of annual returns, which systematically overstates the growth an investor actually compounded — the geometric mean is always lower, and the gap widens with volatility. This is **volatility drag**: two funds can share an identical average return, yet the choppier one leaves you poorer, because its bigger swings multiply through a lower geometric mean. Whenever someone reasons about *rates, returns, or percentages that stack round after round* using plain addition, they are quietly computing the ensemble average and mistaking it for their own path.
+
+<Callout variant="warning" title="The tell">
+The moment a quantity changes by a **percentage of its current self** — money, populations, prices, infections, compound interest — you are in multiplicative territory. Stop adding the percentages. Convert each to a factor, multiply them, and if you want the honest per-round rate, average the *logs* (or, equivalently, take the geometric mean). Adding percentages that compound is the master illusion in a business suit.
+</Callout>
+
+## When to use it: the one question to ask before you average
+
+The entire lesson collapses to a single reflex you can run in a heartbeat, **before** trusting any average anyone hands you:
+
+> **Does this outcome ADD to my total, or MULTIPLY it?**
+
+- If it **adds** a fixed, bounded amount that doesn't scale with your wealth — the process is additive, ergodic, and expected value (the arithmetic mean) is telling you the exact truth. Trust it.
+- If it **multiplies** — a percentage of your current stake, a return, a growth rate, anything that compounds — the process is multiplicative and non-ergodic. The arithmetic mean is the crowd's number, not yours; take the **geometric mean** (average the logs) for the rate you'll actually live, and remember that a step near zero can end the game forever.
+
+That fork — add or multiply — decides *which average is telling the truth*, and asking it costs you nothing. Getting it wrong has bankrupted people who could compute expected value in their sleep.
+
+## Recap
+
+<Quiz
+  client:visible
+  title="Additive vs multiplicative — lock it in"
+  questions={[
+    {
+      question: "Which of these is an ADDITIVE (ergodic) process where expected value is safe?",
+      options: [
+        { text: "A stock portfolio whose value changes by a percentage each day.", correct: false },
+        { text: "A coin that pays a fixed +$10 or −$8 regardless of your bankroll.", correct: true },
+        { text: "A bacterial colony that grows by a growth rate each hour.", correct: false },
+        { text: "Reinvesting all your winnings back into the same percentage bet.", correct: false },
+      ],
+      explanation: "Additive means fixed amounts that don't scale with your wealth — the ±$8/$10 coin. Its wealth after n rounds is a SUM, so the arithmetic mean (expected value) is the honest per-round change and time = ensemble. The other three all change by a percentage of the current amount, so they multiply, compound, and turn non-ergodic.",
+    },
+    {
+      question: "A multiplicative coin does +50% or −40% on a fair flip. After exactly one win and one loss, your wealth is:",
+      options: [
+        { text: "Up 10%, because +50% − 40% = +10%.", correct: false },
+        { text: "Flat, because the gain and loss cancel.", correct: false },
+        { text: "Down 10%, because 1.5 × 0.6 = 0.9.", correct: true },
+        { text: "It depends on which came first.", correct: false },
+      ],
+      explanation: "The master illusion. Percentages that compound multiply, not add: 1.5 × 0.6 = 0.9 → down 10%. Order is irrelevant (0.6 × 1.5 = 0.9 too). The −40% is charged on the bigger, post-gain balance, so it outweighs the +50% built on the smaller starting balance.",
+    },
+    {
+      question: "For the +50%/−40% coin, the honest per-round growth factor is e^(mean log-return). Given ln(1.5) ≈ 0.405 and ln(0.6) ≈ −0.511, that factor is about:",
+      options: [
+        { text: "1.05 (+5%) — the arithmetic mean of the factors.", correct: false },
+        { text: "0.949 (−5%) — e^(½·0.405 + ½·(−0.511)) = e^(−0.053).", correct: true },
+        { text: "1.00 (flat) — the logs cancel.", correct: false },
+        { text: "0.90 (−10%) — the product of the two factors.", correct: false },
+      ],
+      explanation: "Average the log-returns (additive in log-space): ½·0.405 + ½·(−0.511) = −0.053. Exponentiate to leave log-space: e^(−0.053) ≈ 0.949, i.e. −5%/round — which equals the geometric mean √(1.5 × 0.6) = √0.9. The 1.05 is the ensemble/arithmetic answer; 0.949 is the time-average you actually live.",
+    },
+    {
+      question: "You're stuck in a multiplicative, non-ergodic game. Which move drags it back toward ergodic — making the time average and ensemble average nearly re-converge?",
+      options: [
+        { text: "Bet a much larger fraction of your wealth to 'average out' faster.", correct: false },
+        { text: "Stake only a small fixed fraction each round, so losses are non-ruinous and the log is nearly linear.", correct: true },
+        { text: "Play more rounds at full stake — more data fixes the gap.", correct: false },
+        { text: "Nothing can — non-ergodicity is permanent once a game is multiplicative.", correct: false },
+      ],
+      explanation: "Shrink the bet. A tiny fixed fraction keeps any loss far from the zero barrier (the game never ends) and keeps every move in the near-linear zone of the log, where ln(1+x) ≈ x — so the geometric and arithmetic means nearly re-converge. That's the bridge to Kelly (lesson 04), which computes exactly how small.",
+    },
+  ]}
+/>
+
+<Callout variant="success" title="The one line to carry out">
+Before you trust an average, ask: **does this add or multiply?** Fixed amounts *add* → the process is additive and ergodic, and expected value is honest. Percentages of your current wealth *multiply* → the process is non-ergodic, and the only honest per-round rate is the geometric mean (the arithmetic mean of the logs). The logarithm is the whole trick: it turns multiplication back into addition, which is why log-wealth is where compounding finally tells the truth.
+</Callout>
+
+Next up: lesson 04, **The Kelly Fix** — we take the "shrink the bet" cure this lesson named in principle and turn it into a number. Kelly betting maximises the *time-average* (log) growth rate you actually live, finding the exact fraction that keeps you on the growing, ergodic side of the fork instead of the crowd-flattering, path-destroying one.

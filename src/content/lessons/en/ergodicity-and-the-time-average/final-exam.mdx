@@ -1,0 +1,329 @@
+---
+title: "Final Exam: Ergodicity & the Time Average"
+description: "A graded, one-way final exam on ergodicity — the two averages, ergodic vs non-ergodic, the flagship +50%/−40% coin, additive vs multiplicative and the log transform, the Kelly fix and overbetting, ruin and absorbing barriers, insurance as buying back ergodicity, and where the model lies. Pass mark 70%."
+topic: "en/ergodicity-and-the-time-average"
+order: 8
+minutes: 22
+updated: 2026-07-08
+---
+
+import { Callout, FinalExam, MindMap } from '@/components/react';
+
+This is the final exam for **Ergodicity & the Time Average**. It pulls the whole course together: the two averages — the **ensemble average** taken across a crowd of players at a single instant, and the **time average** taken along one player's own path — and the crucial fact that they only agree in an *ergodic* world. The flagship coin promises a cheerful $+5\%$ per round on the ensemble mean yet quietly delivers ruin to the typical player, because multiplying $1.5 \times 0.6 = 0.9$ shrinks a lone bankroll every pair of flips. The fix is not to chase the average across a crowd you will never be, but to optimise the average you actually *live* — take the log, grow at the arithmetic mean of log-returns, and above all **survive the absorbing barrier first**, because after zero there is nothing left to compound. Several questions look easy until you spot the trap: an EV that silently assumes you never hit zero, a "safe" percentage bet that is really multiplicative, or a slogan dressed up as a mechanism.
+
+<Callout variant="warning" title="How this exam works">
+Read carefully — this exam is final. Each question appears one at a time. Once you
+submit an answer it is **locked for good**: there's no going back, no retry, and
+no restart. Your score is hidden until the end, where you'll see a pass/fail
+verdict. **The pass mark is 70%.** A few questions ask you to *select all* correct
+answers.
+</Callout>
+
+<FinalExam
+  client:visible
+  passPercent={70}
+  questions={[
+    {
+      question: 'The whole course rests on two different averages. Which pair of definitions is correct?',
+      options: [
+        { text: 'The ensemble average is taken across a crowd of players at one instant; the time average is taken along one player\'s own path over many rounds', correct: true },
+        { text: 'The ensemble average is one player over time; the time average is many players at one instant' },
+        { text: 'Both averages describe the same crowd, just measured in different currencies' },
+        { text: 'The ensemble average is the median outcome; the time average is the most common outcome' },
+      ],
+      explanation: 'The ensemble average parallelises across space — a million players each play one round, and you average their results. The time average parallelises across time — one player plays a million rounds, and you average along that single path. Confusing the two is the original sin of the whole subject, because in a non-ergodic world they give different numbers and only one of them is the one you live.',
+    },
+    {
+      question: 'What does it mean for a system to be ergodic, and who coined the term?',
+      options: [
+        { text: 'The time average equals the ensemble average, so one long path is a faithful sample of the whole crowd; Boltzmann coined "ergodic" in statistical mechanics', correct: true },
+        { text: 'The time average is always larger than the ensemble average; the term was coined by Kelly in 1956' },
+        { text: 'Every player ends up with exactly the same wealth; the term comes from modern behavioural finance' },
+        { text: 'The system has no randomness at all; Bernoulli coined the term in 1738' },
+      ],
+      explanation: 'Ergodic means the two averages coincide: watching one system for a long time tells you the same thing as watching many copies at one instant, so you can swap time for a crowd. Boltzmann introduced the term in statistical mechanics, where a gas molecule bouncing around does eventually visit every state in proportion to the ensemble. When that holds, the shortcut is legal — the ensemble EV really is your fate.',
+    },
+    {
+      question: 'What does it mean for a system to be NON-ergodic?',
+      options: [
+        { text: 'The time average and the ensemble average diverge, so your own path is not a representative sample of the crowd — the crowd\'s fate and yours can point in opposite directions', correct: true },
+        { text: 'The system is non-ergodic only if it is completely deterministic with no noise' },
+        { text: 'It simply means the outcomes are unusually volatile from day to day' },
+        { text: 'It means the ensemble average is undefined or infinite' },
+      ],
+      explanation: 'Non-ergodic means the two averages part ways. The crowd can get richer on average while almost every individual in it goes broke, because a vanishing minority of extreme winners props up the ensemble mean. When a system is non-ergodic, quoting the ensemble EV to a single player is quietly answering the wrong question — their path is not a sample of that crowd.',
+    },
+    {
+      question: 'The flagship coin is fair: heads multiplies your wealth by 1.5, tails multiplies it by 0.6. What is the ensemble expected value per round?',
+      options: [
+        { text: 'EV = 0.5 × 1.5 + 0.5 × 0.6 = 0.75 + 0.30 = 1.05, a gain of +5% per round', correct: true },
+        { text: 'EV = 0.5 × 1.5 − 0.5 × 0.6 = 0.45, a loss of −55% per round' },
+        { text: 'EV = 1.5 × 0.6 = 0.90, a loss of −10% per round' },
+        { text: 'EV = (1.5 + 0.6) / 2 − 1 = 0.05, but only if you never actually play' },
+      ],
+      explanation: 'The ensemble average multiplies each outcome by its probability and adds: 0.5 × 1.5 + 0.5 × 0.6 = 1.05, a tidy +5% per round. Averaged across a huge crowd where half get heads and half get tails this instant, the pot grows 5% a round. It looks like a licence to print money — which is exactly why the coin is such a good trap.',
+    },
+    {
+      question: 'For that same coin, what happens along one player\'s path — the time-average growth rate per round?',
+      options: [
+        { text: 'A head-then-tail pair multiplies wealth by 1.5 × 0.6 = 0.9, so the per-round factor is √0.9 ≈ 0.949 — about −5% per round, steadily toward zero', correct: true },
+        { text: 'The per-round factor is (1.5 + 0.6) / 2 = 1.05, the same +5% as the ensemble' },
+        { text: 'The per-round factor is 1.5 on average, because heads dominates over time' },
+        { text: 'There is no per-round factor; a fair coin always returns you to where you started' },
+      ],
+      explanation: 'Along one path the flips multiply, and a balanced pair does 1.5 × 0.6 = 0.9. Spread that over the two rounds and the geometric per-round factor is √0.9 ≈ 0.949, roughly −5% each round. The ensemble mean says +5%, the time average says −5%: same coin, opposite verdicts. The lone player bleeds toward zero while the crowd\'s pot swells — the definition of non-ergodic made concrete.',
+    },
+    {
+      question: 'How can the ensemble mean climb at +5% while the typical player goes broke? (Select all that apply.)',
+      allowMultiple: true,
+      options: [
+        { text: 'A vanishing fraction of players hit long lucky streaks and grow astronomically, hauling the arithmetic mean up on their own', correct: true },
+        { text: 'The distribution of wealth becomes wildly right-skewed (lognormal), so the mean sits far above the median', correct: true },
+        { text: 'The median player — the typical experience — drifts toward zero even as the mean rises', correct: true },
+        { text: 'The ensemble mean is simply miscalculated; done correctly it would also be negative' },
+      ],
+      explanation: 'Under multiplication, wealth goes lognormal: a tiny handful of runaway winners carry the arithmetic mean skyward while the vast majority sink. Mean far exceeds median, so "the average is up" and "the typical player is ruined" are both true at once. The ensemble EV is correct arithmetic — it is just describing the lucky tail, not the player you are. The one false option claims a calculation error; there is none.',
+    },
+    {
+      question: 'Why are additive dynamics — where you add or subtract fixed amounts and the effect does not depend on your current wealth — ergodic?',
+      options: [
+        { text: 'Because gains and losses of fixed size do not compound on each other, one long path samples the same outcomes as the whole crowd, so the time average equals the ensemble average', correct: true },
+        { text: 'Because addition is faster to compute than multiplication' },
+        { text: 'Because additive games can never lose money' },
+        { text: 'Because in additive games every player is guaranteed the identical result' },
+      ],
+      explanation: 'When each round adds or removes a fixed amount regardless of your balance, order does not matter and nothing compounds — adding 10 then subtracting 10 is the same as subtracting 10 then adding 10. There is no path-dependence, so watching one player for a long time reproduces the ensemble spread, and the two averages agree. Additive worlds are the ergodic ones where the ensemble EV really is your destiny.',
+    },
+    {
+      question: 'Why are multiplicative dynamics — where each round changes your wealth by a percentage of the current amount — non-ergodic?',
+      options: [
+        { text: 'Because percentage changes compound on the running total, outcomes become path-dependent and one path stops being a fair sample of the crowd, so the time average and ensemble average diverge', correct: true },
+        { text: 'Because multiplication always produces a positive expected value' },
+        { text: 'Because multiplicative games have no randomness in them' },
+        { text: 'Because they are mathematically identical to additive games' },
+      ],
+      explanation: 'When each round multiplies your wealth, the effect of a gain or loss depends on where you are, so the sequence matters and results compound. That path-dependence is what breaks ergodicity: one player\'s trajectory is no longer a representative draw from the crowd, so the time average (what they live) peels away from the ensemble average (what the crowd shows). Percentages-of-current-wealth are the non-ergodic worlds.',
+    },
+    {
+      question: 'The classic illusion: "+50% one year, then −40% the next, that\'s +10%, so I am ahead." Why is this wrong?',
+      options: [
+        { text: 'The gains multiply, not add: 1.5 × 0.6 = 0.9, a net −10%. Percentages of a changing base do not add, and a −50% loss needs a +100% gain just to break even', correct: true },
+        { text: 'It is right — +50% minus 40% really is +10%, so you are ahead' },
+        { text: 'The error is that −40% should have been counted as −60%' },
+        { text: 'The order is wrong; done in the other order it would give +10%' },
+      ],
+      explanation: 'Growth rates compound multiplicatively, so 1.5 × 0.6 = 0.9 — you finish with 90% of your money, a net loss of 10%, not a gain. Percentages act on a moving base, which is also why losses hurt asymmetrically: after −50% you are at half, and climbing back needs a full +100%. Adding percentages of different bases is the everyday face of ignoring multiplicativity.',
+    },
+    {
+      question: 'The log transform is the key trick for multiplicative worlds. What does taking logarithms actually do?',
+      options: [
+        { text: 'It turns products into sums, so multiplicative-in-wealth becomes additive-in-log-wealth, and the time-average growth rate is just the arithmetic mean of the log-returns', correct: true },
+        { text: 'It turns sums into products, making an additive game multiplicative' },
+        { text: 'It removes all the randomness so the outcome becomes certain' },
+        { text: 'It converts the ensemble average into the median automatically' },
+      ],
+      explanation: 'Because ln(a × b) = ln a + ln b, taking the log of a multiplicative process converts compounding into simple addition. In log-space the non-ergodic multiplicative game becomes an ergodic additive one, so the time-average growth rate equals the ordinary arithmetic mean of the log-returns. That is why "maximise the average log-return" is the right objective — it is the average you actually live.',
+    },
+    {
+      question: 'If the flagship coin is so ruinous, why can a SMALL side-bet on it be treated as roughly harmless?',
+      options: [
+        { text: 'Shrinking the stake makes the game approximately additive again, so the gap between the two averages narrows toward zero and the ensemble EV becomes a decent approximation', correct: true },
+        { text: 'Because small bets change the coin\'s probabilities in your favour' },
+        { text: 'Because any bet under a fixed dollar amount is legally exempt from ruin' },
+        { text: 'Because small bets are ergodic only if you also add leverage' },
+      ],
+      explanation: 'Multiplicativity bites in proportion to how much of your wealth is on the line. Bet a tiny slice and a gain or loss barely moves your total, so the dynamics look additive and the two averages reconverge — the ensemble EV is once again a fair guide. Size is the dial: big fraction, dangerously non-ergodic; small fraction, approximately ergodic and safe to judge on the mean.',
+    },
+    {
+      question: 'The Kelly criterion is the principled fix. What does it maximise, and what is its lineage?',
+      options: [
+        { text: 'It maximises expected log-wealth, E[ln W] — the time-average growth rate; Kelly stated it in 1956, with Bernoulli\'s 1738 log-utility argument as the precursor', correct: true },
+        { text: 'It maximises the ensemble arithmetic mean of wealth, E[W]; it was invented by Boltzmann' },
+        { text: 'It maximises the probability of winning any single round, regardless of size' },
+        { text: 'It minimises variance while ignoring growth entirely' },
+      ],
+      explanation: 'Kelly maximises E[ln W], the expected logarithm of wealth — which, thanks to the log transform, is exactly the time-average growth rate you live. John Kelly formalised it in 1956, but Daniel Bernoulli had proposed maximising the log of wealth back in 1738 to resolve the St. Petersburg paradox. Kelly is not risk-aversion dressed up; it is optimising the correct average.',
+    },
+    {
+      question: 'For a simple bet you win with probability p at even payoff odds b (net b per unit staked, else lose the stake), Kelly says stake f* = (bp − q)/b where q = 1 − p. With b = 1 and p = 0.6, what fraction should you bet?',
+      options: [
+        { text: 'f* = (1 × 0.6 − 0.4) / 1 = 0.2, so stake 20% of your bankroll', correct: true },
+        { text: 'f* = 0.6, so stake 60% of your bankroll — your full win probability' },
+        { text: 'f* = 1.0, so stake everything because the edge is positive' },
+        { text: 'f* = 0.4, so stake your loss probability of 40%' },
+      ],
+      explanation: 'Plug in: bp = 1 × 0.6 = 0.6, q = 0.4, so f* = (0.6 − 0.4)/1 = 0.2 — bet 20%. Kelly scales the stake to the size of your edge, not to your raw win probability. A 60% edge at even money is worth a fifth of your bankroll, no more; the formula refuses to let optimism about p become the bet size.',
+    },
+    {
+      question: 'The growth-versus-bet-fraction curve is hump-shaped, peaking at Kelly. What is true about betting MORE than Kelly (overbetting)? (Select all that apply.)',
+      allowMultiple: true,
+      options: [
+        { text: 'It lowers your long-run growth rate compared with Kelly', correct: true },
+        { text: 'It simultaneously raises your risk and volatility', correct: true },
+        { text: 'It is strictly worse — you give up growth AND take on more danger, a lose-lose', correct: true },
+        { text: 'It is a reasonable trade because more risk always buys more growth' },
+      ],
+      explanation: 'Growth as a function of bet fraction rises to a peak at Kelly and then falls. Past that peak you are on the downslope: growth drops while variance keeps climbing, so overbetting is strictly dominated — less reward, more risk. Bet far enough past Kelly and the growth rate goes negative even with a genuine edge. The false option is the gambler\'s creed that more risk must mean more return; here it buys the opposite.',
+    },
+    {
+      question: 'Why does Kelly refuse to ever stake your entire bankroll, no matter how good the edge looks?',
+      options: [
+        { text: 'Because ln(0) = −∞, wiping out carries an infinite penalty in log-wealth, so the objective it maximises will never accept any chance of hitting zero', correct: true },
+        { text: 'Because staking everything is against the rules of most casinos' },
+        { text: 'Because the arithmetic mean of wealth is undefined at zero' },
+        { text: 'Because Kelly assumes you can always borrow more after a loss' },
+      ],
+      explanation: 'Kelly maximises E[ln W], and the log of zero is negative infinity. So any strategy with a non-zero chance of reaching zero carries an infinitely bad term and can never be optimal. Ruin-avoidance is not bolted on — it falls out of the objective for free. That is why Kelly always leaves something on the table: it treats the absorbing barrier as literally infinitely costly.',
+    },
+    {
+      question: 'Practitioners often bet half-Kelly rather than full Kelly. Why?',
+      options: [
+        { text: 'Half-Kelly keeps most of the growth (about three-quarters of it) for far less than half the variance, and it protects you against overestimating your own edge — a cheap insurance against a mismeasured p', correct: true },
+        { text: 'Half-Kelly always grows faster than full Kelly in the long run' },
+        { text: 'Half-Kelly is required by law in regulated markets' },
+        { text: 'Half-Kelly eliminates all risk while keeping the full growth rate' },
+      ],
+      explanation: 'Because the growth curve is nearly flat near its peak, halving the stake sacrifices only a little growth (roughly a quarter) while slashing volatility dramatically. It also guards against the real-world problem that your estimate of the edge is uncertain — if your true p is lower than you think, full Kelly quietly becomes overbetting, and half-Kelly gives you a margin of safety. Less white-knuckle, almost as much growth.',
+    },
+    {
+      question: 'What is the absorbing barrier at zero, and why does the ensemble EV ignore it?',
+      options: [
+        { text: 'It is the state of ruin: once wealth touches zero, nothing rebounds and you are out of the game forever. The ensemble EV silently assumes you can always keep playing, so it never charges for that possibility', correct: true },
+        { text: 'It is a temporary dip that the EV correctly accounts for by design' },
+        { text: 'It is a bonus level you unlock after enough losses' },
+        { text: 'It is the point at which the ensemble average becomes negative' },
+      ],
+      explanation: 'Zero is absorbing: reach it and you cannot bounce back, because you have nothing left to multiply. The ensemble average is a sum over all possible futures as if every player plays on forever, so it never subtracts for the ones who have already been knocked out. That blind spot is exactly why a positive EV can coexist with near-certain personal ruin.',
+    },
+    {
+      question: 'Suppose each period carries a small ruin probability p = 0.001, independently. Over n = 1,000 periods, what is the chance of ruin, using 1 − (1 − p)^n?',
+      options: [
+        { text: '1 − (0.999)^1000 ≈ 1 − 0.37 ≈ 0.63, about a 63% chance of ruin', correct: true },
+        { text: '0.001 × 1,000 = 1.0, a guaranteed 100% chance of ruin' },
+        { text: '0.001, because the per-period risk never accumulates' },
+        { text: 'About 0.05, because rare events almost never occur' },
+      ],
+      explanation: 'Survival across independent periods multiplies: (1 − 0.001)^1000 = (0.999)^1000 ≈ 0.37, so ruin ≈ 1 − 0.37 ≈ 0.63. A risk that feels negligible each period — one in a thousand — compounds to roughly a coin-flip over enough repetitions. Small per-step ruin odds plus long exposure equals near-inevitable disaster; this is why "it almost never happens" is cold comfort over a lifetime.',
+    },
+    {
+      question: 'What does adding leverage do in a multiplicative world?',
+      options: [
+        { text: 'It raises the ensemble expected value but lowers the time-average growth rate and raises the probability of ruin — voluntarily making your own dynamics more non-ergodic', correct: true },
+        { text: 'It raises both the ensemble EV and the time-average growth with no downside' },
+        { text: 'It makes a non-ergodic game ergodic by smoothing the returns' },
+        { text: 'It has no effect on growth, only on the currency you report in' },
+      ],
+      explanation: 'Leverage magnifies the percentage swings, which lifts the arithmetic ensemble mean but also deepens the drawdowns that compounding punishes. Past a point (related to Kelly), it drags the time-average growth down and pushes ruin up. Borrowing to bet bigger is choosing to make your path more non-ergodic — the crowd\'s average looks better while your own survival gets worse.',
+    },
+    {
+      question: 'How does insurance "buy back ergodicity," and why can it be rational even at negative expected value?',
+      options: [
+        { text: 'A small certain premium removes a rare, ruinous tail that could send you to the absorbing barrier; paying it can raise your time-average growth even though it lowers your ensemble EV — you are buying the right to keep playing', correct: true },
+        { text: 'Insurance is only ever rational when it has positive expected value' },
+        { text: 'Insurance works by increasing your ensemble EV at no cost' },
+        { text: 'Insurance removes randomness entirely, making every outcome certain' },
+      ],
+      explanation: 'By ensemble-EV accounting insurance looks like a losing bet — you pay more in premiums than you expect back, or the insurer would go broke. But for one non-ergodic path, chopping off the ruinous tail keeps you off the absorbing barrier, and avoiding zero is worth a certain small cost because it protects the compounding you live. Negative EV, positive time-average growth: rational insurance in one line.',
+    },
+    {
+      question: 'Why does the insurance trade help BOTH sides — the insurer and the insured? (Select all that apply.)',
+      allowMultiple: true,
+      options: [
+        { text: 'The insurer pools many uncorrelated policies, so by the law of large numbers its aggregate outcome is effectively ergodic — it can collect the ensemble EV', correct: true },
+        { text: 'The insured is a single non-ergodic path for whom removing the ruinous tail raises time-average growth', correct: true },
+        { text: 'The same premium is a good deal for a diversified ensemble player and a good deal for a lone path player, so both are better off', correct: true },
+        { text: 'It helps both sides only because one of them must be making a mistake' },
+      ],
+      explanation: 'This is the elegant asymmetry. The insurer holds thousands of uncorrelated risks, so its total is close to the ensemble average — it lives near the mean and can profitably charge the EV. The insured is one path, for whom the tail is existential; paying the premium raises their time-average growth. Both sides gain because they occupy different averages — no one has to be fooled. The false option insists someone must be losing; ergodicity explains why not.',
+    },
+    {
+      question: 'Is EVERYTHING non-ergodic? What does the course say about over-applying the idea?',
+      options: [
+        { text: 'No — small, bounded, repeatable, non-ruinous bets can be judged fine on the ensemble mean; declaring everything non-ergodic is the mirror error of ignoring it', correct: true },
+        { text: 'Yes — every decision in life is strictly non-ergodic without exception' },
+        { text: 'Yes — the ensemble average is never useful for any real decision' },
+        { text: 'No — nothing is ever non-ergodic; the ensemble EV always applies' },
+      ],
+      explanation: 'Ergodicity is a tool, not a religion. When a bet is small relative to your wealth, bounded, repeatable, and carries no path to ruin, the dynamics are approximately additive and the ensemble EV is a perfectly good guide. Slapping "non-ergodic!" on every decision is just the opposite mistake — you would refuse free money out of misplaced fear. The skill is telling which world you are in.',
+    },
+    {
+      question: 'Is non-ergodicity the same as being risk-averse?',
+      options: [
+        { text: 'No — it is a fact about which average is decision-relevant, and it bites even for a perfectly risk-neutral agent; note that Peters\'s ergodicity view versus the expected-utility mainstream is a live, honest debate', correct: true },
+        { text: 'Yes — non-ergodicity is just a fancy re-labelling of risk-aversion' },
+        { text: 'Yes — only risk-averse people should ever care about the time average' },
+        { text: 'No — because risk-neutral agents always maximise the time average by definition' },
+      ],
+      explanation: 'A risk-neutral agent who cares only about growth, with no distaste for volatility at all, still should optimise the time average in a multiplicative world — because that is literally the growth they will experience. So non-ergodicity is about which average is the right target, not about attitude toward risk. And it is worth stating fairly: Ole Peters argues the time average dispenses with utility functions, while the expected-utility mainstream disputes how much is genuinely new — a real, unresolved debate.',
+    },
+    {
+      question: 'How do you avoid the trap of "it\'s non-ergodic" becoming an unfalsifiable slogan?',
+      options: [
+        { text: 'Demand the mechanism — show multiplicative (compounding) dynamics, a reachable absorbing barrier, and that the two averages actually diverge; without those three, "non-ergodic" is just a word', correct: true },
+        { text: 'Accept the label whenever an outcome feels risky or surprising' },
+        { text: 'Assume any losing bet must have been non-ergodic in hindsight' },
+        { text: 'Treat the term as proven the moment someone invokes it confidently' },
+      ],
+      explanation: 'The word explains nothing on its own. To earn it, point to the actual machinery: compounding/multiplicative dynamics, an absorbing barrier the path can genuinely reach, and a demonstrated gap between the time and ensemble averages. If a claim cannot produce that mechanism, it is a slogan, not an analysis — the same rigour you would demand of any causal story.',
+    },
+  ]}
+/>
+
+## Course Recap
+
+<MindMap
+  client:visible
+  title="Ergodicity and the time average, in one picture"
+  root={{
+    label: 'Ergodicity and the time average',
+    children: [
+      {
+        label: 'Ergodic vs non-ergodic',
+        children: [{ label: 'The ensemble average runs across a crowd at one instant while the time average runs along one path over many rounds, ergodic means they agree so one path samples the crowd, non-ergodic means they diverge so your path is not the crowd, and Boltzmann coined the word in statistical mechanics' }],
+      },
+      {
+        label: 'The flagship coin flip',
+        children: [{ label: 'A fair coin that pays times one-and-a-half on heads and times zero-point-six on tails has an ensemble expected value of one-point-zero-five or plus 5 percent per round, yet a head-tail pair multiplies to one-and-a-half times zero-point-six equals zero-point-nine so the time average is the square root of zero-point-nine near zero-point-nine-four-nine or minus 5 percent, the crowd swells while the typical player drifts to zero as a right-skewed lognormal mean races past the median' }],
+      },
+      {
+        label: 'Additive vs multiplicative',
+        children: [{ label: 'Adding fixed amounts is path-independent and ergodic so the ensemble expected value is your fate, multiplying by percentages of current wealth compounds and is non-ergodic, plus 50 percent then minus 40 percent is really times zero-point-nine or minus 10 percent, and taking the log turns products into sums so growth is the arithmetic mean of log-returns' }],
+      },
+      {
+        label: 'The Kelly fix',
+        children: [{ label: 'Kelly maximises expected log-wealth E ln W which is the time-average growth rate, from Bernoulli in 1738 to Kelly in 1956, the stake is f-star equals bp minus q over b so b equals 1 and p equals zero-point-six gives 20 percent, the growth curve is hump-shaped so overbetting is strictly worse, ruin is refused for free because ln 0 is minus infinity, and half-Kelly keeps most growth for far less variance' }],
+      },
+      {
+        label: 'Ruin and the real world',
+        children: [{ label: 'Zero is an absorbing barrier that nothing rebounds from and the ensemble expected value silently assumes you never touch it, a tiny per-period ruin chance compounds so one minus zero-point-nine-nine-nine to the thousandth is about zero-point-six-three, leverage lifts the ensemble mean but lowers growth and raises ruin, and insurance buys back ergodicity by paying a small certain premium to remove a ruinous tail even at negative expected value' }],
+      },
+      {
+        label: 'Where the model lies',
+        children: [{ label: 'Not everything is non-ergodic since small bounded repeatable non-ruinous bets can be judged on the ensemble mean, non-ergodicity is about which average is decision-relevant and bites even a risk-neutral agent with Peters versus expected-utility a live debate, and to avoid an empty slogan demand the mechanism of multiplicativity a reachable absorbing barrier and diverging averages' }],
+      },
+    ],
+  }}
+/>
+
+<Callout variant="success" title="Key takeaways">
+Ergodicity is the difference between two averages: the **ensemble average** across a
+crowd at one instant, and the **time average** along your own path. When they agree
+the world is **ergodic** and the ensemble EV is your fate; when they diverge it is
+**non-ergodic** and your path is not a sample of the crowd. The **flagship coin** — fair,
+$\times 1.5$ heads / $\times 0.6$ tails — makes this vivid: the ensemble mean climbs at
+$+5\%$ a round while the typical player bleeds toward zero, because $1.5 \times 0.6 = 0.9$
+and the time-average factor is $\sqrt{0.9} \approx 0.949$. The engine is
+**multiplicativity**: adding fixed amounts is **additive and ergodic**, but multiplying
+by percentages compounds and is **non-ergodic** — which is why $+50\%$ then $-40\%$ is
+really $\times 0.9$, and why a $-50\%$ loss needs a $+100\%$ gain to recover. Take the
+**log** and products become sums, so the growth you live is the arithmetic mean of
+log-returns — exactly what **Kelly** ($f^* = (bp - q)/b$, maximising $E[\ln W]$)
+optimises, refusing ruin for free because $\ln 0 = -\infty$, punishing **overbetting**,
+and rewarding **half-Kelly** caution. Above all, respect the **absorbing barrier at
+zero**: small per-period ruin odds compound, **leverage** trades growth for a higher
+ensemble mean, and **insurance buys back ergodicity** — a small certain premium removing
+a ruinous tail, rational even at negative EV. But do not over-apply it: small, bounded,
+non-ruinous bets are fine on the mean, non-ergodicity is about *which average matters*
+(not risk-aversion), and "it's non-ergodic" is only real if you can show the
+mechanism — multiplicativity, a reachable barrier, and diverging averages.
+</Callout>

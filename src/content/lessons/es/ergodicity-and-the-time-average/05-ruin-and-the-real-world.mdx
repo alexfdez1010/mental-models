@@ -1,0 +1,280 @@
+---
+title: "La ruina y el mundo real"
+description: "El cero es una barrera absorbente (absorbing barrier): tócalo una vez y no hay siguiente ronda. De ese único hecho brotan la ruina del jugador (gambler's ruin), el dimensionado de posiciones, por qué el apalancamiento (leverage) destruye en silencio el crecimiento del promedio temporal y el bello replanteamiento del seguro como recomprar la ergodicidad (buying back ergodicity). Donde las matemáticas de la moneda se vuelven consejos que puedes usar de verdad — porque una estrategia tiene que sobrevivir antes de poder componer."
+topic: "es/ergodicity-and-the-time-average"
+order: 6
+minutes: 13
+updated: 2026-07-08
+---
+
+import { MCQ, Quiz, MatchConcepts, Callout } from '@/components/react';
+
+Cuatro lecciones después, dominas la teoría: los dos promedios, la moneda insignia, la dinámica aditiva frente a la multiplicativa y la regla de **Kelly** para cuánto apostar. Esta lección gasta esa teoría. Coge la fría aritmética de la moneda y la convierte en decisiones que puedes tomar de verdad un lunes por la mañana: sobre cuánto arriesgar, si endeudarte, por qué contratar un seguro que "esperas" perder y qué partes de tu única vida no debes jamás apostar. Todo se deduce de un hecho poco glamuroso: **solo puedes perderlo todo una vez.**
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una apuesta tiene un valor esperado genuinamente positivo, pero cada ronda hay una pequeña probabilidad de perder toda tu apuesta. Piensas jugarla repetidamente con dinero que no puedes permitirte perder. ¿Qué deberías comprobar primero?"
+  options={[
+    { text: "Nada — un valor esperado positivo significa que a la larga sale a cuenta, así que simplemente juega", correct: false },
+    { text: "Si puedes sobrevivir a cada una de las rondas — porque si un mal paso termina el juego, la larga carrera nunca llega para ti", correct: true },
+    { text: "Si hay más gente jugándola, ya que las multitudes suelen tener razón", correct: false },
+    { text: "Si el valor esperado supera el 10%, que es el umbral seguro", correct: false },
+  ]}
+  explanation="El valor esperado positivo es una afirmación sobre una multitud de jugadores paralelos; da por hecho en silencio que sigues en el juego para cobrarlo. Si una sola ronda puede llevarte a cero, debes valorar la supervivencia antes que el promedio. Sobrevive primero, optimiza después: toda la lección en una línea."
+/>
+
+## La ruina y la barrera absorbente
+
+**Analogía.** Piensa en la riqueza cero como un agujero negro sin velocidad de escape. Cualquier otro nivel de riqueza puede rebotar — puedes caer a 10 \$ y volver a subir a 1.000 \$ multiplicando hacia arriba. Pero el 0 \$ es *pegajoso*: multiplica cero por lo que sea, por afortunado que sea, y obtienes cero. No queda nada que componer. En el lenguaje de la física esto es una **barrera absorbente (absorbing barrier)**: un estado que, una vez alcanzado, nunca se abandona.
+
+**Definición precisa.** Una **barrera absorbente (absorbing barrier)** es un nivel (aquí, la riqueza cero, o "la ruina") tal que, una vez que tu trayectoria lo toca, la secuencia termina: no hay ronda después de la ruina. Esto es lo que hace que la riqueza sea **no ergódica**: tu trayectoria personal puede quedar eliminada permanentemente del juego, así que deja de muestrear la dispersión de la multitud. Todo reluciente cálculo de valor esperado da por hecho en silencio que *nunca tocas la barrera*. Borra esa suposición y el cálculo entero pierde su sentido.
+
+**La fórmula.** Supón que cada periodo lleva una probabilidad independiente $p$ de ruina total. La probabilidad de sobrevivir un periodo es $1 - p$; la de sobrevivir $n$ periodos seguidos es $(1 - p)^n$. Así que la probabilidad de arruinarte *al menos una vez* a lo largo de $n$ periodos es:
+
+$$P(\text{ruina en } n \text{ periodos}) = 1 - (1 - p)^n$$
+
+**Ejemplo resuelto.** Toma un riesgo tan pequeño que parece insignificante: $p = 0{,}001$, una probabilidad de 1 entre 1.000 de reventar cada periodo. Juega durante $n = 1000$ periodos y la probabilidad de supervivencia es $(0{,}999)^{1000}$. Eso no está cerca de 1: es aproximadamente 0,368. Así que la probabilidad de ruina es:
+
+$$1 - (0{,}999)^{1000} \approx 1 - 0{,}368 = 0{,}63$$
+
+Un **63% de probabilidad de ruina** — peor que lanzar una moneda — ensamblado por completo a partir de un riesgo que descartaste por trivial. Esto es la **ruleta rusa por dinero**: cualquier disparo suelto *probablemente* va bien, y eso es exactamente la trampa. Los riesgos pequeños de ruina no se suman con suavidad; se componen hasta la casi certeza.
+
+| Riesgo de ruina por periodo ($p$) | 10 periodos | 100 periodos | 1.000 periodos |
+| --- | --- | --- | --- |
+| 0,001 (1 entre 1.000) | 1,0% | 9,5% | 63,2% |
+| 0,005 (1 entre 200) | 4,9% | 39,4% | 99,3% |
+| 0,01 (1 entre 100) | 9,6% | 63,4% | 99,99% |
+
+**Trampa.** "Las probabilidades de desastre son diminutas" es una afirmación por ronda, y tú no vives una ronda: vives miles. Un riesgo de cola insignificante una vez es casi garantizado si lo repites lo suficiente. La pregunta nunca es "¿qué improbable es la ruina esta vez?", sino "¿qué improbable es que *nunca* toque la ruina en todas las veces que juego?".
+
+### Cuándo usarlo
+
+Cada vez que una decisión se repite y lleva aunque sea una pequeña probabilidad de una pérdida que termine el juego, calcula $1 - (1 - p)^n$ antes de fiarte de las probabilidades por ronda. Si ese número es incómodamente grande, la catástrofe "rara" es en realidad tu caso base, y ningún valor esperado te salvará de ella.
+
+## La ruina del jugador: por qué el jugador pequeño acaba absorbido
+
+**Analogía.** Dos personas lanzan una moneda justa por 1 \$ la ronda: tú con 100 \$ en el bolsillo, el casino con dinero efectivamente ilimitado. Cada sesión tu saldo vaga arriba y abajo como un borracho al borde de un acantilado. El borde del acantilado del casino está tan lejos que es como si no existiera; el tuyo está justo a tu lado, en 0 \$. Con suficiente deambular, el borracho cae por el borde *cercano* — no porque tenga mala suerte en promedio, sino porque solo tiene un borde por el que caer.
+
+**Definición precisa.** La **ruina del jugador (gambler's ruin)** es el resultado clásico de que un apostador con un capital *finito* que hace apuestas repetidas contra un rival de bolsillos mucho más *profundos* acaba absorbido en cero — incluso con probabilidades justas (50/50), y a menudo incluso con probabilidades ligeramente *favorables* — porque el lado de bolsillos profundos puede aguantar más que los vaivenes del jugador pequeño. La restricción vinculante es la **supervivencia**, no la ventaja. Puedes tener razón en promedio y aun así quedar eliminado de la mesa antes de que el promedio te pague.
+
+**Ejemplo resuelto.** En un juego justo (50/50, a dinero par), la probabilidad de que un jugador que empieza con $i$ euros alcance un objetivo de $N$ euros antes de tocar cero es exactamente $i / N$. Empieza con 100 \$ y sueña con convertirlos en 10.000 \$ (así que $N = 10000$): tu probabilidad de llegar antes de reventar es $100 / 10000 = 1\%$. El otro **99%** de las veces, el borde cercano — el cero — te reclama primero. La moneda era justa; el *capital*, no.
+
+**Trampa.** La gente confunde "probabilidades justas" con "seguro para jugar eternamente". La justicia gobierna la *deriva* media (cero, aquí); no dice nada sobre qué barrera absorbente tocas primero. Con una barrera cercana (tu ruina) y una imposiblemente lejana (la de la banca), la cercana gana casi cualquier juego largo.
+
+### Cuándo usarlo
+
+Siempre que seas el jugador pequeño contra una contraparte mucho mayor y paciente — un inversor minorista contra el mercado, una startup contra los titulares, un apostador contra la banca — asume que la restricción es *durar lo suficiente*, no *tener razón en promedio*. Dimensiona y espacia tus apuestas para que el borde cercano quede fuera de alcance.
+
+## Por qué la media del conjunto engaña en las colas gruesas
+
+**Analogía.** Imagina una lotería cuyo premio *medio* es enorme porque un boleto entre mil millones paga un billón de dólares. La media aritmética es gigantesca — pero casi nadie toca nunca ese boleto, y para "cobrar" la media tendrías que seguir solvente a lo largo de mil millones de sorteos. No lo estarás. La ruina te elimina mucho antes de que llegue el valor atípico.
+
+**El punto.** En un mundo de **colas gruesas** — lo que en el curso de colas gruesas llamamos **Extremistán** — la media aritmética (del conjunto) está *dominada por valores atípicos raros e irrepetibles*. Un único valor monstruoso puede sostener toda la media. Pero una media que tienes que sobrevivir para cobrar es una media que no puedes cobrar, porque la propia grosura de la cola que infla la media es también lo que te elimina de camino. La **media del conjunto (ensemble average)** cuenta la trayectoria del premio gordo; el **promedio temporal (time average)** — tu trayectoria — casi nunca la monta.
+
+**Contraste resuelto.** Vuelve a la moneda insignia (+50% en cara / −40% en cruz sobre todo tu saldo). La media del conjunto es un alegre +5% por ronda, sostenida por entero por una menguante astilla de trayectorias que siguen sacando cara. La trayectoria típica, la mediana, se multiplica hacia abajo a un −5% por ronda aproximadamente, hacia la barrera. La media es real; solo describe a un fantasma afortunado, no a ti.
+
+**Trampa.** En colas gruesas, "la media" y "lo que pasa normalmente" son criaturas distintas — y la brecha *crece* con lo ruinosa que sea la cola. Reportar la media como si fuera el resultado típico no es un error de redondeo; es un error de categoría que oculta justo el resultado (la ruina) que termina tu capacidad de promediar nada.
+
+### Cuándo usarlo
+
+Desconfía de cualquier media de titular sacada de un proceso de colas gruesas, componente o capaz de ruina. Pide en su lugar la trayectoria *mediana* y la probabilidad de *supervivencia*. Si la media la sostienen un puñado de valores atípicos que debes sobrevivir para alcanzar, la media no es tu pronóstico.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una estrategia lleva una probabilidad de 1 entre 100 (p = 0,01) de ruina total cada año. En un horizonte de 100 años, ¿cuál es aproximadamente la probabilidad de ruina al menos una vez?"
+  options={[
+    { text: "Alrededor del 1% — el mismo riesgo diminuto que un solo año", correct: false },
+    { text: "Alrededor del 10% — los riesgos pequeños siguen siendo pequeños", correct: false },
+    { text: "Alrededor del 63% — usando 1 − (0,99)^100 ≈ 1 − 0,366", correct: true },
+    { text: "Exactamente el 100% — la ruina es segura", correct: false },
+  ]}
+  explanation="Sobrevivir cada año es 0,99, así que sobrevivir los 100 años es (0,99)^100 ≈ 0,366, y la probabilidad de ruina es 1 − 0,366 ≈ 0,634, alrededor del 63%. Un riesgo de '1 entre 100' repetido 100 veces se convierte en una probabilidad de catástrofe de cara-o-cruz o peor. Ese es todo el peligro de los pequeños riesgos de ruina: se componen."
+/>
+
+## Las caras del mismo hecho en el mundo real
+
+Todo lo anterior es una sola idea con cuatro disfraces. Aquí es donde la aritmética de la moneda se vuelve consejo.
+
+### Dimensionado de posiciones: nunca apuestes lo que termina el juego
+
+**Ilustración concreta.** Dos operadores tienen cada uno una ventaja genuina de +5% por operación. Alicia arriesga el 2% de su capital por operación; Bruno, seguro de su ventaja, arriesga el 60%. Una racha de unas pocas malas operaciones apenas roza a Alicia — sigue componiendo durante años. La misma racha lleva a Bruno a través de una secuencia de ×0,6 de la que no puede recuperarse, y queda fuera. Ambos tenían la *misma ventaja*; solo uno sobrevivió para componerla. A lo largo de una carrera, el operador que sigue operando le gana al operador que fue brevemente brillante.
+
+**La regla.** El **dimensionado de posiciones (position sizing)** significa nunca arriesgar tanto que una mala racha plausible termine el juego. Esto es exactamente lo que **Kelly** (lección 04) formaliza — apuesta una *fracción* proporcional a tu ventaja — y por qué los profesionales apuestan *Kelly fraccional* (medio Kelly o menos): el coste de crecimiento de apostar un poco de menos es leve, pero el coste de ruina de apostar de más es permanente. La supervivencia es el multiplicador de cada rendimiento futuro.
+
+**Cuándo usarlo.** En cualquier apuesta repetida y componente, dimensiona primero desde el *lado malo*: elige una apuesta lo bastante pequeña como para que la peor racha realista te deje aún en el juego, y luego deja que la ventaja componga. Nunca dimensiones desde el lado bueno.
+
+### El apalancamiento: el destructor de la ergodicidad
+
+**Ilustración concreta.** Endéudate para duplicar tu exposición y duplicas cada vaivén. La moneda insignia se convierte en +100% / −80%. La media del conjunto *sube* — $0{,}5 \times 2{,}0 + 0{,}5 \times 0{,}2 = 1{,}10$, un brillante +10% — así que el folleto se ve mejor. Pero el promedio temporal *cae*: $\sqrt{2{,}0 \times 0{,}2} = \sqrt{0{,}4} \approx 0{,}632$, un brutal −37% por ronda. Y un solo −80% es una larga zancada hacia la barrera. El apalancamiento embelleció el número de la multitud y volvió letal el tuyo.
+
+**La definición.** El **apalancamiento (leverage)** (endeudarse para amplificar una posición) agudiza los vaivenes multiplicativos: *sube* el valor esperado del conjunto mientras *baja* la tasa de crecimiento del promedio temporal y *sube* la probabilidad de ruina. En el lenguaje de este curso, el exceso de apalancamiento es **no ergodicidad voluntaria**: ensanchas deliberadamente la brecha entre la media de la multitud y tu propio destino, por el lado equivocado. El monumento de advertencia es **Long-Term Capital Management (LTCM)**, un fondo de premios Nobel cuyos modelos tenían una ventaja real pero cuyo enorme apalancamiento hizo que un solo movimiento de cola gruesa en 1998 los empujara directos a la barrera. Ventaja sin supervivencia es solo una forma más lenta de reventar.
+
+**Cuándo usarlo.** Trata el apalancamiento como una decisión de supervivencia, no de rendimiento. Antes de endeudarte, recalcula el *promedio temporal* y la *probabilidad de ruina* con los vaivenes apalancados — no el valor esperado del conjunto, que siempre te tentará hacia arriba. Si el apalancamiento aumenta tu probabilidad de tocar cero, está destruyendo crecimiento aun cuando adule la media.
+
+### El seguro: recomprar la ergodicidad
+
+**El replanteamiento (Peters).** Aquí está la idea más bella de la lección. Le pagas a una aseguradora una prima pequeña y *cierta* cada año. Actuarialmente, el seguro es una apuesta de valor esperado *negativo* para ti — la aseguradora incorpora su beneficio en el precio, así que en la media del conjunto pierdes dinero. La lógica de manual del valor esperado dice: no lo contrates. La lógica de manual del valor esperado se equivoca, y la ergodicidad explica por qué.
+
+**Definición precisa.** **Recomprar la ergodicidad (buying back ergodicity)** significa pagar un pequeño coste cierto para *eliminar una cola rara y ruinosa* de tu proceso de riqueza personal. Que se te queme la casa es un evento de barrera absorbente — puede dejarte a cero y terminar tu capacidad de componer. El seguro amputa esa cola. A cambio de un pequeño lastre garantizado, tu proceso de riqueza *ya no puede tocar la barrera*, así que se vuelve **lo bastante ergódico como para seguir componiendo**. No estás comprando una apuesta de valor esperado positivo; estás **comprando el derecho a seguir jugando** — y el valor del promedio temporal de seguir en el juego puede superar con creces el coste de la media del conjunto de la prima. Esto es racional **incluso con valor esperado negativo**.
+
+**La asimetría (por qué funciona para ambos lados).** La aseguradora y tú os enfrentáis a procesos *distintos*. La aseguradora agrupa *millones de pólizas no correlacionadas*; ningún incendio suelto mueve su fortuna, así que su cartera es efectivamente **ergódica** — su promedio temporal converge a la media del conjunto, y cobra su ventaja positiva como el casino de la lección 01. Tú eres **una casa, una trayectoria**. El mismo evento que es un error de redondeo para el conjunto es *la ruina* para ti. La prima de valor esperado negativo que pagas financia la ventaja ergódica de la aseguradora, y a cambio hace que *tu* trayectoria sea lo bastante ergódica como para sobrevivir. Ambos lados ganan porque juegan a juegos distintos.
+
+**Cuándo usarlo.** Asegúrate contra cualquier pérdida que sea pequeña en probabilidad pero *ruinosa* en consecuencia para tu única trayectoria — y sáltate el seguro sobre pérdidas que puedas absorber y encajar. La prueba no es "¿es esta apuesta de valor esperado positivo?". Es "¿amenaza este evento con terminar mi secuencia?". Si sí, paga por eliminarlo aunque sea con pérdidas.
+
+### Los activos de una sola trayectoria
+
+**Ilustración concreta.** Una directiva brillante emprende una apuesta agresiva que arriesga su reputación porque el pago "esperado" se ve genial a lo largo de cien carreras hipotéticas. Pero no hay cien carreras — hay *una*. El 5% de probabilidad de un escándalo descalificador no es un coste manejable promediado sobre yoes paralelos; es una posible barrera absorbente para el único yo que existe.
+
+**El punto.** Tu **carrera, reputación, salud y relaciones** son no ergódicas en el sentido más profundo: obtienes *una trayectoria*, y varias de estas tienen barreras absorbentes propias (una reputación arruinada, una enfermedad mortal, una relación quemada). Caer-y-recuperarse no siempre está en el menú. Así que una apuesta que parece bien "en promedio" puede ser catastrófica en la única trayectoria que de verdad recorres — porque la media se calcula, de nuevo, sobre una multitud de tús paralelos que no existen.
+
+**Cuándo usarlo.** Para cualquier cosa de la que tengas exactamente una y no puedas reconstruir, rechaza las apuestas ruinosas sin importar su media anunciada. Protege la base — salud, nombre, relaciones clave — como protegerías un capital que nunca puedes volver a depositar.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="El seguro es, en la media del conjunto, una apuesta de valor esperado negativo para ti — esperas pagar más en primas de lo que cobras. ¿Por qué puede seguir siendo la elección racional?"
+  options={[
+    { text: "Porque la aseguradora está en secreto montando también una apuesta de valor esperado positivo para ti", correct: false },
+    { text: "Porque elimina una cola rara y ruinosa de tu única trayectoria, así que tu proceso de riqueza puede seguir componiendo — estás comprando el derecho a seguir jugando, no una apuesta de valor esperado positivo", correct: true },
+    { text: "Porque el valor esperado negativo en realidad significa que ganas dinero con el tiempo", correct: false },
+    { text: "Porque todos los demás lo contratan, así que debe merecer la pena", correct: false },
+  ]}
+  explanation="La ergodicidad, no el valor esperado, es la lente correcta. Una pérdida catastrófica es un evento de barrera absorbente para tu única trayectoria; una pequeña prima cierta amputa esa cola para que no puedas quedar fuera del juego. El valor del promedio temporal de sobrevivir para seguir componiendo puede empequeñecer el coste de la media del conjunto de la prima — por eso el seguro de valor esperado negativo es a menudo la jugada correcta que maximiza el crecimiento."
+/>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un fondo añade apalancamiento a una estrategia multiplicativa. ¿Qué le ocurre al valor esperado del conjunto, a la tasa de crecimiento del promedio temporal y a la probabilidad de ruina?"
+  options={[
+    { text: "Los tres caen — el apalancamiento encoge todo", correct: false },
+    { text: "El valor esperado del conjunto sube, el crecimiento del promedio temporal baja y la probabilidad de ruina sube", correct: true },
+    { text: "El valor esperado del conjunto baja, pero el crecimiento del promedio temporal sube — por eso los fondos lo hacen", correct: false },
+    { text: "Nada cambia; el apalancamiento solo escala los números, no la dinámica", correct: false },
+  ]}
+  explanation="El apalancamiento amplifica los vaivenes multiplicativos. Eso eleva la media de la multitud (unos pocos ganadores apalancados se hacen enormes), pero baja la tasa de crecimiento que la trayectoria típica de verdad vive y acerca la barrera — así que la probabilidad de ruina trepa. El exceso de apalancamiento es no ergodicidad voluntaria: ensancha la brecha entre la media del conjunto y tu destino, por el lado equivocado. LTCM es la víctima de manual."
+/>
+
+## El hilo conductor: sobrevive primero, optimiza después
+
+Quítale los disfraces y cada sección dice la misma frase. **"En promedio sale bien" es un consuelo helado para la única trayectoria que reventó.** La media del conjunto vive en un mundo de tús paralelos; tú vives en una única línea a través del tiempo con una trampilla en el cero. Como esa trampilla es *absorbente*, la supervivencia no es una meta entre muchas — es la *precondición* de cualquier otra meta. Una estrategia tiene que sobrevivir antes de que se le *permita* componer. El crecimiento que arriesga la ruina no es crecimiento rápido; es un boleto de lotería vestido de crecimiento.
+
+Por eso el orden es fijo e innegociable: **sobrevive primero, optimiza después.** El dimensionado de posiciones, evitar el exceso de apalancamiento, contratar seguros que eliminen la ruina, guardar tus activos de una sola trayectoria — no son añadidos prudentes a una estrategia que maximiza rendimientos. *Son* la estrategia, porque son lo que te mantiene en el tablero el tiempo suficiente para que el componer ocurra siquiera.
+
+## Repaso de vocabulario: empareja los términos clave
+
+Antes de la comprobación final, fija los cinco términos que sostienen todo este curso.
+
+<MatchConcepts
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  allCorrectLabel="✓ Todo emparejado"
+  partialResultWord="correctas"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  question="Empareja cada término clave con lo que significa."
+  pairs={[
+    { term: "Ergodicidad", definition: "La propiedad de que la trayectoria a largo plazo de un jugador coincide con la media de la multitud — cuando se cumple, el valor esperado es seguro de usar." },
+    { term: "Media del conjunto", definition: "El resultado medio a través de muchos jugadores paralelos en un instante — el número que calcula el valor esperado." },
+    { term: "Promedio temporal", definition: "La tasa de crecimiento de un solo jugador que vive la secuencia a través del tiempo — el número que de verdad decide tu destino." },
+    { term: "Barrera absorbente", definition: "Un nivel como la riqueza cero que, una vez tocado, termina la secuencia — no hay ronda después de la ruina." },
+    { term: "Recomprar la ergodicidad", definition: "Pagar un pequeño coste cierto (seguro) para eliminar una cola ruinosa, así tu trayectoria personal puede seguir componiendo — merece la pena incluso con valor esperado negativo." },
+  ]}
+  explanation="Estos cinco términos son la columna vertebral de la economía de la ergodicidad. La ergodicidad es la propiedad de sí/no; la media del conjunto y el promedio temporal son los dos números que ella reconcilia o no; la barrera absorbente es lo que rompe la ergodicidad al eliminar tu trayectoria del juego; y recomprar la ergodicidad es la jugada práctica — pagar un pequeño coste cierto para eliminar una cola ruinosa y que tu única trayectoria pueda seguir componiendo."
+/>
+
+## Trampa y cuándo usar todo esto
+
+**La trampa que retirar para siempre.** El error maestro, una última vez: calcular un valor esperado y tratarlo como tu destino, *sin comprobar si un solo paso puede terminar el juego*. Cada desastre real de esta lección — el riesgo de 1 entre 1.000 que se compone, la ruina del jugador, el apalancamiento de LTCM, el escándalo de la directiva — es la misma omisión. Nadie escribió "damos por hecho que nunca tocamos la barrera"; solo citaron la media y siguieron.
+
+**La única pregunta que hacer, siempre.** Antes de cualquier apuesta repetida o componente: **"¿Puede un solo paso terminar el juego?"** Si *no* — la pérdida es acotada, no ruinosa, aditiva — adelante, fíate de la media del conjunto; es ergódica y el valor esperado es tu amigo. Si *sí* — un paso puede llevarte a una barrera absorbente — entonces **valora la supervivencia antes de valorar la media.** Dimensiona la posición para la peor racha, rechaza el apalancamiento ruinoso, contrata el seguro que elimina la cola y protege los activos de una sola trayectoria que no puedes reconstruir. La media puede esperar; tú no puedes permitírtelo.
+
+<Callout variant="warning" title="Sobrevive primero, optimiza después">
+El cero es una barrera absorbente: una vez que tu trayectoria lo toca, no hay siguiente ronda, y ninguna media posterior puede rescatarte. Ese único hecho impulsa la ruina del jugador, el dimensionado disciplinado de posiciones, la forma en que el apalancamiento sube en secreto la media de la multitud mientras baja *tu* crecimiento y *sube* la ruina, y el elegante argumento del seguro como **recomprar la ergodicidad** — que merece la pena pagar incluso con valor esperado negativo, porque compras el derecho a seguir jugando. Antes de cualquier apuesta repetida, pregunta: *¿puede un solo paso terminar el juego?* Si sí, valora la supervivencia primero. A continuación, la lección 06 — **"Dónde miente el modelo"** — vuelve el mismo escepticismo hacia el propio marco de la ergodicidad: dónde las pulcras matemáticas dejan en silencio de coincidir con la desordenada realidad.
+</Callout>
+
+<Quiz
+  client:visible
+  title="Comprueba tu comprensión: la ruina y el mundo real"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  completeTitleLabel="Cuestionario completado"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: "¿Qué hace de la riqueza cero una 'barrera absorbente', y por qué importa?",
+      options: [
+        { text: "Es el rendimiento más bajo posible, pero siempre puedes recuperarte de él", correct: false },
+        { text: "Una vez que tu trayectoria lo toca, la secuencia termina — no queda nada que multiplicar, así que ninguna media posterior puede rescatarte", correct: true },
+        { text: "Es un umbral psicológico sin significado matemático", correct: false },
+        { text: "Solo importa en los juegos aditivos", correct: false },
+      ],
+      explanation: "Multiplica cero por lo que sea y sigues obteniendo cero — no queda nada que componer. Tocar la barrera elimina tu trayectoria del juego de forma permanente, que es exactamente lo que hace no ergódica la riqueza y por qué todo cálculo de valor esperado da por hecho en silencio que nunca la alcanzas.",
+    },
+    {
+      question: "Un riesgo con p = 0,001 (1 entre 1.000) de ruina total por periodo se ejecuta durante 1.000 periodos. ¿Cuál es aproximadamente la probabilidad de ruina al menos una vez?",
+      options: [
+        { text: "Alrededor del 0,1% — sigue siendo insignificante", correct: false },
+        { text: "Alrededor del 10%", correct: false },
+        { text: "Alrededor del 63%, a partir de 1 − (0,999)^1000 ≈ 1 − 0,368", correct: true },
+        { text: "Exactamente el 100%", correct: false },
+      ],
+      explanation: "Sobrevivir los 1.000 periodos es (0,999)^1000 ≈ 0,368, así que la probabilidad de ruina es alrededor de 0,63 — peor que lanzar una moneda, construida enteramente a partir de un riesgo 'insignificante' de 1 entre 1.000. Los pequeños riesgos de ruina no siguen siendo pequeños al repetirse; se componen hacia la certeza.",
+    },
+    {
+      question: "¿Por qué contratar un seguro suele ser racional aunque sea una apuesta de valor esperado negativo en la media del conjunto?",
+      options: [
+        { text: "Porque se convierte en una apuesta de valor esperado positivo tras suficientes años", correct: false },
+        { text: "Porque elimina una cola ruinosa de tu única trayectoria, recomprando la ergodicidad para que puedas seguir componiendo — aunque la aseguradora, que agrupa millones de pólizas, sea la ergódica que cobra la ventaja", correct: true },
+        { text: "Porque las aseguradoras son organizaciones benéficas que pierden dinero a propósito", correct: false },
+        { text: "Porque el valor esperado no se aplica al seguro", correct: false },
+      ],
+      explanation: "Tú eres una casa en una trayectoria; una catástrofe es un evento de barrera absorbente para ti. La aseguradora agrupa millones de pólizas no correlacionadas y es efectivamente ergódica, cobrando una ventaja positiva. Tu prima de valor esperado negativo compra el derecho a seguir jugando — eliminando la cola para que tu trayectoria pueda seguir componiendo — que el promedio temporal puede valorar muy por encima del coste de la prima.",
+    },
+    {
+      question: "¿Cómo cambia el añadir apalancamiento a una estrategia multiplicativa el valor esperado del conjunto, el crecimiento del promedio temporal y la probabilidad de ruina?",
+      options: [
+        { text: "Los eleva los tres juntos", correct: false },
+        { text: "Sube el valor esperado del conjunto, baja el crecimiento del promedio temporal y sube la probabilidad de ruina — no ergodicidad voluntaria", correct: true },
+        { text: "Baja el valor esperado del conjunto pero merece la pena por seguridad", correct: false },
+        { text: "Deja la dinámica sin cambios", correct: false },
+      ],
+      explanation: "El apalancamiento amplifica los vaivenes: la media de la multitud sube (unos pocos ganadores apalancados se hacen enormes), pero la tasa de crecimiento que la trayectoria típica vive cae y la barrera se acerca, así que la probabilidad de ruina trepa. Ensancha deliberadamente la brecha entre la media del conjunto y tu destino por el lado equivocado — el error que hundió a LTCM.",
+    },
+  ]}
+/>

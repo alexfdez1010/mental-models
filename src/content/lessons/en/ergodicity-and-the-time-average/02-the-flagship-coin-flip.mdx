@@ -1,0 +1,226 @@
+---
+title: "The Flagship Coin Flip"
+description: "Heads +50%, tails −40%, a fair coin: expected value says +5% a round, and it will still bankrupt almost everyone. Work the whole thing out — why the ensemble mean climbs to five figures while the typical path decays to pocket change, and why a vanishing fraction of astronomically lucky streaks hauls the average up over the ruin of everyone else."
+topic: "en/ergodicity-and-the-time-average"
+order: 3
+minutes: 13
+updated: 2026-07-08
+---
+
+import { MCQ, Quiz, Reveal, ErgodicityEngine, Callout } from '@/components/react';
+
+Lesson 1 handed you the distinction: a process is **ergodic** when the time average equals the ensemble average, and **non-ergodic** when they part ways. That was the map. This lesson is the territory — one coin, worked out to the last decimal, until the split between the two averages stops being a definition you can recite and becomes a thing you can *feel*. It is the emotional centre of the course for a simple reason: it is the friendliest-looking bet in the world, and it will quietly ruin nearly everyone who takes it.
+
+<MCQ
+  client:visible
+  pretest
+  question="Start with $100 and play the fair coin: heads multiplies your money by 1.5, tails by 0.6, and you always stake everything. After 100 rounds with exactly 50 heads and 50 tails, roughly how much money do you have?"
+  options={[
+    { text: "About $13,000 — the +5% edge compounds into serious wealth.", correct: false },
+    { text: "About $100 — the wins and losses roughly cancel out.", correct: false },
+    { text: "About 59 cents — you've been ground down to almost nothing.", correct: true },
+    { text: "Exactly $0 — you went bankrupt somewhere along the way.", correct: false },
+  ]}
+  explanation="No penalty on a pretest — just feel the shape of the surprise. Fifty heads and fifty tails is 50 pairs of (heads, tails), and each pair multiplies your money by 1.5 × 0.6 = 0.9. So you end at $100 × 0.9^50 ≈ $0.59 — pocket change. The +5% expected value was real, but it never described your path; it described a crowd of parallel players in which a lucky few explode upward and drag the average to five figures. You lived one path, and multiplication ground it down."
+/>
+
+## The coin, restated exactly
+
+Here is the whole gamble in one breath. The coin is **fair** — a genuine 50/50, nothing loaded. On **heads**, your wealth grows by 50%, i.e. it multiplies by **1.5**. On **tails**, your wealth shrinks by 40%, i.e. it multiplies by **0.6**. Odds honest, edge real, no trick.
+
+Compute the **ensemble expected value** the way every statistics course teaches it — average the multiplier across the two equally likely outcomes:
+
+$$\mathbb{E}[\text{multiplier}] = \tfrac{1}{2}(1.5) + \tfrac{1}{2}(0.6) = \tfrac{1}{2}(2.1) = 1.05.$$
+
+A flat, delicious **+5% per round**. Expected value says: play forever, grow without bound. If you handed this to a casino they would beg to be on your side of the table. Hold onto that number — \$1.05 on the dollar, every round, on average — because everything that follows is the story of how that honest, positive average leads almost everyone straight to ruin.
+
+**When to reach for this:** any time a bet is framed as "positive expected value, so obviously take it," pause and ask what *kind* of outcome you just averaged. Averaging a multiplier (a percentage move on your whole stake) is the tell that you may be in non-ergodic territory — and that the +5% might belong to a crowd you'll never join.
+
+## Live the sequence, don't average the crowd
+
+The ensemble EV imagines a thousand copies of you playing once, side by side, and averages across them. But you don't get a thousand copies. You get **one** run, and each round *multiplies* whatever the last round left you. So watch what multiplication actually does over a sequence.
+
+Take one **heads** then one **tails**. Your wealth is now multiplied by 1.5 × 0.6 = **0.9** — you are **down 10%** after one win and one loss. And here is the quietly devastating part: order does not save you. Tails-then-heads gives 0.6 × 1.5 = **0.9** as well, because multiplication commutes. Every balanced pair of flips — and over a long fair run, roughly half your flips pair off like this — shaves a tenth off *everything you own*. Start at \$100 and let the pairs stack up:
+
+| Round | Sequence so far | Ensemble average says | Your compounding path |
+|---|---|---|---|
+| 0 | — | \$100 | \$100 |
+| 2 | H, T | \$110.25 | \$90.00 |
+| 10 | 5×H, 5×T | ≈ \$163 | ≈ \$59 |
+| 40 | 20×H, 20×T | ≈ \$704 | ≈ \$12 |
+| 100 | 50×H, 50×T | ≈ \$13,150 | ≈ \$0.59 |
+
+Read that table across, then down, and let it sink in. The two columns start at the same \$100 and then *sprint in opposite directions*. The ensemble average — 1.05 raised to the round number — climbs from \$100 to over thirteen thousand dollars. Your actual path — 0.9 raised to the number of pairs — collapses from \$100 to fifty-nine cents. Same coin. Same 100 rounds. One column is describing a crowd; the other is describing you.
+
+<MCQ
+  client:visible
+  question="You play the coin and get heads, then tails. A friend plays and gets tails, then heads. Both of you staked everything each round. Who has more money after those two flips?"
+  options={[
+    { text: "You do — winning first lets your gains compound before the loss hits.", correct: false },
+    { text: "Your friend does — surviving the loss first means the win lands on a smaller base, which is somehow better.", correct: false },
+    { text: "You're exactly tied — 1.5 × 0.6 and 0.6 × 1.5 both equal 0.9, so you both end at 90% of where you started.", correct: true },
+    { text: "It's impossible to say without knowing how much you each started with.", correct: false },
+  ]}
+  explanation="Multiplication commutes: 1.5 × 0.6 = 0.6 × 1.5 = 0.9. Order is irrelevant, so you and your friend are dead even at 90% of your starting stakes. This matters more than it looks: because sequence can't help you, there's no clever way to 'time' the flips into a profit. The only lever that changes your fate is how much you stake — which is exactly where Kelly comes in, two lessons from now."
+/>
+
+## The geometric mean: the growth rate you actually live
+
+The ensemble EV (+5%) answers *"what's the average wealth across the crowd?"* To find the rate *you* compound at, you need a different average — the **geometric mean** of the per-round multipliers, which is the honest per-round growth factor of a multiplicative process.
+
+For our coin, over one heads-and-one-tails, the geometric mean multiplier is the square root of their product:
+
+$$g = \sqrt{1.5 \times 0.6} = \sqrt{0.9} \approx 0.949.$$
+
+That is a multiplier *below one*: about **−5.1% per round** of time-average growth. Line the two averages up side by side and stare at the sign flip:
+
+| Average | What it measures | Per-round result | Verdict |
+|---|---|---|---|
+| Ensemble (arithmetic) mean | Wealth averaged across the crowd | 1.05 → **+5%** | "Get rich" |
+| Time (geometric) mean | Growth rate of one compounding path | 0.949 → **≈ −5.1%** | "Go broke" |
+
+Same coin, opposite signs. This is the whole non-ergodic drama in two rows. The arithmetic mean is the average of the *outcomes*; the geometric mean is the average of the *growth*, and for anything that compounds, growth is what you live in. Note too that the geometric mean is always ≤ the arithmetic mean (they're equal only when every outcome is identical) — the gap between them is precisely the "volatility tax" that multiplicative bets levy on you.
+
+<MCQ
+  client:visible
+  question="For the +50%/−40% coin, the arithmetic (ensemble) mean multiplier is 1.05 and the geometric (time-average) multiplier is √0.9 ≈ 0.949. What does the gap between these two numbers represent?"
+  options={[
+    { text: "A rounding error — for a fair coin the two averages should really be equal.", correct: false },
+    { text: "The volatility drag: the more a multiplicative bet swings, the further its geometric mean falls below its arithmetic mean, dragging your lived growth below the crowd's average.", correct: true },
+    { text: "The casino's hidden fee that's been quietly skimmed from each round.", correct: false },
+    { text: "The probability that you personally go bankrupt on any given round.", correct: false },
+  ]}
+  explanation="The geometric mean is always ≤ the arithmetic mean, and the gap grows with the size of the swings — this is volatility drag (a.k.a. the volatility tax). The arithmetic mean says +5%; the geometric mean says −5.1%; the ~10-point gap is the drag that the 50%/40% swings impose on your compounding path. Shrink the swings (bet a smaller fraction) and the gap shrinks — which is the whole game."
+/>
+
+## Where the +5% hides
+
+If the typical player decays at −5% a round, where does the +5% ensemble average actually *live*? It has to be somewhere — the arithmetic is airtight. The answer is the single most important picture in this course.
+
+After many rounds, the crowd's wealth doesn't spread out evenly. Because wealth is built by *multiplying* random factors, its distribution is **lognormal** — and wildly **right-skewed**. The overwhelming majority of players cluster near zero (a run dominated by pairs, decaying at −5%/round), while a **vanishing fraction** of players who happened to flip mostly heads become *astronomically* rich. A player who got, say, 65 heads out of 100 doesn't end up modestly ahead — they end up with a fortune large enough, and multiplied across enough near-copies, to single-handedly haul the **arithmetic mean** of the whole crowd up into five figures.
+
+So the +5% is real, but it is **unclaimable by the typical person**. It is an average propped up by a handful of lottery-winner paths that almost no individual walks. The number that describes *you* is not the mean but the **median** — the middle player — and the median is decaying toward zero.
+
+<Callout variant="warning" title="Mean ≫ median is the signature of a non-ergodic trap">
+When the arithmetic **mean** sits far above the **median**, you're looking at a right-skewed, multiplicative process where a few explosive winners carry the average and the typical player is being ground down. The mean is honest — it just belongs to the crowd. The median is what you should plan your life around. Any time someone quotes an "average return" without a median beside it, ask where the skew is hiding.
+</Callout>
+
+<MCQ
+  client:visible
+  question="After 100 rounds of the coin across thousands of players, the ARITHMETIC MEAN final wealth is about $13,000 but the MEDIAN final wealth is about 59 cents. Which reading is correct?"
+  options={[
+    { text: "The mean is wrong — someone must have miscalculated, because $13,000 and 59 cents can't both describe the same game.", correct: false },
+    { text: "Both are correct. The distribution is right-skewed: a tiny fraction of mostly-heads players are astronomically rich and haul the mean up, while the typical (median) player has decayed to almost nothing.", correct: true },
+    { text: "The median is wrong — over enough rounds, everyone converges to the mean.", correct: false },
+    { text: "They describe different coins; the mean is for the +5% coin and the median for a different, losing coin.", correct: false },
+  ]}
+  explanation="Both numbers are exactly right and both describe the identical coin. Multiplicative growth produces a lognormal, right-skewed wealth distribution: the mean is dominated by a vanishing sliver of lottery-winner paths, while the median player — the one you're most likely to be — decays toward zero. The mean is real but unclaimable. Mean ≫ median is the fingerprint of a non-ergodic bet, and it's exactly why the ensemble average lies to everyone who lives it."
+/>
+
+## Order doesn't matter — so you can't outsmart it
+
+Because multiplication commutes, the *sequence* of your flips is powerless to change your final wealth. This is worth pausing on, because it quietly kills every "just be clever about timing" escape plan.
+
+<Reveal client:visible buttonLabel="Show why sequence is powerless — and what the only real escape is">
+Start with \$100. Suppose over some stretch you get exactly one heads and one tails, in some order.
+
+- Heads first: \$100 × 1.5 = \$150, then × 0.6 = **\$90**.
+- Tails first: \$100 × 0.6 = \$60, then × 1.5 = **\$90**.
+
+Identical. And it generalises: with any fixed bag of heads and tails, your final wealth is \$100 × 1.5^(#heads) × 0.6^(#tails), and multiplication doesn't care what order you apply the factors in. So there is **no clever ordering, no "wait for a hot streak," no timing trick** that turns this coin profitable. The count of heads and tails is your entire destiny, and for a fair coin that count marches you toward 50/50 — straight into the −5% pairs.
+
+The one thing that *is* under your control is not *which* flips you take or *when*, but **how much of your wealth you stake on each flip.** Stake everything and every pair costs you 10%. Stake a small fraction, and each flip barely moves your base — the −40% can no longer gut you, and the geometric mean of your *actual* per-round outcomes can climb back above 1.0. That single lever, sized correctly, is **Kelly betting** — the subject of lesson 04, and the only real way out of this coin.
+</Reveal>
+
+## Run it yourself: watch the crowd and the path split
+
+Enough arithmetic — go feel it. Below is the same coin, made draggable, run across **400 parallel players** at once. One line is the **ensemble average** (the mean wealth of the whole crowd); the other is the **typical player** (the median person, living the sequence over time). Do two experiments:
+
+1. **Run the default coin first** — heads ×1.5, tails ×0.6, fair, full stake. Watch the ensemble line rocket upward while the typical line collapses toward zero, and note the **"wiped out" share**: the fraction of players busted. This is the table above, rendered in motion.
+2. **Then drag the bet fraction down** toward 20% and run again. Same coin, same odds — but now the typical path bends from a slide into ruin into a genuine climb. You didn't fix the coin; you fixed how much of yourself you staked on each flip.
+
+<ErgodicityEngine
+  client:visible
+  title="Run the +5% coin and watch it ruin the typical player"
+  caption="Run the default coin — heads ×1.5, tails ×0.6, fair, full stake. The ensemble average grows about +5% a round; the typical player decays about −5% a round; most players get wiped out. Then drag the bet fraction down toward 20% and run again: the same coin now grows the typical path too."
+  initialUpPct={50}
+  initialDownPct={40}
+  initialWinPct={50}
+  initialRounds={50}
+  initialBetPct={100}
+/>
+
+Keep dragging the bet fraction back and forth across the point where the typical player flips from *ruin* to *growth*. That crossover isn't a technicality — it's the whole survival logic of the course, and you're watching it live.
+
+## The pitfall: "the law of large numbers guarantees I win"
+
+Here is the trap that catches even careful people. "Sure, any single round is random," the reasoning goes, "but the **law of large numbers** says that over enough rounds, my results converge to the expected value — +5% a round. So if I just play long enough, I'm guaranteed to come out ahead."
+
+It sounds airtight. It is exactly backwards. The **law of large numbers** describes what happens to the **average across many independent players** as the *number of players* grows — the ensemble average converges to the EV. It says **nothing** about what happens to **one player's compounding wealth** as the number of *rounds* grows. For a single path, more rounds don't rescue you; they *doom* you, because they give the −5% geometric drag more time to grind. The LLN is a statement about the crowd getting more predictable, not about you getting richer. Confusing "the average of many players stabilises" with "my own path trends up" is the precise error that makes a +5% coin feel like free money.
+
+<Callout variant="info" title="The one-line correction">
+The law of large numbers stabilises the **ensemble average** as you add **players**. It does *not* pull a single **time average** toward the ensemble EV as you add **rounds**. In a non-ergodic process, playing longer doesn't converge you to +5% — it converges you to zero.
+</Callout>
+
+## When to use this model
+
+You will meet the flagship coin wearing a thousand disguises. Learn to spot the *shape* rather than the story: a **multiplicative bet** announces itself whenever the moves are **percentages of your whole stake** — where this round's outcome resets the base for next round, and a big enough loss can't be recovered by a symmetric gain.
+
+- **Reach for the time average / geometric mean when:** returns compound on your *whole* bankroll (all-in trades, leveraged positions, a business you can't diversify away from, your one career), a single bad round can be irreversible, and the swings are large. Here the ensemble EV is quietly computing someone else's future.
+- **The ordinary arithmetic average is fine when:** the bet is a *small, bounded side-stake* whose outcome adds to (rather than multiplies) your total wealth, no single round can wipe you out, and you can genuinely play many independent copies. That additive-vs-multiplicative fork is exactly where lesson 03 goes next.
+
+The reflex to build: before you accept any "+EV, obviously take it," ask *"is this a percentage of my whole stake, and can a loss end the game?"* If yes, the geometric mean — not the arithmetic one — is the number that maps your future.
+
+## Recap
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: "Why does the ensemble average of the +50%/−40% coin end up around $13,000 after 100 rounds while the typical player ends up around 59 cents?",
+      options: [
+        { text: "The wealth distribution is right-skewed: a vanishing fraction of mostly-heads players get astronomically rich and drag the arithmetic mean up, while the median player decays toward zero.", correct: true },
+        { text: "The casino skims a fee that only hurts typical players, not the average.", correct: false },
+        { text: "The typical player made a mistake in how they ordered their flips.", correct: false },
+        { text: "The $13,000 figure is simply wrong; the mean and median must agree.", correct: false },
+      ],
+      explanation: "Multiplicative growth is lognormal and right-skewed. The mean is real but propped up by a handful of lottery-winner paths; the median — the typical player — decays at the geometric-mean rate of about −5% per round. Mean ≫ median is the signature of the trap.",
+    },
+    {
+      question: "The geometric mean multiplier of the coin is √(1.5 × 0.6) = √0.9 ≈ 0.949. What does this number tell you?",
+      options: [
+        { text: "The typical player's wealth grows at about −5.1% per round — it shrinks, despite the +5% ensemble EV.", correct: true },
+        { text: "The player wins about 94.9% of their rounds.", correct: false },
+        { text: "There's a 5.1% chance of going bankrupt each round.", correct: false },
+        { text: "The arithmetic and geometric means are equal, so the coin is break-even.", correct: false },
+      ],
+      explanation: "The geometric mean is the honest per-round growth factor of a compounding path. At 0.949 it's below 1, meaning about −5.1% per round of time-average growth — the opposite sign from the +5% arithmetic (ensemble) mean. Same coin, two averages, opposite verdicts.",
+    },
+    {
+      question: "A friend insists the law of large numbers guarantees that if they play the +5% coin long enough, they'll come out ahead. What's the flaw?",
+      options: [
+        { text: "The LLN describes the average across many parallel PLAYERS, not one player's compounding path; more rounds give the −5% geometric drag more time to grind you toward zero.", correct: true },
+        { text: "There's no flaw — over enough rounds the time average really does converge to +5%.", correct: false },
+        { text: "The flaw is that the coin isn't actually fair.", correct: false },
+        { text: "The LLN only applies to dice, not coins.", correct: false },
+      ],
+      explanation: "The law of large numbers stabilises the ensemble average as you add players. It says nothing about a single time average converging to the EV as you add rounds. For one compounding path, playing longer converges you toward zero, not toward +5%.",
+    },
+    {
+      question: "You play heads-then-tails; a friend plays tails-then-heads; both stake everything. Given this, what's the ONLY real lever that could turn the coin profitable for an individual?",
+      options: [
+        { text: "Betting a smaller fraction of wealth each round, so the −40% can't gut you and the geometric mean of your actual outcomes climbs back above 1.0 (the Kelly idea).", correct: true },
+        { text: "Timing the flips to catch a hot streak of heads before the tails arrive.", correct: false },
+        { text: "Playing more rounds so the law of large numbers kicks in.", correct: false },
+        { text: "Starting with more money, which raises your growth rate.", correct: false },
+      ],
+      explanation: "Because 1.5 × 0.6 = 0.6 × 1.5 = 0.9, order (timing) is powerless and your head/tail counts are your destiny. The only lever left is bet size: stake a small fraction and each flip barely moves your base, lifting your lived geometric mean back above 1.0. That's Kelly betting — lesson 04.",
+    },
+  ]}
+/>
+
+<Callout variant="success" title="What you now own">
+You've worked the flagship coin end to end. The **ensemble average** climbs to \$13,000 because a vanishing fraction of lucky paths hauls the mean up; the **typical (median) player** decays to pocket change at the **geometric-mean** rate of about −5%/round; **order can't save you** because multiplication commutes; and the **law of large numbers** describes the crowd, not your path. Mean ≫ median is the fingerprint you'll now recognise everywhere. The only escape — betting less — is waiting in lesson 04.
+</Callout>
+
+Next up: lesson 03, **Additive vs Multiplicative** — the fork beneath everything you just saw. Why is averaging perfectly safe for a small, bounded side-bet but fatal for your whole bankroll? Because one *adds* to your wealth and the other *multiplies* it — and that single difference decides whether the two averages agree or tear apart.

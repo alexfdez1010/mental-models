@@ -1,0 +1,269 @@
+---
+title: "Aditivo frente a multiplicativo"
+description: "La bifurcación que decide qué media dice la verdad. Cuando la riqueza cambia sumando cantidades fijas, el proceso es ergódico y el valor esperado es de fiar. Cuando cambia multiplicando —como funcionan de verdad el dinero, las carteras y el crecimiento— se vuelve no ergódico, y el truco que te salva es un logaritmo: multiplicar en riqueza es sumar en log-riqueza."
+topic: "es/ergodicity-and-the-time-average"
+order: 4
+minutes: 12
+updated: 2026-07-08
+---
+
+import { MCQ, Quiz, Reveal, Callout } from '@/components/react';
+
+Las lecciones 01 y 02 os entregaron las dos medias e hicieron que una moneda se portara mal. Esta lección encuentra la *falla* que hay debajo de todo ello: la única pregunta estructural que decide, de antemano, si la media de conjunto (ensemble average) es vuestra amiga o una estafadora. Todo se reduce a una palabra: vuestra riqueza, ¿se **suma** o se **multiplica**?
+
+Esa bifurcación es todo el juego. A un lado, las dos medias coinciden y el valor esperado dice la verdad. Al otro, se separan, y el número en el que vuestra intuición confía está calculando el futuro de otra persona. Y justo al final hay un pequeño milagro matemático —un logaritmo— que convierte el lado peligroso de vuelta en el lado seguro, que es exactamente el movimiento que la lección 04 optimizará.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Dos juegos. Juego A: en cada ronda GANAS o PIERDES una cantidad fija de dinero (digamos +10 $ o −8 $), da igual cuánto tengas. Juego B: en cada ronda tu riqueza se MULTIPLICA por algún factor (digamos ×1,5 o ×0,6). ¿Qué juego es más probable que sea no ergódico —donde la media temporal (time average) y la media de conjunto (ensemble average) no coinciden?"
+  options={[
+    { text: "El juego A, el aditivo — los saltos fijos en dólares son los peligrosos.", correct: false },
+    { text: "El juego B, el multiplicativo — cuando los pasos escalan con tu riqueza, el camino se compone y las dos medias pueden separarse.", correct: true },
+    { text: "Ninguno — un juego justo es ergódico por definición.", correct: false },
+    { text: "Los dos por igual — la aritmética es idéntica, solo cambian los números.", correct: false },
+  ]}
+  explanation="Sin penalización en un pretest — solo intuye la forma. Sumar una cantidad fija no le importa dónde estés: +10 $ son +10 $ tengas 50 $ o 50.000 $, así que los saltos nunca se componen y la media se porta bien. Multiplicar sí le importa: ×0,6 te cuesta 20 $ con 50 $ pero 20.000 $ con 50.000 $, así que el efecto escala con el camino, se cuela la dependencia del orden, y la media temporal se despega de la de conjunto. Aditivo es el lado ergódico de la bifurcación; multiplicativo, el no ergódico. Toda esta lección vive en esa bifurcación."
+/>
+
+## Dinámica aditiva: los saltos a los que no les importa dónde estás
+
+Imaginad un juego en el que cada ronda o embolsáis unos **10 $** fijos o pagáis unos **8 $** fijos —y la cantidad nunca cambia con vuestro capital—. Ricos o arruinados, una victoria son exactamente 10 $ y una derrota son exactamente 8 $. El paso es **ciego a vuestra riqueza actual**. Esa ceguera es toda la clave.
+
+Formalmente, un **proceso aditivo (additive)** actualiza vuestra riqueza $W$ *sumando* una cantidad aleatoria independiente cada ronda: $W_{t+1} = W_t + X_t$, donde el tamaño de $X_t$ no depende de $W_t$. Como los incrementos simplemente se apilan, tras $n$ rondas vuestra riqueza es la apuesta inicial más una **suma** de $n$ extracciones —y el cambio por ronda a largo plazo es solo la media aritmética ordinaria de esas extracciones—. Las sumas son el hogar natural de la media aritmética, y la media aritmética es exactamente lo que calcula el valor esperado.
+
+Aquí está la moneda aditiva resuelta. Es un 50/50 justo: cara paga **+10 $**, cruz cuesta **−8 $**. El valor esperado por ronda es:
+
+$$\tfrac{1}{2}(+10) + \tfrac{1}{2}(-8) = +1$$
+
+Un limpio **+1 $ por ronda**. Ahora la afirmación crucial: un jugador *individual*, moliendo esta moneda a lo largo del tiempo, también saca unos **+1 $ por ronda**. Observad una tirada plausible:
+
+| Ronda | Tirada | Cambio | Riqueza |
+|---|---|---|---|
+| Inicio | — | — | 100 $ |
+| 1 | Cara | +10 $ | 110 $ |
+| 2 | Cruz | −8 $ | 102 $ |
+| 3 | Cara | +10 $ | 112 $ |
+| 4 | Cara | +10 $ | 122 $ |
+| 5 | Cruz | −8 $ | 114 $ |
+| 6 | Cruz | −8 $ | 106 $ |
+
+Seis rondas, tres caras y tres cruces, cambio neto +6 $ —eso es **+1 $ por ronda**, exactamente el valor esperado—. El orden no importó (la suma conmuta: reordenad las tiradas y aterrizáis en 106 $ igualmente), y ninguna pérdida individual pudo escalar hasta tragaros, porque una pérdida es para siempre solo 8 $. **La media temporal es igual a la media de conjunto.** Este juego es **ergódico**, y el valor esperado os está diciendo la verdad exacta sobre vuestro propio futuro.
+
+### Cuándo usarlo
+
+Echad mano del pensamiento aditivo —y fiaos del valor esperado sin reservas— siempre que los resultados sean **cantidades fijas y acotadas que no escalan con vuestro total**: una apuesta lateral de 5 $ entre amigos, un error de redondeo, una pequeña comisión fija, una moneda por calderilla. Si ningún paso individual puede crecer lo suficiente como para terminar el juego, el destino de la multitud es de verdad vuestro destino.
+
+## Dinámica multiplicativa: los saltos que escalan con el camino
+
+Ahora la versión que hace funcionar el mundo real. En lugar de sumar dólares, cada ronda *multiplica* vuestra riqueza por un factor: cara es **×1,5** (sube un 50%) y cruz es **×0,6** (baja un 40%) —la moneda insignia de las lecciones 00–02—. El paso ya no es ciego a vuestra riqueza; es un **porcentaje de dondequiera que estéis ahora**, así que su tamaño en dólares crece y encoge con vosotros.
+
+Formalmente, un **proceso multiplicativo (multiplicative)** actualiza la riqueza *multiplicando* por un factor aleatorio independiente: $W_{t+1} = W_t \cdot R_t$. Tras $n$ rondas, vuestra riqueza es la apuesta por un **producto** de $n$ factores, $W_n = W_0 \cdot R_1 R_2 \cdots R_n$ —no una suma—. Y los productos no se comportan como las sumas: son *insensibles* al orden en valor pero *sensibles* al camino en consecuencias, un único factor diminuto puede destripar toda la cadena, y un factor de exactamente cero es una barrera absorbente que ninguna victoria posterior puede deshacer.
+
+Poned las dos monedas lado a lado y la bifurcación se ve nítida:
+
+| | Moneda aditiva | Moneda multiplicativa |
+|---|---|---|
+| Movimiento de cara | +10 $ (fijo) | ×1,5 (escala con la riqueza) |
+| Movimiento de cruz | −8 $ (fijo) | ×0,6 (escala con la riqueza) |
+| Riqueza tras $n$ rondas | apuesta **más una suma** | apuesta **por un producto** |
+| Media correcta | media aritmética | media geométrica |
+| ¿Conjunto = temporal? | **Sí** — ergódico | **No** — no ergódico |
+| ¿Un paso puede terminar el juego? | No (pérdida tope 8 $) | Sí (un ×0 es para siempre) |
+| ¿El valor esperado *te* dice la verdad? | Sí | **No** |
+
+La misma justicia 50/50, la misma historia de "ventaja positiva" sobre el papel —y sin embargo la moneda aditiva enriquece suavemente a todo jugador paciente mientras que la multiplicativa, como mostró la lección 02, muele a casi todo el mundo hacia cero—. Lo único que cambió es *sumar frente a multiplicar*. Esa es la bifurcación, y todo lo que viene después en este curso cuelga de en qué lado de ella estéis.
+
+## La ilusión maestra: +50% y −40% no dan +10% neto
+
+Aquí está la trampa que atrapa a casi todo el mundo, experto y novato por igual —la **ilusión maestra** de los juegos multiplicativos—. Leéis los dos movimientos de la moneda —"sube 50%, baja 40%"— y vuestra intuición aditiva los suma: $50 - 40 = +10$, así que seguro que una victoria y una derrota os dejan **arriba un 10%**. Parece a prueba de balas.
+
+Está mal, y no por poco. Los porcentajes no se suman entre rondas; los factores se *multiplican*:
+
+$$1{,}5 \times 0{,}6 = 0{,}9$$
+
+Una victoria y una derrota os dejan en **×0,9 — abajo un 10%**, no arriba un 10%. Un error de veinte puntos porcentuales, en la dirección equivocada, a partir de una suma que vuestras tripas juran que es obvia. La mente aditiva ve "+50% + (−40%) = +10%"; la realidad multiplicativa es "×1,5 × 0,6 = ×0,9".
+
+<Reveal client:visible>
+Porque el −40% se cobra sobre un saldo **mayor** que el que construyó el +50%. Empezad con 100 $. El +50% añade 50 $ (eso es el 50% de 100 $) → 150 $. Ahora el −40% se toma de 150 $, no de 100 $, así que resta 60 $ (el 40% de 150 $) → 90 $. Devolvisteis 60 $ para ganar 50 $ —una pérdida neta de 10 $—. La ganancia se calculó sobre vuestra riqueza vieja y más pequeña; la pérdida se calculó sobre la nueva y más grande, así que la pérdida simplemente pesa más. Invertid el orden y es idéntico: 100 $ → 60 $ (baja 40%) → 90 $ (subir 50% de 60 $ son 30 $). La multiplicación no atiende al orden, pero nunca olvida que cada porcentaje se cobra sobre una *base distinta*. Por eso una ganancia y una pérdida del mismo *porcentaje* nunca se cancelan.
+</Reveal>
+
+La asimetría tiene un corolario brutal y práctico. Como una pérdida del −50% os corta a la mitad, deshacerla exige no una ganancia del +50% sino del **+100%** —tenéis que *duplicar* lo que queda solo para volver al punto de partida—. Las pérdidas en el lado multiplicativo son estructuralmente más difíciles de revertir que las ganancias del mismo tamaño de mantener, y empeora cuanto más hondo caéis:
+
+| Pérdida sufrida | Riqueza restante (desde 100 $) | Ganancia necesaria para recuperar |
+|---|---|---|
+| −10% | 90 $ | +11,1% |
+| −20% | 80 $ | +25% |
+| −50% | 50 $ | +100% |
+| −80% | 20 $ | +400% |
+| −90% | 10 $ | +900% |
+
+La columna de recuperación no solo adelanta a la de pérdida: acelera. Ese descontrol es la **rémora de volatilidad (volatility drag)** disfrazada, y es por lo que los grandes vaivenes desangran silenciosamente un capital que se compone, aun cuando el porcentaje "medio" parezca plano.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un amigo presume de que su cartera 'ganó un 50% un año y perdió un 40% al siguiente, así que sigo arriba un 10% en los dos años'. ¿Qué le pasó de verdad a 1.000 $ invertidos al inicio?"
+  options={[
+    { text: "Está arriba ~10% —unos 1.100 $— justo como dijo.", correct: false },
+    { text: "Está abajo ~10% —unos 900 $— porque 1,5 × 0,6 = 0,9, y los porcentajes se multiplican, no se suman.", correct: true },
+    { text: "Está exactamente plano en 1.000 $ —la ganancia y la pérdida se cancelan.", correct: false },
+    { text: "No se puede saber sin conocer qué año vino primero.", correct: false },
+  ]}
+  explanation="Detecta la trampa: el +50% y el −40% se cobran sobre bases distintas, así que no se suman. 1.000 $ × 1,5 = 1.500 $, luego × 0,6 = 900 $ —abajo un 10%, y el orden no lo cambia (0,6 × 1,5 = 0,9 igualmente)—. Su intuición aditiva (+50 − 40 = +10) es exactamente la ilusión maestra de la que trata esta lección. Las carteras reales multiplican; tratad cada movimiento porcentual como un factor, nunca como un sumando."
+/>
+
+## La transformación logarítmica: cómo la multiplicación se vuelve suma
+
+Todo lo anterior hace que los juegos multiplicativos suenen a un universo distinto y más temible, con su propia aritmética rota. Aquí está la parte hermosa: **una sola transformación devuelve ese universo al aditivo, seguro.** Tomad logaritmos.
+
+Todo el truco descansa en la propiedad que define **el logaritmo (logarithm)**: convierte la multiplicación en suma.
+
+$$\ln(a \cdot b) = \ln a + \ln b$$
+
+Así que aplicad $\ln$ a un proceso multiplicativo y el producto de factores se convierte en una **suma** de log-factores: $\ln W_n = \ln W_0 + \ln R_1 + \ln R_2 + \cdots + \ln R_n$. En **log-riqueza**, el proceso es puramente *aditivo* —la mismísima estructura que ya demostramos que es ergódica—. Y como ahora es una suma, la tasa de crecimiento honesta a largo plazo es solo la **media aritmética ordinaria de los log-rendimientos**. El temible juego multiplicativo y el manso juego aditivo son el mismo juego visto a través de dos lentes distintas; el logaritmo es la lente que hace calculable la media temporal.
+
+Derivemos desde cero la tasa de crecimiento verdadera de la moneda insignia —el −5% que la lección 02 afirmó, ahora *ganado*—. Los dos factores son 1,5 y 0,6. Sus log-rendimientos:
+
+- $\ln(1{,}5) \approx +0{,}405$
+- $\ln(0{,}6) \approx -0{,}511$
+
+Promediadlos (media aritmética, porque en el espacio logarítmico es aditivo):
+
+$$\tfrac{1}{2}(0{,}405) + \tfrac{1}{2}(-0{,}511) = -0{,}053$$
+
+Ese −0,053 es el log-rendimiento medio por ronda. Convertidlo de vuelta fuera del espacio logarítmico para obtener el factor de riqueza real por ronda:
+
+$$e^{-0{,}053} \approx 0{,}949$$
+
+Un multiplicador por ronda de **≈ 0,949 — unos −5% por ronda**, exactamente el decaimiento de media temporal que la lección 02 midió, ahora derivado desde los principios. Y fijaos en lo que $e^{-0{,}053}$ *es*: es la **media geométrica (geometric mean)** de 1,5 y 0,6, ya que $\sqrt{1{,}5 \times 0{,}6} = \sqrt{0{,}9} \approx 0{,}949$. Esa es la razón profunda de que la media geométrica (la media tomada en el espacio logarítmico) sea el *factor honesto por ronda* del crecimiento multiplicativo, mientras que la media aritmética de los factores crudos (el número de conjunto, +5%) responde a una pregunta completamente distinta.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En un juego multiplicativo, ¿por qué la media geométrica de los factores es la tasa de crecimiento correcta por ronda —mientras que la media aritmética de esos mismos factores no lo es?"
+  options={[
+    { text: "Porque tomar el logaritmo convierte el producto en suma, así que la tasa de crecimiento de media temporal es la media aritmética de los LOG-rendimientos —y exp de esa media es exactamente la media geométrica.", correct: true },
+    { text: "Porque la media geométrica siempre es menor, y los juegos multiplicativos siempre son perdedores.", correct: false },
+    { text: "Porque la media aritmética ignora las probabilidades, mientras que la geométrica las pondera.", correct: false },
+    { text: "No hay razón real —las dos medias resultan ser intercambiables aquí.", correct: false },
+  ]}
+  explanation="El mecanismo es el logaritmo. En log-riqueza el proceso es aditivo, así que su tasa honesta a largo plazo es la media aritmética de los log-rendimientos: ½·ln(1,5) + ½·ln(0,6) = −0,053. Exponenciad para salir del espacio logarítmico y obtenéis e^(−0,053) ≈ 0,949 —que es precisamente √(1,5 × 0,6) = √0,9, la media geométrica—. La media aritmética de los factores crudos (½·1,5 + ½·0,6 = 1,05, el +5%) es la media de conjunto —real, pero no el número que vives—. Media geométrica = media temporal = lo que se compone a través de ti."
+/>
+
+## Por qué una apuesta lateral pequeña es casi aditiva: el puente a Kelly
+
+Si la multiplicación es el veneno, aquí está el antídoto en embrión: **apostad solo una fracción fija diminuta de vuestra riqueza, y un juego multiplicativo empieza a comportarse como uno aditivo otra vez.** Las dos medias, separadas por la composición a apuesta completa, se van acercando de nuevo la una a la otra.
+
+Pasan dos cosas al encoger la apuesta. Primero, las pérdidas dejan de ser ruinosas: si arriesgáis un 2% de vuestra riqueza por ronda en lugar del 100%, ninguna tirada individual —ni siquiera una racha fría larga— puede empujaros cerca de la barrera absorbente en cero, así que el juego nunca termina de verdad y siempre estáis ahí para cobrar la media. Segundo, y de forma más sutil, en un rango *pequeño* el logaritmo es **casi una línea recta**: para movimientos diminutos $x$, $\ln(1+x) \approx x$. En esa zona casi lineal, "la media de los logs" y "el log de la media" casi coinciden —así que la media geométrica y la aritmética casi se *reconvergen*, y la brecha entre la media temporal y la de conjunto se encoge hacia cero—.
+
+En concreto: nuestra moneda a apuesta completa cuesta unos −5%/ronda (media geométrica 0,949). Recortad la apuesta a una porción pequeña de la riqueza y la rémora por ronda se derrumba hacia —y más allá de— cero, convirtiendo esa misma moneda justa de una bancarrota lenta en un genuino motor de crecimiento, *sin tocar las probabilidades*. No arreglasteis la moneda; arrastrasteis un juego no ergódico de vuelta hacia el lado ergódico de la bifurcación al negaros a apostar todo el camino en una sola tirada.
+
+Esa es la bisagra exacta que recorre la lección 04. La apuesta de **Kelly** es precisamente la receta de *cuán pequeña*: la fracción que maximiza la tasa de crecimiento de media temporal (logarítmica) que de verdad vivís, en lugar de la media de conjunto que atrae a todos los demás hacia las rocas. Esta lección encontró la enfermedad (la multiplicación) y nombró su cura en principio (encoge la apuesta, restaura la casi-aditividad); Kelly convierte ese principio en un número.
+
+## Trampa: llevar gafas aditivas en un mundo multiplicativo
+
+El error más caro de todas las finanzas y del juego es **importar la intuición aditiva a un juego multiplicativo** —y ya habéis conocido su forma insignia—. "Sube 50%, baja 40%, así que estoy arriba un 10%" *parece* aritmética porque vuestro cerebro se entrenó con ejemplos aditivos de la infancia (pagas, canicas, apuestas fijas) donde era genuinamente cierto. Deja de serlo en el instante en que los resultados son **porcentajes de un saldo en movimiento**, porque entonces cada movimiento multiplica y $1{,}5 \times 0{,}6 = 0{,}9$, no $1{,}1$.
+
+El mismo error viste otros disfraces. "Mi fondo promedió un 10% al año" suele citar la media *aritmética* de los rendimientos anuales, que sobrestima sistemáticamente el crecimiento que un inversor de verdad compuso —la media geométrica siempre es menor, y la brecha se ensancha con la volatilidad—. Esto es la **rémora de volatilidad (volatility drag)**: dos fondos pueden compartir un rendimiento medio idéntico y sin embargo el más agitado os deja más pobres, porque sus vaivenes mayores se multiplican a través de una media geométrica más baja. Siempre que alguien razona sobre *tasas, rendimientos o porcentajes que se apilan ronda tras ronda* usando la suma llana, está calculando en silencio la media de conjunto y confundiéndola con su propio camino.
+
+<Callout variant="warning" title="La señal delatora">
+En el momento en que una cantidad cambia por un **porcentaje de sí misma en ese momento** —dinero, poblaciones, precios, infecciones, interés compuesto— estáis en territorio multiplicativo. Dejad de sumar los porcentajes. Convertid cada uno en un factor, multiplicadlos, y si queréis la tasa honesta por ronda, promediad los *logs* (o, equivalentemente, tomad la media geométrica). Sumar porcentajes que se componen es la ilusión maestra con traje de negocios.
+</Callout>
+
+## Cuándo usarlo: la única pregunta antes de promediar
+
+Toda la lección se colapsa en un solo reflejo que podéis ejecutar en un latido, **antes** de fiaros de cualquier media que alguien os entregue:
+
+> **¿Este resultado se SUMA a mi total, o lo MULTIPLICA?**
+
+- Si **suma** una cantidad fija y acotada que no escala con vuestra riqueza —el proceso es aditivo, ergódico, y el valor esperado (la media aritmética) os dice la verdad exacta—. Fiaos de él.
+- Si **multiplica** —un porcentaje de vuestra apuesta actual, un rendimiento, una tasa de crecimiento, cualquier cosa que se componga— el proceso es multiplicativo y no ergódico. La media aritmética es el número de la multitud, no el vuestro; tomad la **media geométrica** (promediad los logs) para la tasa que de verdad viviréis, y recordad que un paso cerca de cero puede terminar el juego para siempre.
+
+Esa bifurcación —sumar o multiplicar— decide *qué media dice la verdad*, y preguntarla no os cuesta nada. Equivocarse ha arruinado a personas que sabían calcular el valor esperado en sueños.
+
+## Repaso
+
+<Quiz
+  client:visible
+  title="Aditivo frente a multiplicativo — fíjalo"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  completeTitleLabel="Cuestionario completado"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: "¿Cuál de estos es un proceso ADITIVO (ergódico) donde el valor esperado es de fiar?",
+      options: [
+        { text: "Una cartera de bolsa cuyo valor cambia un porcentaje cada día.", correct: false },
+        { text: "Una moneda que paga un +10 $ o −8 $ fijos, da igual tu capital.", correct: true },
+        { text: "Una colonia bacteriana que crece a una tasa de crecimiento cada hora.", correct: false },
+        { text: "Reinvertir todas tus ganancias en la misma apuesta porcentual.", correct: false },
+      ],
+      explanation: "Aditivo significa cantidades fijas que no escalan con tu riqueza —la moneda de ±8 $/10 $—. Su riqueza tras n rondas es una SUMA, así que la media aritmética (valor esperado) es el cambio honesto por ronda y temporal = conjunto. Las otras tres cambian por un porcentaje de la cantidad actual, así que multiplican, se componen y se vuelven no ergódicas.",
+    },
+    {
+      question: "Una moneda multiplicativa hace +50% o −40% en una tirada justa. Tras exactamente una victoria y una derrota, tu riqueza está:",
+      options: [
+        { text: "Arriba un 10%, porque +50% − 40% = +10%.", correct: false },
+        { text: "Plana, porque la ganancia y la pérdida se cancelan.", correct: false },
+        { text: "Abajo un 10%, porque 1,5 × 0,6 = 0,9.", correct: true },
+        { text: "Depende de cuál vino primero.", correct: false },
+      ],
+      explanation: "La ilusión maestra. Los porcentajes que se componen multiplican, no suman: 1,5 × 0,6 = 0,9 → abajo un 10%. El orden es irrelevante (0,6 × 1,5 = 0,9 igualmente). El −40% se cobra sobre el saldo mayor posterior a la ganancia, así que pesa más que el +50% construido sobre el saldo inicial menor.",
+    },
+    {
+      question: "Para la moneda +50%/−40%, el factor de crecimiento honesto por ronda es e^(log-rendimiento medio). Dado que ln(1,5) ≈ 0,405 y ln(0,6) ≈ −0,511, ese factor es de unos:",
+      options: [
+        { text: "1,05 (+5%) — la media aritmética de los factores.", correct: false },
+        { text: "0,949 (−5%) — e^(½·0,405 + ½·(−0,511)) = e^(−0,053).", correct: true },
+        { text: "1,00 (plano) — los logs se cancelan.", correct: false },
+        { text: "0,90 (−10%) — el producto de los dos factores.", correct: false },
+      ],
+      explanation: "Promedia los log-rendimientos (aditivo en el espacio logarítmico): ½·0,405 + ½·(−0,511) = −0,053. Exponencia para salir del espacio logarítmico: e^(−0,053) ≈ 0,949, es decir −5%/ronda —que es igual a la media geométrica √(1,5 × 0,6) = √0,9—. El 1,05 es la respuesta de conjunto/aritmética; 0,949 es la media temporal que de verdad vives.",
+    },
+    {
+      question: "Estás atrapado en un juego multiplicativo, no ergódico. ¿Qué movimiento lo arrastra de vuelta hacia lo ergódico —haciendo que la media temporal y la de conjunto casi se reconverjan?",
+      options: [
+        { text: "Apostar una fracción mucho mayor de tu riqueza para 'promediar' más rápido.", correct: false },
+        { text: "Apostar solo una fracción fija pequeña cada ronda, para que las pérdidas no sean ruinosas y el log sea casi lineal.", correct: true },
+        { text: "Jugar más rondas a apuesta completa —más datos arreglan la brecha.", correct: false },
+        { text: "Nada puede —la no ergodicidad es permanente una vez que un juego es multiplicativo.", correct: false },
+      ],
+      explanation: "Encoge la apuesta. Una fracción fija diminuta mantiene cualquier pérdida lejos de la barrera del cero (el juego nunca termina) y mantiene cada movimiento en la zona casi lineal del log, donde ln(1+x) ≈ x —así que las medias geométrica y aritmética casi se reconvergen—. Ese es el puente a Kelly (lección 04), que calcula exactamente cuán pequeña.",
+    },
+  ]}
+/>
+
+<Callout variant="success" title="La única línea que llevarse">
+Antes de fiaros de una media, preguntad: **¿esto suma o multiplica?** Las cantidades fijas *suman* → el proceso es aditivo y ergódico, y el valor esperado es honesto. Los porcentajes de vuestra riqueza actual *multiplican* → el proceso es no ergódico, y la única tasa honesta por ronda es la media geométrica (la media aritmética de los logs). El logaritmo es todo el truco: convierte la multiplicación de vuelta en suma, que es por lo que la log-riqueza es donde la composición por fin dice la verdad.
+</Callout>
+
+A continuación: lección 04, **El arreglo de Kelly** —cogemos la cura de "encoge la apuesta" que esta lección nombró en principio y la convertimos en un número—. La apuesta de Kelly maximiza la tasa de crecimiento de *media temporal* (logarítmica) que de verdad vivís, encontrando la fracción exacta que os mantiene en el lado creciente y ergódico de la bifurcación, en lugar del que halaga a la multitud y destruye el camino.

@@ -48,13 +48,14 @@
  * `credible-commitment-and-deterrence`, `path-dependence-and-lock-in`,
  * `principal-agent-problem`, `cumulative-advantage-and-power-laws`,
  * `debiasing-and-the-bias-blind-spot`, `signaling-and-costly-signals`,
- * `reflexivity-and-self-fulfilling-dynamics`, `antifragility-and-via-negativa`, …)
+ * `reflexivity-and-self-fulfilling-dynamics`, `antifragility-and-via-negativa`,
+ * `ergodicity-and-the-time-average`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * probability/decision-making (`ergodicity-and-the-time-average`, 43),
- * strategy/psychology (`common-knowledge-and-coordination`, 44) and
- * economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`, 45).
+ * strategy/psychology (`common-knowledge-and-coordination`, 44),
+ * economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`, 45) and
+ * biology-evolution/strategy (`evolutionarily-stable-strategies`, 46).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -93,34 +94,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `reflexivity-and-self-
-  // fulfilling-dynamics` (41) and `antifragility-and-via-negativa` (42) — have
-  // graduated and been removed; their topic MDX is now the record. The lowest-
-  // order entry below (`ergodicity-and-the-time-average`, order 43) is built next.
-  // The remaining queue finishes the expert tier and keeps the breadth tag-
-  // diverse, spanning probability/decision-making (`ergodicity-and-the-time-
-  // average`), strategy/psychology (`common-knowledge-and-coordination`) and
+  // The earlier expert rungs — `externalities` (20) … `antifragility-and-via-
+  // negativa` (42) and `ergodicity-and-the-time-average` (43) — have graduated
+  // and been removed; their topic MDX is now the record. The lowest-order entry
+  // below (`common-knowledge-and-coordination`, order 44) is built next. The
+  // remaining queue finishes the expert tier and keeps the breadth tag-diverse,
+  // spanning strategy/psychology (`common-knowledge-and-coordination`),
   // economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`)
-  // so no single roadmap tag races ahead.
-  {
-    slug: 'ergodicity-and-the-time-average',
-    icon: '⏳',
-    difficulty: 'expert',
-    order: 43,
-    accent: 'brand',
-    title: {
-      en: 'Ergodicity & the Time Average',
-      es: 'Ergodicidad y el Promedio Temporal',
-    },
-    description: {
-      en: 'A game with a positive average can still ruin every single player who keeps playing it. The trick is that the average across many parallel bettors (the ensemble) and the average of one bettor across time need not agree — and when they don’t, expected value quietly lies. Why the path you actually live, not the crowd you average over, is what survives.',
-      es: 'Un juego con una media positiva puede aun así arruinar a cada jugador que lo repita. El truco es que la media entre muchos apostadores en paralelo (el conjunto) y la media de un solo apostador a lo largo del tiempo no tienen por qué coincidir — y cuando no lo hacen, el valor esperado miente en voz baja. Por qué lo que sobrevive es el camino que de verdad recorres, no la multitud sobre la que promedias.',
-    },
-    dependencies: ['fat-tails', 'compounding', 'asymmetry-and-optionality'],
-    tags: ['probability', 'decision-making'],
-    buildNotes:
-      'Ergodicity & the time average — the expert probability/decision-making rung on the deepest crack in naive expected-value thinking: when a process is NON-ERGODIC, the ensemble average (average over many parallel copies at one instant) and the time average (average of one copy over time) diverge, and decisions made on the ensemble average quietly court ruin. Assumes fat-tails (rare large deviations dominate outcomes), compounding (multiplicative growth, where order and path matter), and asymmetry-and-optionality (convex/concave payoffs, capped-downside logic). Organising idea (Ole Peters, echoing Kelly): expected value averages over PARALLEL WORLDS you will never inhabit; you live ONE trajectory THROUGH TIME, and for multiplicative dynamics the time-average growth rate is systematically below the naive expected value — because a single wipeout is absorbing and ends the path. Sections, each with mechanism + worked example: define ERGODIC vs NON-ERGODIC plainly (a process is ergodic when the time average = the ensemble average; most wealth/growth processes are NOT); the flagship coin-flip (heads +50%, tails −40%: ensemble expectation is +5% per round and looks great, but the time-average growth is NEGATIVE — sqrt(1.5·0.6) < 1 — so almost every individual player goes broke while the mean is dragged up by a vanishing fraction of astronomically lucky paths); the additive-vs-multiplicative distinction (why averaging works for a bounded, repeatable side-bet but not for your whole bankroll); the KELLY/geometric-mean fix (optimise the time-average growth rate = expected log-return, which automatically respects ruin and bet-sizes to survive); RUIN and absorbing barriers (why "it has positive EV" is not enough if a loss is irreversible — tie to margin-of-safety and to the asymmetry model); why ensemble reasoning misleads across fat tails (the mean is dominated by unrepeatable outliers); real-world faces — position sizing, insurance as buying back ergodicity, why a strategy must survive to compound, gambler’s ruin, and why "on average it works out" is cold comfort to the one path that busted. Pitfalls & where the model lies: not everything is non-ergodic (genuinely additive, bounded, repeatable bets CAN be judged on the ensemble mean — don’t over-apply); ergodicity is about the DYNAMICS, not a mood of pessimism; and don’t confuse it with mere risk-aversion (it is a statement about which average is decision-relevant, not about preferences). Build an interactive island (an "ergodicity engine": set a multiplicative gamble (up-factor, down-factor, win probability); show side by side the ENSEMBLE average of N parallel players versus a single player’s TIME path, with a rounds slider; watch the ensemble mean climb while the median/individual path decays to ruin, a readout of ensemble mean vs time-average growth rate vs share of players wiped out, and a Kelly-fraction slider that shrinks the bet until the time-average growth turns positive). Plus a Categorize (sort scenarios into ergodic / non-ergodic, or judge-on-ensemble-mean vs judge-on-time-average) and MatchConcepts (ergodicity, ensemble average, time average, non-ergodic ruin, geometric/Kelly growth), Quiz + MindMap. en + es twin.',
-  },
+  // and biology-evolution/strategy (`evolutionarily-stable-strategies`) so no
+  // single roadmap tag races ahead.
   {
     slug: 'common-knowledge-and-coordination',
     icon: '👁️',
@@ -158,6 +140,25 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['economics', 'systems-thinking'],
     buildNotes:
       'Spontaneous order & the knowledge problem — the expert economics/systems-thinking rung (Hayek, Adam Smith’s invisible hand, Michael Polanyi, Leonard Read’s "I, Pencil") on how coherent, adaptive order arises WITHOUT central design, and why it must, because the relevant knowledge is irreducibly dispersed. Assumes supply-and-demand (prices clear markets), emergence (macro-order from local rules with no controller) and incentives (agents act on local payoffs). Organising idea: THE KNOWLEDGE PROBLEM (Hayek, "The Use of Knowledge in Society", 1945) — the data a planner would need (every person’s tacit, local, time-and-place-specific circumstances, preferences and know-how) is never given to a single mind; it exists only in scattered fragments, much of it tacit (Polanyi: "we know more than we can tell"). So the economic problem is not allocating known resources but MOBILISING knowledge no one possesses in full. SPONTANEOUS ORDER (Scottish Enlightenment: "the result of human action but not of human design") is the answer: institutions and patterns — prices, language, common law, money, manners, footpaths, science — that are grown, not built. Sections, each with mechanism + worked example: the knowledge problem stated (the tin-shortage example — a price rise transmits "use less tin" to millions who never learn why, each responding to a single number that summarises the whole world’s change); PRICES AS SIGNALS/telecommunication system (a market as a giant distributed computer aggregating dispersed knowledge into one sufficient statistic, the price; contrast with the socialist-calculation debate — why the planner is blind without prices); "I, PENCIL" and the invisible hand (no one knows how to make a pencil; the order coordinates strangers via self-interest, Smith); ORDER WITHOUT A DESIGNER across domains — language and its grammar, common law, the desire-path/footpath, science as a spontaneous order, ant colonies/stigmergy and the market’s kinship to emergence; the RULES that let it work (property, contract, stable expectations — Hayek’s cosmos vs taxis, grown "nomos" vs made order) and why good institutions are often evolved, not engineered. Pitfalls & where the model lies: spontaneous ≠ optimal or just (path-dependence, lock-in, externalities and tragedies of the commons are ALSO spontaneous orders — bottom-up does not mean benign; tie to externalities/tragedy-of-the-commons); it is not an argument that ALL design is bad (rules themselves are often deliberately set; the claim is about limits on central knowledge, not a blanket anti-planning slogan); the FATAL CONCEIT / planner’s hubris cuts both ways — markets can fail, and "let it emerge" can be its own lazy dogma; and emergence can encode and amplify bad local incentives. Build an interactive island (a "dispersed-knowledge market": a grid/population of agents each holding only PRIVATE local info (a cost, a need) and following a simple local rule; toggle between a CENTRAL PLANNER who must set one quantity/price from aggregate data it cannot see in full versus a PRICE mechanism that lets the number emerge from local trades; introduce a shock (a shortage somewhere) and watch the price-coordinated system re-allocate and clear while the blind-planner system mis-allocates and leaves shortages/gluts; readout of total welfare, unmet need, and how much dispersed knowledge each regime actually used). Plus a Categorize (sort orders into designed/made vs spontaneous/grown, or knowledge-centralisable vs irreducibly-dispersed) and MatchConcepts (spontaneous order, the knowledge problem, tacit knowledge, price signal, invisible hand), Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'evolutionarily-stable-strategies',
+    icon: '🦂',
+    difficulty: 'expert',
+    order: 46,
+    accent: 'accent',
+    title: {
+      en: 'Evolutionarily Stable Strategies',
+      es: 'Estrategias Evolutivamente Estables',
+    },
+    description: {
+      en: 'Why does a population settle on the mix of behaviours it does — so much fighting, so much bluffing, so much cooperation — and hold there? An evolutionarily stable strategy is one that, once common, cannot be invaded by any rival: the equilibrium biology finds without anyone choosing it. Where game theory and natural selection fuse into a single lens.',
+      es: 'Por qué una población se asienta en la mezcla de conductas que exhibe — tanto pelear, tanto farolear, tanto cooperar — y se mantiene ahí. Una estrategia evolutivamente estable es la que, una vez común, no puede ser invadida por ninguna rival: el equilibrio que la biología encuentra sin que nadie lo elija. Donde la teoría de juegos y la selección natural se funden en una sola lente.',
+    },
+    dependencies: ['game-theory-basics', 'natural-selection', 'evolution-of-cooperation'],
+    tags: ['biology-evolution', 'strategy'],
+    buildNotes:
+      'Evolutionarily stable strategies (ESS) — the expert biology-evolution/strategy rung (John Maynard Smith & George Price, 1973) fusing game theory with natural selection: an ESS is a strategy such that, if (almost) all members of a population adopt it, no rare mutant strategy can invade by doing better. Assumes game-theory-basics (payoffs, best responses, Nash equilibrium), natural-selection (differential reproduction, fitness) and evolution-of-cooperation (repeated interaction, replicator dynamics). Organising idea: replace the rational chooser of classic game theory with a population where fitter strategies simply reproduce more — the equilibrium is REACHED BY SELECTION, not by reasoning, and an ESS is a refinement of Nash equilibrium that must also be uninvadable by mutants at the margin. Sections, each with mechanism + worked example: the ESS definition and the invasion test (E(S,S) > E(T,S), or ties broken by E(S,T) > E(T,T)); the flagship HAWK–DOVE game (fighting vs displaying over a resource V with injury cost C: pure Hawk is invadable when C>V, so the ESS is a MIXED/polymorphic equilibrium at proportion V/C hawks — worked with real numbers); why an ESS is a Nash equilibrium but not every Nash equilibrium is an ESS (stability against drift/mutation is the extra bar); mixed strategies as either an individual randomising OR a stable polymorphism of the population; frequency-dependent selection (a strategy’s payoff depends on how common it is — rare-type advantage, e.g. the 1:1 SEX RATIO as Fisher’s ESS, left-right scale-eating fish, side-blotched-lizard rock–paper–scissors morphs); the tie to cooperation (Tit-for-Tat as (nearly) an ESS in the iterated Prisoner’s Dilemma, and why AllD is also stable — bistability); replicator dynamics as the engine that carries a population toward an ESS. Pitfalls & where the model lies: an ESS is about stability against invasion, NOT global optimality (populations get stuck at ESSs that are collectively worse — the Hawk–Dove waste of fighting is an ESS); not every game HAS a pure ESS (some have only mixed, some none); real populations have finite size, kin structure and shifting environments the static ESS ignores; and "evolutionarily stable" is easy to narrate loosely — insist on the actual invasion inequality. Build an interactive island (a "Hawk–Dove invasion lab": sliders for resource value V and injury cost C and a Hawk-fraction slider; show each type’s fitness as a function of the current Hawk fraction, mark the ESS where the lines cross, and a "let selection run" button that drives any starting mix toward the stable proportion, with a readout of the ESS Hawk share, each type’s payoff, and whether a rare mutant of the other type could invade). Plus a Categorize (sort outcomes into ESS / invadable, or pure-ESS / mixed-ESS / no-ESS) and MatchConcepts (evolutionarily stable strategy, invasion, frequency-dependent selection, Hawk–Dove, replicator dynamics), Quiz + MindMap. en + es twin.',
   },
 ];
 

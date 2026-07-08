@@ -1,0 +1,275 @@
+---
+title: "El arreglo de Kelly: apuesta para sobrevivir"
+description: "Si el promedio temporal es lo que de verdad vives, entonces optimízalo directamente: maximiza el logaritmo esperado de tu patrimonio. De ahí sale el criterio de Kelly (Kelly criterion): un tamaño de apuesta que hace crecer tu dinero lo más rápido posible con el tiempo y que, como ln(0) es menos infinito, se niega a arriesgar la ruina. La curva de crecimiento en forma de joroba, el precipicio de la sobreapuesta y por qué el medio Kelly es el seguro del profesional."
+topic: "es/ergodicity-and-the-time-average"
+order: 5
+minutes: 13
+updated: 2026-07-08
+---
+
+import { MCQ, Quiz, Callout, ErgodicityEngine } from '@/components/react';
+
+La lección 03 te entregó el truco: para un patrimonio que *multiplica*, toma el logaritmo y la multiplicación se convierte en suma. La composición en patrimonio se convierte en un simple total acumulado en log-patrimonio, y la cantidad que de verdad vives —la tasa de crecimiento promedio temporal— no es más que la media de los rendimientos logarítmicos. Ese era el diagnóstico. Esta lección es la cura. Si el número que te gobierna es el rendimiento logarítmico esperado, entonces no lo *midas* sin más: *maximízalo*. Dale vueltas a esa idea y de ella cae un único y hermoso tamaño de apuesta que hace crecer tu dinero lo más rápido posible con el tiempo y que, de regalo, se niega en redondo a arruinarte jamás. Tiene nombre: el **criterio de Kelly (Kelly criterion)**.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Tienes una apuesta repetida genuinamente favorable —filo positivo, jugada una y otra vez sobre tu propio capital—. ¿Qué parte de tu capital deberías apostar en cada ronda para que tu dinero crezca lo más rápido posible con el tiempo?"
+  options={[
+    { text: "Todo lo que puedas — un filo mayor merece una apuesta mayor, así que apuéstalo todo", correct: false },
+    { text: "Una fracción concreta de tu capital — suficiente para cosechar el filo, pero acotada para que una mala racha no pueda arruinarte", correct: true },
+    { text: "Una cantidad fija y pequeña en euros, la misma cada ronda sin importar tu capital", correct: false },
+    { text: "La mitad de lo que ganes, reinvirtiendo solo los beneficios", correct: false },
+  ]}
+  explanation="Maximizar el crecimiento a largo plazo (promedio temporal) significa maximizar el log-patrimonio esperado, y eso tiene una única respuesta interior: apostar una FRACCIÓN concreta de tu capital. Apuesta demasiado poco y dejas crecimiento sobre la mesa; apuesta demasiado y la volatilidad arrastra tu crecimiento promedio temporal hacia abajo —hasta volverlo negativo—. El punto óptimo es la fracción de Kelly, y esta lección la deduce."
+/>
+
+## El movimiento: optimizar la propia tasa de crecimiento
+
+**Analogía.** La lección 03 te dio una brújula —el logaritmo— que siempre apunta a *tu* destino en lugar del de la multitud. Sería raro tener una brújula y luego caminar en una dirección al azar. El paso obvio es caminar hacia donde apunta la brújula: elegir el tamaño de apuesta que empuja la tasa de crecimiento promedio temporal lo más alto posible.
+
+**Definición precisa.** Para una apuesta multiplicativa repetida, tu tasa de crecimiento promedio temporal es el logaritmo esperado del factor de patrimonio por ronda, $g = E[\ln(W_{\text{después}}/W_{\text{antes}})]$ —la **media geométrica (geometric mean)** convertida en tasa de crecimiento de la lección 03—. Elegir tu tamaño de apuesta para *maximizar* $E[\ln W]$ es el **criterio de Kelly (Kelly criterion)**. Esa es la idea entera en una línea: **maximiza el log-patrimonio esperado.**
+
+**Origen.** La regla lleva el nombre de **John L. Kelly Jr.**, un físico de los Bell Labs que la publicó en 1956 pensando en qué parte del capital de un apostador arriesgar dada una señal ruidosa sobre el resultado. Le precedieron más de dos siglos: **Daniel Bernoulli** propuso la utilidad logarítmica (log utility) ya en 1738 para resolver la paradoja de San Petersburgo, argumentando que un ducado vale menos para el rico que para el pobre. El colega de Kelly en teoría de la información, **Claude Shannon**, defendió la regla, y el matemático **Ed Thorp** la sacó del seminario a las mesas de los casinos y a Wall Street, usándola para dimensionar apuestas en el blackjack y luego en su fondo de cobertura.
+
+**Los dos caminos, un mismo destino.** Aquí está la parte silenciosamente asombrosa. Bernoulli y Kelly llegaron a "maximiza el log-patrimonio esperado" desde la *utilidad* y la *información* —psicología y señales—. El argumento de la ergodicidad de **Ole Peters** (todo este curso) llega al *mismo* objetivo logarítmico desde la *física* —del simple hecho de que vives una trayectoria a lo largo del tiempo y el crecimiento multiplicativo compone—. Dos puntos de partida completamente distintos; una respuesta idéntica. Cuando dos caminos se cruzan así, deberías sospechar que has dado con algo real.
+
+### Cuándo usarlo
+
+Recurre a Kelly siempre que te enfrentes a una apuesta *repetida y multiplicativa* sobre tu propio capital en evolución y quieras que crezca tan rápido como pueda sostener. Es el puente entre "el promedio temporal es lo que importa" (un diagnóstico) y "así que apuesta exactamente esto" (una prescripción).
+
+## La apuesta de Kelly, resuelta
+
+**Fórmula precisa.** Para el caso más limpio —una simple apuesta de ganar/perder— Kelly da una fracción explícita de tu capital que apostar:
+
+$$f^* = \frac{bp - q}{b}$$
+
+Término a término:
+
+- $b$ = las **cuotas netas (net odds)**: beneficio por unidad apostada *si ganas*. Una apuesta que te devuelve tu apuesta más otro tanto (doble-o-nada) tiene $b = 1$; una que paga 2 a 1 tiene $b = 2$.
+- $p$ = la **probabilidad de ganar**.
+- $q = 1 - p$ = la probabilidad de perder.
+
+Lee el numerador en voz alta y cuenta una historia: $bp$ es tu *ganancia* esperada por unidad apostada, $q$ es tu *pérdida* esperada, así que $bp - q$ es tu **filo**. Divide el filo por las cuotas $b$ y obtienes la fracción de tu capital a poner en riesgo. Sin filo ($bp = q$) es $f^* = 0$ —Kelly te dice que no apuestes—. Un filo negativo hace que $f^*$ se vuelva negativo, es decir, deberías estar en el *otro* lado de la apuesta.
+
+**Ejemplo resuelto por completo.** Toma una apuesta de doble-o-nada —ganas y ganas tu apuesta ($b = 1$), pierdes y pierdes tu apuesta— con una probabilidad de ganar de $p = 0.6$ (así que $q = 0.4$). Entonces:
+
+$$f^* = \frac{(1)(0.6) - 0.4}{1} = \frac{0.6 - 0.4}{1} = \frac{0.2}{1} = 0.2$$
+
+Así que apuestas el **20% de tu capital** cada ronda. Sobre un capital de \$1.000 eso son \$200 —no los \$1.000 que gritaría el instinto de "es +VE, apuéstalo todo", ni los \$5 que arriesgaría un apostador nervioso—. El veinte por ciento es la fracción exacta que hace crecer este capital lo más rápido posible a largo plazo.
+
+**Trampa.** La fórmula supone que *conoces* $p$ y $b$ con exactitud. En la vida real los estimas, y una sobrestimación optimista de tu filo se cuela directa en un $f^*$ demasiado grande —lo cual, como muestra la siguiente sección, es la dirección peligrosa en la que equivocarse—.
+
+### Cuándo usarlo
+
+La forma $f^* = (bp - q)/b$ es tu recurso para cualquier apuesta binaria de "gana esto / pierde tu apuesta": apuestas deportivas, una operación con un stop definido, una mano de blackjack de juego con ventaja. Para pagos más enrevesados, la regla de fondo ("maximiza el log-patrimonio esperado") sigue en pie; simplemente la resuelves numéricamente en lugar de con la fórmula limpia.
+
+## La curva de crecimiento es una joroba
+
+**Analogía.** Piensa en el tamaño de la apuesta como en la dosis de un fármaco. Demasiado poco no hace nada. La dosis justa cura. Demasiado te envenena —y pasado un punto, más dosis es estrictamente peor *y* más tóxica—. El crecimiento frente a la fracción apostada tiene exactamente esta forma: una joroba.
+
+**Definición precisa.** Representa el crecimiento promedio temporal $g$ frente a la fracción $f$ que apuestas cada ronda. En $f = 0$ nunca apuestas, así que $g = 0$. A medida que $f$ sube, $g$ trepa hasta un único **pico** positivo —ese pico está en la fracción de Kelly $f^*$—. Empuja $f$ más allá del pico y $g$ vuelve a caer, cruza el cero y se vuelve **negativo**: ahora tienes garantizado encoger con el tiempo. Hay un único mejor tamaño de apuesta, y tanto quedarse corto como pasarse cuestan crecimiento.
+
+**Ejemplo resuelto — la moneda insignia.** Toma la moneda de este curso: cara paga +50%, cruz cuesta −40%, un lanzamiento justo 50/50, apostando una fracción $f$ de tu capital cada ronda. Los factores de patrimonio por ronda son $(1 + 0.5f)$ al ganar y $(1 - 0.4f)$ al perder, y el crecimiento promedio temporal es $g = 0.5\ln(1 + 0.5f) + 0.5\ln(1 - 0.4f)$. Evalúalo en distintos tamaños de apuesta:
+
+| Fracción apostada $f$ | Factor al ganar | Factor al perder | Crecimiento promedio temporal $g$ por ronda |
+| --- | --- | --- | --- |
+| 0,00 (nunca apuestas) | ×1,00 | ×1,00 | 0,0% (plano) |
+| 0,10 | ×1,05 | ×0,96 | +0,3% |
+| 0,25 (cerca de Kelly) | ×1,125 | ×0,90 | **+0,5% (el pico)** |
+| 0,50 (media apuesta) | ×1,25 | ×0,80 | ≈ 0,0% (de vuelta a plano) |
+| 1,00 (todo el capital) | ×1,50 | ×0,60 | **−5,1% (al precipicio)** |
+
+Léelo como un viaje. No apostar nada no te lleva a ninguna parte. En torno a un cuarto de tu capital alcanzas el **pico positivo** —el crecimiento sostenible más rápido que esta moneda permite—. Para la mitad de tu capital ya has devuelto el pico y no haces más que mantenerte a flote. Y apostar *todo* —la movida ingenua del "+5% de valor esperado, ¡apuéstalo todo!" de lecciones anteriores— te planta de lleno en territorio negativo, en torno a −5,1% por ronda, moliéndote hacia cero.
+
+**El precipicio de la sobreapuesta.** Fíjate en la asimetría. Apostar *más* que Kelly no es una versión más audaz de la misma buena idea —es **estrictamente peor**: aceptas *menos* crecimiento *y* vaivenes más salvajes a la vez—. Estás pagando riesgo extra para *reducir* tu rendimiento. Ese es el precipicio de la sobreapuesta (overbetting), y es la forma más importante de todo este curso.
+
+### Cuándo usarlo
+
+Mantén la joroba en tu ojo mental cada vez que dimensiones una posición. Replantea la pregunta de "¿es buena esta apuesta?" (sí/no) a "¿*cuánto* de esta buena apuesta maximiza mi crecimiento?" —y te avisa de que equivocarse por arriba no es solo agresivo, es autodestructivo—.
+
+<ErgodicityEngine
+  client:visible
+  title="Encuentra la región de Kelly — arrastra la fracción apostada hasta que la trayectoria crezca"
+  caption="Lanza la moneda por defecto a apuesta completa y el jugador típico se hunde. Ahora arrastra la fracción apostada hacia abajo y relanza: en torno a un 20% de apuesta el crecimiento promedio temporal se vuelve positivo y la trayectoria típica sube. Sube de nuevo la apuesta más allá del pico y vuelve a decaer — eso es sobreapostar."
+  eyebrow="Motor de ergodicidad"
+  instructions="Una moneda multiplicativa, jugada de dos formas a la vez. La línea del CONJUNTO es el patrimonio medio de 400 jugadores en paralelo; la línea TÍPICA es el jugador mediano viviendo la secuencia a lo largo del tiempo. Configura la apuesta y lánzala. Con la moneda por defecto, la media del conjunto se dispara mientras al jugador típico lo muelen hacia cero — la misma apuesta, dos destinos opuestos. Reduce la fracción apostada y observa cómo la trayectoria típica por fin se gira hacia arriba."
+  ensembleLabel="Media del conjunto (400 jugadores en paralelo)"
+  medianLabel="Jugador típico (mediana, a lo largo del tiempo)"
+  upLabel="Jugada ganadora — la parte apostada crece un"
+  downLabel="Jugada perdedora — la parte apostada mengua un"
+  winLabel="Probabilidad de ganar"
+  roundsLabel="Rondas jugadas"
+  betLabel="Fracción apostada — cuánto de tu patrimonio arriesgas cada ronda"
+  betLowLabel="una brizna"
+  betHighLabel="todo"
+  runLabel="Lanza la apuesta ▸"
+  resetLabel="Reiniciar ↻"
+  axisLabel="× apuesta (escala logarítmica)"
+  verdictRuin="ruina NO ERGÓDICA — la media del conjunto sube, pero al jugador típico lo arrastran hacia cero. El valor esperado positivo vive solo en una fracción ínfima de trayectorias astronómicamente afortunadas; casi todos quiebran."
+  verdictFlat="el filo del cuchillo — la trayectoria típica apenas se sostiene mientras la media del conjunto sigue subiendo. Un poco más de apuesta y el individuo empieza a decaer."
+  verdictGrow="ahora la apuesta es lo bastante pequeña como para que el promedio temporal sea positivo — el jugador típico también compone al alza. Esta es la región de Kelly: dimensiona la apuesta para sobrevivir y la trayectoria por fin crece."
+  idlePrompt="Configura la apuesta y pulsa lanzar. Observa cómo se separan la media del conjunto y el jugador típico."
+  readout="Tras {rounds} rondas entre {players} jugadores: la media del conjunto termina en {ensemble}× la apuesta (creciendo {eGrowth}%/ronda), pero el jugador típico termina en {median}× (promedio temporal {tGrowth}%/ronda), y el {wiped}% de los jugadores se arruinó. {verdict}"
+  groupSeparator="."
+  initialUpPct={50}
+  initialDownPct={40}
+  initialWinPct={50}
+  initialRounds={60}
+  initialBetPct={100}
+/>
+
+Haz el experimento tú mismo. Lanza la moneda por defecto a **apuesta completa** primero: la media del conjunto se infla mientras la trayectoria *típica* es molida hacia cero —la ruina no ergódica que ya te sabes de memoria—. Luego arrastra el deslizador de la **fracción apostada** hacia abajo y relanza. En algún punto en torno a un 20-25% de apuesta la ficha del crecimiento promedio temporal pasa de negativa a positiva y la trayectoria típica por fin sube —has encontrado la región de Kelly—. Ahora vuelve a subir la fracción apostada hacia el máximo y observa cómo el crecimiento se vuelve negativo otra vez. Ese giro en U es el otro lado de la joroba: sobreapostar.
+
+## Kelly respeta la ruina — gratis
+
+**Analogía.** Imagina un excursionista cuyo mapa asigna una puntuación *infinitamente* mala a una única casilla al borde del precipicio. Ningún planificador de rutas, por ávido de atajos que esté, trazará jamás un camino por esa casilla —no porque le hayas atornillado una regla de "no te caigas por los precipicios", sino porque las matemáticas hacen que el precipicio sea infinitamente repulsivo por sí solas—.
+
+**Definición precisa.** El objetivo de Kelly es el *log*-patrimonio esperado, y $\ln(0) = -\infty$. Quebrar —llegar a cero— conlleva por tanto una penalización *infinita* en la mismísima cantidad que Kelly maximiza. Así que un apostador de Kelly *nunca* apostará todo el capital a nada que pudiera dejarlo en cero, porque incluso una probabilidad ínfima de tocar $-\infty$ aniquila el valor esperado. **La aversión a la ruina está horneada en las matemáticas, no atornillada después.**
+
+**Ejemplo resuelto.** Considera una apuesta que, al perder, podría llevarse todo tu capital. Apostar $f = 1$ significa que una pérdida manda tu patrimonio a \$0 y tu log-patrimonio a $-\infty$. Promediada, esa única rama arrastra el log-patrimonio esperado a $-\infty$ *por muy jugosa que sea la rama ganadora*. El maximizador de Kelly retrocede por tanto ante $f = 1$ automáticamente y se asienta en alguna fracción interior —para la moneda del +60% de arriba, el 20%—. Nunca tuviste que decir "y por favor no quiebres"; el logaritmo lo dijo por ti.
+
+**Trampa.** Esta protección gratis supone el objetivo *logarítmico*. Cámbialo por maximizar el patrimonio *esperado* (la simple media del conjunto —la media aritmética—) y la barandilla desaparece: la maximización del patrimonio esperado te dice alegremente que apuestes todo a cualquier jugada +VE, directo al precipicio. La seguridad es una propiedad del logaritmo específicamente.
+
+### Cuándo usarlo
+
+Apóyate en esto siempre que una apuesta lleve un riesgo de ruina genuino. Dimensionar por log-patrimonio esperado significa que nunca tienes que ajustar a mano una regla de "pérdida máxima" —el objetivo ya trata la quiebra como el resultado infinitamente malo que es—.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una apuesta de doble-o-nada (b = 1) gana con probabilidad p = 0,6. ¿Qué fracción de tu capital dice el criterio de Kelly que apuestes?"
+  options={[
+    { text: "60% — deberías apostar tu probabilidad de ganar", correct: false },
+    { text: "20%", correct: true },
+    { text: "100% — es una apuesta de filo positivo, así que apuéstalo todo", correct: false },
+    { text: "5% — un pequeño seguro fijo", correct: false },
+  ]}
+  explanation="f* = (bp − q)/b con b = 1, p = 0,6, q = 0,4 da (0,6 − 0,4)/1 = 0,2, es decir, apostar el 20% de tu capital. Tu probabilidad de ganar (60%) no es el tamaño de la apuesta, y apostarlo todo a una jugada que puede reducirte a la mitad una y otra vez te planta en el lado equivocado de la joroba de crecimiento."
+/>
+
+## El medio Kelly y el mundo real
+
+**Analogía.** El Kelly completo es como conducir a la velocidad exacta que te lleva antes por una carretera perfecta. El medio Kelly es levantar el pie del acelerador: llegas *casi* igual de rápido, con muchos menos nudillos blancos, y no te estrellas cuando la carretera resulta ser más accidentada de lo que prometía el mapa.
+
+**Definición precisa.** El **medio Kelly** significa apostar la *mitad* de la fracción de Kelly —$f^*/2$— cada ronda. El trueque es notablemente amable: como el crecimiento es una joroba suave y *plana* cerca de su cima, reducir la apuesta a la mitad conserva más o menos **tres cuartas partes de la tasa de crecimiento máxima** mientras recorta la *varianza* de tu capital a la mitad, aproximadamente. Cedes una pizca de velocidad a cambio de una gran reducción de vaivenes que te revuelven las tripas.
+
+**Ejemplo resuelto.** En la apuesta de doble-o-nada de arriba, el Kelly completo apuesta el 20%. El medio Kelly apuesta el **10%**. Como el pico de la joroba de crecimiento es ancho y plano, bajar del 20% al 10% te cuesta solo una porción modesta del crecimiento a largo plazo —pero el viaje es drásticamente más suave y, crucialmente, si tu verdadera probabilidad de ganar era en realidad 0,55 en lugar del 0,6 que estimaste, la apuesta del 10% está cómodamente *por debajo* de la fracción de Kelly real (aún en el lado seguro y creciente de la joroba) en lugar de *por encima*—.
+
+**Por qué los profesionales fraccionan.** Los filos reales se *estiman*, no se conocen, y los errores de estimación te sesgan hacia sobreapostar: un $p$ optimista infla $f^*$, empujándote hacia el precipicio donde el crecimiento se vuelve negativo. Apostar una fracción de Kelly es un seguro contra tu propio exceso de confianza —te mantiene en el lado *izquierdo* de suave pendiente de la joroba, donde equivocarte un poco te cuesta algo de crecimiento, en lugar del lado *derecho* empinado, donde equivocarte un poco te cuesta todo—.
+
+**Trampa.** Estimar el filo demasiado alto es el modo de fallo clásico. Exagera $p$ o $b$, calcula $f^*$ con los números inflados, y *crees* que apuestas Kelly cuando en realidad estás **sobreapostando** —sentado más allá del pico, en la pendiente de crecimiento negativo, convencido de que optimizas—.
+
+### Cuándo usarlo
+
+Ponte por defecto en alguna fracción del Kelly completo —una mitad, o incluso un cuarto— siempre que tus datos de entrada sean inciertos (que es casi siempre). Es el seguro estándar del profesional: casi todo el crecimiento, una fracción de la volatilidad y un amplio margen de seguridad frente a una estimación errónea del filo.
+
+## Dónde muerde Kelly
+
+Kelly es un bisturí, y los bisturíes cortan al cirujano si se manejan mal. Conoce sus supuestos antes de fiarte de su número.
+
+- **Supone que conoces las cuotas.** La fórmula toma $p$ y $b$ como dados. Aliméntala con datos erróneos y te devuelve con aplomo un tamaño de apuesta erróneo —normalmente *demasiado grande*—. Basura entra, sobreapuesta sale.
+- **Los datos erróneos causan sobreapuesta específicamente.** Como $f^*$ sube con tu filo estimado, el error humano natural (el optimismo) te empuja hacia el precipicio, no lejos de él. El error es asimétrico y duele.
+- **Maximiza el crecimiento a largo plazo, no la comodidad.** Aun apostando a la perfección, una trayectoria de Kelly completo es *volátil* —caídas profundas y prolongadas son del todo normales de camino al crecimiento más rápido—. Kelly optimiza dónde *acabas*, no lo suave que se siente el viaje.
+- **Va de crecimiento, no de tu tolerancia personal al riesgo.** Kelly responde "¿qué tamaño hace crecer mi dinero lo más rápido?" —no "¿qué tamaño me deja dormir?"—. Si los vaivenes del Kelly completo te harían abandonar en el fondo (cristalizando la pérdida), el tamaño óptimo de crecimiento es el tamaño *equivocado* *para ti*. Precisamente por eso existe el medio Kelly.
+
+**Trampa.** Tratar a Kelly como una garantía de viaje suave es el malentendido más profundo. Garantiza el *crecimiento sostenible más rápido*, y crecimiento rápido y nervios calmados son cosas distintas. Dimensiona a la baja hasta la volatilidad que de verdad puedas soportar —porque un apostador que abandona en el valle nunca cobra el largo plazo que Kelly optimiza—.
+
+### Cuándo usarlo
+
+Usa Kelly para *convertir una decisión*: transforma "¿debería aceptar esta apuesta?" en "¿*cuánto* debería apostar?" —la pregunta mucho más útil—. El dimensionamiento de posiciones para cualquier apuesta multiplicativa repetida —operaciones, apuestas, asignaciones de capital— es exactamente su terreno. Solo aliméntalo con datos honestos y fracciona para ajustarte a la incertidumbre de esos datos y a la volatilidad que puedas aguantar.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Tienes una apuesta repetida genuinamente +VE. Comparado con apostar la fracción de Kelly, ¿qué error es peor: quedarse corto o sobreapostar?"
+  options={[
+    { text: "Quedarse corto — dejas dinero gratis sobre la mesa, y menos dinero siempre es malo", correct: false },
+    { text: "Sobreapostar — pasado el pico de Kelly asumes MÁS volatilidad por MENOS crecimiento, y suficientemente lejos empujas el crecimiento promedio temporal a negativo y tiendes a la ruina", correct: true },
+    { text: "Son igual de malos — la curva de crecimiento es simétrica alrededor del pico", correct: false },
+    { text: "Ninguno importa mientras la apuesta sea +VE", correct: false },
+  ]}
+  explanation="La joroba de crecimiento no es simétrica donde cuenta. Quédate corto y obtienes algo menos de crecimiento con menos volatilidad —una pérdida leve y segura—. Sobreapuesta y obtienes menos crecimiento Y más volatilidad, y pasado el punto donde la curva cruza el cero tu crecimiento promedio temporal se vuelve negativo —tiendes a la ruina en una apuesta supuestamente favorable—. Como los errores de estimación te empujan hacia sobreapostar, este es el modo de fallo del que guardarse, y por eso los profesionales apuestan una fracción de Kelly."
+/>
+
+<Callout variant="tip" title="El arreglo de Kelly en una frase">
+El promedio temporal es lo que vives, así que **maximízalo directamente** —maximiza el log-patrimonio esperado, $E[\ln W]$—. Para una simple apuesta de ganar/perder eso da el **criterio de Kelly (Kelly criterion)**, $f^* = (bp - q)/b$: apuesta tu filo dividido por las cuotas. El crecimiento frente al tamaño de la apuesta es una **joroba** —cero sin apostar, un pico positivo en la fracción de Kelly, negativo en cuanto sobreapuestas— y como $\ln(0) = -\infty$, Kelly **nunca arriesga la ruina**, gratis. En la práctica, apuesta una *fracción* de Kelly (el medio Kelly conserva ~¾ del crecimiento por mucha menos volatilidad y te protege cuando tu estimación del filo se equivoca). A continuación, la lección 05 —"La ruina y el mundo real"— saca esta mentalidad de supervivencia-primero de la mesa de la moneda y la lleva a los seguros, el apalancamiento y los problemas de ruina que deciden las fortunas reales.
+</Callout>
+
+<Quiz
+  client:visible
+  title="Compruébate: el arreglo de Kelly"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  completeTitleLabel="Cuestionario completado"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: "¿Qué cantidad maximiza el criterio de Kelly?",
+      options: [
+        { text: "El patrimonio esperado (la media del conjunto)", correct: false },
+        { text: "El log-patrimonio esperado, E[ln W] — equivalentemente, la tasa de crecimiento promedio temporal", correct: true },
+        { text: "La probabilidad de ganar en una sola ronda", correct: false },
+        { text: "El número de rondas que puedes sobrevivir", correct: false },
+      ],
+      explanation: "Kelly maximiza el log-patrimonio esperado, que es exactamente la tasa de crecimiento promedio temporal (geométrica) de la lección 03. Maximizar el patrimonio esperado en su lugar —la media aritmética— es el error de la media del conjunto que te dice que lo apuestes todo.",
+    },
+    {
+      question: "Para una apuesta de doble-o-nada (b = 1) con un 60% de probabilidad de ganar, la apuesta de Kelly es:",
+      options: [
+        { text: "60% del capital", correct: false },
+        { text: "20% del capital", correct: true },
+        { text: "40% del capital", correct: false },
+        { text: "100% del capital", correct: false },
+      ],
+      explanation: "f* = (bp − q)/b = (1×0,6 − 0,4)/1 = 0,2, así que apuestas el 20%. El filo es bp − q = 0,2 y dividir por las cuotas b = 1 deja 0,2.",
+    },
+    {
+      question: "¿Por qué un apostador de Kelly nunca apuesta todo su capital a una apuesta que podría dejarlo en cero?",
+      options: [
+        { text: "Porque una regla de gestión de riesgo aparte lo prohíbe", correct: false },
+        { text: "Porque ln(0) = −∞, así que cualquier posibilidad de ruina arrastra el log-patrimonio esperado a menos infinito — la aversión a la ruina está incorporada en el objetivo", correct: true },
+        { text: "Porque la probabilidad de ganar siempre está por debajo del 100%", correct: false },
+        { text: "Porque los casinos limitan el tamaño de las apuestas", correct: false },
+      ],
+      explanation: "Kelly maximiza el log-patrimonio esperado, y el logaritmo de cero es menos infinito. Una probabilidad no nula de tocar cero hace por tanto que el log-patrimonio esperado sea −∞, así que el maximizador retrocede automáticamente ante cualquier apuesta de todo-o-nada ruinosa. La barandilla es el propio logaritmo.",
+    },
+    {
+      question: "¿Por qué los profesionales suelen apostar una fracción de Kelly (p. ej. medio Kelly)?",
+      options: [
+        { text: "Porque el medio Kelly hace crecer el capital más rápido que el Kelly completo", correct: false },
+        { text: "Porque la joroba de crecimiento es plana cerca de su pico, así que media apuesta conserva la mayor parte del crecimiento con mucha menos volatilidad — y protege frente a sobrestimar tu filo", correct: true },
+        { text: "Porque el Kelly completo es matemáticamente incorrecto", correct: false },
+        { text: "Porque el medio Kelly elimina toda posibilidad de pérdida", correct: false },
+      ],
+      explanation: "Cerca de su pico la curva de crecimiento es ancha y plana, así que reducir la apuesta a la mitad cuesta solo un poco de crecimiento (se conserva en torno a tres cuartas partes) mientras recorta la varianza sustancialmente. Y como los filos reales se estiman —y los errores te empujan a sobreapostar más allá del pico— apostar una fracción de Kelly te mantiene en el lado seguro y creciente de la joroba.",
+    },
+  ]}
+/>
