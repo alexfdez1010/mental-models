@@ -34,7 +34,14 @@ CRON_TZ="${CRON_TZ:-Europe/Madrid}"
 BUILDER_SCHEDULE="${BUILDER_SCHEDULE:-0 6,18 * * *}"
 IMPROVER_SCHEDULE="${IMPROVER_SCHEDULE:-0 12 * * 0}"
 
-FLOCK="$(command -v flock || echo /usr/bin/flock)"
+# Resolve flock to an absolute path baked into the crontab line (cron's PATH is
+# minimal). macOS has no native flock; the Homebrew `flock` formula installs it
+# at /opt/homebrew/bin/flock. Fall back to the Linux default only as a last resort.
+FLOCK="$(command -v flock || true)"
+[ -n "$FLOCK" ] || for c in /opt/homebrew/bin/flock /usr/local/bin/flock /usr/bin/flock; do
+  [ -x "$c" ] && { FLOCK="$c"; break; }
+done
+FLOCK="${FLOCK:-/usr/bin/flock}"
 
 # Marker comment tags the lines this repo owns, so --remove / re-install only
 # touch our own entries even if several template clones share one crontab.

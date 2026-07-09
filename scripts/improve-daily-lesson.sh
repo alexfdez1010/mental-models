@@ -41,7 +41,12 @@ set -euo pipefail
 export TZ="Europe/Madrid"
 export HOME="${HOME:-$(getent passwd "$(id -u)" | cut -d: -f6)}"
 export LANG="en_US.UTF-8"
-export PATH="$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+# macOS lacks setsid/timeout/flock and ships BSD `date` (no `date -d`). The GNU
+# tools come from Homebrew: coreutils' gnubin gives un-prefixed `timeout`/`date`,
+# util-linux gives `setsid`, and the `flock` formula gives `flock`. These dirs
+# are prepended first; on Linux they simply don't exist and PATH falls through to
+# the native GNU tools, so the same line stays portable across both OSes.
+export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:/opt/homebrew/opt/util-linux/bin:$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=8192}"
 
 # Derived from this script's own location so it works wherever you cloned the
