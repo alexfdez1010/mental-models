@@ -49,13 +49,15 @@
  * `principal-agent-problem`, `cumulative-advantage-and-power-laws`,
  * `debiasing-and-the-bias-blind-spot`, `signaling-and-costly-signals`,
  * `reflexivity-and-self-fulfilling-dynamics`, `antifragility-and-via-negativa`,
- * `ergodicity-and-the-time-average`, `no-free-lunch-theorem`, …)
+ * `ergodicity-and-the-time-average`, `no-free-lunch-theorem`,
+ * `common-knowledge-and-coordination`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * strategy/psychology (`common-knowledge-and-coordination`, 44),
- * economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`, 45) and
- * biology-evolution/strategy (`evolutionarily-stable-strategies`, 46).
+ * economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`, 45),
+ * biology-evolution/strategy (`evolutionarily-stable-strategies`, 46),
+ * systems-thinking/psychology/economics (`goodharts-law`, 47) and
+ * probability/psychology (`information-cascades-and-herding`, 48).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -94,34 +96,16 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `antifragility-and-via-
-  // negativa` (42) and `ergodicity-and-the-time-average` (43) — have graduated
+  // The earlier expert rungs — `externalities` (20) … `ergodicity-and-the-time-
+  // average` (43) and `common-knowledge-and-coordination` (44) — have graduated
   // and been removed; their topic MDX is now the record. The lowest-order entry
-  // below (`common-knowledge-and-coordination`, order 44) is built next. The
-  // remaining queue finishes the expert tier and keeps the breadth tag-diverse,
-  // spanning strategy/psychology (`common-knowledge-and-coordination`),
-  // economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`)
-  // and biology-evolution/strategy (`evolutionarily-stable-strategies`) so no
-  // single roadmap tag races ahead.
-  {
-    slug: 'common-knowledge-and-coordination',
-    icon: '👁️',
-    difficulty: 'expert',
-    order: 44,
-    accent: 'accent',
-    title: {
-      en: 'Common Knowledge & Coordination',
-      es: 'Conocimiento Común y Coordinación',
-    },
-    description: {
-      en: 'There is a world of difference between everyone knowing a thing and everyone knowing that everyone knows it. That second, recursive kind of knowledge — common knowledge — is what lets a crowd move as one: topple a regime, run on a bank, laugh at the emperor’s clothes. Why the public signal that makes knowledge common, not the private truth, is what actually moves people.',
-      es: 'Hay un mundo de diferencia entre que todos sepan algo y que todos sepan que todos lo saben. Ese segundo tipo de conocimiento, recursivo — el conocimiento común — es lo que permite a una multitud moverse como una sola: derribar un régimen, provocar un pánico bancario, reírse del rey desnudo. Por qué lo que de verdad mueve a la gente es la señal pública que vuelve común el conocimiento, no la verdad privada.',
-    },
-    dependencies: ['nash-equilibrium', 'critical-mass', 'game-theory-basics'],
-    tags: ['strategy', 'psychology'],
-    buildNotes:
-      'Common knowledge & coordination — the expert strategy/psychology rung on the recursive knowledge that lets groups act in concert, and why coordination hinges on what is PUBLICLY shared rather than privately true. Assumes game-theory-basics and nash-equilibrium (coordination games, multiple equilibria, best responses) and critical-mass (tipping thresholds, the fraction that must move before it is safe to move). Organising idea: distinguish (1) private knowledge (I know X), (2) mutual/shared knowledge (we each know X but not that the others know), and (3) COMMON KNOWLEDGE (everyone knows X, everyone knows that everyone knows, ad infinitum). Coordination on a risky joint action requires level 3, not level 1 — you only move against the regime / withdraw from the bank / point at the emperor when you know that enough others know that enough others will too. Sections, each with mechanism + worked example: the ladder of knowledge with the recursion made concrete (the "everyone knows that everyone knows" regress); the emperor’s-new-clothes / the child who says it out loud (the fact was mutual knowledge; the shout made it COMMON, and that is what changed behaviour) — public announcements, focal points (Schelling), and why a PUBLIC signal coordinates where a pile of private signals cannot; coordination games with a safe and a risky equilibrium, and why beliefs about others’ beliefs select which one you land on (tie to nash-equilibrium and critical-mass thresholds); real faces — bank runs and self-fulfilling panics, revolutions and preference falsification (Kuran: private opposition that stays hidden until a public spark makes it common and the dam breaks), protests and the role of visible crowds/media, advertising during major broadcasts as manufactured common knowledge (everyone sees that everyone sees the ad), the Keynesian beauty contest (guess what others guess others will do), traffic conventions and standards; why authoritarian regimes fear PUBLIC gatherings and open dissent far more than private grumbling (they attack the common-knowledge-generating channel). Pitfalls & where the model lies: common knowledge is an idealisation (true infinite recursion is rarely met — approximate/"almost common" knowledge and the electronic-mail / coordinated-attack problem show how fragile it is when confirmation can fail); a visible signal can manufacture FALSE common knowledge (rumour cascades, manufactured consensus); and not every coordination needs full common knowledge — sometimes a focal point or a little critical mass suffices. Build an interactive island (a "common-knowledge coordinator": a population in a coordination game each with a private willingness to act and a threshold "I’ll move only if I believe at least k% of others will"; toggle a PUBLIC SIGNAL (a shared announcement everyone sees everyone see) on or off and watch the same private dispositions either stay frozen (mutual knowledge, everyone waits) or cascade into collective action (common knowledge crosses the critical mass), with a readout of who-knows-what level, the believed participation, and whether the coordinated move succeeds or fizzles). Plus a Categorize (sort cases into private / mutual / common knowledge, or public-signal vs private-signal) and MatchConcepts (common knowledge, mutual knowledge, focal point, preference falsification, coordination equilibrium), Quiz + MindMap. en + es twin.',
-  },
+  // below (`spontaneous-order-and-the-knowledge-problem`, order 45) is built
+  // next. The remaining queue finishes the expert tier and keeps the breadth
+  // tag-diverse, spanning economics/systems-thinking
+  // (`spontaneous-order-and-the-knowledge-problem`), biology-evolution/strategy
+  // (`evolutionarily-stable-strategies`), systems-thinking/psychology/economics
+  // (`goodharts-law`) and probability/psychology
+  // (`information-cascades-and-herding`) so no single roadmap tag races ahead.
   {
     slug: 'spontaneous-order-and-the-knowledge-problem',
     icon: '🐜',
@@ -159,6 +143,44 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['biology-evolution', 'strategy'],
     buildNotes:
       'Evolutionarily stable strategies (ESS) — the expert biology-evolution/strategy rung (John Maynard Smith & George Price, 1973) fusing game theory with natural selection: an ESS is a strategy such that, if (almost) all members of a population adopt it, no rare mutant strategy can invade by doing better. Assumes game-theory-basics (payoffs, best responses, Nash equilibrium), natural-selection (differential reproduction, fitness) and evolution-of-cooperation (repeated interaction, replicator dynamics). Organising idea: replace the rational chooser of classic game theory with a population where fitter strategies simply reproduce more — the equilibrium is REACHED BY SELECTION, not by reasoning, and an ESS is a refinement of Nash equilibrium that must also be uninvadable by mutants at the margin. Sections, each with mechanism + worked example: the ESS definition and the invasion test (E(S,S) > E(T,S), or ties broken by E(S,T) > E(T,T)); the flagship HAWK–DOVE game (fighting vs displaying over a resource V with injury cost C: pure Hawk is invadable when C>V, so the ESS is a MIXED/polymorphic equilibrium at proportion V/C hawks — worked with real numbers); why an ESS is a Nash equilibrium but not every Nash equilibrium is an ESS (stability against drift/mutation is the extra bar); mixed strategies as either an individual randomising OR a stable polymorphism of the population; frequency-dependent selection (a strategy’s payoff depends on how common it is — rare-type advantage, e.g. the 1:1 SEX RATIO as Fisher’s ESS, left-right scale-eating fish, side-blotched-lizard rock–paper–scissors morphs); the tie to cooperation (Tit-for-Tat as (nearly) an ESS in the iterated Prisoner’s Dilemma, and why AllD is also stable — bistability); replicator dynamics as the engine that carries a population toward an ESS. Pitfalls & where the model lies: an ESS is about stability against invasion, NOT global optimality (populations get stuck at ESSs that are collectively worse — the Hawk–Dove waste of fighting is an ESS); not every game HAS a pure ESS (some have only mixed, some none); real populations have finite size, kin structure and shifting environments the static ESS ignores; and "evolutionarily stable" is easy to narrate loosely — insist on the actual invasion inequality. Build an interactive island (a "Hawk–Dove invasion lab": sliders for resource value V and injury cost C and a Hawk-fraction slider; show each type’s fitness as a function of the current Hawk fraction, mark the ESS where the lines cross, and a "let selection run" button that drives any starting mix toward the stable proportion, with a readout of the ESS Hawk share, each type’s payoff, and whether a rare mutant of the other type could invade). Plus a Categorize (sort outcomes into ESS / invadable, or pure-ESS / mixed-ESS / no-ESS) and MatchConcepts (evolutionarily stable strategy, invasion, frequency-dependent selection, Hawk–Dove, replicator dynamics), Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'goodharts-law',
+    icon: '🎯',
+    difficulty: 'expert',
+    order: 47,
+    accent: 'brand',
+    title: {
+      en: "Goodhart's Law",
+      es: 'La Ley de Goodhart',
+    },
+    description: {
+      en: 'When a measure becomes a target, it stops being a good measure. Point an incentive at a proxy — test scores, clicks, arrests, hospital wait-times — and people optimise the proxy while the real goal it stood for quietly rots. Why every metric you reward eventually lies to you, and what to do about it.',
+      es: 'Cuando una medida se convierte en objetivo, deja de ser una buena medida. Apunta un incentivo a un indicador — notas de examen, clics, detenciones, tiempos de espera hospitalarios — y la gente optimiza el indicador mientras el objetivo real que representaba se pudre en silencio. Por qué toda métrica que premias acaba mintiéndote, y qué hacer al respecto.',
+    },
+    dependencies: ['incentives', 'feedback-loops', 'principal-agent-problem'],
+    tags: ['systems-thinking', 'psychology', 'economics'],
+    buildNotes:
+      "Goodhart's Law — the expert systems-thinking/psychology/economics rung: \"When a measure becomes a target, it ceases to be a good measure\" (Charles Goodhart 1975; sharpened by Marilyn Strathern). Assumes incentives (agents optimise what is rewarded), feedback-loops (proxy optimisation feeds back and corrupts the signal) and principal-agent-problem (the measured party knows things the measurer does not, and games the gap). Organising idea: a metric is only ever a PROXY for the thing you actually care about; the two are correlated in the wild, but the moment you apply optimisation pressure to the proxy, the correlation you relied on breaks (the proxy and the goal come apart) and you get the number without the substance. Sections, each with mechanism + worked example: proxy vs goal and why we ever use proxies (the real target is unmeasurable/slow; the proxy is cheap and correlated — teaching→test scores, health→wait times, safety→reported incidents); the mechanism of decoupling under pressure (Campbell's Law, the four types in the Manheim/Garrabrant taxonomy — regressional, extremal, causal, adversarial Goodhart — kept intuitive, not heavy); flagship worked cases (the Soviet nail factory: reward by weight → one giant useless nail, reward by number → millions of tiny useless tacks; the cobra effect / Hanoi rats bounty breeding the very pest; teaching to the test; sales quotas and sandbagging; clicks/engagement metrics and clickbait; hospital A&E four-hour targets; arrest/ticket quotas; citation counts and salami-slicing science; VaR and risk metrics gamed pre-2008); why it is a SPECIAL CASE of incentives + principal-agent (the agent optimises the letter of the reward, not its spirit) and how it forms a feedback loop that erodes the metric's own validity. Pitfalls & where the model lies: it is NOT an argument against measuring at all (flying blind is worse) — it is an argument against naive single-metric targets under high stakes; not every measure collapses (low-stakes or hard-to-game measures survive; the failure scales with optimisation pressure and gameability); over-quoting it becomes a lazy excuse to dodge accountability. Fixes: use baskets of metrics that are hard to game together, hold some targets loosely, keep humans in the loop / qualitative audit, reward outcomes not proxies where possible, keep the true goal explicit, and expect to rotate metrics as they decay. Build an interactive island (a \"Goodhart pressure dial\": a scatter/bar showing a true-quality variable and a measured PROXY that track together at low pressure; crank an \"optimisation pressure / stakes\" slider and watch agents pour effort into the gap — the proxy shoots up while true quality flatlines or falls, the correlation coefficient between them visibly decaying toward zero, with a readout of measured score vs real value vs the wasted gaming effort). Plus a Categorize (sort cases into measure-still-valid vs measure-corrupted, or the Goodhart types) and MatchConcepts (proxy, target, Campbell's Law, gaming, Goodhart's Law), Quiz + MindMap. en + es twin.",
+  },
+  {
+    slug: 'information-cascades-and-herding',
+    icon: '🐑',
+    difficulty: 'expert',
+    order: 48,
+    accent: 'accent',
+    title: {
+      en: 'Information Cascades & Herding',
+      es: 'Cascadas de Información y Comportamiento Gregario',
+    },
+    description: {
+      en: 'Sometimes it is perfectly rational to ignore what you know and copy the crowd — and that is exactly how the crowd goes wrong together. Once a few early choices line up, each newcomer sensibly follows the herd instead of their own private signal, so no new information enters and a fragile consensus locks in on a whim. How rational individuals produce irrational, reversible mobs.',
+      es: 'A veces es perfectamente racional ignorar lo que sabes y copiar a la multitud — y así es precisamente como la multitud se equivoca en bloque. En cuanto unas pocas elecciones tempranas coinciden, cada recién llegado sigue sensatamente al rebaño en vez de a su propia señal privada, así que no entra información nueva y un consenso frágil se fija por capricho. Cómo individuos racionales producen masas irracionales y reversibles.',
+    },
+    dependencies: ['bayesian-updating', 'common-knowledge-and-coordination', 'critical-mass'],
+    tags: ['probability', 'psychology'],
+    buildNotes:
+      'Information cascades & herding — the expert probability/psychology rung (Bikhchandani, Hirshleifer & Welch 1992; Banerjee 1992) on how rational Bayesian agents, observing only each other\'s ACTIONS (not their private information), rationally abandon their own signal and copy predecessors — so information stops aggregating and the group locks onto a possibly-wrong choice. Assumes bayesian-updating (posterior from prior + evidence, weighing signal strength), common-knowledge-and-coordination (acting on beliefs about others) and critical-mass (a threshold of early movers that tips the rest). Organising idea: distinguish an INFORMATION cascade (I copy you because your action reveals information I trust more than my own weak private signal — informational herding) from mere conformity/social pressure; once the public tally of actions outweighs any one private signal, each newcomer optimally ignores their own data, so their action carries NO new information, and everyone after them is in the same trap — the cascade is informationally empty yet self-perpetuating. Sections, each with mechanism + worked example: the canonical urn experiment (two urns, majority-red vs majority-blue; you see a private draw AND everyone\'s prior guesses; after two same guesses your single contrary draw is rationally overruled — walk the Bayesian arithmetic with real numbers); why cascades are RATIONAL yet FRAGILE and information-poor (they aggregate almost no private knowledge, so a tiny new public signal or one credible contrarian can shatter and reverse them — fads, flips); real faces (restaurant queues and bestseller lists, viral products and app-store ranks, bank-run/coordination links, academic and medical consensus bandwagons, financial bubbles and fashion, citation herding, standing ovations); the difference from and relationship to COMMON KNOWLEDGE and critical mass (a public signal can start OR break a cascade; visible actions are the channel); reputational herding (Scharfstein–Stein: agents herd to not look wrong alone). Pitfalls & where the model lies: herding is not always irrational (following others can be Bayesian-optimal individually even as it is collectively bad — the paradox is the point); cascades are shallow and reversible, unlike genuine consensus built on independent evidence — do not mistake agreement for accuracy (tie to base rates / diversity of information); the cure is preserving INDEPENDENT private signals (aggregate votes/prices/prediction markets that reveal information, not just actions; encourage contrarians; sequence disclosures to avoid anchoring). Build an interactive island (a "cascade line": a sequence of agents each with a private noisy signal about which of two options is correct; they decide in order, seeing only the earlier CHOICES; a signal-strength / prior slider and a step/run control; watch a couple of early coincidences trigger everyone downstream to follow regardless of their private signal, with a readout of how many people followed their own signal vs the herd, whether the cascade landed on the correct option, and how little private information actually got used — plus a "drop a public signal" button that can shatter and flip it). Plus a Categorize (sort cases into information-cascade vs independent-judgement, or fragile-herd vs robust-consensus) and MatchConcepts (information cascade, private signal, herding, reputational herding, cascade fragility), Quiz + MindMap. en + es twin.',
   },
 ];
 

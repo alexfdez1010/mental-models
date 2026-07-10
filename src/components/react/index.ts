@@ -237,3 +237,6 @@ export type { ErgodicityEngineProps } from '@/components/react/ErgodicityEngine'
 
 export { NoFreeLunchBoard, default as NoFreeLunchBoardDefault } from '@/components/react/NoFreeLunchBoard';
 export type { NoFreeLunchBoardProps, NoFreeLunchStrategy } from '@/components/react/NoFreeLunchBoard';
+
+export { CommonKnowledgeCoordinator, default as CommonKnowledgeCoordinatorDefault } from '@/components/react/CommonKnowledgeCoordinator';
+export type { CommonKnowledgeCoordinatorProps } from '@/components/react/CommonKnowledgeCoordinator';

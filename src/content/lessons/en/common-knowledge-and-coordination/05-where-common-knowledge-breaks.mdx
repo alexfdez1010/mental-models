@@ -1,0 +1,375 @@
+---
+title: "Where Common Knowledge Breaks"
+description: The pitfalls and limits of the model — why true common knowledge is an idealisation, why coordination stays brittle, how false common knowledge is manufactured, and how the whole course fits the latticework.
+topic: "en/common-knowledge-and-coordination"
+order: 6
+minutes: 14
+updated: 2026-07-10
+---
+
+import { Callout, MCQ, FillBlank, Categorize, MatchConcepts, MindMap, Reveal } from '@/components/react';
+
+For five lessons we've handed common knowledge a great deal of power: it turns a
+room full of private doubts into a public revolt, tips a healthy bank into a run,
+and lets strangers converge on the same street corner without a word. Time to turn
+the model over and inspect its underside. Because the honest truth is that **true
+common knowledge — the infinite tower of "I know that you know that I know…" — is
+almost never literally achieved.** Humans run on a cheaper, fragile approximation
+of it, and knowing exactly where that approximation cracks is what separates
+someone who *uses* the model from someone the model uses.
+
+<MCQ
+  client:visible
+  pretest
+  question="Guess: in real human coordination, how high does the tower of 'I know that you know that I know…' actually get climbed?"
+  options={[
+    { text: 'Never truly to infinity — people run on a few levels plus an assumption that the rest holds', correct: true },
+    { text: 'All the way to infinity, every time two people coordinate' },
+    { text: 'Exactly two levels, always, and never more' },
+  ]}
+  explanation="Genuine common knowledge requires an infinite recursion nobody ever literally verifies. In practice people climb a few rungs, then assume the tower keeps going. That assumption usually holds — and occasionally, expensively, does not."
+/>
+
+## Common knowledge is an idealisation
+
+Picture a ladder that is supposed to reach the moon. In the textbook, it has
+infinitely many rungs and everyone has climbed every one. In real life, people
+step on the first two or three rungs — *I know it, you know it, I'm pretty sure you
+know I know it* — glance up, and simply **assume** the rest of the ladder is there.
+That assumption is doing enormous quiet work.
+
+What people actually have is **almost-common knowledge**: a fact is known by
+everyone, and known to be known up to some finite depth, after which each person
+merely *presumes* the recursion continues without ever checking. Formally, if true
+common knowledge is "known at every level $1, 2, 3, \ldots$ to infinity",
+almost-common knowledge is "known and mutually known up to level $n$, then taken on
+faith". For the vast majority of coordination, level 2 or 3 plus faith is
+indistinguishable from the real thing — the coordination fires anyway.
+
+The catch is the faith. It holds until something makes a player doubt one rung, and
+because every rung leans on the one above it, a single crack can bring the whole
+assumption down. That is why coordination built on almost-common knowledge is
+*usually* fine but *structurally* brittle at the edges.
+
+<Callout variant="tip" title="The word that does the quiet work: approximate">
+**Almost-common knowledge** is knowledge shared and mutually known up to a few
+levels, then *assumed* to continue forever. It is what humans actually run on. It
+behaves like the real thing right up until someone has a reason to doubt a single
+level — at which point the borrowed certainty above it can vanish all at once.
+</Callout>
+
+<FillBlank
+  client:visible
+  question="Name what humans actually run on."
+  text="True common knowledge needs an {{infinite|single|written}} recursion nobody ever verifies. In practice people rely on {{almost-common|purely private|legally binding}} knowledge — known up to a few levels, then simply {{assumed|proven|recorded}} to continue — which usually suffices but is {{fragile|permanent|invisible}} at the edges."
+  explanation="The infinite tower is an idealisation. Real coordination stands on a few verified rungs plus an assumption about the rest — powerful in the ordinary case, brittle exactly where that assumption is stressed."
+/>
+
+## The coordinated-attack problem: why confirmation never closes
+
+Here is the cleanest proof that the infinite tower cannot be built by talking.
+Two allied generals sit on hilltops on opposite sides of a valley, with the enemy
+in between. If they attack **together** at dawn, they win. If only one attacks, that
+lone army is destroyed. They must agree on the timing — but the only way to
+communicate is to send a messenger *through* the valley, where the enemy might
+intercept them.
+
+General A sends: *"Attack at dawn."* But A cannot move until she knows the message
+arrived — a lone charge is suicide. So B, on receiving it, sends an
+acknowledgement: *"Got it — dawn."* Now B has the plan… but B cannot move either,
+because B doesn't know *his* acknowledgement got through. If it was intercepted, A
+never marches, and B charging alone dies. So A must acknowledge the acknowledgement:
+*"Got your confirmation."* And now **A** is in exactly B's earlier position — A
+can't be sure *that* message landed. Every acknowledgement creates a new final
+message whose delivery is uncertain, and whoever sent the last one can't safely act
+on it.
+
+<Callout variant="warning" title="The trap in one line">
+Whenever the last message sent might have been lost, its sender cannot rely on it —
+so no finite exchange of confirmations ever reaches common knowledge. The tower
+needs an acknowledgement for every acknowledgement, forever.
+</Callout>
+
+Let's tabulate the regress so the impossibility is undeniable. Each row adds a level
+of knowledge, and each row still leaves *someone* holding an unconfirmed final
+message:
+
+| Message | After it (if delivered) | Who still can't be sure |
+|---|---|---|
+| A → B: "Attack at dawn" | B knows the plan | B — did A learn I received it? |
+| B → A: "Confirmed" | A knows B knows | A — did B learn I got the confirm? |
+| A → B: "Got your confirm" | B knows A knows B knows | B — did A learn I got *that*? |
+| … forever | one more level of knowing | always the last sender |
+
+No finite number of rounds ever removes the doubt; it only pushes it up one level.
+Since real channels *can* fail, common knowledge here is genuinely **unreachable**,
+and the generals — each rational, each willing to win together — may never dare to
+attack.
+
+### Rubinstein's electronic-mail game
+
+You might hope automation rescues the generals: let computers fire confirmations
+back and forth thousands of times a second. Ariel Rubinstein's **electronic-mail
+game** shows it doesn't. Two players benefit from jointly taking a risky action, but
+only in one "state of the world" that just one of them observes directly. Their
+computers automatically confirm each message, and confirm the confirmations —
+building a tower hundreds of levels high. Yet because there's always a tiny chance
+the *last* automatic message was the one that got lost, the reasoning unravels from
+the top down exactly as with the generals. The startling result: **no matter how
+many automatic confirmations pass, the players still fail to coordinate on the risky
+action.** A hundred levels of "I know that you know" is not common knowledge, and
+the gap between "very high finite tower" and "actually infinite" is the whole
+difference between coordinating and not.
+
+<MCQ
+  client:visible
+  question="In the two-generals problem, why doesn't sending one more acknowledgement ever solve it?"
+  options={[
+    { text: 'Each new acknowledgement is itself unconfirmed, so it just moves the doubt up one level instead of removing it', correct: true },
+    { text: 'The generals are not smart enough to count the messages' },
+    { text: 'The enemy always reads every single message without fail' },
+  ]}
+  explanation="The regress is the point. Any final message might be lost, so its sender can't rely on it — adding another acknowledgement simply creates a new unconfirmed last message. Common knowledge needs the tower to be infinite, and no finite exchange gets there."
+/>
+
+## False common knowledge: manufactured, not true
+
+Now the pitfall that turns the model from a tool into a trap. A public signal
+manufactures common knowledge about **what everyone will act on** — and it does
+this whether or not the underlying claim is *true*. The bank in lesson 5 didn't run
+because it was insolvent; it ran because a rumour became common knowledge that
+*others would run*, and pulling your money first is rational once you believe that,
+solvent bank or not.
+
+Call it **false common knowledge**: a state where "everyone knows that everyone
+knows $X$" has been established by a public signal, while $X$ itself is false. The
+recursion is perfectly real; only the content is wrong. And crucially, false common
+knowledge is just as *behaviourally* potent as the true kind — people coordinate on
+it identically, because what drives their action is the belief about others, not the
+buried fact.
+
+Worked example. A viral post claims a popular payment app is "about to freeze all
+withdrawals at midnight." It's fabricated. But it's *public* — millions see it,
+and each viewer sees that millions of others saw it. Now everyone knows that
+everyone knows about the alleged freeze. The rational move, given that belief, is to
+withdraw now, before the crowd does. The stampede of withdrawals then really does
+strain the app — and the false claim becomes true *because* it was commonly
+believed. This is **reflexivity** wearing a mask: the signal manufactured the
+reality it described.
+
+<Callout variant="warning" title="The trap: acting on it is not evidence it's true">
+Never read "everyone is acting on $X$" as "$X$ is true." A public signal creates
+common knowledge about *coordination*, not about *facts*. Rumour cascades, moral
+panics, manufactured consensus, and viral misinformation all run on genuine common
+knowledge attached to a false core. The recursion is real; the content can be
+garbage.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A stock forum erupts: 'Everyone knows this company is finished — look how many people are selling!' The price craters. What's the reasoning error a careful thinker spots?"
+  options={[
+    { text: 'Mass selling shows common knowledge that others will sell — not evidence the company is actually finished', correct: true },
+    { text: 'There is no error; a falling price always proves the company is worthless' },
+    { text: 'The error is that stocks cannot fall on rumours, only on real news' },
+  ]}
+  explanation="This is false common knowledge in action. The public signal made 'everyone will sell' common knowledge, which is enough to trigger selling regardless of the firm's real health. Reading the coordinated sell-off as proof of the underlying claim confuses 'everyone is acting on it' with 'it is true.'"
+/>
+
+## Not every coordination needs FULL common knowledge
+
+Having warned that true common knowledge is unreachable, we must avoid the opposite
+overcorrection — concluding that coordination is therefore impossible. It plainly
+isn't; people coordinate constantly. The resolution is that **most coordination
+never needed the full infinite tower in the first place.**
+
+Two cheaper substitutes usually do the job. First, a **focal point** — a solution so
+obvious it needs no communication (meet "at noon", split "50/50", rally at "the main
+square") — lets people converge on almost-common knowledge alone, because each
+correctly assumes the other's mind runs the same obvious way. Second, a little
+**critical mass** inside a dense-enough core can be enough to tip the rest:
+approximate common knowledge within one tightly connected cluster — a friend group,
+a trading desk, a neighbourhood — can start a cascade that pulls in the loosely
+connected periphery afterward. You don't need the whole society to *simultaneously*
+know that everyone knows; you need a connected seed where it's *almost* true, plus a
+threshold structure that lets the seed spread.
+
+<Callout variant="tip" title="Enough, not perfect">
+Coordination rarely requires literal common knowledge. A **focal point** lets minds
+converge on the obvious with no messages at all; a dense **critical-mass** core lets
+approximate common knowledge among a connected few ignite the many. The model's
+demand for an infinite tower is the idealisation — real tipping runs on 'enough,'
+not 'perfect.'
+</Callout>
+
+<Categorize
+  client:visible
+  question="Sort each situation by whether its coordination rests on TRUE common knowledge (a genuine, verifiable public fact) or FALSE common knowledge (a public signal attached to an untrue core)."
+  buckets={['True common knowledge', 'False common knowledge']}
+  items={[
+    { text: 'A televised referee blows the final whistle; both teams and every fan know the match is over', bucket: 'True common knowledge' },
+    { text: 'A fabricated viral post triggers a withdrawal stampede on a solvent bank', bucket: 'False common knowledge' },
+    { text: 'A published, verifiable timetable makes "the train leaves at 9:00" common knowledge', bucket: 'True common knowledge' },
+    { text: 'A rigged "everyone agrees" chorus manufactures the sense of a consensus that does not exist', bucket: 'False common knowledge' },
+    { text: 'A moral panic spreads a debunked rumour that "everyone knows" a danger is real', bucket: 'False common knowledge' },
+    { text: 'An official, broadcast election result both sides can independently verify', bucket: 'True common knowledge' },
+  ]}
+  explanation="The recursion — everyone knowing that everyone knows — can be real in both columns. What differs is the core: true common knowledge sits on a verifiable public fact; false common knowledge sits on an untrue claim that a public signal made everyone act on anyway."
+/>
+
+## Where the model lies — and how it gets misused
+
+Every powerful model has a failure surface. Common knowledge's three biggest
+misuses share a root: treating a subtle, degree-laden idea as a blunt, binary one.
+
+| The misuse | Why it's wrong | The corrective |
+|---|---|---|
+| Treating common knowledge as binary ("we have it or we don't") | It's a matter of **degree** — depth of recursion and density of the network both vary continuously | Ask *how* common: how many levels, how connected the core, how confirmable |
+| Assuming a public signal ALWAYS ignites coordination | A signal only tips if the underlying **grievances or thresholds** already exist (lesson 5) — shout "revolt!" to the content and nothing happens | Check the private preferences and thresholds *before* crediting the signal |
+| Forgetting false common knowledge is a **weapon** | Manufactured consensus and rumour cascades are engineered deliberately, not just accidental bugs | Treat "everyone knows" as a claim to audit, especially when someone benefits from you believing it |
+
+The through-line: common knowledge is not a switch, it's a landscape with depth,
+density, and truth-value as separate dials. Whenever you catch yourself saying "it's
+common knowledge, therefore…", stop and ask which dial you're actually leaning on.
+
+<Reveal client:visible label="A subtle synthesis — why false common knowledge is so hard to puncture">
+Once a public signal has made a false claim common knowledge, a single person
+knowing it's false doesn't fix anything — because their *best action* still depends
+on what everyone else will do, and everyone else is still acting on the signal.
+Debunking the fact privately doesn't dissolve the coordination; only a **counter-
+signal that is itself public** — one that makes "it's false, and everyone now knows
+that" common knowledge — can. This is why the antidote to manufactured common
+knowledge is rarely quiet truth and almost always a louder, more credible public
+signal. The recursion that trapped the crowd can only be undone at the same level it
+was created.
+</Reveal>
+
+## The latticework — how this whole course connects
+
+Common knowledge isn't a lone gadget; it's a joint that links several models you
+already hold. Wiring it in is what makes it durable.
+
+- **Critical mass & tipping points.** Common knowledge is the *informational* engine
+  behind a threshold cascade. A public signal doesn't add protesters directly — it
+  tells each person that enough others will show up to cross their personal
+  threshold, so they all move at once. Thresholds are the fuel; common knowledge is
+  the spark.
+- **Nash equilibrium & equilibrium selection.** Coordination games have multiple
+  equilibria (everyone stays home / everyone revolts; keep your money in / run).
+  Common knowledge is the mechanism that **selects** which equilibrium the group
+  lands on — it doesn't change the payoff matrix, it moves everyone's beliefs to the
+  same corner of it.
+- **Reflexivity & self-fulfilling dynamics.** False common knowledge is reflexivity
+  with a public address system: a belief about what others will do reshapes reality
+  until the belief comes true. The healthy bank that gets run on, the app whose
+  fabricated freeze causes a real one — the signal manufactures the fact it claimed.
+- **Incentives & preference falsification.** Before a public signal, people hide
+  their true preferences because each *privately* fears being the only one to act.
+  The signal doesn't create the grievance — it reveals that the grievance was
+  common all along, flipping falsified preferences into shared, actionable
+  knowledge.
+- **Forward pointer: information cascades.** Coming up in your latticework is a close
+  cousin — cascades where people rationally ignore their *own* information to copy
+  the visible actions of others. Common knowledge is about aligning beliefs *about
+  beliefs*; cascades are about inferring facts from *behaviour*. They interlock:
+  watch for where one shades into the other.
+
+<MatchConcepts
+  client:visible
+  question="Match each concept from this lesson to its precise meaning."
+  pairs={[
+    { term: 'Almost-common knowledge', definition: 'Shared and mutually known up to a few levels, then assumed to continue — what humans actually run on' },
+    { term: 'Coordinated-attack problem', definition: 'Proof that no finite exchange of confirmations over a failable channel ever reaches common knowledge' },
+    { term: 'False common knowledge', definition: 'A real recursion of mutual knowledge attached to an untrue core, established by a public signal' },
+    { term: 'Degrees of common knowledge', definition: 'The insight that it varies by depth and network density rather than being simply on or off' },
+    { term: 'Focal point', definition: 'An obvious solution that lets minds converge without messages, on approximate knowledge alone' },
+  ]}
+  explanation="Almost-common knowledge is the practical substitute; the coordinated-attack problem is why the true version is unreachable by talking; false common knowledge is the weaponised failure; degrees names the binary-to-continuum correction; and the focal point is the cheap substitute that often suffices."
+/>
+
+### When to reach for common knowledge (and when not to)
+
+1. **Is coordination the bottleneck?** Reach for the model when everyone *wants* the
+   same outcome but each is waiting on the others. If the problem is conflicting
+   interests, not aligned-but-uncertain ones, use game theory more broadly.
+2. **Is there a genuine public signal?** The model bites when something is seen *and
+   seen to be seen*. No public signal, no manufactured common knowledge.
+3. **Do the underlying thresholds exist?** A signal only tips a crowd whose private
+   grievances or incentives already reach their thresholds. Check the fuel before
+   crediting the spark.
+4. **Am I confusing coordination with truth?** If your only evidence for a claim is
+   that everyone's acting on it, you may be looking at false common knowledge. Audit
+   the core separately from the crowd.
+5. **Is the channel reliable enough?** Where confirmation can silently fail — the
+   two-generals regime — expect coordination to stay brittle no matter how many
+   messages fly.
+
+<MindMap
+  client:visible
+  title="Where common knowledge breaks"
+  root={{
+    label: 'Limits & latticework',
+    children: [
+      {
+        label: 'It is an idealisation',
+        children: [
+          { label: 'Infinite tower never literally built' },
+          { label: 'We run on almost-common knowledge' },
+        ],
+      },
+      {
+        label: 'Unreachable by talking',
+        children: [
+          { label: 'Two-generals: confirm the confirmation, forever' },
+          { label: 'Rubinstein e-mail game: high finite ≠ infinite' },
+        ],
+      },
+      {
+        label: 'False common knowledge',
+        children: [
+          { label: 'Public signal ignores truth' },
+          { label: '"Everyone acts on it" ≠ "it is true"' },
+        ],
+      },
+      {
+        label: 'Enough, not perfect',
+        children: [
+          { label: 'Focal points and a dense core often suffice' },
+        ],
+      },
+      {
+        label: 'Latticework',
+        children: [
+          { label: 'Critical mass, Nash, reflexivity' },
+          { label: 'Preference falsification → cascades' },
+        ],
+      },
+    ],
+  }}
+/>
+
+<Callout variant="success" title="Key takeaways">
+- **True common knowledge is an idealisation.** The infinite recursion is never
+  literally built; humans run on **almost-common knowledge** — a few verified
+  levels plus faith — which usually suffices but is fragile at the edges.
+- **Confirmation never closes the loop.** The coordinated-attack problem and
+  Rubinstein's e-mail game prove that over a failable channel, no finite exchange
+  reaches common knowledge — coordination stays brittle where messages can be lost.
+- **A public signal manufactures common knowledge regardless of truth.** False
+  common knowledge — rumours, panics, runs on healthy banks — coordinates people
+  just as forcefully as the true kind. Never read "everyone acts on it" as "it's
+  true."
+- **You rarely need the full tower.** Focal points and a dense critical-mass core
+  let approximate common knowledge do the work; the model's demand for infinity is
+  the idealisation, not the requirement.
+- **Common knowledge is a dial, not a switch** — depth, density, and truth-value are
+  separate — and it's the joint connecting critical mass, Nash equilibrium
+  selection, reflexivity, preference falsification, and the information cascades
+  coming next.
+</Callout>
+
+You now hold the whole course: the ladder from private to mutual to common
+knowledge, how public signals and focal points move a crowd to the same equilibrium,
+how bank runs and revolutions ignite — and, from this lesson, exactly where the
+model thins out, how it's faked, and how it wires into the rest of your latticework.
+Carry the humility with the power into the final exam.
