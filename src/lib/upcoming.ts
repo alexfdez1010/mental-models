@@ -49,7 +49,7 @@
  * `principal-agent-problem`, `cumulative-advantage-and-power-laws`,
  * `debiasing-and-the-bias-blind-spot`, `signaling-and-costly-signals`,
  * `reflexivity-and-self-fulfilling-dynamics`, `antifragility-and-via-negativa`,
- * `ergodicity-and-the-time-average`, …)
+ * `ergodicity-and-the-time-average`, `no-free-lunch-theorem`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
@@ -93,26 +93,6 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Beginner tier ──────────────────────────────────────────────────────────
-  {
-    slug: 'no-free-lunch-theorem',
-    icon: '🍽️',
-    difficulty: 'beginner',
-    order: 1,
-    accent: 'brand',
-    title: {
-      en: 'The No Free Lunch Theorem',
-      es: 'El Teorema de que No Hay Almuerzo Gratis',
-    },
-    description: {
-      en: 'There is no single method, model, or strategy that beats all the others on every problem. Any approach that does better on one kind of task pays for it by doing worse on another — averaged over every possible problem, they all tie. Why "what is the best algorithm / tool / rule?" is the wrong question, and "best for which problem?" is the right one.',
-      es: 'No existe un único método, modelo o estrategia que gane a todos los demás en todos los problemas. Cualquier enfoque que va mejor en un tipo de tarea lo paga yendo peor en otro — promediado sobre todos los problemas posibles, todos empatan. Por qué «¿cuál es el mejor algoritmo / herramienta / regla?» es la pregunta equivocada, y «¿el mejor para qué problema?» es la correcta.',
-    },
-    dependencies: ['what-are-mental-models'],
-    tags: ['problem-solving', 'decision-making'],
-    buildNotes:
-      'The No Free Lunch theorem (Wolpert & Macready, 1997, for optimization; earlier for supervised learning) as a BEGINNER mental model — assume zero background, define every term (optimizer, algorithm, search, prior, generalization) on first use. Organising idea: if you AVERAGE performance across ALL possible problems (all possible objective functions / all possible worlds), every search or learning method performs exactly the same — the clever ones and the random ones tie. So no method is universally best; superior performance on one class of problems is mathematically PAID FOR by inferior performance on the rest. The practical punchline: performance comes from MATCHING a method to the structure of the specific problem (its prior / assumptions), not from finding a magic universal method. Sections, each with an intuitive analogy + a plain worked example + a pitfall: (1) the claim in plain words — "no shortcut that works everywhere for free" (the free-lunch metaphor); (2) WHY it is true, gently — if an algorithm is tuned to exploit one kind of pattern, an adversarial problem with the opposite pattern punishes it exactly as much (a worked toy example over a tiny space of problems where you can literally tabulate that two strategies tie on the average); (3) it does NOT mean "all methods are equally good in practice" — real-world problems are NOT drawn uniformly from all possible problems; they have STRUCTURE (smoothness, regularity), and the whole game is picking a method whose built-in assumptions match that structure (this is the crucial, most-misunderstood point — spell out the misconception); (4) faces of the idea beyond CS — no single investment strategy, diet, management style, study technique, or decision rule dominates every situation; "it depends" has a theorem behind it; tie to circle-of-competence (know which problems your tool fits) and combining-models-latticework (why you carry many models, not one); (5) the free-lunch you CAN get — exploiting known structure and priors is legitimate and powerful; NFL forbids only the FREE (assumption-less, works-on-everything) lunch. Pitfalls: over-reading it as nihilism ("nothing works / all methods equal" — false in the structured real world); under-reading it ("my favourite method is just best" — beware the universal-hammer). Build an interactive island (a "no-free-lunch board": a small set of toy problems and a few strategies; let the learner run each strategy on each problem and watch one strategy win here and lose there, with a running AVERAGE bar that visibly converges so all strategies tie across the full problem set — making the theorem tangible). Plus a Categorize (sort claims into "matches NFL" vs "myth of a universal best method") and MatchConcepts (no free lunch, prior/assumption, problem structure, generalization, universal-hammer bias), Quiz + MindMap. Keep it beginner-tier: no formal proof, no heavy math — build intuition. en + es twin.',
-  },
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
   // The earlier expert rungs — `externalities` (20) … `antifragility-and-via-
   // negativa` (42) and `ergodicity-and-the-time-average` (43) — have graduated

@@ -234,3 +234,6 @@ export type { FragilityTesterProps, FragilitySystem } from '@/components/react/F
 
 export { ErgodicityEngine, default as ErgodicityEngineDefault } from '@/components/react/ErgodicityEngine';
 export type { ErgodicityEngineProps } from '@/components/react/ErgodicityEngine';
+
+export { NoFreeLunchBoard, default as NoFreeLunchBoardDefault } from '@/components/react/NoFreeLunchBoard';
+export type { NoFreeLunchBoardProps, NoFreeLunchStrategy } from '@/components/react/NoFreeLunchBoard';
