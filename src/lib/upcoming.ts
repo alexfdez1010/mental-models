@@ -50,11 +50,11 @@
  * `debiasing-and-the-bias-blind-spot`, `signaling-and-costly-signals`,
  * `reflexivity-and-self-fulfilling-dynamics`, `antifragility-and-via-negativa`,
  * `ergodicity-and-the-time-average`, `no-free-lunch-theorem`,
- * `common-knowledge-and-coordination`, …)
+ * `common-knowledge-and-coordination`,
+ * `spontaneous-order-and-the-knowledge-problem`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * economics/systems-thinking (`spontaneous-order-and-the-knowledge-problem`, 45),
  * biology-evolution/strategy (`evolutionarily-stable-strategies`, 46),
  * systems-thinking/psychology/economics (`goodharts-law`, 47) and
  * probability/psychology (`information-cascades-and-herding`, 48).
@@ -96,35 +96,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `ergodicity-and-the-time-
-  // average` (43) and `common-knowledge-and-coordination` (44) — have graduated
-  // and been removed; their topic MDX is now the record. The lowest-order entry
-  // below (`spontaneous-order-and-the-knowledge-problem`, order 45) is built
-  // next. The remaining queue finishes the expert tier and keeps the breadth
-  // tag-diverse, spanning economics/systems-thinking
-  // (`spontaneous-order-and-the-knowledge-problem`), biology-evolution/strategy
+  // The earlier expert rungs — `externalities` (20) … `common-knowledge-and-
+  // coordination` (44) and `spontaneous-order-and-the-knowledge-problem` (45) —
+  // have graduated and been removed; their topic MDX is now the record. The
+  // lowest-order entry below (`evolutionarily-stable-strategies`, order 46) is
+  // built next. The remaining queue finishes the expert tier and keeps the
+  // breadth tag-diverse, spanning biology-evolution/strategy
   // (`evolutionarily-stable-strategies`), systems-thinking/psychology/economics
   // (`goodharts-law`) and probability/psychology
   // (`information-cascades-and-herding`) so no single roadmap tag races ahead.
-  {
-    slug: 'spontaneous-order-and-the-knowledge-problem',
-    icon: '🐜',
-    difficulty: 'expert',
-    order: 45,
-    accent: 'brand',
-    title: {
-      en: 'Spontaneous Order & the Knowledge Problem',
-      es: 'Orden Espontáneo y el Problema del Conocimiento',
-    },
-    description: {
-      en: 'No one designs a language, a city’s food supply, or the price of copper — and yet each works, coordinating millions of strangers who never meet. Order can emerge from the bottom up, without a planner, precisely because the knowledge needed to run the whole is scattered in fragments no single mind can gather. Why the market, the anthill, and the footpath across the lawn all solve a problem no committee could.',
-      es: 'Nadie diseña un idioma, el suministro de comida de una ciudad o el precio del cobre — y sin embargo cada uno funciona, coordinando a millones de desconocidos que jamás se encuentran. El orden puede emerger de abajo arriba, sin planificador, precisamente porque el conocimiento necesario para gobernar el todo está disperso en fragmentos que ninguna mente puede reunir. Por qué el mercado, el hormiguero y el sendero pisado en el césped resuelven un problema que ningún comité podría.',
-    },
-    dependencies: ['supply-and-demand', 'emergence', 'incentives'],
-    tags: ['economics', 'systems-thinking'],
-    buildNotes:
-      'Spontaneous order & the knowledge problem — the expert economics/systems-thinking rung (Hayek, Adam Smith’s invisible hand, Michael Polanyi, Leonard Read’s "I, Pencil") on how coherent, adaptive order arises WITHOUT central design, and why it must, because the relevant knowledge is irreducibly dispersed. Assumes supply-and-demand (prices clear markets), emergence (macro-order from local rules with no controller) and incentives (agents act on local payoffs). Organising idea: THE KNOWLEDGE PROBLEM (Hayek, "The Use of Knowledge in Society", 1945) — the data a planner would need (every person’s tacit, local, time-and-place-specific circumstances, preferences and know-how) is never given to a single mind; it exists only in scattered fragments, much of it tacit (Polanyi: "we know more than we can tell"). So the economic problem is not allocating known resources but MOBILISING knowledge no one possesses in full. SPONTANEOUS ORDER (Scottish Enlightenment: "the result of human action but not of human design") is the answer: institutions and patterns — prices, language, common law, money, manners, footpaths, science — that are grown, not built. Sections, each with mechanism + worked example: the knowledge problem stated (the tin-shortage example — a price rise transmits "use less tin" to millions who never learn why, each responding to a single number that summarises the whole world’s change); PRICES AS SIGNALS/telecommunication system (a market as a giant distributed computer aggregating dispersed knowledge into one sufficient statistic, the price; contrast with the socialist-calculation debate — why the planner is blind without prices); "I, PENCIL" and the invisible hand (no one knows how to make a pencil; the order coordinates strangers via self-interest, Smith); ORDER WITHOUT A DESIGNER across domains — language and its grammar, common law, the desire-path/footpath, science as a spontaneous order, ant colonies/stigmergy and the market’s kinship to emergence; the RULES that let it work (property, contract, stable expectations — Hayek’s cosmos vs taxis, grown "nomos" vs made order) and why good institutions are often evolved, not engineered. Pitfalls & where the model lies: spontaneous ≠ optimal or just (path-dependence, lock-in, externalities and tragedies of the commons are ALSO spontaneous orders — bottom-up does not mean benign; tie to externalities/tragedy-of-the-commons); it is not an argument that ALL design is bad (rules themselves are often deliberately set; the claim is about limits on central knowledge, not a blanket anti-planning slogan); the FATAL CONCEIT / planner’s hubris cuts both ways — markets can fail, and "let it emerge" can be its own lazy dogma; and emergence can encode and amplify bad local incentives. Build an interactive island (a "dispersed-knowledge market": a grid/population of agents each holding only PRIVATE local info (a cost, a need) and following a simple local rule; toggle between a CENTRAL PLANNER who must set one quantity/price from aggregate data it cannot see in full versus a PRICE mechanism that lets the number emerge from local trades; introduce a shock (a shortage somewhere) and watch the price-coordinated system re-allocate and clear while the blind-planner system mis-allocates and leaves shortages/gluts; readout of total welfare, unmet need, and how much dispersed knowledge each regime actually used). Plus a Categorize (sort orders into designed/made vs spontaneous/grown, or knowledge-centralisable vs irreducibly-dispersed) and MatchConcepts (spontaneous order, the knowledge problem, tacit knowledge, price signal, invisible hand), Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'evolutionarily-stable-strategies',
     icon: '🦂',

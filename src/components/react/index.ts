@@ -240,3 +240,6 @@ export type { NoFreeLunchBoardProps, NoFreeLunchStrategy } from '@/components/re
 
 export { CommonKnowledgeCoordinator, default as CommonKnowledgeCoordinatorDefault } from '@/components/react/CommonKnowledgeCoordinator';
 export type { CommonKnowledgeCoordinatorProps } from '@/components/react/CommonKnowledgeCoordinator';
+
+export { DispersedKnowledgeMarket, default as DispersedKnowledgeMarketDefault } from '@/components/react/DispersedKnowledgeMarket';
+export type { DispersedKnowledgeMarketProps } from '@/components/react/DispersedKnowledgeMarket';
