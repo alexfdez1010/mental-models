@@ -52,11 +52,11 @@
  * `ergodicity-and-the-time-average`, `no-free-lunch-theorem`,
  * `common-knowledge-and-coordination`,
  * `spontaneous-order-and-the-knowledge-problem`,
- * `evolutionarily-stable-strategies`, `goodharts-law`, …)
+ * `evolutionarily-stable-strategies`, `goodharts-law`,
+ * `information-cascades-and-herding`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * probability/psychology (`information-cascades-and-herding`, 48),
  * decision-making/probability (`the-value-of-information`, 49),
  * economics/systems-thinking/strategy (`creative-destruction`, 50) and
  * biology-evolution/systems-thinking (`punctuated-equilibrium`, 51).
@@ -98,35 +98,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `evolutionarily-stable-
-  // strategies` (46) and `goodharts-law` (47) — have graduated and been removed;
+  // The earlier expert rungs — `externalities` (20) … `goodharts-law` (47) and
+  // `information-cascades-and-herding` (48) — have graduated and been removed;
   // their topic MDX is now the record. The lowest-order entry below
-  // (`information-cascades-and-herding`, order 48) is built next. The remaining
+  // (`the-value-of-information`, order 49) is built next. The remaining
   // queue keeps the expert-tier breadth tag-diverse, spanning
-  // probability/psychology (`information-cascades-and-herding`),
   // decision-making/probability (`the-value-of-information`),
   // economics/systems-thinking/strategy (`creative-destruction`) and
   // biology-evolution/systems-thinking (`punctuated-equilibrium`) so no single
   // roadmap tag races ahead.
-  {
-    slug: 'information-cascades-and-herding',
-    icon: '🐑',
-    difficulty: 'expert',
-    order: 48,
-    accent: 'accent',
-    title: {
-      en: 'Information Cascades & Herding',
-      es: 'Cascadas de Información y Comportamiento Gregario',
-    },
-    description: {
-      en: 'Sometimes it is perfectly rational to ignore what you know and copy the crowd — and that is exactly how the crowd goes wrong together. Once a few early choices line up, each newcomer sensibly follows the herd instead of their own private signal, so no new information enters and a fragile consensus locks in on a whim. How rational individuals produce irrational, reversible mobs.',
-      es: 'A veces es perfectamente racional ignorar lo que sabes y copiar a la multitud — y así es precisamente como la multitud se equivoca en bloque. En cuanto unas pocas elecciones tempranas coinciden, cada recién llegado sigue sensatamente al rebaño en vez de a su propia señal privada, así que no entra información nueva y un consenso frágil se fija por capricho. Cómo individuos racionales producen masas irracionales y reversibles.',
-    },
-    dependencies: ['bayesian-updating', 'common-knowledge-and-coordination', 'critical-mass'],
-    tags: ['probability', 'psychology'],
-    buildNotes:
-      'Information cascades & herding — the expert probability/psychology rung (Bikhchandani, Hirshleifer & Welch 1992; Banerjee 1992) on how rational Bayesian agents, observing only each other\'s ACTIONS (not their private information), rationally abandon their own signal and copy predecessors — so information stops aggregating and the group locks onto a possibly-wrong choice. Assumes bayesian-updating (posterior from prior + evidence, weighing signal strength), common-knowledge-and-coordination (acting on beliefs about others) and critical-mass (a threshold of early movers that tips the rest). Organising idea: distinguish an INFORMATION cascade (I copy you because your action reveals information I trust more than my own weak private signal — informational herding) from mere conformity/social pressure; once the public tally of actions outweighs any one private signal, each newcomer optimally ignores their own data, so their action carries NO new information, and everyone after them is in the same trap — the cascade is informationally empty yet self-perpetuating. Sections, each with mechanism + worked example: the canonical urn experiment (two urns, majority-red vs majority-blue; you see a private draw AND everyone\'s prior guesses; after two same guesses your single contrary draw is rationally overruled — walk the Bayesian arithmetic with real numbers); why cascades are RATIONAL yet FRAGILE and information-poor (they aggregate almost no private knowledge, so a tiny new public signal or one credible contrarian can shatter and reverse them — fads, flips); real faces (restaurant queues and bestseller lists, viral products and app-store ranks, bank-run/coordination links, academic and medical consensus bandwagons, financial bubbles and fashion, citation herding, standing ovations); the difference from and relationship to COMMON KNOWLEDGE and critical mass (a public signal can start OR break a cascade; visible actions are the channel); reputational herding (Scharfstein–Stein: agents herd to not look wrong alone). Pitfalls & where the model lies: herding is not always irrational (following others can be Bayesian-optimal individually even as it is collectively bad — the paradox is the point); cascades are shallow and reversible, unlike genuine consensus built on independent evidence — do not mistake agreement for accuracy (tie to base rates / diversity of information); the cure is preserving INDEPENDENT private signals (aggregate votes/prices/prediction markets that reveal information, not just actions; encourage contrarians; sequence disclosures to avoid anchoring). Build an interactive island (a "cascade line": a sequence of agents each with a private noisy signal about which of two options is correct; they decide in order, seeing only the earlier CHOICES; a signal-strength / prior slider and a step/run control; watch a couple of early coincidences trigger everyone downstream to follow regardless of their private signal, with a readout of how many people followed their own signal vs the herd, whether the cascade landed on the correct option, and how little private information actually got used — plus a "drop a public signal" button that can shatter and flip it). Plus a Categorize (sort cases into information-cascade vs independent-judgement, or fragile-herd vs robust-consensus) and MatchConcepts (information cascade, private signal, herding, reputational herding, cascade fragility), Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'the-value-of-information',
     icon: '🔍',

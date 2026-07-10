@@ -249,3 +249,6 @@ export type { HawkDoveLabProps } from '@/components/react/HawkDoveLab';
 
 export { GoodhartPressureDial, default as GoodhartPressureDialDefault } from '@/components/react/GoodhartPressureDial';
 export type { GoodhartPressureDialProps } from '@/components/react/GoodhartPressureDial';
+
+export { CascadeLine, default as CascadeLineDefault } from '@/components/react/CascadeLine';
+export type { CascadeLineProps } from '@/components/react/CascadeLine';
