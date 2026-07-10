@@ -1,0 +1,609 @@
+---
+title: "La prueba de invasión"
+description: "¿Qué significa exactamente 'no puede ser invadida'? La definición precisa de una estrategia evolutivamente estable, y la desigualdad de dos líneas — mejor respuesta a sí misma, con un desempate — que decide para cualquier estrategia si un mutante raro podría llegar a hacer pie."
+topic: "es/evolutionarily-stable-strategies"
+order: 2
+minutes: 12
+updated: 2026-07-10
+---
+
+import { Callout, MCQ, Quiz, MatchConcepts, Categorize, FillBlank, Reveal, MindMap } from '@/components/react';
+
+Una **estrategia evolutivamente estable (evolutionarily stable strategy, ESS)** es un
+comportamiento que, una vez que casi todo el mundo en una población lo practica, no puede
+ser expulsado por un recién llegado raro que hace otra cosa. Es una frase preciosa.
+También es, por sí sola, inútil — porque "no puede ser expulsado" suena a intuición, y la
+evolución no funciona con intuiciones. Funciona con pagos (payoffs), y los pagos son
+números.
+
+Así que esta lección tiene exactamente una misión: coger la frase *"no puede ser
+invadida"* y convertirla en una **desigualdad que puedas comprobar**. Dos líneas de
+aritmética, una condición de mejor respuesta y un desempate, y podrás mirar cualquier
+estrategia y decir — no adivinar, *decir* — si un mutante podría llegar alguna vez a hacer
+pie.
+
+## El escenario: residentes, mutantes y E(A, B)
+
+<MCQ
+  client:visible
+  pretest
+  question="Una población es 99,9% estrategia I y 0,1% un nuevo mutante J. A grandes rasgos, cuando el mutante es así de raro, ¿el éxito reproductivo de quién se decide sobre todo por cómo le va a cada uno CONTRA la estrategia I?"
+  options={[
+    { text: "De ambos — casi todos los oponentes que cualquiera de los dos tipos se encuentra son residentes jugando I", correct: true },
+    { text: "Solo del mutante — los residentes nunca se encuentran con mutantes" },
+    { text: "Solo del residente — los mutantes solo se encuentran entre sí" },
+    { text: "De ninguno — la rareza hace que los pagos sean irrelevantes" },
+  ]}
+  explanation="Cuando los mutantes son raros, casi todos los oponentes — para un residente Y para un mutante — son residentes jugando I. Así que la aptitud de ambos tipos está dominada por su pago contra I. Esa única observación es la semilla de toda la prueba de invasión."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Antes de cualquier desigualdad, necesitamos una pieza de notación, y nos apoyaremos en
+ella durante el resto del curso. Escribe **E(A, B)** para el pago que obtiene un jugador
+que usa la estrategia A cuando su oponente usa la estrategia B. Primera casilla: *tú*.
+Segunda casilla: *ellos*. Esa es toda la gramática.
+
+Ahora nombra al reparto:
+
+- **I** — el *residente* (o *titular*): la estrategia que casi todo el mundo ya juega.
+  Piénsala como la costumbre local.
+- **J** — un *mutante raro*: alguna estrategia recién llegada, `J ≠ I`, que acaba de
+  aparecer en una porción minúscula de la población.
+
+La pregunta de todo el campo de la teoría de juegos evolutiva, reducida a lo esencial:
+*si la población es básicamente todo `I` con un susurro de `J`, ¿crece `J` o se encoge?*
+Si siempre se encoge — para cualquier `J` posible — entonces `I` es una ESS. Es una
+fortaleza que ningún tipo de mutante individual puede asaltar.
+
+<Callout variant="info" title="Lee las casillas en voz alta">
+E(J, I) es "lo que puntúa un mutante J contra un residente I." E(I, J) es "lo que puntúa
+un residente I contra un mutante J." Son cantidades distintas y la definición usa ambas,
+así que siempre que aparezca un término, dilo en voz alta: *yo-primero, ellos-segundo.*
+Confundir las casillas es la forma más común en que la gente estropea una comprobación de
+invasión.
+</Callout>
+
+### Por qué "raro" es todo el juego
+
+Una ESS se define frente a mutantes *raros* — formalmente, en el límite cuando la
+fracción de mutantes se encoge hacia cero — y frente a **un tipo de mutante a la vez**.
+Esto no es un tecnicismo para pasar de largo; es la suposición que sostiene todo el
+edificio. "Evolutivamente estable" significa *localmente* no invadible: a salvo de
+cualquier recién llegado solitario que aparezca en números pequeños. **No** promete que
+la población sea globalmente la mejor, la más feliz o la más eficiente. (Guarda esa idea —
+morderá en el primerísimo ejemplo resuelto.)
+
+<MCQ
+  client:visible
+  question="¿Qué afirmación describe correctamente lo que significa E(I, J)?"
+  options={[
+    { text: "El pago a un residente I que juega contra un mutante J", correct: true },
+    { text: "El pago a un mutante J que juega contra un residente I" },
+    { text: "El pago medio en toda la población" },
+    { text: "El número de mutantes J en la población" },
+  ]}
+  explanation="La primera casilla es el jugador, la segunda casilla es el oponente. E(I, J): el residente I obtiene esto contra el mutante J. Compáralo con E(J, I), que es la puntuación del mutante contra el residente — un número distinto."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Derivar la prueba a partir de la aritmética de poblaciones
+
+<MCQ
+  client:visible
+  pretest
+  question="Supón que a un mutante le va EXACTAMENTE igual de bien contra los residentes que a los residentes contra sí mismos — un empate perfecto en el enfrentamiento principal. ¿Podemos declarar ya seguro al residente?"
+  options={[
+    { text: "No — un empate en el enfrentamiento principal significa que debemos mirar los juegos más raros de mutante-contra-mutante para romperlo", correct: true },
+    { text: "Sí — un empate significa que el mutante nunca puede crecer" },
+    { text: "Sí — los empates siempre favorecen al titular por defecto" },
+    { text: "No — un empate significa que el mutante gana automáticamente" },
+  ]}
+  explanation="Un empate en el término dominante entrega la decisión al siguiente término más pequeño — los juegos raros donde un mutante se encuentra con otro mutante. Esa es precisamente la situación para la que se inventó la condición de desempate."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Aquí está la parte bonita: no tienes que *memorizar* la definición de ESS. Puedes
+*derivarla* a partir de un cálculo honesto de aptitud, y luego leer la definición
+directamente de la aritmética.
+
+Sea la población una fracción `(1 − ε)` de residentes jugando `I` y una fracción pequeña
+`ε` de mutantes jugando `J`, donde `ε` (épsilon) es minúscula. Un oponente elegido al
+azar es un residente con probabilidad `(1 − ε)` y un mutante con probabilidad `ε`. Así
+que la aptitud esperada de cada tipo es simplemente una media ponderada sobre a quién
+podría encontrarse:
+
+$$W(I) = (1-\varepsilon)\,E(I,I) + \varepsilon\,E(I,J)$$
+
+$$W(J) = (1-\varepsilon)\,E(J,I) + \varepsilon\,E(J,J)$$
+
+El residente `I` resiste la invasión exactamente cuando se reproduce más que el mutante —
+cuando `W(I) > W(J)` para toda `ε > 0` pequeña. Miremos de verdad esa comparación a
+medida que `ε` se encoge hacia cero.
+
+**Los términos dominantes.** A medida que `ε → 0`, los pesos `(1 − ε)` engullen a los
+pesos `ε`. Así que la comparación se decide primero por los términos grandes: `E(I, I)`
+frente a `E(J, I)`. Para que `I` tenga alguna esperanza, necesitas
+
+$$E(I,I) \ge E(J,I).$$
+
+Se derivan dos casos, y *son* las dos condiciones:
+
+- **Si esa desigualdad es estricta** — `E(I, I) > E(J, I)` — entonces para una `ε` lo
+  bastante pequeña, `W(I) > W(J)` pase lo que pase en los términos minúsculos de `ε`. El
+  residente gana de forma rotunda. Esta es la **Condición 1**.
+- **Si es una igualdad** — `E(I, I) = E(J, I)`, un empate en el término grande — entonces
+  los términos grandes se cancelan y la decisión recae en los términos de `ε`. Ahí, `I`
+  gana si y solo si `E(I, J) > E(J, J)`. Esta es la **Condición 2**.
+
+Esa es la definición entera de ESS, y acabamos de *encontrarla* en lugar de declararla.
+
+<Callout variant="success" title="La definición (Maynard Smith y Price, 1973)">
+La estrategia **I** es una **ESS** si, para toda estrategia alternativa J ≠ I, se cumple
+al menos una de estas:
+
+- **Condición 1 (mejor respuesta estricta a sí misma):** E(I, I) > E(J, I). Al mutante le
+  va *estrictamente peor* contra los residentes que a un residente.
+- **Condición 2 (el desempate):** E(I, I) = E(J, I) **y** E(I, J) > E(J, J). Si el
+  mutante *empata* contra los residentes, los residentes deben hacerlo estrictamente mejor
+  contra el mutante raro que el mutante contra una copia de sí mismo.
+</Callout>
+
+Fíjate en la forma: la Condición 1 trata del enfrentamiento *común*
+(todos-contra-residente), y la Condición 2 es la letra pequeña para cuando ese
+enfrentamiento común es un empate, decidido por el enfrentamiento *raro*
+(mutante-contra-mutante). El término grande primero; si empata, el término pequeño lo
+rompe.
+
+<FillBlank
+  client:visible
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  text="A medida que la fracción de mutantes se encoge hacia cero, la comparación de la aptitud de residente y mutante está dominada por los términos {{E(I,I) y E(J,I)|E(I,J) y E(J,J)|W(I) y W(J)}}. Si esos empatan, la decisión pasa a los términos más pequeños {{E(I,J) y E(J,J)|E(I,I) y E(J,I)|los pesos épsilon}}, que es exactamente lo que comprueba la Condición 2."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+/>
+
+### Cuándo echar mano de esta derivación
+
+Siempre que alguien te entregue una "definición" de ESS como un par de desigualdades para
+memorizar, puedes regenerarla en treinta segundos a partir de `W(I) > W(J)` y la frase
+"término grande primero, luego el desempate". Entender *por qué* existen las dos
+condiciones — una para el enfrentamiento dominante, otra para el raro — es lo que te
+permite aplicarlas sin dudar de qué casilla va dónde.
+
+## Ejemplo resuelto A: Desertar Siempre es una ESS en el dilema del prisionero de una tirada
+
+<MCQ
+  client:visible
+  pretest
+  question="En una población donde TODO EL MUNDO deserta siempre en el dilema del prisionero de una tirada, aparece un mutante solitario que coopera siempre. Recuerda T=5, R=3, P=1, S=0. ¿Qué gana el mutante cooperador contra un desertor?"
+  options={[
+    { text: "S = 0 — el pago del primo", correct: true },
+    { text: "T = 5 — el pago de la tentación" },
+    { text: "R = 3 — el pago de la recompensa" },
+    { text: "P = 1 — el pago del castigo" },
+  ]}
+  explanation="Cooperar-contra-Desertar es el resultado clásico del primo: obtienes S = 0 mientras tu oponente desertor se embolsa T = 5. Ese cero es la razón por la que el mutante no puede hacer pie — como estamos a punto de confirmar."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Es hora de dejar de admirar la definición y *meter números*. Recuerda los pagos del
+dilema del prisionero de una tirada de cursos anteriores, con `T > R > P > S` y los
+valores estándar `T = 5`, `R = 3`, `P = 1`, `S = 0`.
+
+Sea el residente **AllD** ("Desertar Siempre", Always Defect). Toda una población
+deserta. Ahora aparece un mutante raro **AllC** ("Cooperar Siempre", Always Cooperate).
+Ejecuta la prueba.
+
+Los enfrentamientos relevantes, todos contra el mar de desertores:
+
+| Término | Enfrentamiento | Pago | Valor |
+|---|---|---|---|
+| E(I, I) | AllD vs AllD | ambos desertan → P | 1 |
+| E(J, I) | AllC vs AllD | el mutante coopera, le hacen el primo → S | 0 |
+
+Comprueba la **Condición 1**: ¿es `E(I, I) > E(J, I)`? Eso es `1 > 0`. **Sí — de forma
+estricta.** Un residente que puntúa `1` contra la multitud le gana a un mutante que
+puntúa `0` contra la misma multitud. Ni siquiera necesitamos la Condición 2; la condición
+de mejor respuesta estricta ya cierra la puerta de golpe. **AllD es una ESS.**
+
+<Callout variant="warning" title="Estable no es lo mismo que bueno">
+Una población que deserta por completo es una fortaleza — genuinamente no invadible por
+un cooperador solitario — y sin embargo todos en ella ganan P = 1 cuando *podrían* estar
+ganando todos R = 3 cooperando. Esa brecha es toda la tragedia del dilema del prisionero,
+y es exactamente por eso que "evolutivamente estable" significa *localmente no invadible*,
+no *colectivamente lo mejor*. Una estrategia puede ser una trampa estable.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Mostramos que E(I,I) = 1 > 0 = E(J,I) para AllD frente a un mutante AllC. ¿Por qué no necesitamos comprobar también aquí la Condición 2?"
+  options={[
+    { text: "La Condición 1 se satisface de forma estricta, y una ESS solo requiere que se cumpla AL MENOS UNA condición", correct: true },
+    { text: "La Condición 2 nunca se aplica al dilema del prisionero" },
+    { text: "Porque AllC y AllD empatan, así que la Condición 2 es automáticamente verdadera" },
+    { text: "Porque la Condición 2 solo importa cuando los pagos son negativos" },
+  ]}
+  explanation="La definición requiere que, para cada mutante, se cumpla al menos una de las dos condiciones. La Condición 1 se cumplió de forma estricta (1 > 0), así que hemos terminado con este mutante — la Condición 2 es el recurso para los empates, y no hubo empate."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Ejemplo resuelto B: Cooperar Siempre NO es una ESS
+
+<MCQ
+  client:visible
+  pretest
+  question="Ahora dale la vuelta: todo el mundo coopera siempre, y un mutante solitario que Deserta Siempre invade. Con T=5, R=3, ¿qué gana el mutante desertor contra un cooperador, frente a lo que gana un residente cooperador contra otro cooperador?"
+  options={[
+    { text: "El mutante obtiene T = 5, el residente obtiene R = 3 — así que al mutante le va MEJOR contra la multitud", correct: true },
+    { text: "El mutante obtiene S = 0, el residente obtiene R = 3 — al mutante le va peor" },
+    { text: "Ambos obtienen R = 3 — un empate perfecto" },
+    { text: "El mutante obtiene P = 1, el residente obtiene P = 1" },
+  ]}
+  explanation="Un desertor que explota a un cooperador agarra el pago de la tentación T = 5, mientras que dos cooperadores solo se reparten R = 3 cada uno. El mutante gana más que el residente contra la mismísima población que está invadiendo — la señal de manual de una estrategia invadible."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Ahora la imagen especular. El residente es **AllC**; todos cooperan, la vida es preciosa.
+Aparece un mutante raro **AllD**. Ejecuta la misma prueba de dos filas:
+
+| Término | Enfrentamiento | Pago | Valor |
+|---|---|---|---|
+| E(I, I) | AllC vs AllC | ambos cooperan → R | 3 |
+| E(J, I) | AllD vs AllC | el mutante deserta sobre un cooperador → T | 5 |
+
+Comprueba la **Condición 1**: ¿es `E(I, I) > E(J, I)`? Eso es `3 > 5`. **No.** De hecho
+`E(I, I) < E(J, I)` — al mutante le va *estrictamente mejor* contra los residentes que a
+los propios residentes. La Condición 1 falla con estrépito.
+
+¿La rescata la Condición 2? No — la Condición 2 solo se aplica cuando hay un *empate* en
+el enfrentamiento principal, `E(I, I) = E(J, I)`. Aquí `3 ≠ 5`, así que no hay empate que
+romper. No se cumple ninguna condición. **AllC no es una ESS** — un único desertor gana
+una prima de crecimiento y la mutación se propaga. El precioso mundo de cooperación total
+se lo comen desde dentro.
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada escenario de residente-vs-mutante con su veredicto."
+  pairs={[
+    { term: "Residente AllD, mutante AllC: E(I,I)=1 > E(J,I)=0", definition: "ESS — la Condición 1 se cumple de forma estricta, no invadible" },
+    { term: "Residente AllC, mutante AllD: E(I,I)=3 < E(J,I)=5", definition: "No es una ESS — el mutante gana más que los residentes, no hay empate que romper" },
+    { term: "El enfrentamiento principal es un empate: E(I,I) = E(J,I)", definition: "Sin decidir por la línea 1 — hay que comprobar el desempate de la Condición 2" },
+  ]}
+  explanation="Una victoria estricta en el enfrentamiento principal (Condición 1) asegura una ESS. Una derrota estricta en el enfrentamiento principal, sin empate, la descarta. Solo un empate exacto te manda a la segunda línea."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Escenarios"
+  definitionsLabel="Veredictos"
+  explanationLabel="Explicación"
+/>
+
+## Ejemplo resuelto C: cuando el desempate se gana de verdad el sueldo
+
+<MCQ
+  client:visible
+  pretest
+  question="Si un mutante puntúa EXACTAMENTE igual que un residente contra la población residente, ¿qué tiene que ser cierto para que el residente aún lo repela?"
+  options={[
+    { text: "El residente debe hacerlo estrictamente mejor contra el mutante raro que el mutante contra otro mutante", correct: true },
+    { text: "Nada — un empate protege automáticamente al residente" },
+    { text: "El mutante también debe empatar contra sí mismo" },
+    { text: "El residente debe puntuar más alto contra sí mismo que lo que el mutante puntúa contra el residente" },
+  ]}
+  explanation="Esa es la Condición 2 en palabras: dado un empate en el enfrentamiento principal, E(I, I) = E(J, I), la estabilidad depende ahora de los juegos raros de mutante-contra-mutante — el residente sobrevive solo si E(I, J) > E(J, J)."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Ambos ejemplos hasta ahora se resolvieron en la línea uno. Para ver a la Condición 2
+hacer trabajo de verdad, necesitamos un enfrentamiento que *empate*. Imagina una
+convención de tipo coordinación — digamos, dos formas de hacer la misma cosa que pagan
+igual de bien cuando te encuentras con los lugareños. Aquí están los pagos para el jugador
+de la fila:
+
+| | vs I | vs J |
+|---|---|---|
+| **I** | 2 | 2 |
+| **J** | 2 | 0 |
+
+Lee los cuatro números que necesitamos. Residente `I`, mutante `J`:
+
+- `E(I, I) = 2` — residente se encuentra con residente.
+- `E(J, I) = 2` — mutante se encuentra con residente. **¡Empate con E(I, I)!**
+- `E(I, J) = 2` — residente se encuentra con mutante.
+- `E(J, J) = 0` — mutante se encuentra con mutante.
+
+**Condición 1:** ¿es `E(I, I) > E(J, I)`? Eso es `2 > 2` — **falso.** Es un empate, no
+una victoria estricta. Así que la línea uno no puede salvar a `I`, y una definición más
+perezosa ("basta con ser una mejor respuesta a ti mismo") se encogería de hombros y lo
+daría por zanjado.
+
+**Condición 2:** el empate nos manda a la letra pequeña. Necesitamos `E(I, J) > E(J, J)`,
+es decir `2 > 0`. **¡Verdadero!** Así que `I` *sí* es una ESS después de todo — rescatada
+por completo por la segunda línea.
+
+La historia detrás de los números es deliciosa. El mutante `J` es un impostor perfecto
+contra la multitud: puntúa `2` contra los residentes, exactamente como lo haría un
+residente, así que se cuela sin penalización. Pero `J` tiene un defecto fatal que solo
+sale a la luz cuando dos mutantes se encuentran por casualidad — entonces puntúan un
+mísero `0` en lugar de `2`. A medida que los mutantes se vuelven aunque sea un poco más
+comunes, esos encuentros mutante-sobre-mutante empiezan a ocurrir, y `J` sangra aptitud.
+Los residentes, mientras tanto, siguen puntuando `2` incluso contra los mutantes. Así que
+`J` nunca puede ganar tracción. El enfrentamiento raro consigo mismo es la trampa que se
+cierra sobre el invasor.
+
+<Reveal client:visible>
+<Callout variant="tip" title="Ahora cambia un número y mira cómo se rompe">
+Cambia solo el auto-pago del mutante: deja que `E(J, J) = 3` en lugar de `0`. Vuelve a
+ejecutar la Condición 2: ahora necesitamos `E(I, J) > E(J, J)`, es decir `2 > 3` —
+**falso.** Y la Condición 1 ya era un empate. *Ninguna* condición se cumple, así que `I`
+ya no es una ESS. Lo que ocurre físicamente: `J` se cuela gratis (aún empatada en el
+enfrentamiento principal), y una vez que existen unos pocos mutantes, en realidad
+*prefieren* la compañía mutua (`3` le gana a `2`). El mutante hace bola de nieve desde una
+deriva neutra hasta una toma del poder. Aquí `I` es solo un punto de Nash *débil* — una
+mejor respuesta a sí misma, pero no evolutivamente estable. Esa brecha entre "Nash" y
+"ESS" es exactamente de lo que trata la próxima lección.
+</Callout>
+</Reveal>
+
+<Categorize
+  client:visible
+  question="Usando la matriz del Ejemplo C (I vs I = 2, J vs I = 2, I vs J = 2), ordena cada resultado según si hace de I una ESS."
+  buckets={['I es una ESS', 'I NO es una ESS']}
+  items={[
+    { text: "Auto-pago del mutante E(J,J) = 0, así que E(I,J)=2 > 0", bucket: 'I es una ESS' },
+    { text: "La Condición 1 empata, pero la Condición 2 se cumple de forma estricta", bucket: 'I es una ESS' },
+    { text: "Auto-pago del mutante E(J,J) = 3, así que E(I,J)=2 no es > 3", bucket: 'I NO es una ESS' },
+    { text: "No se cumple ninguna condición — el mutante se cuela y luego toma el poder", bucket: 'I NO es una ESS' },
+  ]}
+  explanation="Con un empate en el enfrentamiento principal, todo depende del raro enfrentamiento consigo mismo. E(J,J)=0 permite al residente ganar el desempate (ESS); E(J,J)=3 lo da la vuelta, y el mutante neutro se convierte en un invasor (no es una ESS)."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  explanationLabel="Explicación"
+/>
+
+### Cuándo echar mano de la Condición 2
+
+Siempre que el enfrentamiento principal termine en empate. Los juegos de coordinación,
+las convenciones y los problemas de "por-qué-lado-de-la-carretera" producen
+constantemente empates en `E(I, I) = E(J, I)`, porque el sentido mismo de una convención
+es que la alternativa paga igual mientras todo el mundo siga haciendo lo de siempre. En
+exactamente esos casos, la línea uno guarda silencio y el desempate es lo único que se
+interpone entre "costumbre autoimpuesta" y "a una deriva del colapso".
+
+## Trampas: cómo se usa mal la prueba de invasión
+
+<MCQ
+  client:visible
+  pretest
+  question="Alguien dice 'AllD es un equilibrio de Nash del dilema del prisionero de una tirada, por lo tanto es una ESS'. ¿Es válido el razonamiento en general?"
+  options={[
+    { text: "La conclusión resulta ser correcta aquí, pero el razonamiento es erróneo — Nash es necesario, no suficiente, para una ESS", correct: true },
+    { text: "Sí — el equilibrio de Nash y la ESS son lo mismo" },
+    { text: "No — AllD no es un equilibrio de Nash" },
+    { text: "Sí, pero solo porque los pagos son positivos" },
+  ]}
+  explanation="Ser una mejor respuesta a sí misma (E(I,I) ≥ E(J,I)) es exactamente la condición de Nash — necesaria para una ESS pero no suficiente. AllD resulta ser una ESS, pero eso necesita la desigualdad estricta, no solo 'es Nash'. El desempate es el listón extra."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Tres formas en que la gente lista tropieza con esta prueba:
+
+1. **Afirmar la estabilidad en lugar de ganársela.** "Obviamente ese comportamiento es
+   evolutivamente estable" no es un argumento. Debes nombrar los pagos y *meter números*.
+   Todo el valor de la prueba de invasión es que reemplaza la intuición con `E(I, I)`
+   frente a `E(J, I)`. Si no has escrito esos números, no has comprobado nada.
+
+2. **Confundir la no invadibilidad local con la optimalidad global.** Una ESS está a salvo
+   de mutantes *raros*, *un tipo a la vez*. Eso es todo. No dice nada sobre si la población
+   es eficiente, justa o feliz — AllD es la Prueba A. Nunca asciendas "estable" a "lo
+   mejor".
+
+3. **Confundir la condición de Nash con la condición de ESS.** Mejor-respuesta-a-sí-misma —
+   `E(I, I) ≥ E(J, I)`, con una desigualdad *débil* — es precisamente la condición de
+   equilibrio de Nash. Es **necesaria** para una ESS pero **no suficiente**. La ESS exige
+   más: o una victoria *estricta* en el enfrentamiento principal, o el desempate de la
+   Condición 2 encima. La comparación completa de Nash y ESS es la próxima lección; por
+   ahora, simplemente no trates "es Nash" como "es una ESS".
+
+<Callout variant="info" title="Repaso espaciado — de vuelta a la introducción">
+Abrimos diciendo que una ESS es una estrategia que, una vez que casi todo el mundo la
+juega, ningún mutante raro puede invadir. Ahora has visto que "ningún mutante raro puede
+invadir" no es un eslogan sino una afirmación comprobable: para *cada* alternativa J, al
+menos una de las dos condiciones debe cumplirse. La no invadibilidad es una promesa que
+cumples haciendo la aritmética — para toda J, no solo para la que se te ocurrió pensar.
+</Callout>
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Selecciona TODAS las afirmaciones que son VERDADERAS sobre la prueba de invasión. (Más de una es correcta.)"
+  options={[
+    { text: "E(I,I) > E(J,I) por sí sola (Condición 1, estricta) basta para hacer de I una ESS frente al mutante J", correct: true },
+    { text: "El desempate de la Condición 2 solo se aplica cuando E(I,I) = E(J,I)", correct: true },
+    { text: "Ser una mejor respuesta a sí misma es necesario pero no suficiente para una ESS", correct: true },
+    { text: "Una ESS garantiza que la población obtiene el pago medio más alto posible" },
+    { text: "Debes comprobar las condiciones frente a cada estrategia alternativa J, no solo una", correct: true },
+  ]}
+  explanation="La Condición 1 (estricta) basta por sí sola; la Condición 2 solo se invoca en un empate; ser mejor respuesta a sí misma es la condición de Nash necesaria-pero-no-suficiente; y la estabilidad debe cumplirse frente a TODAS las alternativas. La falsa es la afirmación del 'pago medio más alto' — AllD es estable y aun así deja a todos con P=1 cuando R=3 estaba disponible."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Cuándo echar mano de la prueba de invasión
+
+Siempre que puedas escribir pagos que dependan de *contra quién te enfrentas* — el tipo
+del oponente — la prueba de invasión te dice qué comportamientos, convenciones o
+estrategias son autoimpuestos. Eso cubre un rango enorme: contiendas animales (¿luchar o
+huir?), señalización, convenciones de mercado, normas sociales, el lado de la carretera
+por el que conduces. Si puedes rellenar una matriz de pagos, puedes ejecutar `E(I, I)`
+frente a `E(J, I)`, añadir el desempate si empata, y pronunciar un veredicto sobre la
+estabilidad. La prueba es pequeña; su alcance no.
+
+## Resumen
+
+<MindMap
+  client:visible
+  title="La prueba de invasión de un vistazo"
+  outlineLabel="Esquema"
+  root={{
+    label: 'ESS: ¿puede invadir un mutante raro?',
+    children: [
+      {
+        label: 'Notación E(A, B) = A vs B',
+        children: [
+          { label: 'I = residente, J = mutante raro' },
+          { label: 'Primera casilla = yo, segunda = ellos' },
+        ],
+      },
+      {
+        label: 'Derivada de la aptitud',
+        children: [
+          { label: 'W(I) = (1-e)E(I,I) + e·E(I,J)' },
+          { label: 'W(J) = (1-e)E(J,I) + e·E(J,J)' },
+          { label: 'Término grande primero cuando e -> 0' },
+        ],
+      },
+      {
+        label: 'Dos condiciones (al menos una)',
+        children: [
+          { label: 'C1: E(I,I) > E(J,I) estrictamente' },
+          { label: 'C2: empate, luego E(I,J) > E(J,J)' },
+        ],
+      },
+      {
+        label: 'Veredictos resueltos',
+        children: [
+          { label: 'AllD en PD: 1 > 0, ESS' },
+          { label: 'AllC en PD: 3 < 5, no ESS' },
+          { label: 'Caso de empate: decide C2' },
+        ],
+      },
+      {
+        label: 'Ojo con esto',
+        children: [
+          { label: 'Estable ≠ óptimo' },
+          { label: 'Nash necesario, no suficiente' },
+          { label: 'Comprueba toda J, rara, una a la vez' },
+        ],
+      },
+    ],
+  }}
+/>
+
+<Quiz
+  client:visible
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  questions={[
+    {
+      question: "Enuncia la Condición 1 de la definición de ESS para el residente I frente al mutante J.",
+      options: [
+        { text: "E(I, I) > E(J, I) — el residente puntúa estrictamente más que el mutante en el enfrentamiento principal", correct: true },
+        { text: "E(I, J) > E(J, J) — el residente le gana al mutante cuando ambos se encuentran con un mutante" },
+        { text: "E(J, I) > E(I, I) — el mutante puntúa estrictamente más que el residente" },
+        { text: "E(I, I) = E(J, I) — un empate en el enfrentamiento principal" },
+      ],
+      explanation: "La Condición 1 es la desigualdad estricta de mejor-respuesta-a-sí-misma: E(I, I) > E(J, I). Si se cumple, I es una ESS frente a J sin necesidad del desempate.",
+    },
+    {
+      question: "En el PD de una tirada (T=5, R=3, P=1, S=0), ¿por qué Desertar Siempre es una ESS pero Cooperar Siempre no?",
+      options: [
+        { text: "AllD: E(I,I)=1 > 0=E(J,I) así que se cumple C1; AllC: E(I,I)=3 < 5=E(J,I) así que C1 falla sin empate", correct: true },
+        { text: "AllD obtiene más pago total para la población que AllC" },
+        { text: "AllC nunca es un equilibrio de Nash y AllD siempre lo es" },
+        { text: "AllD empata en el enfrentamiento principal y gana el desempate" },
+      ],
+      explanation: "Contra una multitud AllD un mutante cooperador obtiene S=0 < P=1, así que AllD gana la Condición 1. Contra una multitud AllC un mutante desertor agarra T=5 > R=3, así que AllC pierde el enfrentamiento principal de forma rotunda — sin empate, la Condición 2 no puede ayudar.",
+    },
+    {
+      question: "El enfrentamiento principal empata: E(I, I) = E(J, I). ¿Qué decide si I es una ESS?",
+      options: [
+        { text: "Si E(I, J) > E(J, J) — el juego raro de mutante-contra-mutante", correct: true },
+        { text: "Si E(I, I) > E(I, J)" },
+        { text: "Si el mutante es lo bastante raro" },
+        { text: "No hace falta nada más — un empate significa que I es automáticamente una ESS" },
+      ],
+      explanation: "En un empate, los términos dominantes se cancelan y los términos épsilon deciden. La Condición 2 requiere E(I, J) > E(J, J): el residente debe ganar al mutante en el raro enfrentamiento consigo mismo para que I siga siendo estable.",
+    },
+    {
+      question: "En el Ejemplo C (I vs I = 2, J vs I = 2, I vs J = 2), supón que el auto-pago del mutante es J vs J = 3. ¿Cuál es el veredicto sobre I?",
+      options: [
+        { text: "No es una ESS — la Condición 1 empata y la Condición 2 falla (2 no es > 3), así que J se cuela y toma el poder", correct: true },
+        { text: "Una ESS — la Condición 2 aún se cumple porque 2 > 0" },
+        { text: "Una ESS — un empate en el enfrentamiento principal siempre protege al residente" },
+        { text: "No es una ESS — la Condición 1 falla porque 2 < 2" },
+      ],
+      explanation: "Con E(J,J)=3, la Condición 2 necesita E(I,J)=2 > 3, lo cual es falso; la Condición 1 era solo un empate. Ninguna se cumple, así que el mutante que se cuela en deriva neutra puede invadir. I es meramente un punto de Nash débil, no una ESS.",
+    },
+    {
+      question: "¿Qué afirmación sobre la ESS es FALSA?",
+      options: [
+        { text: "Una ESS garantiza que la población alcanza su pago colectivo más alto posible", correct: true },
+        { text: "Mejor-respuesta-a-sí-misma es la condición de Nash, necesaria pero no suficiente para una ESS" },
+        { text: "La estabilidad se comprueba frente a mutantes raros, un tipo a la vez" },
+        { text: "Debes verificar las condiciones para cada estrategia alternativa J" },
+      ],
+      explanation: "La afirmación falsa es la optimalidad colectiva. AllD es una ESS sólida como una roca y aun así deja a todos con P=1 cuando R=3 estaba sobre la mesa. ESS significa no invadibilidad local, no eficiencia global.",
+    },
+    {
+      question: "¿Por qué la definición de ESS se puede 'leer directamente de la aritmética' de W(I) y W(J)?",
+      options: [
+        { text: "A medida que la fracción de mutantes tiende a cero, los términos grandes E(_,I) dominan; si empatan, los términos pequeños E(_,J) lo rompen — dando C1 y C2 exactamente", correct: true },
+        { text: "Porque W(I) y W(J) siempre son iguales en una ESS" },
+        { text: "Porque los términos épsilon siempre son mayores que los términos principales" },
+        { text: "Porque los pagos en juegos evolutivos siempre son enteros" },
+      ],
+      explanation: "W(I) > W(J) está dominado por E(I,I) vs E(J,I) a medida que épsilon se encoge (victoria estricta → Condición 1). En un empate esos se cancelan y el E(I,J) vs E(J,J) ponderado por épsilon decide (Condición 2). La definición es el límite de la comparación de aptitud.",
+    },
+  ]}
+/>

@@ -51,13 +51,14 @@
  * `reflexivity-and-self-fulfilling-dynamics`, `antifragility-and-via-negativa`,
  * `ergodicity-and-the-time-average`, `no-free-lunch-theorem`,
  * `common-knowledge-and-coordination`,
- * `spontaneous-order-and-the-knowledge-problem`, …)
+ * `spontaneous-order-and-the-knowledge-problem`,
+ * `evolutionarily-stable-strategies`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * biology-evolution/strategy (`evolutionarily-stable-strategies`, 46),
- * systems-thinking/psychology/economics (`goodharts-law`, 47) and
- * probability/psychology (`information-cascades-and-herding`, 48).
+ * systems-thinking/psychology/economics (`goodharts-law`, 47),
+ * probability/psychology (`information-cascades-and-herding`, 48) and
+ * decision-making/probability (`the-value-of-information`, 49).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -96,34 +97,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `common-knowledge-and-
-  // coordination` (44) and `spontaneous-order-and-the-knowledge-problem` (45) —
+  // The earlier expert rungs — `externalities` (20) … `spontaneous-order-and-
+  // the-knowledge-problem` (45) and `evolutionarily-stable-strategies` (46) —
   // have graduated and been removed; their topic MDX is now the record. The
-  // lowest-order entry below (`evolutionarily-stable-strategies`, order 46) is
-  // built next. The remaining queue finishes the expert tier and keeps the
-  // breadth tag-diverse, spanning biology-evolution/strategy
-  // (`evolutionarily-stable-strategies`), systems-thinking/psychology/economics
-  // (`goodharts-law`) and probability/psychology
-  // (`information-cascades-and-herding`) so no single roadmap tag races ahead.
-  {
-    slug: 'evolutionarily-stable-strategies',
-    icon: '🦂',
-    difficulty: 'expert',
-    order: 46,
-    accent: 'accent',
-    title: {
-      en: 'Evolutionarily Stable Strategies',
-      es: 'Estrategias Evolutivamente Estables',
-    },
-    description: {
-      en: 'Why does a population settle on the mix of behaviours it does — so much fighting, so much bluffing, so much cooperation — and hold there? An evolutionarily stable strategy is one that, once common, cannot be invaded by any rival: the equilibrium biology finds without anyone choosing it. Where game theory and natural selection fuse into a single lens.',
-      es: 'Por qué una población se asienta en la mezcla de conductas que exhibe — tanto pelear, tanto farolear, tanto cooperar — y se mantiene ahí. Una estrategia evolutivamente estable es la que, una vez común, no puede ser invadida por ninguna rival: el equilibrio que la biología encuentra sin que nadie lo elija. Donde la teoría de juegos y la selección natural se funden en una sola lente.',
-    },
-    dependencies: ['game-theory-basics', 'natural-selection', 'evolution-of-cooperation'],
-    tags: ['biology-evolution', 'strategy'],
-    buildNotes:
-      'Evolutionarily stable strategies (ESS) — the expert biology-evolution/strategy rung (John Maynard Smith & George Price, 1973) fusing game theory with natural selection: an ESS is a strategy such that, if (almost) all members of a population adopt it, no rare mutant strategy can invade by doing better. Assumes game-theory-basics (payoffs, best responses, Nash equilibrium), natural-selection (differential reproduction, fitness) and evolution-of-cooperation (repeated interaction, replicator dynamics). Organising idea: replace the rational chooser of classic game theory with a population where fitter strategies simply reproduce more — the equilibrium is REACHED BY SELECTION, not by reasoning, and an ESS is a refinement of Nash equilibrium that must also be uninvadable by mutants at the margin. Sections, each with mechanism + worked example: the ESS definition and the invasion test (E(S,S) > E(T,S), or ties broken by E(S,T) > E(T,T)); the flagship HAWK–DOVE game (fighting vs displaying over a resource V with injury cost C: pure Hawk is invadable when C>V, so the ESS is a MIXED/polymorphic equilibrium at proportion V/C hawks — worked with real numbers); why an ESS is a Nash equilibrium but not every Nash equilibrium is an ESS (stability against drift/mutation is the extra bar); mixed strategies as either an individual randomising OR a stable polymorphism of the population; frequency-dependent selection (a strategy’s payoff depends on how common it is — rare-type advantage, e.g. the 1:1 SEX RATIO as Fisher’s ESS, left-right scale-eating fish, side-blotched-lizard rock–paper–scissors morphs); the tie to cooperation (Tit-for-Tat as (nearly) an ESS in the iterated Prisoner’s Dilemma, and why AllD is also stable — bistability); replicator dynamics as the engine that carries a population toward an ESS. Pitfalls & where the model lies: an ESS is about stability against invasion, NOT global optimality (populations get stuck at ESSs that are collectively worse — the Hawk–Dove waste of fighting is an ESS); not every game HAS a pure ESS (some have only mixed, some none); real populations have finite size, kin structure and shifting environments the static ESS ignores; and "evolutionarily stable" is easy to narrate loosely — insist on the actual invasion inequality. Build an interactive island (a "Hawk–Dove invasion lab": sliders for resource value V and injury cost C and a Hawk-fraction slider; show each type’s fitness as a function of the current Hawk fraction, mark the ESS where the lines cross, and a "let selection run" button that drives any starting mix toward the stable proportion, with a readout of the ESS Hawk share, each type’s payoff, and whether a rare mutant of the other type could invade). Plus a Categorize (sort outcomes into ESS / invadable, or pure-ESS / mixed-ESS / no-ESS) and MatchConcepts (evolutionarily stable strategy, invasion, frequency-dependent selection, Hawk–Dove, replicator dynamics), Quiz + MindMap. en + es twin.',
-  },
+  // lowest-order entry below (`goodharts-law`, order 47) is built next. The
+  // remaining queue finishes the expert tier and keeps the breadth tag-diverse,
+  // spanning systems-thinking/psychology/economics (`goodharts-law`),
+  // probability/psychology (`information-cascades-and-herding`) and
+  // decision-making/probability (`the-value-of-information`) so no single
+  // roadmap tag races ahead.
   {
     slug: 'goodharts-law',
     icon: '🎯',
@@ -161,6 +143,25 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['probability', 'psychology'],
     buildNotes:
       'Information cascades & herding — the expert probability/psychology rung (Bikhchandani, Hirshleifer & Welch 1992; Banerjee 1992) on how rational Bayesian agents, observing only each other\'s ACTIONS (not their private information), rationally abandon their own signal and copy predecessors — so information stops aggregating and the group locks onto a possibly-wrong choice. Assumes bayesian-updating (posterior from prior + evidence, weighing signal strength), common-knowledge-and-coordination (acting on beliefs about others) and critical-mass (a threshold of early movers that tips the rest). Organising idea: distinguish an INFORMATION cascade (I copy you because your action reveals information I trust more than my own weak private signal — informational herding) from mere conformity/social pressure; once the public tally of actions outweighs any one private signal, each newcomer optimally ignores their own data, so their action carries NO new information, and everyone after them is in the same trap — the cascade is informationally empty yet self-perpetuating. Sections, each with mechanism + worked example: the canonical urn experiment (two urns, majority-red vs majority-blue; you see a private draw AND everyone\'s prior guesses; after two same guesses your single contrary draw is rationally overruled — walk the Bayesian arithmetic with real numbers); why cascades are RATIONAL yet FRAGILE and information-poor (they aggregate almost no private knowledge, so a tiny new public signal or one credible contrarian can shatter and reverse them — fads, flips); real faces (restaurant queues and bestseller lists, viral products and app-store ranks, bank-run/coordination links, academic and medical consensus bandwagons, financial bubbles and fashion, citation herding, standing ovations); the difference from and relationship to COMMON KNOWLEDGE and critical mass (a public signal can start OR break a cascade; visible actions are the channel); reputational herding (Scharfstein–Stein: agents herd to not look wrong alone). Pitfalls & where the model lies: herding is not always irrational (following others can be Bayesian-optimal individually even as it is collectively bad — the paradox is the point); cascades are shallow and reversible, unlike genuine consensus built on independent evidence — do not mistake agreement for accuracy (tie to base rates / diversity of information); the cure is preserving INDEPENDENT private signals (aggregate votes/prices/prediction markets that reveal information, not just actions; encourage contrarians; sequence disclosures to avoid anchoring). Build an interactive island (a "cascade line": a sequence of agents each with a private noisy signal about which of two options is correct; they decide in order, seeing only the earlier CHOICES; a signal-strength / prior slider and a step/run control; watch a couple of early coincidences trigger everyone downstream to follow regardless of their private signal, with a readout of how many people followed their own signal vs the herd, whether the cascade landed on the correct option, and how little private information actually got used — plus a "drop a public signal" button that can shatter and flip it). Plus a Categorize (sort cases into information-cascade vs independent-judgement, or fragile-herd vs robust-consensus) and MatchConcepts (information cascade, private signal, herding, reputational herding, cascade fragility), Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'the-value-of-information',
+    icon: '🔍',
+    difficulty: 'expert',
+    order: 49,
+    accent: 'brand',
+    title: {
+      en: 'The Value of Information',
+      es: 'El Valor de la Información',
+    },
+    description: {
+      en: 'Before you pay for one more test, study, or opinion, ask the question almost no one asks: could the answer actually change what you do? Information is only worth something if it might flip a decision — and its value is capped by the cost of being wrong. The mental model that tells you when to look before you leap, and when looking is just expensive procrastination.',
+      es: 'Antes de pagar por una prueba, un estudio o una opinión más, hazte la pregunta que casi nadie hace: ¿podría la respuesta cambiar de verdad lo que vas a hacer? La información solo vale algo si podría hacerte cambiar de decisión — y su valor está acotado por el coste de equivocarte. El modelo mental que te dice cuándo mirar antes de saltar, y cuándo mirar es solo una procrastinación cara.',
+    },
+    dependencies: ['bayesian-updating', 'thinking-in-probabilities', 'asymmetry-and-optionality'],
+    tags: ['decision-making', 'probability'],
+    buildNotes:
+      'The Value of Information (VOI) — the expert decision-making/probability rung from decision analysis (Howard 1966; the expected value of perfect and of sample/imperfect information). Assumes bayesian-updating (revising beliefs from a test result), thinking-in-probabilities (expected value over states) and asymmetry-and-optionality (the payoff to knowing is convex — you keep the good news and act on it, discard the bad). Organising idea — the single sharpest question in applied decision-making: information has value ONLY if it could change your decision; if you would do the same thing whatever the test says, the test is worth exactly zero no matter how accurate or interesting it is. Value comes from AVERTED MISTAKES, so VOI = (expected payoff of the best decision WITH the information) minus (expected payoff of the best decision WITHOUT it), and it is always >= 0 and always <= the cost of being wrong (the loss you could avoid). Sections, each mechanism + worked example: the core definition and the "would it change my action?" test (a doctor who will operate regardless gains nothing from the scan); Expected Value of PERFECT Information (EVPI) as the ceiling — what a clairvoyant is worth — worked with a real payoff table (e.g. drill-the-well / launch-the-product decision across two states, compute EV with clairvoyance minus EV of the best prior action); Expected Value of SAMPLE/IMPERFECT Information (EVSI) for a real, noisy test — fold in sensitivity/specificity via Bayes, compute the pre-posterior expected value, and note EVSI <= EVPI always; the net value = EVSI minus the cost/price of the test, and the decision to gather info is itself an expected-value decision; why VOI is highest when you are genuinely UNCERTAIN and the decision is CLOSE and the stakes are HIGH (a lopsided prior, a trivial decision, or an unactionable answer all drive VOI to zero); the tie to optionality (information is a real option — the value of learning before committing is the value of keeping your choice open). Pitfalls & where the model lies: gathering information is not free (money, time, and the cost of DELAY — sometimes acting now beats a better-informed action later); more data past the decision threshold is pure waste (analysis paralysis, the vanity metric, the study that cannot change the plan); ignoring the cost of the WRONG test (a very accurate test of the wrong question is worthless); base-rate and reliability errors make people wildly overvalue noisy tests; and VOI assumes you will actually ACT on the answer — information you will rationalise away is worth nothing. Build an interactive island (a "value-of-information lab": a two-action decision under two uncertain states with an editable payoff table and a prior-probability slider; a test with adjustable RELIABILITY and COST; show the expected value of acting on the prior alone, the EVPI ceiling (perfect clairvoyance), and the EVSI of the noisy test, with the net value = EVSI minus cost — and a readout that flips to "this test cannot change your decision → value 0" whenever the prior is lopsided enough or the decision one-sided, so the learner SEES value collapse to zero as the decision stops being close). Plus a Categorize (sort scenarios into worth-testing vs test-is-worthless, i.e. could-change-the-action vs could-not) and MatchConcepts (value of information, EVPI, EVSI, the change-my-action test, analysis paralysis), Quiz + MindMap. en + es twin.',
   },
 ];
 

@@ -1,0 +1,534 @@
+---
+title: "The Invasion Test"
+description: "What exactly does 'cannot be invaded' mean? The precise definition of an evolutionarily stable strategy, and the two-line inequality — best-reply-to-itself, with a tie-breaker — that decides for any strategy whether a rare mutant could ever get a foothold."
+topic: "en/evolutionarily-stable-strategies"
+order: 2
+minutes: 12
+updated: 2026-07-10
+---
+
+import { Callout, MCQ, Quiz, MatchConcepts, Categorize, FillBlank, Reveal, MindMap } from '@/components/react';
+
+An **evolutionarily stable strategy (ESS)** is a behaviour that, once nearly everyone
+in a population is doing it, cannot be pushed out by a rare newcomer doing something
+else. That is a lovely sentence. It is also, on its own, useless — because "cannot be
+pushed out" sounds like a vibe, and evolution does not run on vibes. It runs on
+payoffs, and payoffs are numbers.
+
+So this lesson has exactly one job: take the phrase *"cannot be invaded"* and turn it
+into an **inequality you can check**. Two lines of arithmetic, a best-reply condition
+and a tie-breaker, and you will be able to look at any strategy and say — not guess,
+*say* — whether a mutant could ever get a foothold.
+
+## The setup: residents, mutants, and E(A, B)
+
+<MCQ
+  client:visible
+  pretest
+  question="A population is 99.9% strategy I and 0.1% a new mutant J. Roughly speaking, when the mutant is this rare, whose reproductive success is decided mostly by how each does AGAINST strategy I?"
+  options={[
+    { text: "Both — almost every opponent either type meets is a resident playing I", correct: true },
+    { text: "Only the mutant's — residents never meet mutants" },
+    { text: "Only the resident's — mutants only meet each other" },
+    { text: "Neither — rarity makes payoffs irrelevant" },
+  ]}
+  explanation="When mutants are rare, almost every opponent — for a resident AND for a mutant — is a resident playing I. So both types' fitness is dominated by their payoff against I. That single observation is the seed of the whole invasion test."
+/>
+
+Before any inequality, we need one piece of notation, and we will lean on it for the
+rest of the course. Write **E(A, B)** for the payoff earned by a player using strategy
+A when its opponent uses strategy B. First slot: *you*. Second slot: *them*. That is
+the whole grammar.
+
+Now name the cast:
+
+- **I** — the *resident* (or *incumbent*): the strategy almost everyone is already
+  playing. Think of it as the local custom.
+- **J** — a *rare mutant*: some newcomer strategy, `J ≠ I`, that has just appeared in a
+  tiny sliver of the population.
+
+The question of the entire field of evolutionary game theory, boiled down: *if the
+population is basically all `I` with a whisper of `J`, does `J` grow or shrink?* If it
+always shrinks — for every possible `J` — then `I` is an ESS. It is a fortress no
+single mutant type can storm.
+
+<Callout variant="info" title="Read the slots out loud">
+E(J, I) is "what a mutant J scores against a resident I." E(I, J) is "what a resident I
+scores against a mutant J." They are different quantities and the definition uses both,
+so whenever a term appears, say it aloud: *me-first, them-second.* Mixing up the slots
+is the single most common way people botch an invasion check.
+</Callout>
+
+### Why "rare" is the whole game
+
+An ESS is defined against *rare* mutants — formally, in the limit as the mutant
+fraction shrinks toward zero — and against **one mutant type at a time**. This is not a
+technicality to skim past; it is the load-bearing assumption. "Evolutionarily stable"
+means *locally* uninvadable: safe from any lone newcomer that shows up in small numbers.
+It does **not** promise the population is globally best, happiest, or most efficient.
+(Hold that thought — it will bite in the very first worked example.)
+
+<MCQ
+  client:visible
+  question="Which statement correctly describes what E(I, J) means?"
+  options={[
+    { text: "The payoff to a resident I playing against a mutant J", correct: true },
+    { text: "The payoff to a mutant J playing against a resident I" },
+    { text: "The average payoff in the whole population" },
+    { text: "The number of mutants J in the population" },
+  ]}
+  explanation="First slot is the player, second slot is the opponent. E(I, J): resident I earns this against mutant J. Compare E(J, I), which is the mutant's score against the resident — a different number."
+/>
+
+## Deriving the test from population arithmetic
+
+<MCQ
+  client:visible
+  pretest
+  question="Suppose a mutant does EXACTLY as well against residents as residents do against themselves — a perfect tie on the main matchup. Can we already declare the resident safe?"
+  options={[
+    { text: "No — a tie on the main matchup means we must look at the rarer mutant-vs-mutant games to break it", correct: true },
+    { text: "Yes — a tie means the mutant can never grow" },
+    { text: "Yes — ties always favour the incumbent by default" },
+    { text: "No — a tie means the mutant automatically wins" },
+  ]}
+  explanation="A tie on the dominant term hands the decision to the next-smallest term — the rare games where a mutant meets another mutant. That's precisely the situation the tie-breaker condition was invented for."
+/>
+
+Here is the beautiful part: you do not have to *memorise* the ESS definition. You can
+*derive* it from one honest fitness calculation, and then read the definition straight
+off the arithmetic.
+
+Let the population be a fraction `(1 − ε)` residents playing `I` and a small fraction
+`ε` mutants playing `J`, where `ε` (epsilon) is tiny. A randomly chosen opponent is a
+resident with probability `(1 − ε)` and a mutant with probability `ε`. So the expected
+fitness of each type is just a weighted average over who it might meet:
+
+$$W(I) = (1-\varepsilon)\,E(I,I) + \varepsilon\,E(I,J)$$
+
+$$W(J) = (1-\varepsilon)\,E(J,I) + \varepsilon\,E(J,J)$$
+
+The resident `I` resists invasion exactly when it out-reproduces the mutant — when
+`W(I) > W(J)` for all small `ε > 0`. Let us actually look at that comparison as `ε`
+shrinks toward zero.
+
+**The dominant terms.** As `ε → 0`, the `(1 − ε)` weights swamp the `ε` weights. So the
+comparison is decided first by the big terms: `E(I, I)` versus `E(J, I)`. For `I` to
+have any hope, you need
+
+$$E(I,I) \ge E(J,I).$$
+
+Two cases fall out, and they *are* the two conditions:
+
+- **If that inequality is strict** — `E(I, I) > E(J, I)` — then for small enough `ε`,
+  `W(I) > W(J)` no matter what happens in the tiny `ε` terms. The resident wins
+  outright. This is **Condition 1**.
+- **If it is an equality** — `E(I, I) = E(J, I)`, a tie on the big term — then the big
+  terms cancel and the decision falls to the `ε` terms. There, `I` wins iff
+  `E(I, J) > E(J, J)`. This is **Condition 2**.
+
+That is the entire ESS definition, and we just *found* it rather than declaring it.
+
+<Callout variant="success" title="The definition (Maynard Smith & Price, 1973)">
+Strategy **I** is an **ESS** if, for every alternative strategy J ≠ I, at least one of
+these holds:
+
+- **Condition 1 (strict best reply to itself):** E(I, I) > E(J, I). The mutant does
+  *strictly worse* against the residents than a resident does.
+- **Condition 2 (the tie-breaker):** E(I, I) = E(J, I) **and** E(I, J) > E(J, J). If
+  the mutant *ties* against residents, the residents must do strictly better against the
+  rare mutant than the mutant does against a copy of itself.
+</Callout>
+
+Notice the shape: Condition 1 is about the *common* matchup (everyone-vs-resident), and
+Condition 2 is the fine print for when that common matchup is a draw, decided by the
+*rare* matchup (mutant-vs-mutant). Big term first; if it ties, small term breaks it.
+
+<FillBlank
+  client:visible
+  text="As the mutant fraction shrinks toward zero, the comparison of resident and mutant fitness is dominated by the terms {{E(I,I) and E(J,I)|E(I,J) and E(J,J)|W(I) and W(J)}}. If those tie, the decision passes to the smaller terms {{E(I,J) and E(J,J)|E(I,I) and E(J,I)|the epsilon weights}}, which is exactly what Condition 2 checks."
+/>
+
+### When to reach for this derivation
+
+Any time someone hands you an ESS "definition" as a pair of inequalities to memorise,
+you can regenerate it in thirty seconds from `W(I) > W(J)` and the phrase "big term
+first, then the tie-breaker." Understanding *why* the two conditions exist — one for the
+dominant matchup, one for the rare one — is what lets you apply them without second-
+guessing which slot goes where.
+
+## Worked example A: Always Defect is an ESS in the one-shot PD
+
+<MCQ
+  client:visible
+  pretest
+  question="In a population where EVERYONE always defects in the one-shot prisoner's dilemma, a lone mutant shows up who always cooperates. Recall T=5, R=3, P=1, S=0. What does the cooperating mutant earn against a defector?"
+  options={[
+    { text: "S = 0 — the sucker's payoff", correct: true },
+    { text: "T = 5 — the temptation payoff" },
+    { text: "R = 3 — the reward payoff" },
+    { text: "P = 1 — the punishment payoff" },
+  ]}
+  explanation="Cooperate-against-Defect is the classic sucker outcome: you get S = 0 while your defecting opponent bags T = 5. That zero is why the mutant can't gain a foothold — as we're about to confirm."
+/>
+
+Time to stop admiring the definition and *plug numbers in.* Recall the one-shot
+prisoner's dilemma payoffs from earlier courses, with `T > R > P > S` and the standard
+values `T = 5`, `R = 3`, `P = 1`, `S = 0`.
+
+Let the resident be **AllD** ("Always Defect"). A whole population defects. Now a rare
+mutant **AllC** ("Always Cooperate") appears. Run the test.
+
+The relevant matchups, all against the sea of defectors:
+
+| Term | Matchup | Payoff | Value |
+|---|---|---|---|
+| E(I, I) | AllD vs AllD | both defect → P | 1 |
+| E(J, I) | AllC vs AllD | mutant cooperates, gets suckered → S | 0 |
+
+Check **Condition 1**: is `E(I, I) > E(J, I)`? That is `1 > 0`. **Yes — strictly.** A
+resident scoring `1` against the crowd beats a mutant scoring `0` against the same
+crowd. We never even need Condition 2; the strict best-reply condition already slams the
+door. **AllD is an ESS.**
+
+<Callout variant="warning" title="Stable is not the same as good">
+An all-defect population is a fortress — genuinely uninvadable by a lone cooperator —
+and yet everyone in it earns P = 1 when they *could* all be earning R = 3 by
+cooperating. That gap is the whole tragedy of the prisoner's dilemma, and it is exactly
+why "evolutionarily stable" means *locally uninvadable*, not *collectively best*. A
+strategy can be a stable trap.
+</Callout>
+
+<MCQ
+  client:visible
+  question="We showed E(I,I) = 1 > 0 = E(J,I) for AllD versus an AllC mutant. Why don't we also need to check Condition 2 here?"
+  options={[
+    { text: "Condition 1 is satisfied strictly, and an ESS only requires that AT LEAST ONE condition holds", correct: true },
+    { text: "Condition 2 never applies to the prisoner's dilemma" },
+    { text: "Because AllC and AllD tie, so Condition 2 is automatically true" },
+    { text: "Because Condition 2 only matters when payoffs are negative" },
+  ]}
+  explanation="The definition requires that for each mutant, at least one of the two conditions holds. Condition 1 held strictly (1 > 0), so we're done for this mutant — Condition 2 is the fallback for ties, and there was no tie."
+/>
+
+## Worked example B: Always Cooperate is NOT an ESS
+
+<MCQ
+  client:visible
+  pretest
+  question="Now flip it: everyone always cooperates, and a lone Always-Defect mutant invades. With T=5, R=3, what does the defecting mutant earn against a cooperator, versus what a resident cooperator earns against another cooperator?"
+  options={[
+    { text: "Mutant gets T = 5, resident gets R = 3 — so the mutant does BETTER against the crowd", correct: true },
+    { text: "Mutant gets S = 0, resident gets R = 3 — the mutant does worse" },
+    { text: "Both get R = 3 — a perfect tie" },
+    { text: "Mutant gets P = 1, resident gets P = 1" },
+  ]}
+  explanation="A defector exploiting a cooperator grabs the temptation payoff T = 5, while two cooperators only split R = 3 each. The mutant out-earns the resident against the very population it's invading — the textbook sign of an invadable strategy."
+/>
+
+Now the mirror image. Resident is **AllC**; everyone cooperates, life is lovely. A rare
+**AllD** mutant appears. Run the same two-row test:
+
+| Term | Matchup | Payoff | Value |
+|---|---|---|---|
+| E(I, I) | AllC vs AllC | both cooperate → R | 3 |
+| E(J, I) | AllD vs AllC | mutant defects on a cooperator → T | 5 |
+
+Check **Condition 1**: is `E(I, I) > E(J, I)`? That is `3 > 5`. **No.** In fact
+`E(I, I) < E(J, I)` — the mutant does *strictly better* against the residents than the
+residents do. Condition 1 fails hard.
+
+Does Condition 2 rescue it? No — Condition 2 only even applies when there is a *tie* on
+the main matchup, `E(I, I) = E(J, I)`. Here `3 ≠ 5`, so there is no tie to break.
+Neither condition holds. **AllC is not an ESS** — a single defector earns a growth
+premium and the mutation spreads. The lovely all-cooperate world gets eaten from the
+inside.
+
+<MatchConcepts
+  client:visible
+  question="Match each resident-vs-mutant scenario to its verdict."
+  pairs={[
+    { term: "AllD resident, AllC mutant: E(I,I)=1 > E(J,I)=0", definition: "ESS — Condition 1 holds strictly, uninvadable" },
+    { term: "AllC resident, AllD mutant: E(I,I)=3 < E(J,I)=5", definition: "Not an ESS — mutant out-earns residents, no tie to break" },
+    { term: "Main matchup is a tie: E(I,I) = E(J,I)", definition: "Undecided by line 1 — must check the Condition 2 tie-breaker" },
+  ]}
+  explanation="Strict win on the main matchup (Condition 1) locks in an ESS. A strict loss on the main matchup, with no tie, rules it out. Only an exact tie sends you down to the second line."
+  checkLabel="Check"
+  retryLabel="Try again"
+  allCorrectLabel="✓ All matched"
+  termsLabel="Scenarios"
+  definitionsLabel="Verdicts"
+  explanationLabel="Explanation"
+/>
+
+## Worked example C: when the tie-breaker actually earns its keep
+
+<MCQ
+  client:visible
+  pretest
+  question="If a mutant scores EXACTLY the same as a resident against the resident population, what has to be true for the resident to still repel it?"
+  options={[
+    { text: "The resident must do strictly better against the rare mutant than the mutant does against another mutant", correct: true },
+    { text: "Nothing — a tie automatically protects the resident" },
+    { text: "The mutant must also tie against itself" },
+    { text: "The resident must score higher against itself than the mutant scores against the resident" },
+  ]}
+  explanation="That's Condition 2 in words: given a tie on the main matchup, E(I, I) = E(J, I), stability now hinges on the rare mutant-vs-mutant games — the resident survives only if E(I, J) > E(J, J)."
+/>
+
+Both examples so far were settled on line one. To see Condition 2 do real work, we need
+a matchup that *ties*. Picture a coordination-style convention — say, two ways of doing
+the same thing that pay equally well when you meet the locals. Here are payoffs to the
+row player:
+
+| | vs I | vs J |
+|---|---|---|
+| **I** | 2 | 2 |
+| **J** | 2 | 0 |
+
+Read off the four numbers we need. Resident `I`, mutant `J`:
+
+- `E(I, I) = 2` — resident meets resident.
+- `E(J, I) = 2` — mutant meets resident. **Tie with E(I, I)!**
+- `E(I, J) = 2` — resident meets mutant.
+- `E(J, J) = 0` — mutant meets mutant.
+
+**Condition 1:** is `E(I, I) > E(J, I)`? That is `2 > 2` — **false.** It is a tie, not a
+strict win. So line one cannot save `I`, and a lazier definition ("just be a best reply
+to yourself") would shrug and call it a day.
+
+**Condition 2:** the tie sends us to the fine print. We need `E(I, J) > E(J, J)`, i.e.
+`2 > 0`. **True!** So `I` *is* an ESS after all — rescued entirely by the second line.
+
+The story behind the numbers is delightful. The mutant `J` is a perfect impostor
+against the crowd: it scores `2` against residents, exactly like a resident would, so it
+drifts in without penalty. But `J` has a fatal flaw that only shows up when two mutants
+happen to meet each other — then they score a miserable `0` instead of `2`. As mutants
+become even slightly more common, those mutant-on-mutant encounters start happening, and
+`J` bleeds fitness. The residents, meanwhile, still score `2` even against the mutants.
+So `J` can never gain traction. The rare self-matchup is the trap that springs on the
+invader.
+
+<Reveal client:visible>
+<Callout variant="tip" title="Now flip one number and watch it break">
+Change only the mutant's self-payoff: let `E(J, J) = 3` instead of `0`. Re-run
+Condition 2: we now need `E(I, J) > E(J, J)`, i.e. `2 > 3` — **false.** And Condition 1
+was already a tie. *Neither* condition holds, so `I` is no longer an ESS. What happens
+physically: `J` drifts in for free (still tied on the main matchup), and once a few
+mutants exist, they actually *prefer* each other's company (`3` beats `2`). The mutant
+snowballs from a neutral drift into a takeover. Here `I` is only a *weak* Nash point —
+a best reply to itself, but not evolutionarily stable. That gap between "Nash" and "ESS"
+is exactly what the next lesson is about.
+</Callout>
+</Reveal>
+
+<Categorize
+  client:visible
+  question="Using the Example C matrix (I vs I = 2, J vs I = 2, I vs J = 2), sort each outcome by whether it makes I an ESS."
+  buckets={['I is an ESS', 'I is NOT an ESS']}
+  items={[
+    { text: "Mutant self-payoff E(J,J) = 0, so E(I,J)=2 > 0", bucket: 'I is an ESS' },
+    { text: "Condition 1 ties, but Condition 2 holds strictly", bucket: 'I is an ESS' },
+    { text: "Mutant self-payoff E(J,J) = 3, so E(I,J)=2 is not > 3", bucket: 'I is NOT an ESS' },
+    { text: "Neither condition holds — mutant drifts in then takes over", bucket: 'I is NOT an ESS' },
+  ]}
+  explanation="With a tie on the main matchup, everything rides on the rare self-matchup. E(J,J)=0 lets the resident win the tie-breaker (ESS); E(J,J)=3 flips it, and the neutral mutant becomes an invader (not an ESS)."
+  checkLabel="Check"
+  retryLabel="Try again"
+  allCorrectLabel="✓ All sorted"
+  partialResultWord="correct"
+  explanationLabel="Explanation"
+/>
+
+### When to reach for Condition 2
+
+Whenever the main matchup ends in a draw. Coordination games, conventions, and
+"which-side-of-the-road" problems constantly produce ties on `E(I, I) = E(J, I)`,
+because the whole point of a convention is that the alternative pays the same when
+everyone's still doing the old thing. In exactly those cases, line one is silent and the
+tie-breaker is the only thing standing between "self-enforcing custom" and "one drift
+away from collapse."
+
+## Pitfalls: how the invasion test gets misused
+
+<MCQ
+  client:visible
+  pretest
+  question="Someone says 'AllD is a Nash equilibrium of the one-shot PD, therefore it's an ESS.' Is the reasoning valid in general?"
+  options={[
+    { text: "The conclusion happens to be right here, but the reasoning is wrong — Nash is necessary, not sufficient, for ESS", correct: true },
+    { text: "Yes — Nash equilibrium and ESS are the same thing" },
+    { text: "No — AllD is not a Nash equilibrium" },
+    { text: "Yes, but only because the payoffs are positive" },
+  ]}
+  explanation="Being a best reply to itself (E(I,I) ≥ E(J,I)) is exactly the Nash condition — necessary for an ESS but not sufficient. AllD does turn out to be an ESS, but that needs the strict inequality, not just 'it's Nash.' The tie-breaker is the extra bar."
+/>
+
+Three ways smart people trip over this test:
+
+1. **Asserting stability instead of earning it.** "Obviously that behaviour is
+   evolutionarily stable" is not an argument. You must name the payoffs and *plug in*.
+   The whole value of the invasion test is that it replaces intuition with `E(I, I)`
+   versus `E(J, I)`. If you have not written those numbers down, you have not checked
+   anything.
+
+2. **Confusing local uninvadability with global optimality.** An ESS is safe from *rare*
+   mutants, *one type at a time*. That is all. It says nothing about whether the
+   population is efficient, fair, or happy — AllD is Exhibit A. Never upgrade "stable"
+   to "best."
+
+3. **Mistaking the Nash condition for the ESS condition.** Best-reply-to-itself —
+   `E(I, I) ≥ E(J, I)`, with a *weak* inequality — is precisely the Nash equilibrium
+   condition. It is **necessary** for an ESS but **not sufficient**. ESS demands more:
+   either a *strict* win on the main matchup, or the Condition 2 tie-breaker on top. The
+   full comparison of Nash and ESS is the next lesson; for now, just don't treat "it's
+   Nash" as "it's an ESS."
+
+<Callout variant="info" title="Spaced recall — back to the intro">
+We opened by saying an ESS is a strategy that, once nearly everyone plays it, no rare
+mutant can invade. You have now seen that "no rare mutant can invade" is not a slogan
+but a checkable claim: for *every* alternative J, at least one of the two conditions
+must hold. Uninvadability is a promise you keep by doing the arithmetic — for all J, not
+just the one you happened to think of.
+</Callout>
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Select ALL statements that are TRUE about the invasion test. (More than one is correct.)"
+  options={[
+    { text: "E(I,I) > E(J,I) alone (Condition 1, strict) is enough to make I an ESS against mutant J", correct: true },
+    { text: "The tie-breaker Condition 2 only applies when E(I,I) = E(J,I)", correct: true },
+    { text: "Being a best reply to itself is necessary but not sufficient for an ESS", correct: true },
+    { text: "An ESS guarantees the population earns the highest possible average payoff" },
+    { text: "You must check the conditions against every alternative strategy J, not just one", correct: true },
+  ]}
+  explanation="Condition 1 (strict) suffices on its own; Condition 2 is only invoked on a tie; best-reply-to-itself is the necessary-but-not-sufficient Nash condition; and stability must hold against ALL alternatives. The false one is the 'highest average payoff' claim — AllD is stable yet leaves everyone with P=1 when R=3 was available."
+/>
+
+## When to reach for the invasion test
+
+Any time you can write down payoffs that depend on *who you're up against* — the
+opponent's type — the invasion test tells you which behaviours, conventions, or
+strategies are self-enforcing. That covers an enormous range: animal contests (fight or
+flee?), signalling, market conventions, social norms, the side of the road you drive on.
+If you can fill in a payoff matrix, you can run `E(I, I)` versus `E(J, I)`, add the
+tie-breaker if it ties, and pronounce a verdict on stability. The test is small; its
+reach is not.
+
+## Recap
+
+<MindMap
+  client:visible
+  title="The Invasion Test at a glance"
+  outlineLabel="Outline"
+  root={{
+    label: 'ESS: can a rare mutant invade?',
+    children: [
+      {
+        label: 'Notation E(A, B) = A vs B',
+        children: [
+          { label: 'I = resident, J = rare mutant' },
+          { label: 'First slot = me, second = them' },
+        ],
+      },
+      {
+        label: 'Derived from fitness',
+        children: [
+          { label: 'W(I) = (1-e)E(I,I) + e·E(I,J)' },
+          { label: 'W(J) = (1-e)E(J,I) + e·E(J,J)' },
+          { label: 'Big term first as e -> 0' },
+        ],
+      },
+      {
+        label: 'Two conditions (at least one)',
+        children: [
+          { label: 'C1: E(I,I) > E(J,I) strictly' },
+          { label: 'C2: tie, then E(I,J) > E(J,J)' },
+        ],
+      },
+      {
+        label: 'Worked verdicts',
+        children: [
+          { label: 'AllD in PD: 1 > 0, ESS' },
+          { label: 'AllC in PD: 3 < 5, not ESS' },
+          { label: 'Tie case: C2 decides' },
+        ],
+      },
+      {
+        label: 'Watch out',
+        children: [
+          { label: 'Stable ≠ optimal' },
+          { label: 'Nash necessary, not sufficient' },
+          { label: 'Check all J, rare, one at a time' },
+        ],
+      },
+    ],
+  }}
+/>
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: "State Condition 1 of the ESS definition for resident I against mutant J.",
+      options: [
+        { text: "E(I, I) > E(J, I) — the resident strictly out-scores the mutant on the main matchup", correct: true },
+        { text: "E(I, J) > E(J, J) — the resident beats the mutant when both meet a mutant" },
+        { text: "E(J, I) > E(I, I) — the mutant strictly out-scores the resident" },
+        { text: "E(I, I) = E(J, I) — a tie on the main matchup" },
+      ],
+      explanation: "Condition 1 is the strict best-reply-to-itself inequality: E(I, I) > E(J, I). If it holds, I is an ESS against J with no need for the tie-breaker.",
+    },
+    {
+      question: "In the one-shot PD (T=5, R=3, P=1, S=0), why is Always Defect an ESS but Always Cooperate isn't?",
+      options: [
+        { text: "AllD: E(I,I)=1 > 0=E(J,I) so C1 holds; AllC: E(I,I)=3 < 5=E(J,I) so C1 fails with no tie", correct: true },
+        { text: "AllD earns more total payoff for the population than AllC" },
+        { text: "AllC is never a Nash equilibrium and AllD always is" },
+        { text: "AllD ties on the main matchup and wins the tie-breaker" },
+      ],
+      explanation: "Against an AllD crowd a cooperating mutant gets S=0 < P=1, so AllD wins Condition 1. Against an AllC crowd a defecting mutant grabs T=5 > R=3, so AllC loses the main matchup outright — no tie, so Condition 2 can't help.",
+    },
+    {
+      question: "The main matchup ties: E(I, I) = E(J, I). What decides whether I is an ESS?",
+      options: [
+        { text: "Whether E(I, J) > E(J, J) — the rare mutant-vs-mutant game", correct: true },
+        { text: "Whether E(I, I) > E(I, J)" },
+        { text: "Whether the mutant is rare enough" },
+        { text: "Nothing more is needed — a tie means I is automatically an ESS" },
+      ],
+      explanation: "On a tie, the dominant terms cancel and the epsilon terms decide. Condition 2 requires E(I, J) > E(J, J): the resident must beat the mutant in the rare self-matchup for I to remain stable.",
+    },
+    {
+      question: "In Example C (I vs I = 2, J vs I = 2, I vs J = 2), suppose the mutant's self-payoff is J vs J = 3. What is the verdict on I?",
+      options: [
+        { text: "Not an ESS — Condition 1 ties and Condition 2 fails (2 is not > 3), so J drifts in and takes over", correct: true },
+        { text: "An ESS — Condition 2 still holds because 2 > 0" },
+        { text: "An ESS — a tie on the main matchup always protects the resident" },
+        { text: "Not an ESS — Condition 1 fails because 2 < 2" },
+      ],
+      explanation: "With E(J,J)=3, Condition 2 needs E(I,J)=2 > 3, which is false; Condition 1 was only a tie. Neither holds, so the neutral-drifting mutant can invade. I is merely a weak Nash point, not an ESS.",
+    },
+    {
+      question: "Which claim about ESS is FALSE?",
+      options: [
+        { text: "An ESS guarantees the population reaches its highest possible collective payoff", correct: true },
+        { text: "Best-reply-to-itself is the Nash condition, necessary but not sufficient for an ESS" },
+        { text: "Stability is checked against rare mutants, one type at a time" },
+        { text: "You must verify the conditions for every alternative strategy J" },
+      ],
+      explanation: "The false claim is collective optimality. AllD is a rock-solid ESS yet leaves everyone with P=1 when R=3 was on the table. ESS means local uninvadability, not global efficiency.",
+    },
+    {
+      question: "Why can the ESS definition be 'read straight off the arithmetic' of W(I) and W(J)?",
+      options: [
+        { text: "As the mutant fraction goes to zero, the big E(_,I) terms dominate; if they tie, the small E(_,J) terms break it — giving C1 and C2 exactly", correct: true },
+        { text: "Because W(I) and W(J) are always equal at an ESS" },
+        { text: "Because the epsilon terms are always larger than the main terms" },
+        { text: "Because payoffs in evolutionary games are always integers" },
+      ],
+      explanation: "W(I) > W(J) is dominated by E(I,I) vs E(J,I) as epsilon shrinks (strict win → Condition 1). On a tie those cancel and the epsilon-weighted E(I,J) vs E(J,J) decides (Condition 2). The definition is the limit of the fitness comparison.",
+    },
+  ]}
+/>

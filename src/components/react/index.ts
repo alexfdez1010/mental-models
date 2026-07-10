@@ -243,3 +243,6 @@ export type { CommonKnowledgeCoordinatorProps } from '@/components/react/CommonK
 
 export { DispersedKnowledgeMarket, default as DispersedKnowledgeMarketDefault } from '@/components/react/DispersedKnowledgeMarket';
 export type { DispersedKnowledgeMarketProps } from '@/components/react/DispersedKnowledgeMarket';
+
+export { HawkDoveLab, default as HawkDoveLabDefault } from '@/components/react/HawkDoveLab';
+export type { HawkDoveLabProps } from '@/components/react/HawkDoveLab';

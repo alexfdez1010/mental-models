@@ -1,0 +1,491 @@
+---
+title: "Halcón–Paloma: el juego insignia"
+description: "Dos animales se disputan un premio que vale V; perder una pelea real cuesta C en heridas. Trabaja el modelo entero a mano: por qué la agresión pura se derrumba siempre que pelear es costoso, y por qué la población se asienta en una mezcla estable de exactamente V/C halcones que nadie diseñó."
+topic: "es/evolutionarily-stable-strategies"
+order: 3
+minutes: 14
+updated: 2026-07-10
+---
+
+import { MCQ, Quiz, MatchConcepts, Categorize, FillBlank, Reveal, MindMap, HawkDoveLab, Callout } from '@/components/react';
+
+Cada idea profunda de este curso tiene su hogar en un juego, y este es el juego. **Halcón–Paloma (Hawk–Dove)** es la *Drosophila* de la teoría de juegos evolutiva: la mosca de la fruta que todo el mundo cría porque es lo bastante pequeña para resolverla con lápiz y lo bastante rica para mostrar la máquina entera en marcha. Maynard Smith y Price lo construyeron en 1973 para responder una pregunta que llevaba décadas incordiando a los biólogos: si pelear gana recursos, ¿por qué no pelean los animales a muerte por cada migaja? El ciervo brama y se retira; la serpiente forcejea pero rara vez muerde; el pez despliega las branquias y deja marchar al intruso. La contención está por todas partes, y se supone que la selección natural es despiadada. ¿Qué pasa aquí?
+
+La respuesta, trabajada abajo hasta el último decimal, es que **la contención no es un favor que una población se hace a sí misma: es un equilibrio al que la selección se ve forzada.** Al final serás capaz de tomar cualquier valor de recurso y cualquier coste de herida, y predecir la mezcla exacta de agresores que una población mantendrá, para siempre, sin que nadie la elija.
+
+<Callout variant="tip" title="Lo que ya tienes">
+De la lección anterior te llevas la **prueba de invasión (invasion test)**: una estrategia I es una EEE si, para todo mutante J, o bien **E(I,I) > E(J,I)** (I es la mejor respuesta estricta a sí misma), o bien **E(I,I) = E(J,I)** y **E(I,J) > E(J,J)** (empate frente a I, resuelto venciendo al mutante en su propia multitud). Aquí E(A,B) es el pago para un jugador A que se encuentra con un jugador B. Esa prueba es la única herramienta que usaremos: toda esta lección es una larga aplicación de ella.
+</Callout>
+
+## El montaje: dos estrategias, un premio
+
+Imagina dos animales que llegan al mismo pedazo de comida, el mismo lugar de anidamiento, la misma pareja: un recurso que vale **V** en aptitud (descendencia extra) para quien acabe con él. Cada animal está cableado a una de dos estrategias:
+
+- Un **Halcón** siempre escala. Pelea, y sigue peleando hasta que gana o resulta herido.
+- Una **Paloma** siempre se exhibe — se hincha, hace posturas, mete ruido —, pero en cuanto el rival pelea de verdad, huye ilesa.
+
+Ahora recorre los cuatro encuentros posibles, porque el modelo entero vive en estas cuatro frases:
+
+- **Halcón se encuentra con Paloma.** La Paloma huye a la primera señal de pelea real. El Halcón se lleva el recurso entero, ileso: el Halcón obtiene **V**, la Paloma obtiene **0**.
+- **Paloma se encuentra con Halcón.** El mismo encuentro desde el otro lado: la Paloma obtiene **0**, el Halcón obtiene **V**.
+- **Paloma se encuentra con Paloma.** Dos posturistas, ninguna dispuesta a pelear. Se reparten el recurso (o cada una lo gana la mitad de las veces, que da el mismo promedio): cada una obtiene **V/2**.
+- **Halcón se encuentra con Halcón.** Dos escaladores — una pelea real. Uno gana el recurso (**V**), el otro resulta herido (paga **C**). Cada uno tiene la misma probabilidad de ser el ganador, así que el pago *promedio* para un Halcón en este encuentro es **(V − C)/2**.
+
+Esa última línea es la bisagra del modelo entero, así que léela despacio. Un Halcón frente a otro Halcón a veces gana V y a veces paga C, mitad y mitad, así que en promedio recoge $(V-C)/2$. Cuando la herida es barata ese número es positivo y pelear compensa; cuando la herida es cara se vuelve *negativo* — el encuentro promedio Halcón-contra-Halcón es una pérdida neta. En qué régimen estés lo decide todo.
+
+Podemos empaquetar los cuatro encuentros en una **matriz de pagos**. Cada celda es el pago para el jugador de la **fila** cuando se encuentra con el jugador de la **columna**:
+
+| Jugador de fila | vs Halcón | vs Paloma |
+|---|---|---|
+| **Halcón** | (V − C)/2 | V |
+| **Paloma** | 0 | V/2 |
+
+<Callout variant="info" title="Leer una matriz de pagos">
+Las filas soy *yo*, las columnas son *mi rival*. La celda superior izquierda, $(V-C)/2$, es lo que gano como Halcón al encontrarme con otro Halcón. La superior derecha, $V$, es lo que gano como Halcón al encontrarme con una Paloma. Las Palomas nunca pagan $C$ — se marchan antes de que ocurra la herida —, así que toda la fila inferior está libre de heridas. Cada afirmación de esta lección es solo aritmética sobre estos cuatro números.
+</Callout>
+
+<MCQ
+  client:visible
+  pretest
+  question="Dos Halcones se encuentran por un recurso que vale V, y el perdedor de la pelea paga un coste de herida C. Cada Halcón tiene la misma probabilidad de ganar. ¿Cuál es el pago PROMEDIO para un Halcón en este encuentro?"
+  options={[
+    { text: "(V − C)/2 — la mitad de las veces gana V, la mitad de las veces paga C, así que el promedio es (V − C)/2", correct: true },
+    { text: "V − C — siempre gana el premio pero siempre paga la herida", correct: false },
+    { text: "V/2 — reparte el premio con el otro Halcón", correct: false },
+    { text: "0 — la pelea se cancela y nadie gana nada", correct: false },
+  ]}
+  explanation="Sin penalización en un pretest — solo ancla el número. En una pelea Halcón-contra-Halcón hay exactamente un ganador (pago V) y un perdedor (pago −C), y cada Halcón tiene un 50% de probabilidad de cada papel. El valor esperado es 0,5·V + 0,5·(−C) = (V − C)/2. NO es V − C (no ganas Y te hieres a la vez), y NO es V/2 (esa es la parte de Paloma-con-Paloma, donde nadie pelea). Esta única expresión es el motor del modelo entero: fíjate en que puede volverse negativa cuando C > V, que es donde la cosa se pone interesante."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Caso 1 — cuando pelear es barato (V > C)
+
+Empieza por el mundo fácil: el premio vale más de lo que cuesta una herida, así que **V > C**. Un ciervo peleando por un harén entero cuando una escaramuza solo deja moratones; un ave disputando el último territorio antes del invierno cuando perder es la muerte igualmente. Aquí $(V - C)/2$ es **positivo** — incluso una reyerta Halcón-contra-Halcón compensa en promedio.
+
+Comprobemos si el **Halcón puro** es una EEE usando la prueba de invasión. Imagina una población de todo Halcones y suelta en ella una Paloma mutante rara. Compara cómo le va a cada uno *frente a la multitud residente de Halcones*:
+
+| Cantidad | Valor | Significado |
+|---|---|---|
+| E(Halcón, Halcón) | (V − C)/2 | un Halcón residente frente a la multitud |
+| E(Paloma, Halcón) | 0 | la Paloma mutante frente a la multitud |
+
+La primera condición de la prueba de invasión pregunta: ¿es $E(\text{Halcón},\text{Halcón}) > E(\text{Paloma},\text{Halcón})$? Es decir, ¿es $(V-C)/2 > 0$? Cuando $V > C$, sí — así que **el Halcón puro es una mejor respuesta estricta a sí mismo, y es la EEE.** La Paloma rara gana 0 mientras todos a su alrededor ganan un $(V-C)/2$ positivo, así que la selección la borra.
+
+**Números trabajados.** Sea V = 8, C = 4. Entonces un Halcón que se encuentra con un Halcón gana $(8 - 4)/2 = 2$, mientras que una Paloma mutante gana 0. Dos vence a cero; la Paloma se muere de hambre. Todos pelean y — porque ganar vale más que resultar herido — todos *deberían* hacerlo.
+
+<Callout variant="warning" title="La predicción incómoda">
+Cuando los recursos valen más de lo que cuestan las peleas, el modelo predice que **la agresión implacable es estable**. Una Paloma que cede educadamente simplemente entrega su aptitud a los Halcones y desaparece. Esto no es un fallo — es el modelo siendo honesto. La guerra total es una EEE genuina en el mundo V > C. La contención que de hecho vemos en la naturaleza es evidencia de que, para la mayoría de las contiendas reales, **C > V** — las heridas cuestan más de lo que vale la mayoría de los premios individuales.
+</Callout>
+
+<MCQ
+  client:visible
+  question="En un mundo donde pelear es barato (V = 8, C = 4), ¿por qué se expulsa a una Paloma mutante solitaria de una población de todo Halcones?"
+  options={[
+    { text: "Cada Halcón residente gana (8−4)/2 = 2 frente a la multitud, mientras que la Paloma gana 0 al huir de cada contienda — así que la Paloma es superada en reproducción y la selección la elimina", correct: true },
+    { text: "Las Palomas son físicamente más débiles y pierden las peleas en las que entran", correct: false },
+    { text: "Los Halcones se juntan contra la Paloma y la hieren deliberadamente", correct: false },
+    { text: "Las Palomas solo sobreviven en gran número, así que una sola siempre muere por azar", correct: false },
+  ]}
+  explanation="Aplica la prueba de invasión. Halcón residente frente a la multitud de Halcones: (V − C)/2 = (8 − 4)/2 = 2. Paloma mutante frente a la multitud de Halcones: 0 (huye, no gana nada, pero tampoco paga nada). Como 2 > 0, se cumple la condición 1 de la prueba — el Halcón puro es una mejor respuesta estricta a sí mismo, así que ninguna Paloma puede invadir. La Paloma nunca resulta herida, así que no va de debilidad ni de juntarse contra ella; simplemente gana menos que los residentes agresivos cuando el premio (8) vale más que la herida (4). Ser pacífico es aquí una apuesta de aptitud perdedora."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Caso 2 — cuando pelear es costoso (C > V), el caso interesante
+
+Ahora dale la vuelta al mundo. Las heridas cuestan *más* de lo que vale cualquier premio individual: **C > V**. Una pelea real por una sola comida puede dejarte tullido durante una temporada; las cornamentas cornean, los colmillos matan. Este es el régimen realista para la mayoría de las contiendas animales, y es donde el modelo se gana su fama — porque ahora $(V - C)/2$ es **negativo**. Una pelea Halcón-contra-Halcón es, en promedio, una *pérdida*.
+
+Observa cómo ambas estrategias puras fallan la prueba de invasión por turnos.
+
+**El Halcón puro no es una EEE.** En un mundo de todo Halcones, cada residente gana $E(\text{Halcón},\text{Halcón}) = (V-C)/2 < 0$ — todos sangrando aptitud en peleas inútiles. Una Paloma mutante rara gana $E(\text{Paloma},\text{Halcón}) = 0$. Como $0 > (V-C)/2$, a la Paloma le va *mejor* que a la multitud e **invade**. La agresión pura se derrumba.
+
+**El Paloma puro tampoco es una EEE.** En un mundo de todo Palomas, cada residente gana $E(\text{Paloma},\text{Paloma}) = V/2$ — todos repartiendo recursos educadamente, una pequeña utopía. Pero un Halcón mutante raro entra y gana $E(\text{Halcón},\text{Paloma}) = V$, porque cada Paloma que encuentra simplemente huye y entrega el premio entero. Como $V > V/2$, el Halcón **invade**. La utopía pacífica es un paraíso de primos — un solo agresor lo barre todo.
+
+| EEE candidata | El residente gana | El mejor mutante gana | Veredicto |
+|---|---|---|---|
+| Todo Halcón | (V − C)/2 &lt; 0 | Paloma: 0 | Invadida — a la Paloma le va mejor |
+| Todo Paloma | V/2 | Halcón: V | Invadida — al Halcón le va mejor |
+
+Así que estamos acorralados: **ninguna estrategia pura puede sostenerse.** Empuja la población hacia todo Halcones y las Palomas invaden; empújala hacia todo Palomas y los Halcones invaden. Siempre que ambas estrategias *puras* son invadibles así, la EEE — si existe alguna — tiene que ser una **estrategia mixta**: una mezcla concreta de Halcón y Paloma que ningún mutante raro pueda vencer. Encontrar esa mezcla exacta es la siguiente sección.
+
+<MatchConcepts
+  client:visible
+  question="En el mundo de pelea costosa (C > V), empareja cada estado de población con el mutante que lo rompe y por qué."
+  pairs={[
+    { term: "Población de todo Halcones", definition: "Invadida por una Paloma — los residentes ganan (V−C)/2 < 0 en peleas constantes, mientras que la Paloma gana 0 al no pelear nunca" },
+    { term: "Población de todo Palomas", definition: "Invadida por un Halcón — los residentes ganan V/2 al compartir, mientras que el Halcón solitario se lleva el V completo de cada Paloma que encuentra" },
+    { term: "La mezcla de Halcón y Paloma", definition: "El único candidato que queda en pie una vez que ambas estrategias puras fallan la prueba de invasión" },
+  ]}
+  explanation="Cuando C > V, ambas estrategias puras son invadibles. El todo-Halcones cae porque pelear sin descanso es una pérdida neta (pago promedio negativo), así que una Paloma pacífica que esquiva las peleas gana más que la multitud. El todo-Palomas cae porque una sala llena de cedores es un almuerzo gratis para un solo agresor. Con ambos extremos descartados, la estabilidad — si existe siquiera — debe vivir en alguna mezcla interior. Eso es lo que resolvemos a continuación."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Estados"
+  definitionsLabel="Qué los rompe"
+  explanationLabel="Explicación"
+/>
+
+## Resolviendo la EEE mixta: p* = V/C
+
+Aquí está el pago de toda la lección. Sea **p** la fracción de la población que juega Halcón (así que 1 − p juega Paloma). Queremos la mezcla en la que Halcón y Paloma ganen *exactamente lo mismo* — porque en cualquier otra mezcla, un tipo gana más, se extiende y desplaza la proporción. El punto estable es donde el tira y afloja se equilibra.
+
+Escribe la aptitud de cada tipo frente a una población que es una fracción p de Halcones. Un rival aleatorio es un Halcón con probabilidad p y una Paloma con probabilidad 1 − p:
+
+$$W_H(p) = p \cdot \frac{V - C}{2} + (1 - p) \cdot V$$
+
+$$W_D(p) = p \cdot 0 + (1 - p) \cdot \frac{V}{2}$$
+
+Un Halcón a veces se encuentra con Halcones (ganando $(V-C)/2$) y a veces con Palomas (ganando $V$). Una Paloma no gana nada contra Halcones y $V/2$ contra otras Palomas. En la EEE mixta estos son iguales — iguala $W_H(p) = W_D(p)$ y dale a la manivela:
+
+$$p \cdot \frac{V - C}{2} + (1 - p) \cdot V = (1 - p) \cdot \frac{V}{2}$$
+
+Pasa el lado derecho al otro lado. Fíjate en que $(1-p)V$ a la izquierda menos $(1-p)\tfrac{V}{2}$ a la derecha deja $(1-p)\tfrac{V}{2}$:
+
+$$p \cdot \frac{V - C}{2} + (1 - p) \cdot \frac{V}{2} = 0$$
+
+Multiplica todo por 2 para quitar las mitades:
+
+$$p(V - C) + (1 - p)V = 0$$
+
+Desarrolla el segundo término:
+
+$$pV - pC + V - pV = 0$$
+
+El $pV$ y el $-pV$ se cancelan — el modelo prácticamente se resuelve solo:
+
+$$V - pC = 0 \quad\Longrightarrow\quad V = pC \quad\Longrightarrow\quad \boxed{p^* = \dfrac{V}{C}}$$
+
+Ese es el resultado estrella de la teoría de juegos evolutiva: **una población se asienta en una fracción de Halcones de exactamente V/C.** La proporción de agresores iguala la razón entre lo que vale la pena ganar y lo que cuesta perder una pelea. Ningún individuo calcula esto. La selección tritura cualquier desviación hasta que la proporción aterriza aquí — y es una EEE, no invadible, porque en $p^*$ cada tipo gana lo mismo y nada raro puede hacerlo mejor.
+
+<Callout variant="success" title="Lee la fórmula en voz alta">
+$p^* = V/C$. **Sube el premio** V y hay más Halcones (la agresión vale el riesgo). **Sube el coste de herida** C y hay menos (pelear es demasiado caro, así que exhibirse se extiende). La fracción de peleadores en una población es un termostato fijado por lo que está en juego: las contiendas valiosas-y-seguras crían camorristas; las contiendas baratas-pero-peligrosas crían faroleros. Esa única razón predice el nivel de agresión de toda la población.
+</Callout>
+
+**Ejemplo trabajado.** Sea **V = 6, C = 10**. Entonces $p^* = 6/10 = 0.6$ — la población estable es **60% Halcones y 40% Palomas.** Suelta los animales en cualquier otra mezcla y la selección los devuelve al 60/40.
+
+**Un segundo.** Sea **V = 4, C = 12**. Entonces $p^* = 4/12 = 1/3 \approx 0.33$ — alrededor del **33% de Halcones.** Pelear es tres veces más costoso que valioso el premio, así que solo un tercio de la población puede permitirse ser agresivo antes de que las colisiones Halcón-contra-Halcón arrastren el pago de los agresores por debajo del de las Palomas.
+
+<FillBlank
+  client:visible
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  text="En la estrategia evolutivamente estable mixta de Halcón–Paloma, la fracción de la población que juega Halcón es igual a {{V/C|C/V|V−C}}. Así que subir el coste de herida C hace que la población estable sea {{menos|más|igual de}} agresiva, y subir el valor del premio V la hace {{más|menos|igual de}} agresiva."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+/>
+
+<MCQ
+  client:visible
+  question="Un recurso vale V = 6 y perder una pelea cuesta C = 10. En una población establecida de Halcón–Paloma, ¿qué fracción juega Halcón en la EEE?"
+  options={[
+    { text: "60% — la fracción de Halcones de la EEE es p* = V/C = 6/10 = 0.6", correct: true },
+    { text: "40% — las Palomas son mayoría porque pelear es costoso", correct: false },
+    { text: "50% — una mezcla estable siempre se reparte a partes iguales", correct: false },
+    { text: "62,5% — porque V/(C−V) = 6/4", correct: false },
+  ]}
+  explanation="Sustituye directamente en el resultado: p* = V/C = 6/10 = 0.6, así que 60% Halcones y 40% Palomas. Que las Palomas sean la minoría del 40% es la clave — aunque pelear sea costoso (C > V), la agresión no desaparece; se asienta en una fracción positiva fijada por la razón de lo que está en juego. No es un 50/50 fijo (eso ignoraría V y C por completo), y la fórmula es V/C, no V/(C−V). Comprobación de sensatez: como aquí C > V, V/C está entre 0 y 1, una fracción válida."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Míralo asentarse: arrastra la población hasta la EEE
+
+Leer $p^* = V/C$ es una cosa; *ver* a una población arrastrarse hasta ahí desde un arranque desequilibrado es otra. En el laboratorio de abajo, cada línea es la aptitud de un tipo frente a la mezcla actual. Donde se cruzan, Halcón y Paloma ganan lo mismo — ese cruce es la EEE en V/C. Cárgalo al rojo vivo al 95% de Halcones y deja correr la selección.
+
+<HawkDoveLab
+  client:visible
+  title="Resuelve la EEE mixta arrastrando"
+  initialValue={6}
+  initialCost={10}
+  initialHawkPct={95}
+  caption="Haz tres experimentos. PRIMERO, tal como está cargado (V = 6, C = 10, 95% Halcones): la población se ahoga en peleas Halcón-contra-Halcón, así que pulsa 'deja correr la selección' y observa cómo la fracción de Halcones CAE por sí sola hasta la EEE en V/C = 60%. SEGUNDO, arrastra el deslizador de Halcones hasta cerca del 5%: ahora los Halcones son raros y se apoderan de recursos sin oposición, así que déjalo correr y observa cómo la fracción SUBE de vuelta al 60% — el equilibrio tira desde ambos lados, que es lo que significa 'estable'. TERCERO, arrastra el coste C por debajo del valor V (prueba V = 6, C = 4): las dos líneas dejan de cruzarse, y la selección lleva a la población hasta el Halcón puro — pelear barato trae de vuelta la agresión total."
+  eyebrow="Laboratorio de invasión Halcón–Paloma"
+  instructions="Dos animales se disputan un recurso que vale V; el perdedor de una pelea real paga un coste de heridas C. Fija V y C y luego arrastra la fracción de la población que juega Halcón. Cada línea es la aptitud de un tipo frente a la mezcla actual — donde se cruzan, Halcón y Paloma ganan lo mismo, así que ninguno puede extenderse. Ese cruce es la estrategia evolutivamente estable."
+  valueLabel="Valor del recurso V (aquello por lo que se pelea)"
+  costLabel="Coste de heridas C (precio de perder una pelea real)"
+  hawkFractionLabel="Fracción de la población que juega Halcón"
+  axisLabel="Aptitud (pago por contienda)"
+  xAxisLabel="Fracción de la población que juega Halcón"
+  hawkLineLabel="Aptitud del Halcón"
+  doveLineLabel="Aptitud de la Paloma"
+  essLabel="EEE"
+  runLabel="Deja correr la selección ▸"
+  pauseLabel="Pausa"
+  resetLabel="Reiniciar la mezcla"
+  readoutLabel="Leyendo la población"
+  essStatLabel="Fracción estable de Halcones"
+  hawkStatLabel="Pago del Halcón ahora"
+  doveStatLabel="Pago de la Paloma ahora"
+  invadeStatLabel="¿Puede invadir un mutante raro?"
+  pureHawkNote="Aquí pelear es barato — el recurso vale tanto como (o más que) la herida. Un Halcón vence a una Paloma por común que sea, así que la selección lleva a la población a TODO Halcón. El Halcón puro es la EEE: un mutante Paloma solo cede y acaba muriéndose de hambre. Pelea costosa y derrochadora — y perfectamente estable."
+  mixedNote="Ahora la herida supera al premio (C > V), y la EEE es una MEZCLA: ninguna estrategia pura es estable. En un mundo de Halcones las peleas son ruinosas, así que una Paloma rara que esquiva cada reyerta lo hace mejor y se extiende; en un mundo de Palomas, un Halcón raro se lleva cada recurso sin oposición y se extiende. Las dos presiones se equilibran en exactamente V/C Halcones — un polimorfismo estable que nadie diseñó."
+  settledNote="La selección se ha asentado. En esta mezcla Halcón y Paloma ganan exactamente el mismo pago, así que un mutante raro de cualquier tipo no lo hace mejor que los nativos y no puede invadir. Esa es la prueba de invasión superada — la definición de una EEE, alcanzada solo por reproducción, sin que nadie razone para llegar a ella."
+  hawksInvadeWord="Invaden Halcones ↑"
+  dovesInvadeWord="Invaden Palomas ↓"
+  stableWord="Ninguno — estable"
+/>
+
+Fíjate en lo que muestra el tercer experimento: la fórmula $p^* = V/C$ solo *funciona* mientras C > V. En el momento en que pelear se vuelve barato, el cruce se desliza fuera del borde del gráfico y volvemos al Caso 1, donde el Halcón puro es la EEE. El laboratorio hace visible lo que el álgebra advertía — un escollo que fijaremos formalmente en un momento.
+
+<MCQ
+  client:visible
+  question="Cargaste el laboratorio al 95% de Halcones con V = 6, C = 10, y pulsaste ejecutar. La fracción de Halcones cayó al 60% y se detuvo. Luego la arrastraste hasta el 5% y ejecutaste de nuevo — subió de vuelta al 60%. ¿Qué demuestra el hecho de que regrese al 60% DESDE AMBOS LADOS?"
+  options={[
+    { text: "60% es un equilibrio estable — las desviaciones en cualquier dirección son corregidas por la selección, así que un mutante raro de cualquier tipo no puede alejar a la población de V/C", correct: true },
+    { text: "60% es solo el promedio de los dos puntos de partida, 95% y 5%", correct: false },
+    { text: "La población tiene un objetivo fijo del 60% de Halcones incorporado en los animales", correct: false },
+    { text: "Es una coincidencia de estos números concretos y no ocurriría con otros V y C", correct: false },
+  ]}
+  explanation="Regresar al mismo punto DESDE ARRIBA y DESDE ABAJO es exactamente lo que hace estable a un equilibrio — y la estabilidad es todo el significado de 'EEE'. Por encima del 60%, los Halcones son demasiado comunes, las peleas Halcón-contra-Halcón hacen de la agresión una pérdida neta, y la fracción cae. Por debajo del 60%, los Halcones son raros, explotan a todas las Palomas, y la fracción sube. Ambas fuerzas apuntan de vuelta al 60% = V/C. No es el promedio de tus puntos de partida (arranca en 20% y 20% y aun así va al 60%), y nada está 'incorporado' — el objetivo se calcula en vivo a partir de V y C. Cámbialos y el punto estable se mueve al nuevo V/C."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## El coste de la estabilidad: estable ≠ óptimo
+
+Ahora el giro que hace de Halcón–Paloma más que una curiosidad. Hemos encontrado que la población *se asienta* en $p^* = V/C$. Pero ¿es ese un *buen* sitio donde estar? Calculemos lo que todos ganan de verdad ahí — y comparémoslo con lo que *podrían* haber tenido.
+
+En la EEE cada tipo gana lo mismo, así que podemos simplemente evaluar la aptitud de la Paloma en $p^*$ (es más fácil — las Palomas nunca tocan el enrevesado término $(V-C)/2$). Recuerda $W_D(p) = (1-p)\cdot \tfrac{V}{2}$, y sustituye $p^* = V/C$:
+
+$$W_D(p^*) = \left(1 - \frac{V}{C}\right)\frac{V}{2} = \frac{V(C - V)}{2C}$$
+
+**Números trabajados, V = 6, C = 10.** La fracción de Halcones es $1 - V/C = 1 - 0.6 = 0.4$, así que cada individuo gana $0.4 \cdot \tfrac{6}{2} = 0.4 \cdot 3 = \mathbf{1.2}$.
+
+Ahora el puñetazo en el estómago. Supón que toda la población pudiera de algún modo ser **todo Palomas** — todos compartiendo educadamente, nadie peleando. Cada una ganaría $V/2 = 6/2 = \mathbf{3}$. Eso es **más del doble** del 1.2 que de hecho obtienen en la EEE. La mezcla estable está dejando aptitud sobre la mesa, a manos llenas, para siempre.
+
+| Estado de población | Pago por individuo (V=6, C=10) | ¿Estable? |
+|---|---|---|
+| Todo Paloma (el sueño) | V/2 = 3 | No — un Halcón invade |
+| La mezcla EEE (60% Halcón) | V(C−V)/(2C) = 1.2 | **Sí — no invadible** |
+| Todo Halcón (la pesadilla) | (V−C)/2 = −2 | No — una Paloma invade |
+
+La utopía de todo Palomas gana 3 cada una y a la población le encantaría vivir ahí — pero *no puede*, porque no es estable. Un solo Halcón mutante en ese mundo pacífico gana el V = 6 completo atracando a cada Paloma que encuentra, así que la agresión se extiende hasta que la población es arrastrada hasta la EEE que gana 1.2 y clavada ahí. **Todo individuo estaría mejor en un mundo con menos peleas, y ni uno solo puede llegar ahí unilateralmente** — una Paloma que sigue cediendo simplemente es explotada. La población está atrapada quemando aptitud en peleas que no puede detener colectivamente.
+
+<Callout variant="warning" title="La lección que sobrevive a la biología">
+Esta es la primera visión dura de **estabilidad ≠ optimalidad**, y es una de las ideas más transferibles de todo el entramado. Una estrategia evolutivamente estable es de lo que una población *no puede escapar* — no lo que es mejor para ella. La población de Halcón–Paloma está atascada en un mal equilibrio del mismo modo que lo está una carrera armamentística, una guerra de precios o una tragedia de los comunes: todos ganarían desarmándose, y nadie se atreve a ir primero. Lo desarrollamos por completo en la Lección 5, pero siéntelo ahora: **la selección optimiza a los individuos frente a sus vecinos, no al grupo frente al mundo.**
+</Callout>
+
+<Categorize
+  client:visible
+  question="Ordena cada afirmación sobre la EEE de Halcón–Paloma (con V = 6, C = 10) en verdadera o falsa."
+  buckets={['Verdadera', 'Falsa']}
+  items={[
+    { text: "La mezcla estable hace que cada individuo gane 1.2, menos que el 3 que daría un mundo de todo Palomas", bucket: 'Verdadera' },
+    { text: "La población se asienta en el 60% de Halcones aunque una mezcla más pacífica pagaría mejor a todos", bucket: 'Verdadera' },
+    { text: "El estado de todo Palomas no puede sostenerse porque un solo Halcón mutante gana el V completo explotando a las Palomas", bucket: 'Verdadera' },
+    { text: "Como la EEE es estable, debe ser también el mejor resultado posible para la población", bucket: 'Falsa' },
+    { text: "Una Paloma podría rescatar a la población negándose unilateralmente a pelear nunca", bucket: 'Falsa' },
+  ]}
+  explanation="Con V=6, C=10 la EEE paga V(C−V)/(2C) = 1.2 por individuo, muy por debajo del pago de todo Palomas de V/2 = 3 — así que las tres primeras afirmaciones son verdaderas. Pero el mundo pacífico es inalcanzable: lo invade cualquier Halcón (que gana el 6 completo frente a Palomas que ceden), por lo que 'estable significa mejor' es falso y 'una Paloma puede rescatar a todos' es falso. Las Palomas ya se niegan a pelear — eso es lo que una Paloma ES — y no ayuda, porque los pagos recompensan a los Halcones que las explotan. La estabilidad va de lo que no puede ser invadido, no de lo que es bueno."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  explanationLabel="Explicación"
+/>
+
+## Dos maneras de leer p* = V/C
+
+Una sutileza antes del repaso, y presagia la siguiente lección. El resultado "60% de Halcones" puede describir dos mundos físicamente distintos que un biólogo no puede diferenciar solo a partir de los pagos:
+
+1. **Una estrategia mixta monomórfica.** *Cada* animal es idéntico y juega Halcón con probabilidad V/C y Paloma en caso contrario — cada individuo lanza una moneda sesgada en cada contienda. La población parece 60% Halcón en cualquier instante porque cada animal es halconesco el 60% del tiempo.
+2. **Un polimorfismo estable (stable polymorphism).** Una fracción V/C de los animales son *Halcones puros, de por vida* y el 1 − V/C restante son *Palomas puras, de por vida*. Ningún individuo aleatoriza; la *población* es 60% Halcón porque el 60% de los cuerpos son Halcones.
+
+Ambos dan el estado de población idéntico, los pagos idénticos, la estabilidad idéntica. En Halcón–Paloma son indistinguibles al nivel de la aptitud — por eso la EEE es a veces el dado de un individuo y a veces un censo de dos tipos fijos. **La Lección 3 afila esta distinción** y muestra cuándo las dos lecturas se separan; por ahora, solo retén que "V/C Halcones" puede significar un animal flexible o dos castas rígidas.
+
+<Reveal client:visible>
+**Comprobación rápida antes de mirar — ¿cuál lectura es esta?** "En cierta lagartija, algunos machos son genéticamente naranjas (siempre agresivos) y otros genéticamente amarillos (siempre furtivos), en proporciones fijas." Esa es la lectura del **polimorfismo estable**: dos tipos distintos, cableados, coexistiendo en la población, no una lagartija aleatorizando su comportamiento. La alternativa — una sola lagartija que juega agresiva el 60% de los días y furtiva el resto — sería la estrategia mixta monomórfica. Misma matemática, distinta biología.
+</Reveal>
+
+## Tres escollos que hacen tropezar a todos
+
+<Callout variant="warning" title="1. p* = V/C solo se aplica cuando C > V">
+Si metes V ≥ C en V/C obtienes una fracción de Halcones de 1 o más — lo cual es un sinsentido como probabilidad. Eso es la fórmula gritando que has salido de su dominio. Cuando V ≥ C, pelear es barato, no hay cruce interior, y la EEE es el **Halcón puro (p* = 1)** — el Caso 1. Comprueba siempre C > V *antes* de echar mano de V/C.
+</Callout>
+
+<Callout variant="warning" title="2. Un Halcón no es 'mejor' ni 'peor' — depende de la mezcla">
+El equilibrio es **dependiente de la frecuencia**. Un Halcón prospera solo cuando los Halcones son *raros* (explota un mar de Palomas); le va fatal cuando los Halcones son comunes (peleas costosas sin fin). No hay una clasificación de las estrategias libre de contexto — "¿cuál es mejor?" es incontestable sin conocer la proporción actual. Ese es el motor que diseccionamos en la Lección 4.
+</Callout>
+
+<Callout variant="warning" title="3. 'Halcón' y 'Paloma' son metáforas, no solo aves">
+El modelo describe *cualquier* contienda de escalar-o-ceder donde escalar es costoso: dos empresas decidiendo si empezar una guerra de precios, dos naciones en una frontera, dos negociadores aguantando, dos plantas compitiendo por crecer altas. Dondequiera que un premio valioso pueda ganarse por la agresión pero la agresión mutua sea ruinosa, alguna fracción V/C jugará duro. Los animales son solo la ilustración más clara.
+</Callout>
+
+## Recuerdo espaciado: de vuelta a la prueba de invasión
+
+<MCQ
+  client:visible
+  question="Recuerda la prueba de invasión de la lección anterior: la estrategia I es una EEE si para todo mutante J, o bien E(I,I) > E(J,I), O BIEN [E(I,I) = E(J,I) Y E(I,J) > E(J,J)]. En el mundo de pelea costosa (C > V), ¿qué línea de la prueba explica por qué el Halcón puro FALLA en ser una EEE?"
+  options={[
+    { text: "Falla la primera condición: E(Halcón,Halcón) = (V−C)/2 NO es mayor que E(Paloma,Halcón) = 0 — de hecho es menor — y como una multitud de Halcones ni siquiera es una mejor respuesta a sí misma, el desempate nunca tiene ocasión", correct: true },
+    { text: "Falla el desempate: E(Halcón,Halcón) = E(Paloma,Halcón), y luego E(Halcón,Paloma) < E(Paloma,Paloma)", correct: false },
+    { text: "Ambas condiciones pasan, pero el Halcón falla una regla de estabilidad aparte, exclusiva de este juego", correct: false },
+    { text: "La prueba no se aplica a estrategias puras, solo a las mixtas", correct: false },
+  ]}
+  explanation="Alinea los números. Cuando C > V, E(Halcón,Halcón) = (V−C)/2 < 0, mientras que la Paloma mutante gana E(Paloma,Halcón) = 0. Así que E(Halcón,Halcón) < E(Paloma,Halcón) — la primera condición (mejor respuesta estricta a sí misma) falla de plano, y al mutante de hecho le va MEJOR frente a la multitud de Halcones que a los residentes. El desempate (segunda línea) solo importa cuando la primera línea es un EMPATE, es decir, cuando E(I,I) = E(J,I); aquí es una pérdida estricta, no un empate, así que nunca llegamos a él. La Paloma invade estrictamente. La prueba de invasión sí se aplica a estrategias puras — el Halcón puro es simplemente una estrategia que la falla."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Repaso
+
+Ahora dominas el juego insignia de principio a fin: desde cuatro frases sobre quién pelea con quién, a una matriz de pagos, a la prueba de invasión, a la fracción estable exacta $p^* = V/C$ y la aptitud que gana — y el hecho aleccionador de que este punto estable desperdicia aptitud que la población no puede recuperar.
+
+<MindMap
+  client:visible
+  title="Halcón–Paloma en un mapa"
+  outlineLabel="Esquema"
+  root={{
+    label: "Juego Halcón–Paloma",
+    children: [
+      {
+        label: "Montaje",
+        children: [
+          { label: "Premio que vale V; perder una pelea cuesta C" },
+          { label: "El Halcón siempre pelea; la Paloma se exhibe y luego huye" },
+          { label: "Matriz (para la fila): H-vs-H=(V−C)/2, H-vs-P=V, P-vs-H=0, P-vs-P=V/2" },
+        ],
+      },
+      {
+        label: "Caso 1: V > C (pelea barata)",
+        children: [
+          { label: "(V−C)/2 > 0" },
+          { label: "E(Halcón,Halcón) > E(Paloma,Halcón): el Halcón puro es la EEE" },
+          { label: "Ejemplo V=8, C=4 → el Halcón gana 2 > 0" },
+        ],
+      },
+      {
+        label: "Caso 2: C > V (pelea costosa)",
+        children: [
+          { label: "Todo-Halcones invadido por Paloma (0 > (V−C)/2)" },
+          { label: "Todo-Palomas invadido por Halcón (V > V/2)" },
+          { label: "Ninguna pura → la EEE es MIXTA" },
+        ],
+      },
+      {
+        label: "La EEE mixta",
+        children: [
+          { label: "Iguala W_H(p) = W_D(p), resuelve: p* = V/C" },
+          { label: "V=6, C=10 → 60% Halcones; V=4, C=12 → 33%" },
+          { label: "Dependiente de la frecuencia: el Halcón gana solo cuando es raro" },
+        ],
+      },
+      {
+        label: "Estabilidad ≠ optimalidad",
+        children: [
+          { label: "Pago de la EEE = V(C−V)/(2C); V=6,C=10 → 1.2" },
+          { label: "Todo-Palomas ganaría V/2 = 3, pero es invadible" },
+          { label: "Población atrapada quemando aptitud en peleas" },
+        ],
+      },
+      {
+        label: "Dos lecturas de p*",
+        children: [
+          { label: "Un animal aleatorizando (estrategia mixta)" },
+          { label: "Dos castas fijas coexistiendo (polimorfismo)" },
+          { label: "Mismo estado, mismos pagos — la Lección 3 las separa" },
+        ],
+      },
+    ],
+  }}
+/>
+
+<Quiz
+  client:visible
+  questionLabel="Pregunta"
+  ofLabel="de"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  nextLabel="Siguiente"
+  backLabel="Atrás"
+  questions={[
+    {
+      question: "En la matriz de pagos de Halcón–Paloma, ¿qué gana un Halcón en promedio cuando se encuentra con otro Halcón?",
+      correct: 0,
+      options: [
+        "(V − C)/2 — gana V o paga C, cada uno con probabilidad 1/2",
+        "V — siempre se lleva el recurso",
+        "V/2 — los dos Halcones se reparten el premio",
+        "−C — siempre pierde la pelea",
+      ],
+      explanation: "Un encuentro Halcón-contra-Halcón es una pelea real con un ganador (V) y un perdedor herido (−C), cada uno igual de probable, así que el pago esperado es (V + (−C))/2 = (V − C)/2. Esta es la única celda que puede ser negativa, y es la razón de que el modelo entero tenga dos regímenes.",
+    },
+    {
+      question: "¿Cuándo es el Halcón puro una estrategia evolutivamente estable?",
+      correct: 0,
+      options: [
+        "Cuando V > C — pelear es barato, así que (V−C)/2 > 0 = E(Paloma,Halcón), y ninguna Paloma puede invadir",
+        "Cuando C > V — las peleas costosas mantienen fuera a las Palomas",
+        "Siempre — la agresión es la ganadora por defecto en cualquier contienda",
+        "Nunca — una Paloma siempre puede invadir una población de todo Halcones",
+      ],
+      explanation: "El Halcón puro es la EEE exactamente cuando V > C. Entonces E(Halcón,Halcón) = (V−C)/2 > 0, mientras que una Paloma mutante gana E(Paloma,Halcón) = 0, así que la primera condición de invasión se cumple estrictamente y las Palomas quedan excluidas. Cuando C > V esa desigualdad se invierte y las Palomas invaden, así que el Halcón puro es estable solo en el mundo de pelea barata.",
+    },
+    {
+      question: "Un recurso vale V = 5 y perder una pelea cuesta C = 20. ¿Qué fracción de la población juega Halcón en la EEE, y muestra la aritmética?",
+      correct: 0,
+      options: [
+        "25% — p* = V/C = 5/20 = 0.25, así que un cuarto son Halcones y tres cuartos Palomas",
+        "75% — porque las Palomas son solo 5/20 de la población",
+        "50% — una EEE mixta siempre se reparte a partes iguales",
+        "400% — p* = C/V = 20/5",
+      ],
+      explanation: "Como C = 20 > V = 5, la EEE es mixta y p* = V/C = 5/20 = 1/4 = 0.25, así que 25% Halcones y 75% Palomas. Pelear cuesta cuatro veces lo que vale el premio, así que solo un cuarto de la población puede permitirse la agresión antes de que las colisiones Halcón-contra-Halcón arrastren su pago por debajo del de las Palomas. Fíjate en que la fórmula es V/C, nunca C/V (que superaría 1 y no tendría sentido como fracción).",
+    },
+    {
+      question: "¿Por qué la EEE de Halcón–Paloma es un caso de 'estabilidad ≠ optimalidad'?",
+      correct: 0,
+      options: [
+        "La población se asienta en V/C Halcones ganando V(C−V)/(2C), pero un mundo de todo Palomas haría ganar más a cada individuo (V/2) — aunque ese mundo mejor es invadible, así que la población queda atrapada en el peor, el estable",
+        "La EEE gana más que cualquier otro arreglo, así que es a la vez estable y óptima",
+        "La población nunca alcanza de verdad un punto estable, así que nada es óptimo",
+        "La optimalidad y la estabilidad siempre coinciden en los juegos evolutivos",
+      ],
+      explanation: "En la EEE todos ganan V(C−V)/(2C) — para V=6, C=10 eso es 1.2, frente a 3 en un mundo de todo Palomas. Todos preferirían el mundo pacífico, pero no puede sostenerse: un solo Halcón mutante gana el V completo explotando a las Palomas, arrastrando a la población de vuelta al equilibrio derrochador. La selección optimiza a los individuos frente a sus vecinos, no a la población frente al mundo — así que una estrategia estable puede ser gravemente subóptima.",
+    },
+    {
+      question: "El resultado p* = V/C se describe como 'dependiente de la frecuencia'. ¿Qué significa eso para el éxito de un Halcón?",
+      correct: 0,
+      options: [
+        "A un Halcón le va bien solo cuando los Halcones son raros (explota a muchas Palomas) y mal cuando los Halcones son comunes (peleas costosas sin fin) — no hay clasificación de las estrategias libre de contexto",
+        "Los Halcones siempre superan a las Palomas sin importar cuán común sea cada uno",
+        "El pago de un Halcón es fijo y no depende de la mezcla de la población",
+        "Halcones y Palomas siempre ganan pagos idénticos en cada mezcla posible",
+      ],
+      explanation: "La dependencia de la frecuencia significa que el pago de una estrategia depende de cuán común sea. Un Halcón raro en un mundo lleno de Palomas se apodera de recursos sin oposición y prospera; un Halcón común se encuentra casi siempre con otros Halcones y sangra aptitud en peleas. Precisamente por eso el equilibrio es una mezcla interior — los dos tipos ganan pagos iguales solo en p* = V/C, y lejos de ahí el tipo más raro está favorecido, tirando de la población de vuelta.",
+    },
+    {
+      question: "Calculas p* = V/C para una contienda y obtienes 1,5. ¿Qué ha salido mal?",
+      correct: 0,
+      options: [
+        "V ≥ C, así que la fórmula está fuera de su dominio — pelear es barato, no hay mezcla interior, y la EEE real es el Halcón puro (p* = 1)",
+        "Nada — 1,5 solo significa que el 150% de las contiendas involucran a un Halcón",
+        "Deberías usar p* = C/V en su lugar para obtener una fracción válida",
+        "La población tiene más Halcones que individuos, lo cual está bien en este modelo",
+      ],
+      explanation: "Una probabilidad por encima de 1 es imposible, así que un p* de 1,5 es la fórmula diciéndote que V ≥ C — estás en el régimen de pelea barata donde no hay cruce interior. Ahí, el Halcón puro es la EEE (p* = 1). La fórmula V/C solo es válida cuando C > V; fuera de eso, limita la respuesta al Halcón puro en vez de reportar una fracción mayor que 1.",
+    },
+  ]}
+/>
+
+**Lo siguiente — EEE y Nash: la barra extra.** Has visto una EEE emerger como una mezcla estable; a continuación la situamos con precisión junto al equilibrio de Nash que conoces de la teoría de juegos (toda EEE es un equilibrio de Nash, pero no todo equilibrio de Nash es una EEE), y finalmente separamos las dos lecturas de $p^* = V/C$ — un animal lanzando dados frente a dos tipos fijos viviendo lado a lado.
