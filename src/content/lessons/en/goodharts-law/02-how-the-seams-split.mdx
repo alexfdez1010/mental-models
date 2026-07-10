@@ -1,0 +1,211 @@
+---
+title: "How the Seams Split"
+description: The mechanism of decoupling under pressure — Campbell's Law as Goodhart's twin, why optimising a proxy drags you off-distribution, and the four flavours of Goodhart that name exactly how the number peels away from the truth.
+topic: "en/goodharts-law"
+order: 3
+minutes: 14
+updated: 2026-07-10
+---
+
+import { Callout, MCQ, Categorize, MindMap } from '@/components/react';
+
+Last lesson you met the crime scene: a proxy that tracked its goal faithfully right up until we started *rewarding* it, at which point the two peeled apart. That's the *what*. This lesson is the **how** — the machinery under the hood. Because "the measure stops measuring" isn't magic and it isn't one thing. It's a small family of failure modes, each with its own gear, and once you can name them you stop being surprised by any of them.
+
+We'll do it in three moves: meet Goodhart's less-famous twin (**Campbell's Law**), state the core mechanism in the coldest mechanical terms we can, and then split it into the **four flavours of Goodhart** — the taxonomy that turns "ugh, the metric got gamed" into a precise diagnosis.
+
+<MCQ
+  client:visible
+  pretest
+  question="Before we open the hood — take a guess. When a proxy detaches from its goal under pressure, is it always because someone is cheating?"
+  options={[
+    { text: 'No — some flavours need no cheater at all; plain optimisation plus statistics is enough', correct: true },
+    { text: 'Yes — Goodhart only bites when a person deliberately games the metric' },
+    { text: 'No — it only happens when the metric was badly designed to begin with' },
+  ]}
+  explanation="Hold that thought. A deliberate gamer makes things worse, but two of the four flavours (regressional and extremal) fire with nobody cheating — just optimisation pressure and the ordinary statistics of noise and extremes. Villains are optional; decoupling isn't."
+/>
+
+## Campbell's Law: Goodhart's identical twin
+
+In 1976, the American social scientist **Donald T. Campbell** wrote a sentence that says almost exactly what Goodhart's does, but from inside the world of schools, policing and public policy:
+
+<Callout variant="info" title="Campbell's Law (Donald T. Campbell, 1976)">
+"The more any quantitative social indicator is used for social decision-making, the more subject it will be to corruption pressures and the more apt it will be to distort and corrupt the social processes it is intended to monitor."
+</Callout>
+
+Read it slowly and you'll notice it's *sharper* than the slogan version of Goodhart. Campbell doesn't say a measure flips from "good" to "bad" the instant you target it. He says the corruption grows **the more** the indicator is used for decisions — it's a **dial, not a switch.** A test score that nudges a footnote in a report barely bends. The same score deciding pay, promotions, funding and headlines bends a lot. Same metric; different amount of pressure; different amount of rot.
+
+Think of it as an analogy to material stress. A steel beam holds fine under a light load and snaps under a heavy one — and between those extremes it *flexes* by an amount that scales with the weight. Campbell's Law says a social indicator is that beam, and "how much you use it to decide things" is the weight. The failure isn't binary. It's proportional to two things:
+
+- **How hard you optimise it** — the stakes riding on the number (Campbell's "used for social decision-making").
+- **How gameable it is** — how much cheap slack exists between moving the number and moving the real goal.
+
+<Callout variant="tip" title="Goodhart and Campbell, same coin">
+Goodhart's Law names the *outcome* ("a measure that becomes a target stops being a good measure"). Campbell's Law names the *gradient* ("the harder you lean on the measure, the more it corrupts"). Treat them as one idea with a volume knob: crank the knob and you slide from a trustworthy number to a corrupted one.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Two hospitals both track 'average A&E wait time'. Hospital A publishes it quietly in an annual report. Hospital B ties every manager's bonus to it. What does Campbell's Law predict?"
+  options={[
+    { text: "B's metric will corrupt far more — the failure scales with how hard the indicator drives decisions", correct: true },
+    { text: 'Both corrupt equally, because they use the identical metric' },
+    { text: "Neither corrupts, because wait time is an objective number" },
+  ]}
+  explanation="Campbell's Law is about the gradient. The same indicator bends in proportion to the decision-weight resting on it. B has loaded the beam — expect clock-stopping tricks, reclassifying patients, and 'treated' timestamps that beat the target while the actual wait is unchanged. A, barely leaned on, barely bends."
+/>
+
+## The mechanism, said mechanically
+
+Strip away the stories and here is the engine, in one cold line:
+
+> **Selecting hard on a proxy pulls you off-distribution, and out there the proxy and the goal decouple.**
+
+Unpack it in three beats:
+
+1. **On the natural distribution, proxy and goal are correlated.** Over the ordinary spread of behaviour — the messy, un-optimised middle where the correlation was first measured — high proxy really does tend to mean high goal. That's *why* we trusted the proxy. Test scores tracked learning; A&E timestamps tracked genuine speed; step counts tracked activity.
+
+2. **Optimisation pressure pushes behaviour to the extreme of the proxy.** When the number becomes the prize, effort stops spreading across the natural range and stampedes toward wherever the proxy is highest. You don't get a *typical* high scorer any more; you get the most extreme proxy value the system can manufacture.
+
+3. **Out at that extreme, the old correlation no longer holds.** The relationship between proxy and goal was only ever a local fact about the middle of the distribution. Drag the system to the edge and you leave the region where the correlation was ever true. The proxy is pinned at maximum; the goal has quietly wandered off.
+
+The keystone idea is that a correlation is a **statement about a region**, not a law of nature. "Taller people are heavier" is rock-solid across ordinary humans and useless the moment you optimise — a nine-foot balloon animal is very tall and weighs nothing. Optimisation is precisely a machine for finding the balloon animal: the point that is extreme on your proxy and nowhere near your goal.
+
+<Callout variant="warning" title="The move to remember">
+Every Goodhart failure is the same geometric move: **optimisation drags you off the distribution where the proxy was validated.** The proxy didn't change and nobody necessarily lied — you simply left the neighbourhood where the proxy and the goal happened to travel together.
+</Callout>
+
+<MCQ
+  client:visible
+  question="A recruiter finds that, across normal applicants, typing speed correlates with programming productivity. So they start hiring whoever types fastest. Why does this backfire, mechanically?"
+  options={[
+    { text: 'Optimising typing speed pulls hires to the extreme of that proxy, off the ordinary range where it tracked productivity', correct: true },
+    { text: 'Typing speed was never correlated with productivity in the first place' },
+    { text: 'Fast typists are always worse programmers than slow ones' },
+  ]}
+  explanation="The correlation was real — but only as a local fact about typical applicants. Selecting hard on speed fills the room with speed-typing champions and data-entry specialists, an extreme where the link to programming has evaporated. Same proxy, off-distribution, decoupled."
+/>
+
+## The four flavours of Goodhart
+
+"The metric got gamed" is a lazy diagnosis, because at least four genuinely different things wear that costume. In 2018 **David Manheim and Scott Garrabrant** carved the failure into four **flavours**, and knowing which one you're facing tells you what to actually do about it. Here they are, one everyday example each.
+
+### 1. Regressional Goodhart — the winner's curse of noise
+
+Your proxy is *goal plus noise*: `proxy = goal + luck`. When you crown whoever scores highest on the proxy, you don't just select for a high goal — you also select for a **lucky draw of the noise.** The very top of the proxy is packed with people who were somewhat good *and* somewhat fortunate. Strip the luck away (as reality eventually does) and the winners **regress** toward the mean on the true goal.
+
+**Everyday example:** hiring purely on the single highest interview score. The top scorer is partly the best candidate and partly whoever caught the friendliest room, the questions they'd happened to rehearse, a good night's sleep. On the job — where the luck resets — they slide back toward average. This is regression to the mean wearing a Goodhart hat: nobody cheated, and the proxy still overpromised.
+
+### 2. Extremal Goodhart — the relationship that only holds in the normal range
+
+The proxy tracks the goal beautifully across everyday values, then **breaks at the extreme you push it to.** The link was true in the middle and simply doesn't extend to the edge — and optimisation lives at the edge.
+
+**Everyday example:** "drink water, it's healthy." True across normal intake; push it to the extreme and you reach *water intoxication*, which can kill you. Or: your sleep-tracker rewards long "asleep" readings, so you optimise the score by lying dead still, awake, fooling the sensor — a perfect number attached to zero sleep. The proxy didn't lie in the normal band; you just dragged it somewhere it was never valid.
+
+### 3. Causal Goodhart — pushing a lever that was never connected
+
+You intervene on a proxy that merely **correlated** with the goal, with no causal wire between them. Because there's no lever, pushing the proxy does **nothing** for the goal — you've mistaken a symptom for a cause.
+
+**Everyday example:** taller children tend to have bigger feet, so you buy your kid enormous shoes to make them grow taller. Foot size and height are correlated (both driven by age), but shoe size doesn't *cause* height. You can max the proxy all day; the goal doesn't budge. Causal Goodhart is a **modelling error** — you optimised a correlation you mistook for a cause.
+
+### 4. Adversarial Goodhart — the metric gets an enemy
+
+Now add an agent who **knows your metric and games it on purpose,** often against your interests. They find the cheapest route to a big number and take it, decoupling proxy from goal deliberately and often gleefully.
+
+**Everyday example:** SEO keyword-stuffing — a page crams your search terms not to be useful but to rank. Or teaching to the test: drilling the exact question format so scores rise while understanding doesn't. This is the flavour most people *mean* when they say "Goodhart", because it has a villain — but notice it's only one of four.
+
+<Callout variant="info" title="The four in one breath">
+**Regressional** — top of the proxy over-selects lucky noise. **Extremal** — the link only held in the normal range. **Causal** — you pushed a correlate that isn't a cause. **Adversarial** — someone gamed it on purpose. First two are pure statistics + pressure; the third is a modelling mistake; the fourth adds a strategist.
+</Callout>
+
+<Categorize
+  client:visible
+  question="Diagnose each case. Sort every scenario into the one flavour of Goodhart it best fits."
+  buckets={['Regressional', 'Extremal', 'Causal', 'Adversarial']}
+  items={[
+    { text: 'Promote the single top salesperson of the quarter; next quarter they slump toward average.', bucket: 'Regressional' },
+    { text: 'A student memorises leaked exam answers to ace the test without learning the subject.', bucket: 'Adversarial' },
+    { text: 'Vitamin D helps health, so someone megadoses it and reaches toxic levels.', bucket: 'Extremal' },
+    { text: 'Rich people own more books, so a family buys books hoping it will make them wealthy.', bucket: 'Causal' },
+    { text: 'Pick the fund with the single best one-year return; it reverts to mediocre the next year.', bucket: 'Regressional' },
+    { text: 'A content farm stuffs trending keywords into empty articles to win search rankings.', bucket: 'Adversarial' },
+    { text: 'A weight-loss app rewards low daily calories, so a user starves to a dangerous extreme.', bucket: 'Extremal' },
+    { text: 'CEOs tend to be tall, so someone wears lifts expecting a promotion to follow.', bucket: 'Causal' },
+  ]}
+  explanation="Regressional = the top of a noisy proxy over-selects luck, so winners regress (top salesperson, best one-year fund). Adversarial = a knowing agent games it on purpose (leaked answers, keyword-stuffing). Extremal = the link held mid-range and breaks at the edge you push to (vitamin toxicity, dangerous calorie-cutting). Causal = optimising a mere correlate with no causal lever (books→wealth, height→promotion)."
+/>
+
+## How the four relate
+
+They aren't four unrelated bugs — they line up along a single axis: **how much does the failure need a human doing something wrong?**
+
+| Flavour | One-line mechanism | Needs a gamer? | Everyday example |
+|---|---|---|---|
+| **Regressional** | Top of `goal + noise` over-selects lucky noise → winners regress | **No** | Hiring on the single highest interview score |
+| **Extremal** | Proxy–goal link holds mid-range, breaks at the extreme | **No** | "Drink water for health" → water intoxication |
+| **Causal** | You push a correlate with no causal lever to the goal | **No** (a modelling error) | Big shoes to make a child taller |
+| **Adversarial** | A knowing agent games the metric on purpose | **Yes** | SEO keyword-stuffing; teaching to the test |
+
+Read top to bottom and the "human wrongdoing" required climbs from *none at all* to *a deliberate strategist*:
+
+- **Regressional and extremal fire with nobody misbehaving.** They're what you get from optimisation pressure meeting ordinary statistics — noise at the top, and correlations that don't reach the edge. No intent, no villain, still broken.
+- **Causal is a mistake, not a sin.** Nobody games anything; you simply modelled a correlation as if it were a cause and pushed a disconnected lever. The failure is in your head, not in an adversary.
+- **Adversarial adds a strategist.** Here a mind is actively hunting the gap between proxy and goal and driving a truck through it.
+
+The moral to carry into the rest of the course: **you do not need villains for Goodhart to bite.** Optimisation plus statistics is enough to detach the number from the truth all on its own. But — and this is the hinge into the lessons ahead — **villains make it dramatically worse,** because an adversarial optimiser searches for the decoupling *on purpose* and never gets tired. That's exactly why the deepest cases live inside the **principal–agent problem** we'll open up later: put a self-interested agent between your metric and your goal, and every one of these flavours gets an accelerant.
+
+<MCQ
+  client:visible
+  question="A team insists 'Goodhart's Law only matters when someone is cheating, so honest people are safe.' What's the flaw?"
+  options={[
+    { text: 'Regressional and extremal Goodhart need no cheater — optimisation plus statistics decouples the metric even among saints', correct: true },
+    { text: 'There is no flaw — without a cheater, a proxy can never detach from its goal', correct: false },
+    { text: 'The flaw is that cheating is actually the only one of the four flavours that exists', correct: false },
+  ]}
+  explanation="Only the adversarial flavour needs a gamer. Regressional (lucky noise at the top) and extremal (the link breaking at the edge) fire from pressure and statistics alone, and causal is an honest modelling error. Honesty doesn't immunise you — it just removes one of the four accelerants."
+/>
+
+## Recap
+
+<MindMap
+  client:visible
+  title="How the seams split"
+  root={{
+    label: 'Decoupling under pressure',
+    children: [
+      {
+        label: "Campbell's Law: a dial, not a switch",
+        children: [
+          { label: 'Corruption scales with optimisation pressure' },
+          { label: '…and with how gameable the proxy is' },
+        ],
+      },
+      {
+        label: 'Core mechanism',
+        children: [
+          { label: 'Proxy ~ goal only on the natural distribution' },
+          { label: 'Optimising drags you to the extreme' },
+          { label: 'Off-distribution, the correlation breaks' },
+        ],
+      },
+      {
+        label: 'The four flavours',
+        children: [
+          { label: 'Regressional — lucky noise at the top' },
+          { label: 'Extremal — link breaks at the edge' },
+          { label: 'Causal — pushed a non-causal lever' },
+          { label: 'Adversarial — someone games it on purpose' },
+        ],
+      },
+      {
+        label: 'How they relate',
+        children: [
+          { label: 'First three need no villain' },
+          { label: 'Adversarial adds a strategist — and makes it worse' },
+        ],
+      },
+    ],
+  }}
+/>
+
+You now have the machinery: Campbell's dial tells you the failure is *proportional*, the off-distribution move tells you *why* the seam splits, and the four flavours tell you *which* seam split this time. Next we'll watch all four strut through history in a parade of famous disasters — cobra bounties, clickbait, and the risk models of 2008 — every one of them wearing this same skeleton under the costume.

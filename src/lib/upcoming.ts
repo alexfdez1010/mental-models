@@ -52,13 +52,14 @@
  * `ergodicity-and-the-time-average`, `no-free-lunch-theorem`,
  * `common-knowledge-and-coordination`,
  * `spontaneous-order-and-the-knowledge-problem`,
- * `evolutionarily-stable-strategies`, …)
+ * `evolutionarily-stable-strategies`, `goodharts-law`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * systems-thinking/psychology/economics (`goodharts-law`, 47),
- * probability/psychology (`information-cascades-and-herding`, 48) and
- * decision-making/probability (`the-value-of-information`, 49).
+ * probability/psychology (`information-cascades-and-herding`, 48),
+ * decision-making/probability (`the-value-of-information`, 49),
+ * economics/systems-thinking/strategy (`creative-destruction`, 50) and
+ * biology-evolution/systems-thinking (`punctuated-equilibrium`, 51).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -97,34 +98,16 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `spontaneous-order-and-
-  // the-knowledge-problem` (45) and `evolutionarily-stable-strategies` (46) —
-  // have graduated and been removed; their topic MDX is now the record. The
-  // lowest-order entry below (`goodharts-law`, order 47) is built next. The
-  // remaining queue finishes the expert tier and keeps the breadth tag-diverse,
-  // spanning systems-thinking/psychology/economics (`goodharts-law`),
-  // probability/psychology (`information-cascades-and-herding`) and
-  // decision-making/probability (`the-value-of-information`) so no single
+  // The earlier expert rungs — `externalities` (20) … `evolutionarily-stable-
+  // strategies` (46) and `goodharts-law` (47) — have graduated and been removed;
+  // their topic MDX is now the record. The lowest-order entry below
+  // (`information-cascades-and-herding`, order 48) is built next. The remaining
+  // queue keeps the expert-tier breadth tag-diverse, spanning
+  // probability/psychology (`information-cascades-and-herding`),
+  // decision-making/probability (`the-value-of-information`),
+  // economics/systems-thinking/strategy (`creative-destruction`) and
+  // biology-evolution/systems-thinking (`punctuated-equilibrium`) so no single
   // roadmap tag races ahead.
-  {
-    slug: 'goodharts-law',
-    icon: '🎯',
-    difficulty: 'expert',
-    order: 47,
-    accent: 'brand',
-    title: {
-      en: "Goodhart's Law",
-      es: 'La Ley de Goodhart',
-    },
-    description: {
-      en: 'When a measure becomes a target, it stops being a good measure. Point an incentive at a proxy — test scores, clicks, arrests, hospital wait-times — and people optimise the proxy while the real goal it stood for quietly rots. Why every metric you reward eventually lies to you, and what to do about it.',
-      es: 'Cuando una medida se convierte en objetivo, deja de ser una buena medida. Apunta un incentivo a un indicador — notas de examen, clics, detenciones, tiempos de espera hospitalarios — y la gente optimiza el indicador mientras el objetivo real que representaba se pudre en silencio. Por qué toda métrica que premias acaba mintiéndote, y qué hacer al respecto.',
-    },
-    dependencies: ['incentives', 'feedback-loops', 'principal-agent-problem'],
-    tags: ['systems-thinking', 'psychology', 'economics'],
-    buildNotes:
-      "Goodhart's Law — the expert systems-thinking/psychology/economics rung: \"When a measure becomes a target, it ceases to be a good measure\" (Charles Goodhart 1975; sharpened by Marilyn Strathern). Assumes incentives (agents optimise what is rewarded), feedback-loops (proxy optimisation feeds back and corrupts the signal) and principal-agent-problem (the measured party knows things the measurer does not, and games the gap). Organising idea: a metric is only ever a PROXY for the thing you actually care about; the two are correlated in the wild, but the moment you apply optimisation pressure to the proxy, the correlation you relied on breaks (the proxy and the goal come apart) and you get the number without the substance. Sections, each with mechanism + worked example: proxy vs goal and why we ever use proxies (the real target is unmeasurable/slow; the proxy is cheap and correlated — teaching→test scores, health→wait times, safety→reported incidents); the mechanism of decoupling under pressure (Campbell's Law, the four types in the Manheim/Garrabrant taxonomy — regressional, extremal, causal, adversarial Goodhart — kept intuitive, not heavy); flagship worked cases (the Soviet nail factory: reward by weight → one giant useless nail, reward by number → millions of tiny useless tacks; the cobra effect / Hanoi rats bounty breeding the very pest; teaching to the test; sales quotas and sandbagging; clicks/engagement metrics and clickbait; hospital A&E four-hour targets; arrest/ticket quotas; citation counts and salami-slicing science; VaR and risk metrics gamed pre-2008); why it is a SPECIAL CASE of incentives + principal-agent (the agent optimises the letter of the reward, not its spirit) and how it forms a feedback loop that erodes the metric's own validity. Pitfalls & where the model lies: it is NOT an argument against measuring at all (flying blind is worse) — it is an argument against naive single-metric targets under high stakes; not every measure collapses (low-stakes or hard-to-game measures survive; the failure scales with optimisation pressure and gameability); over-quoting it becomes a lazy excuse to dodge accountability. Fixes: use baskets of metrics that are hard to game together, hold some targets loosely, keep humans in the loop / qualitative audit, reward outcomes not proxies where possible, keep the true goal explicit, and expect to rotate metrics as they decay. Build an interactive island (a \"Goodhart pressure dial\": a scatter/bar showing a true-quality variable and a measured PROXY that track together at low pressure; crank an \"optimisation pressure / stakes\" slider and watch agents pour effort into the gap — the proxy shoots up while true quality flatlines or falls, the correlation coefficient between them visibly decaying toward zero, with a readout of measured score vs real value vs the wasted gaming effort). Plus a Categorize (sort cases into measure-still-valid vs measure-corrupted, or the Goodhart types) and MatchConcepts (proxy, target, Campbell's Law, gaming, Goodhart's Law), Quiz + MindMap. en + es twin.",
-  },
   {
     slug: 'information-cascades-and-herding',
     icon: '🐑',
@@ -162,6 +145,48 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['decision-making', 'probability'],
     buildNotes:
       'The Value of Information (VOI) — the expert decision-making/probability rung from decision analysis (Howard 1966; the expected value of perfect and of sample/imperfect information). Assumes bayesian-updating (revising beliefs from a test result), thinking-in-probabilities (expected value over states) and asymmetry-and-optionality (the payoff to knowing is convex — you keep the good news and act on it, discard the bad). Organising idea — the single sharpest question in applied decision-making: information has value ONLY if it could change your decision; if you would do the same thing whatever the test says, the test is worth exactly zero no matter how accurate or interesting it is. Value comes from AVERTED MISTAKES, so VOI = (expected payoff of the best decision WITH the information) minus (expected payoff of the best decision WITHOUT it), and it is always >= 0 and always <= the cost of being wrong (the loss you could avoid). Sections, each mechanism + worked example: the core definition and the "would it change my action?" test (a doctor who will operate regardless gains nothing from the scan); Expected Value of PERFECT Information (EVPI) as the ceiling — what a clairvoyant is worth — worked with a real payoff table (e.g. drill-the-well / launch-the-product decision across two states, compute EV with clairvoyance minus EV of the best prior action); Expected Value of SAMPLE/IMPERFECT Information (EVSI) for a real, noisy test — fold in sensitivity/specificity via Bayes, compute the pre-posterior expected value, and note EVSI <= EVPI always; the net value = EVSI minus the cost/price of the test, and the decision to gather info is itself an expected-value decision; why VOI is highest when you are genuinely UNCERTAIN and the decision is CLOSE and the stakes are HIGH (a lopsided prior, a trivial decision, or an unactionable answer all drive VOI to zero); the tie to optionality (information is a real option — the value of learning before committing is the value of keeping your choice open). Pitfalls & where the model lies: gathering information is not free (money, time, and the cost of DELAY — sometimes acting now beats a better-informed action later); more data past the decision threshold is pure waste (analysis paralysis, the vanity metric, the study that cannot change the plan); ignoring the cost of the WRONG test (a very accurate test of the wrong question is worthless); base-rate and reliability errors make people wildly overvalue noisy tests; and VOI assumes you will actually ACT on the answer — information you will rationalise away is worth nothing. Build an interactive island (a "value-of-information lab": a two-action decision under two uncertain states with an editable payoff table and a prior-probability slider; a test with adjustable RELIABILITY and COST; show the expected value of acting on the prior alone, the EVPI ceiling (perfect clairvoyance), and the EVSI of the noisy test, with the net value = EVSI minus cost — and a readout that flips to "this test cannot change your decision → value 0" whenever the prior is lopsided enough or the decision one-sided, so the learner SEES value collapse to zero as the decision stops being close). Plus a Categorize (sort scenarios into worth-testing vs test-is-worthless, i.e. could-change-the-action vs could-not) and MatchConcepts (value of information, EVPI, EVSI, the change-my-action test, analysis paralysis), Quiz + MindMap. en + es twin.',
+  },
+  // ── Appended to keep the queue tag-diverse (economics, biology-evolution) ────
+  // With `goodharts-law` graduated, the queue had dropped to two probability/
+  // psychology/decision-making entries; these two add the missing economics and
+  // biology-evolution breadth at the expert tier so no single tag races ahead.
+  {
+    slug: 'creative-destruction',
+    icon: '🌪️',
+    difficulty: 'expert',
+    order: 50,
+    accent: 'accent',
+    title: {
+      en: 'Creative Destruction',
+      es: 'Destrucción Creativa',
+    },
+    description: {
+      en: 'Growth does not add to the old order — it dismantles it. Every genuinely new product, method, or business model must destroy the incumbent it replaces, so progress and ruin are the same event seen from two sides. Why the healthiest economies are the ones most willing to let their winners die.',
+      es: 'El crecimiento no se suma al orden viejo: lo desmantela. Todo producto, método o modelo de negocio de verdad nuevo tiene que destruir al titular que reemplaza, así que el progreso y la ruina son el mismo suceso visto por dos caras. Por qué las economías más sanas son las más dispuestas a dejar morir a sus ganadores.',
+    },
+    dependencies: ['supply-and-demand', 'feedback-loops', 'moats'],
+    tags: ['economics', 'systems-thinking', 'strategy'],
+    buildNotes:
+      "Creative destruction — the expert economics/systems-thinking rung from Joseph Schumpeter (1942, borrowing from Marx and Sombart): the \"process of industrial mutation that incessantly revolutionises the economic structure from within, incessantly destroying the old one, incessantly creating a new one.\" Assumes supply-and-demand (new entrants undercut incumbents on price/quality and shift the whole curve), feedback-loops (innovation compounds and reinvests, and the destruction of incumbents frees capital/labour that fuels the next wave) and moats (what protects an incumbent, and why every moat is eventually breached). Organising idea: economic growth is NOT incremental accumulation on top of a stable base — it is a gale of innovation that must KILL the thing it replaces. The car destroyed the horse-and-carriage trade, streaming destroyed video rental, the transistor destroyed the vacuum-tube industry, digital photography destroyed Kodak (which invented it). Progress and ruin are two faces of one event. Sections, each mechanism + worked example: the core claim and why it is destruction, not addition (the new S-curve rises only as the old one collapses; jobs, firms, and skills are genuinely destroyed, not merely displaced upward); the entrepreneur and the innovation as the engine (new goods, new methods, new markets, new supply chains, new organisational forms — Schumpeter's five kinds of innovation); why incumbents lose despite every advantage (the incumbent's curse / disruption: existing moats, cash, and customers become anchors; the innovator's dilemma where serving today's best customers rationally blinds you to the low-end entrant); the wave/cycle structure (Kondratiev-style long waves; booms of building and busts of clearing are part of one process, not a malfunction); the tie to moats and Red Queen (no moat is permanent; standing still is falling behind). Worked cases: Kodak, Blockbuster vs Netflix, Nokia/BlackBerry vs smartphone, gas lamps → electric light, mainframe → PC → cloud, ICE cars → EVs. Pitfalls & where the model lies: it is NOT a cheer for destruction for its own sake (the human cost of displaced workers is real and is the core policy tension — creative destruction explains growth but does not by itself justify laissez-faire; safety nets and retraining are the honest counterweight); not all disruption is creative (some \"disruption\" is just value extraction, rent-seeking, or hype with no productivity gain); survivorship bias makes us over-celebrate the winners and forget the destroyed; and incumbents sometimes DO adapt (the model is a strong tendency, not an iron law — some firms cross the chasm). Fixes/uses: for a strategist, assume your current moat is a countdown clock and cannibalise yourself before someone else does; for a policymaker, cushion the people, not the failing firms; for an investor, distinguish durable disruption from fads. Build an interactive island (a \"creative-destruction wave\": overlapping S-curves where a rising entrant technology's adoption curve climbs as the incumbent's installed base and profits collapse, with a slider for the entrant's improvement rate and a readout of the crossover point where the incumbent is doomed — plus the freed resources flowing into the next curve). Plus a Categorize (sort changes into genuinely-creative-destruction vs mere-churn/rent-seeking, or disrupted-incumbent vs adapted-incumbent) and MatchConcepts (creative destruction, innovator's dilemma, incumbent's curse, Schumpeterian rent, long wave), Quiz + MindMap. en + es twin.",
+  },
+  {
+    slug: 'punctuated-equilibrium',
+    icon: '🌋',
+    difficulty: 'expert',
+    order: 51,
+    accent: 'brand',
+    title: {
+      en: 'Punctuated Equilibrium',
+      es: 'Equilibrio Puntuado',
+    },
+    description: {
+      en: 'Change is not a steady drip — it is long stretches of almost nothing, snapped by sudden bursts of everything. Species, technologies, companies, and even your own habits mostly sit still, then lurch. Why "stable for ages, then all at once" is the real shape of history, and how to read the stillness before the lurch.',
+      es: 'El cambio no es un goteo constante: son largos tramos de casi nada, rotos por estallidos súbitos de todo. Las especies, las tecnologías, las empresas y hasta tus propios hábitos permanecen sobre todo quietos, y luego pegan un tirón. Por qué «estable durante siglos, y luego de golpe» es la forma real de la historia, y cómo leer la quietud antes del tirón.',
+    },
+    dependencies: ['natural-selection', 'fitness-landscapes', 'path-dependence-and-lock-in'],
+    tags: ['biology-evolution', 'systems-thinking'],
+    buildNotes:
+      'Punctuated equilibrium — the expert biology-evolution/systems-thinking rung from Niles Eldredge & Stephen Jay Gould (1972): most species show long periods of morphological STASIS interrupted by geologically rapid bursts of change, usually at speciation events — not the slow, uniform gradualism Darwin\'s successors assumed. Assumes natural-selection (the mechanism of adaptive change), fitness-landscapes (stasis = sitting on a local peak; a punctuation = a jump to a new peak when the landscape shifts or a barrier is crossed) and path-dependence-and-lock-in (why systems get stuck in stasis — established structure, developmental constraints, and network effects resist change until something forces it). Organising idea: change is lumpy, not smooth. Long equilibria (stability held in place by stabilising selection, canalisation, and interconnected constraints) are punctuated by fast transitions (triggered by environmental shocks, isolation, or a threshold being crossed), so the fossil record\'s "gaps" are data, not just missing pages. The pattern generalises far beyond biology — it is a systems model of how complex, locked-in systems actually change. Sections, each mechanism + worked example: stasis and why systems resist change (stabilising selection, developmental/organisational constraints, "if it ain\'t broke"); the punctuation and its triggers (a shock removes the constraint, a small isolated population can shift fast, a threshold tips — tie to critical-mass); why the record LOOKS gappy and why that is expected, not a failure (rapid transitions in small peripheral populations leave few fossils); the fitness-landscape reading (stuck on a local peak, then a valley-crossing to a higher one); the transfer to non-biological systems — technology (long incumbent plateaus then abrupt platform shifts), companies and institutions (Tushman & Romanelli\'s punctuated-equilibrium model of organisational change: long convergent periods broken by brief revolutionary reorientations), scientific paradigms (Kuhn: normal science punctuated by revolutions), personal habit change, and geopolitics. Worked cases: Cambrian explosion, the horseshoe crab\'s hundreds of millions of years of stasis, QWERTY/technology plateaus, corporate turnarounds, the abruptness of political revolutions. Pitfalls & where the model lies: it is NOT anti-Darwinian and NOT saltationism — the "sudden" bursts are still gradual by human timescales (thousands of years), just fast geologically; punctuated equilibrium and gradualism are not either/or, both occur and the debate is about relative frequency; do not over-apply it as an excuse to wait passively for a magic punctuation (in human systems you can sometimes ENGINEER the conditions for a jump); and beware hindsight — a "sudden" lurch often had a long invisible build-up of pressure (tie to the stillness hiding accumulating tension). Fixes/uses: read the stasis as stored, not absent, pressure; look for the constraint that must break for change to happen; in organisations, recognise that incremental tuning eventually needs a punctuated reorientation. Build an interactive island (a "stasis-and-lurch" timeline/trait-tracker: a lineage\'s trait value stays flat across long spans then jumps at punctuation events, with a slider for environmental-stability vs shock-frequency and a fitness-landscape inset showing the population pinned on a local peak until a shock lets it cross a valley to a new peak — readout contrasting the near-zero change during stasis with the burst rate during punctuations). Plus a Categorize (sort scenarios into stasis vs punctuation, or gradualist-change vs punctuated-change) and MatchConcepts (stasis, punctuation, stabilising selection, valley-crossing, peripheral isolate), Quiz + MindMap. en + es twin.',
   },
 ];
 

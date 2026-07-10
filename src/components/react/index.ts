@@ -246,3 +246,6 @@ export type { DispersedKnowledgeMarketProps } from '@/components/react/Dispersed
 
 export { HawkDoveLab, default as HawkDoveLabDefault } from '@/components/react/HawkDoveLab';
 export type { HawkDoveLabProps } from '@/components/react/HawkDoveLab';
+
+export { GoodhartPressureDial, default as GoodhartPressureDialDefault } from '@/components/react/GoodhartPressureDial';
+export type { GoodhartPressureDialProps } from '@/components/react/GoodhartPressureDial';

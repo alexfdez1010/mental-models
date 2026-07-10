@@ -1,0 +1,241 @@
+---
+title: "Cómo se abren las costuras"
+description: "El mecanismo del desacoplamiento bajo presión: la Ley de Campbell (Campbell's Law) como gemela de Goodhart, por qué optimizar un proxy te arrastra fuera de la distribución y los cuatro sabores de Goodhart que nombran exactamente cómo el número se despega de la verdad."
+topic: "es/goodharts-law"
+order: 3
+minutes: 14
+updated: 2026-07-10
+---
+
+import { Callout, MCQ, Categorize, MindMap } from '@/components/react';
+
+En la lección anterior visteis la escena del crimen: un proxy que seguía fielmente a su objetivo justo hasta que empezamos a *premiarlo*, momento en el que ambos se despegaron. Ese es el *qué*. Esta lección es el **cómo** — la maquinaria bajo el capó. Porque «la medida deja de medir» no es magia ni es una sola cosa. Es una pequeña familia de modos de fallo, cada uno con su propio engranaje, y en cuanto sabes nombrarlos dejas de sorprenderte por ninguno.
+
+Lo haremos en tres movimientos: conocer a la gemela menos famosa de Goodhart (la **Ley de Campbell (Campbell's Law)**), enunciar el mecanismo central en los términos más mecánicos y fríos que podamos, y luego partirlo en los **cuatro sabores de Goodhart** — la taxonomía que convierte «puf, se ha jugado con la métrica» en un diagnóstico preciso.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  question="Antes de abrir el capó — adivina. Cuando un proxy se despega de su objetivo bajo presión, ¿siempre es porque alguien hace trampa?"
+  options={[
+    { text: 'No — algunos sabores no necesitan ningún tramposo; basta la simple optimización más la estadística', correct: true },
+    { text: 'Sí — Goodhart solo muerde cuando una persona juega con la métrica a propósito' },
+    { text: 'No — solo ocurre cuando la métrica estaba mal diseñada desde el principio' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Guárdate esa idea. Un tramposo empeora las cosas, pero dos de los cuatro sabores (regresional y extremal) se disparan sin que nadie haga trampa: solo hace falta presión de optimización y la estadística corriente del ruido y los extremos. Los villanos son opcionales; el desacoplamiento no."
+/>
+
+## La Ley de Campbell: la gemela idéntica de Goodhart
+
+En 1976, el científico social estadounidense **Donald T. Campbell** escribió una frase que dice casi exactamente lo mismo que la de Goodhart, pero desde el mundo de las escuelas, la policía y las políticas públicas:
+
+<Callout variant="info" title="La Ley de Campbell (Donald T. Campbell, 1976)">
+«Cuanto más se use un indicador social cuantitativo para la toma de decisiones sociales, más sujeto estará a presiones de corrupción y más tenderá a distorsionar y corromper los procesos sociales que pretende monitorizar.»
+</Callout>
+
+Léela despacio y verás que es *más afilada* que la versión eslogan de Goodhart. Campbell no dice que una medida salte de «buena» a «mala» en el instante en que la conviertes en objetivo. Dice que la corrupción crece **cuanto más** se usa el indicador para decidir: es un **dial, no un interruptor.** Una nota de examen que apenas mueve una nota al pie de un informe apenas se dobla. La misma nota decidiendo sueldos, ascensos, financiación y titulares se dobla mucho. Misma métrica; distinta presión; distinta cantidad de podredumbre.
+
+Piénsalo como una analogía con el estrés de los materiales. Una viga de acero aguanta bien bajo poca carga y se parte bajo mucha — y entre esos extremos se *flexa* una cantidad que escala con el peso. La Ley de Campbell dice que un indicador social es esa viga, y «cuánto lo usas para decidir cosas» es el peso. El fallo no es binario. Es proporcional a dos cosas:
+
+- **Cuán fuerte lo optimizas** — lo que hay en juego sobre el número (el «usado para la toma de decisiones sociales» de Campbell).
+- **Cuán manipulable es** — cuánta holgura barata existe entre mover el número y mover el objetivo real.
+
+<Callout variant="tip" title="Goodhart y Campbell, la misma moneda">
+La Ley de Goodhart nombra el *resultado* («una medida que se vuelve objetivo deja de ser una buena medida»). La Ley de Campbell nombra el *gradiente* («cuanto más te apoyas en la medida, más se corrompe»). Trátalas como una sola idea con un mando de volumen: sube el mando y te deslizas de un número fiable a uno corrompido.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Dos hospitales miden el «tiempo medio de espera en urgencias». El hospital A lo publica discretamente en una memoria anual. El hospital B ata el bonus de cada gestor a esa cifra. ¿Qué predice la Ley de Campbell?"
+  options={[
+    { text: 'La métrica de B se corromperá mucho más — el fallo escala con lo fuerte que el indicador impulsa las decisiones', correct: true },
+    { text: 'Ambas se corrompen por igual, porque usan la métrica idéntica' },
+    { text: 'Ninguna se corrompe, porque el tiempo de espera es un número objetivo' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="La Ley de Campbell va del gradiente. El mismo indicador se dobla en proporción al peso de decisión que descansa sobre él. B ha cargado la viga: espera trucos para parar el reloj, reclasificar pacientes y marcas de «atendido» que baten el objetivo mientras la espera real no cambia. A, casi sin presión, apenas se dobla."
+/>
+
+## El mecanismo, dicho mecánicamente
+
+Quita las historias y aquí está el motor, en una línea fría:
+
+> **Seleccionar con fuerza sobre un proxy te arrastra fuera de la distribución, y ahí fuera el proxy y el objetivo se desacoplan.**
+
+Desglosa en tres tiempos:
+
+1. **En la distribución natural, proxy y objetivo están correlacionados.** Sobre el reparto corriente de la conducta —ese centro desordenado y sin optimizar donde se midió la correlación por primera vez— un proxy alto de verdad tiende a significar un objetivo alto. Por *eso* nos fiábamos del proxy. Las notas seguían al aprendizaje; las marcas de urgencias seguían a la rapidez genuina; los pasos seguían a la actividad.
+
+2. **La presión de optimización empuja la conducta al extremo del proxy.** Cuando el número se vuelve el premio, el esfuerzo deja de repartirse por el rango natural y estampida hacia donde el proxy sea más alto. Ya no obtienes a un *típico* buen puntuador; obtienes el valor de proxy más extremo que el sistema pueda fabricar.
+
+3. **Ahí, en ese extremo, la vieja correlación ya no se sostiene.** La relación entre proxy y objetivo solo fue nunca un hecho local sobre el centro de la distribución. Arrastra el sistema al borde y sales de la región donde la correlación fue cierta alguna vez. El proxy queda clavado en el máximo; el objetivo se ha marchado en silencio.
+
+La idea clave es que una correlación es una **afirmación sobre una región**, no una ley de la naturaleza. «La gente más alta pesa más» es sólida como una roca entre humanos corrientes e inútil en cuanto optimizas: un globo alargado de tres metros es altísimo y no pesa nada. La optimización es precisamente una máquina para encontrar el globo alargado: el punto que es extremo en tu proxy y no está ni cerca de tu objetivo.
+
+<Callout variant="warning" title="El movimiento que hay que recordar">
+Todo fallo de Goodhart es el mismo movimiento geométrico: **la optimización te arrastra fuera de la distribución donde el proxy fue validado.** El proxy no cambió y nadie mintió necesariamente — simplemente saliste del barrio donde el proxy y el objetivo casualmente viajaban juntos.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Un reclutador descubre que, entre los candidatos normales, la velocidad de mecanografía correlaciona con la productividad programando. Así que empieza a contratar a quien escriba más rápido. ¿Por qué sale mal, mecánicamente?"
+  options={[
+    { text: 'Optimizar la velocidad de mecanografía arrastra las contrataciones al extremo de ese proxy, fuera del rango corriente donde seguía a la productividad', correct: true },
+    { text: 'La velocidad de mecanografía nunca estuvo correlacionada con la productividad, para empezar' },
+    { text: 'Quienes teclean rápido siempre son peores programadores que quienes teclean lento' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="La correlación era real, pero solo como hecho local sobre candidatos típicos. Seleccionar con fuerza por velocidad llena la sala de campeones de mecanografía y especialistas en introducir datos, un extremo donde el vínculo con programar se ha evaporado. Mismo proxy, fuera de la distribución, desacoplado."
+/>
+
+## Los cuatro sabores de Goodhart
+
+«Se ha jugado con la métrica» es un diagnóstico perezoso, porque al menos cuatro cosas genuinamente distintas visten ese disfraz. En 2018, **David Manheim y Scott Garrabrant** trocearon el fallo en cuatro **sabores**, y saber a cuál te enfrentas te dice qué hacer de verdad al respecto. Aquí están, con un ejemplo cotidiano cada uno.
+
+### 1. Goodhart regresional (regressional) — la maldición del ganador por ruido
+
+Tu proxy es *objetivo más ruido*: `proxy = objetivo + suerte`. Cuando coronas a quien más puntúa en el proxy, no solo seleccionas un objetivo alto — también seleccionas una **tirada afortunada del ruido.** La cima del proxy está atestada de gente que era algo buena *y* algo afortunada. Quita la suerte (como la realidad acaba haciendo) y los ganadores **regresan** hacia la media en el objetivo real.
+
+**Ejemplo cotidiano:** contratar solo por la puntuación de entrevista más alta. Quien más puntúa es en parte el mejor candidato y en parte quien pilló la sala más amable, las preguntas que casualmente había ensayado, una buena noche de sueño. En el puesto —donde la suerte se reinicia— se desliza hacia la media. Esto es la regresión a la media con sombrero de Goodhart: nadie hizo trampa y el proxy aun así prometió de más.
+
+### 2. Goodhart extremal (extremal) — la relación que solo vale en el rango normal
+
+El proxy sigue al objetivo maravillosamente en los valores cotidianos, y luego **se rompe en el extremo al que lo empujas.** El vínculo era cierto en el centro y sencillamente no se extiende al borde — y la optimización vive en el borde.
+
+**Ejemplo cotidiano:** «bebe agua, es sano». Cierto en la ingesta normal; empújalo al extremo y llegas a la *intoxicación por agua*, que puede matarte. O: tu pulsera de sueño premia lecturas largas de «dormido», así que optimizas la puntuación quedándote inmóvil como un muerto, despierto, engañando al sensor — un número perfecto pegado a cero sueño. El proxy no mintió en la banda normal; solo lo arrastraste a un sitio donde nunca fue válido.
+
+### 3. Goodhart causal (causal) — empujar una palanca que nunca estuvo conectada
+
+Intervienes sobre un proxy que solo **correlacionaba** con el objetivo, sin cable causal entre ambos. Como no hay palanca, empujar el proxy no hace **nada** por el objetivo — has confundido un síntoma con una causa.
+
+**Ejemplo cotidiano:** los niños más altos tienden a tener pies más grandes, así que le compras a tu hijo unos zapatos enormes para que crezca más alto. El tamaño del pie y la altura están correlacionados (ambos empujados por la edad), pero el número de zapato no *causa* la altura. Puedes maximizar el proxy todo el día; el objetivo no se mueve. El Goodhart causal es un **error de modelado** — optimizaste una correlación que confundiste con una causa.
+
+### 4. Goodhart adversarial (adversarial) — la métrica se echa un enemigo
+
+Ahora añade un agente que **conoce tu métrica y la juega a propósito,** a menudo contra tus intereses. Encuentra la ruta más barata hacia un número grande y la toma, desacoplando proxy y objetivo deliberadamente y a menudo con regocijo.
+
+**Ejemplo cotidiano:** el relleno de palabras clave en SEO — una página abarrota tus términos de búsqueda no para ser útil sino para posicionar. O enseñar para el examen: machacar el formato exacto de la pregunta para que suban las notas mientras la comprensión no. Este es el sabor que la mayoría *quiere decir* cuando dice «Goodhart», porque tiene villano — pero fíjate en que es solo uno de cuatro.
+
+<Callout variant="info" title="Los cuatro en un respiro">
+**Regresional** — la cima del proxy sobreselecciona ruido afortunado. **Extremal** — el vínculo solo valía en el rango normal. **Causal** — empujaste un correlato que no es causa. **Adversarial** — alguien lo jugó a propósito. Los dos primeros son pura estadística + presión; el tercero es un error de modelado; el cuarto añade un estratega.
+</Callout>
+
+<Categorize
+  client:visible
+  question="Diagnostica cada caso. Clasifica cada escenario en el único sabor de Goodhart que mejor encaja."
+  buckets={['Regresional', 'Extremal', 'Causal', 'Adversarial']}
+  items={[
+    { text: 'Ascender al mejor vendedor del trimestre; al trimestre siguiente cae hacia la media.', bucket: 'Regresional' },
+    { text: 'Un estudiante memoriza respuestas filtradas del examen para bordarlo sin aprender la materia.', bucket: 'Adversarial' },
+    { text: 'La vitamina D ayuda a la salud, así que alguien se megadosifica y alcanza niveles tóxicos.', bucket: 'Extremal' },
+    { text: 'La gente rica posee más libros, así que una familia compra libros esperando volverse rica.', bucket: 'Causal' },
+    { text: 'Elige el fondo con la mejor rentabilidad a un año; al año siguiente revierte a mediocre.', bucket: 'Regresional' },
+    { text: 'Una granja de contenidos abarrota palabras clave de moda en artículos vacíos para ganar posiciones.', bucket: 'Adversarial' },
+    { text: 'Una app de adelgazamiento premia pocas calorías diarias, así que un usuario ayuna hasta un extremo peligroso.', bucket: 'Extremal' },
+    { text: 'Los directivos tienden a ser altos, así que alguien lleva alzas esperando que llegue un ascenso.', bucket: 'Causal' },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  explanation="Regresional = la cima de un proxy ruidoso sobreselecciona suerte, así que los ganadores regresan (mejor vendedor, mejor fondo a un año). Adversarial = un agente que sabe lo juega a propósito (respuestas filtradas, relleno de palabras clave). Extremal = el vínculo valía en el rango medio y se rompe en el borde al que empujas (toxicidad vitamínica, recorte peligroso de calorías). Causal = optimizar un mero correlato sin palanca causal (libros→riqueza, altura→ascenso)."
+/>
+
+## Cómo se relacionan los cuatro
+
+No son cuatro bichos inconexos: se alinean a lo largo de un solo eje: **¿cuánto necesita el fallo que un humano haga algo mal?**
+
+| Sabor | Mecanismo en una línea | ¿Necesita tramposo? | Ejemplo cotidiano |
+|---|---|---|---|
+| **Regresional** | La cima de `objetivo + ruido` sobreselecciona ruido afortunado → los ganadores regresan | **No** | Contratar por la puntuación de entrevista más alta |
+| **Extremal** | El vínculo proxy–objetivo vale en el rango medio y se rompe en el extremo | **No** | «Bebe agua por salud» → intoxicación por agua |
+| **Causal** | Empujas un correlato sin palanca causal hacia el objetivo | **No** (error de modelado) | Zapatos grandes para que un niño crezca |
+| **Adversarial** | Un agente que sabe juega la métrica a propósito | **Sí** | Relleno de palabras clave en SEO; enseñar para el examen |
+
+Lee de arriba abajo y la «mala conducta humana» requerida sube de *ninguna* a *un estratega deliberado*:
+
+- **El regresional y el extremal se disparan sin que nadie se porte mal.** Son lo que obtienes cuando la presión de optimización se encuentra con la estadística corriente: ruido en la cima y correlaciones que no llegan al borde. Sin intención, sin villano, roto igual.
+- **El causal es un error, no un pecado.** Nadie juega con nada; simplemente modelaste una correlación como si fuera una causa y empujaste una palanca desconectada. El fallo está en tu cabeza, no en un adversario.
+- **El adversarial añade un estratega.** Aquí una mente caza activamente el hueco entre proxy y objetivo y mete un camión por él.
+
+La moraleja para llevarte al resto del curso: **no necesitas villanos para que Goodhart muerda.** La optimización más la estadística basta para despegar el número de la verdad por sí sola. Pero —y este es el gozne hacia las lecciones que vienen— **los villanos lo empeoran drásticamente,** porque un optimizador adversarial busca el desacoplamiento *a propósito* y nunca se cansa. Por eso justamente los casos más profundos viven dentro del **problema del principal y el agente (principal–agent problem)** que abriremos más adelante: pon a un agente interesado entre tu métrica y tu objetivo, y cada uno de estos sabores recibe un acelerante.
+
+<MCQ
+  client:visible
+  question="Un equipo insiste: «La Ley de Goodhart solo importa cuando alguien hace trampa, así que la gente honesta está a salvo». ¿Cuál es el fallo?"
+  options={[
+    { text: 'El Goodhart regresional y el extremal no necesitan tramposo — la optimización más la estadística desacopla la métrica incluso entre santos', correct: true },
+    { text: 'No hay ningún fallo — sin un tramposo, un proxy jamás puede despegarse de su objetivo', correct: false },
+    { text: 'El fallo es que hacer trampa es en realidad el único de los cuatro sabores que existe', correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Solo el sabor adversarial necesita un tramposo. El regresional (ruido afortunado en la cima) y el extremal (el vínculo que se rompe en el borde) se disparan solo con presión y estadística, y el causal es un error de modelado honesto. La honestidad no te inmuniza: solo elimina uno de los cuatro acelerantes."
+/>
+
+## Repaso
+
+<MindMap
+  client:visible
+  title="Cómo se abren las costuras"
+  root={{
+    label: 'Desacoplamiento bajo presión',
+    children: [
+      {
+        label: 'Ley de Campbell: un dial, no un interruptor',
+        children: [
+          { label: 'La corrupción escala con la presión de optimización' },
+          { label: '…y con lo manipulable que sea el proxy' },
+        ],
+      },
+      {
+        label: 'Mecanismo central',
+        children: [
+          { label: 'Proxy ~ objetivo solo en la distribución natural' },
+          { label: 'Optimizar te arrastra al extremo' },
+          { label: 'Fuera de la distribución, la correlación se rompe' },
+        ],
+      },
+      {
+        label: 'Los cuatro sabores',
+        children: [
+          { label: 'Regresional — ruido afortunado en la cima' },
+          { label: 'Extremal — el vínculo se rompe en el borde' },
+          { label: 'Causal — empujaste una palanca no causal' },
+          { label: 'Adversarial — alguien lo juega a propósito' },
+        ],
+      },
+      {
+        label: 'Cómo se relacionan',
+        children: [
+          { label: 'Los tres primeros no necesitan villano' },
+          { label: 'El adversarial añade un estratega — y lo empeora' },
+        ],
+      },
+    ],
+  }}
+/>
+
+Ya tienes la maquinaria: el dial de Campbell te dice que el fallo es *proporcional*, el movimiento de salir de la distribución te dice *por qué* se abre la costura, y los cuatro sabores te dicen *qué* costura se abrió esta vez. A continuación veremos a los cuatro desfilar por la historia en un pasacalles de desastres famosos —recompensas por cobras, clickbait y los modelos de riesgo de 2008— cada uno vistiendo este mismo esqueleto bajo el disfraz.
