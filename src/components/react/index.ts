@@ -258,3 +258,6 @@ export type { VoiLabProps } from '@/components/react/VoiLab';
 
 export { CreativeDestructionWave, default as CreativeDestructionWaveDefault } from '@/components/react/CreativeDestructionWave';
 export type { CreativeDestructionWaveProps } from '@/components/react/CreativeDestructionWave';
+
+export { PunctuatedTimeline, default as PunctuatedTimelineDefault } from '@/components/react/PunctuatedTimeline';
+export type { PunctuatedTimelineProps } from '@/components/react/PunctuatedTimeline';
