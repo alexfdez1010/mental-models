@@ -1,0 +1,240 @@
+---
+title: "The Value of a Real, Noisy Test (EVSI)"
+description: No test is perfect. Fold a test's error rate in with Bayes, work out what an imperfect test is actually worth (EVSI), see why it always comes in under the perfect-info ceiling, and net it against its price — with an interactive lab that lets you watch the value move.
+topic: "en/the-value-of-information"
+order: 4
+minutes: 16
+updated: 2026-07-11
+---
+
+import { Callout, MCQ, FillBlank, VoiLab, MindMap } from '@/components/react';
+
+The crystal ball was a fantasy. Real tests — surveys, scans, pilots, references —
+are **noisy**: they're right most of the time and wrong some of the time. So the
+real question isn't "what's a perfect answer worth?" (that's EVPI, the ceiling we
+found last lesson: **160** on the launch decision). It's *"what's **this** flawed
+test worth, and is that more than its price?"* That number has a name — **EVSI**,
+the Expected Value of Sample Information — and computing it is where Bayesian
+updating finally earns its keep.
+
+<MCQ
+  client:visible
+  pretest
+  question="Guess: how does a noisy test's value compare with the perfect-info ceiling (EVPI)?"
+  options={[
+    { text: 'It’s always below the ceiling — an imperfect test can’t be worth more than a perfect one', correct: true },
+    { text: 'It can exceed the ceiling if the test is cheap enough' },
+    { text: 'It equals the ceiling as long as the test is over 50% accurate' },
+  ]}
+  explanation="A noisy test sometimes sends the wrong signal, so it can't do better than a flawless one. EVSI ≤ EVPI, always. The ceiling from last lesson bounds every real test you'll ever price."
+/>
+
+## A test is just two conditional probabilities
+
+Our market survey isn't a crystal ball; it flashes one of two signals — a **green
+light** ("market looks good") or a **red flag** ("market looks bad") — and it's
+sometimes wrong. Pin down "sometimes" with two numbers:
+
+- **Sensitivity** — when the market really is good, how often does the survey
+  correctly flash green? Say **80%**.
+- **Specificity** — when the market really is bad, how often does it correctly flash
+  red? Say **80%** too.
+
+So the survey is right 80% of the time in each state and wrong the other 20%. It's
+informative, but it's no oracle. Now — exactly as in **Bayesian updating** — we turn
+those "probability of the signal given the state" numbers around into what we actually
+want: the probability of the **state given the signal**.
+
+<Callout variant="info" title="The direction that matters">
+The survey gives you P(signal | state). Your decision needs P(state | signal) — given
+that it flashed green, how likely is the market *actually* good? Flipping one into the
+other is Bayes' rule, and it's the whole engine of EVSI. (We'll keep the arithmetic to
+multiply-and-divide; no formula to memorise.)
+</Callout>
+
+## Step 1 — how often does each signal fire, and what does it mean?
+
+Start from 100 imagined launches. 40 are truly good, 60 truly bad (the prior). The
+survey is 80% accurate each way:
+
+|  | Truly good (40) | Truly bad (60) | Total flashing this signal |
+|---|---|---|---|
+| **Green light** | 0.8 × 40 = **32** | 0.2 × 60 = **12** | **44** |
+| **Red flag** | 0.2 × 40 = **8** | 0.8 × 60 = **48** | **56** |
+
+Read the posteriors straight off the table:
+
+- After a **green light** (44 of them), the market is truly good in 32: $32/44 \approx$
+  **73%**. Your 40% prior jumped to 73%.
+- After a **red flag** (56 of them), the market is truly good in just 8: $8/56 \approx$
+  **14%**. Your prior fell from 40% to 14%.
+
+<MCQ
+  client:visible
+  question="The survey is 80% accurate, yet after a green light you're only 73% sure the market is good — not 80%. Why the gap?"
+  options={[
+    { text: 'Because good markets are rarer to begin with (40%), some green lights are false alarms from the larger pool of bad markets', correct: true },
+    { text: 'Because the survey is secretly less accurate than advertised' },
+    { text: 'Because 73% is a rounding error and it should be 80%' },
+  ]}
+  explanation="This is the base-rate lesson again. There are more bad markets (60) than good (40), so even at 80% accuracy the 12 false green lights from bad markets dilute the 32 true ones: 32/(32+12) = 73%. Ignore the base rate and you'll wildly overvalue the test."
+/>
+
+## Step 2 — would the answer change your action? (Yes — it flips)
+
+Now the pivotal check from lesson one, applied to each signal. Plug each posterior
+back into the launch payoffs (+400 good, −300 bad):
+
+**After a green light** (73% good):
+$$EV(\text{Launch}) = 0.73 \times 400 - 0.27 \times 300 \approx 209$$
+That's well above 0, so a green light says **launch**.
+
+**After a red flag** (14% good):
+$$EV(\text{Launch}) = 0.14 \times 400 - 0.86 \times 300 \approx -200$$
+Below 0, so a red flag says **walk away**.
+
+The two signals lead to **different actions** — green→launch, red→walk. That's the
+whole point: *this test can flip your decision*, so it clears the would-it-change-my-
+action bar and earns a positive value. (If both signals had said "walk away," the
+test would be worthless, exactly like the surgeon's scan.)
+
+## Step 3 — add it up: the pre-posterior expected value
+
+Here's the subtle move that trips people up. You must value the test **before** you
+know which signal you'll get — because that's when you decide whether to *buy* it.
+So average the value of acting-on-each-signal, weighted by how often each signal fires:
+
+$$EV(\text{with survey}) = \underbrace{0.44 \times 209}_{\text{green} \to \text{launch}} + \underbrace{0.56 \times 0}_{\text{red} \to \text{walk, banks }0} \approx 92$$
+
+With the survey you expect **92**. Without it, acting on your prior, you walked away
+and banked **0** ($V_0 = 0$ from last lesson). So:
+
+$$\text{EVSI} = 92 - 0 = \mathbf{92}$$
+
+<Callout variant="tip" title="EVSI, defined">
+**EVSI (Expected Value of Sample Information)** = the expected payoff of your best
+decision **after** running the (noisy) test, minus the payoff of your best decision
+**without** it. Here: 92 − 0 = 92. And sure enough it sits under the ceiling: EVSI
+(92) < EVPI (160). A real test captures **part** of what a crystal ball would — here,
+about 57% of it.
+</Callout>
+
+<MCQ
+  client:visible
+  question="Why must you weight by how often each signal fires (0.44 and 0.56) rather than just averaging the two outcomes?"
+  options={[
+    { text: 'You’re valuing the test before you know its result, so each result counts in proportion to how likely you are to get it', correct: true },
+    { text: 'Because 0.44 and 0.56 are the payoffs of each action' },
+    { text: 'To make the arithmetic come out to a round number' },
+  ]}
+  explanation="The decision to buy the test happens before the signal arrives. So its value is the expected value across the signals you might get — each weighted by its probability. This 'pre-posterior' averaging is what separates EVSI from a single after-the-fact update."
+/>
+
+## Step 4 — the only number that decides it: the net
+
+EVSI is the test's **worth**. The decision to buy it is itself an expected-value
+decision: compare the worth against the **price**. If the survey costs 30:
+
+$$\text{Net value} = \text{EVSI} - \text{price} = 92 - 30 = \mathbf{62}$$
+
+Positive, so buy the survey: it's worth 92 in averted mistakes and costs only 30. But
+watch how fragile that is. If the same survey cost 100, the net is $92 - 100 = -8$ —
+now it's an informative test you still **shouldn't buy**, because it costs more than
+the decision it improves is worth. *Worth* and *worth buying* are different questions,
+and only the net answers the second.
+
+<FillBlank
+  client:visible
+  question="Put the pieces in order."
+  text="A real test's worth is its {{EVSI|EVPI|price}}, which is always {{below|above|equal to}} the perfect-info ceiling. To decide whether to buy it, subtract the {{price|prior|posterior}} to get the net — and buy only when the net is {{positive|accurate|large}}."
+  explanation="EVSI is the worth; it's always ≤ EVPI; subtract the price to get the net; buy only when the net is positive. Worth and worth-buying are separate questions."
+/>
+
+## See it move: the value-of-information lab
+
+Everything above is one frozen frame. Drag the dials and watch the value breathe.
+Start where our example sits (prior 40% good, reliability 80%, price 30, payoffs
++400 / −300) and notice the three bars: **act now** on the prior, **buy the test**
+(its information gain tinted on top, its price shaded off), and the **crystal-ball
+ceiling**. Then try to break it:
+
+- Slide the **prior** toward 5% or 95% and watch the test's value **collapse to zero**
+  — the read-out flips to "this test cannot change your decision" because both signals
+  now point the same way.
+- Crank **reliability** up and down: more accuracy lifts EVSI toward the ceiling, but
+  it can never punch through it.
+- Push the **price** up until the net goes red: a worthwhile test becomes a waste.
+
+<VoiLab
+  client:visible
+  title="Should you buy the market survey?"
+  initialPrior={40}
+  initialReliability={80}
+  initialCost={30}
+  initialGain={400}
+  initialLoss={300}
+  maxPayoff={500}
+  maxCost={120}
+  caption="All figures in thousands of dollars. Act = Launch; Walk away = don't. The middle bar's tinted top is the test's information value (EVSI); the shaded slice is its price. Drag the prior to an extreme and the test's value drops to zero — it can no longer flip your decision."
+/>
+
+<MCQ
+  client:visible
+  question="In the lab, you drag the prior to 92% good while leaving a highly accurate test in place. The test's value drops to zero. What happened?"
+  options={[
+    { text: 'At 92% good you’d launch whatever the survey says, so it can’t change your action — and value comes only from changed actions', correct: true },
+    { text: 'The test broke and stopped being accurate at high priors' },
+    { text: 'A bug — an accurate test should always be worth something' },
+  ]}
+  explanation="At 92% you're launching regardless; even a red flag can't pull the posterior below the launch line. Both signals → launch → no flip → EVSI = 0. The test's accuracy is irrelevant once it can't change the decision. This is the whole model in one drag of a slider."
+/>
+
+## Why EVSI is always below the ceiling
+
+It's worth seeing *why* the inequality EVSI ≤ EVPI can never break. Perfect
+information tells you the true state every time, so you act right every time. A noisy
+test sometimes lies — a false green light launches you into a bad market, a false red
+flag scares you off a good one. Those mistakes are exactly the value a perfect answer
+would have saved and a noisy one doesn't. So a real test recovers only **part** of the
+ceiling, and the noisier it is, the smaller that part. Get the test up to 100%
+accurate and EVSI rises to meet EVPI exactly; drop it to a coin-flip 50% and EVSI falls
+to 0 — a test that's right half the time tells you nothing.
+
+<MindMap
+  client:visible
+  title="What a noisy test is worth"
+  root={{
+    label: 'EVSI',
+    children: [
+      {
+        label: 'How to get it',
+        children: [
+          { label: 'Bayes: flip P(signal|state) into P(state|signal)' },
+          { label: 'Best action for each signal — does it flip?' },
+          { label: 'Average outcomes, weighted by signal frequency' },
+        ],
+      },
+      {
+        label: 'Two hard bounds',
+        children: [
+          { label: '≤ EVPI (the perfect-info ceiling)' },
+          { label: '0 when both signals give the same action' },
+        ],
+      },
+      {
+        label: 'The decision',
+        children: [
+          { label: 'Net = EVSI − price' },
+          { label: 'Buy only when the net is positive' },
+        ],
+      },
+    ],
+  }}
+/>
+
+You can now price a real, imperfect test end to end: turn its error rate into
+posteriors, check whether the answer flips your action, average across the signals to
+get EVSI, and subtract the price for the net. Next we step back from the arithmetic
+and ask the strategic question it all points to: *when* is information worth gathering
+at all? The answer is three conditions — and killing any one of them sends the value
+to zero.

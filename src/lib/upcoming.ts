@@ -53,13 +53,15 @@
  * `common-knowledge-and-coordination`,
  * `spontaneous-order-and-the-knowledge-problem`,
  * `evolutionarily-stable-strategies`, `goodharts-law`,
- * `information-cascades-and-herding`, …)
+ * `information-cascades-and-herding`,
+ * `the-value-of-information`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * decision-making/probability (`the-value-of-information`, 49),
- * economics/systems-thinking/strategy (`creative-destruction`, 50) and
- * biology-evolution/systems-thinking (`punctuated-equilibrium`, 51).
+ * economics/systems-thinking/strategy (`creative-destruction`, 50),
+ * biology-evolution/systems-thinking (`punctuated-equilibrium`, 51),
+ * psychology/strategy (`preference-falsification`, 52) and
+ * decision-making/economics/probability (`winners-curse`, 53).
  */
 
 import type { Difficulty } from '@/lib/catalog-filter';
@@ -97,39 +99,15 @@ export interface UpcomingCourse {
  * MDX exists. Keep the same `slug` you intend the built topic to use.
  */
 export const upcomingCourses: UpcomingCourse[] = [
-  // ── Expert tier — kept tag-diverse ─────────────────────────────────────────
-  // The earlier expert rungs — `externalities` (20) … `goodharts-law` (47) and
-  // `information-cascades-and-herding` (48) — have graduated and been removed;
-  // their topic MDX is now the record. The lowest-order entry below
-  // (`the-value-of-information`, order 49) is built next. The remaining
-  // queue keeps the expert-tier breadth tag-diverse, spanning
-  // decision-making/probability (`the-value-of-information`),
-  // economics/systems-thinking/strategy (`creative-destruction`) and
-  // biology-evolution/systems-thinking (`punctuated-equilibrium`) so no single
+  // -- Expert tier -- kept tag-diverse ----------------------------------------
+  // The value-of-information rung (order 49) has graduated and been removed; its
+  // topic MDX under src/content/topics/ is now the record. The lowest-order entry
+  // below (`creative-destruction`, order 50) is built next. The queue is kept
+  // tag-diverse across the expert tier -- economics/systems-thinking/strategy
+  // (`creative-destruction`), biology-evolution/systems-thinking
+  // (`punctuated-equilibrium`), psychology/strategy (`preference-falsification`)
+  // and decision-making/economics/probability (`winners-curse`) -- so no single
   // roadmap tag races ahead.
-  {
-    slug: 'the-value-of-information',
-    icon: '🔍',
-    difficulty: 'expert',
-    order: 49,
-    accent: 'brand',
-    title: {
-      en: 'The Value of Information',
-      es: 'El Valor de la Información',
-    },
-    description: {
-      en: 'Before you pay for one more test, study, or opinion, ask the question almost no one asks: could the answer actually change what you do? Information is only worth something if it might flip a decision — and its value is capped by the cost of being wrong. The mental model that tells you when to look before you leap, and when looking is just expensive procrastination.',
-      es: 'Antes de pagar por una prueba, un estudio o una opinión más, hazte la pregunta que casi nadie hace: ¿podría la respuesta cambiar de verdad lo que vas a hacer? La información solo vale algo si podría hacerte cambiar de decisión — y su valor está acotado por el coste de equivocarte. El modelo mental que te dice cuándo mirar antes de saltar, y cuándo mirar es solo una procrastinación cara.',
-    },
-    dependencies: ['bayesian-updating', 'thinking-in-probabilities', 'asymmetry-and-optionality'],
-    tags: ['decision-making', 'probability'],
-    buildNotes:
-      'The Value of Information (VOI) — the expert decision-making/probability rung from decision analysis (Howard 1966; the expected value of perfect and of sample/imperfect information). Assumes bayesian-updating (revising beliefs from a test result), thinking-in-probabilities (expected value over states) and asymmetry-and-optionality (the payoff to knowing is convex — you keep the good news and act on it, discard the bad). Organising idea — the single sharpest question in applied decision-making: information has value ONLY if it could change your decision; if you would do the same thing whatever the test says, the test is worth exactly zero no matter how accurate or interesting it is. Value comes from AVERTED MISTAKES, so VOI = (expected payoff of the best decision WITH the information) minus (expected payoff of the best decision WITHOUT it), and it is always >= 0 and always <= the cost of being wrong (the loss you could avoid). Sections, each mechanism + worked example: the core definition and the "would it change my action?" test (a doctor who will operate regardless gains nothing from the scan); Expected Value of PERFECT Information (EVPI) as the ceiling — what a clairvoyant is worth — worked with a real payoff table (e.g. drill-the-well / launch-the-product decision across two states, compute EV with clairvoyance minus EV of the best prior action); Expected Value of SAMPLE/IMPERFECT Information (EVSI) for a real, noisy test — fold in sensitivity/specificity via Bayes, compute the pre-posterior expected value, and note EVSI <= EVPI always; the net value = EVSI minus the cost/price of the test, and the decision to gather info is itself an expected-value decision; why VOI is highest when you are genuinely UNCERTAIN and the decision is CLOSE and the stakes are HIGH (a lopsided prior, a trivial decision, or an unactionable answer all drive VOI to zero); the tie to optionality (information is a real option — the value of learning before committing is the value of keeping your choice open). Pitfalls & where the model lies: gathering information is not free (money, time, and the cost of DELAY — sometimes acting now beats a better-informed action later); more data past the decision threshold is pure waste (analysis paralysis, the vanity metric, the study that cannot change the plan); ignoring the cost of the WRONG test (a very accurate test of the wrong question is worthless); base-rate and reliability errors make people wildly overvalue noisy tests; and VOI assumes you will actually ACT on the answer — information you will rationalise away is worth nothing. Build an interactive island (a "value-of-information lab": a two-action decision under two uncertain states with an editable payoff table and a prior-probability slider; a test with adjustable RELIABILITY and COST; show the expected value of acting on the prior alone, the EVPI ceiling (perfect clairvoyance), and the EVSI of the noisy test, with the net value = EVSI minus cost — and a readout that flips to "this test cannot change your decision → value 0" whenever the prior is lopsided enough or the decision one-sided, so the learner SEES value collapse to zero as the decision stops being close). Plus a Categorize (sort scenarios into worth-testing vs test-is-worthless, i.e. could-change-the-action vs could-not) and MatchConcepts (value of information, EVPI, EVSI, the change-my-action test, analysis paralysis), Quiz + MindMap. en + es twin.',
-  },
-  // ── Appended to keep the queue tag-diverse (economics, biology-evolution) ────
-  // With `goodharts-law` graduated, the queue had dropped to two probability/
-  // psychology/decision-making entries; these two add the missing economics and
-  // biology-evolution breadth at the expert tier so no single tag races ahead.
   {
     slug: 'creative-destruction',
     icon: '🌪️',
@@ -167,6 +145,44 @@ export const upcomingCourses: UpcomingCourse[] = [
     tags: ['biology-evolution', 'systems-thinking'],
     buildNotes:
       'Punctuated equilibrium — the expert biology-evolution/systems-thinking rung from Niles Eldredge & Stephen Jay Gould (1972): most species show long periods of morphological STASIS interrupted by geologically rapid bursts of change, usually at speciation events — not the slow, uniform gradualism Darwin\'s successors assumed. Assumes natural-selection (the mechanism of adaptive change), fitness-landscapes (stasis = sitting on a local peak; a punctuation = a jump to a new peak when the landscape shifts or a barrier is crossed) and path-dependence-and-lock-in (why systems get stuck in stasis — established structure, developmental constraints, and network effects resist change until something forces it). Organising idea: change is lumpy, not smooth. Long equilibria (stability held in place by stabilising selection, canalisation, and interconnected constraints) are punctuated by fast transitions (triggered by environmental shocks, isolation, or a threshold being crossed), so the fossil record\'s "gaps" are data, not just missing pages. The pattern generalises far beyond biology — it is a systems model of how complex, locked-in systems actually change. Sections, each mechanism + worked example: stasis and why systems resist change (stabilising selection, developmental/organisational constraints, "if it ain\'t broke"); the punctuation and its triggers (a shock removes the constraint, a small isolated population can shift fast, a threshold tips — tie to critical-mass); why the record LOOKS gappy and why that is expected, not a failure (rapid transitions in small peripheral populations leave few fossils); the fitness-landscape reading (stuck on a local peak, then a valley-crossing to a higher one); the transfer to non-biological systems — technology (long incumbent plateaus then abrupt platform shifts), companies and institutions (Tushman & Romanelli\'s punctuated-equilibrium model of organisational change: long convergent periods broken by brief revolutionary reorientations), scientific paradigms (Kuhn: normal science punctuated by revolutions), personal habit change, and geopolitics. Worked cases: Cambrian explosion, the horseshoe crab\'s hundreds of millions of years of stasis, QWERTY/technology plateaus, corporate turnarounds, the abruptness of political revolutions. Pitfalls & where the model lies: it is NOT anti-Darwinian and NOT saltationism — the "sudden" bursts are still gradual by human timescales (thousands of years), just fast geologically; punctuated equilibrium and gradualism are not either/or, both occur and the debate is about relative frequency; do not over-apply it as an excuse to wait passively for a magic punctuation (in human systems you can sometimes ENGINEER the conditions for a jump); and beware hindsight — a "sudden" lurch often had a long invisible build-up of pressure (tie to the stillness hiding accumulating tension). Fixes/uses: read the stasis as stored, not absent, pressure; look for the constraint that must break for change to happen; in organisations, recognise that incremental tuning eventually needs a punctuated reorientation. Build an interactive island (a "stasis-and-lurch" timeline/trait-tracker: a lineage\'s trait value stays flat across long spans then jumps at punctuation events, with a slider for environmental-stability vs shock-frequency and a fitness-landscape inset showing the population pinned on a local peak until a shock lets it cross a valley to a new peak — readout contrasting the near-zero change during stasis with the burst rate during punctuations). Plus a Categorize (sort scenarios into stasis vs punctuation, or gradualist-change vs punctuated-change) and MatchConcepts (stasis, punctuation, stabilising selection, valley-crossing, peripheral isolate), Quiz + MindMap. en + es twin.',
+  },
+  {
+    slug: 'preference-falsification',
+    icon: '🎭',
+    difficulty: 'expert',
+    order: 52,
+    accent: 'brand',
+    title: {
+      en: 'Preference Falsification',
+      es: 'Falsificación de Preferencias',
+    },
+    description: {
+      en: "When speaking your mind is costly, people voice the opinion they think is safe, not the one they hold — so the public consensus can be a mirror almost nobody privately believes, and it can flip overnight.",
+      es: "Cuando decir lo que piensas sale caro, la gente expresa la opinión que cree segura, no la que sostiene — así que el consenso público puede ser un espejo que casi nadie se cree en privado, y puede voltearse de la noche a la mañana.",
+    },
+    dependencies: ['incentives', 'information-cascades-and-herding', 'common-knowledge-and-coordination'],
+    tags: ['psychology', 'strategy', 'systems-thinking'],
+    buildNotes:
+      "Preference falsification — the expert psychology/strategy rung from Timur Kuran (Private Truths, Public Lies, 1995): when expressing your true preference carries a social, professional or political cost, you publicly state the preference you think is rewarded and hide your private one. Assumes incentives (the social payoff/punishment that makes honesty costly), information-cascades-and-herding (people read others' stated views as evidence and copy them) and common-knowledge-and-coordination (why a shared but unspoken truth stays unspoken until it becomes common knowledge). Organising idea: a visible public consensus can be a facade almost nobody privately believes, held up only because each person underestimates how many others secretly agree with them. Because everyone is watching a falsified signal, the true distribution of opinion is invisible — until a small shock lets a few speak honestly, which lowers the cost for the next few, and the whole edifice can collapse with startling speed (preference cascades, the surprising suddenness of revolutions, the emperor's new clothes, the overnight unravelling of unpopular norms). Sections, each mechanism + worked example: the core definition and the private-vs-public split; why the cost of dissent drives it (and how repression raises MEASURED consensus while hollowing out real support); the hidden-distribution problem (pluralistic ignorance — everyone thinks they are the lonely dissenter); the cascade/tipping mechanism when the cost drops (tie to critical-mass and information cascades — a few brave defectors flip the common knowledge and the dam breaks); the persistence trap (falsification also freezes bad norms, censorship and unloved policies in place for years, then they evaporate at once); the distortion of knowledge itself (when honest debate is falsified, everyone — including rulers — ends up reasoning from fake information). Worked cases: the 1989 collapse of Eastern Bloc regimes, bank-run-style opinion reversals, corporate cultures where nobody voices the obvious problem, sudden shifts in social norms. Pitfalls & where the model lies: not every hidden preference cascades (some private views really are fringe; a loud minority can falsify in the other direction too); do not use it to claim any silent majority secretly agrees with you (unfalsifiable and self-serving); revealed shifts can overshoot; measured public opinion is noisy evidence, not proof, of private opinion. Fixes/uses: build institutions that lower the cost of honesty (secret ballots, anonymity, steel-manning dissent) to surface real preferences before they cascade; as a forecaster, treat lopsided public consensus under high dissent-cost as fragile. Build an interactive island (a preference-falsification cascade: a population grid where each person has a hidden private threshold and publicly conforms until the visible share of dissenters exceeds it, with a dissent-cost slider and a small-shock button — lower the cost or inject a few brave speakers and watch a stable false consensus unravel; a readout contrasting the true private distribution with the falsified public one). Plus a Categorize (likely-to-cascade vs stably-falsified, or genuine-consensus vs falsified-consensus) and MatchConcepts (preference falsification, pluralistic ignorance, preference cascade, common knowledge, dissent cost), Quiz + MindMap. en + es twin.",
+  },
+  {
+    slug: 'winners-curse',
+    icon: '🏆',
+    difficulty: 'expert',
+    order: 53,
+    accent: 'accent',
+    title: {
+      en: "The Winner's Curse",
+      es: 'La Maldición del Ganador',
+    },
+    description: {
+      en: "In a competitive auction for something of uncertain value, winning is bad news: you won precisely because you were the most optimistic bidder, so the very act of winning means you probably overpaid.",
+      es: "En una subasta competitiva por algo de valor incierto, ganar es una mala noticia: has ganado precisamente porque eras el pujador más optimista, así que el propio hecho de ganar significa que probablemente pagaste de más.",
+    },
+    dependencies: ['thinking-in-probabilities', 'regression-to-the-mean', 'mechanism-design'],
+    tags: ['decision-making', 'economics', 'probability'],
+    buildNotes:
+      "The winner's curse — the expert decision-making/economics/probability rung from Capen, Clapp & Campbell (1971, oil-lease auctions): when many bidders estimate the uncertain COMMON value of a prize and the highest bid wins, the winner is systematically the one who most OVERestimated it, so winning itself is evidence you paid too much. Assumes thinking-in-probabilities (each bid is a noisy estimate drawn from a distribution around the true value), regression-to-the-mean (the maximum of many noisy estimates sits far above the average and above the truth, and will regress down) and mechanism-design (how the auction format shapes bidding and how to bid to avoid the curse). Organising idea: conditioning on winning changes the odds. Your estimate might be unbiased before the auction, but the event you-won selects for the highest, most optimistic draw, so E[value | you won] is below E[value]. The rational fix is to bid as if you have ALREADY won and been told your estimate was the highest — shade your bid DOWN to correct for the selection, and shade it more the more rivals there are and the more uncertain the value. Sections, each mechanism + worked example: common-value vs private-value auctions (the curse bites on COMMON value — an oil field, spectrum, a company, a free-agent athlete — not on private how-much-YOU-enjoy-it value); the selection mechanism worked numerically (N bidders, true value plus noise; show the expected winning estimate rising above the truth as N grows); the bid-shading correction (condition on being highest — the more bidders, the deeper you shade, the paradox that more competition means bidding LESS aggressively per signal); the regression-to-the-mean framing (the winner's optimistic estimate regresses ex post, the deal underperforms); real arenas — corporate M&A (acquirers overpay, the acquisition premium and post-merger underperformance), IPOs, spectrum and mineral-rights auctions, sports free agency, competitive hiring (you win the candidate everyone else passed on at that price), online ad auctions and hot-housing-market bidding wars. Pitfalls & where the model lies: the curse is about COMMON value and only bites if bidders fail to shade — sophisticated bidders in equilibrium already correct for it, so it is a warning for the naive, not an iron law; private-value auctions do not suffer it; second-price/Vickrey and well-designed mechanisms blunt it; and do not over-shade into never winning (the goal is the right bid, not zero bids). Fixes/uses: estimate value then subtract a selection correction that grows with the number of rivals and the uncertainty; as an acquirer, be most cautious exactly when you win easily; as a mechanism designer, pick formats that reduce the curse and reveal information. Build an interactive island (a winner's-curse auction sim: a hidden true common value, N simulated bidders each drawing a noisy estimate, sliders for number of bidders and estimate noise, and a your-bid control; run repeated auctions and chart the average gap between the winning bid and the true value — watch overpayment GROW with more bidders and more noise, and a bid-shading toggle pull the winner's expected profit back toward zero). Plus a Categorize (curse-prone common-value vs safe private-value, or shaded vs naive bidding) and MatchConcepts (winner's curse, common value, bid shading, regression to the mean, selection on winning), Quiz + MindMap. en + es twin.",
   },
 ];
 

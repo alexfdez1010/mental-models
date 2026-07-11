@@ -1,0 +1,268 @@
+---
+title: "El valor de una prueba real y ruidosa (EVSI)"
+description: Ninguna prueba es perfecta. Combina la tasa de error de una prueba con Bayes, calcula lo que vale de verdad una prueba imperfecta (EVSI), descubre por qué siempre se queda por debajo del techo de la información perfecta, y compárala con su precio — con un laboratorio interactivo que te deja ver moverse el valor.
+topic: "es/the-value-of-information"
+order: 4
+minutes: 16
+updated: 2026-07-11
+---
+
+import { Callout, MCQ, FillBlank, VoiLab, MindMap } from '@/components/react';
+
+La bola de cristal era una fantasía. Las pruebas reales — encuestas, escáneres, pilotos,
+referencias — son **ruidosas**: aciertan la mayoría de las veces y fallan algunas. Así que
+la pregunta de verdad no es "¿cuánto vale una respuesta perfecta?" (eso es el EVPI, el techo
+que encontramos en la lección anterior: **160** en la decisión de lanzar). Es *"¿cuánto vale
+**esta** prueba imperfecta, y es más que su precio?"* Ese número tiene nombre — **EVSI**, el
+valor de la información muestral (Expected Value of Sample Information) — y calcularlo es donde
+la actualización bayesiana por fin se gana el sueldo.
+
+<MCQ
+  client:visible
+  pretest
+  question="Adivina: ¿cómo se compara el valor de una prueba ruidosa con el techo de la información perfecta (EVPI)?"
+  options={[
+    { text: 'Siempre está por debajo del techo — una prueba imperfecta no puede valer más que una perfecta', correct: true },
+    { text: 'Puede superar el techo si la prueba es lo bastante barata' },
+    { text: 'Iguala el techo mientras la prueba tenga más de un 50 % de acierto' },
+  ]}
+  explanation="Una prueba ruidosa a veces manda la señal equivocada, así que no puede hacerlo mejor que una impecable. EVSI ≤ EVPI, siempre. El techo de la lección anterior acota cualquier prueba real que vayas a valorar."
+/>
+
+## Una prueba no es más que dos probabilidades condicionadas
+
+Nuestra encuesta de mercado no es una bola de cristal; enciende una de dos señales — una
+**luz verde** ("el mercado pinta bien") o una **bandera roja** ("el mercado pinta mal") — y a
+veces se equivoca. Fija ese "a veces" con dos números:
+
+- **Sensibilidad (sensitivity)** — cuando el mercado es realmente bueno, ¿con qué frecuencia
+  enciende correctamente la luz verde? Digamos **80 %**.
+- **Especificidad (specificity)** — cuando el mercado es realmente malo, ¿con qué frecuencia
+  enciende correctamente la bandera roja? Digamos **80 %** también.
+
+Así que la encuesta acierta el 80 % de las veces en cada estado y falla el otro 20 %. Es
+informativa, pero no es un oráculo. Ahora — exactamente como en la **actualización bayesiana**
+— damos la vuelta a esos números de "probabilidad de la señal dado el estado" para obtener lo
+que de verdad queremos: la probabilidad del **estado dada la señal**.
+
+<Callout variant="info" title="La dirección que importa">
+La encuesta te da P(señal | estado). Tu decisión necesita P(estado | señal) — dado que
+encendió la luz verde, ¿qué probabilidad hay de que el mercado sea *realmente* bueno?
+Convertir una en la otra es la regla de Bayes (Bayes' rule), y es todo el motor del EVSI.
+(Mantendremos la aritmética en multiplicar y dividir; ninguna fórmula que memorizar.)
+</Callout>
+
+## Paso 1 — ¿con qué frecuencia se enciende cada señal, y qué significa?
+
+Parte de 100 lanzamientos imaginados. 40 son realmente buenos, 60 realmente malos (la
+probabilidad a priori). La encuesta acierta el 80 % en cada sentido:
+
+|  | Realmente bueno (40) | Realmente malo (60) | Total que enciende esta señal |
+|---|---|---|---|
+| **Luz verde** | 0,8 × 40 = **32** | 0,2 × 60 = **12** | **44** |
+| **Bandera roja** | 0,2 × 40 = **8** | 0,8 × 60 = **48** | **56** |
+
+Lee las probabilidades a posteriori directamente de la tabla:
+
+- Tras una **luz verde** (44 de ellas), el mercado es realmente bueno en 32: $32/44 \approx$
+  **73 %**. Tu probabilidad a priori del 40 % saltó al 73 %.
+- Tras una **bandera roja** (56 de ellas), el mercado es realmente bueno en solo 8: $8/56 \approx$
+  **14 %**. Tu probabilidad a priori cayó del 40 % al 14 %.
+
+<MCQ
+  client:visible
+  question="La encuesta acierta el 80 %, y sin embargo tras una luz verde solo estás un 73 % seguro de que el mercado es bueno — no un 80 %. ¿Por qué la diferencia?"
+  options={[
+    { text: 'Porque los mercados buenos son más raros de partida (40 %), así que algunas luces verdes son falsas alarmas del grupo mayor de mercados malos', correct: true },
+    { text: 'Porque la encuesta es en secreto menos precisa de lo anunciado' },
+    { text: 'Porque el 73 % es un error de redondeo y debería ser el 80 %' },
+  ]}
+  explanation="Es de nuevo la lección de la tasa base. Hay más mercados malos (60) que buenos (40), así que incluso con un 80 % de acierto las 12 falsas luces verdes de los mercados malos diluyen las 32 verdaderas: 32/(32+12) = 73 %. Ignora la tasa base y sobrevalorarás la prueba disparatadamente."
+/>
+
+## Paso 2 — ¿cambiaría la respuesta tu acción? (Sí — la voltea)
+
+Ahora la comprobación decisiva de la primera lección, aplicada a cada señal. Introduce cada
+probabilidad a posteriori en los resultados del lanzamiento (+400 bueno, −300 malo):
+
+**Tras una luz verde** (73 % bueno):
+$$EV(\text{Lanzar}) = 0.73 \times 400 - 0.27 \times 300 \approx 209$$
+Está muy por encima de 0, así que una luz verde dice **lanzar**.
+
+**Tras una bandera roja** (14 % bueno):
+$$EV(\text{Lanzar}) = 0.14 \times 400 - 0.86 \times 300 \approx -200$$
+Por debajo de 0, así que una bandera roja dice **retirarse**.
+
+Las dos señales llevan a **acciones distintas** — verde→lanzar, roja→retirarse. Ese es el
+quid de la cuestión: *esta prueba puede voltear tu decisión*, así que supera el listón del
+¿cambiaría-mi-acción? y se gana un valor positivo. (Si ambas señales hubieran dicho
+"retirarse", la prueba no valdría nada, exactamente igual que el escáner del cirujano.)
+
+## Paso 3 — súmalo todo: el valor esperado pre-posterior
+
+Aquí está el movimiento sutil que hace tropezar a la gente. Debes valorar la prueba **antes**
+de saber qué señal vas a obtener — porque ese es el momento en que decides si *comprarla*. Así
+que promedia el valor de actuar-según-cada-señal, ponderado por la frecuencia con que se
+enciende cada señal:
+
+$$EV(\text{con encuesta}) = \underbrace{0.44 \times 209}_{\text{verde} \to \text{lanzar}} + \underbrace{0.56 \times 0}_{\text{roja} \to \text{retirarse, embolsa }0} \approx 92$$
+
+Con la encuesta esperas **92**. Sin ella, actuando según tu probabilidad a priori, te retiraste
+y embolsaste **0** ($V_0 = 0$ de la lección anterior). Así que:
+
+$$\text{EVSI} = 92 - 0 = \mathbf{92}$$
+
+<Callout variant="tip" title="EVSI, definido">
+**EVSI (valor de la información muestral)** = el resultado esperado de tu mejor decisión
+**después** de realizar la prueba (ruidosa), menos el resultado de tu mejor decisión **sin**
+ella. Aquí: 92 − 0 = 92. Y, en efecto, se sitúa por debajo del techo: EVSI (92) < EVPI (160).
+Una prueba real captura **parte** de lo que capturaría una bola de cristal — aquí, alrededor
+del 57 %.
+</Callout>
+
+<MCQ
+  client:visible
+  question="¿Por qué debes ponderar por la frecuencia con que se enciende cada señal (0,44 y 0,56) en lugar de simplemente promediar los dos resultados?"
+  options={[
+    { text: 'Estás valorando la prueba antes de conocer su resultado, así que cada resultado cuenta en proporción a lo probable que es que lo obtengas', correct: true },
+    { text: 'Porque 0,44 y 0,56 son los resultados de cada acción' },
+    { text: 'Para que la aritmética dé un número redondo' },
+  ]}
+  explanation="La decisión de comprar la prueba ocurre antes de que llegue la señal. Así que su valor es el valor esperado a lo largo de las señales que podrías obtener — cada una ponderada por su probabilidad. Este promediado 'pre-posterior' es lo que separa el EVSI de una única actualización a posteriori."
+/>
+
+## Paso 4 — el único número que lo decide: el neto
+
+El EVSI es lo que **vale** la prueba. La decisión de comprarla es ella misma una decisión de
+valor esperado: compara lo que vale con el **precio**. Si la encuesta cuesta 30:
+
+$$\text{Valor neto} = \text{EVSI} - \text{precio} = 92 - 30 = \mathbf{62}$$
+
+Positivo, así que compra la encuesta: vale 92 en errores evitados y solo cuesta 30. Pero fíjate
+en lo frágil que es. Si la misma encuesta costara 100, el neto es $92 - 100 = -8$ — ahora es
+una prueba informativa que aun así **no deberías comprar**, porque cuesta más de lo que vale la
+decisión que mejora. *Valer* y *valer la pena comprar* son preguntas distintas, y solo el neto
+responde a la segunda.
+
+<FillBlank
+  client:visible
+  question="Pon las piezas en orden."
+  text="Lo que vale una prueba real es su {{EVSI|EVPI|precio}}, que siempre está {{por debajo|por encima|igual}} del techo de la información perfecta. Para decidir si comprarla, resta el {{precio|prior|posterior}} para obtener el neto — y cómprala solo cuando el neto sea {{positivo|preciso|grande}}."
+  explanation="El EVSI es lo que vale; siempre es ≤ EVPI; resta el precio para obtener el neto; cómprala solo cuando el neto sea positivo. Valer y valer la pena comprar son preguntas separadas."
+/>
+
+## Míralo moverse: el laboratorio del valor de la información
+
+Todo lo de arriba es un solo fotograma congelado. Arrastra los diales y observa cómo respira
+el valor. Empieza donde se sitúa nuestro ejemplo (prior 40 % bueno, fiabilidad 80 %, precio
+30, resultados +400 / −300) y fíjate en las tres barras: **actuar ya** según la probabilidad
+a priori, **comprar la prueba** (su ganancia de información teñida encima, su precio sombreado
+aparte) y el **techo de la bola de cristal**. Luego intenta romperlo:
+
+- Desliza la **probabilidad a priori** hacia el 5 % o el 95 % y observa cómo el valor de la
+  prueba **se desploma a cero** — el indicador cambia a "esta prueba no puede cambiar tu
+  decisión" porque ahora ambas señales apuntan en el mismo sentido.
+- Sube y baja la **fiabilidad**: más precisión eleva el EVSI hacia el techo, pero nunca puede
+  atravesarlo.
+- Empuja el **precio** hacia arriba hasta que el neto se ponga en rojo: una prueba que valía la
+  pena se convierte en un desperdicio.
+
+<VoiLab
+  client:visible
+  title="¿Deberías comprar la encuesta de mercado?"
+  initialPrior={40}
+  initialReliability={80}
+  initialCost={30}
+  initialGain={400}
+  initialLoss={300}
+  maxPayoff={500}
+  maxCost={120}
+  currencyPrefix="$"
+  actionLabel="Lanzar"
+  inactionLabel="Retirarse"
+  goodStateLabel="Bueno"
+  badStateLabel="Malo"
+  priorLabel="Probabilidad a priori: que el mercado sea bueno"
+  reliabilityLabel="Fiabilidad de la prueba"
+  costLabel="Precio de la prueba"
+  gainLabel="Ganancia si lanzas y va bien"
+  lossLabel="Pérdida si lanzas y va mal"
+  actNowBarLabel="Actuar ya"
+  testBarLabel="Comprar la prueba"
+  perfectBarLabel="Bola de cristal"
+  ceilingLabel="Techo de info perfecta (EVPI)"
+  infoGainLabel="valor de la info"
+  priceTagLabel="precio"
+  evpiLabel="EVPI (techo)"
+  evsiLabel="EVSI (esta prueba)"
+  netLabel="Neto tras el precio"
+  positiveResultLabel="una luz verde"
+  negativeResultLabel="una bandera roja"
+  decisionTemplate="Solo con tu probabilidad a priori {prior}. Tras {pos} harías {posAction}; tras {neg} harías {negAction}."
+  worthlessVerdict="Esta prueba no puede cambiar tu decisión → su valor es 0. Diga lo que diga, harías {prior} igualmente, así que una luz verde y una bandera roja llevan al mismo movimiento. Ni la precisión ni un descuento salvan a una prueba que nunca cambia la acción."
+  worthItVerdict="Merece la pena comprarla: la prueba vale {evsi} en errores evitados y cuesta {cost}, así que te deja un neto de {net}. Puede cambiar tu decisión, y el cambio vale más que el precio."
+  overpricedVerdict="Informativa pero cara: la prueba solo vale {evsi} y cuesta {cost}, así que comprarla deja un neto de {net}. La respuesta podría hacerte cambiar de idea, pero no lo suficiente para pagarla. Actúa según tu probabilidad a priori."
+  readoutTemplate="Actuando solo con tu probabilidad a priori ({prior} bueno) harías {decision}. Una bola de cristal valdría {evpi} (el techo); esta prueba ruidosa vale {evsi} y cuesta {cost}, para un neto de {net}."
+  caption="Todas las cifras en miles de dólares. Actuar = Lanzar; Retirarse = no hacerlo. La parte teñida de la barra central es el valor de información de la prueba (EVSI); la franja sombreada es su precio. Arrastra la probabilidad a priori a un extremo y el valor de la prueba cae a cero — ya no puede voltear tu decisión."
+/>
+
+<MCQ
+  client:visible
+  question="En el laboratorio, arrastras la probabilidad a priori al 92 % bueno dejando en su sitio una prueba muy precisa. El valor de la prueba cae a cero. ¿Qué ha pasado?"
+  options={[
+    { text: 'Al 92 % bueno lanzarías dijera lo que dijera la encuesta, así que no puede cambiar tu acción — y el valor solo viene de acciones que cambian', correct: true },
+    { text: 'La prueba se estropeó y dejó de ser precisa con probabilidades a priori altas' },
+    { text: 'Un fallo — una prueba precisa siempre debería valer algo' },
+  ]}
+  explanation="Al 92 % vas a lanzar de todas formas; ni siquiera una bandera roja puede tirar de la probabilidad a posteriori por debajo de la línea de lanzamiento. Ambas señales → lanzar → sin volteo → EVSI = 0. La precisión de la prueba es irrelevante en cuanto no puede cambiar la decisión. Es todo el modelo en un solo arrastre de un deslizador."
+/>
+
+## Por qué el EVSI siempre está por debajo del techo
+
+Merece la pena ver *por qué* la desigualdad EVSI ≤ EVPI nunca puede romperse. La información
+perfecta te dice el estado verdadero cada vez, así que actúas bien cada vez. Una prueba ruidosa
+a veces miente — una falsa luz verde te lanza a un mercado malo, una falsa bandera roja te
+espanta de uno bueno. Esos errores son exactamente el valor que una respuesta perfecta habría
+ahorrado y una ruidosa no. Así que una prueba real recupera solo **parte** del techo, y cuanto
+más ruidosa sea, más pequeña será esa parte. Sube la prueba al 100 % de acierto y el EVSI se
+eleva hasta encontrarse exactamente con el EVPI; bájala a un 50 % de cara-o-cruz y el EVSI cae
+a 0 — una prueba que acierta la mitad de las veces no te dice nada.
+
+<MindMap
+  client:visible
+  title="Lo que vale una prueba ruidosa"
+  root={{
+    label: 'EVSI',
+    children: [
+      {
+        label: 'Cómo obtenerlo',
+        children: [
+          { label: 'Bayes: voltea P(señal|estado) en P(estado|señal)' },
+          { label: 'Mejor acción para cada señal — ¿la voltea?' },
+          { label: 'Promedia los resultados, ponderados por la frecuencia de cada señal' },
+        ],
+      },
+      {
+        label: 'Dos límites duros',
+        children: [
+          { label: '≤ EVPI (el techo de la información perfecta)' },
+          { label: '0 cuando ambas señales dan la misma acción' },
+        ],
+      },
+      {
+        label: 'La decisión',
+        children: [
+          { label: 'Neto = EVSI − precio' },
+          { label: 'Compra solo cuando el neto sea positivo' },
+        ],
+      },
+    ],
+  }}
+/>
+
+Ya sabes valorar una prueba real e imperfecta de principio a fin: convierte su tasa de error en
+probabilidades a posteriori, comprueba si la respuesta voltea tu acción, promedia a lo largo de
+las señales para obtener el EVSI y resta el precio para el neto. A continuación damos un paso
+atrás desde la aritmética y hacemos la pregunta estratégica a la que todo apunta: *¿cuándo*
+vale la pena recopilar información siquiera? La respuesta son tres condiciones — y cargarse
+cualquiera de ellas manda el valor a cero.

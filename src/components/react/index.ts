@@ -252,3 +252,6 @@ export type { GoodhartPressureDialProps } from '@/components/react/GoodhartPress
 
 export { CascadeLine, default as CascadeLineDefault } from '@/components/react/CascadeLine';
 export type { CascadeLineProps } from '@/components/react/CascadeLine';
+
+export { VoiLab, default as VoiLabDefault } from '@/components/react/VoiLab';
+export type { VoiLabProps } from '@/components/react/VoiLab';
