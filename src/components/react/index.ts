@@ -261,3 +261,6 @@ export type { CreativeDestructionWaveProps } from '@/components/react/CreativeDe
 
 export { PunctuatedTimeline, default as PunctuatedTimelineDefault } from '@/components/react/PunctuatedTimeline';
 export type { PunctuatedTimelineProps } from '@/components/react/PunctuatedTimeline';
+
+export { PreferenceCascade, default as PreferenceCascadeDefault } from '@/components/react/PreferenceCascade';
+export type { PreferenceCascadeProps } from '@/components/react/PreferenceCascade';

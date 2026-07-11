@@ -54,11 +54,11 @@
  * `spontaneous-order-and-the-knowledge-problem`,
  * `evolutionarily-stable-strategies`, `goodharts-law`,
  * `information-cascades-and-herding`, `the-value-of-information`,
- * `creative-destruction`, `punctuated-equilibrium`, …)
+ * `creative-destruction`, `punctuated-equilibrium`,
+ * `preference-falsification`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * psychology/strategy (`preference-falsification`, 52),
  * decision-making/economics/probability (`winners-curse`, 53),
  * science-engineering/systems-thinking (`entropy-and-the-second-law`, 54) and
  * biology-evolution/science-engineering (`hormesis-and-the-dose-response`, 55).
@@ -100,33 +100,13 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // -- Expert tier -- kept tag-diverse ----------------------------------------
-  // The punctuated-equilibrium rung (order 51) has graduated and been removed; its
+  // The preference-falsification rung (order 52) has graduated and been removed; its
   // topic MDX under src/content/topics/ is now the record. The lowest-order entry
-  // below (`preference-falsification`, order 52) is built next. The queue is kept
-  // tag-diverse across the expert tier -- psychology/strategy
-  // (`preference-falsification`), decision-making/economics/probability
+  // below (`winners-curse`, order 53) is built next. The queue is kept
+  // tag-diverse across the expert tier -- decision-making/economics/probability
   // (`winners-curse`), science-engineering/systems-thinking
   // (`entropy-and-the-second-law`) and biology-evolution/science-engineering
   // (`hormesis-and-the-dose-response`) -- so no single roadmap tag races ahead.
-  {
-    slug: 'preference-falsification',
-    icon: '🎭',
-    difficulty: 'expert',
-    order: 52,
-    accent: 'brand',
-    title: {
-      en: 'Preference Falsification',
-      es: 'Falsificación de Preferencias',
-    },
-    description: {
-      en: "When speaking your mind is costly, people voice the opinion they think is safe, not the one they hold — so the public consensus can be a mirror almost nobody privately believes, and it can flip overnight.",
-      es: "Cuando decir lo que piensas sale caro, la gente expresa la opinión que cree segura, no la que sostiene — así que el consenso público puede ser un espejo que casi nadie se cree en privado, y puede voltearse de la noche a la mañana.",
-    },
-    dependencies: ['incentives', 'information-cascades-and-herding', 'common-knowledge-and-coordination'],
-    tags: ['psychology', 'strategy', 'systems-thinking'],
-    buildNotes:
-      "Preference falsification — the expert psychology/strategy rung from Timur Kuran (Private Truths, Public Lies, 1995): when expressing your true preference carries a social, professional or political cost, you publicly state the preference you think is rewarded and hide your private one. Assumes incentives (the social payoff/punishment that makes honesty costly), information-cascades-and-herding (people read others' stated views as evidence and copy them) and common-knowledge-and-coordination (why a shared but unspoken truth stays unspoken until it becomes common knowledge). Organising idea: a visible public consensus can be a facade almost nobody privately believes, held up only because each person underestimates how many others secretly agree with them. Because everyone is watching a falsified signal, the true distribution of opinion is invisible — until a small shock lets a few speak honestly, which lowers the cost for the next few, and the whole edifice can collapse with startling speed (preference cascades, the surprising suddenness of revolutions, the emperor's new clothes, the overnight unravelling of unpopular norms). Sections, each mechanism + worked example: the core definition and the private-vs-public split; why the cost of dissent drives it (and how repression raises MEASURED consensus while hollowing out real support); the hidden-distribution problem (pluralistic ignorance — everyone thinks they are the lonely dissenter); the cascade/tipping mechanism when the cost drops (tie to critical-mass and information cascades — a few brave defectors flip the common knowledge and the dam breaks); the persistence trap (falsification also freezes bad norms, censorship and unloved policies in place for years, then they evaporate at once); the distortion of knowledge itself (when honest debate is falsified, everyone — including rulers — ends up reasoning from fake information). Worked cases: the 1989 collapse of Eastern Bloc regimes, bank-run-style opinion reversals, corporate cultures where nobody voices the obvious problem, sudden shifts in social norms. Pitfalls & where the model lies: not every hidden preference cascades (some private views really are fringe; a loud minority can falsify in the other direction too); do not use it to claim any silent majority secretly agrees with you (unfalsifiable and self-serving); revealed shifts can overshoot; measured public opinion is noisy evidence, not proof, of private opinion. Fixes/uses: build institutions that lower the cost of honesty (secret ballots, anonymity, steel-manning dissent) to surface real preferences before they cascade; as a forecaster, treat lopsided public consensus under high dissent-cost as fragile. Build an interactive island (a preference-falsification cascade: a population grid where each person has a hidden private threshold and publicly conforms until the visible share of dissenters exceeds it, with a dissent-cost slider and a small-shock button — lower the cost or inject a few brave speakers and watch a stable false consensus unravel; a readout contrasting the true private distribution with the falsified public one). Plus a Categorize (likely-to-cascade vs stably-falsified, or genuine-consensus vs falsified-consensus) and MatchConcepts (preference falsification, pluralistic ignorance, preference cascade, common knowledge, dissent cost), Quiz + MindMap. en + es twin.",
-  },
   {
     slug: 'winners-curse',
     icon: '🏆',
