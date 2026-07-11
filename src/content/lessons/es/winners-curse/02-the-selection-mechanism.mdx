@@ -1,0 +1,268 @@
+---
+title: "El mecanismo de selección"
+description: El motor de la maldición del ganador (winner's curse) — por qué condicionar sobre ganar desplaza las probabilidades de modo que el valor esperado dado que ganas queda por debajo del valor esperado global, desarrollado con números reales, y su profundo vínculo con la reversión a la media.
+topic: "es/winners-curse"
+order: 3
+minutes: 16
+updated: 2026-07-11
+---
+
+import { Callout, MCQ, Reveal, WinnerCurseSim } from '@/components/react';
+
+Ya sabes *dónde* vive la maldición: en el valor común (common value). Esta lección abre
+el motor y muestra *cómo* funciona. Todo gira en torno a una idea engañosamente simple:
+**ganar es información.** El suceso «he ganado esta subasta» no es neutro. Es un
+filtro que te dice algo concreto e incómodo sobre tu propia estimación. Aprende a
+leer esa señal y la maldición deja de ser un misterio para convertirse en un número que
+puedes restar.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Antes de empezar — adivina. Tu estimación del valor de un yacimiento petrolífero es insesgada: de media, a lo largo de todos los yacimientos, no es ni demasiado alta ni demasiado baja. Pujas tu estimación y GANAS. Condicionada a ganar, ¿sigue siendo insesgada tu estimación?"
+  options={[
+    { text: 'No — condicionada a ganar está sesgada AL ALZA, porque tiendes a ganar precisamente cuando tu estimación resultó ser demasiado optimista', correct: true },
+    { text: 'Sí — una estimación insesgada sigue siendo insesgada pase lo que pase', correct: false },
+    { text: 'No — condicionada a ganar está sesgada A LA BAJA', correct: false },
+    { text: 'Depende del vendedor, no de tu estimación', correct: false },
+  ]}
+  explanation="Es la primera, y es el meollo de todo el modelo. Tu estimación es insesgada ANTES de conocer el resultado. Pero «he ganado» no es una noticia al azar: ganas desproporcionadamente cuando tu estimación resultó alta. Así que el acto de condicionar sobre ganar filtra tus estimaciones bajas y conserva las altas, arrastrando la media condicional por encima de la verdad. Insesgada en global, sesgada al alza dado que ganas."
+/>
+
+## Ganar es un filtro, no lanzar una moneda
+
+Empecemos con un único pujador en solitario. Tus geólogos estiman un yacimiento
+petrolífero en \$100M. Su método es honesto: a lo largo de muchos yacimientos, sus
+estimaciones son **insesgadas**, cayendo por encima de la verdad exactamente tantas
+veces como por debajo, esparcidas simétricamente alrededor del número real. Si alguien
+eligiera un yacimiento al azar y preguntara «¿tu estimación es aquí demasiado alta o
+demasiado baja?», la respuesta sería, de verdad, cara o cruz.
+
+Ahora te ponemos en una subasta con nueve rivales, todos usando métodos igual de
+honestos, todos estimando el *mismo* yacimiento. Todos pujan su estimación. Ganas —
+lo que significa que tus \$100M fueron la **más alta** de las diez estimaciones. Vuelve
+a hacer la pregunta: *dado que has ganado, ¿es tu estimación demasiado alta o demasiado
+baja?*
+
+Ya no es cara o cruz. Has ganado **porque** tu estimación superó a la de todos los
+demás, y la forma de tener la estimación más alta de diez es haber sacado un gran
+error positivo. Los pujadores perdedores fueron desproporcionadamente los que estimaron
+bajo (más cerca de la verdad, o por debajo); los pujadores ganadores son
+desproporcionadamente los que estimaron alto. **La subasta entrega el premio al
+optimista.** Así que, condicionada a ganar, tu estimación está sesgada *al alza*,
+aunque fuera insesgada antes de que empezara la subasta. La puja ganadora no es una
+lectura del valor del yacimiento: es una lectura del mayor error de la sala.
+
+<Callout variant="info" title="E[valor | ganas] < E[valor]">
+Aquí tienes el modelo en una línea de notación. Tu estimación es insesgada, así que
+`E[valor] = tu estimación`. Pero la estimación *condicionada a ganar* está inflada:
+`E[valor | ganas] < tu estimación`. La diferencia entre ambas es la maldición del
+ganador. Puja tu estimación en bruto y estarás pagando `E[valor]` por algo cuyo valor,
+*dado que has ganado*, es en realidad `E[valor | ganas]` — sistemáticamente menor.
+Pierdes la diferencia de media, cada vez que ganas.
+</Callout>
+
+## Un ejemplo resuelto con números reales
+
+Pongamos números para que el efecto no sea solo un eslogan. Un yacimiento vale de verdad
+**\$100M**. La estimación de cada pujador es la verdad más un error aleatorio y, para
+mantener la aritmética limpia, digamos que cada error es igual de probable en cualquier
+punto entre **−\$30M y +\$30M** (uniforme). Así que cada estimación individual es
+insesgada: su media es exactamente \$100M.
+
+Ahora varía cuántos pujadores aparecen y sigue la *estimación más alta esperada* — la
+que gana.
+
+| Pujadores (N) | Estimación más alta esperada | Exceso sobre la verdad de \$100M |
+|---|---|---|
+| 1 | \$100M | \$0M |
+| 2 | \$110M | +\$10M |
+| 4 | \$118M | +\$18M |
+| 6 | \$121M | +\$26M... |
+| 10 | \$125M | +\$25M |
+| 20 | \$129M | +\$29M |
+
+*(Para un error uniforme de −a a +a y N pujadores, el máximo esperado se sitúa unos
+`a·(N−1)/(N+1)` por encima de la verdad — con a = \$30M eso son \$10M en N=2, \$18M en
+N=4, \$25M en N=10, acercándose al techo completo de \$30M a medida que N crece.)*
+
+Lee esa columna hacia abajo y el modelo salta a la vista. Con **un** pujador, sin
+selección, cero exceso — tu estimación insesgada es simplemente insesgada. Con **dos**,
+el ganador ya se excede en \$10M de media. Con **diez** pujadores, la estimación
+ganadora es \$125M para un yacimiento de \$100M — un **sobrepago del 25%** incorporado
+puramente por la selección, antes de que nadie haya hecho ninguna tontería. Cada pujador
+fue honesto; cada estimación fue insesgada; y aun así la subasta fabricó un sobrepago
+sistemático de \$25M de la nada, sencillamente coronando al máximo.
+
+Y fíjate en la dirección del efecto: **más competencia lo empeora.** En casi todos los
+ámbitos de la vida, más opciones y más escrutinio ayudan al comprador. Aquí, cada rival
+adicional estira el máximo aún más hacia la cola optimista, así que el exceso del
+ganador *crece*. Veinte geólogos adivinando significa que el ganador batió a otros
+diecinueve — su conjetura tuvo que ser una sobreestimación aún más disparatada para
+salir ganadora.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En el ejemplo resuelto, pasar de 2 pujadores a 10 pujadores elevó el exceso esperado del ganador de $10M a $25M. ¿Qué implica esto sobre la competencia en las subastas de valor común?"
+  options={[
+    { text: 'Más pujadores EMPEORA la maldición del ganador, porque el máximo de más estimaciones llega más lejos por encima de la verdad', correct: true },
+    { text: 'Más pujadores suaviza la maldición, porque las estimaciones se promedian', correct: false },
+    { text: 'El número de pujadores no tiene efecto sobre el exceso del ganador', correct: false },
+    { text: 'Más pujadores reduce el valor real del yacimiento', correct: false },
+  ]}
+  explanation="Más pujadores es peor para el ganador. Promediar ayudaría si tomaras la MEDIA de todas las estimaciones — pero la subasta no lo hace; toma el MÁXIMO, y el máximo de más extracciones se sitúa más lejos en la cola optimista. Ganar contra 10 rivales es una evidencia más fuerte de que sobreestimaste que ganar contra 2. Este es el corazón contraintuitivo del modelo: en una subasta de valor común, una sala abarrotada es una sala más peligrosa."
+/>
+
+## Condúcelo tú mismo
+
+Ahora siente el mecanismo en lugar de solo leerlo. Repite ×50 con unos pocos pujadores,
+anota el sobrepago medio, luego sube el deslizador de pujadores y repite ×50 otra vez.
+Haz lo mismo con el deslizador de ruido. Ambos mandos empujan el sobrepago en la misma
+dirección — al alza.
+
+<WinnerCurseSim
+  client:visible
+  title="Observa cómo crece el sobrepago con rivales y ruido"
+  caption="Pon los pujadores bajos (digamos 3) y repite ×50 — anota el sobrepago medio. Ahora pon los pujadores en 20 y repite ×50 otra vez: el sobrepago se dispara, porque la estimación ganadora es ahora el máximo de veinte extracciones. Luego empuja el deslizador de ruido: más incertidumbre por conjetura ensancha la cola de la que se extrae el máximo, así que el ganador se excede todavía más. Más rivales Y más incertidumbre hacen, cada uno, que ganar sea peor."
+  initialBidders={4}
+  initialNoise={20}
+  instructions="Cada pujador estima el mismo valor real oculto y luego puja. La puja más alta gana y paga su propia puja. Celebra subastas y observa el sobrepago medio: ganar significa que fuiste el más optimista."
+  eyebrow="Laboratorio de la maldición del ganador"
+  biddersLabel="Número de pujadores"
+  noiseLabel="Ruido de la estimación (cuánto puede errar cada conjetura)"
+  shadeLabel="Regla de puja"
+  shadeOffLabel="Ingenua (puja tu estimación)"
+  shadeOnLabel="Rebajada (corrige por ganar)"
+  runOneLabel="Celebrar una subasta"
+  runManyLabel="Repetir ×50"
+  resetLabel="Reiniciar"
+  trueValueLabel="Valor real"
+  bidderLabel="Una puja"
+  winnerLabel="Estimación ganadora"
+  shadedBidLabel="Puja ganadora rebajada"
+  lastLabel="Última subasta"
+  averagesLabel="Promedios hasta ahora"
+  roundsLabel="Subastas celebradas"
+  overshootLabel="Media: estimación ganadora sobre el valor real"
+  overpayLabel="Sobrepago medio (puja − valor)"
+  profitLabel="Beneficio medio del ganador"
+  emptyLabel="Pulsa «Celebrar una subasta» para celebrar una. Luego repite ×50 para ver cómo se asientan los promedios."
+  shadeNoteTemplate="Rebajando en {shade} = ruido × (N−1)/(N+1). Más profundo con más rivales."
+  lastTemplate="El ganador estimó {winner} por algo que vale {true}, pujó {bid} y se fue con un beneficio de {profit}."
+/>
+
+Dos mandos, una dirección. **Más pujadores** y **más ruido** estiran ambos la brecha
+entre la estimación ganadora y la verdad. Merece la pena detenerse en esto, porque
+invierte dos instintos a la vez: que la competencia protege al comprador (no lo hace, en
+valor común) y que deberías pujar con audacia cuando el valor es muy incierto (deberías
+pujar *con más cautela* — el ruido alto es exactamente cuando la maldición es más
+profunda).
+
+## El vínculo con la reversión a la media
+
+Si has conocido la **reversión a la media** (regression to the mean), la maldición del
+ganador debería parecerte una vieja amiga con un disfraz nuevo — porque lo *es*. La
+reversión a la media dice: una medición extrema es extrema en parte por señal genuina y
+en parte por ruido afortunado, y la parte de ruido no se repetirá, así que la siguiente
+medición deriva de vuelta hacia la media. Los padres más altos tienen hijos más bajos;
+el mejor fondo del primer trimestre se enfría; el novato en la portada de la revista
+se hunde.
+
+La estimación ganadora es exactamente una medición extrema así. Es el **máximo** de
+muchas conjeturas ruidosas, así que es alta en parte porque el yacimiento realmente
+podría ser bueno y en parte porque esa estimación en concreto pilló una racha
+afortunada de error positivo. La parte de señal es real; la parte de ruido no va a
+estar ahí cuando aparezca la realidad. Así que *ex post* — una vez perforados los pozos,
+llegados los flujos de caja, tomado el yacimiento por el jugador — el resultado
+**revierte a la baja** hacia la verdad, y el trato rinde por debajo de la rosada
+estimación que lo ganó. La maldición del ganador es la reversión a la media con una
+etiqueta de precio pegada: pagaste el extremo, recibes el valor revertido y te comes la
+diferencia.
+
+<Reveal client:visible label="Por qué «la estimación del comprador siempre parecía tan buena»">
+<Callout variant="success" title="Selección, luego reversión, luego decepción">
+Esta es la forma de casi todos los tratos decepcionantes. Primero **selección**: la
+subasta corona a aquel cuya estimación resultó más alta. Luego **reversión**: esa
+afortunada estimación alta cae de vuelta hacia la realidad a medida que llegan los
+resultados reales. Luego **decepción**: el ganador, tras haber pagado por el extremo,
+obtiene el valor revertido y lo llama «mala suerte». No es mala suerte — es la
+consecuencia absolutamente predecible de pagar el máximo de una muestra ruidosa y luego
+verlo revertir. La única sorpresa real es que alguien se sorprenda.
+</Callout>
+</Reveal>
+
+<MCQ
+  client:visible
+  allowMultiple
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Cuáles de estas afirmaciones conectan correctamente la maldición del ganador con la reversión a la media? (Selecciona todas las que apliquen.)"
+  options={[
+    { text: 'La estimación ganadora es el máximo de muchas conjeturas ruidosas, así que es alta en parte por una suerte que no se repetirá', correct: true },
+    { text: 'Ex post, el resultado real revierte a la baja hacia la verdad, así que el trato rinde por debajo de la estimación ganadora', correct: true },
+    { text: 'El ganador paga por el valor extremo pero recibe el valor revertido, y pierde la diferencia', correct: true },
+    { text: 'La reversión garantiza que todo ganador de subasta pierde dinero en cada trato individual', correct: false },
+    { text: 'La conexión solo se cumple cuando hay exactamente un pujador', correct: false },
+  ]}
+  explanation="Las tres primeras son el vínculo: la estimación ganadora es un extremo (un máximo) inflado por la suerte, que revierte hacia la verdad a posteriori, así que el ganador paga el pico y cobra el valor revertido. Las dos últimas son trampas — la reversión trata de PROMEDIOS, así que cualquier trato individual todavía puede salir alto (podrías haber ganado con un yacimiento genuinamente excelente); y con un único pujador no hay selección ni maldición alguna."
+/>
+
+## Cuándo usarlo
+
+Saca este mecanismo en cuanto te pilles a punto de ganar una puja competitiva sobre un
+valor común incierto. El movimiento mental es concreto:
+
+- **Condiciona sobre ganar antes de ganar.** Pregúntate: «Si gano esto, es porque mi
+  estimación batió a la de todos los demás — así que mi estimación estaba probablemente
+  cerca de lo más alto del montón. ¿Cuánto por encima de la verdad me sitúa eso?»
+- **Cuenta la sala.** Más rivales significa una estimación ganadora más extrema, así que
+  más pujadores deberían volverte *más* cauteloso por señal, no menos.
+- **Respeta el ruido.** Cuanto más incierto es el valor, más ancha es la cola de la que
+  se extrae el máximo, y más profunda la maldición. La incertidumbre alta es una razón
+  para rebajar con más fuerza, no para lanzarte con más ímpetu.
+- **Espera la reversión.** Cualquier estimación que gane parecerá, en retrospectiva, que
+  revirtió. Valora el trato frente al valor *revertido*, no frente al ganador.
+
+<Callout variant="warning" title="La trampa que te tiende">
+La lectura errónea seductora es tratar tu estimación ganadora como tu *mejor*
+estimación — «mi número salió el primero, así que debe de ser la lectura más afinada de
+la sala». Exactamente al revés. En una subasta de valor común, salir el primero es
+evidencia de que tu número fue el más *optimista*, no el más *preciso*. La estimación
+ganadora es el único dato en el que deberías confiar **menos**, precisamente porque
+ganó.
+
+</Callout>
+
+## Repaso
+
+El motor de la maldición del ganador es **condicionar sobre ganar**. Tu estimación puede
+ser perfectamente insesgada por sí sola, pero «he ganado» es un filtro que selecciona
+tus extracciones optimistas y descarta las pesimistas, así que `E[valor | ganas]` se
+sitúa por debajo de tu estimación en bruto — y la brecha es la maldición. Desarrollado
+con números, diez pujadores honestos adivinando un yacimiento de \$100M producen una
+estimación ganadora cercana a \$125M: un sobrepago del 25% fabricado solo por la
+selección, y *crece* con más pujadores y más ruido. Es la **reversión a la media** con
+una etiqueta de precio puesta: la estimación ganadora es un máximo extremo inflado por
+la suerte, que revierte a la baja a posteriori, dejando al ganador pagar el pico y
+cobrar el valle.
+
+Así que el diagnóstico está completo — ahora la cura. Si ganar significa que
+sobreestimaste en una cantidad predecible, el remedio es **restar esa cantidad por
+adelantado.** Eso es la rebaja de puja (bid shading), y es adonde vamos a continuación.

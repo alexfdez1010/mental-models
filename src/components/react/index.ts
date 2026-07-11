@@ -264,3 +264,6 @@ export type { PunctuatedTimelineProps } from '@/components/react/PunctuatedTimel
 
 export { PreferenceCascade, default as PreferenceCascadeDefault } from '@/components/react/PreferenceCascade';
 export type { PreferenceCascadeProps } from '@/components/react/PreferenceCascade';
+
+export { WinnerCurseSim, default as WinnerCurseSimDefault } from '@/components/react/WinnerCurseSim';
+export type { WinnerCurseSimProps } from '@/components/react/WinnerCurseSim';

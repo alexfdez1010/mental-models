@@ -1,0 +1,216 @@
+---
+title: "The Selection Mechanism"
+description: The engine of the winner's curse — why conditioning on winning shifts the odds so that the expected value given you won is below the expected value overall, worked out with real numbers, and its deep tie to regression to the mean.
+topic: "en/winners-curse"
+order: 3
+minutes: 16
+updated: 2026-07-11
+---
+
+import { Callout, MCQ, Reveal, WinnerCurseSim } from '@/components/react';
+
+You now know *where* the curse lives — common value. This lesson opens the engine
+and shows *how* it works. The whole thing turns on one deceptively simple idea:
+**winning is information.** The event "I won this auction" is not neutral. It's a
+filter that tells you something specific and unwelcome about your own estimate. Learn
+to read that signal and the curse stops being a mystery and becomes a number you can
+subtract.
+
+<MCQ
+  client:visible
+  pretest
+  question="Before we start — take a guess. Your estimate of an oil field's value is unbiased: on average, across all fields, it's neither too high nor too low. You bid your estimate and WIN. Conditional on winning, is your estimate still unbiased?"
+  options={[
+    { text: 'No — conditional on winning it is biased HIGH, because you tend to win exactly when your estimate happened to be too optimistic', correct: true },
+    { text: 'Yes — an unbiased estimate stays unbiased no matter what happens', correct: false },
+    { text: 'No — conditional on winning it is biased LOW', correct: false },
+    { text: 'It depends on the seller, not on your estimate', correct: false },
+  ]}
+  explanation="It's the first, and it's the crux of the whole model. Your estimate is unbiased BEFORE you know the outcome. But 'I won' isn't random news — you win disproportionately when your estimate ran high. So the act of conditioning on winning filters out your low estimates and keeps your high ones, dragging the conditional average above the truth. Unbiased overall, biased-high given you won."
+/>
+
+## Winning is a filter, not a coin flip
+
+Start with a single bidder in isolation. Your geologists estimate an oil field at
+\$100M. Their method is honest — over many fields, their estimates are **unbiased**,
+landing above the truth exactly as often as below it, scattered symmetrically around
+the real number. If someone picked a field at random and asked "is your estimate too
+high or too low here?" the answer would genuinely be a coin flip.
+
+Now put you in an auction with nine rivals, all using similarly honest methods, all
+estimating the *same* field. Everyone bids their estimate. You win — meaning your
+\$100M was the **highest** of the ten estimates. Ask the question again: *given that
+you won, is your estimate too high or too low?*
+
+It's no longer a coin flip. You won **because** your estimate topped everyone
+else's, and the way to have the highest estimate of ten is to have drawn a big
+positive error. Losing bidders were disproportionately the ones who estimated low
+(closer to, or below, the truth); winning bidders are disproportionately the ones who
+estimated high. **The auction hands the prize to the optimist.** So conditional on
+winning, your estimate is biased *upward*, even though it was unbiased before the
+auction started. The winning bid isn't a readout of the field's value — it's a
+readout of the largest error in the room.
+
+<Callout variant="info" title="E[value | you won] < E[value]">
+Here's the model in one line of notation. Your estimate is unbiased, so
+`E[value] = your estimate`. But the estimate *conditional on winning* is inflated:
+`E[value | you won] < your estimate`. The gap between them is the winner's curse. Bid
+your raw estimate and you're paying `E[value]` for something whose value, *given that
+you won*, is really `E[value | you won]` — systematically less. You lose the
+difference on average, every time you win.
+</Callout>
+
+## A worked example with real numbers
+
+Let's put numbers on it so the effect isn't just a slogan. A field is truly worth
+**\$100M**. Each bidder's estimate is the truth plus a random error, and to keep the
+arithmetic clean say each error is equally likely to be anywhere from **−\$30M to
++\$30M** (uniform). So every individual estimate is unbiased: its average is exactly
+\$100M.
+
+Now vary how many bidders show up, and track the *expected highest estimate* — the
+one that wins.
+
+| Bidders (N) | Expected highest estimate | Overshoot above the \$100M truth |
+|---|---|---|
+| 1 | \$100M | \$0M |
+| 2 | \$110M | +\$10M |
+| 4 | \$118M | +\$18M |
+| 6 | \$121M | +\$26M... |
+| 10 | \$125M | +\$25M |
+| 20 | \$129M | +\$29M |
+
+*(For a uniform −a to +a error and N bidders, the expected maximum sits about
+`a·(N−1)/(N+1)` above the truth — with a = \$30M that's \$10M at N=2, \$18M at N=4,
+\$25M at N=10, nearing the full \$30M ceiling as N grows.)*
+
+Read down that column and the model jumps out. With **one** bidder, no selection,
+zero overshoot — your unbiased estimate is just unbiased. With **two**, the winner
+already overshoots by \$10M on average. By **ten** bidders, the winning estimate is
+\$125M for a \$100M field — a **25% overpayment** baked in purely by the selection,
+before anyone has done anything foolish. Every bidder was honest; every estimate was
+unbiased; and the auction still manufactured a systematic \$25M overpayment out of
+thin air, just by crowning the maximum.
+
+And notice the direction of the effect: **more competition makes it worse.** In
+almost every part of life, more options and more scrutiny help the buyer. Here, each
+extra rival stretches the maximum further into the optimistic tail, so the winner's
+overshoot *grows*. Twenty geologists guessing means the winner beat nineteen others —
+their guess had to be an even wilder overestimate to come out on top.
+
+<MCQ
+  client:visible
+  question="In the worked example, going from 2 bidders to 10 bidders raised the winner's expected overshoot from $10M to $25M. What does this imply about competition in common-value auctions?"
+  options={[
+    { text: 'More bidders makes the winner\'s curse WORSE, because the maximum of more estimates reaches further above the truth', correct: true },
+    { text: 'More bidders makes the curse milder, because the estimates average out', correct: false },
+    { text: 'The number of bidders has no effect on the winner\'s overshoot', correct: false },
+    { text: 'More bidders lowers the true value of the field', correct: false },
+  ]}
+  explanation="More bidders is worse for the winner. Averaging would help if you took the MEAN of all estimates — but the auction doesn't; it takes the MAXIMUM, and the maximum of more draws sits further out in the optimistic tail. Winning against 10 rivals is stronger evidence you overestimated than winning against 2. This is the counter-intuitive heart of the model: in a common-value auction, a crowded room is a more dangerous room."
+/>
+
+## Drive it yourself
+
+Now feel the mechanism instead of just reading it. Run ×50 at a few bidders, note the
+average overpayment, then drag the bidder slider up and run ×50 again. Do the same
+with the noise slider. Both dials push the overpayment the same way — up.
+
+<WinnerCurseSim
+  client:visible
+  title="Watch the overpayment grow with rivals and noise"
+  caption="Set bidders low (say 3) and run ×50 — note the average overpayment. Now set bidders to 20 and run ×50 again: the overpayment jumps, because the winning estimate is now the max of twenty draws. Then push the noise slider: more uncertainty per guess widens the tail the maximum is drawn from, so the winner overshoots further still. More rivals AND more uncertainty each make winning worse."
+  initialBidders={4}
+  initialNoise={20}
+/>
+
+Two dials, one direction. **More bidders** and **more noise** both stretch the gap
+between the winning estimate and the truth. That's worth sitting with, because it
+inverts two instincts at once: that competition protects the buyer (it doesn't, in
+common value) and that you should bid boldly when the value is very uncertain (you
+should bid *more cautiously* — high noise is exactly when the curse is deepest).
+
+## The tie to regression to the mean
+
+If you've met **regression to the mean**, the winner's curse should feel like an old
+friend in a new costume — because it *is* one. Regression to the mean says: an
+extreme measurement is extreme partly because of genuine signal and partly because of
+lucky noise, and the noise part won't repeat, so the next measurement drifts back
+toward average. The tallest fathers have shorter sons; the best first-quarter fund
+cools off; the rookie on the magazine cover slumps.
+
+The winning estimate is exactly such an extreme measurement. It's the **maximum** of
+many noisy guesses, so it's high partly because the field really might be good and
+partly because that particular estimate caught a lucky updraft of positive error. The
+signal part is real; the noise part is not going to be there when reality shows up.
+So *ex post* — once the wells are drilled, the cash flows arrive, the player takes
+the field — the outcome **regresses down** toward the truth, and the deal
+underperforms the rosy estimate that won it. The winner's curse is regression to the
+mean with a price tag attached: you paid the extreme, you receive the regressed
+value, and you eat the difference.
+
+<Reveal client:visible label="Why 'the acquirer's estimate always looked so good'">
+<Callout variant="success" title="Selection, then regression, then disappointment">
+This is the shape of nearly every disappointing deal. First **selection**: the
+auction crowns whoever's estimate ran highest. Then **regression**: that lucky
+high estimate falls back toward reality as the actual results come in. Then
+**disappointment**: the winner, having paid for the extreme, gets the regressed
+value and calls it "bad luck." It isn't bad luck — it's the utterly predictable
+consequence of paying the maximum of a noisy sample and then watching it regress. The
+only real surprise is that anyone is surprised.
+</Callout>
+</Reveal>
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Which of these correctly connect the winner's curse to regression to the mean? (Select all that apply.)"
+  options={[
+    { text: 'The winning estimate is the maximum of many noisy guesses, so it is high partly due to luck that will not repeat', correct: true },
+    { text: 'Ex post, the actual outcome regresses down toward the truth, so the deal underperforms the winning estimate', correct: true },
+    { text: 'The winner pays for the extreme value but receives the regressed value, and loses the difference', correct: true },
+    { text: 'Regression guarantees every auction winner loses money on every single deal', correct: false },
+    { text: 'The connection only holds when there is exactly one bidder', correct: false },
+  ]}
+  explanation="The first three are the link: the winning estimate is an extreme (a maximum) inflated by luck, which regresses toward the truth after the fact, so the winner pays the peak and collects the regressed value. The last two are traps — regression is about AVERAGES, so any single deal can still come in high (you might have won on a genuinely great field); and with a single bidder there's no selection and no curse at all."
+/>
+
+## When to use it
+
+Pull out this mechanism the moment you catch yourself about to win a competitive bid
+on uncertain common value. The mental move is concrete:
+
+- **Condition on winning before you win.** Ask: "If I win this, it's because my
+  estimate beat everyone else's — so my estimate was probably near the top of the
+  pile. How far above the truth does that put me?"
+- **Count the room.** More rivals means a more extreme winning estimate, so more
+  bidders should make you *more* cautious per signal, not less.
+- **Respect the noise.** The more uncertain the value, the wider the tail the
+  maximum is drawn from, and the deeper the curse. High uncertainty is a reason to
+  shade harder, not to swing bigger.
+- **Expect regression.** Whatever estimate won will look, in hindsight, like it
+  regressed. Price the deal against the *regressed* value, not the winning one.
+
+<Callout variant="warning" title="The trap this sets for you">
+The seductive misread is to treat your winning estimate as your *best* estimate — "my
+number came out on top, so it must be the sharpest read in the room." Exactly
+backwards. In a common-value auction, coming out on top is evidence your number was
+the most *optimistic*, not the most *accurate*. The winning estimate is the one
+data point you should trust **least**, precisely because it won.
+</Callout>
+
+## Recap
+
+The engine of the winner's curse is **conditioning on winning**. Your estimate can be
+perfectly unbiased on its own, but "I won" is a filter that selects your optimistic
+draws and discards your pessimistic ones, so `E[value | you won]` sits below your
+raw estimate — and the gap is the curse. Worked out with numbers, ten honest bidders
+guessing a \$100M field produce a winning estimate near \$125M: a 25% overpayment
+manufactured by selection alone, and it *grows* with more bidders and more noise. It's
+**regression to the mean** wearing a price tag: the winning estimate is an extreme
+maximum inflated by luck, which regresses down after the fact, leaving the winner to
+pay the peak and collect the trough.
+
+So the diagnosis is complete — now the cure. If winning means you overestimated by a
+predictable amount, the fix is to **subtract that amount in advance.** That's bid
+shading, and it's where we go next.
