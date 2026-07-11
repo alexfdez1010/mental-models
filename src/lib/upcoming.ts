@@ -53,12 +53,11 @@
  * `common-knowledge-and-coordination`,
  * `spontaneous-order-and-the-knowledge-problem`,
  * `evolutionarily-stable-strategies`, `goodharts-law`,
- * `information-cascades-and-herding`,
- * `the-value-of-information`, …)
+ * `information-cascades-and-herding`, `the-value-of-information`,
+ * `creative-destruction`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * economics/systems-thinking/strategy (`creative-destruction`, 50),
  * biology-evolution/systems-thinking (`punctuated-equilibrium`, 51),
  * psychology/strategy (`preference-falsification`, 52) and
  * decision-making/economics/probability (`winners-curse`, 53).
@@ -100,33 +99,13 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // -- Expert tier -- kept tag-diverse ----------------------------------------
-  // The value-of-information rung (order 49) has graduated and been removed; its
+  // The creative-destruction rung (order 50) has graduated and been removed; its
   // topic MDX under src/content/topics/ is now the record. The lowest-order entry
-  // below (`creative-destruction`, order 50) is built next. The queue is kept
-  // tag-diverse across the expert tier -- economics/systems-thinking/strategy
-  // (`creative-destruction`), biology-evolution/systems-thinking
+  // below (`punctuated-equilibrium`, order 51) is built next. The queue is kept
+  // tag-diverse across the expert tier -- biology-evolution/systems-thinking
   // (`punctuated-equilibrium`), psychology/strategy (`preference-falsification`)
   // and decision-making/economics/probability (`winners-curse`) -- so no single
   // roadmap tag races ahead.
-  {
-    slug: 'creative-destruction',
-    icon: '🌪️',
-    difficulty: 'expert',
-    order: 50,
-    accent: 'accent',
-    title: {
-      en: 'Creative Destruction',
-      es: 'Destrucción Creativa',
-    },
-    description: {
-      en: 'Growth does not add to the old order — it dismantles it. Every genuinely new product, method, or business model must destroy the incumbent it replaces, so progress and ruin are the same event seen from two sides. Why the healthiest economies are the ones most willing to let their winners die.',
-      es: 'El crecimiento no se suma al orden viejo: lo desmantela. Todo producto, método o modelo de negocio de verdad nuevo tiene que destruir al titular que reemplaza, así que el progreso y la ruina son el mismo suceso visto por dos caras. Por qué las economías más sanas son las más dispuestas a dejar morir a sus ganadores.',
-    },
-    dependencies: ['supply-and-demand', 'feedback-loops', 'moats'],
-    tags: ['economics', 'systems-thinking', 'strategy'],
-    buildNotes:
-      "Creative destruction — the expert economics/systems-thinking rung from Joseph Schumpeter (1942, borrowing from Marx and Sombart): the \"process of industrial mutation that incessantly revolutionises the economic structure from within, incessantly destroying the old one, incessantly creating a new one.\" Assumes supply-and-demand (new entrants undercut incumbents on price/quality and shift the whole curve), feedback-loops (innovation compounds and reinvests, and the destruction of incumbents frees capital/labour that fuels the next wave) and moats (what protects an incumbent, and why every moat is eventually breached). Organising idea: economic growth is NOT incremental accumulation on top of a stable base — it is a gale of innovation that must KILL the thing it replaces. The car destroyed the horse-and-carriage trade, streaming destroyed video rental, the transistor destroyed the vacuum-tube industry, digital photography destroyed Kodak (which invented it). Progress and ruin are two faces of one event. Sections, each mechanism + worked example: the core claim and why it is destruction, not addition (the new S-curve rises only as the old one collapses; jobs, firms, and skills are genuinely destroyed, not merely displaced upward); the entrepreneur and the innovation as the engine (new goods, new methods, new markets, new supply chains, new organisational forms — Schumpeter's five kinds of innovation); why incumbents lose despite every advantage (the incumbent's curse / disruption: existing moats, cash, and customers become anchors; the innovator's dilemma where serving today's best customers rationally blinds you to the low-end entrant); the wave/cycle structure (Kondratiev-style long waves; booms of building and busts of clearing are part of one process, not a malfunction); the tie to moats and Red Queen (no moat is permanent; standing still is falling behind). Worked cases: Kodak, Blockbuster vs Netflix, Nokia/BlackBerry vs smartphone, gas lamps → electric light, mainframe → PC → cloud, ICE cars → EVs. Pitfalls & where the model lies: it is NOT a cheer for destruction for its own sake (the human cost of displaced workers is real and is the core policy tension — creative destruction explains growth but does not by itself justify laissez-faire; safety nets and retraining are the honest counterweight); not all disruption is creative (some \"disruption\" is just value extraction, rent-seeking, or hype with no productivity gain); survivorship bias makes us over-celebrate the winners and forget the destroyed; and incumbents sometimes DO adapt (the model is a strong tendency, not an iron law — some firms cross the chasm). Fixes/uses: for a strategist, assume your current moat is a countdown clock and cannibalise yourself before someone else does; for a policymaker, cushion the people, not the failing firms; for an investor, distinguish durable disruption from fads. Build an interactive island (a \"creative-destruction wave\": overlapping S-curves where a rising entrant technology's adoption curve climbs as the incumbent's installed base and profits collapse, with a slider for the entrant's improvement rate and a readout of the crossover point where the incumbent is doomed — plus the freed resources flowing into the next curve). Plus a Categorize (sort changes into genuinely-creative-destruction vs mere-churn/rent-seeking, or disrupted-incumbent vs adapted-incumbent) and MatchConcepts (creative destruction, innovator's dilemma, incumbent's curse, Schumpeterian rent, long wave), Quiz + MindMap. en + es twin.",
-  },
   {
     slug: 'punctuated-equilibrium',
     icon: '🌋',

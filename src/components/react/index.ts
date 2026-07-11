@@ -255,3 +255,6 @@ export type { CascadeLineProps } from '@/components/react/CascadeLine';
 
 export { VoiLab, default as VoiLabDefault } from '@/components/react/VoiLab';
 export type { VoiLabProps } from '@/components/react/VoiLab';
+
+export { CreativeDestructionWave, default as CreativeDestructionWaveDefault } from '@/components/react/CreativeDestructionWave';
+export type { CreativeDestructionWaveProps } from '@/components/react/CreativeDestructionWave';
