@@ -1,0 +1,293 @@
+---
+title: "Variations That Matter"
+description: The clean 37% rule lives in a fantasy world — irreversible, no recall, ranks only, known N. Relax any one assumption and the optimal policy shifts, sometimes dramatically. Here's how.
+topic: "en/optimal-stopping-and-the-secretary-problem"
+order: 5
+minutes: 13
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, MatchConcepts, OptimalStoppingLab } from '@/components/react';
+
+The **37% rule** is beautiful, and beauty is a warning sign. A result that clean only survives
+in a world sanded down to a very specific shape: options arrive **one at a time**, you must
+decide **on the spot**, a rejected option is **gone forever**, you learn only **who beats whom**
+(ranks, never values), you know **exactly how many** options there are, and looking is **free**.
+Six assumptions, all load-bearing, all frequently false in the decisions you actually face.
+
+The temptation is to memorise "37%" and slap it on everything. That's like learning the frictionless-pulley
+formula in physics and then being shocked when the real box won't budge. This lesson does the
+opposite: we take the six assumptions one at a time, **relax** each, and watch the optimal policy
+move. The headline you should carry out: *the rule is a family, not a number.* Each assumption you
+break tells you which direction to bend the policy — look **longer** or **shorter**, set the bar
+**higher** or **lower**.
+
+<MCQ
+  client:visible
+  pretest
+  question="The pure 37% rule assumes rejected options are gone forever ('no recall'). Suppose that's false — you can actually go back and take an earlier option later. What should happen to how long you explore?"
+  options={[
+    { text: "You should explore LONGER — a great early option isn't necessarily lost, so the cost of looking more is lower", correct: true },
+    { text: "You should explore SHORTER — since you can go back, there's no reason to keep sampling", correct: false },
+    { text: "Nothing changes — 37% is optimal regardless of recall", correct: false },
+    { text: "You should stop the instant you see anything above average", correct: false },
+  ]}
+  explanation="Recall is a safety net. The whole reason the 37% rule commits so aggressively is that hesitation is fatal — the option you love vanishes if you don't grab it. Give that fear a parachute (you can return to earlier options) and you can afford to keep looking, because a strong early candidate is still (partly) on the table. Relaxed danger, relaxed rule: explore longer. In the extreme — guaranteed free recall — sequential stopping collapses entirely into 'view them all, then pick the best.'"
+/>
+
+## Recall — when you *can* go back
+
+**No recall** — the rule that a passed option evaporates the instant you say "next" — is the
+assumption doing the most emotional work in the 37% rule. It's why the policy feels so tense:
+every rejection is a tiny funeral. **Recall** relaxes exactly that. If earlier options remain
+available, the penalty for looking one more time drops, and a lower penalty always means you
+should look **more**.
+
+Think of two ways to buy a used car. In the **no-recall** world you're at a one-day-only auction:
+the car rolls past, you bid or it's gone. In the **recall** world you're browsing a lot where
+every car just sits there — you can walk the whole row, then double back to the blue one you liked
+in aisle two. Nobody at a car lot uses the 37% rule, and they're right not to: with free recall,
+optimal stopping isn't stopping at all. You inspect everything and choose the best. The sequential
+drama disappears.
+
+Reality usually sits in the **realistic middle**: an earlier option is *still there with probability
+p*. The house you toured last week might be under offer now — or might not. The candidate you passed
+on might have taken another job — or might still be looking. This is **recall with probability p**,
+and it interpolates smoothly between the two extremes:
+
+| Recall regime | Probability an earlier pick is still available | Optimal behaviour |
+|---|---|---|
+| No recall (`p = 0`) | 0% | Classic 37% rule — commit hard, hesitation is fatal |
+| Partial recall (`0 < p < 1`) | somewhere between | Explore longer than 37%; the higher `p`, the longer |
+| Full free recall (`p = 1`) | 100% | Not sequential at all — view all, take the best |
+
+The lever is intuitive: **the more likely recall, the longer you should explore**, because your
+best-so-far isn't truly lost when you keep going. Suppose a rejected candidate is still reachable
+with `p = 0.5`. Your "safety" if you keep looking is halfway between "gone" and "guaranteed," so
+your explore phase stretches well past 37% — you can gamble on seeing more, knowing there's a
+coin-flip's chance your current favourite is waiting if the gamble sours.
+
+<Callout variant="warning" title="The rigidity trap">
+The most common real-world misuse of optimal stopping is applying the vanilla 37% rule when recall
+is actually available. People agonise over a job offer as if declining it detonates it — when in
+fact they could circle back next week. Treating a recall situation as no-recall makes you
+**wastefully rigid**: you commit far too early to escape a danger that isn't there. Before you reach
+for 37%, ask the cheap question first — *can I go back?* If the honest answer is "probably," throw
+the number out and keep looking.
+</Callout>
+
+## Known distribution — set a reservation value
+
+The 37% rule is, secretly, a **learning** algorithm. You reject the first 37% not out of pickiness
+but because you have **no idea what "good" means** on this scale until you've seen a sample. The
+explore phase is you building a ruler from scratch. But what if you already own the ruler?
+
+If you actually **know the distribution** of quality — not just ranks, but the real spread of values
+and how often each shows up — you don't need to burn options learning the scale. You already know it.
+So instead of "reject 37%, then beat the best-so-far," you set a **reservation value**: a fixed bar,
+computed in advance, and you **accept the first option that clears it**. No warm-up sampling. No
+throwing away good early options just to calibrate.
+
+The canonical case is **selling a house**. Suppose from comparable sales you know offers on your house
+are roughly normally distributed around \$500,000, and each week roughly one serious offer arrives.
+You do the expected-value math once and it tells you: *accept any offer at or above \$520,000; reject
+anything below.* That \$520,000 is your reservation value. The first offer over it — whether it's the
+1st offer or the 9th — you take. You never reject a \$540,000 offer in week one just because "you're
+still in the sampling phase." That would be lunacy: you're not sampling, you already knew the scale.
+
+Because a reservation value throws away **zero** options to information-gathering, it strictly
+**beats** the 37% rule whenever you genuinely know the distribution. The 37% rule pays a tuition of
+about 37% of your options to learn a scale; if you already know it, you skip tuition entirely and
+keep a higher expected outcome.
+
+Two refinements worth naming:
+
+- **Time-declining reservation value.** If waiting is costly — property taxes, mortgage, a house that
+  sits and gets stale — you **lower the bar as time passes**. Week one, hold out for \$520,000. By
+  month three, with carrying costs eating you alive, drop it to \$505,000, then \$495,000. This is the
+  descending-threshold idea from Lesson 3, now driven by a *known* distribution plus *known* costs
+  rather than a dwindling count.
+- **Fixed vs. declining.** With an infinite horizon and no waiting cost, the reservation value is a
+  flat constant — famously, a genuinely stationary problem has a single fixed bar you never move.
+
+<MCQ
+  client:visible
+  question="You're selling a car and you know from listings that offers cluster tightly around a value you can name — you know the distribution cold. Which policy is best?"
+  options={[
+    { text: "Compute a reservation price up front and accept the first offer at or above it, no warm-up sampling", correct: true },
+    { text: "Reject the first 37% of offers to calibrate, then take the first offer that beats them all", correct: false },
+    { text: "Wait for the single highest offer possible, however long it takes", correct: false },
+    { text: "Accept the very first offer, since you can't do better than random", correct: false },
+  ]}
+  explanation="This is the classic mistake the section warns about: sampling for a bar you already know. The 37% rule earns its keep only when you're ignorant of the scale. Here you know the distribution, so a reservation value is strictly better — it discards no offers to information-gathering. Waiting for the absolute max ignores that offers arrive with a cost and no guarantee, and taking the first offer throws away the very information you have."
+/>
+
+## A cost to keep searching
+
+The pure rule assumes **looking is free** — you can inspect candidate after candidate at no charge.
+Reality bills you. Every extra apartment viewing is an afternoon gone; every extra interview round is
+staff time; every extra week of job-hunting is rent with no salary. When search has a **marginal cost**,
+the optimal policy shifts in one clear direction: **stop earlier**.
+
+The clean way to think about it borrows directly from the **value of information** (the idea that
+information is only worth gathering while it changes your decision profitably). One more look has an
+**expected gain** — the chance it turns up something better than your current best, times how much
+better. It also has a **cost** — the money, time, or effort of taking that look. The optimal rule is a
+running comparison:
+
+> **Keep looking only while the expected gain from one more look exceeds the cost of that look. The
+> moment marginal gain drops below marginal cost, stop.**
+
+A worked feel for it: you're apartment-hunting, and your best find so far is genuinely good. Each new
+viewing costs you an afternoon you value at, say, \$80. Early on, when you've seen only two places, one
+more viewing has a fat expected payoff — you might easily beat your mediocre best, and the improvement
+could be large. Worth the \$80. But once your best-so-far is already excellent, the odds that viewing
+number twelve beats it shrink, and the *size* of any improvement shrinks too. When the expected
+improvement from the next viewing falls below \$80, you're paying \$80 to gain less than \$80 in
+expectation — you're **lighting money on fire**. Stop.
+
+Search costs push the whole policy down and in: the **reservation value falls** (you'll accept a bit
+less because holding out is expensive) and the **explore phase shortens** (you stop calibrating sooner).
+
+<Callout variant="tip" title="The one-more-look test">
+When you feel the itch to see just one more option, price it. Ask: *what's the realistic expected
+improvement from this next look, and what does the look cost me?* If the honest answer is "probably a
+tiny bump, and it'll cost me a whole day," you've already found your answer. Over-searching — ignoring
+that looking isn't free — is how people turn a good-enough decision into a worse one, exhausted and
+poorer for the privilege.
+</Callout>
+
+## Uncertain or unknown N
+
+To compute "37%" you need one number: **N**, how many options there are. Multiply N by 0.37, reject
+that many, done. But an enormous share of real decisions never hand you N. You don't know how many
+people you'll date, how many candidates will apply, how many houses will hit the market this spring.
+Options don't arrive in a numbered queue — they trickle in over **time**, on a horizon you can only
+guess at.
+
+When N is unknown or random, the rule adapts by **switching its clock from count to time**. Instead
+of "explore the first 1/e ≈ 37% of the *candidates*," you "explore the first 1/e of the *available
+time*." This is the **1/e time variant**: if you have, say, a three-month window to find a flatmate
+and applicants arrive at some unknown rate, you spend the **first ~37% of the calendar** — about the
+first five weeks — in pure explore mode, calibrating, committing to no one. After that, you take the
+first applicant who beats everyone you saw in the opening window. You never needed to know how many
+applicants there'd be; you only needed to know the deadline.
+
+The deep reason this works: when arrivals follow a **time process** (a steady or random trickle — a
+Poisson-like flow), the *fraction of time elapsed* is a good proxy for the *fraction of options seen*,
+so the same 1/e logic transfers from counting to clock-watching. You trade a census you can't take for
+a calendar you can.
+
+And here's the reassuring part — **rough N is usually good enough.** The 37% rule's payoff curve is
+remarkably **flat near its peak**. Guess N is 40 when it's really 60, and you'll set your cutoff a bit
+early, but your success probability barely dips. The rule is *robust*: it forgives sloppy inputs. So
+even when you can only ballpark the horizon, a ballpark lands you near optimal.
+
+<OptimalStoppingLab
+  client:visible
+  title="How much does getting N slightly wrong hurt?"
+  initialN={30}
+  initialLookPercent={37}
+  initialObjective="best"
+  caption="Slide the candidate count and watch how flat the peak is — the 37% rule is forgiving, so a rough guess at N still lands near the optimum."
+/>
+
+Play with the lab above and notice what *doesn't* happen: the peak of the curve doesn't lurch around
+wildly as you change N. It sits stubbornly near a look-fraction of 37% and a success rate near 37%,
+for N of 10 or 30 or 100. That flatness is your permission slip to estimate. You are not required to
+know N to the unit — you're required to be in the right neighbourhood, and the neighbourhood is wide.
+
+<MCQ
+  client:visible
+  question="Spot the trap. A recruiter insists she can't use optimal stopping because she has no idea how many people will apply before the role's hard deadline. What's the best response?"
+  options={[
+    { text: "Switch from a count threshold to a TIME threshold — explore for the first ~37% of the time window, then hire the first applicant who beats that opening period", correct: true },
+    { text: "She's right; with unknown N the whole framework is useless and she should just hire whoever feels best", correct: false },
+    { text: "She should wait until the very last day and hire the final applicant, since she can't calibrate", correct: false },
+    { text: "She must first survey the market to pin down the exact N before any rule applies", correct: false },
+  ]}
+  explanation="Unknown N doesn't break the framework — it changes the clock. The 1/e time variant explores the first ~37% of the available TIME instead of the first 37% of a count you can't measure. Combined with the rule's robustness (rough estimates land near optimal), she has a perfectly usable policy. Waiting for the last applicant throws away all calibration, and demanding an exact N is exactly the paralysis the time variant is designed to dissolve."
+/>
+
+## Rejectable offers — two-sided search
+
+The last assumption is the sneakiest, because the pure model quietly casts you as the only one making
+a choice. Options are passive; they sit there waiting to be accepted or rejected by you. But in the
+decisions that matter most — **jobs, dating, competitive bids** — the option **can reject *you* right
+back.** You extend an offer; it might be declined. This is **two-sided search**, and it changes the
+math because now *hesitation carries two risks instead of one.*
+
+In the classic one-sided problem, holding out for someone better costs you only the options you let
+pass. In two-sided search, holding out **also** risks that the person you finally reach for says *no*
+— they've been evaluating you the whole time, and your dream option may have zero interest in dreaming
+back. So the optimal move shifts twice over: **aim a little below your absolute top, and commit a
+little earlier.**
+
+A worked feel for it in dating or hiring: if you insist on holding out for a "10 out of 10," you face a
+brutal double bind. Tens are rare (few pass your bar), *and* tens have their pick (the ones you find are
+the least likely to choose you back). Lower your target to a "strong 8," and both problems ease at once
+— more options clear the bar, and each is likelier to accept you. You end up matched, whereas the person
+holding out for a 10 ends up alone, having been turned down by the two tens they ever met. The same logic
+governs **competitive bids**: bid for the absolute steal and you'll be outbid; aim for a good-not-perfect
+deal and you actually win some.
+
+This is the doorway where optimal stopping walks out of pure probability and into **game theory and
+matching** — where the classic result is the stable-matching machinery of Gale–Shapley, and the guiding
+intuition is that when both sides choose, both sides must **compromise toward the achievable** rather
+than hold out for the ideal. Full treatment is beyond this lesson; the takeaway to carry is the
+direction of the bend: **aim lower, commit earlier**, because standing on your absolute-highest bar in a
+two-sided world is how you end up matched with nothing.
+
+<MatchConcepts
+  client:visible
+  question="Each variation relaxes one assumption of the pure 37% rule. Match each to how the optimal policy shifts."
+  pairs={[
+    { term: "Recall is available (you can go back)", definition: "Explore LONGER — a strong early option isn't truly lost, so more looking is cheaper" },
+    { term: "You know the quality distribution", definition: "Set a fixed reservation value — accept the first option above a pre-computed bar, no warm-up sampling" },
+    { term: "Each extra look has a cost", definition: "Stop EARLIER — quit when the expected gain from one more look falls below its cost" },
+    { term: "N is unknown or random", definition: "Use a TIME threshold — explore the first ~37% of the available time instead of a count" },
+    { term: "Offers can reject you (two-sided)", definition: "Aim below your top and commit earlier — holding out risks losing options AND being turned down" },
+  ]}
+  explanation="Five assumptions, five directions. Recall relaxes the fear that drives early commitment, so you look longer. Known distribution removes the need to sample a scale, so you use a fixed bar. Search cost makes looking expensive, so you stop earlier. Unknown N removes the count, so you switch to a clock. Rejectable offers add a second risk, so you compromise toward the achievable. The number 37% only survives when all five assumptions hold at once."
+/>
+
+## Putting the variations together
+
+Here's the whole family on one page. Read it as a diagnostic: identify which assumption your real
+decision actually breaks, and the table tells you which way to bend.
+
+| Assumption relaxed | Real-world flavour | Optimal policy moves… |
+|---|---|---|
+| **Recall** — passed options remain available | Car lot, house still on market, candidate still looking | **Look longer**; the higher the recall probability `p`, the longer. At `p = 1`, just view all and pick the best |
+| **Known distribution** — you know the scale of quality | Selling a house with known comps, a well-charted market | **Set a reservation value** (a fixed bar); skip sampling entirely — strictly beats 37% |
+| **Search cost** — each look costs money/time/effort | Apartment viewings, interview rounds, months of job-hunting | **Stop earlier**; reservation value falls, explore phase shortens (value-of-information logic) |
+| **Unknown N** — you don't know how many options | Dating, open-ended hiring, houses on the market this year | **Use a time threshold** (explore first ~1/e of the *time*); rough N is good enough anyway |
+| **Rejectable offers** — the option can reject you | Jobs, dating, competitive bids | **Aim lower, commit earlier**; enters game-theory / matching territory |
+
+Notice the two rough groupings. Anything that makes waiting **safer or more informative** — recall,
+known distribution — lets you be **choosier or longer** in a targeted way. Anything that makes waiting
+**costlier or riskier** — search costs, rejectable offers — pushes you to **commit sooner and aim a
+notch lower**. The 37% rule is the knife-edge special case where every one of these forces is switched
+off at once. It almost never is.
+
+<MCQ
+  client:visible
+  question="A friend is flat-hunting in a hot market. Rejected flats vanish within a day (little recall), each viewing eats a costly afternoon (search cost), and landlords screen HER hard so she can be rejected (two-sided). Relative to the pure 37% rule, what's the sensible adjustment?"
+  options={[
+    { text: "Explore a fairly SHORT window and aim a notch below her dream flat — search costs and two-sided rejection both push toward committing earlier and lower", correct: true },
+    { text: "Explore much LONGER than 37% and hold out only for a perfect flat", correct: false },
+    { text: "Use the 37% rule exactly as-is; none of these details matter", correct: false },
+    { text: "Refuse to decide until she knows the exact number of flats that will ever be listed", correct: false },
+  ]}
+  explanation="Two of the forces here — costly search and two-sided rejection — both point the same way: commit earlier and aim slightly below the absolute top. Low recall keeps the situation tense (no parachute), so she can't afford to dawdle either. Exploring longer would be exactly backwards. And demanding an exact count is the unknown-N paralysis the time-threshold variant exists to cure. When multiple assumptions break, add up the directions they push — here they nearly all point toward 'decide sooner, settle for excellent-not-perfect.'"
+/>
+
+<Callout variant="success" title="The rule is a family, not a number">
+You now hold the whole clan. **37%** is one member — the one born in a world of no recall, unknown
+values, free looking, known count, and one-sided choice. Break any assumption and you know which way to
+bend: recall means **look longer**; a known distribution means **use a fixed bar**; search costs mean
+**stop earlier**; unknown N means **switch to a time threshold**; rejectable offers mean **aim lower and
+commit earlier**. The real skill isn't memorising the number — it's reading a messy decision, spotting
+which assumptions it actually breaks, and bending the policy accordingly. Next lesson we put the whole
+family to work on decisions in the wild.
+</Callout>

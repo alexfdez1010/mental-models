@@ -1,0 +1,385 @@
+---
+title: "Explorar y luego comprometerse"
+description: La regla del 37% es un caso concreto de un patrón más profundo — explorar y luego comprometerse — donde dedicas una fase inicial a reunir información solo para calibrar un listón, y luego saltas a la primera opción que lo supere.
+topic: "es/optimal-stopping-and-the-secretary-problem"
+order: 3
+minutes: 12
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, OptimalStoppingLab } from '@/components/react';
+
+En la lección anterior clavamos un número concreto: rechaza el primer **37%**, recuerda la
+mejor opción que viste y luego coge la primera opción posterior que la supere. Limpio, exacto,
+un poco mágico. Pero si te llevas solo el número, te has guardado la respuesta y has tirado la
+*idea*. El número es un caso especial. La idea es una forma que encaja en un rango enorme de
+decisiones, la mayoría de las cuales no tienen nada que ver con el 37%.
+
+Esa forma es **explorar y luego comprometerse (explore-then-commit)** (también llamada **mirar
+y luego saltar (look-then-leap)**): divide una decisión secuencial y sin vuelta atrás en dos
+fases — una fase de **exploración** en la que reúnes información y no te comprometes con *nada*,
+y una fase de **compromiso** en la que coges la primera opción que supera un **listón**. Todo
+el truco, lo que parece del revés hasta que hace clic, está en para *qué* sirve la fase de
+exploración. Durante ella no estás comprando. Estás **construyendo una regla de medir**.
+
+Esta lección saca esa regla de medir a la luz. Veremos por qué toda regla de esta familia
+tiene exactamente dos fases con un listón entre ellas, por qué «explorar vs. comprometerse» es
+una disyuntiva genuina afilada por la irreversibilidad, por qué el listón tiene que salir *de
+la muestra* y no de tu imaginación, por qué (adelanto de la Lección 3) el listón debería en
+realidad *moverse* a medida que se acorta tu pista, y cómo leer decisiones reales y caóticas
+como explorar y luego comprometerse a simple vista.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de empezar — arriésgate a adivinar"
+  question="Vas a explorar y luego comprometerte en una decisión — digamos, una contratación. ¿Cuál es la verdadera función de la fase de 'exploración' (los primeros candidatos que rechazas deliberadamente)?"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "Calibrar un listón — aprender cómo de bueno es 'bueno' de verdad en esta escala — para que en la fase de compromiso puedas reconocer una opción genuinamente fuerte y saltar", correct: true },
+    { text: "Encontrar a la única mejor persona y contratarla ahí mismo en la fase inicial", correct: false },
+    { text: "Ganar tiempo mientras acumulas confianza antes de decidir", correct: false },
+    { text: "Cubrir el puesto temporalmente hasta que lleguen los candidatos de verdad", correct: false },
+  ]}
+  explanation="La fase de exploración es pura calibración. Rechazas a todos en ella a propósito — no porque sean malos, sino porque su función es enseñarte la escala para que tu listón posterior se apoye en la realidad y no en la fantasía. 'Bueno' no significa nada hasta que hayas visto la cima de la distribución. Contratar desde la muestra frustra su propósito; ganar tiempo no es explorar (explorar tiene un final definido y un objetivo). Al terminar la fase de exploración no tienes una contratación — tienes una vara de medir."
+/>
+
+## Dos fases, un listón
+
+Aquí está el replanteamiento, y es toda la lección en un suspiro. **Toda regla de parada óptima
+de esta familia es la misma máquina: una fase de exploración, luego una fase de compromiso, con
+un único listón entre ellas.** El listón es la **mejor opción que viste mientras explorabas**.
+La fase de compromiso hace exactamente una cosa: coger la **primera** opción que supera el
+listón.
+
+La analogía que lo fija: imagina que eres un **juez de vinos** en un concurso, catando una copa
+a la vez, y debes coronar a un ganador en el instante en que lo catas — sin volver atrás a una
+recata. Si coronas la copa uno, la coronas contra *nada*. Así que el primer tramo de copas,
+remueves, sorbes, escupes y **clasificas mentalmente pero no premias nada**. Estás calibrando
+tu paladar al rango de *este* concurso. Luego, en el momento en que una copa supera a todas las
+que has catado hasta ahora, dejas caer el mazo. La cata nunca fue sobre esas primeras copas. Fue
+sobre aprender a qué sabe «excelente aquí» para reconocerlo al llegar.
+
+La parte contraintuitiva merece decirse despacio: **la muestra no es una lista corta de
+finalistas**. Las opciones de la fase de exploración *no son candidatas a ser elegidas* — aunque
+una sea obviamente brillante. Su propósito entero es fijar el número contra el que mide la fase
+de compromiso. Una opción de la fase de exploración es una **marca en la regla**, no un
+**premio**.
+
+### Ejemplo resuelto: las dos fases en números
+
+Vas a entrevistar a **12** aspirantes, uno a uno, decidiendo sobre cada uno en el acto, sin
+recuperación. Usando una fracción de observación cercana a 1/e, tu fase de exploración son los
+**primeros 4** aspirantes (aproximadamente un tercio de 12). Digamos que sus puntuaciones reales
+de calidad resultan ser:
+
+| Fase | Aspirante | Puntuación | Qué haces |
+|---|---|---|---|
+| Exploración | 1 | 6.1 | Rechazar — solo registrar |
+| Exploración | 2 | **8.3** | Rechazar — pero este es ahora el listón |
+| Exploración | 3 | 5.0 | Rechazar — solo registrar |
+| Exploración | 4 | 7.2 | Rechazar — solo registrar |
+| Compromiso | 5 | 7.9 | Rechazar — por debajo del listón de 8.3 |
+| Compromiso | 6 | 8.0 | Rechazar — todavía por debajo de 8.3 |
+| Compromiso | 7 | **8.6** | **CONTRATAR** — el primero en superar el listón |
+
+El aspirante 2 puntuó 8.3 y lo *rechazaste* — eso escuece, pero es justo el punto. Su 8.3 se
+convirtió en tu listón. Luego te mantuviste firme ante dos personas decentes-pero-no-mejores
+(7.9, 8.0) y saltaste sobre el aspirante 7 en cuanto superó el 8.3. La fase de exploración
+construyó la regla de medir; el aspirante 7 fue lo primero suficientemente alto como para
+activarla.
+
+<Callout variant="warning" title="La trampa de la rigidez">
+Fíjate en que rechazaste un 8.3 durante la exploración y resultó que nadie en la fase de
+compromiso fue mucho mejor. En el problema de la secretaria *puro* eso es correcto — no puedes
+recuperar al aspirante 2. Pero la vida real suele ser más amable: a veces *sí* puedes volver
+atrás. Negarte a ciegas a elegir jamás de tu muestra, cuando la recuperación está realmente
+disponible, es una trampa de rigidez. La Lección 4 aborda «¿y si puedes recuperar?» de frente.
+Por ahora, mantén la regla pura — pero no confundas el modelo con una ley de la física.
+</Callout>
+
+## Siente las dos fases en el laboratorio
+
+Ajusta el laboratorio a **25** opciones con una fracción de observación del **37%**. Reparte una
+secuencia y observa la estructura que el código de colores hace evidente: las cartas **grises**
+son la fase de exploración — descartadas a propósito para fijar el listón — y la regla se queda
+de brazos cruzados, sin comprometerse con nada, hasta que una carta posterior supera a la mejor
+carta gris. Entonces **salta**. Reparte una docena de secuencias nuevas seguidas y *verás* el
+patrón: una observación larga y disciplinada, luego un zarpazo repentino.
+
+<OptimalStoppingLab
+  client:visible
+  title="Explora para fijar el listón, luego salta"
+  initialN={25}
+  initialLookPercent={37}
+  initialObjective="best"
+  eyebrow="Laboratorio de parada óptima"
+  objectiveLabel="Objetivo"
+  bestObjectiveLabel="Elegir la única mejor"
+  valueObjectiveLabel="Maximizar el valor esperado"
+  lookLabel="Fracción de observación (observa y luego salta)"
+  countLabel="Cuántos candidatos"
+  axisLookLabel="Fracción de observación →"
+  axisBestLabel="P(conseguir la mejor)"
+  axisValueLabel="Calidad media de la elección"
+  optimalStatLabel="Observación óptima"
+  scoreStatLabel="Puntuación aquí"
+  referenceStatLabel="1/e ≈ 37%"
+  dealLabel="Repartir una secuencia nueva"
+  demoLabel="Observa una secuencia"
+  samplingLabel="observa"
+  commitLabel="salta"
+  hitLabel="✓ conseguiste la mejor"
+  missLabel="✗ te perdiste la mejor"
+  bestWasLabel="la verdadera mejor era la #{pos}"
+  readoutTemplate="Con {n} candidatos y el objetivo «{objective}», observar el primer {cutoff}% y luego saltar puntúa {score}. La observación óptima ronda el {optimal}% — cerca del {reference} teórico."
+  caption="Reparte secuencias y observa las dos fases: las cartas grises (exploración) se sacrifican para calibrar el listón, luego la regla salta a la primera carta posterior que lo supera. Arrastra la fracción de observación al 0% (salta a ciegas, sin regla de medir) y al 90% (explora tanto que has quemado todas las opciones) para sentir por qué el punto óptimo vive en el medio."
+/>
+
+Ahora abusa del deslizador para sentir la disyuntiva. Arrastra la fracción de observación cerca
+del **0%** — la regla no tiene vara de medir, así que agarra la primera carta y normalmente
+consigue una mediocre. Arrástrala cerca del **90%** — la regla explora casi toda la baraja, fija
+un listón por las nubes, luego descubre que no queda nada que lo supere y se queda atrapada con
+la última carta. Ningún extremo funciona. El medio gana porque es donde has mirado *lo
+suficiente para conocer la escala* pero *no tanto como para haber quemado tus opciones.* Esa
+tensión tiene nombre.
+
+## La disyuntiva explorar/explotar bajo irreversibilidad
+
+Toda decisión secuencial bajo incertidumbre enfrenta dos movimientos, y vale la pena nombrarlos
+como los viejos amigos que son. **Explorar** significa seguir mirando — comprar más información,
+aprender el terreno y aceptar el riesgo de que una gran opción que dejaste pasar ya no esté.
+**Explotar** significa comprometerte con lo que tienes — cobrar ahora y aceptar el riesgo de que
+todavía viniera algo mejor. Esta es la disyuntiva **explorar/explotar (explore/exploit)**, y
+aparece en todas partes, desde los ensayos clínicos hasta a qué restaurante volver.
+
+Lo que convierte la *parada óptima* en su propia bestia es el contexto: explorar/explotar se
+encuentra con la **irreversibilidad sin recuperación**. Cada opción que dejas pasar queda
+**quemada**. Así que el coste de explorar no es meramente «tiempo» — es que la mismísima cosa
+que estabas valorando podría ser la única que nunca puedas recuperar. Aquí explorar es caro de
+una forma que normalmente no lo es, que es exactamente por lo que a la matemática le importa
+tanto *cuándo parar*.
+
+Contrasta esto con explorar/explotar cuando **sí puedes volver a visitar** — el mundo del
+**bandido de múltiples brazos (multi-armed bandit)** (imagina una fila de máquinas
+tragaperras; cada tirón te dice un poco más sobre qué brazo paga mejor, y puedes volver a
+cualquier brazo en cualquier momento). Ahí explorar es *barato*: tira de una palanca, aprende
+algo, y si otra palanca parece mejor simplemente cambias de vuelta — nada se destruye. Como
+nada queda quemado, lo que te juegas en una exploración «desperdiciada» es suave; pagas un
+pequeño coste de oportunidad y sigues. La parada óptima arranca esa red de seguridad. Tienes
+una pasada, un tiro por opción, y una puerta que se cierra a tu espalda.
+
+<MCQ
+  client:visible
+  question="¿Por qué la disyuntiva explorar/explotar es MÁS DURA en un problema de parada óptima que en un bandido de múltiples brazos?"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "En la parada óptima cada opción que pasas queda quemada sin recuperación, así que explorar arriesga perder permanentemente la mismísima opción que estabas evaluando; en un bandido puedes volver a cualquier brazo, así que una exploración 'desperdiciada' es barata", correct: true },
+    { text: "Los bandidos tienen más opciones que los problemas de parada óptima, así que hay más que perder", correct: false },
+    { text: "La parada óptima no tiene información que reunir, así que explorar no tiene sentido", correct: false },
+    { text: "En un bandido debes comprometerte en el acto, pero en la parada óptima nunca tienes que comprometerte", correct: false },
+  ]}
+  explanation="Ambos son problemas de explorar/explotar, pero la irreversibilidad es el multiplicador. En un bandido, explorar un brazo es casi gratis — siempre puedes volver, así que el peor caso de un mal tirón es un pequeño coste de oportunidad. En la parada óptima, explorar significa pasar opciones que nunca puedes recuperar, así que una observación larga puede quemar la mejor opción sin más. La misma disyuntiva, con lo que te juegas mucho más afilado, porque la puerta se cierra tras cada elección."
+/>
+
+## Por qué el listón sale de la muestra, y no de la nada
+
+Supón que anunciaras tu listón *antes* de mirar: «Contrataré a la primera persona que sea un 8
+sobre 10.» Suena decidido. También es un sinsentido — **¿un 8 sobre 10 en qué escala?** No sabes
+si esta reserva de aspirantes llega como mucho al 6 (en cuyo caso esperarás para siempre y no
+contratarás a nadie) o alcanza el 9 rutinariamente (en cuyo caso tu 8 es mediocre y te
+conformarás demasiado pronto). Un listón sacado de la imaginación no está anclado. Estás
+midiendo con una regla cuyas marcas te inventaste.
+
+Esta es la razón profunda por la que existe la fase de exploración: es literalmente el acto de
+**aprender la cima de la distribución** para que tu listón se apoye en suelo real. «La mejor del
+primer tercio» no es una suposición — es una *estimación de qué aspecto tiene la excelencia
+aquí*, extraída de datos reales. El regalo entero de la muestra es un umbral anclado. Por eso
+tiras la muestra: su valor nunca fueron las opciones que había en ella; fue el **número que te
+enseñaron.**
+
+### Ejemplo resuelto: dos candidatas, dos calibraciones
+
+Dos responsables de contratación entrevistan a las mismas 15 personas en el mismo orden, ambos
+usando explorar y luego comprometerse con una muestra de 5 personas.
+
+- **Las primeras 5 de la responsable A** resultan incluir una estrella genuina (un 9.1). Su
+  listón queda fijado alto en 9.1. Aguanta — y como aquella fue una muestra fuerte por chiripa,
+  nadie posterior lo supera, así que se ve forzada al último candidato. Calibrada un pelín
+  demasiado alto por suerte.
+- **Las primeras 5 de la responsable B** son todas mediocres (puntuación máxima 6.8). Su listón
+  es un modesto 6.8. Salta sobre el candidato 8, un sólido 7.4 — una buena contratación,
+  temprana y segura.
+
+La misma regla, las mismas personas, muestras distintas — y no pasa nada. El punto no es que la
+muestra esté siempre perfectamente calibrada (no lo está; es una extracción aleatoria). El punto
+es que un listón *de la muestra* está anclado a la realidad y consigue la mejor opción
+sorprendentemente a menudo, mientras que un listón *de tu imaginación* no está anclado a nada y
+falla de forma predecible. Una regla real un poco ruidosa gana a una falsa pero segura.
+
+<Callout variant="tip" title="Dilo con tus palabras">
+La fase de exploración responde a una pregunta que literalmente no puedes responder de ninguna
+otra manera: **¿cómo de bueno es bueno, aquí?** No puedes exigir un 8 si nunca has visto la
+escala. Mira primero — la cima de tu muestra *es* tu 8.
+</Callout>
+
+## El listón no es fijo — depende de cuánta observación queda
+
+Aquí hay una sutileza que desplegamos por completo la próxima lección pero que deberías conocer
+ya, porque corrige la mayor lectura errónea de explorar y luego comprometerse: **el listón no es
+un único número fijo que mantienes durante toda la fase de compromiso.** O más bien — en el
+problema de la secretaria puro resulta que parece fijo (supera a la mejor de la muestra), pero
+la regla óptima *real* es un **umbral que depende del tiempo que queda.**
+
+La intuición es puro sentido común una vez enunciada. Al principio de tu fase de compromiso, con
+mucha pista por delante, puedes permitirte ser **exigente** — si dejas pasar una buena opción,
+vienen muchas más oportunidades. Al final de la fase de compromiso, con solo un par de opciones
+restantes, debes **relajar el listón** — aguantar por la excelencia cuando la baraja está casi
+vacía es cómo acabas varado con las sobras. Así que la política óptima es en realidad un
+**listón que cae**: exige mucho cuando tienes tiempo, exige menos a medida que la puerta se
+cierra.
+
+<Callout variant="warning" title="La trampa del 'listón fijo para siempre'">
+La forma más común en que la gente rompe explorar y luego comprometerse en la vida real es tratar
+el listón como sagrado y permanente. Calibraste «genial» en el mes uno de una búsqueda de piso
+de seis meses — y para el mes cinco, con dos fines de semana antes de tener que mudarte, *sigues*
+rechazando pisos perfectamente buenos por no pasar un listón que fijaste cuando tenías pista
+infinita. Un listón que ignora tu tiempo menguante es un listón que te dejará varado. La parada
+óptima es una **regla de umbral dependiente del tiempo**, y la Lección 3 hace preciso el listón
+que cae.
+</Callout>
+
+Planteado así, toda la familia entra en foco: explorar y luego comprometerse no es «mira el 37%
+y luego aplica un estándar congelado». Es «**dedica una fase inicial a aprender la escala, luego
+aplica un estándar que empieza alto y se relaja a medida que se te acaban las opciones.**» La
+regla del 37% es el caso especial limpio, de solo-la-mejor, de esa idea mucho más general.
+
+<MCQ
+  client:visible
+  question="Estás a cinco meses de una búsqueda de piso de seis meses con una fecha límite dura de mudanza. Aparece un piso muy bueno — no exactamente el listón de la 'mejor' que calibraste allá por el mes uno. La lógica de la parada óptima dice:"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "Baja tu listón y considera seriamente cogerlo — sin apenas pista por delante, aguantar por el estándar de la 'mejor' del mes uno arriesga quedarte varado", correct: true },
+    { text: "Recházalo — tu listón calibrado es el listón, y los estándares no deberían aflojar", correct: false },
+    { text: "Recházalo y reinicia la fase de exploración para recalibrar desde cero", correct: false },
+    { text: "Cógelo solo si supera a todos los pisos que has visto jamás, exactamente como en el mes uno", correct: false },
+  ]}
+  explanation="El listón óptimo depende del tiempo que queda. Temprano, con mucha pista, un listón alto es correcto — puedes permitirte pasar buenas opciones. Tarde, con la puerta cerrándose, aferrarte a ese mismo listón alto es cómo acabas sin nada. El movimiento correcto es un umbral que cae: relaja el estándar a medida que se te acaban las opciones. Tratar el listón del mes uno como permanente es la clásica trampa del 'listón fijo para siempre'."
+/>
+
+## Leer una decisión como explorar y luego comprometerse
+
+La verdadera destreza que esta lección te compra es una **lente**: te encuentras con una
+decisión secuencial caótica e inmediatamente la divides en su fase de exploración (reúne
+información, no te comprometas con nada, fija el listón) y su fase de compromiso (coge la primera
+opción por encima del listón). Aquí van cuatro, descompuestas.
+
+| Decisión | Fase de exploración (calibrar el listón) | Fase de compromiso (saltar por encima del listón) |
+|---|---|---|
+| **Contratar desde entrevistas secuenciales** | Entrevista a un lote inicial del que no contratarás; la mejor de ellas fija «candidato fuerte» | Ofrece el puesto al primer candidato posterior que supere a esa mejor de la muestra |
+| **Elegir un contratista de presupuestos que van llegando** | Recoge varios presupuestos a medida que entran, sin adjudicar ninguno; anota la mejor relación valor-alcance hasta ahora | Firma con el primer presupuesto nuevo que supere claramente a tu mejor-hasta-ahora en precio y alcance |
+| **Escoger un posgrado de ofertas que van llegando** | Atiende las ofertas tempranas con plazos duros, declinándolas, para aprender el nivel de programa que te dice que sí | Acepta la primera oferta posterior que supere a la mejor de las que ya rechazaste |
+| **Comprar un coche de segunda mano según aparecen anuncios** | Observa anuncios durante una ventana fijada sin comprar; la mejor combinación precio-estado que veas fija el listón | Compra el primer anuncio nuevo que supere ese listón — antes de que, inevitablemente, se lo venda a otro |
+
+Cada fila es la misma máquina. Un tramo inicial dedicado a **aprender la escala** sin
+comprometerse con nada, luego un salto disciplinado de **el-primero-que-supera-el-listón**. Lo
+único que cambia son las unidades del listón (habilidad, dinero, nivel del programa,
+precio-estado) y la longitud de la fase de exploración. Lo único que comparten — y lo que tus
+tripas combaten — es que *te alejas deliberadamente de buenas opciones al principio* para que
+«bueno» signifique algo más tarde.
+
+<Categorize
+  client:visible
+  question="Clasifica cada acción en la fase a la que pertenece dentro de una estrategia de explorar y luego comprometerse."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  buckets={["Fase de exploración (reunir información, no comprometerse con nada)", "Fase de compromiso (coger la primera opción por encima del listón)"]}
+  items={[
+    { text: "Entrevistar a los primeros cuatro candidatos sin intención de contratar a ninguno de ellos", bucket: "Fase de exploración (reunir información, no comprometerse con nada)" },
+    { text: "Anotar que el más fuerte de los candidatos iniciales puntuó un 8.3 y convertir eso en tu listón", bucket: "Fase de exploración (reunir información, no comprometerse con nada)" },
+    { text: "Observar anuncios de coches de segunda mano durante dos semanas sin comprar, siguiendo la mejor combinación precio-estado", bucket: "Fase de exploración (reunir información, no comprometerse con nada)" },
+    { text: "Recoger varios presupuestos de contratistas a medida que llegan, sin adjudicar el trabajo a ninguno todavía", bucket: "Fase de exploración (reunir información, no comprometerse con nada)" },
+    { text: "Ofrecer el puesto al primer candidato posterior que supere al mejor de tu lote inicial", bucket: "Fase de compromiso (coger la primera opción por encima del listón)" },
+    { text: "Comprar el primer anuncio nuevo que supere el listón que fijaste durante tu ventana de observación", bucket: "Fase de compromiso (coger la primera opción por encima del listón)" },
+    { text: "Firmar con el primer presupuesto nuevo que supere claramente a tu mejor-hasta-ahora en precio y alcance", bucket: "Fase de compromiso (coger la primera opción por encima del listón)" },
+    { text: "Aceptar la primera oferta posterior de posgrado que supere a las que ya rechazaste", bucket: "Fase de compromiso (coger la primera opción por encima del listón)" },
+  ]}
+  explanation="La fase de exploración es todo lo que haces para construir la regla de medir: mirar, seguir la pista y — crucialmente — no comprometerte con nada, ni siquiera con opciones que te gustan. La fase de compromiso es un único movimiento disciplinado: coger la PRIMERA opción que supera el listón que fijó la fase de exploración. La señal de 'exploración' es 'sin compromiso todavía, solo calibrando'; la señal de 'compromiso' es 'el primero por encima del listón, y lo cojo.'"
+/>
+
+### Explorar no es procrastinar
+
+Una distinción más, porque es la diferencia entre usar este modelo y abusar de él. **Explorar no
+es procrastinar.** Pueden parecer idénticos desde fuera — ambos implican «no decidir todavía» —
+pero son opuestos en estructura. La procrastinación no tiene **final definido** ni **propósito**;
+es evitación disfrazada de diligencia. La exploración tiene un **final fijo** (el tamaño de la
+muestra — digamos, el primer tercio) y una **tarea específica** (fijar el listón). En el momento
+en que termina la fase de exploración, explorar se vuelve *prohibido*: cambias a modo compromiso
+y saltas a la primera opción por encima del listón. Si tu «fase de investigación» no tiene una
+línea de meta programada ni un umbral esperando al otro lado, no estás explorando — estás dando
+largas, y el modelo no te da cobertura alguna para ello.
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada idea de explorar y luego comprometerse con lo que realmente significa."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo emparejado"
+  partialResultWord="correctas"
+  pickDefinitionHint="→ ahora elige una definición"
+  notLinkedHint="sin enlazar todavía"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  pairs={[
+    { term: "El listón", definition: "La mejor opción vista durante la fase de exploración — el umbral contra el que la fase de compromiso mide cada opción posterior" },
+    { term: "La fase de exploración", definition: "Un tramo inicial definido en el que reúnes información y no te comprometes con nada; su producto es un listón calibrado, no una opción elegida" },
+    { term: "La fase de compromiso", definition: "El movimiento en el que coges la primera opción que supera el listón, sin mirar más" },
+    { term: "Irreversibilidad sin recuperación", definition: "La regla de que toda opción que pasas queda quemada, que es lo que hace que explorar sea costoso y esta disyuntiva afilada" },
+    { term: "Umbral que cae", definition: "La idea de que el listón óptimo debería bajar a medida que se acaban las opciones, porque mantener un estándar alto al final arriesga quedarse varado" },
+    { term: "Procrastinación (la impostora)", definition: "No-decidir sin final fijo ni listón esperando — evitación haciéndose pasar por exploración" },
+  ]}
+  explanation="Explorar y luego comprometerse es un vocabulario pequeño usado con precisión. La fase de exploración produce un listón (no una contratación); la fase de compromiso gasta ese listón en la primera opción que lo supera; la irreversibilidad sin recuperación es por qué todo el asunto es delicado; el umbral que cae es la corrección al 'listón fijo para siempre'; y la procrastinación es la falsificación — misma superficie, sin estructura."
+/>
+
+## Juntándolo todo
+
+Quita el 37% concreto y aquí está la máquina reutilizable que ahora posees. Una decisión
+secuencial y sin vuelta atrás se divide limpiamente en dos fases unidas por un listón. La fase de
+**exploración** reúne información y no se compromete con nada — su único producto es un
+**listón**, calibrado a partir de la cima de lo que viste, porque «bueno» no significa nada hasta
+que hayas visto la escala. La fase de **compromiso** coge la **primera** opción que supera el
+listón. La disyuntiva por debajo es **explorar/explotar**, vuelta inusualmente afilada por la
+**irreversibilidad** — cada observación arriesga quemar una gran opción, a diferencia de un
+bandido donde siempre puedes volver. Y el listón mismo no está congelado: la regla verdaderamente
+óptima es un **umbral que cae a medida que se acorta tu pista**, que es exactamente hacia donde
+nos lleva la Lección 3.
+
+<Callout variant="success" title="El patrón que llevarte">
+Explorar y luego comprometerse: dedica una fase inicial definida a reunir información y a no
+comprometerte con **nada** — su única tarea es **calibrar un listón** a partir de la cima de lo
+que ves — luego coge la **primera** opción que lo supere. La muestra es una **regla de medir**, no
+una lista de finalistas. Cuidado con las tres trampas: negarte a elegir jamás de la muestra
+incluso cuando la recuperación está genuinamente disponible (rigidez), confundir dar largas sin
+rumbo con exploración (la procrastinación no tiene final ni listón), y aferrarte a un listón que
+fijaste con pista infinita cuando la puerta está casi cerrada (un listón fijo te deja varado).
+A continuación: por qué el listón más inteligente **cae** a medida que se te acaban las opciones.
+</Callout>

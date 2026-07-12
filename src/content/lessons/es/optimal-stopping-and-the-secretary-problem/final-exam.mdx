@@ -1,0 +1,343 @@
+---
+title: "Examen final: la parada óptima y el problema de la secretaria"
+description: Un examen final calificado y sin vuelta atrás sobre la parada óptima y el problema de la secretaria — la regla del 37% y por qué aparece e, explorar-luego-comprometerse, la variante de valor esperado/valor de reserva con su umbral descendente, las variaciones reales y los límites honestos del modelo. Aprobado con el 70%.
+topic: "es/optimal-stopping-and-the-secretary-problem"
+order: 7
+minutes: 22
+updated: 2026-07-12
+---
+
+import { Callout, FinalExam, MindMap } from '@/components/react';
+
+Este es el final calificado de todo el curso. Reúne el arco completo: el problema exacto de la secretaria (secretary problem) y la regla de mirar-luego-saltar, por qué tanto la fracción óptima de observación como la probabilidad de acierto convergen en 1/e (alrededor del 37%), el patrón general de explorar-luego-comprometerse bajo irreversibilidad, el cambio hacia un umbral de valor de reserva (reservation value) descendente cuando te importa el valor esperado en lugar de solo el mejor único, las variaciones del mundo real (recuperación, distribuciones conocidas, costes de búsqueda, N desconocido, búsqueda de dos lados) y —igual de importante— los límites honestos del modelo. Varias preguntas llevan trampas deliberadas extraídas de las lecturas erróneas más comunes de la regla del 37%, así que leed cada enunciado con atención antes de fijar una respuesta.
+
+<Callout variant="warning" title="Cómo funciona este examen">
+Este es un examen final, sin vuelta atrás. Las preguntas llegan de una en una, y **enviar una respuesta la fija para siempre**: no hay marcha atrás, ni reintentos, ni reinicio. Tu puntuación permanece oculta hasta el final, cuando verás si has aprobado. La nota de aprobado es del **70%**. Algunas preguntas están marcadas como **selecciona todas las que correspondan** y necesitan todas las opciones correctas marcadas (y ninguna incorrecta) para ganar el punto. Tómate tu tiempo con cada pregunta, porque solo tienes un intento.
+</Callout>
+
+<FinalExam
+  client:visible
+  passPercent={70}
+  questionLabel="Pregunta"
+  ofLabel="de"
+  submitLabel="Enviar respuesta"
+  selectHintLabel="Selecciona una respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  completeTitleLabel="Examen completado"
+  scoreLabel="Tu puntuación"
+  passLabel="Aprobado"
+  failLabel="No superado"
+  reviewLabel="Tus respuestas"
+  multiSelectLabel="Selecciona todas las que correspondan"
+  questions={[
+    {
+      question: '¿Qué clase de problema describe la "parada óptima" (optimal stopping)?',
+      options: [
+        { text: 'Decidir, a medida que las opciones llegan de una en una, cuándo dejar de buscar y comprometerse — equilibrando el coste de parar demasiado pronto frente al riesgo de dejar pasar la mejor y no recuperarla nunca', correct: true },
+        { text: 'Ordenar una lista fija de opciones de mejor a peor antes de elegir', correct: false },
+        { text: 'Elegir la opción más barata una vez que puedes ver todos los precios a la vez', correct: false },
+        { text: 'Repetir una apuesta hasta que tu resultado medio converja', correct: false },
+      ],
+      explanation: 'La parada óptima es fundamentalmente secuencial e irreversible: las opciones aparecen una a una, y cada decisión de seguir mirando o de parar es definitiva. Las demás opciones describen problemas donde puedes verlo todo a la vez o rehacer la elección, lo que elimina la tensión central.',
+    },
+    {
+      question: 'En el problema clásico de la secretaria, ¿qué condiciones se cumplen todas a la vez?',
+      allowMultiple: true,
+      options: [
+        { text: 'Ves a las N candidatas de una en una en orden aleatorio', correct: true },
+        { text: 'Debes aceptar o rechazar a cada candidata en el acto, y los rechazos son permanentes (sin recuperación)', correct: true },
+        { text: 'Tu único objetivo es conseguir a la mejor candidata única — la segunda mejor cuenta como pérdida total', correct: true },
+        { text: 'Conoces de antemano la puntuación numérica exacta de cada candidata', correct: false },
+      ],
+      explanation: 'El problema limpio es solo de rangos (solo puedes distinguir el orden relativo, no las puntuaciones absolutas), secuencial, irreversible sin recuperación, orden aleatorio, N conocido y solo-el-mejor. Conocer las puntuaciones numéricas exactas de antemano lo convertiría en un problema distinto y más fácil.',
+    },
+    {
+      question: '¿Cuál es la regla de "mirar-luego-saltar" que resuelve el problema clásico de la secretaria?',
+      options: [
+        { text: 'Rechaza al primer ~37% de las candidatas por muy buenas que sean, recuerda a la mejor de ellas y luego toma a la primera candidata posterior que supere a esa mejor-hasta-ahora', correct: true },
+        { text: 'Toma a la primera candidata que esté por encima de la media', correct: false },
+        { text: 'Entrevista a las N y luego vuelve atrás y contrata a la mejor (se permite recuperación)', correct: false },
+        { text: 'Acepta a la candidata número 37 sin importar su calidad', correct: false },
+      ],
+      explanation: 'La política óptima tiene dos fases: una fase pura de "mirar" que solo calibra un listón (la mejor de la muestra) y nunca contrata, y luego una fase de "saltar" que toma a la primera candidata que supera ese listón. No va de una posición fija ni de una simple regla de por-encima-de-la-media.',
+    },
+    {
+      question: 'A medida que N crece mucho, ¿a qué se acerca la fracción ÓPTIMA de candidatas que dedicar a la fase de observación?',
+      options: [
+        { text: '1/e, alrededor del 37%', correct: true },
+        { text: '1/2, alrededor del 50%', correct: false },
+        { text: '1/3, exactamente el 33%', correct: false },
+        { text: '2/3, alrededor del 67%', correct: false },
+      ],
+      explanation: 'La fracción óptima de observación r/N converge en 1/e ≈ 0,3679, aproximadamente el 37%. Es un límite para N grande —para N pequeño el corte exacto óptimo difiere ligeramente— pero el 37% es el número famoso de titular.',
+    },
+    {
+      question: 'A medida que N crece mucho, ¿a qué se acerca la PROBABILIDAD de conseguir realmente a la mejor candidata única bajo la regla óptima?',
+      options: [
+        { text: 'También alrededor de 1/e, aproximadamente el 37%', correct: true },
+        { text: 'Alrededor del 63%, porque te saltas el 37%', correct: false },
+        { text: '100%, ya que la regla es óptima', correct: false },
+        { text: 'Alrededor del 50%, lo mismo que lanzar una moneda', correct: false },
+      ],
+      explanation: 'Una coincidencia elegante: tanto la fracción óptima de observación COMO la probabilidad de éxito resultante convergen en 1/e ≈ 37%. Óptimo no significa garantizado — incluso jugando a la perfección, consigues a la mejor solo un 37% de las veces, porque a veces la mejor estaba en tu muestra o nunca ves a nadie que supere el listón.',
+    },
+    {
+      question: 'Un candidato dice: "El 37% es la tasa de éxito a la que deberías apuntar". ¿Qué tiene de erróneo esa afirmación?',
+      options: [
+        { text: 'El 37% no es un objetivo al que apuntar — es la fracción de observación a la que te comprometes y, por separado, aproximadamente la tasa de acierto que sale de jugar de forma óptima; no puedes elegir hacerlo mejor en el escenario solo-rangos solo-el-mejor', correct: true },
+        { text: 'No hay nada erróneo; el 37% es una meta que fijas para tu tasa de acierto', correct: false },
+        { text: 'La verdadera tasa de acierto objetivo es el 63%', correct: false },
+        { text: 'El objetivo debería ser el 50% por el caso N=3', correct: false },
+      ],
+      explanation: 'Esta es una confusión clásica. El 37% aparece dos veces por razones distintas: es la fracción óptima de observación (una entrada que eliges) y aproximadamente la probabilidad de acierto (una salida que no puedes superar en este escenario). No es una meta de tasa de acierto que subes o bajas.',
+    },
+    {
+      question: 'Para N = 3 candidatas, la regla óptima es mirar a la primera (r = 1) y luego tomar a la siguiente candidata que la supere. ¿Qué probabilidad de acierto logra esto?',
+      options: [
+        { text: '50%', correct: true },
+        { text: '33%', correct: false },
+        { text: '37%', correct: false },
+        { text: '66%', correct: false },
+      ],
+      explanation: 'Recorriendo los 6 ordenamientos igualmente probables de 3 candidatas clasificadas, la regla de "rechazar a la primera, tomar a la siguiente que la supere" gana en 3 de ellos, exactamente el 50%. Esto supera el 1/3 que obtendrías eligiendo a ciegas, y muestra que el límite de 1/e solo se aproxima a medida que N crece.',
+    },
+    {
+      question: 'Intuitivamente, ¿POR QUÉ aparece e (y por tanto 1/e) en el problema de la secretaria?',
+      options: [
+        { text: 'La probabilidad de acierto es un compromiso entre mirar demasiado poco (un listón débil) y mirar demasiado (agotar candidatas), y maximizar ese compromiso a lo largo de la secuencia cae exactamente en la razón r/N = 1/e', correct: true },
+        { text: 'Porque e es la base de los logaritmos naturales y siempre aparece en probabilidad', correct: false },
+        { text: 'Porque hay exactamente e candidatas en la muestra ideal', correct: false },
+        { text: 'Porque el interés compuesto y la contratación usan la misma fórmula', correct: false },
+      ],
+      explanation: 'e emerge de optimizar un compromiso real: una fase de observación más larga fija un listón más alto y fiable pero quema candidatas que podrían haber sido las mejores. Sumar la probabilidad de que la mejor aparezca en cada posición posterior y maximizar lleva al corte donde r/N = 1/e. No es una coincidencia de notación.',
+    },
+    {
+      question: 'La lección 2 planteó la regla de la secretaria como un caso especial de un patrón más amplio. ¿Cómo se llama ese patrón y qué hace realmente su primera fase?',
+      options: [
+        { text: 'Explorar-luego-comprometerse: la fase de exploración solo CALIBRA un listón (la mejor de la muestra) y no se compromete con nadie; la fase de compromiso toma luego a la primera opción que supera el listón', correct: true },
+        { text: 'Ordenar-luego-seleccionar: la primera fase clasifica todo, la segunda elige la cima', correct: false },
+        { text: 'Comprometerse-luego-explorar: fijas pronto y luego sigues muestreando como respaldo', correct: false },
+        { text: 'Promediar-y-aceptar: la primera fase calcula la media, la segunda toma cualquier cosa por encima de ella', correct: false },
+      ],
+      explanation: 'Explorar-luego-comprometerse es la forma general. La idea crucial es que la fase de exploración no se malgasta buscando a un ganador — es pura calibración, que convierte el "no tengo ni idea de qué aspecto tiene lo bueno" en un listón concreto. Solo después empieza a aceptar la fase de compromiso.',
+    },
+    {
+      question: 'El compromiso explorar/explotar en la parada óptima se agudiza por cuál rasgo específico del problema?',
+      options: [
+        { text: 'La irreversibilidad sin recuperación — porque no puedes volver atrás, cada "seguir mirando" es una apuesta permanente contra cada "comprometerse ahora"', correct: true },
+        { text: 'El hecho de que todas las opciones tengan un valor idéntico', correct: false },
+        { text: 'El requisito de ver las opciones en orden clasificado', correct: false },
+        { text: 'La garantía de que la mejor opción llega la última', correct: false },
+      ],
+      explanation: 'Si pudieras recuperar opciones anteriores, explorar sería casi gratis y simplemente lo mirarías todo. La irreversibilidad sin recuperación es lo que hace costoso explorar: cada opción que dejas pasar para reunir información es una opción que nunca podrás reclamar.',
+    },
+    {
+      question: '¿Cómo se comporta el umbral óptimo de aceptación a medida que la búsqueda avanza por las candidatas?',
+      options: [
+        { text: 'El umbral depende de cuánto queda por mirar — puedes permitirte ser exigente cuando quedan muchas opciones, y debes relajarte a medida que se agotan', correct: true },
+        { text: 'El umbral es un listón fijo en el percentil 37 durante toda la búsqueda', correct: false },
+        { text: 'El umbral sube con el tiempo, así que te vuelves más exigente a medida que avanzas', correct: false },
+        { text: 'No hay umbral; aceptas la primera opción de la fase de compromiso', correct: false },
+      ],
+      explanation: 'Un tema clave a lo largo del curso: el listón correcto no es estático. Con muchas opciones futuras, aguantar por algo excelente es barato; con pocas restantes, el mismo estándar arriesga terminar con las manos vacías, así que el listón óptimo cae a medida que las opciones se agotan.',
+    },
+    {
+      question: 'Supón que ya no te importa solo la mejor única — quieres el mejor VALOR ESPERADO, así que un gran segundo puesto todavía cuenta. Comparado con la regla clásica del 37%, ¿qué le pasa a la fracción óptima de observación?',
+      options: [
+        { text: 'Se encoge POR DEBAJO del 37%, porque agarrar una opción fuerte-pero-no-perfecta ahora vale mucho, así que te comprometes antes', correct: true },
+        { text: 'Se queda exactamente en el 37%, ya que eso siempre es óptimo', correct: false },
+        { text: 'Crece muy por encima del 37%, porque deberías muestrear más para ir seguro', correct: false },
+        { text: 'Salta al 100% — debes verlo todo primero', correct: false },
+      ],
+      explanation: 'La regla pura del 37% optimiza un objetivo severo de todo-o-nada que da cero crédito a un segundo puesto soberbio. Cuando los casi-aciertos cuentan (pagos cardinales), el coste de aguantar baja, así que la fase óptima de observación se encoge por debajo del 37% y empiezas a aceptar antes.',
+    },
+    {
+      question: 'Cuando optimizas para el valor esperado con una escala de pagos conocida, ¿qué forma toma la política óptima?',
+      options: [
+        { text: 'Un valor de reserva — un umbral por encima del cual aceptas cualquier cosa — que DESCIENDE a medida que se agotan las opciones (exigente pronto, indulgente tarde)', correct: true },
+        { text: 'Una única posición de corte fija, exactamente igual que la regla clásica', correct: false },
+        { text: 'Un umbral ascendente, así que exiges más a medida que avanzas', correct: false },
+        { text: 'Ningún umbral en absoluto; siempre tomas la última opción disponible', correct: false },
+      ],
+      explanation: 'La solución de valor esperado es un valor de reserva descendente: aguanta por la excelencia mientras quedan muchas oportunidades, luego baja tu listón paso a paso a medida que el horizonte se encoge. Es "exigente pronto, indulgente tarde", una política más suave y realista que un corte duro de mirar-luego-saltar.',
+    },
+    {
+      question: 'Bajo una política de valor de reserva descendente para el valor esperado, ¿qué deberías hacer cuando llegas a la ÚLTIMA opción?',
+      options: [
+        { text: 'Aceptarla pase lo que pase, porque la alternativa es marcharte sin nada', correct: true },
+        { text: 'Rechazarla si está por debajo de la mejor que has visto', correct: false },
+        { text: 'Aplicar el mismo listón del 37% que usaste al principio', correct: false },
+        { text: 'Volver atrás y recuperar una opción anterior en su lugar', correct: false },
+      ],
+      explanation: 'En la última opción no hay futuro por el que aguantar, así que cualquier opción de valor positivo supera el cero garantizado de terminar con las manos vacías. El valor de reserva ha caído hasta el suelo, que es exactamente por lo que el umbral debe descender a lo largo de la búsqueda.',
+    },
+    {
+      question: '¿Cómo cambia la estrategia óptima permitir la RECUPERACIÓN (puedes volver atrás y aceptar una opción que dejaste pasar)?',
+      options: [
+        { text: 'Te deja mirar MÁS TIEMPO, y con recuperación totalmente libre puedes de hecho comparar todas las opciones y elegir la mejor', correct: true },
+        { text: 'Te obliga a comprometerte incluso antes del 37%', correct: false },
+        { text: 'No tiene efecto, ya que la regla ya es óptima', correct: false },
+        { text: 'Hace que el problema no tenga solución', correct: false },
+      ],
+      explanation: 'La recuperación elimina la penalización por dejar pasar una buena opción, así que explorar se vuelve más barato y deberías muestrear más. Con recuperación gratuita y garantizada, toda la tensión se colapsa: puedes examinarlo todo y luego tomar la mejor, que es por lo que "sin recuperación" es un supuesto que sostiene la regla del 37%.',
+    },
+    {
+      question: 'Si de verdad CONOCES la distribución de la que se extraen los valores de las opciones, ¿qué deberías usar en lugar de una fase de muestreo de mirar-luego-saltar?',
+      options: [
+        { text: 'Un valor de reserva calculado a partir de la distribución — acepta la primera opción por encima de él, sin necesidad de muestrear primero', correct: true },
+        { text: 'La regla del 37%, sin cambios', correct: false },
+        { text: 'Una fase de observación más larga, del 63%, para ir seguro', correct: false },
+        { text: 'Selección aleatoria, ya que el conocimiento no ayuda', correct: false },
+      ],
+      explanation: 'La fase de observación existe para aprender qué aspecto tiene lo bueno. Si ya conoces la distribución, esa calibración es gratis, así que te saltas el muestreo y fijas directamente un valor de reserva, aceptando la primera extracción que lo supere. El muestreo solo es necesario cuando estás en solo-rangos y ciego a la distribución.',
+    },
+    {
+      question: '¿Cómo cambian los COSTES DE BÚSQUEDA explícitos (cada opción que inspeccionas cuesta tiempo o dinero) el momento en que deberías parar?',
+      options: [
+        { text: 'Deberías parar ANTES, porque seguir buscando ahora acarrea un coste real que come el valor de un hallazgo mejor', correct: true },
+        { text: 'Deberías buscar más tiempo para justificar el coste ya pagado', correct: false },
+        { text: 'Los costes de búsqueda no tienen efecto en el punto de parada', correct: false },
+        { text: 'Nunca deberías parar hasta encontrar a la mejor única', correct: false },
+      ],
+      explanation: 'Cada observación adicional resta de tu pago neto, así que el beneficio marginal de seguir buscando debe superar su coste marginal. Eso empuja el punto óptimo de parada más pronto y baja tus estándares efectivos. Perseguir una opción algo mejor no vale mucho cuando cada observación drena valor.',
+    },
+    {
+      question: 'No conoces N — las opciones podrían seguir llegando durante un tiempo desconocido. ¿Qué adaptación sugiere el modelo?',
+      options: [
+        { text: 'Cambia a un umbral de TIEMPO: explora durante el primer 1/e (alrededor del 37%) del TIEMPO disponible, luego comprométete con la primera opción que supere tu mejor-hasta-ahora', correct: true },
+        { text: 'Supón que N es infinito y no te comprometas nunca', correct: false },
+        { text: 'Adivina N con precisión, porque la regla se rompe con cualquier error', correct: false },
+        { text: 'Comprométete con la primerísima opción para ir seguro', correct: false },
+      ],
+      explanation: 'Cuando no puedes contar las opciones pero sí acotar la ventana temporal (buscar casa durante tres meses, una temporada de contratación), aplicas la lógica de 1/e al tiempo en lugar del recuento: explora aproximadamente el primer 37% del periodo, luego toma la primera opción que supere tu listón calibrado.',
+    },
+    {
+      question: 'En una búsqueda de dos lados —donde la opción también puede rechazarte A TI (quien busca empleo, un mercado de citas)—, ¿cómo deberías ajustar?',
+      options: [
+        { text: 'Apunta un poco más bajo y comprométete antes, porque aguantar por la mejor única también aumenta la probabilidad de que tus primeras opciones te rechacen', correct: true },
+        { text: 'Apunta más alto y mira más tiempo, ya que tienes más información', correct: false },
+        { text: 'Ignora al otro lado; la regla de un solo lado sigue aplicándose exactamente', correct: false },
+        { text: 'Acepta siempre la primera opción, ya que el rechazo es probable', correct: false },
+      ],
+      explanation: 'Cuando la otra parte puede rechazar las ofertas, el objetivo de la mejor única es aún más difícil de alcanzar, porque tus favoritos pueden no elegirte de vuelta. La adaptación sensata es bajar tu listón y comprometerte antes, apuntando a un buen emparejamiento mutuo en lugar de a uno perfecto inalcanzable.',
+    },
+    {
+      question: '¿Por qué es tranquilizador que "el pico del 37% sea ancho"?',
+      options: [
+        { text: 'Porque la probabilidad de acierto cambia muy poco para fracciones de observación algo por encima o por debajo del 37%, así que una estimación aproximada de N (o desviarte un poco) apenas te perjudica', correct: true },
+        { text: 'Porque significa que puedes ignorar N por completo y elegir al azar', correct: false },
+        { text: 'Porque demuestra que el 37% es la tasa de acierto garantizada', correct: false },
+        { text: 'Porque significa que mirar el 90% de las opciones es igual de bueno', correct: false },
+      ],
+      explanation: 'El objetivo es plano cerca de su máximo, así que cortes de, digamos, el 30% o el 45% rinden casi tan bien como exactamente el 37%. Esto es lo que hace la regla prácticamente útil: no necesitas un N preciso ni un corte preciso, solo una aproximación razonable.',
+    },
+    {
+      question: '¿Cuáles de estas son transferencias VÁLIDAS al mundo real del pensamiento de parada óptima? (Selecciona todas las que correspondan.)',
+      allowMultiple: true,
+      options: [
+        { text: 'Contratar dentro de un grupo definido de candidatos: muestrea a los primeros para calibrar un listón, luego comprométete', correct: true },
+        { text: 'Buscar o vender casa: usa un valor de reserva con un umbral descendente a medida que se cierra tu ventana', correct: true },
+        { text: 'Decidir cuándo dejar de investigar una decisión: para en cuanto el coste de seguir buscando supere la mejora esperada', correct: true },
+        { text: 'Elegir un plato de comida de un menú impreso que puedes leer todo a la vez', correct: false },
+      ],
+      explanation: 'Contratar, buscar/vender casa y saber cuándo dejar de investigar son búsquedas secuenciales e irreversibles genuinas donde el modelo aplica. Un menú impreso no lo es: puedes ver cada opción simultáneamente y reelegir libremente, así que no hay problema de parada en absoluto.',
+    },
+    {
+      question: 'Un amigo dice: "La regla del 37% demuestra que deberías tener citas hasta que el 37% de tu vida haya pasado, luego casarte con la siguiente persona mejor que todas las anteriores". ¿Cuál es la objeción más fuerte?',
+      options: [
+        { text: 'Malaplica el modelo en varios frentes: N (y tu tiempo) es desconocido, a menudo existe la recuperación, las citas son de dos lados y "la mejor única" es el objetivo equivocado para un emparejamiento de por vida de todos modos', correct: true },
+        { text: 'No hay nada erróneo; el 37% de tu vida es exactamente el corte correcto', correct: false },
+        { text: 'El único problema es que el 37% debería ser el 50%', correct: false },
+        { text: 'La regla está bien pero deberías recuperar a tu primerísima pareja en su lugar', correct: false },
+      ],
+      explanation: 'El meme de las citas es una ilustración divertida pero viola casi todos los supuestos: no conoces N, a veces se puede recuperar a los ex, la otra persona también elige, y optimizar para la pareja literalmente mejor única (con cero crédito a un casi-emparejamiento maravilloso) es el objetivo equivocado. La versión honesta es "explora un rato para calibrar, luego comprométete", no una fracción precisa de la vida.',
+    },
+    {
+      question: '¿Cuáles de los siguientes son LÍMITES HONESTOS del modelo clásico de la secretaria / del 37%? (Selecciona todas las que correspondan.)',
+      allowMultiple: true,
+      options: [
+        { text: 'Optimiza para la mejor única, que es el objetivo equivocado para la mayoría de las elecciones reales donde un segundo puesto fuerte es casi igual de bueno', correct: true },
+        { text: 'Supone irreversibilidad estricta y sin recuperación, lo que muchas búsquedas reales violan', correct: true },
+        { text: 'Supone solo-rangos con una distribución desconocida; si de verdad conoces la distribución deberías usar un valor de reserva en su lugar', correct: true },
+        { text: 'Solo funciona cuando se garantiza que la mejor opción aparece en el primer 37%', correct: false },
+      ],
+      explanation: 'Los límites reales son su objetivo (mejor única), su irreversibilidad estricta sin recuperación y su premisa de solo-rangos/distribución-desconocida (más suponer N conocido y orden aleatorio). El cuarto es un sinsentido — no existe tal garantía; la mejor tiene igual probabilidad de caer en cualquier parte de la secuencia.',
+    },
+    {
+      question: '¿Qué significa "no fetichices el número exacto" como consejo práctico de este curso?',
+      options: [
+        { text: 'Trata el 37% como una guía amplia de cuánto calibrar antes de comprometerte, no como una constante mágica que calcular al decimal — el objetivo es "explora lo suficiente para fijar un listón, luego comprométete", y el corte exacto apenas importa', correct: true },
+        { text: 'Ignora el modelo por completo porque los números nunca ayudan', correct: false },
+        { text: 'Redondea siempre el 37% al 40% por un margen de seguridad', correct: false },
+        { text: 'Recalcula 1/e con precisión antes de cada decisión', correct: false },
+      ],
+      explanation: 'Como el pico es ancho y los problemas reales rompen los supuestos limpios, el valor del modelo es la forma de la estrategia (calibra, luego comprométete; mantén un listón descendente), no un porcentaje preciso. Obsesionarse con el 37,00% se pierde la lección de verdad.',
+    },
+    {
+      question: '¿Qué única afirmación es el resumen más completo y correcto de la parada óptima como modelo mental?',
+      options: [
+        { text: 'Cuando las opciones llegan de una en una y las elecciones son difíciles de revertir, dedica una fase inicial a calibrar un listón en lugar de comprometerte, luego toma la primera opción que lo supere — y adapta el listón a tu objetivo real (un valor de reserva descendente si los casi-aciertos cuentan), a tu recuperación, a tu conocimiento de la distribución, a tus costes de búsqueda y a tu incertidumbre sobre N, en lugar de aferrarte a un 37% preciso', correct: true },
+        { text: 'Rechaza siempre el primer 37% de cualquier cosa y toma lo siguiente que sea mejor', correct: false },
+        { text: 'La mejor estrategia es ver cada opción y luego elegir la de arriba', correct: false },
+        { text: 'La parada óptima garantiza que consigues la mejor opción única el 37% de las veces en toda situación', correct: false },
+      ],
+      explanation: 'La versión madura del modelo mantiene el movimiento central —calibra un listón, luego comprométete con la primera opción que lo supere— pero trata cada parámetro como ajustable: el objetivo (mejor frente a valor esperado), la recuperación, el conocimiento distribucional, los costes de búsqueda y el N desconocido reconfiguran todos el listón óptimo. Las demás opciones son sobreaplicaciones rígidas de una regla que solo se sostiene bajo supuestos estrechos.',
+    },
+  ]}
+/>
+
+## Repaso del curso
+
+<MindMap
+  client:visible
+  title="La parada óptima y el problema de la secretaria — el curso entero"
+  root={{
+    label: 'La parada óptima y el problema de la secretaria',
+    children: [
+      {
+        label: 'El problema de la secretaria y la regla del 37%',
+        children: [
+          { label: 'N opciones vistas de una en una, aceptar/rechazar de forma irreversible sin recuperación, objetivo = la mejor única; mirar-luego-saltar rechaza al primer ~37%, recuerda a la mejor de esa muestra y luego toma la primera opción posterior que la supere.' },
+          { label: 'Tanto la fracción óptima de observación como la probabilidad de acierto convergen en 1/e ≈ 37% a medida que N crece; e aparece de maximizar el compromiso de probabilidad de acierto en r/N = 1/e; a mano, N=3 con r=1 gana el 50%.' },
+        ],
+      },
+      {
+        label: 'Explorar-luego-comprometerse',
+        children: [
+          { label: 'El patrón general: una fase de exploración que solo CALIBRA un listón (mejor-de-la-muestra) y no se compromete con nadie, luego una fase de compromiso que toma la primera opción por encima del listón.' },
+          { label: 'El compromiso explorar/explotar se agudiza por la irreversibilidad sin recuperación; el umbral óptimo depende de cuánto queda por mirar — exigente cuando quedan muchas opciones, relajado a medida que se agotan.' },
+        ],
+      },
+      {
+        label: 'Valor esperado y el valor de reserva',
+        children: [
+          { label: 'La regla pura del 37% optimiza un objetivo severo de mejor-única; en cuanto los casi-aciertos cuentan (pagos cardinales), la observación óptima se encoge POR DEBAJO del 37%.' },
+          { label: 'La política óptima se vuelve un valor de reserva DESCENDENTE: aguanta por la excelencia pronto, baja el listón a medida que se agotan las opciones y acepta cualquier cosa en la última opción.' },
+        ],
+      },
+      {
+        label: 'Variaciones que importan',
+        children: [
+          { label: 'La recuperación te deja mirar más tiempo (recuperación libre → simplemente compara todo); una distribución conocida → usa un valor de reserva sin muestreo; costes de búsqueda → para antes.' },
+          { label: 'N desconocido → usa un umbral de TIEMPO (explora el primer 1/e del tiempo); búsqueda rechazable/de dos lados → apunta más bajo y comprométete antes; el pico del 37% es ancho, así que un N aproximado vale.' },
+        ],
+      },
+      {
+        label: 'Transferencia y límites honestos',
+        children: [
+          { label: 'Aplica a contratar, buscar y vender casa (valor de reserva, umbral descendente), saber cuándo dejar de investigar y el meme de citas "37% luego comprométete" con muchas salvedades.' },
+          { label: 'Límites: optimiza la mejor única (objetivo equivocado para la mayoría de las elecciones), supone irreversibilidad estricta y sin recuperación, supone solo-rangos con distribución desconocida, supone N conocido y orden aleatorio — y no fetichices el número exacto.' },
+        ],
+      },
+    ],
+  }}
+/>
+
+<Callout variant="success" title="Ideas clave — el curso entero">
+La parada óptima es el arte de elegir cuándo dejar de buscar una vez que las opciones llegan de una en una y los compromisos son difíciles de deshacer. El problema de la secretaria es su forma más limpia: rechaza al primer ~37% para calibrar un listón, luego salta sobre la primera opción que lo supere — una regla donde tanto la fracción ideal de observación como la tasa de acierto convergen en 1/e ≈ 37%, y donde e cae de un compromiso genuino, no de un truco de notación. Aléjate y esto es solo explorar-luego-comprometerse: una fase de exploración que solo fija un listón bajo irreversibilidad sin recuperación, luego una fase de compromiso que toma la primera opción por encima de él, con un umbral que debe relajarse a medida que se agotan las opciones. Cambia el objetivo al valor esperado y la observación óptima se encoge por debajo del 37%, reemplazada por un valor de reserva descendente — exigente pronto, indulgente tarde, acepta cualquier cosa al final. La vida real dobla luego la regla: la recuperación te deja mirar más tiempo, una distribución conocida reemplaza el muestreo por un valor de reserva, los costes de búsqueda te empujan a parar antes, un N desconocido te lleva a un umbral de tiempo (explora el primer 1/e del tiempo), y la búsqueda de dos lados significa apuntar más bajo y comprometerse antes. Sobre todo, respeta los límites honestos del modelo — optimiza para la mejor única (rara vez tu verdadero objetivo), supone irreversibilidad estricta y sin recuperación, y supone solo-rangos con una distribución desconocida y un N conocido y ordenado al azar. Conserva la forma de la estrategia, no el porcentaje exacto: calibra, luego comprométete, y deja que un listón descendente te lleve a casa.
+</Callout>

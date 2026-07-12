@@ -276,3 +276,6 @@ export type { CarnotGaugeProps } from '@/components/react/CarnotGauge';
 
 export { DoseResponseExplorer, default as DoseResponseExplorerDefault } from '@/components/react/DoseResponseExplorer';
 export type { DoseResponseExplorerProps, DoseResponseShape } from '@/components/react/DoseResponseExplorer';
+
+export { OptimalStoppingLab, default as OptimalStoppingLabDefault } from '@/components/react/OptimalStoppingLab';
+export type { OptimalStoppingLabProps, StoppingObjective } from '@/components/react/OptimalStoppingLab';
