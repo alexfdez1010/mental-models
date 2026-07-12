@@ -56,11 +56,10 @@
  * `information-cascades-and-herding`, `the-value-of-information`,
  * `creative-destruction`, `punctuated-equilibrium`,
  * `preference-falsification`, `winners-curse`,
- * `entropy-and-the-second-law`, …)
+ * `entropy-and-the-second-law`, `hormesis-and-the-dose-response`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * biology-evolution/science-engineering (`hormesis-and-the-dose-response`, 55),
  * decision-making/probability (`optimal-stopping-and-the-secretary-problem`, 56),
  * economics/strategy (`adverse-selection-and-the-lemons-problem`, 57) and
  * probability/decision-making/economics (`the-kelly-criterion`, 58).
@@ -102,34 +101,14 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // -- Expert tier -- kept tag-diverse ----------------------------------------
-  // The entropy-and-the-second-law rung (order 54) has graduated and been
+  // The hormesis-and-the-dose-response rung (order 55) has graduated and been
   // removed; its topic MDX under src/content/topics/ (en + es) is now the record.
-  // The lowest-order entry below (`hormesis-and-the-dose-response`, order 55) is
-  // built next. The queue is kept tag-diverse across the expert tier --
-  // biology-evolution/science-engineering (`hormesis-and-the-dose-response`),
-  // decision-making/probability (`optimal-stopping-and-the-secretary-problem`),
+  // The lowest-order entry below (`optimal-stopping-and-the-secretary-problem`,
+  // order 56) is built next. The queue is kept tag-diverse across the expert tier
+  // -- decision-making/probability (`optimal-stopping-and-the-secretary-problem`),
   // economics/strategy (`adverse-selection-and-the-lemons-problem`) and
   // probability/decision-making/economics (`the-kelly-criterion`) -- so no single
   // roadmap tag races ahead.
-  {
-    slug: 'hormesis-and-the-dose-response',
-    icon: '💊',
-    difficulty: 'expert',
-    order: 55,
-    accent: 'brand',
-    title: {
-      en: 'Hormesis & the Dose-Response Curve',
-      es: 'La Hormesis y la Curva Dosis-Respuesta',
-    },
-    description: {
-      en: 'A small dose of a stressor strengthens; a large dose of the same thing harms or kills. Exercise, fasting, vaccines, sunlight, even certain poisons follow a curve where "the dose makes the poison" — and the biggest mistake is assuming that if a lot is bad, a little must be too (or that if a little is good, more is better).',
-      es: 'Una dosis pequeña de un factor de estrés fortalece; una dosis grande de lo mismo daña o mata. El ejercicio, el ayuno, las vacunas, la luz solar e incluso ciertos venenos siguen una curva en la que «la dosis hace el veneno» — y el mayor error es suponer que si mucho es malo, un poco también debe serlo (o que si un poco es bueno, más es mejor).',
-    },
-    dependencies: ['antifragility-and-via-negativa', 'natural-selection', 'asymmetry-and-optionality'],
-    tags: ['biology-evolution', 'science-engineering'],
-    buildNotes:
-      'Hormesis & the dose-response curve — the expert biology-evolution/science-engineering rung. Core claim: the biological response to a dose of a stressor is often NON-MONOTONIC and biphasic — low doses stimulate or strengthen (an overcompensating adaptive response) while high doses inhibit or harm, producing a J-shaped or inverted-U curve rather than a straight line. Paracelsus\' "sola dosis facit venenum" (the dose makes the poison) is the 500-year-old headline; Southam & Ehrlich (1943) coined "hormesis." Assumes antifragility-and-via-negativa (systems that GAIN from the right amount of stressor/volatility, and the power of removal), natural-selection (why overcompensation to intermittent stress is adaptive — organisms evolved in variable environments) and nonlinearity-and-convexity (the response is a curved, not linear, function of dose, so averages mislead and Jensen\'s inequality bites). Organising idea: the effect of X is a FUNCTION of dose, and that function is usually curved with an optimum in the middle, so "good vs bad" is the wrong question — "how much, how often, with what recovery?" is the right one. Sections, each mechanism + worked example: (1) the shape itself — linear-no-threshold vs threshold vs hormetic (inverted-U / J) dose-response curves, and how to read an optimum; (2) the biological mechanism — mild stress triggers repair, autophagy, heat-shock proteins, mitochondrial and immune upregulation that OVERSHOOT baseline, leaving the system stronger (the adaptive overcompensation); recovery/rest is part of the dose (stress + recovery, not stress alone); (3) worked cases across domains — exercise (mechanical/metabolic stress → strength; overtraining → injury), fasting/caloric restriction, vaccines and immune training (a controlled small dose), sunlight/UV (vitamin D vs burns/cancer), alcohol\'s contested J-curve (and why confounding makes it a cautionary tale), radiation hormesis (real scientific controversy — flag it honestly), toxins/xenohormesis (polyphenols), psychological stress and post-traumatic GROWTH; (4) the dosing variables — magnitude, frequency, duration, and RECOVERY; acute intermittent stress with recovery builds, chronic unremitting stress destroys (tie to allostatic load); (5) the transfer as a thinking tool — teams, markets, muscles, immune systems, forests (fire suppression removes the small stressors and breeds fragility — tie antifragility), children and overprotection, debugging by fuzzing. Pitfalls & where the model lies: hormesis is NOT a licence to self-poison — the optimal dose is often small and the therapeutic window narrow, and for many genuine toxins there is no safe beneficial dose (do not generalise the curve to everything); "the dose makes the poison" cuts BOTH ways (a little of a good thing can still be optimal while more is worse — water, oxygen, sleep, and even exercise can be overdosed); publication bias and confounding plague the evidence (the alcohol J-curve, some radiation claims) so treat specific hormetic claims skeptically even though the general principle is sound; and beware the naturalistic "what doesn\'t kill me makes me stronger" slogan — some stressors just maim. Fixes/uses: ask "what is the dose-response SHAPE?" before deciding good/bad; seek the intermittent-stress-plus-recovery pattern; distinguish acute-recoverable from chronic-relentless load; do not linearly extrapolate from high-dose harm to low-dose harm (or vice versa). Build an interactive island (a dose-response explorer: a curve that morphs between linear, threshold, and hormetic/inverted-U shapes, with a DOSE slider and a readout of the response — sweep the dose to find the optimum, watch benefit turn to harm past the peak; a second control for FREQUENCY/RECOVERY showing how the same total dose builds when spaced with recovery but harms when chronic; overlay a "linear extrapolation" ghost line to show the classic error of assuming a straight line). Plus a Categorize (hormetic stressor-with-an-optimum vs monotonic pure-poison, or acute-recoverable vs chronic-relentless dosing) and MatchConcepts (hormesis, the dose makes the poison, adaptive overcompensation, inverted-U/J-curve, therapeutic window, allostatic load), Quiz + MindMap. en + es twin.',
-  },
   {
     slug: 'optimal-stopping-and-the-secretary-problem',
     icon: '⏱️',

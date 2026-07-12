@@ -273,3 +273,6 @@ export type { EntropyBoxProps } from '@/components/react/EntropyBox';
 
 export { CarnotGauge, default as CarnotGaugeDefault } from '@/components/react/CarnotGauge';
 export type { CarnotGaugeProps } from '@/components/react/CarnotGauge';
+
+export { DoseResponseExplorer, default as DoseResponseExplorerDefault } from '@/components/react/DoseResponseExplorer';
+export type { DoseResponseExplorerProps, DoseResponseShape } from '@/components/react/DoseResponseExplorer';
