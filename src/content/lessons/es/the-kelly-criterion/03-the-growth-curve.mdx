@@ -1,0 +1,244 @@
+---
+title: "La curva de crecimiento: una cima, luego la ruina"
+description: "La forma de la curva de crecimiento de Kelly — cero en f=0, una única cima en f*, de vuelta a cero en el doble de f*, y luego negativa hacia −∞. Por qué sobreapostar e infraapostar cuestan un crecimiento similar pero un riesgo salvajemente distinto, así que errar por lo bajo sale mucho más barato que errar por lo alto."
+topic: "es/the-kelly-criterion"
+order: 4
+minutes: 13
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, KellyGrowthCurve, KellyBankrollSimulator } from '@/components/react';
+
+La lección anterior derivamos la fracción de Kelly (Kelly fraction) $f^{*}=p-q/b$ — la única apuesta que hace crecer un capital que se compone tan rápido como puede. Pero una fórmula que escupe un número mágico es peligrosa si no entiendes el **paisaje que la rodea**. ¿Qué pasa si te quedas un poco por encima? ¿Un poco por debajo? ¿El doble por encima? La fracción de Kelly vive sobre una curva, y la *forma* de esa curva — dónde alcanza su cima, dónde cruza el cero, con qué inclinación cae a cada lado — es donde se esconde la verdadera sabiduría de apostar según Kelly.
+
+Esta lección cartografía esa curva, la **función de crecimiento** (growth function) $g(f)$. Veremos que es una colina desequilibrada: empieza en cero, sube hasta una única cumbre en $f^{*}$, **vuelve a bajar a cero en aproximadamente el doble de $f^{*}$**, y luego se hunde en territorio negativo, arrastrando a un jugador con ventaja positiva hasta la ruina. Y extraeremos la lección más práctica de todo Kelly: **en caso de duda, apuesta demasiado poco, nunca demasiado.**
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de empezar — arriésgate a adivinar"
+  question="Estás apostando la fracción óptima de Kelly f* en un juego favorable. Por descuido DUPLICAS accidentalmente tu apuesta a 2f* en cada ronda. ¿Qué le ocurre aproximadamente a tu tasa de crecimiento a largo plazo?"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "Se duplica también — el doble de apuesta, el doble de crecimiento", correct: false },
+    { text: "Se reduce aproximadamente a la mitad pero se mantiene cómodamente positiva", correct: false },
+    { text: "Se colapsa hasta aproximadamente CERO — te quedas a flote pese a una ventaja real", correct: true },
+    { text: "Se queda igual — el crecimiento es plano cerca de la cima", correct: false },
+  ]}
+  explanation="Duplicar la apuesta de Kelly te deja en 2f*, que es (con muy buena aproximación) la fracción exacta donde la curva de crecimiento vuelve a cruzar el cero. Todo ese riesgo extra, y tu crecimiento a largo plazo queda aniquilado — un juego con ventaja positiva convertido en un cara o cruz entre la mediocridad y la ruina. Pasa un pelín más allá de 2f* y el crecimiento se vuelve negativo. Esta asimetría es toda la lección."
+/>
+
+## La forma de la curva: una colina desequilibrada
+
+Dibuja la tasa de crecimiento $g(f)=p\ln(1+fb)+q\ln(1-f)$ frente a la fracción $f$ y obtienes una **loma** distintiva con cuatro hitos que merece la pena memorizar:
+
+- **En $f=0$:** no apuestas nada, así que nada se compone. $g(0)=0$. Terreno llano.
+- **Subiendo hacia $f^{*}$:** cada pizca extra de apuesta añade crecimiento, a un ritmo decreciente, hasta la única **cumbre** en la fracción de Kelly $f^{*}$, donde la pendiente es exactamente cero.
+- **De vuelta a cero cerca de $2f^{*}$:** pasada la cima la curva desciende, y vuelve a $g=0$ en aproximadamente **el doble** de la fracción de Kelly. Aquí cargas con el riesgo máximo por *cero* recompensa.
+- **Negativa más allá, cayendo hacia $-\infty$:** apuesta más de $2f^{*}$ y el crecimiento se vuelve negativo — decaes hacia cero con el tiempo. Cuando $f\to1$ (apostar todo) una única derrota te pone a cero, así que $g\to-\infty$.
+
+**La analogía.** Imagina que subes una cresta en la niebla. Desde el inicio del sendero ($f=0$) el camino asciende a una cumbre ($f^{*}$). Sigue caminando en la misma dirección y no te quedas arriba — desciendes por la ladera *lejana* de vuelta a la altura del inicio (en $2f^{*}$) y luego caes por un precipicio a un barranco ($g<0$). La cumbre es el único buen sitio donde estar. La tragedia es que **tanto** la ladera lejana como el precipicio *se sienten* como «apostar más agresivamente en un juego ganador» — el mapa no da ningún aviso de que has cruzado la cima.
+
+### Por qué es casi una parábola — la derivación rápida
+
+Cerca de la cima la loma es casi exactamente una **parábola hacia abajo**, lo que hace precisa su simetría. Desarrolla $\ln(1+fX)$ para $f$ pequeño (donde $X=+b$ en una victoria, $-1$ en una derrota) usando $\ln(1+u)\approx u-\tfrac12u^{2}$:
+
+$$g(f)=E[\ln(1+fX)] \approx f\,E[X] - \tfrac12 f^{2}\,E[X^{2}] = \mu f - \tfrac12\sigma^{2}f^{2},$$
+
+donde $\mu=E[X]=pb-q$ es tu **ventaja** (edge) (el rendimiento medio por unidad) y $\sigma^{2}=\operatorname{Var}(X)\approx E[X^{2}]$ es su **varianza**. Esta parábola hace exactos ambos hitos:
+
+$$\text{cima: } g'(f)=\mu-\sigma^{2}f=0 \;\Rightarrow\; f^{*}=\frac{\mu}{\sigma^{2}}, \qquad \text{cero: } \mu f-\tfrac12\sigma^{2}f^{2}=0 \;\Rightarrow\; f=\frac{2\mu}{\sigma^{2}}=2f^{*}.$$
+
+Así que en la aproximación continua (de difusión), el crecimiento es una parábola limpia que alcanza su cima en $f^{*}=\mu/\sigma^{2}$ y llega a **cero exactamente en $2f^{*}$**. Para apuestas discretas está ligeramente desviado — recuerda del ejemplo A que el doble Kelly $f=0.40$ daba $g\approx-0.0025$, un *pelín* por debajo de cero en lugar de justo en él — pero «el doble de Kelly ≈ crecimiento nulo» está lo bastante cerca como para regir tu vida por ello.
+
+<KellyGrowthCurve
+  client:visible
+  initialWinPct={60}
+  initialOdds={1}
+  initialFractionPct={20}
+  title="Una cima, luego de vuelta a cero en 2f*"
+  eyebrow="Curva de crecimiento de Kelly"
+  instructions="Apuesta una fracción de tu capital en una apuesta favorable repetida. La curva es tu tasa de crecimiento a largo plazo por ronda en función de esa fracción. Alcanza su máximo en la fracción de Kelly f*, vuelve a cero cerca del doble de f*, y se vuelve negativa más allá — apuesta pasado ese punto y un juego con ventaja positiva aun así te muele hacia la ruina. Arrastra la fracción y observa dónde caes en la loma."
+  winLabel="Probabilidad de ganar p"
+  oddsLabel="Cuotas de pago b (ganar paga b a 1)"
+  fractionLabel="Fracción apostada f (porción del capital en juego)"
+  axisFractionLabel="Fracción apostada f →"
+  axisGrowthLabel="Crecimiento / ronda"
+  kellyStatLabel="Kelly f*"
+  growthStatLabel="Crecimiento aquí"
+  doubleStatLabel="Crecimiento nulo ≈ 2f*"
+  underLabel="seguro, lento"
+  overLabel="rápido, luego fatal"
+  zeroLabel="crecimiento nulo"
+  readoutTemplate="Con un {p}% de probabilidad de ganar a cuotas de {b} a 1, la fracción de Kelly es f* = {fstar}%. Apostar el {f}% de tu capital da un crecimiento a largo plazo del {growth}%/ronda; el crecimiento máximo (en f*) es del {peak}%/ronda, y el crecimiento vuelve a cero en torno al {double}%. {verdict}"
+  verdictUnder="Estás por debajo de Kelly: seguro, y conservas la mayor parte del crecimiento — un sitio sensato donde estar."
+  verdictKelly="Estás cerca de Kelly pleno: máximo crecimiento a largo plazo, pero también máxima volatilidad."
+  verdictOver="Estás por encima de Kelly: asumes más vaivenes por MENOS crecimiento que en f* — un mal trato sin paliativos."
+  verdictRuin="Estás en el doble de Kelly o más allá: tu crecimiento a largo plazo es nulo o negativo — un juego con ventaja positiva que aun así acaba en ruina."
+  caption="La moneda 60/40: cima en f* = 20%, y el crecimiento vuelve a cruzar el cero cerca del 40% (el doble de f*). Arrastra el deslizador de la fracción PASADO el 40% y observa cómo la lectura se vuelve negativa — un juego con ventaja positiva y crecimiento a largo plazo negativo. Fíjate en lo suave que cae la curva justo a la izquierda de la cima y en cómo todo el lado derecho es una trampa."
+/>
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada punto de la curva de crecimiento de Kelly con lo que ocurre ahí."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  pairs={[
+    { term: "f = 0", definition: "Sin apuesta, sin composición — el crecimiento es exactamente cero (terreno llano)" },
+    { term: "f = f* (la cima)", definition: "Máximo crecimiento a largo plazo; la pendiente de la curva es plana aquí" },
+    { term: "f = 2f*", definition: "El crecimiento vuelve a cruzar el cero — máximo riesgo por ninguna recompensa" },
+    { term: "f entre f* y 2f*", definition: "Crecimiento positivo pero menguante, con volatilidad que sube rápidamente — un trato estrictamente malo" },
+    { term: "f > 2f* (hasta f = 1)", definition: "Crecimiento negativo: un juego con ventaja positiva que aun así te decae hacia la ruina" },
+  ]}
+  explanation="La curva es una loma: cero en 0, una única cima en f*, de vuelta a cero en ~2f*, negativa más allá. Todo lo que está a la derecha de la cima cambia más riesgo por menos (luego negativo) crecimiento — que es por lo que sobreapostar es el pecado capital de apostar según Kelly."
+/>
+
+## La trampa de la simetría: igual coste de crecimiento, peligro desigual
+
+Aquí está la parte sutil que casi todo el mundo entiende mal. Como la loma es casi una parábola simétrica alrededor de su cima, **sobreapostar en cierta cantidad e infraapostar en la misma cantidad cuestan aproximadamente lo mismo en crecimiento.** Cae en $0.5f^{*}$ o en $1.5f^{*}$ y sacrificas una porción similar de crecimiento. Si el crecimiento fuera lo único que importara, pasarse y quedarse corto serían errores igualmente perdonables. No lo son — porque acarrean un **riesgo** salvajemente distinto.
+
+Tabulemos la moneda 60/40 a dinero parejo ($f^{*}=20\%$) en cuatro fracciones, siguiendo tanto el crecimiento como una medida aproximada del riesgo de ronda a ronda. (La volatilidad del log-riqueza escala aproximadamente de forma *lineal* con $f$, así que se duplica de $0.5f^{*}$ a $f^{*}$ y se vuelve a duplicar para $2f^{*}$ — mientras que el crecimiento apenas se mueve cerca de la cima.)
+
+| Fracción | $g(f)$ | ≈ crecimiento/ronda | % del crecimiento máximo | Riesgo de ronda a ronda (∝ $f$) | Veredicto |
+|---:|---:|---:|---:|:--|:--|
+| $0.5f^{*}=10\%$ | 0.0150 | +1.52% | ~75% | Bajo (~10%) | Seguro y lento — deja crecimiento sobre la mesa |
+| $f^{*}=20\%$ | 0.0201 | +2.03% | 100% | Medio (~20%) | La cumbre — máximo crecimiento |
+| $1.5f^{*}=30\%$ | 0.0147 | +1.49% | ~73% | Alto (~30%) | Mismo crecimiento que medio Kelly pero 3× los vaivenes |
+| $2f^{*}=40\%$ | −0.0025 | −0.24% | ~0% | Brutal (~40%) | Crecimiento nulo, caídas salvajes — puro lado negativo |
+
+Mira fijamente las dos filas centrales: **el $10\%$ y el $30\%$ entregan un crecimiento casi idéntico** (~1.5%/ronda, ~tres cuartas partes de la cima). Simétricos en crecimiento. Pero el apostador del $30\%$ soporta aproximadamente **tres veces** la volatilidad del apostador del $10\%$ por ese mismo rendimiento — y se sienta peligrosamente cerca del precipicio del $40\%$ donde el crecimiento se desvanece. Los costes son simétricos; las **consecuencias no.**
+
+<Callout variant="warning" title="Por qué errar por lo BAJO sale mucho más barato que errar por lo ALTO">
+Falla la cima por el lado **bajo** y renuncias a un poco de crecimiento — pero nunca arriesgas la
+ruina, tus caídas se mantienen suaves, y eres robusto a una ventaja mal estimada. Falla por el
+lado **alto** y renuncias al *mismo* poco de crecimiento **más** una montaña de volatilidad y
+caídas extra a cambio — y si te pasas hasta $2f^{*}$ o más allá, tu crecimiento llega a cero y
+luego se vuelve negativo y un juego ganador te **muele hasta la nada**. Infraapostar es lento;
+sobreapostar es fatal. Dado que nunca conoces tu verdadera ventaja, redondea siempre tu apuesta
+**hacia abajo**.
+</Callout>
+
+## Observa el desplome de la sobreapuesta
+
+Los números sobre una curva son una cosa; ver morir capitales es otra. En el simulador de abajo, la fracción elegida está prefijada en el **40%** — exactamente el doble de Kelly para la moneda 60/40, justo en el cruce de crecimiento nulo. Ejecútalo y compara las tres líneas de apuesta: medio Kelly repta hacia arriba de forma constante, Kelly pleno sube más rápido, y la **sobreapuesta del 40% se dispara al principio y luego se colapsa**, terminando típicamente cerca o por debajo de donde empezó pese a la ventaja ganadora idéntica. Luego cambia la línea elegida a la vista de la **media**: la media parece dispararse hacia arriba — porque un puñado de trayectorias absurdamente afortunadas la arrastran al cielo — mientras que el jugador **mediano** (y casi todos los demás) ha quedado arruinado. Esa brecha entre la media que se dispara y la mediana que se hunde es la brecha de ergodicidad (ergodicity gap), y es exactamente lo que fabrica sobreapostar.
+
+<KellyBankrollSimulator
+  client:visible
+  initialWinPct={60}
+  initialOdds={1}
+  initialBetPct={40}
+  initialRounds={80}
+  title="Sobreapostar hasta 2f*: pico, luego desplome"
+  eyebrow="Simulador de capital de Kelly"
+  instructions="La misma apuesta favorable, apostada de tres formas a la vez: medio Kelly, Kelly pleno y tu fracción elegida. Cada línea es el capital típico (mediano) a lo largo del tiempo en un eje logarítmico. Fija la apuesta, pulsa ejecutar, y observa cómo medio Kelly repta, Kelly pleno sube más rápido, y una fracción sobreapostada se dispara y luego se desploma. Cambia a la vista de la media para ver cómo la media de conjunto miente sobre cómo le fue de verdad al jugador típico."
+  winLabel="Probabilidad de ganar p"
+  oddsLabel="Cuotas de pago b (ganar paga b a 1)"
+  betLabel="Tu fracción apostada elegida f"
+  roundsLabel="Rondas jugadas"
+  chosenLabel="Tu fracción"
+  kellyLabel="Kelly pleno f*"
+  halfKellyLabel="Medio Kelly"
+  viewLabel="La línea de la fracción elegida muestra"
+  medianViewLabel="Jugador típico (mediana)"
+  meanViewLabel="Media de conjunto (media)"
+  runLabel="Ejecutar los capitales ▸"
+  resetLabel="Reiniciar ↻"
+  axisLabel="× capital (escala logarítmica)"
+  kellyStatLabel="Kelly f*"
+  growthStatLabel="Crecimiento / ronda"
+  ruinStatLabel="Arruinados"
+  idlePrompt="Fija la apuesta y pulsa ejecutar. Observa cómo las tres fracciones de apuesta se separan con el tiempo."
+  readout="Tras {rounds} rondas a {b} a 1 con un {p}% de probabilidad de ganar (Kelly f* = {fstar}%): apostar tu {f}% deja al jugador típico en {chosenMedian}× el capital (crecimiento a largo plazo {growth}%/ronda), mientras que la media de conjunto marca {chosenMean}× y el {ruin}% de los jugadores quedó arruinado. {verdict}"
+  verdictRuin="Tu fracción sobreapuesta hasta la ruina: la media queda arrastrada hacia arriba por unos pocos afortunados mientras el capital típico se colapsa — una ventaja positiva desperdiciada por apostar demasiado grande."
+  verdictOver="Tu fracción sobreapuesta: vaivenes más violentos por MENOS crecimiento que Kelly pleno. Errar por lo alto se castiga duro."
+  verdictKelly="Tu fracción está cerca de Kelly pleno: el crecimiento a largo plazo más rápido, a costa de una volatilidad que revuelve el estómago."
+  verdictUnder="Tu fracción está por debajo de Kelly: más lenta que f*, pero mucho más suave y robusta a una ventaja sobreestimada."
+  groupSeparator="."
+  caption="La fracción elegida es el 40% — el doble de Kelly para esta moneda. Pulsa ejecutar: Kelly pleno sube, medio Kelly repta, y la sobreapuesta del 40% se dispara y luego se desploma hacia la ruina. Cambia a la vista de la media (de conjunto) para ver cómo la media miente — se dispara sobre unos pocos supervivientes afortunados mientras el jugador típico queda arruinado. Baja la fracción hacia el 20% y el desplome desaparece."
+/>
+
+<MCQ
+  client:visible
+  question="Dos apostadores juegan la moneda 60/40. Alicia apuesta el 10% (medio Kelly); Carolina apuesta el 30% (1.5× Kelly). Sus tasas de crecimiento a largo plazo son casi idénticas (~1.5%/ronda). ¿Por qué la posición de Alicia sigue siendo claramente mejor?"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "No lo es — un crecimiento idéntico significa que las dos posiciones son igual de buenas", correct: false },
+    { text: "Alicia gana el mismo crecimiento con mucha menos volatilidad y cero riesgo de ruina, mientras que Carolina paga por un crecimiento igual con ~3× los vaivenes y se sienta cerca del precipicio de 2f*", correct: true },
+    { text: "Alicia en realidad crece mucho más rápido; los números de crecimiento de la tabla están mal", correct: false },
+    { text: "Carolina es mejor — estar más cerca de la zona de peligro significa mayores rendimientos", correct: false },
+  ]}
+  explanation="Esta es la trampa de la simetría en acción. El crecimiento es aproximadamente simétrico alrededor de la cima, así que 0.5f* y 1.5f* dan un crecimiento casi igual. Pero el riesgo escala con f, así que Carolina al 30% sufre unas tres veces la volatilidad de Alicia por el mismo rendimiento — y está a una mala estimación del precipicio de crecimiento nulo del 40%. Igual crecimiento, peligro desigual: infraapostar es la forma estrictamente más segura de fallar la cima."
+/>
+
+## Infraapostar: seguro pero lento
+
+Nada de esto hace que infraapostar sea *gratis*. Siéntate en medio Kelly para siempre y de verdad dejas crecimiento sobre la mesa — alrededor de un cuarto de él, en el caso 60/40 (1.5% frente a 2.0% por ronda), que se compone en una diferencia real a lo largo de miles de rondas. Infraapostar es la tortuga: nunca reventará, nunca golpeará el precipicio de la ruina, nunca sufrirá una caída que pare el corazón — pero anda despacio. La disyuntiva es honesta y merece decirse sin rodeos:
+
+- **Infraapostar ($f<f^{*}$):** crecimiento más lento, viaje más suave, **sin riesgo de ruina**, indulgente con una ventaja mal estimada. La tortuga.
+- **Kelly pleno ($f=f^{*}$):** el crecimiento más rápido, pero volatilidad violenta y solo *exactamente* correcto si de verdad conoces $p$ y $b$. El filo del cuchillo.
+- **Sobreapostar ($f>f^{*}$):** *menos* crecimiento que Kelly pleno, *más* volatilidad, y pasado $2f^{*}$ crecimiento negativo — rápido, luego fatal. La liebre que muere.
+
+Como la cumbre es plana (su pendiente es cero), un paso modesto hacia el lado bajo no cuesta casi nada en crecimiento a la vez que compra mucha seguridad — que es toda la razón de ser de la estrategia de **Kelly fraccionado** (fractional Kelly) en torno a la que se construye la próxima lección. La asimetría significa que la opción por defecto inteligente no es la cima en el filo de la navaja; es un paso deliberado ladera abajo por el lado seguro.
+
+<Categorize
+  client:visible
+  question="Clasifica cada afirmación sobre la curva de crecimiento de Kelly en VERDADERO o FALSO."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  buckets={["Verdadero", "Falso"]}
+  items={[
+    { text: "La curva de crecimiento vuelve a cero en aproximadamente el doble de la fracción de Kelly", bucket: "Verdadero" },
+    { text: "Sobreapostar e infraapostar en la misma cantidad cuestan aproximadamente lo mismo en CRECIMIENTO", bucket: "Verdadero" },
+    { text: "La volatilidad de ronda a ronda crece con la fracción apostada f", bucket: "Verdadero" },
+    { text: "Apostar pasado 2f* da un crecimiento a largo plazo negativo pese a una ventaja positiva", bucket: "Verdadero" },
+    { text: "Infraapostar nunca arriesga la ruina, solo un crecimiento más lento", bucket: "Verdadero" },
+    { text: "Sobreapostar hasta 2f* está bien porque duplica tu crecimiento", bucket: "Falso" },
+    { text: "La forma más segura de fallar la cima es errar por el lado ALTO", bucket: "Falso" },
+    { text: "Como la cima es plana, un pequeño paso por debajo de f* cuesta una enorme cantidad de crecimiento", bucket: "Falso" },
+  ]}
+  explanation="Verdadero: la curva es una loma que se anula cerca de 2f*, el crecimiento es aproximadamente simétrico alrededor de la cima mientras el riesgo sube con f, pasado 2f* el crecimiento se vuelve negativo, e infraapostar solo cuesta velocidad (nunca ruina). Falso: 2f* significa crecimiento CERO (no doble), errar por lo bajo es el lado seguro (no por lo alto), y la cima plana significa que una pequeña infraapuesta casi no cuesta crecimiento — que es por lo que el Kelly fraccionado es tan buen trato."
+/>
+
+<MCQ
+  client:visible
+  question="Causa y efecto: ¿POR QUÉ el consejo práctico 'cuando dudes, apuesta por debajo de Kelly, nunca por encima' se sigue de la forma de la curva de crecimiento?"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "Porque el crecimiento es mayor a la izquierda de la cima que en la cima misma", correct: false },
+    { text: "Porque la cima es plana (así que una pequeña infraapuesta apenas mella el crecimiento) mientras que el lado derecho acumula volatilidad y, pasado 2f*, cambia a crecimiento negativo y ruina", correct: true },
+    { text: "Porque infraapostar siempre produce más dinero total que Kelly pleno", correct: false },
+    { text: "Porque la curva es perfectamente simétrica, así que de verdad no importa por qué lado te equivoques", correct: false },
+  ]}
+  explanation="La cumbre es plana, así que dar un paso un poco BAJO sacrifica casi nada de crecimiento pero elimina el riesgo de ruina y doma las caídas. Dar el mismo paso ALTO sacrifica un crecimiento similar pero AÑADE volatilidad, y pasarse hasta 2f* o más allá vuelve el crecimiento nulo-luego-negativo — un juego ganador que aun así te arruina. Mismo coste de crecimiento, lado negativo catastróficamente distinto. Como nunca conoces tu verdadera ventaja con exactitud, redondea hacia abajo."
+/>
+
+<Callout variant="success" title="Lo único que hay que recordar">
+La curva de crecimiento de Kelly es una **colina desequilibrada**: cero en $f=0$, una cima en
+$f^{*}$, de vuelta a **cero en torno a $2f^{*}$**, y luego negativa hacia $-\infty$. El crecimiento
+es aproximadamente **simétrico** alrededor de la cima, así que sobreapostar e infraapostar cuestan
+un *crecimiento* similar — pero las *consecuencias* son salvajemente asimétricas: infraapostar es
+solo lento y nunca arriesga la ruina, mientras que sobreapostar compra volatilidad extra sin
+ganancia de crecimiento y, pasado $2f^{*}$, muele una ventaja ganadora hasta la nada.
+**Errar por lo bajo sale mucho más barato que errar por lo alto — en caso de duda, apuesta menos.**
+</Callout>

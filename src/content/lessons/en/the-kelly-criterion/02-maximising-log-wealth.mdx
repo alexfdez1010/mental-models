@@ -1,0 +1,191 @@
+---
+title: "Maximising the Log of Wealth"
+description: Why the right objective for compounding money is expected log wealth — the time-average growth rate — and how maximising it hands you the Kelly fraction f* = p − q/b, worked end to end on the 60/40 coin and 2-to-1 odds.
+topic: "en/the-kelly-criterion"
+order: 3
+minutes: 13
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, KellyGrowthCurve } from '@/components/react';
+
+Last lesson left us with a paradox. A bet with a genuine edge — the 60/40 coin, where you win 60% of the time at even money — will still **wipe you out** if you bet your whole bankroll, and even betting *most* of it grinds you down over time. The arithmetic that says "positive expected value, so bet big" is answering a question you are not actually asking. So what *is* the right question? What single number should a compounding gambler try to make as large as possible?
+
+The answer, discovered by John Kelly at Bell Labs in 1956 and weaponised by Ed Thorp at the blackjack tables a few years later, is deceptively small: maximise the **expected logarithm of your wealth**. Not your wealth. The *log* of your wealth. This lesson explains why that peculiar objective is the correct one for money that multiplies, then turns the crank and **derives the Kelly fraction** from it — a formula you can write on a napkin and that tells you exactly how much of your bankroll to stake.
+
+<MCQ
+  client:visible
+  pretest
+  question="You repeatedly bet a fixed fraction of your bankroll on a favourable, multiplicative gamble. To bet the amount that makes your money grow fastest over many rounds, which quantity should you actually maximise each round?"
+  options={[
+    { text: "Expected wealth, E[W] — the plain average of where you end up", correct: false },
+    { text: "Expected log wealth, E[ln W] — equivalently, the growth rate of the logarithm", correct: true },
+    { text: "The probability of finishing ahead of where you started", correct: false },
+    { text: "The single most likely (modal) final bankroll", correct: false },
+  ]}
+  explanation="For a multiplicative process, the quantity a single trajectory actually experiences over the long run is the average GROWTH RATE, which is the average of the log-returns. Maximising E[ln W] maximises that long-run growth rate — and, as we'll see, the median outcome. Maximising plain E[W] tells you to bet everything and ruins you; it's dragged up by a few absurdly lucky paths you will almost surely never be on."
+/>
+
+## Why logarithms: wealth multiplies, so growth adds
+
+Here is the crux, and it is a fact about arithmetic, not psychology. When you bet a **fraction** of your bankroll, good and bad rounds **multiply** together, they do not add. Win the 60/40 coin at fraction $f$ and your wealth is multiplied by $(1+fb)$; lose and it is multiplied by $(1-f)$. After many rounds your wealth is a long **product** of these factors:
+
+$$W_n = W_0 \cdot (1+fb)^{\,\text{wins}} \cdot (1-f)^{\,\text{losses}}.$$
+
+Products are hard to reason about; sums are easy. The logarithm is the tool that **turns a product into a sum** — $\ln(xy)=\ln x+\ln y$ — so taking logs converts your multiplying bankroll into an *adding* one:
+
+$$\ln W_n = \ln W_0 + (\text{wins})\ln(1+fb) + (\text{losses})\ln(1-f).$$
+
+Now the long-run behaviour is a plain average. Divide by $n$ rounds and, by the law of large numbers, the fraction of wins tends to $p$ and losses to $q=1-p$. The **per-round growth rate of log-wealth** settles down to a fixed number we call $g(f)$:
+
+$$g(f) = p\,\ln(1+fb) + q\,\ln(1-f).$$
+
+This $g(f)$ is the **time-average growth rate** — the exponential rate at which a *single* bankroll, yours, actually compounds if you keep playing. Because $W_n \approx W_0\, e^{\,g(f)\,n}$, a positive $g$ means exponential growth, $g=0$ means you tread water forever, and $g<0$ means you decay to zero no matter how promising a single round looked.
+
+**The analogy.** Think of two escalators. Plain expected wealth $E[W]$ is a lottery announcer shouting the *average* prize across a million ticket-holders — a number one jackpot winner can single-handedly inflate while everyone else goes home broke. The log-growth rate $g(f)$ is the escalator *you personally* are standing on: its slope is the rate your own money climbs, round after round, and no stranger's jackpot changes the step under your feet.
+
+<Callout variant="info" title="Time average vs ensemble average — the ergodicity point">
+On a multiplicative process these two averages **disagree**, sometimes wildly. The
+**ensemble average** $E[W]$ averages across many parallel universes at one instant; it
+is dominated by a handful of astronomically lucky paths. The **time average** $g(f)$ is
+what one path does across many rounds. Kelly betting maximises the time average — the
+growth *you* will see and, it turns out, the **median** long-run wealth. If the words
+"time average" feel new, that is the whole point of the prerequisite course on
+ergodicity; here we simply take $g(f)$ as the number to maximise.
+</Callout>
+
+**The misconception to kill.** "Log wealth is about being risk-averse — it's a psychological utility function for cowards." No. Even a perfectly risk-neutral robot that only cares about growing its money as fast as physically possible, with zero feelings about volatility, should maximise $E[\ln W]$ — because that *is* the growth rate. The log is not a fudge factor for nerves; it is the exact bookkeeping of a multiplying quantity.
+
+### When to use this lens
+
+Reach for expected log wealth whenever outcomes **multiply** and you **reinvest**: bankrolls, portfolios, compounding returns, bet sizing over many independent rounds. If instead your payoffs simply **add** — a one-shot bet you will never repeat, a fixed stake you cannot re-wager — then plain expected value is the right tool and Kelly does not apply. Kelly is the mathematics of the *repeated, reinvested, divisible* wager.
+
+## Deriving the Kelly fraction
+
+We have the objective $g(f)$. Now we find the fraction $f$ that maximises it — and this is where a napkin and one line of calculus produce a famous formula. A smooth hump is maximised where its slope is zero, so we differentiate $g$ with respect to $f$ and set the result to $0$:
+
+$$g'(f) = \frac{p\,b}{1+fb} - \frac{q}{1-f} = 0.$$
+
+Cross-multiply the two fractions:
+
+$$p\,b\,(1-f) = q\,(1+fb).$$
+
+Expand both sides — $pb - pbf = q + qbf$ — and gather every term with $f$ on one side:
+
+$$pb - q = pbf + qbf = bf\,(p+q) = bf,$$
+
+using $p+q=1$. Divide by $b$ and you have the **Kelly fraction**:
+
+$$\boxed{\,f^{*} = \frac{pb - q}{b} = p - \frac{q}{b}\,}$$
+
+Read it as a sentence: **bet your edge divided by the odds.** The numerator $pb-q$ is your **edge** — expected profit per unit staked — and dividing by the payoff odds $b$ scales it into a fraction of bankroll. Bigger edge, bet more; longer odds (bigger $b$), bet a smaller slice, because each win already pays handsomely.
+
+For an **even-money** bet ($b=1$) the formula collapses to something you can do in your head:
+
+$$f^{*} = 2p - 1 = p - q,$$
+
+which is simply your edge. A 60% coin at even money: $f^*=2(0.6)-1=0.2$, bet a fifth. A 55% coin: bet a tenth. A 50% coin: bet nothing — no edge, no wager.
+
+<MatchConcepts
+  client:visible
+  question="Match each piece of the Kelly derivation to what it means."
+  pairs={[
+    { term: "g(f) = p·ln(1+fb) + q·ln(1−f)", definition: "The long-run (time-average) growth rate of log-wealth per round — the quantity we maximise" },
+    { term: "Edge = pb − q", definition: "Expected profit per unit staked; positive means the bet is favourable and worth taking" },
+    { term: "f* = (pb − q)/b", definition: "The Kelly fraction: your edge divided by the odds b" },
+    { term: "f* = 2p − 1", definition: "The even-money special case (b = 1), where the Kelly fraction is just your edge p − q" },
+    { term: "Setting g'(f) = 0", definition: "Finding the top of the growth hump — the fraction where the slope of the curve is flat" },
+  ]}
+  explanation="The whole derivation is: write the growth rate g(f), differentiate, set the slope to zero, and solve. Out pops f* = (pb − q)/b = p − q/b — edge over odds — which for even money simplifies to 2p − 1."
+/>
+
+## Worked example A: the 60/40 even-money coin
+
+Take the canonical bet: win probability $p=0.6$, lose $q=0.4$, even money $b=1$. The formula gives $f^{*}=0.6-0.4=\mathbf{0.20}$ — stake **20%** of your bankroll every round. Let us verify it really is the peak by tabulating the growth rate $g(f)$ across fractions. (The middle column is $g$ in log units; the right column converts it to an effective compounded return per round, $e^{g}-1$.)
+
+| Bet fraction $f$ | $g(f)=0.6\ln(1{+}f)+0.4\ln(1{-}f)$ | ≈ growth per round |
+|---:|---:|---:|
+| 0% | 0.0000 | +0.00% |
+| 5% | 0.0088 | +0.88% |
+| 10% (half-Kelly) | 0.0150 | +1.52% |
+| **20% (Kelly f\*)** | **0.0201** | **+2.03%** |
+| 30% | 0.0147 | +1.49% |
+| 40% (double Kelly) | −0.0025 | −0.24% |
+| 100% (all-in) | −∞ | total ruin |
+
+The peak sits exactly at $f^*=20\%$, earning about **+2%/round** of compounding — modest per round, but $e^{0.02n}$ over hundreds of rounds is a fortune. Two features to file away for the next lesson: **half-Kelly (10%)** still banks about **1.5%/round**, roughly **three-quarters** of the peak growth for half the stake; and **double-Kelly (40%)** has already fallen back through **zero** — a positive-edge bet delivering *negative* long-run growth. Betting everything ($f=1$) means a single loss multiplies you by $(1-1)=0$: instantaneous, permanent ruin, which repeated play guarantees.
+
+<KellyGrowthCurve
+  client:visible
+  initialWinPct={60}
+  initialOdds={1}
+  initialFractionPct={20}
+  title="The growth hump for the 60/40 coin"
+  caption="With p = 60% at even money the Kelly fraction is f* = 20%, sitting right on the peak at about +2%/round. Drag the bet fraction: growth climbs to the peak at f*, then falls back through zero near 40% (double Kelly). Push win probability and odds around and watch f* = p − q/b track the top of the hump."
+/>
+
+<MCQ
+  client:visible
+  question="On the 60/40 even-money coin, someone bets 30% of their bankroll each round instead of the Kelly 20%. What does the table say happens to their long-run growth?"
+  options={[
+    { text: "It's higher than at 20% — betting more of a winning edge always grows faster", correct: false },
+    { text: "It's LOWER than at 20% (about +1.5%/round vs +2%), even though the bet still has a positive edge", correct: true },
+    { text: "It's exactly the same — growth is flat for any fraction below 40%", correct: false },
+    { text: "It's negative — 30% already means long-run ruin", correct: false },
+  ]}
+  explanation="Growth is a hump with its single peak at f* = 20%. Overbetting to 30% slides you back DOWN the far side to about +1.5%/round — the same growth you'd get from underbetting at 10%, but with far more volatility. More edge exposure past the peak buys you extra swings for LESS growth. Growth only turns negative near double Kelly (40%)."
+/>
+
+## Worked example B: favourable odds (2-to-1)
+
+Now change the payoff. Suppose a fair-ish coin, $p=0.5$, but a win pays **2-to-1** ($b=2$) — you risk one unit to win two. Is this worth betting on, and how much? First the **edge**:
+
+$$\text{edge} = pb - q = (0.5)(2) - 0.5 = 1.0 - 0.5 = 0.5 > 0,$$
+
+so yes, strongly favourable. The Kelly fraction is edge over odds:
+
+$$f^{*} = \frac{pb-q}{b} = \frac{0.5}{2} = 0.25,$$
+
+and the alternative form agrees: $f^{*}=p-\dfrac{q}{b}=0.5-\dfrac{0.5}{2}=0.5-0.25=0.25$. Stake **25%**. Notice the discipline here: a bet you win only *half* the time still deserves a quarter of your bankroll because the winning rounds pay double — but not more than a quarter, because the losing half will show up just as often and you must survive it.
+
+<Categorize
+  client:visible
+  question="Each row is a repeated, even-money bet unless it says otherwise. Sort them by what the Kelly fraction f* = p − q/b tells you to do."
+  buckets={["Bet a positive fraction", "Bet nothing (no edge or negative edge)"]}
+  items={[
+    { text: "p = 0.60, even money (b = 1) → f* = 0.20", bucket: "Bet a positive fraction" },
+    { text: "p = 0.55, even money → f* = 0.10", bucket: "Bet a positive fraction" },
+    { text: "p = 0.50, win pays 2-to-1 (b = 2) → f* = 0.25", bucket: "Bet a positive fraction" },
+    { text: "p = 0.50, even money → f* = 0", bucket: "Bet nothing (no edge or negative edge)" },
+    { text: "p = 0.45, even money → f* = −0.10", bucket: "Bet nothing (no edge or negative edge)" },
+    { text: "p = 0.40, even money → f* = −0.20 (the house's game)", bucket: "Bet nothing (no edge or negative edge)" },
+  ]}
+  explanation="Kelly says bet a positive slice only when the edge pb − q is positive. At even money that means p > 0.5; longer odds (b > 1) let a coin-flip p = 0.5 still be worth a quarter of your roll. A zero or negative Kelly fraction is the formula's way of saying 'don't play' (a negative f* would mean betting the OTHER side, if you could)."
+/>
+
+## Worked example C: a thin real edge
+
+Real edges are rarely 20%. When Ed Thorp took card-counting to the blackjack tables, his advantage over the house at a favourable count was on the order of **1%** at roughly even money. Kelly then says stake about $f^{*}\approx 1\%$ of your bankroll — and serious advantage players bet a *fraction* of even that, for reasons the next two lessons make painfully clear. The lineage matters: Kelly's 1956 paper grew out of Claude Shannon's information theory (its title is literally about *information rate*), Thorp turned it into a blackjack and then a Wall Street fortune at the hedge fund Princeton–Newport, and the same formula now sizes positions for professional gamblers and quantitative traders alike.
+
+The lesson of example C is sobering: a **1% edge is real money over time** — about a 1%/round growth engine — but it is also a whisper. Overestimate it even slightly, bet as if it were 3%, and you have shoved yourself over the peak toward the ruin side of a hump you cannot see. Precisely *how* dangerous that is — and why "err low" is the only safe direction — is the subject of the next lesson.
+
+<MCQ
+  client:visible
+  question="A sports bettor is offered a wager at 4-to-1 odds (b = 4) that they'll win only 30% of the time (p = 0.30). Using f* = p − q/b, how much of the bankroll does full Kelly stake?"
+  options={[
+    { text: "Nothing — a 30% win rate means the bet is a loser", correct: false },
+    { text: "About 12.5% of the bankroll", correct: true },
+    { text: "30%, matching the win probability p", correct: false },
+    { text: "About 50% — the payoff is huge at those long odds", correct: false },
+  ]}
+  explanation="First check the edge: pb − q = 0.30·4 − 0.70 = 1.2 − 0.7 = 0.5 > 0, so the bet is favourable despite the sub-50% win rate — the 4-to-1 payoff more than compensates for losing most of the time. Then f* = p − q/b = 0.30 − 0.70/4 = 0.30 − 0.175 = 0.125, i.e. 12.5% (equivalently edge/b = 0.5/4 = 0.125). Long odds plus a real edge justify a meaningful but far-from-reckless slice — you win rarely, so you must survive the frequent losses."
+/>
+
+<Callout variant="success" title="The one thing to remember">
+Money that **compounds** grows at the rate of its **average log-return**, not its average
+return — so the number to maximise is $g(f)=p\ln(1+fb)+q\ln(1-f)$, the time-average growth
+rate. Maximise it (set the slope to zero) and you get the **Kelly fraction**
+$f^{*}=\dfrac{pb-q}{b}=p-\dfrac{q}{b}$: **bet your edge divided by the odds**, which for even
+money is just $2p-1$. It is not a risk-aversion knob — it is the exact size that makes a
+reinvested bankroll grow as fast as it mathematically can.
+</Callout>

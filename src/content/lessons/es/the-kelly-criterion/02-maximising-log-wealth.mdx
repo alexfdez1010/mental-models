@@ -1,0 +1,239 @@
+---
+title: "Maximizar el logaritmo de la riqueza"
+description: "Por qué el objetivo correcto para el dinero que se compone es el logaritmo esperado de la riqueza — la tasa de crecimiento temporal — y cómo maximizarlo te entrega la fracción de Kelly f* = p − q/b, trabajada de principio a fin sobre la moneda 60/40 y las cuotas de 2 a 1."
+topic: "es/the-kelly-criterion"
+order: 3
+minutes: 13
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, KellyGrowthCurve } from '@/components/react';
+
+La lección anterior nos dejó con una paradoja. Una apuesta con una ventaja genuina — la moneda 60/40, en la que ganas el 60% de las veces a dinero parejo (even money) — aun así te **arruinará** si apuestas todo tu capital, e incluso apostar la *mayor parte* te desgasta con el tiempo. La aritmética que dice «valor esperado positivo, así que apuesta fuerte» está respondiendo a una pregunta que en realidad no te estás haciendo. Entonces, ¿cuál *es* la pregunta correcta? ¿Qué único número debería intentar hacer lo más grande posible un jugador que reinvierte?
+
+La respuesta, descubierta por John Kelly en los Laboratorios Bell en 1956 y convertida en arma por Ed Thorp en las mesas de blackjack unos años después, es engañosamente pequeña: maximiza el **logaritmo esperado de tu riqueza** (expected log wealth). No tu riqueza. El *logaritmo* de tu riqueza. Esta lección explica por qué ese objetivo tan peculiar es el correcto para el dinero que se multiplica, y luego le da a la manivela y **deriva la fracción de Kelly** (Kelly fraction) a partir de él — una fórmula que puedes escribir en una servilleta y que te dice exactamente cuánto de tu capital apostar.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de empezar — arriésgate a adivinar"
+  question="Apuestas repetidamente una fracción fija de tu capital en un juego favorable y multiplicativo. Para apostar la cantidad que hace crecer tu dinero lo más rápido posible a lo largo de muchas rondas, ¿qué magnitud deberías maximizar en realidad en cada ronda?"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "La riqueza esperada, E[W] — la media simple de dónde acabas", correct: false },
+    { text: "El logaritmo esperado de la riqueza, E[ln W] — equivalentemente, la tasa de crecimiento del logaritmo", correct: true },
+    { text: "La probabilidad de terminar por encima de donde empezaste", correct: false },
+    { text: "El capital final más probable (la moda)", correct: false },
+  ]}
+  explanation="Para un proceso multiplicativo, la magnitud que una única trayectoria experimenta de verdad a largo plazo es la TASA DE CRECIMIENTO media, que es la media de los log-rendimientos. Maximizar E[ln W] maximiza esa tasa de crecimiento a largo plazo — y, como veremos, el resultado mediano. Maximizar el simple E[W] te dice que apuestes todo y te arruina; está inflado por unas pocas trayectorias absurdamente afortunadas en las que casi con seguridad nunca estarás."
+/>
+
+## Por qué logaritmos: la riqueza se multiplica, así que el crecimiento se suma
+
+Aquí está el meollo, y es un hecho sobre aritmética, no sobre psicología. Cuando apuestas una **fracción** de tu capital, las rondas buenas y malas se **multiplican** entre sí, no se suman. Gana la moneda 60/40 con fracción $f$ y tu riqueza se multiplica por $(1+fb)$; pierde y se multiplica por $(1-f)$. Tras muchas rondas tu riqueza es un largo **producto** de estos factores:
+
+$$W_n = W_0 \cdot (1+fb)^{\,\text{ganadas}} \cdot (1-f)^{\,\text{perdidas}}.$$
+
+Los productos son difíciles de razonar; las sumas son fáciles. El logaritmo es la herramienta que **convierte un producto en una suma** — $\ln(xy)=\ln x+\ln y$ — así que tomar logaritmos convierte tu capital multiplicativo en uno que *suma*:
+
+$$\ln W_n = \ln W_0 + (\text{ganadas})\ln(1+fb) + (\text{perdidas})\ln(1-f).$$
+
+Ahora el comportamiento a largo plazo es una media simple. Divide entre $n$ rondas y, por la ley de los grandes números, la fracción de victorias tiende a $p$ y la de derrotas a $q=1-p$. La **tasa de crecimiento por ronda del log-riqueza** se estabiliza en un número fijo que llamamos $g(f)$:
+
+$$g(f) = p\,\ln(1+fb) + q\,\ln(1-f).$$
+
+Este $g(f)$ es la **tasa de crecimiento temporal** (time-average growth rate) — el ritmo exponencial al que un *único* capital, el tuyo, se compone en realidad si sigues jugando. Como $W_n \approx W_0\, e^{\,g(f)\,n}$, una $g$ positiva significa crecimiento exponencial, $g=0$ significa que te quedas a flote para siempre, y $g<0$ significa que decaes hacia cero por muy prometedora que pareciera una sola ronda.
+
+**La analogía.** Piensa en dos escaleras mecánicas. La riqueza esperada simple $E[W]$ es un locutor de lotería gritando el premio *medio* entre un millón de poseedores de boletos — un número que un único ganador del bote puede inflar él solito mientras todos los demás se van a casa arruinados. La tasa de log-crecimiento $g(f)$ es la escalera mecánica sobre la que estás de pie *tú personalmente*: su pendiente es el ritmo al que sube tu propio dinero, ronda tras ronda, y el bote de ningún desconocido cambia el escalón bajo tus pies.
+
+<Callout variant="info" title="Media temporal vs. media de conjunto — la cuestión de la ergodicidad">
+En un proceso multiplicativo estas dos medias **discrepan**, a veces salvajemente. La
+**media de conjunto** (ensemble average) $E[W]$ promedia entre muchos universos paralelos en un
+instante; está dominada por un puñado de trayectorias astronómicamente afortunadas. La **media
+temporal** (time average) $g(f)$ es lo que hace una sola trayectoria a lo largo de muchas
+rondas. Apostar según Kelly maximiza la media temporal — el crecimiento que *tú* verás y, resulta
+que, la riqueza **mediana** a largo plazo. Si las palabras «media temporal» te suenan nuevas, ese
+es todo el objetivo del curso previo sobre ergodicidad (ergodicity); aquí simplemente tomamos
+$g(f)$ como el número a maximizar.
+</Callout>
+
+**El error que hay que matar.** «El log-riqueza va de ser averso al riesgo — es una función de utilidad psicológica para cobardes.» No. Incluso un robot perfectamente neutral al riesgo que solo se preocupa por hacer crecer su dinero tan rápido como sea físicamente posible, sin ningún sentimiento sobre la volatilidad, debería maximizar $E[\ln W]$ — porque eso *es* la tasa de crecimiento. El logaritmo no es un apaño para los nervios; es la contabilidad exacta de una magnitud que se multiplica.
+
+### Cuándo usar esta lente
+
+Recurre al logaritmo esperado de la riqueza siempre que los resultados **se multipliquen** y **reinviertas**: capitales, carteras, rendimientos compuestos, dimensionar apuestas a lo largo de muchas rondas independientes. Si en cambio tus pagos simplemente **se suman** — una apuesta única que nunca repetirás, una cantidad fija que no puedes volver a apostar — entonces el valor esperado simple es la herramienta correcta y Kelly no aplica. Kelly es la matemática de la apuesta *repetida, reinvertida y divisible*.
+
+## Derivar la fracción de Kelly
+
+Tenemos el objetivo $g(f)$. Ahora encontramos la fracción $f$ que lo maximiza — y aquí es donde una servilleta y una línea de cálculo producen una fórmula famosa. Una loma suave se maximiza donde su pendiente es cero, así que derivamos $g$ respecto de $f$ e igualamos el resultado a $0$:
+
+$$g'(f) = \frac{p\,b}{1+fb} - \frac{q}{1-f} = 0.$$
+
+Multiplicamos en cruz las dos fracciones:
+
+$$p\,b\,(1-f) = q\,(1+fb).$$
+
+Desarrollamos ambos lados — $pb - pbf = q + qbf$ — y agrupamos a un lado todos los términos con $f$:
+
+$$pb - q = pbf + qbf = bf\,(p+q) = bf,$$
+
+usando $p+q=1$. Dividimos entre $b$ y tenemos la **fracción de Kelly**:
+
+$$\boxed{\,f^{*} = \frac{pb - q}{b} = p - \frac{q}{b}\,}$$
+
+Léela como una frase: **apuesta tu ventaja dividida entre las cuotas.** El numerador $pb-q$ es tu **ventaja** (edge) — beneficio esperado por unidad apostada — y dividir entre las cuotas de pago $b$ la escala a una fracción del capital. Mayor ventaja, apuesta más; cuotas más largas (mayor $b$), apuesta una porción más pequeña, porque cada victoria ya paga generosamente.
+
+Para una apuesta a **dinero parejo** ($b=1$) la fórmula se colapsa en algo que puedes hacer de cabeza:
+
+$$f^{*} = 2p - 1 = p - q,$$
+
+que es simplemente tu ventaja. Una moneda al 60% a dinero parejo: $f^*=2(0.6)-1=0.2$, apuesta un quinto. Una moneda al 55%: apuesta una décima parte. Una moneda al 50%: no apuestes nada — sin ventaja, sin apuesta.
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada pieza de la derivación de Kelly con lo que significa."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  pairs={[
+    { term: "g(f) = p·ln(1+fb) + q·ln(1−f)", definition: "La tasa de crecimiento a largo plazo (media temporal) del log-riqueza por ronda — la magnitud que maximizamos" },
+    { term: "Ventaja = pb − q", definition: "Beneficio esperado por unidad apostada; positivo significa que la apuesta es favorable y merece la pena hacerla" },
+    { term: "f* = (pb − q)/b", definition: "La fracción de Kelly: tu ventaja dividida entre las cuotas b" },
+    { term: "f* = 2p − 1", definition: "El caso especial de dinero parejo (b = 1), donde la fracción de Kelly es justo tu ventaja p − q" },
+    { term: "Igualar g'(f) = 0", definition: "Encontrar la cima de la loma de crecimiento — la fracción donde la pendiente de la curva es plana" },
+  ]}
+  explanation="Toda la derivación es: escribir la tasa de crecimiento g(f), derivar, igualar la pendiente a cero y despejar. Sale f* = (pb − q)/b = p − q/b — ventaja entre cuotas — que para dinero parejo se simplifica a 2p − 1."
+/>
+
+## Ejemplo resuelto A: la moneda 60/40 a dinero parejo
+
+Toma la apuesta canónica: probabilidad de ganar $p=0.6$, de perder $q=0.4$, dinero parejo $b=1$. La fórmula da $f^{*}=0.6-0.4=\mathbf{0.20}$ — apuesta el **20%** de tu capital en cada ronda. Verifiquemos que de verdad es la cima tabulando la tasa de crecimiento $g(f)$ en varias fracciones. (La columna del medio es $g$ en unidades logarítmicas; la de la derecha la convierte en un rendimiento compuesto efectivo por ronda, $e^{g}-1$.)
+
+| Fracción apostada $f$ | $g(f)=0.6\ln(1{+}f)+0.4\ln(1{-}f)$ | ≈ crecimiento por ronda |
+|---:|---:|---:|
+| 0% | 0.0000 | +0.00% |
+| 5% | 0.0088 | +0.88% |
+| 10% (medio Kelly) | 0.0150 | +1.52% |
+| **20% (Kelly f\*)** | **0.0201** | **+2.03%** |
+| 30% | 0.0147 | +1.49% |
+| 40% (doble Kelly) | −0.0025 | −0.24% |
+| 100% (todo dentro) | −∞ | ruina total |
+
+La cima se sitúa exactamente en $f^*=20\%$, ganando alrededor de **+2%/ronda** de composición — modesto por ronda, pero $e^{0.02n}$ a lo largo de cientos de rondas es una fortuna. Dos rasgos que archivar para la próxima lección: **medio Kelly (10%)** aún embolsa cerca de **1.5%/ronda**, aproximadamente **tres cuartas partes** del crecimiento máximo por la mitad de la apuesta; y **doble Kelly (40%)** ya ha caído de nuevo por debajo de **cero** — una apuesta con ventaja positiva entregando crecimiento a largo plazo *negativo*. Apostar todo ($f=1$) significa que una única derrota te multiplica por $(1-1)=0$: ruina instantánea y permanente, que el juego repetido garantiza.
+
+<KellyGrowthCurve
+  client:visible
+  initialWinPct={60}
+  initialOdds={1}
+  initialFractionPct={20}
+  title="La loma de crecimiento para la moneda 60/40"
+  eyebrow="Curva de crecimiento de Kelly"
+  instructions="Apuesta una fracción de tu capital en una apuesta favorable repetida. La curva es tu tasa de crecimiento a largo plazo por ronda en función de esa fracción. Alcanza su máximo en la fracción de Kelly f*, vuelve a cero cerca del doble de f*, y se vuelve negativa más allá — apuesta pasado ese punto y un juego con ventaja positiva aun así te muele hacia la ruina. Arrastra la fracción y observa dónde caes en la loma."
+  winLabel="Probabilidad de ganar p"
+  oddsLabel="Cuotas de pago b (ganar paga b a 1)"
+  fractionLabel="Fracción apostada f (porción del capital en juego)"
+  axisFractionLabel="Fracción apostada f →"
+  axisGrowthLabel="Crecimiento / ronda"
+  kellyStatLabel="Kelly f*"
+  growthStatLabel="Crecimiento aquí"
+  doubleStatLabel="Crecimiento nulo ≈ 2f*"
+  underLabel="seguro, lento"
+  overLabel="rápido, luego fatal"
+  zeroLabel="crecimiento nulo"
+  readoutTemplate="Con un {p}% de probabilidad de ganar a cuotas de {b} a 1, la fracción de Kelly es f* = {fstar}%. Apostar el {f}% de tu capital da un crecimiento a largo plazo del {growth}%/ronda; el crecimiento máximo (en f*) es del {peak}%/ronda, y el crecimiento vuelve a cero en torno al {double}%. {verdict}"
+  verdictUnder="Estás por debajo de Kelly: seguro, y conservas la mayor parte del crecimiento — un sitio sensato donde estar."
+  verdictKelly="Estás cerca de Kelly pleno: máximo crecimiento a largo plazo, pero también máxima volatilidad."
+  verdictOver="Estás por encima de Kelly: asumes más vaivenes por MENOS crecimiento que en f* — un mal trato sin paliativos."
+  verdictRuin="Estás en el doble de Kelly o más allá: tu crecimiento a largo plazo es nulo o negativo — un juego con ventaja positiva que aun así acaba en ruina."
+  caption="Con p = 60% a dinero parejo la fracción de Kelly es f* = 20%, justo en la cima, en torno a +2%/ronda. Arrastra la fracción apostada: el crecimiento sube hasta la cima en f*, luego vuelve a cruzar el cero cerca del 40% (doble Kelly). Mueve la probabilidad de ganar y las cuotas y observa cómo f* = p − q/b sigue la cima de la loma."
+/>
+
+<MCQ
+  client:visible
+  question="En la moneda 60/40 a dinero parejo, alguien apuesta el 30% de su capital en cada ronda en lugar del 20% de Kelly. ¿Qué dice la tabla que le ocurre a su crecimiento a largo plazo?"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "Es mayor que al 20% — apostar más de una ventaja ganadora siempre crece más rápido", correct: false },
+    { text: "Es MENOR que al 20% (unos +1.5%/ronda frente a +2%), aunque la apuesta siga teniendo ventaja positiva", correct: true },
+    { text: "Es exactamente igual — el crecimiento es plano para cualquier fracción por debajo del 40%", correct: false },
+    { text: "Es negativo — el 30% ya significa ruina a largo plazo", correct: false },
+  ]}
+  explanation="El crecimiento es una loma con su única cima en f* = 20%. Sobreapostar al 30% te desliza de nuevo HACIA ABAJO por la ladera lejana hasta cerca de +1.5%/ronda — el mismo crecimiento que obtendrías infraapostando al 10%, pero con mucha más volatilidad. Más exposición a la ventaja pasada la cima te compra vaivenes extra por MENOS crecimiento. El crecimiento solo se vuelve negativo cerca del doble Kelly (40%)."
+/>
+
+## Ejemplo resuelto B: cuotas favorables (2 a 1)
+
+Ahora cambia el pago. Supón una moneda casi justa, $p=0.5$, pero una victoria paga **2 a 1** ($b=2$) — arriesgas una unidad para ganar dos. ¿Merece la pena apostar, y cuánto? Primero la **ventaja**:
+
+$$\text{ventaja} = pb - q = (0.5)(2) - 0.5 = 1.0 - 0.5 = 0.5 > 0,$$
+
+así que sí, fuertemente favorable. La fracción de Kelly es la ventaja entre las cuotas:
+
+$$f^{*} = \frac{pb-q}{b} = \frac{0.5}{2} = 0.25,$$
+
+y la forma alternativa coincide: $f^{*}=p-\dfrac{q}{b}=0.5-\dfrac{0.5}{2}=0.5-0.25=0.25$. Apuesta el **25%**. Fíjate en la disciplina aquí: una apuesta que ganas solo la *mitad* de las veces aun así merece un cuarto de tu capital porque las rondas ganadoras pagan el doble — pero no más de un cuarto, porque la mitad perdedora aparecerá con la misma frecuencia y debes sobrevivirla.
+
+<Categorize
+  client:visible
+  question="Cada fila es una apuesta repetida a dinero parejo salvo que se diga lo contrario. Clasifícalas según lo que la fracción de Kelly f* = p − q/b te dice que hagas."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  buckets={["Apostar una fracción positiva", "No apostar nada (sin ventaja o ventaja negativa)"]}
+  items={[
+    { text: "p = 0.60, dinero parejo (b = 1) → f* = 0.20", bucket: "Apostar una fracción positiva" },
+    { text: "p = 0.55, dinero parejo → f* = 0.10", bucket: "Apostar una fracción positiva" },
+    { text: "p = 0.50, victoria paga 2 a 1 (b = 2) → f* = 0.25", bucket: "Apostar una fracción positiva" },
+    { text: "p = 0.50, dinero parejo → f* = 0", bucket: "No apostar nada (sin ventaja o ventaja negativa)" },
+    { text: "p = 0.45, dinero parejo → f* = −0.10", bucket: "No apostar nada (sin ventaja o ventaja negativa)" },
+    { text: "p = 0.40, dinero parejo → f* = −0.20 (el juego de la banca)", bucket: "No apostar nada (sin ventaja o ventaja negativa)" },
+  ]}
+  explanation="Kelly dice apostar una porción positiva solo cuando la ventaja pb − q es positiva. A dinero parejo eso significa p > 0.5; cuotas más largas (b > 1) permiten que una moneda p = 0.5 aún merezca un cuarto de tu capital. Una fracción de Kelly nula o negativa es la forma que tiene la fórmula de decir 'no juegues' (una f* negativa significaría apostar al OTRO lado, si pudieras)."
+/>
+
+## Ejemplo resuelto C: una ventaja real y fina
+
+Las ventajas reales rara vez son del 20%. Cuando Ed Thorp llevó el conteo de cartas a las mesas de blackjack, su ventaja sobre la banca con un recuento favorable era del orden del **1%** a un pago aproximadamente parejo. Kelly dice entonces apostar en torno a $f^{*}\approx 1\%$ de tu capital — y los jugadores con ventaja serios apuestan una *fracción* incluso de eso, por razones que las dos próximas lecciones dejan dolorosamente claras. El linaje importa: el artículo de Kelly de 1956 surgió de la teoría de la información de Claude Shannon (su título va literalmente sobre la *tasa de información*), Thorp lo convirtió en una fortuna primero en el blackjack y luego en Wall Street con el fondo de cobertura Princeton–Newport, y la misma fórmula dimensiona hoy posiciones tanto para jugadores profesionales como para operadores cuantitativos.
+
+La lección del ejemplo C es aleccionadora: una **ventaja del 1% es dinero real con el tiempo** — un motor de crecimiento de aproximadamente 1%/ronda — pero también es un susurro. Sobreestímala aunque sea ligeramente, apuesta como si fuera del 3%, y te has empujado más allá de la cima hacia el lado de la ruina de una loma que no puedes ver. Exactamente *cuán* peligroso es eso — y por qué «errar por lo bajo» es la única dirección segura — es el tema de la próxima lección.
+
+<MCQ
+  client:visible
+  question="A un apostador deportivo le ofrecen una apuesta a cuotas de 4 a 1 (b = 4) que ganará solo el 30% de las veces (p = 0.30). Usando f* = p − q/b, ¿cuánto del capital apuesta Kelly pleno?"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  options={[
+    { text: "Nada — una tasa de victorias del 30% significa que la apuesta es perdedora", correct: false },
+    { text: "Alrededor del 12.5% del capital", correct: true },
+    { text: "El 30%, igualando la probabilidad de ganar p", correct: false },
+    { text: "Alrededor del 50% — el pago es enorme a esas cuotas tan largas", correct: false },
+  ]}
+  explanation="Primero comprueba la ventaja: pb − q = 0.30·4 − 0.70 = 1.2 − 0.7 = 0.5 > 0, así que la apuesta es favorable pese a la tasa de victorias por debajo del 50% — el pago de 4 a 1 compensa de sobra perder la mayoría de las veces. Luego f* = p − q/b = 0.30 − 0.70/4 = 0.30 − 0.175 = 0.125, es decir, el 12.5% (equivalentemente ventaja/b = 0.5/4 = 0.125). Cuotas largas más una ventaja real justifican una porción significativa pero lejos de temeraria — ganas rara vez, así que debes sobrevivir las derrotas frecuentes."
+/>
+
+<Callout variant="success" title="Lo único que hay que recordar">
+El dinero que **se compone** crece al ritmo de su **log-rendimiento medio**, no de su
+rendimiento medio — así que el número a maximizar es $g(f)=p\ln(1+fb)+q\ln(1-f)$, la tasa de
+crecimiento temporal. Maximízala (iguala la pendiente a cero) y obtienes la **fracción de Kelly**
+$f^{*}=\dfrac{pb-q}{b}=p-\dfrac{q}{b}$: **apuesta tu ventaja dividida entre las cuotas**, que para
+dinero parejo es simplemente $2p-1$. No es una perilla de aversión al riesgo — es el tamaño exacto
+que hace crecer un capital reinvertido tan rápido como matemáticamente puede.
+</Callout>

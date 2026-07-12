@@ -1,0 +1,329 @@
+---
+title: "La moneda que te arruina"
+description: Una moneda sesgada a tu favor, una estrategia que maximiza tu riqueza media, y por qué esa estrategia aun así liquida a casi todo el que la juega. El remate de la ergodicidad — media del conjunto frente a crecimiento promedio en el tiempo, por qué la riqueza multiplicativa hace permanente una ruina, y por qué el arreglo es maximizar el log de la riqueza.
+topic: "es/the-kelly-criterion"
+order: 2
+minutes: 12
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, ErgodicityEngine, KellyBankrollSimulator } from '@/components/react';
+
+De vuelta a la moneda trucada. Sale cara el **60%** de las veces y paga a dinero parejo (even
+money): arriesga una fracción de tu capital, gana esa cantidad si sale cara, piérdela si sale
+cruz. Puedes jugar tanto tiempo como quieras. Esta es una *buena* apuesta — genuina y
+demostrablemente a tu favor — y voy a enseñarte que la forma «obvia» de explotarla, la que
+literalmente maximiza tu riqueza esperada, va a **arruinar a casi todos los que lo intenten.**
+No por mala suerte. Por diseño.
+
+Esa frase debería sonar mal. ¿Una apuesta favorable y una estrategia maximizadora de riqueza
+que te *arruina*? Sin duda, si un plan hace crecer tu fortuna media, ¿hace crecer *tu*
+fortuna? Pues no, y la razón es una de las ideas más importantes y menos intuitivas de todo el
+asunto de asumir riesgos. La media de muchos apostadores no es la experiencia de un apostador a
+lo largo del tiempo. Esta lección desmonta esa idea sobre nuestra moneda, y la reparación —
+maximizar el **log** de la riqueza — es la base sobre la que se construye el resto del curso.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de empezar — arriésgate a adivinar"
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En la moneda 60/40 a dinero parejo, apostar tu capital ENTERO cada ronda maximiza tu riqueza esperada (media). ¿Qué le pasa de verdad a un jugador típico que sigue esa estrategia durante muchas rondas?"
+  options={[
+    { text: "Casi con certeza se arruina — una sola cruz multiplica su capital por cero, y a lo largo de muchas tiradas una cruz está esencialmente garantizada", correct: true },
+    { text: "Se hace rico lo más rápido, porque la estrategia maximiza la riqueza esperada", correct: false },
+    { text: "Queda en tablas a largo plazo, ya que la moneda solo está ligeramente sesgada", correct: false },
+    { text: "Crece de forma constante pero lenta, como cualquier otra fracción de apuesta", correct: false },
+  ]}
+  explanation="Apostarlo todo gana ×2 si sale cara y ×0 si sale cruz. La riqueza esperada genuinamente sube lo más rápido así — pero esa media es un espejismo sostenido por el jugador uno-entre-mil-millones que nunca saca ni una sola cruz. Todos los demás sacan una cruz, su capital se multiplica por cero, y cero por cualquier ganancia futura sigue siendo cero. A lo largo de muchas rondas una cruz es una casi certeza, así que la ruina es una casi certeza. La media se dispara mientras el jugador típico quiebra: esa es la paradoja entera."
+/>
+
+## La apuesta que es brillante sobre el papel
+
+Concretemos el margen. Arriesga una fracción $f$ de tu capital en cada tirada. Gana
+(probabilidad $p = 0.6$) y tu riqueza se multiplica por $1 + f$; pierde (probabilidad
+$q = 0.4$) y se multiplica por $1 - f$. El **multiplicador esperado** para una ronda es:
+
+$$E[\text{factor}] = p(1 + f) + q(1 - f) = 1 + f(p - q) = 1 + 0.2f.$$
+
+Lee esa fórmula. Es una línea recta que **sube con $f$**. Cuanto más apuestas, más alta es tu
+riqueza esperada tras la ronda — sin pico, sin trampa, sin rendimientos decrecientes a la
+vista. Empuja $f$ hasta el **1** (apuéstalo todo) y la maximizas: tu riqueza esperada crece un
+gordo **20% por ronda**. Por la lógica del valor esperado — la misma lógica que te dice
+correctamente que aceptes una apuesta con valor esperado positivo (+EV) en primer lugar —
+deberías apostar **todo, cada vez.**
+
+| Fracción apostada $f$ | Gana → × | Pierde → × | Factor esperado $1+0.2f$ | Riqueza esperada tras la ronda |
+| --- | --- | --- | --- | --- |
+| 10% | 1,10 | 0,90 | 1,02 | +2% |
+| 20% | 1,20 | 0,80 | 1,04 | +4% |
+| 50% | 1,50 | 0,50 | 1,10 | +10% |
+| **100%** | **2,00** | **0,00** | **1,20** | **+20% (el máximo)** |
+
+Todo en esta tabla dice *apuesta más*. Y cada celda es **verdad**. La riqueza esperada
+realmente se maximiza en $f = 1$. La trampa no está en la aritmética — está en la suposición
+silenciosa de que la «riqueza esperada» es lo que deberías valorar. Observa cómo se
+desmorona.
+
+<Callout variant="warning" title="Sobre qué promedia en secreto la 'riqueza esperada'">
+$E[\text{riqueza}]$ es una media a través de **universos paralelos** — todas las formas en que
+la moneda *podría* caer, ponderadas por su probabilidad. Apostarlo todo gana ese concurso
+porque en el único universo deslumbrante donde sacas cara para siempre, tu riqueza es
+astronómica, y ese único término arrastra la media hasta el cielo. Pero no puedes vivir en
+todos los universos a la vez. **Vives una secuencia de tiradas, en orden.** La pregunta es qué
+ocurre *a lo largo de esa única trayectoria* — y ahí, la historia se invierte.
+</Callout>
+
+## Por qué apostarlo todo es una sentencia de muerte
+
+Sigue a un único jugador que lo apuesta todo. Ronda uno, saca cara: el capital se dobla. Ronda
+dos, cara otra vez: se dobla de nuevo. Esto puede seguir un rato emocionante. Pero aquí la
+riqueza es **multiplicativa** — cada ronda *multiplica* a la anterior — y el factor de pérdida
+es $1 - f = 1 - 1 = \mathbf{0}$. La primera vez que este jugador vea **cruz**, su capital se
+multiplica por cero. No abollado. Puesto a cero. Y aquí está la crueldad del interés compuesto:
+**cero por cualquier cosa es cero, para siempre.** Ninguna racha ganadora futura, por larga que
+sea, puede levantar un capital de \$0 de vuelta por encima de \$0. No hay camino de regreso
+desde la ruina.
+
+Ahora pregúntate cómo de probable es esa cruz fatal. La probabilidad de *nunca* sacar cruz en
+$n$ rondas es $0.6^n$ — que se colapsa deprisa:
+
+| Rondas jugadas | Probabilidad de sobrevivir (aún sin cruces) con $f = 1$ |
+| --- | --- |
+| 1 | 60% |
+| 5 | 7,8% |
+| 10 | 0,60% |
+| 20 | 0,0037% |
+| 50 | 0,0000000066% |
+
+Juega lo suficiente y la probabilidad de supervivencia corre hacia **cero**. La estrategia que
+maximiza tu riqueza *media* te arruina con **probabilidad que tiende a 1**. Ambas afirmaciones
+son verdad a la vez, y no están en contradicción — solo miden cosas distintas. La media está
+apuntalada por completo por la porción evanescente de jugadores que tienen una suerte
+imposible; el jugador **típico** — el mediano, el del medio del pelotón — está completamente
+arruinado.
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Por qué un jugador que lo apostó todo y sacó una cruz no puede recuperarse jamás, por mucha suerte que tenga después?"
+  options={[
+    { text: "Porque la riqueza se compone de forma multiplicativa — un capital multiplicado por cero se queda en cero, y cualquier factor ganador posterior multiplica el cero por sí mismo", correct: true },
+    { text: "Porque la moneda se sesga en su contra tras una pérdida", correct: false },
+    { text: "Porque el valor esperado prohíbe la recuperación una vez que has perdido", correct: false },
+    { text: "Porque se queda sin rondas por jugar", correct: false },
+  ]}
+  explanation="Es puro interés compuesto. La riqueza multiplicativa se actualiza multiplicando, y una vez que multiplicas por cero quedas clavado en cero — cada factor futuro, ganancia o pérdida, te deja ahí (0 × 2 = 0). Por eso la ruina en un juego multiplicativo es ABSORBENTE: es una puerta de un solo sentido. Un juego aditivo (apuestas fijas en euros que siempre puedes reponer) no tiene esta trampa; un capital que se compone, sí."
+/>
+
+## Dos medias que discrepan: conjunto frente a tiempo
+
+Hemos venido diciendo «media» a la ligera. En realidad hay **dos** medias, y la lección entera
+es que en una apuesta multiplicativa **discrepan**.
+
+- La **media del conjunto** (ensemble average, media aritmética) es lo que obtienes alineando a
+  una multitud enorme de jugadores que apuestan una vez cada uno, y promediando su riqueza *a
+  través de la multitud*. Esto es $E[\text{riqueza}]$, y para nuestra moneda en $f = 1$ crece
+  **+20%/ronda**. Responde a: *si pudiera clonarme en un millón de apostadores paralelos, ¿cuál
+  es mi resultado medio?*
+- El **promedio en el tiempo** (time-average, crecimiento geométrico) es lo que **experimenta un
+  único jugador a lo largo de una secuencia de tiradas, con el tiempo**. Como las rondas
+  multiplican, la forma correcta de promediarlas es en una **escala logarítmica**: la tasa de
+  crecimiento a largo plazo por ronda es
+
+$$g(f) = p\ln(1 + f) + q\ln(1 - f).$$
+
+En $f = 1$ ese segundo término es $q\ln(0) = -\infty$: el crecimiento promedio en el tiempo es
+menos infinito — la forma que tiene un matemático de escribir **«ruina segura».** Las dos
+medias no solo difieren en tamaño; apuntan en **direcciones opuestas**. El conjunto dice
+*despega*; el tiempo dice *húndete*.
+
+Un proceso donde estas dos medias coinciden se llama **ergódico** (ergodic); uno donde se
+separan — como la riqueza multiplicativa — es **no ergódico** (non-ergodic). Casi cualquier
+apuesta que dimensiones alguna vez en la vida real es no ergódica, que es exactamente por qué
+«maximizar la riqueza esperada» es una opción por defecto tan traicionera.
+
+<ErgodicityEngine
+  client:visible
+  title="La media del conjunto frente al jugador típico"
+  eyebrow="Motor de ergodicidad"
+  instructions="Un lanzamiento de moneda multiplicativo, jugado de dos formas a la vez. La línea del CONJUNTO es la riqueza media a través de 400 jugadores paralelos; la línea TÍPICA es el único jugador mediano viviendo la secuencia con el tiempo. Fija la apuesta y luego ejecútala. Con la moneda por defecto, la media del conjunto se dispara mientras el jugador típico es molido en silencio hacia cero — la misma apuesta, dos destinos opuestos. Reduce la fracción de apuesta y observa cómo la trayectoria típica finalmente gira hacia arriba."
+  ensembleLabel="Media del conjunto (400 jugadores paralelos)"
+  medianLabel="Jugador típico (mediana, con el tiempo)"
+  upLabel="Movimiento ganador — la porción apostada crece un"
+  downLabel="Movimiento perdedor — la porción apostada se reduce un"
+  winLabel="Probabilidad de ganar"
+  roundsLabel="Rondas jugadas"
+  betLabel="Fracción de apuesta — cuánto de tu riqueza arriesgas cada ronda"
+  betLowLabel="una pizca"
+  betHighLabel="todo"
+  runLabel="Ejecutar la apuesta ▸"
+  resetLabel="Reiniciar ↻"
+  axisLabel="× apuesta (escala logarítmica)"
+  verdictRuin="Ruina NO ERGÓDICA — la media del conjunto sube, pero el jugador típico es arrastrado hacia cero. El valor esperado positivo vive solo en una fracción evanescente de trayectorias astronómicamente afortunadas; casi todos quiebran."
+  verdictFlat="el filo del cuchillo — la trayectoria típica apenas mantiene el tipo mientras la media del conjunto aún deriva hacia arriba. Un pelín más de apuesta y el individuo empieza a decaer."
+  verdictGrow="la apuesta es ahora lo bastante pequeña como para que el crecimiento PROMEDIO EN EL TIEMPO sea positivo — el jugador típico también se compone hacia arriba. Esta es la región de Kelly: dimensiona la apuesta para sobrevivir, y la trayectoria finalmente crece."
+  idlePrompt="Fija la apuesta y pulsa ejecutar. Observa cómo la media del conjunto y el jugador típico se separan."
+  readout="Tras {rounds} rondas a través de {players} jugadores: la media del conjunto termina en {ensemble}× la apuesta (creciendo {eGrowth}%/ronda), pero el jugador típico termina en {median}× (promedio en el tiempo {tGrowth}%/ronda), y el {wiped}% de los jugadores fueron liquidados. {verdict}"
+  initialUpPct={100}
+  initialDownPct={95}
+  initialWinPct={60}
+  initialRounds={60}
+  initialBetPct={100}
+  groupSeparator="."
+  caption="Una moneda cercana a nuestra apuesta 60/40 a dinero parejo, arriesgada por completo. La línea del CONJUNTO (media de 400 jugadores paralelos) deriva hacia arriba mientras el jugador TÍPICO es molido hacia el suelo y la mayoría de los jugadores quedan liquidados — la no ergodicidad en una imagen. Ahora arrastra el deslizador de fracción de apuesta hacia abajo: encoge tu apuesta y la trayectoria típica deja de decaer y finalmente gira hacia arriba. Esa región segura es donde vive Kelly."
+/>
+
+El movimiento más útil que puedes hacer con este cajón de arena: arrastra el deslizador de
+**fracción de apuesta** hacia abajo y observa cómo la línea *típica* despega del suelo. No
+estás cambiando la moneda — el margen es el mismo — estás cambiando **cuánto de él expones a la
+ruina cada ronda.** Por debajo de cierta fracción el crecimiento promedio en el tiempo pasa de
+negativo a positivo, y el jugador típico finalmente se compone hacia arriba. Encontrar esa
+fracción es el problema de Kelly.
+
+<MatchConcepts
+  client:visible
+  question="Empareja cada idea con lo que describe de verdad."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  pairs={[
+    { term: "Media del conjunto", definition: "La riqueza media a través de una enorme multitud de jugadores paralelos — arrastrada al cielo por unos pocos afortunados" },
+    { term: "Promedio en el tiempo", definition: "El crecimiento que experimenta un único jugador a lo largo de una secuencia de tiradas con el tiempo" },
+    { term: "No ergódico", definition: "Un proceso donde la media de la multitud y la media de una sola trayectoria discrepan" },
+    { term: "Ruina multiplicativa", definition: "Un capital multiplicado por cero que nunca puede volver a subir — una puerta de un solo sentido" },
+  ]}
+  explanation="Conjunto frente a tiempo es el quid: la media del conjunto responde «media a través de muchos jugadores a la vez», el promedio en el tiempo responde «qué me pasa a mí a lo largo de una trayectoria». En una apuesta multiplicativa estos discrepan (no ergódico), y la razón de que la discrepancia sea fatal es la ruina multiplicativa — el cero es absorbente. Kelly elige el tamaño de apuesta que maximiza el promedio en el tiempo, es decir, el crecimiento de la trayectoria típica, no la media de la multitud."
+/>
+
+## Ver la brecha directamente
+
+Devuelve la moneda a exactamente **60/40 a dinero parejo** y observa competir a tres fracciones
+de apuesta: medio Kelly, Kelly completo y una sobreapuesta deliberada. Ejecútalo primero en la
+vista **Jugador típico (mediana)**, luego cambia a **Media del conjunto (media)** y observa
+cómo la historia de la línea sobreapostada cambia por completo.
+
+<KellyBankrollSimulator
+  client:visible
+  title="La misma moneda, mediana frente a media"
+  eyebrow="Simulador de capital de Kelly"
+  instructions="La misma apuesta favorable, arriesgada de tres formas a la vez: medio Kelly, Kelly completo y tu fracción elegida. Cada línea es el capital típico (mediano) a lo largo del tiempo en un eje logarítmico. Fija la apuesta, pulsa ejecutar, y observa cómo medio Kelly repta, Kelly completo sube más rápido, y una fracción sobreapostada se dispara y luego se desploma. Cambia a la vista de la media para ver cómo la media del conjunto miente sobre lo que le pasó de verdad al jugador típico."
+  initialWinPct={60}
+  initialOdds={1}
+  initialBetPct={70}
+  initialRounds={90}
+  winLabel="Probabilidad de ganar p"
+  oddsLabel="Cuotas de pago b (ganar paga b-a-1)"
+  betLabel="Tu fracción de apuesta elegida f"
+  roundsLabel="Rondas jugadas"
+  chosenLabel="Tu fracción"
+  kellyLabel="Kelly completo f*"
+  halfKellyLabel="Medio Kelly"
+  viewLabel="La línea de tu fracción muestra"
+  medianViewLabel="Jugador típico (mediana)"
+  meanViewLabel="Media del conjunto (media)"
+  runLabel="Ejecutar los capitales ▸"
+  resetLabel="Reiniciar ↻"
+  axisLabel="× capital (escala logarítmica)"
+  kellyStatLabel="Kelly f*"
+  growthStatLabel="Crecimiento / ronda"
+  ruinStatLabel="Liquidados"
+  idlePrompt="Fija la apuesta y pulsa ejecutar. Observa cómo las tres fracciones de apuesta se separan con el tiempo."
+  readout="Tras {rounds} rondas a {b}-a-1 con un {p}% de probabilidad de ganar (Kelly f* = {fstar}%): arriesgar tu {f}% deja al jugador típico en {chosenMedian}× el capital (crecimiento a largo plazo {growth}%/ronda), mientras que la media del conjunto marca {chosenMean}× y el {ruin}% de los jugadores fueron liquidados. {verdict}"
+  verdictRuin="Tu fracción sobreapuesta hasta la ruina: la media la arrastran hacia arriba unos pocos afortunados mientras el capital típico se desploma — un margen positivo malgastado por apostar demasiado fuerte."
+  verdictOver="Tu fracción sobreapuesta: vaivenes más violentos por MENOS crecimiento que Kelly completo. Pasarse por arriba se castiga duro."
+  verdictKelly="Tu fracción está cerca de Kelly completo: el crecimiento a largo plazo más rápido, a costa de una volatilidad que revuelve el estómago."
+  verdictUnder="Tu fracción está por debajo de Kelly: más lenta que f*, pero mucho más suave y robusta frente a un margen sobreestimado."
+  groupSeparator="."
+  caption="Con el 70% arriesgado — bastante pasado el doble de Kelly — el jugador TÍPICO se colapsa hacia el suelo y la mayoría quedan liquidados. Cambia a la MEDIA DEL CONJUNTO y esa mismísima estrategia sobreapostada de repente se lee como un triunfo, con su media arrastrada hasta los millones por un puñado de trayectorias afortunadas. Dos vistas de una estrategia: ruina para el individuo, riquezas «de media». La mediana es el número honesto."
+/>
+
+Esta es la brecha de ergodicidad hecha visible. En la vista de la mediana, la estrategia
+sobreapostada es una catástrofe. Cambia a la media y parece la mejor idea que has tenido jamás
+— porque la media es una historia contada por supervivientes. Cuando alguien te cita el
+*rendimiento esperado* de una estrategia agresiva, te está citando la media del conjunto, el
+número que describe a los pocos afortunados y a casi nadie más. **Tú no eres el conjunto. Eres
+una trayectoria.** El dimensionamiento de Kelly maximiza el número que describe *tu*
+trayectoria: el promedio en el tiempo, equivalentemente la riqueza mediana a largo plazo.
+
+<Categorize
+  client:visible
+  question="Clasifica cada afirmación según sea VERDADERA o FALSA para la moneda 60/40 a dinero parejo jugada repetidamente."
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  buckets={["Verdadero", "Falso"]}
+  items={[
+    { text: "Apostarlo todo maximiza la riqueza esperada (media)", bucket: "Verdadero" },
+    { text: "Apostarlo todo arruina al jugador típico con probabilidad que tiende a 1", bucket: "Verdadero" },
+    { text: "Aquí la riqueza se compone de forma multiplicativa, así que una ruina es permanente", bucket: "Verdadero" },
+    { text: "La media del conjunto y el crecimiento promedio en el tiempo pueden apuntar en direcciones opuestas", bucket: "Verdadero" },
+    { text: "La media del conjunto describe lo que experimentará un único jugador típico", bucket: "Falso" },
+    { text: "Como la apuesta es +EV, cualquier fracción de apuesta hace crecer tu riqueza con el tiempo", bucket: "Falso" },
+    { text: "De una sola cruz se puede recuperar uno más tarde si tiene suficiente suerte", bucket: "Falso" },
+    { text: "Maximizar la riqueza media y sobrevivir son el mismo objetivo", bucket: "Falso" },
+  ]}
+  explanation="Verdadero: apostarlo todo sí maximiza E[riqueza], pero aun así arruina casi con certeza al jugador típico; la riqueza multiplicativa hace permanente la ruina; y las dos medias genuinamente divergen. Falso: la media del conjunto está inflada por valores atípicos afortunados y no describe a casi nadie; una apuesta +EV aún puede tener crecimiento PROMEDIO EN EL TIEMPO negativo si sobreapuestas (¡arriesgar el 50% de esta moneda pierde terreno con el tiempo!); el cero es absorbente, así que no hay recuperación de una ruina a apuesta completa; y maximizar la media es exactamente el objetivo que te arruina — sobrevivir es un objetivo distinto y mejor."
+/>
+
+<MCQ
+  client:visible
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un amigo insiste: «La moneda es +EV, así que mientras no apueste literalmente todo, apostar una buena parte — digamos el 50% cada ronda — hará crecer mi dinero con el tiempo.» En la moneda 60/40 a dinero parejo, ¿cuál es el fallo?"
+  options={[
+    { text: "Incluso el 50% sobreapuesta esta moneda: su crecimiento promedio en el tiempo g = 0,6·ln 1,5 + 0,4·ln 0,5 ≈ −3,4%/ronda es negativo, así que el jugador típico aún decae hacia la ruina", correct: true },
+    { text: "Nada — cualquier fracción por debajo del 100% hace crecer una apuesta +EV con el tiempo", correct: false },
+    { text: "El 50% está bien; solo apostar más del 60% (la probabilidad de ganar) pierde dinero", correct: false },
+    { text: "El fallo es que el 50% crece demasiado lento, no que pierda dinero", correct: false },
+  ]}
+  explanation="Ser +EV no basta — cuánto arriesgas decide si el crecimiento PROMEDIO EN EL TIEMPO es positivo. Sustituye f = 0,5 en g(f) = p·ln(1+f) + q·ln(1−f): 0,6·ln(1,5) + 0,4·ln(0,5) = 0,243 − 0,277 ≈ −0,034, alrededor de −3,4% por ronda. Crecimiento negativo significa que el capital típico se encoge con el tiempo. La fracción de equilibrio aquí es en torno al 40% (el doble de la fracción de Kelly), y cualquier cosa por encima — incluido el 50% — te arruina en silencio pese al margen positivo."
+/>
+
+## El arreglo, en una palabra: logaritmos
+
+Aquí está la salida, planteada ahora y derivada por completo en la siguiente lección. El
+problema con $E[\text{riqueza}]$ es que promedia la riqueza en una escala **lineal**, donde un
+doblar y un partir por la mitad no se cancelan (subir \$100 y luego bajar \$100 desde \$200 te
+deja en \$100 — pero el viaje de ida y vuelta *multiplicativo* ×2 y luego ×0,5 te devuelve
+justo a donde empezaste). La escala honesta para un capital que se compone es el **logaritmo**,
+porque los logaritmos convierten la multiplicación en suma, así que el crecimiento de una única
+trayectoria es la *suma* de los log-factores por ronda — algo que la ley de los grandes números
+sí gobierna.
+
+Así que el objetivo ganador no es «maximizar la riqueza esperada» sino **maximizar el *log*
+esperado de la riqueza**, $E[\ln W]$ — que es exactamente la **tasa de crecimiento promedio en
+el tiempo** $g(f)$ que escribimos arriba. Maximiza eso, y maximizas el crecimiento de la
+trayectoria *típica* y la riqueza *mediana* a largo plazo. Haz el cálculo sobre $g(f)$ y de ahí
+sale una única fracción óptima: la **fracción de Kelly** $f^* = p - \dfrac{q}{b}$, que para
+nuestra moneda es $0.6 - 0.4 = 0.20$. Un veinte por ciento — ni cien, ni cincuenta. Esa
+derivación es la Lección 2.
+
+<Callout variant="success" title="Lo único que hay que recordar">
+En una apuesta repetida y multiplicativa, **maximizar tu riqueza media (esperada) no es lo
+mismo que hacer crecer tu dinero — puede garantizar la ruina.** La media es un número del
+*conjunto*, apuntalado por unos pocos afortunados; lo que *tú* experimentas a lo largo de una
+secuencia de tiradas es el crecimiento **promedio en el tiempo**, y en un proceso
+multiplicativo los dos pueden apuntar en direcciones opuestas. Como un capital multiplicado por
+cero nunca se recupera, **la supervivencia debe ir primero** — y la forma de conseguirla es
+dejar de maximizar la riqueza y empezar a maximizar el **log** de la riqueza. Ese único cambio
+te entrega la fracción de Kelly, y es adonde vamos a continuación.
+</Callout>

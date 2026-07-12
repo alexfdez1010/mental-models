@@ -4,16 +4,16 @@
  * people to the catalog. The actual topics/lessons live at /catalog.
  * Spanish twin lives at src/pages/es/index.astro.
  *
- * This page is **data-driven and topic-agnostic**: course counts, the marquee,
- * the learning paths and the build queue all come from content + lib data, so
- * it adapts to whatever subject the site teaches with no per-subject editing.
- * The only words to tune for your brand live in `src/lib/site.ts` and the
- * `home.*` / `hero.*` keys in `src/i18n/ui.ts`.
+ * This page is **data-driven and topic-agnostic**: course counts, the marquee
+ * and the learning paths all come from content + lib data, so it adapts to
+ * whatever subject the site teaches with no per-subject editing. The only words
+ * to tune for your brand live in `src/lib/site.ts` and the `home.*` / `hero.*`
+ * keys in `src/i18n/ui.ts`.
  *
  * Narrative order (a conversion ladder, not a feature dump):
  * promise (hero) → why it works (value band) → the path (zero→expert ladder)
  * → breadth proof (course marquee) → method (how a lesson works) → curated
- * paths → coming soon → final CTA.
+ * paths → final CTA.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Reveal } from '@/components/react';
@@ -22,7 +22,6 @@ import { useTranslations, localizePath, alternates as alternatesFor } from '@/i1
 import { getTopics, getLessons } from '@/lib/content';
 import { getRoadmapSummaries, roadmapHref } from '@/lib/roadmaps';
 import { getDifficultyLabels } from '@/lib/catalog';
-import { upcomingCourses } from '@/lib/upcoming';
 
 const lang = 'en' as const;
 const t = useTranslations(lang);
@@ -48,10 +47,6 @@ const featured = topics[0];
 
 const roadmaps = await getRoadmapSummaries(lang);
 const difficultyLabels = getDifficultyLabels(lang);
-
-// The next few courses on the build queue (from @/lib/upcoming).
-const upcomingHref = localizePath('/upcoming', lang);
-const nextUp = [...upcomingCourses].sort((a, b) => a.order - b.order).slice(0, 3);
 
 // The zero→expert ladder, with live course counts per tier.
 type Tier = 'beginner' | 'intermediate' | 'advanced' | 'expert';
@@ -493,57 +488,6 @@ const trust = ['Free forever', 'No account', 'No ads', 'Open source', 'English +
                   </span>
                 </div>
               </a>
-            );
-          })}
-        </div>
-      </Reveal>
-    )
-  }
-
-  <!-- Coming soon — next on the build queue (from @/lib/upcoming) -->
-  {
-    nextUp.length > 0 && (
-      <Reveal client:visible as="section" className="pb-8 pt-12">
-        <div class="mb-10 flex flex-wrap items-end justify-between gap-4">
-          <div class="max-w-2xl">
-            <span class="text-sm font-semibold uppercase tracking-wide text-accent-600">
-              {t('upcoming.title')}
-            </span>
-            <h2 class="mt-2 font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
-              The ladder keeps growing.
-            </h2>
-            <p class="mt-3 text-lg leading-relaxed text-ink-600">{t('upcoming.subtitle')}</p>
-          </div>
-          <a
-            href={upcomingHref}
-            class="inline-flex items-center gap-1 font-semibold text-brand-600 hover:text-brand-700"
-          >
-            {t('nav.upcoming')} →
-          </a>
-        </div>
-
-        <div class="grid gap-4 sm:grid-cols-3">
-          {nextUp.map((c) => {
-            const tint = c.accent === 'accent' ? 'bg-accent-50' : 'bg-brand-50';
-            return (
-              <article class="brutal flex flex-col border-dashed bg-surface p-5">
-                <div class="flex items-center justify-between gap-3">
-                  <span class={`grid h-10 w-10 shrink-0 place-items-center rounded-card border-2 border-edge text-xl ${tint}`}>
-                    {c.icon}
-                  </span>
-                  <span class={`difficulty-badge difficulty-${c.difficulty}`}>
-                    {difficultyLabels[c.difficulty]}
-                  </span>
-                </div>
-                <h3 class="mt-3 font-display text-lg font-semibold leading-snug text-ink-900">
-                  {c.title.en}
-                </h3>
-                <p class="mt-1.5 flex-1 text-sm leading-relaxed text-ink-600">{c.description.en}</p>
-                <p class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
-                  <span aria-hidden="true">⏳</span>
-                  {t('catalog.comingSoon')}
-                </p>
-              </article>
             );
           })}
         </div>

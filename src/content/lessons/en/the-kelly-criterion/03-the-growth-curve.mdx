@@ -1,0 +1,170 @@
+---
+title: "The Growth Curve: One Peak, Then Ruin"
+description: The shape of the Kelly growth curve — zero at f=0, a single peak at f*, back to zero at twice f*, then negative to −∞. Why over- and under-betting cost similar growth but wildly different risk, so erring low is far cheaper than erring high.
+topic: "en/the-kelly-criterion"
+order: 4
+minutes: 13
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, KellyGrowthCurve, KellyBankrollSimulator } from '@/components/react';
+
+Last lesson we derived the Kelly fraction $f^{*}=p-q/b$ — the single stake that makes a compounding bankroll grow as fast as it can. But a formula that spits out one magic number is dangerous if you don't understand the **landscape around it**. What happens if you're a little over? A little under? Twice over? The Kelly fraction lives on a curve, and the *shape* of that curve — where it peaks, where it crosses zero, how steeply it falls on each side — is where the real wisdom of Kelly betting hides.
+
+This lesson maps that curve, the **growth function** $g(f)$. We'll see it is a lopsided hill: it starts at zero, climbs to a single summit at $f^{*}$, comes **back down to zero at roughly twice $f^{*}$**, and then plunges into negative territory, dragging a positive-edge gambler all the way to ruin. And we'll extract the most practical lesson in all of Kelly betting: **when in doubt, bet too little, never too much.**
+
+<MCQ
+  client:visible
+  pretest
+  question="You're betting the Kelly-optimal fraction f* on a favourable game. Out of carelessness you accidentally DOUBLE your stake to 2f* every round. Roughly what happens to your long-run growth rate?"
+  options={[
+    { text: "It doubles too — twice the stake, twice the growth", correct: false },
+    { text: "It's cut roughly in half but stays comfortably positive", correct: false },
+    { text: "It collapses to approximately ZERO — you tread water despite a real edge", correct: true },
+    { text: "It stays the same — growth is flat near the peak", correct: false },
+  ]}
+  explanation="Doubling the Kelly stake lands you at 2f*, which is (to a very good approximation) the exact fraction where the growth curve crosses back through zero. All that extra risk, and your long-run growth is wiped out — a positive-edge game turned into a coin-toss between mediocrity and ruin. Go even a hair past 2f* and growth turns negative. This asymmetry is the whole lesson."
+/>
+
+## The shape of the curve: a lopsided hill
+
+Plot the growth rate $g(f)=p\ln(1+fb)+q\ln(1-f)$ against the fraction $f$ and you get a distinctive **hump** with four landmarks worth memorising:
+
+- **At $f=0$:** you bet nothing, so nothing compounds. $g(0)=0$. Flat ground.
+- **Climbing to $f^{*}$:** every extra bit of stake adds growth, at a diminishing rate, up to the single **summit** at the Kelly fraction $f^{*}$, where the slope is exactly zero.
+- **Back to zero near $2f^{*}$:** past the peak the curve descends, and it returns to $g=0$ at approximately **twice** the Kelly fraction. Here you carry maximum risk for *zero* reward.
+- **Negative beyond, diving to $-\infty$:** stake more than $2f^{*}$ and growth goes negative — you decay to zero over time. As $f\to1$ (betting everything) a single loss zeroes you, so $g\to-\infty$.
+
+**The analogy.** Picture hiking a ridge in fog. From the trailhead ($f=0$) the path climbs to a summit ($f^{*}$). Keep walking the same direction and you don't stay high — you descend the *far* slope back to trailhead elevation (at $2f^{*}$) and then off a cliff into a ravine ($g<0$). The summit is the only good place to stand. The tragedy is that **both** the far slope and the cliff *feel* like "betting more aggressively on a winning game" — the map gives no warning that you've crossed the top.
+
+### Why it's a near-parabola — the quick derivation
+
+Near the peak the hump is almost exactly a **downward parabola**, which makes its symmetry precise. Expand $\ln(1+fX)$ for small $f$ (where $X=+b$ on a win, $-1$ on a loss) using $\ln(1+u)\approx u-\tfrac12u^{2}$:
+
+$$g(f)=E[\ln(1+fX)] \approx f\,E[X] - \tfrac12 f^{2}\,E[X^{2}] = \mu f - \tfrac12\sigma^{2}f^{2},$$
+
+where $\mu=E[X]=pb-q$ is your **edge** (the mean per-unit return) and $\sigma^{2}=\operatorname{Var}(X)\approx E[X^{2}]$ is its **variance**. This parabola makes both landmarks exact:
+
+$$\text{peak: } g'(f)=\mu-\sigma^{2}f=0 \;\Rightarrow\; f^{*}=\frac{\mu}{\sigma^{2}}, \qquad \text{zero: } \mu f-\tfrac12\sigma^{2}f^{2}=0 \;\Rightarrow\; f=\frac{2\mu}{\sigma^{2}}=2f^{*}.$$
+
+So in the continuous (diffusion) approximation, growth is a clean parabola that peaks at $f^{*}=\mu/\sigma^{2}$ and hits **exactly zero at $2f^{*}$**. For discrete bets it's slightly off — recall from Example A that double-Kelly $f=0.40$ gave $g\approx-0.0025$, a *hair* below zero rather than dead on — but "twice Kelly ≈ zero growth" is close enough to run your life by.
+
+<KellyGrowthCurve
+  client:visible
+  initialWinPct={60}
+  initialOdds={1}
+  initialFractionPct={20}
+  title="One peak, then back to zero at 2f*"
+  caption="The 60/40 coin: peak at f* = 20%, and growth falls back through zero near 40% (twice f*). Drag the fraction slider PAST 40% and watch the readout turn negative — a positive-edge game with negative long-run growth. Notice how gently the curve falls just left of the peak and how the whole right side is a trap."
+/>
+
+<MatchConcepts
+  client:visible
+  question="Match each point on the Kelly growth curve to what's happening there."
+  pairs={[
+    { term: "f = 0", definition: "No bet, no compounding — growth is exactly zero (flat ground)" },
+    { term: "f = f* (the peak)", definition: "Maximum long-run growth; the slope of the curve is flat here" },
+    { term: "f = 2f*", definition: "Growth crosses back through zero — maximum risk for no reward" },
+    { term: "f between f* and 2f*", definition: "Positive but shrinking growth, with rapidly rising volatility — a strictly bad trade" },
+    { term: "f > 2f* (up to f = 1)", definition: "Negative growth: a positive-edge game that still decays you to ruin" },
+  ]}
+  explanation="The curve is a hump: zero at 0, a single peak at f*, back to zero at ~2f*, negative beyond. Everything to the right of the peak trades more risk for less (then negative) growth — which is why overbetting is the cardinal sin of Kelly betting."
+/>
+
+## The symmetry trap: equal growth cost, unequal danger
+
+Here is the subtle part almost everyone gets wrong. Because the hump is nearly a symmetric parabola about its peak, **overbetting by some amount and underbetting by the same amount cost about the same in growth.** Land at $0.5f^{*}$ or at $1.5f^{*}$ and you sacrifice a similar slice of growth. If growth were the only thing that mattered, over and under would be equally forgivable errors. They are not — because they carry wildly different **risk**.
+
+Let's tabulate the 60/40 even-money coin ($f^{*}=20\%$) at four fractions, tracking both growth and a rough measure of round-to-round risk. (Volatility of log-wealth scales roughly *linearly* with $f$, so it doubles from $0.5f^{*}$ to $f^{*}$ and doubles again by $2f^{*}$ — while growth barely moves near the top.)
+
+| Fraction | $g(f)$ | ≈ growth/round | % of peak growth | Round-to-round risk (∝ $f$) | Verdict |
+|---:|---:|---:|---:|:--|:--|
+| $0.5f^{*}=10\%$ | 0.0150 | +1.52% | ~75% | Low (~10%) | Safe and slow — leaves growth on the table |
+| $f^{*}=20\%$ | 0.0201 | +2.03% | 100% | Medium (~20%) | The summit — maximum growth |
+| $1.5f^{*}=30\%$ | 0.0147 | +1.49% | ~73% | High (~30%) | Same growth as half-Kelly but 3× the swings |
+| $2f^{*}=40\%$ | −0.0025 | −0.24% | ~0% | Brutal (~40%) | Zero growth, savage drawdowns — pure downside |
+
+Stare at the middle two data rows: **$10\%$ and $30\%$ deliver almost identical growth** (~1.5%/round, ~three-quarters of the peak). Symmetric in growth. But the $30\%$ bettor endures roughly **three times** the volatility of the $10\%$ bettor for that same return — and sits perilously close to the $40\%$ cliff where growth vanishes. The costs are symmetric; the **consequences are not**.
+
+<Callout variant="warning" title="Why erring LOW is far cheaper than erring HIGH">
+Miss the peak on the **low** side and you give up a little growth — but you never risk ruin,
+your drawdowns stay mild, and you're robust to a mis-estimated edge. Miss on the **high**
+side and you give up the *same* little growth **plus** a mountain of extra volatility and
+drawdown for it — and if you overshoot to $2f^{*}$ or beyond, your growth hits zero and then
+goes negative and a winning game **grinds you to nothing**. Underbetting is slow; overbetting
+is fatal. Given that you never know your true edge, always round your bet **down**.
+</Callout>
+
+## Watch the over-bet crash
+
+Numbers on a curve are one thing; watching bankrolls die is another. In the simulator below, the chosen fraction is pre-set to **40%** — exactly double Kelly for the 60/40 coin, right on the zero-growth crossing. Run it and compare the three staking lines: half-Kelly crawls steadily upward, full Kelly climbs fastest, and the **40% over-bet spikes early then collapses**, typically ending near or below where it started despite the identical winning edge. Then flip the chosen line to the **mean** view: the average appears to rocket up — because a handful of absurdly lucky paths drag it skyward — while the **median** player (and almost everyone else) has been wiped out. That gap between the soaring mean and the sinking median is the ergodicity gap, and it is exactly what overbetting manufactures.
+
+<KellyBankrollSimulator
+  client:visible
+  initialWinPct={60}
+  initialOdds={1}
+  initialBetPct={40}
+  initialRounds={80}
+  title="Overbetting to 2f*: spike, then crash"
+  caption="Chosen fraction is 40% — double Kelly for this coin. Press run: full Kelly climbs, half-Kelly crawls, and the 40% over-bet spikes then crashes toward ruin. Toggle to the mean (ensemble) view to watch the average lie — it rockets up on a few lucky survivors while the typical player is wiped out. Slide the fraction down toward 20% and the crash disappears."
+/>
+
+<MCQ
+  client:visible
+  question="Two bettors play the 60/40 coin. Alice bets 10% (half-Kelly); Carol bets 30% (1.5× Kelly). Their long-run growth rates are nearly identical (~1.5%/round). Why is Alice's position still clearly better?"
+  options={[
+    { text: "It isn't — identical growth means the two positions are equally good", correct: false },
+    { text: "Alice earns the same growth with far less volatility and zero ruin risk, while Carol pays for equal growth with ~3× the swings and sits near the 2f* cliff", correct: true },
+    { text: "Alice actually grows much faster; the table's growth numbers are wrong", correct: false },
+    { text: "Carol is better — being closer to the danger zone means higher returns", correct: false },
+  ]}
+  explanation="This is the symmetry trap in action. Growth is roughly symmetric about the peak, so 0.5f* and 1.5f* give nearly equal growth. But risk scales with f, so Carol at 30% suffers about three times Alice's volatility for the same return — and she's one bad estimate away from the 40% zero-growth cliff. Equal growth, unequal danger: underbetting is the strictly safer way to miss the peak."
+/>
+
+## Under-betting: safe but slow
+
+None of this makes under-betting *free*. Sit at half-Kelly forever and you genuinely leave growth on the table — about a quarter of it, in the 60/40 case (1.5% vs 2.0% per round), which compounds into a real difference over thousands of rounds. Under-betting is the tortoise: it will never blow up, never hit the ruin cliff, never suffer a heart-stopping drawdown — but it ambles. The trade-off is honest and worth stating plainly:
+
+- **Under-betting ($f<f^{*}$):** slower growth, gentler ride, **no ruin risk**, forgiving of a mis-estimated edge. The tortoise.
+- **Full Kelly ($f=f^{*}$):** fastest growth, but violent volatility and only *exactly* correct if you truly know $p$ and $b$. The knife's edge.
+- **Over-betting ($f>f^{*}$):** *less* growth than full Kelly, *more* volatility, and past $2f^{*}$ negative growth — fast, then fatal. The hare that dies.
+
+Because the summit is flat (its slope is zero), a modest step to the low side costs almost nothing in growth while buying a lot of safety — which is the entire rationale for the **fractional Kelly** strategy the next lesson is built around. The asymmetry means the smart default isn't the razor-edge peak; it's a deliberate step down the safe slope.
+
+<Categorize
+  client:visible
+  question="Sort each statement about the Kelly growth curve into TRUE or FALSE."
+  buckets={["True", "False"]}
+  items={[
+    { text: "The growth curve returns to zero at roughly twice the Kelly fraction", bucket: "True" },
+    { text: "Over- and under-betting by the same amount cost about the same in GROWTH", bucket: "True" },
+    { text: "Round-to-round volatility grows with the bet fraction f", bucket: "True" },
+    { text: "Betting past 2f* gives negative long-run growth despite a positive edge", bucket: "True" },
+    { text: "Under-betting never risks ruin, only slower growth", bucket: "True" },
+    { text: "Overbetting to 2f* is fine because it doubles your growth", bucket: "False" },
+    { text: "The safest way to miss the peak is to err on the HIGH side", bucket: "False" },
+    { text: "Because the peak is flat, a small step below f* costs a huge amount of growth", bucket: "False" },
+  ]}
+  explanation="True: the curve is a hump zeroing near 2f*, growth is roughly symmetric about the peak while risk rises with f, past 2f* growth goes negative, and underbetting only costs speed (never ruin). False: 2f* means ZERO growth (not double), erring low is the safe side (not high), and the flat peak means a small underbet costs almost no growth — which is why fractional Kelly is such a good deal."
+/>
+
+<MCQ
+  client:visible
+  question="Cause and effect: WHY does the practical advice 'when unsure, bet below Kelly, never above' follow from the shape of the growth curve?"
+  options={[
+    { text: "Because growth is higher to the left of the peak than at the peak itself", correct: false },
+    { text: "Because the peak is flat (so a small underbet barely dents growth) while the right side piles on volatility and, past 2f*, flips to negative growth and ruin", correct: true },
+    { text: "Because underbetting always produces more total money than full Kelly", correct: false },
+    { text: "Because the curve is perfectly symmetric, so it genuinely doesn't matter which side you err on", correct: false },
+  ]}
+  explanation="The summit is flat, so stepping a little LOW sacrifices almost no growth but eliminates ruin risk and tames drawdowns. Stepping the same amount HIGH sacrifices similar growth but ADDS volatility, and overshooting to 2f* or beyond turns growth zero-then-negative — a winning game that still ruins you. Same growth cost, catastrophically different downside. Since you never know your true edge exactly, round down."
+/>
+
+<Callout variant="success" title="The one thing to remember">
+The Kelly growth curve is a **lopsided hill**: zero at $f=0$, one peak at $f^{*}$, back to
+**zero at about $2f^{*}$**, then negative to $-\infty$. Growth is roughly **symmetric** about
+the peak, so over- and under-betting cost similar *growth* — but the *consequences* are
+wildly asymmetric: under-betting is merely slow and never risks ruin, while over-betting buys
+extra volatility for no growth gain and, past $2f^{*}$, grinds a winning edge to nothing.
+**Erring low is far cheaper than erring high — when in doubt, bet less.**
+</Callout>

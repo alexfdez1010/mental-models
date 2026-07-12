@@ -1,0 +1,258 @@
+---
+title: "Fractional Kelly: Bet Less Than You Should"
+description: Full Kelly is the mathematically optimal bet — and almost nobody sane bets it. Half-Kelly keeps about three-quarters of the growth for half the volatility, and shrugs off the edge-estimation errors that push full Kelly into ruin. Here's why betting under the optimum is the real optimum.
+topic: "en/the-kelly-criterion"
+order: 5
+minutes: 12
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, KellyGrowthCurve, KellyBankrollSimulator } from '@/components/react';
+
+Last lesson ended on a triumphant note: solve for the peak of the growth curve and you get
+the **Kelly fraction** $f^* = p - q/b$ — the single bet size that makes your money compound
+fastest over the long run. Betting more is strictly worse; betting past $2f^*$ ruins you.
+So the answer is "bet exactly $f^*$," right?
+
+Almost nobody who actually manages money does. Ask a professional gambler, a card-counter, a
+hedge-fund quant — anyone who's had real money on a Kelly bet — and they'll tell you they bet
+**half of $f^*$, or less.** Not because they can't do the arithmetic. Because they can, and
+because they've felt what full Kelly does to a real bankroll on a real losing streak. This
+lesson is about the single most important practical adjustment in the entire framework:
+**deliberately betting a fraction of what the theory says.** It sounds like timidity. It's
+closer to wisdom.
+
+<MCQ
+  client:visible
+  pretest
+  question="Full Kelly (betting exactly f*) gives the maximum long-run growth rate. You instead bet HALF of f*. Roughly what happens to your long-run growth?"
+  options={[
+    { text: "You keep about three-quarters of the maximum growth — you give up only ~25% of the growth rate", correct: true },
+    { text: "You lose half the growth — growth scales one-for-one with bet size", correct: false },
+    { text: "You lose almost all the growth — betting under Kelly barely compounds at all", correct: false },
+    { text: "You keep 100% of the growth — anything at or below Kelly grows identically", correct: false },
+  ]}
+  explanation="This is the whole reason fractional Kelly is such a good deal. Near its peak the growth curve is a downward parabola — nearly flat right at the top — so growth falls off only QUADRATICALLY as you back away from f*. Halve your bet and you're still near the flat summit: about 75% of peak growth. Meanwhile volatility falls off LINEARLY, so half the bet means roughly half the swings. Three-quarters of the reward for half the risk is a trade almost everyone should take."
+/>
+
+## The half-Kelly bargain — most of the growth, half the swings
+
+Here's the geometry that makes fractional Kelly work. The growth curve $g(f)$ isn't a sharp
+spike you have to hit dead-on; near the top it's a **gently rounded hill**. Standing right on
+the summit ($f^*$) versus standing a bit down the slope ($f^*/2$) barely changes your altitude
+— because near a smooth peak the curve is essentially flat. Formally, close to the top the
+growth rate behaves like a downward parabola,
+
+$$g(f) \approx \mu f - \tfrac{1}{2}\sigma^2 f^2,$$
+
+which peaks at $f^* = \mu/\sigma^2$. Growth falls off **quadratically** as you move away from
+$f^*$; the volatility of your log-wealth, meanwhile, scales **linearly** with $f$. Two
+different speeds — and that mismatch is the entire bargain.
+
+Run the numbers on our canonical 60/40 even-money coin ($p=0.6$, $b=1$, so $f^*=0.20$):
+
+- **Full Kelly**, $f=0.20$: $g = 0.6\ln 1.2 + 0.4\ln 0.8 \approx 0.0201$ → **+2.0%/round** (the peak).
+- **Half-Kelly**, $f=0.10$: $g = 0.6\ln 1.1 + 0.4\ln 0.9 \approx 0.0150$ → **+1.5%/round** — that's
+  $0.0150/0.0201 \approx$ **75% of peak growth** for **half** the stake.
+
+Cut your bet in half and you keep three-quarters of the compounding. That's the headline number
+to tattoo somewhere: **half the bet, three-quarters the growth, half the volatility.**
+
+<KellyGrowthCurve
+  client:visible
+  title="Standing on the summit vs. a step down the slope"
+  initialWinPct={60}
+  initialOdds={1}
+  initialFractionPct={10}
+  caption="The marker sits at half-Kelly (10% on the 60/40 coin, where f* is 20%). Notice how little altitude you lose stepping down from the peak — the top of the hill is nearly flat. Now drag the fraction slider up toward f* and past it: the climb to the summit is tiny, but the drop off the far side is a cliff."
+/>
+
+The picture makes the asymmetry obvious. Below $f^*$ the curve is nearly flat — under-betting
+costs you almost nothing. Above $f^*$ it plunges — over-betting costs you everything. So the
+smart error is to err **low**, and half-Kelly is erring low on purpose.
+
+<Callout variant="tip" title="Why 'give up 25% of growth' isn't the sacrifice it sounds like">
+A 25% haircut on the growth *rate* sounds steep until you remember what you buy with it: roughly
+half the volatility, dramatically shallower drawdowns, and immunity to the estimation errors that
+wreck full-Kelly bettors (next section). You're not paying for slower growth — you're paying for
+the ability to *stay in the game long enough for the growth to happen*. A slightly slower
+compounder that survives beats a faster one that busts.
+</Callout>
+
+## You always overestimate your edge — so full Kelly always over-bets
+
+Now the deeper reason, the one that turns fractional Kelly from "nice trade" into "non-negotiable."
+The Kelly formula demands two inputs: the true win probability $p$ and the true payoff odds $b$.
+**You never know them.** You estimate them — from a model, from history, from gut — and human
+estimates of one's own edge run reliably, almost comically, **too high**. Traders overrate their
+signals; gamblers overrate their reads; everyone thinks their edge is bigger than it is.
+
+Here's why that's not a minor rounding error but a structural trap. Kelly is a *maximum* — the
+top of the hump. Plug in an **inflated** edge and the formula hands you a bet size that sits to
+the **right** of the true peak, out on the ruin-facing slope. And that slope, as we saw, is a
+cliff. Over-estimating your edge doesn't cost you a little growth; it pushes you toward $2f^*$,
+where a genuinely positive-edge game grinds you to zero.
+
+A worked scare: suppose the truth is $p=0.6$, $b=1$, so the true Kelly is $f^*=20\%$. But you're
+optimistic and *believe* $p=0.7$. Your believed Kelly is $f = 2(0.7)-1 = 40\%$ — which is
+**exactly** $2f^*$ for the real coin. You'd bet 40% of your bankroll every round, convinced you're
+maximizing growth, while your true long-run growth is **zero and drifting negative**. One
+overconfident guess and you've bet yourself onto the ruin line.
+
+<KellyBankrollSimulator
+  client:visible
+  title="What an over-estimated edge does to a real bankroll"
+  initialWinPct={60}
+  initialOdds={1}
+  initialBetPct={40}
+  initialRounds={80}
+  caption="The true coin is 60/40 (real f* = 20%, shown as the accent line; half-Kelly is the dashed line). But you believed your edge was bigger and bet 40% — double the true Kelly. Press run a few times: your fraction (the bold line) spikes on lucky streaks then collapses, and a big share of players are wiped out. The dashed half-Kelly line just keeps climbing, smoothly. Betting BELOW your estimate is what protects you when the estimate is wrong."
+/>
+
+This flips the safety logic entirely. If your edge estimate could be off in either direction, the
+cost of guessing **too low** is a little forgone growth on the flat side of the hill. The cost of
+guessing **too high** is drawdown and ruin on the cliff side. Faced with an asymmetric penalty
+like that, you protect yourself by **shading your bet down** — betting a *fraction* of your
+computed Kelly, so that even if your true edge is smaller than you think, you're still safely on
+the left side of the peak. Half-Kelly means you can over-estimate your edge by a factor of two and
+still not over-bet the truth.
+
+<Callout variant="warning" title="The over-confidence multiplier">
+Betting full Kelly is a bet that your edge estimate is *exactly right*. It almost never is, and
+the errors don't cancel — an over-estimate hurts far more than an equal under-estimate helps.
+Fractional Kelly is the humble admission that your model is fuzzy. The fuzzier your edge (thin
+signal, small sample, changing conditions), the smaller the fraction you should bet. Certainty
+about your edge is the one thing full Kelly requires and the one thing you never have.
+</Callout>
+
+## Even full Kelly hands you brutal drawdowns
+
+Suppose you *could* know your edge exactly — no estimation error at all. Should you bet full
+Kelly then? Still probably not, because full Kelly, even played perfectly, is **savagely volatile**.
+Maximizing growth and minimizing heartburn are different objectives, and Kelly optimizes only the
+first.
+
+The clean fact: under full Kelly, the probability that your bankroll **ever** drops to a fraction
+$\alpha$ of its starting value is approximately $\alpha$ itself. So there is about a **50% chance
+you will at some point be down to half** your starting bankroll, and about a **10% chance you'll
+at some point touch one-tenth** of it — not as a permanent loss, just as part of the ride up.
+Fifty-fifty to watch half your money evaporate is more than most humans, and essentially all
+institutions with clients, can stomach without panicking and pulling the plug at the worst moment.
+
+Betting a fraction $c$ of full Kelly makes those drawdown odds collapse fast. In the continuous
+(diffusion) approximation the probability of *ever* falling to a fraction $\alpha$ is
+$\alpha^{(2-c)/c}$ — a bigger exponent as $c$ shrinks, so a smaller probability. Halving $c$ from
+1 to $\tfrac12$ takes the "ever halve" odds from 50% to about 12%. Here's the whole trade laid out
+on the 60/40 coin:
+
+| Strategy | Fraction of Kelly ($c$) | Bet size (ex. A) | Long-run growth | % of peak growth | Volatility (relative) | Chance of *ever* halving | Chance of *ever* hitting 10% |
+|---|---|---|---|---|---|---|---|
+| **Full Kelly** | 1 | 20% | +2.0%/round | 100% | 1.0× | ~50% | ~10% |
+| **Half-Kelly** | ½ | 10% | +1.5%/round | ~75% | 0.5× | ~12% | ~0.1% |
+| **Quarter-Kelly** | ¼ | 5% | +0.9%/round | ~44% | 0.25× | ~1% | negligible |
+
+Read across the half-Kelly row: you surrender a quarter of your growth and in return your chance
+of ever seeing a 50% drawdown falls from a coin-flip to about one-in-eight, and a 90% wipe-down
+goes from plausible to nearly impossible. Quarter-Kelly buys even more calm at the cost of roughly
+half the growth. There is no row where full Kelly's drawdown profile looks like a good deal for a
+real person with a real stomach and a finite career.
+
+<Callout variant="info" title="Growth is long-run; drawdowns are right now">
+The Kelly optimum is a statement about the limit — what happens as the number of bets goes to
+infinity. But you live in the short run, where a 50% drawdown can end your career, trigger client
+redemptions, or simply make you quit. Fractional Kelly trades a sliver of the asymptotic growth
+you'll never fully collect for a ride smooth enough that you're still betting when the long run
+finally arrives.
+</Callout>
+
+## Fractional Kelly *is* margin of safety
+
+If "deliberately do less than the optimum, to leave room for being wrong" rings a bell, it should:
+it's the **margin of safety**, the same principle a structural engineer uses when she builds a
+bridge rated for 40 tons and posts the limit at 10. She isn't confused about the physics. She's
+respecting that loads spike, materials fatigue, and her model of the world is an approximation. The
+gap between what the structure can bear and what she'll allow onto it *is* the safety margin.
+
+Fractional Kelly is that exact move in bankroll form. Full Kelly is the load your growth-math says
+you can bear. The **fraction you actually bet** is the posted limit — set deliberately below the
+theoretical maximum to absorb the two things you can't control: an edge you've over-estimated, and
+a losing streak worse than your average. Same logic in value investing (buy at a discount to
+estimated worth so a wrong estimate still leaves you whole), same logic in Kelly (bet below
+computed optimum so a wrong edge still leaves you solvent).
+
+<MatchConcepts
+  client:visible
+  question="Fractional Kelly borrows its logic from margin-of-safety thinking. Match each idea to its fractional-Kelly meaning."
+  pairs={[
+    { term: "The theoretical maximum load", definition: "Full Kelly f* — the bet size that maximizes long-run growth IF your inputs are exactly right" },
+    { term: "The posted, deliberately lower limit", definition: "The fraction of Kelly you actually bet (half or less) — sized to survive being wrong" },
+    { term: "The safety margin itself", definition: "The gap between f* and your actual bet — it absorbs an over-estimated edge and worse-than-average streaks" },
+    { term: "Why the margin is needed at all", definition: "Your p and b are estimates, and an over-estimate pushes full Kelly onto the ruin-facing slope" },
+    { term: "How much margin to leave", definition: "The fuzzier your edge, the bigger the fraction you shave off — thin or unstable edges demand smaller bets" },
+  ]}
+  explanation="Fractional Kelly isn't a different theory from margin of safety — it's the same principle applied to bet sizing. Full Kelly is what you could bear under perfect information; the fraction you bet is the conservative posted limit; the difference between them is the buffer that keeps an estimation error or a bad streak from being fatal. And just like an engineer leaves a bigger margin for an uncertain load, you shave a bigger fraction off a fuzzier edge."
+/>
+
+## How much to shave — picking your fraction
+
+So how much *should* you bet — half, quarter, a tenth? There's no universal number, but there is a
+clean way to reason about it. Three dials set the fraction:
+
+- **How well you know your edge.** A sharp, well-tested, stable edge (a proven card-counting count,
+  a backtested-to-death signal) can bear a bigger fraction — say a half. A vague, thin, or shifting
+  edge (a hunch, a small sample, a market that keeps changing) demands a smaller one — a quarter or
+  less. The fraction is a dial for your *confidence in the inputs*, not just your appetite for risk.
+- **How much drawdown you (or your clients) can survive.** If a 30% drop makes you quit or triggers
+  redemptions, size so a 30% drawdown is unlikely — which, per the table, means well under full
+  Kelly. Your true constraint is often "what drawdown ends me," not "what maximizes growth."
+- **How correlated your bets are.** If you're running many bets at once that tend to lose together,
+  their *combined* Kelly is much smaller than the sum of the individual ones — a subject the next
+  lesson opens up. Correlated exposure is a reason to shave harder.
+
+### When to use it
+
+Use fractional Kelly **essentially always** — it's the practical default, and full Kelly is the
+edge case, not the other way around. Reach for something *near* full Kelly only in the rare
+situation where your edge is genuinely, precisely known and you truly do not care about
+short-run drawdowns (a purely mathematical toy, or a bankroll so segregated that a total loss of
+*this* stake changes nothing about your life). Everywhere real money meets an uncertain edge and a
+human nervous system, bet **half or less**. The mnemonic: *the theory tells you the most you could
+bet; wisdom tells you to bet less.*
+
+<MCQ
+  client:visible
+  question="Spot the trap. A trader computes his Kelly fraction at 30% from a brand-new signal he's only tested on a small, recent sample. He's confident and wants to bet the full 30%. What's the strongest objection?"
+  options={[
+    { text: "A new signal on a small sample means his edge estimate is especially unreliable — likely too high — so full Kelly probably over-bets a smaller true edge; he should bet a fraction (a quarter or less) precisely because the estimate is shaky", correct: true },
+    { text: "30% is fine because Kelly is proven optimal — the math guarantees maximum growth regardless of how the edge was estimated", correct: false },
+    { text: "He should bet even MORE than 30%, since full Kelly is conservative and a confident trader can safely exceed it", correct: false },
+    { text: "The issue is only psychological; the 30% bet is mathematically correct and he just needs the nerve to hold it", correct: false },
+  ]}
+  explanation="The trap is trusting a Kelly number built on a shaky input. Kelly's optimality is conditional on knowing the TRUE p and b — a small, recent sample gives a noisy, probably-inflated estimate, and an inflated edge makes full Kelly land on the ruin-facing slope. The thinner and less-tested the edge, the bigger the fraction you shave off. Betting more is the exact wrong direction, and calling it 'just nerves' ignores that the drawdown risk is real, not imagined."
+/>
+
+<Categorize
+  client:visible
+  question="Sort each factor by which way it should push your bet size relative to full Kelly."
+  buckets={["Bet a LARGER fraction of Kelly (closer to full)", "Bet a SMALLER fraction of Kelly (shave harder)"]}
+  items={[
+    { text: "A precise, heavily backtested, stable edge you trust", bucket: "Bet a LARGER fraction of Kelly (closer to full)" },
+    { text: "A segregated bankroll whose total loss wouldn't change your life", bucket: "Bet a LARGER fraction of Kelly (closer to full)" },
+    { text: "A thin edge estimated from a small, recent sample", bucket: "Bet a SMALLER fraction of Kelly (shave harder)" },
+    { text: "Clients who will redeem the moment they see a 25% drawdown", bucket: "Bet a SMALLER fraction of Kelly (shave harder)" },
+    { text: "Many simultaneous bets that tend to lose together (correlated)", bucket: "Bet a SMALLER fraction of Kelly (shave harder)" },
+    { text: "A market whose behaviour keeps shifting under your model", bucket: "Bet a SMALLER fraction of Kelly (shave harder)" },
+  ]}
+  explanation="Everything that makes your edge MORE certain and drawdowns MORE survivable lets you bet closer to full Kelly; everything that makes your edge FUZZIER or drawdowns more dangerous means shave harder. Confidence in the inputs and tolerance for the swings are the two dials — and correlated bets quietly inflate your real exposure, so treat correlation as a reason to bet less, not more."
+/>
+
+<Callout variant="success" title="The one thing to remember">
+**Bet a fraction of Kelly — half or less — essentially always.** Full Kelly is the mathematical
+ceiling, computed as if you knew your edge exactly and didn't care about drawdowns; you know
+neither. Backing off to half-Kelly keeps about **75% of the growth for half the volatility**,
+makes a 50% drawdown roughly four times less likely, and — most importantly — lets you *over-estimate
+your edge by a factor of two and still not over-bet the truth*. It's the margin of safety in
+bankroll form: leave room to be wrong, because you will be. Next lesson we carry the whole
+framework out of the casino — into portfolios, poker, ventures, and careers — and name every place
+Kelly quietly lies to you.
+</Callout>

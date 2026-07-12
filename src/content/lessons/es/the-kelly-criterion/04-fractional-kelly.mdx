@@ -1,0 +1,339 @@
+---
+title: "Kelly fraccionado: apuesta menos de lo que deberías"
+description: El Kelly completo es la apuesta matemáticamente óptima — y casi nadie con la cabeza en su sitio la juega. El medio Kelly conserva unas tres cuartas partes del crecimiento por la mitad de la volatilidad, y se sacude de encima los errores de estimación del margen que empujan al Kelly completo hacia la ruina. Aquí tienes por qué apostar por debajo del óptimo es el verdadero óptimo.
+topic: "es/the-kelly-criterion"
+order: 5
+minutes: 12
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, KellyGrowthCurve, KellyBankrollSimulator } from '@/components/react';
+
+La última lección terminó con una nota triunfal: resolved el pico de la curva de crecimiento y
+obtenéis la **fracción de Kelly (Kelly fraction)** $f^* = p - q/b$ — el único tamaño de apuesta que
+hace que vuestro dinero componga más rápido a largo plazo. Apostar más es estrictamente peor;
+apostar más allá de $2f^*$ os arruina. Así que la respuesta es «apuesta exactamente $f^*$», ¿no?
+
+Casi nadie que gestione dinero de verdad lo hace. Preguntadle a un jugador profesional, a un
+contador de cartas, a un quant de un fondo de cobertura — cualquiera que haya tenido dinero real en
+una apuesta de Kelly — y os dirá que apuesta **la mitad de $f^*$, o menos.** No porque no sepa hacer
+la aritmética. Porque sabe hacerla, y porque ha *sentido* lo que el Kelly completo le hace a un
+capital real en una racha de pérdidas real. Esta lección va sobre el ajuste práctico más importante
+de todo el marco: **apostar deliberadamente una fracción de lo que dice la teoría.** Suena a
+timidez. Está más cerca de la sabiduría.
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de empezar — arriésgate a adivinar"
+  question="El Kelly completo (apostar exactamente f*) da la máxima tasa de crecimiento a largo plazo. En su lugar apuestas LA MITAD de f*. ¿Qué le pasa aproximadamente a tu crecimiento a largo plazo?"
+  options={[
+    { text: "Conservas alrededor de tres cuartas partes del crecimiento máximo — solo renuncias a un ~25% de la tasa de crecimiento", correct: true },
+    { text: "Pierdes la mitad del crecimiento — el crecimiento escala uno a uno con el tamaño de la apuesta", correct: false },
+    { text: "Pierdes casi todo el crecimiento — apostar por debajo de Kelly apenas compone", correct: false },
+    { text: "Conservas el 100% del crecimiento — cualquier cosa igual o por debajo de Kelly crece idéntico", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="Esta es toda la razón por la que el Kelly fraccionado es tan buen negocio. Cerca de su pico, la curva de crecimiento es una parábola invertida — casi plana justo en la cima — así que el crecimiento cae solo de forma CUADRÁTICA a medida que te alejas de f*. Reduce a la mitad tu apuesta y sigues cerca de la cumbre plana: alrededor del 75% del crecimiento máximo. Mientras tanto la volatilidad cae de forma LINEAL, así que media apuesta significa aproximadamente la mitad de los vaivenes. Tres cuartas partes de la recompensa por la mitad del riesgo es un trato que casi todo el mundo debería aceptar."
+/>
+
+## El chollo del medio Kelly — casi todo el crecimiento, la mitad de los vaivenes
+
+Aquí está la geometría que hace funcionar al Kelly fraccionado. La curva de crecimiento $g(f)$ no es
+un pico afilado que tenéis que clavar; cerca de la cima es una **colina suavemente redondeada.**
+Estar justo en la cumbre ($f^*$) frente a estar un poco ladera abajo ($f^*/2$) apenas cambia vuestra
+altitud — porque cerca de un pico suave la curva es esencialmente plana. Formalmente, cerca de la
+cima la tasa de crecimiento se comporta como una parábola invertida,
+
+$$g(f) \approx \mu f - \tfrac{1}{2}\sigma^2 f^2,$$
+
+que tiene su pico en $f^* = \mu/\sigma^2$. El crecimiento cae de forma **cuadrática** a medida que
+os alejáis de $f^*$; la volatilidad de vuestra log-riqueza, en cambio, escala **linealmente** con
+$f$. Dos velocidades distintas — y ese desajuste es todo el chollo.
+
+Echad las cuentas en nuestra moneda canónica 60/40 a dinero par ($p=0{,}6$, $b=1$, así que
+$f^*=0{,}20$):
+
+- **Kelly completo**, $f=0{,}20$: $g = 0{,}6\ln 1{,}2 + 0{,}4\ln 0{,}8 \approx 0{,}0201$ → **+2,0%/ronda** (el pico).
+- **Medio Kelly**, $f=0{,}10$: $g = 0{,}6\ln 1{,}1 + 0{,}4\ln 0{,}9 \approx 0{,}0150$ → **+1,5%/ronda** — eso es
+  $0{,}0150/0{,}0201 \approx$ **75% del crecimiento máximo** por **la mitad** de la apuesta.
+
+Reducid vuestra apuesta a la mitad y conserváis tres cuartas partes de la composición. Ese es el
+número para tatuárselo en alguna parte: **media apuesta, tres cuartas partes del crecimiento, la
+mitad de la volatilidad.**
+
+<KellyGrowthCurve
+  client:visible
+  title="En la cumbre frente a un paso ladera abajo"
+  initialWinPct={60}
+  initialOdds={1}
+  initialFractionPct={10}
+  eyebrow="Curva de crecimiento de Kelly"
+  instructions="Apuesta una fracción de tu capital en una apuesta favorable repetida. La curva es tu tasa de crecimiento a largo plazo por ronda en función de esa fracción. Tiene su pico en la fracción de Kelly f*, vuelve a cero cerca del doble de f*, y se vuelve negativa más allá — apuesta pasado ese punto y un juego con margen positivo aun así te muele hasta la ruina. Arrastra la fracción y observa dónde caes en la joroba."
+  winLabel="Probabilidad de ganar p"
+  oddsLabel="Cuota de pago b (ganar paga b-a-1)"
+  fractionLabel="Fracción de apuesta f (parte del capital arriesgada)"
+  axisFractionLabel="Fracción de apuesta f →"
+  axisGrowthLabel="Crecimiento / ronda"
+  kellyStatLabel="Kelly f*"
+  growthStatLabel="Crecimiento aquí"
+  doubleStatLabel="Crecimiento cero ≈ 2f*"
+  underLabel="seguro, lento"
+  overLabel="rápido, luego fatal"
+  zeroLabel="crecimiento cero"
+  readoutTemplate="Con un {p}% de probabilidad de ganar a cuota {b}-a-1, la fracción de Kelly es f* = {fstar}%. Apostar el {f}% de tu capital da un crecimiento a largo plazo del {growth}%/ronda; el crecimiento máximo (en f*) es del {peak}%/ronda, y el crecimiento vuelve a cero en torno al {double}%. {verdict}"
+  verdictUnder="Estás por debajo de Kelly: seguro, y conservas la mayor parte del crecimiento — un sitio sensato donde estar."
+  verdictKelly="Estás cerca del Kelly completo: máximo crecimiento a largo plazo, pero también máxima volatilidad."
+  verdictOver="Estás por encima de Kelly: asumes más vaivenes por MENOS crecimiento que f* — un trato estrictamente malo."
+  verdictRuin="Estás en el doble de Kelly o más allá: tu crecimiento a largo plazo es cero o negativo — un juego con margen positivo que aun así acaba en ruina."
+  caption="El marcador está en el medio Kelly (10% en la moneda 60/40, donde f* es 20%). Fíjate en lo poca altitud que pierdes bajando desde el pico — la cima de la colina es casi plana. Ahora arrastra el deslizador de la fracción hacia f* y más allá: la subida a la cumbre es minúscula, pero la caída por la ladera del otro lado es un precipicio."
+/>
+
+La imagen deja obvia la asimetría. Por debajo de $f^*$ la curva es casi plana — quedarse corto no os
+cuesta casi nada. Por encima de $f^*$ se despeña — pasarse os cuesta todo. Así que el error listo es
+errar **por lo bajo**, y el medio Kelly es errar por lo bajo a propósito.
+
+<Callout variant="tip" title="Por qué «renunciar al 25% del crecimiento» no es el sacrificio que parece">
+Un recorte del 25% en la *tasa* de crecimiento suena severo hasta que recordáis qué compráis con él:
+aproximadamente la mitad de la volatilidad, caídas dramáticamente más someras, e inmunidad a los
+errores de estimación que destrozan a los apostantes de Kelly completo (siguiente sección). No estáis
+pagando por un crecimiento más lento — estáis pagando por la capacidad de *seguir en el juego el
+tiempo suficiente para que el crecimiento ocurra*. Un compositor un pelín más lento que sobrevive le
+gana a uno más rápido que revienta.
+</Callout>
+
+## Siempre sobreestimas tu margen — así que el Kelly completo siempre se pasa
+
+Ahora la razón más profunda, la que convierte al Kelly fraccionado de «buen trato» en «innegociable».
+La fórmula de Kelly exige dos ingredientes: la verdadera probabilidad de ganar $p$ y la verdadera
+cuota de pago $b$. **Nunca los conocéis.** Los estimáis — con un modelo, con el historial, con el
+instinto — y las estimaciones humanas del propio margen tiran, con fiabilidad y casi cómicamente,
+**demasiado alto.** Los traders sobrevaloran sus señales; los jugadores sobrevaloran sus lecturas;
+todo el mundo cree que su margen es mayor de lo que es.
+
+Aquí está por qué eso no es un error de redondeo menor sino una trampa estructural. Kelly es un
+*máximo* — la cima de la joroba. Meted un margen **inflado** y la fórmula os entrega un tamaño de
+apuesta que se sitúa a la **derecha** del pico verdadero, ahí fuera en la ladera que da a la ruina. Y
+esa ladera, como vimos, es un precipicio. Sobreestimar vuestro margen no os cuesta un poco de
+crecimiento; os empuja hacia $2f^*$, donde un juego con margen genuinamente positivo os muele hasta
+cero.
+
+Un susto trabajado: supón que la verdad es $p=0{,}6$, $b=1$, así que el Kelly verdadero es
+$f^*=20\%$. Pero eres optimista y *crees* que $p=0{,}7$. Tu Kelly creído es $f = 2(0{,}7)-1 = 40\%$
+— que es **exactamente** $2f^*$ para la moneda real. Apostarías el 40% de tu capital cada ronda,
+convencido de que maximizas el crecimiento, mientras tu verdadero crecimiento a largo plazo es **cero
+y derivando hacia negativo.** Una conjetura demasiado confiada y te has apostado justo sobre la línea
+de la ruina.
+
+<KellyBankrollSimulator
+  client:visible
+  title="Lo que un margen sobreestimado le hace a un capital real"
+  initialWinPct={60}
+  initialOdds={1}
+  initialBetPct={40}
+  initialRounds={80}
+  eyebrow="Simulador de capital de Kelly"
+  instructions="La misma apuesta favorable, arriesgada de tres formas a la vez: medio Kelly, Kelly completo, y tu fracción elegida. Cada línea es el capital típico (mediana) a lo largo del tiempo en un eje logarítmico. Fija la apuesta, pulsa ejecutar, y observa al medio Kelly reptar, al Kelly completo trepar más rápido, y a una fracción excesiva dispararse y luego desplomarse. Cambia a la vista de media para ver cómo la media del conjunto miente sobre lo que de verdad le pasó al jugador típico."
+  winLabel="Probabilidad de ganar p"
+  oddsLabel="Cuota de pago b (ganar paga b-a-1)"
+  betLabel="Tu fracción de apuesta elegida f"
+  roundsLabel="Rondas jugadas"
+  chosenLabel="Tu fracción"
+  kellyLabel="Kelly completo f*"
+  halfKellyLabel="Medio Kelly"
+  viewLabel="La línea de tu fracción muestra"
+  medianViewLabel="Jugador típico (mediana)"
+  meanViewLabel="Media del conjunto (media)"
+  runLabel="Ejecutar los capitales ▸"
+  resetLabel="Reiniciar ↻"
+  axisLabel="× capital (escala log)"
+  kellyStatLabel="Kelly f*"
+  growthStatLabel="Crecimiento / ronda"
+  ruinStatLabel="Arruinados"
+  idlePrompt="Fija la apuesta y pulsa ejecutar. Observa cómo las tres fracciones de apuesta se separan con el tiempo."
+  readout="Tras {rounds} rondas a {b}-a-1 con un {p}% de probabilidad de ganar (Kelly f* = {fstar}%): arriesgar tu {f}% deja al jugador típico en {chosenMedian}× el capital (crecimiento a largo plazo {growth}%/ronda), mientras que la media del conjunto marca {chosenMean}× y el {ruin}% de los jugadores fueron arruinados. {verdict}"
+  verdictRuin="Tu fracción se pasa hasta la ruina: la media la arrastra hacia arriba un puñado de afortunados mientras el capital típico se desploma — un margen positivo malgastado por apostar demasiado grande."
+  verdictOver="Tu fracción se pasa: vaivenes más violentos por MENOS crecimiento que el Kelly completo. Errar por lo alto se castiga duro."
+  verdictKelly="Tu fracción está cerca del Kelly completo: el crecimiento a largo plazo más rápido, a costa de una volatilidad que revuelve el estómago."
+  verdictUnder="Tu fracción está por debajo de Kelly: más lenta que f*, pero mucho más suave y robusta ante un margen sobreestimado."
+  groupSeparator="."
+  caption="La moneda real es 60/40 (f* real = 20%, mostrado como la línea de acento; el medio Kelly es la línea discontinua). Pero creíste que tu margen era mayor y apostaste el 40% — el doble del Kelly verdadero. Pulsa ejecutar unas cuantas veces: tu fracción (la línea gruesa) se dispara en las rachas de suerte y luego se colapsa, y una buena parte de los jugadores queda arruinada. La línea discontinua del medio Kelly simplemente sigue subiendo, suavemente. Apostar POR DEBAJO de tu estimación es lo que te protege cuando la estimación es errónea."
+/>
+
+Esto invierte por completo la lógica de la seguridad. Si vuestra estimación del margen pudiera errar
+en cualquier dirección, el coste de conjeturar **demasiado bajo** es un poco de crecimiento renunciado
+en el lado plano de la colina. El coste de conjeturar **demasiado alto** es caída y ruina en el lado
+del precipicio. Ante una penalización asimétrica así, os protegéis **rebajando vuestra apuesta** —
+apostando una *fracción* de vuestro Kelly calculado, de modo que aunque vuestro margen verdadero sea
+menor de lo que creéis, seguís a salvo en el lado izquierdo del pico. El medio Kelly significa que
+podéis sobreestimar vuestro margen por un factor de dos y aun así no pasaros de la verdad.
+
+<Callout variant="warning" title="El multiplicador del exceso de confianza">
+Apostar el Kelly completo es apostar a que vuestra estimación del margen es *exactamente correcta*.
+Casi nunca lo es, y los errores no se cancelan — una sobreestimación hace mucho más daño del que
+ayuda una infraestimación equivalente. El Kelly fraccionado es la admisión humilde de que vuestro
+modelo es borroso. Cuanto más borroso el margen (señal fina, muestra pequeña, condiciones
+cambiantes), menor la fracción que deberíais apostar. La certeza sobre vuestro margen es lo único que
+el Kelly completo exige y lo único que nunca tenéis.
+</Callout>
+
+## Hasta el Kelly completo te entrega caídas brutales
+
+Supón que *pudieras* conocer tu margen con exactitud — sin ningún error de estimación. ¿Deberías
+apostar el Kelly completo entonces? Aun así probablemente no, porque el Kelly completo, incluso jugado
+a la perfección, es **salvajemente volátil.** Maximizar el crecimiento y minimizar la acidez de
+estómago son objetivos distintos, y Kelly solo optimiza el primero.
+
+El hecho limpio: bajo Kelly completo, la probabilidad de que vuestro capital **alguna vez** caiga a
+una fracción $\alpha$ de su valor inicial es aproximadamente $\alpha$ mismo. Así que hay alrededor de
+un **50% de probabilidad de que en algún momento estéis reducidos a la mitad** de vuestro capital
+inicial, y alrededor de un **10% de probabilidad de que en algún momento toquéis una décima parte**
+de él — no como pérdida permanente, solo como parte del viaje hacia arriba. Cincuenta-cincuenta de ver
+evaporarse la mitad de vuestro dinero es más de lo que la mayoría de los humanos, y esencialmente
+todas las instituciones con clientes, pueden aguantar sin entrar en pánico y tirar del enchufe en el
+peor momento.
+
+Apostar una fracción $c$ del Kelly completo hace que esas probabilidades de caída se desplomen rápido.
+En la aproximación continua (de difusión) la probabilidad de *alguna vez* caer a una fracción $\alpha$
+es $\alpha^{(2-c)/c}$ — un exponente mayor a medida que $c$ se encoge, así que una probabilidad menor.
+Reducir $c$ a la mitad, de 1 a $\tfrac12$, lleva las probabilidades de «reducirse a la mitad alguna
+vez» del 50% a alrededor del 12%. Aquí está todo el trato desplegado sobre la moneda 60/40:
+
+| Estrategia | Fracción de Kelly ($c$) | Tamaño de apuesta (ej. A) | Crecimiento a largo plazo | % del crecimiento máximo | Volatilidad (relativa) | Probabilidad de *alguna vez* reducirse a la mitad | Probabilidad de *alguna vez* tocar el 10% |
+|---|---|---|---|---|---|---|---|
+| **Kelly completo** | 1 | 20% | +2,0%/ronda | 100% | 1,0× | ~50% | ~10% |
+| **Medio Kelly** | ½ | 10% | +1,5%/ronda | ~75% | 0,5× | ~12% | ~0,1% |
+| **Cuarto de Kelly** | ¼ | 5% | +0,9%/ronda | ~44% | 0,25× | ~1% | insignificante |
+
+Leed a lo ancho la fila del medio Kelly: entregáis una cuarta parte de vuestro crecimiento y a cambio
+vuestra probabilidad de ver alguna vez una caída del 50% baja de un cara-o-cruz a alrededor de uno de
+cada ocho, y una barrida del 90% pasa de plausible a casi imposible. El cuarto de Kelly compra aún más
+calma a costa de aproximadamente la mitad del crecimiento. No hay ninguna fila donde el perfil de
+caídas del Kelly completo parezca un buen trato para una persona real con un estómago real y una
+carrera finita.
+
+<Callout variant="info" title="El crecimiento es a largo plazo; las caídas son ahora mismo">
+El óptimo de Kelly es una afirmación sobre el límite — lo que pasa cuando el número de apuestas tiende
+a infinito. Pero vosotros vivís en el corto plazo, donde una caída del 50% puede acabar con vuestra
+carrera, disparar reembolsos de clientes, o simplemente haceros abandonar. El Kelly fraccionado
+cambia una pizca del crecimiento asintótico que nunca cobraréis del todo por un viaje lo bastante
+suave como para que sigáis apostando cuando el largo plazo por fin llegue.
+</Callout>
+
+## El Kelly fraccionado *es* margen de seguridad
+
+Si «hacer deliberadamente menos que el óptimo, para dejar sitio a equivocarte» os suena, debería:
+es el **margen de seguridad (margin of safety)**, el mismo principio que usa una ingeniera de
+estructuras cuando construye un puente calificado para 40 toneladas y coloca el límite en 10. No está
+confundida sobre la física. Está respetando que las cargas se disparan, los materiales fatigan, y su
+modelo del mundo es una aproximación. El hueco entre lo que la estructura puede soportar y lo que
+permitirá encima *es* el margen de seguridad.
+
+El Kelly fraccionado es ese movimiento exacto en forma de capital. El Kelly completo es la carga que
+vuestra matemática del crecimiento dice que podéis soportar. La **fracción que de verdad apostáis** es
+el límite señalizado — fijado deliberadamente por debajo del máximo teórico para absorber las dos
+cosas que no controláis: un margen que habéis sobreestimado, y una racha de pérdidas peor que vuestra
+media. La misma lógica en la inversión en valor (comprad con descuento sobre el valor estimado para
+que una estimación errónea aún os deje enteros), la misma lógica en Kelly (apostad por debajo del
+óptimo calculado para que un margen erróneo aún os deje solventes).
+
+<MatchConcepts
+  client:visible
+  question="El Kelly fraccionado toma prestada su lógica del pensamiento de margen de seguridad. Empareja cada idea con su significado en Kelly fraccionado."
+  pairs={[
+    { term: "La carga máxima teórica", definition: "El Kelly completo f* — el tamaño de apuesta que maximiza el crecimiento a largo plazo SI tus ingredientes son exactamente correctos" },
+    { term: "El límite señalizado, deliberadamente menor", definition: "La fracción de Kelly que de verdad apuestas (la mitad o menos) — dimensionada para sobrevivir a estar equivocado" },
+    { term: "El propio margen de seguridad", definition: "El hueco entre f* y tu apuesta real — absorbe un margen sobreestimado y rachas peores que la media" },
+    { term: "Por qué hace falta el margen siquiera", definition: "Tu p y tu b son estimaciones, y una sobreestimación empuja al Kelly completo a la ladera que da a la ruina" },
+    { term: "Cuánto margen dejar", definition: "Cuanto más borroso el margen, mayor la fracción que recortas — los márgenes finos o inestables exigen apuestas menores" },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo emparejado"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+  explanation="El Kelly fraccionado no es una teoría distinta del margen de seguridad — es el mismo principio aplicado al dimensionado de apuestas. El Kelly completo es lo que podrías soportar con información perfecta; la fracción que apuestas es el límite señalizado, conservador; la diferencia entre ambos es el colchón que impide que un error de estimación o una mala racha sean fatales. Y, igual que una ingeniera deja un margen mayor para una carga incierta, tú recortas una fracción mayor de un margen más borroso."
+/>
+
+## Cuánto recortar — eligiendo tu fracción
+
+Entonces, ¿cuánto *deberíais* apostar — la mitad, un cuarto, una décima? No hay número universal, pero
+sí hay una forma limpia de razonarlo. Tres diales fijan la fracción:
+
+- **Cómo de bien conocéis vuestro margen.** Un margen afilado, bien probado y estable (un conteo de
+  cartas demostrado, una señal contrastada hasta la saciedad) puede soportar una fracción mayor —
+  digamos la mitad. Un margen vago, fino o cambiante (una corazonada, una muestra pequeña, un mercado
+  que no para de cambiar) exige una menor — un cuarto o menos. La fracción es un dial para vuestra
+  *confianza en los ingredientes*, no solo para vuestro apetito de riesgo.
+- **Cuánta caída podéis sobrevivir (vosotros o vuestros clientes).** Si una caída del 30% os hace
+  abandonar o dispara reembolsos, dimensionad de modo que una caída del 30% sea improbable — lo que,
+  según la tabla, significa muy por debajo del Kelly completo. Vuestra verdadera restricción suele ser
+  «qué caída me acaba», no «qué maximiza el crecimiento».
+- **Cómo de correlacionadas están vuestras apuestas.** Si tenéis muchas apuestas a la vez que tienden
+  a perder juntas, su Kelly *combinado* es mucho menor que la suma de los individuales — un tema que
+  abre la próxima lección. La exposición correlacionada es una razón para recortar más fuerte.
+
+### Cuándo usarlo
+
+Usad el Kelly fraccionado **esencialmente siempre** — es el ajuste por defecto práctico, y el Kelly
+completo es el caso límite, no al revés. Acercaos a *algo parecido* al Kelly completo solo en la rara
+situación en que vuestro margen sea genuina y precisamente conocido y de verdad no os importen las
+caídas a corto plazo (un juguete puramente matemático, o un capital tan segregado que una pérdida total
+de *esta* apuesta no cambie nada de vuestra vida). Allá donde el dinero real se encuentra con un margen
+incierto y un sistema nervioso humano, apostad **la mitad o menos.** El mnemónico: *la teoría os dice
+lo más que podríais apostar; la sabiduría os dice que apostéis menos.*
+
+<MCQ
+  client:visible
+  question="Detecta la trampa. Un trader calcula su fracción de Kelly en el 30% a partir de una señal recién estrenada que solo ha probado en una muestra pequeña y reciente. Está confiado y quiere apostar el 30% completo. ¿Cuál es la objeción más fuerte?"
+  options={[
+    { text: "Una señal nueva sobre una muestra pequeña significa que su estimación del margen es especialmente poco fiable — probablemente demasiado alta — así que el Kelly completo seguramente se pasa respecto a un margen verdadero menor; debería apostar una fracción (un cuarto o menos) precisamente porque la estimación es endeble", correct: true },
+    { text: "El 30% está bien porque Kelly está demostrado como óptimo — la matemática garantiza el máximo crecimiento sin importar cómo se estimó el margen", correct: false },
+    { text: "Debería apostar AÚN MÁS del 30%, ya que el Kelly completo es conservador y un trader confiado puede superarlo con seguridad", correct: false },
+    { text: "El problema es solo psicológico; la apuesta del 30% es matemáticamente correcta y solo necesita agallas para mantenerla", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="La trampa es fiarse de un número de Kelly construido sobre un ingrediente endeble. La optimalidad de Kelly está condicionada a conocer la p y la b VERDADERAS — una muestra pequeña y reciente da una estimación ruidosa, probablemente inflada, y un margen inflado hace que el Kelly completo caiga en la ladera que da a la ruina. Cuanto más fino y menos probado el margen, mayor la fracción que recortas. Apostar más es exactamente la dirección equivocada, y llamarlo «solo nervios» ignora que el riesgo de caída es real, no imaginado."
+/>
+
+<Categorize
+  client:visible
+  question="Ordena cada factor según hacia qué lado debería empujar el tamaño de tu apuesta respecto al Kelly completo."
+  buckets={["Apostar una fracción MAYOR de Kelly (más cerca del completo)", "Apostar una fracción MENOR de Kelly (recortar más fuerte)"]}
+  items={[
+    { text: "Un margen preciso, muy contrastado y estable en el que confías", bucket: "Apostar una fracción MAYOR de Kelly (más cerca del completo)" },
+    { text: "Un capital segregado cuya pérdida total no cambiaría tu vida", bucket: "Apostar una fracción MAYOR de Kelly (más cerca del completo)" },
+    { text: "Un margen fino estimado a partir de una muestra pequeña y reciente", bucket: "Apostar una fracción MENOR de Kelly (recortar más fuerte)" },
+    { text: "Clientes que reembolsarán en cuanto vean una caída del 25%", bucket: "Apostar una fracción MENOR de Kelly (recortar más fuerte)" },
+    { text: "Muchas apuestas simultáneas que tienden a perder juntas (correlacionadas)", bucket: "Apostar una fracción MENOR de Kelly (recortar más fuerte)" },
+    { text: "Un mercado cuyo comportamiento no para de cambiar bajo tu modelo", bucket: "Apostar una fracción MENOR de Kelly (recortar más fuerte)" },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  explanation="Todo lo que hace tu margen MÁS cierto y tus caídas MÁS sobrevivibles te deja apostar más cerca del Kelly completo; todo lo que hace tu margen MÁS borroso o tus caídas más peligrosas significa recortar más fuerte. La confianza en los ingredientes y la tolerancia a los vaivenes son los dos diales — y las apuestas correlacionadas inflan calladamente tu exposición real, así que trata la correlación como una razón para apostar menos, no más."
+/>
+
+<Callout variant="success" title="Lo único que hay que recordar">
+**Apuesta una fracción de Kelly — la mitad o menos — esencialmente siempre.** El Kelly completo es el
+techo matemático, calculado como si conocierais vuestro margen con exactitud y no os importaran las
+caídas; no conocéis ninguna de las dos cosas. Bajar al medio Kelly conserva alrededor del **75% del
+crecimiento por la mitad de la volatilidad**, hace una caída del 50% aproximadamente cuatro veces
+menos probable, y — lo más importante — os deja *sobreestimar vuestro margen por un factor de dos y
+aun así no pasaros de la verdad*. Es el margen de seguridad en forma de capital: dejad sitio para
+equivocaros, porque os equivocaréis. La próxima lección saca todo el marco fuera del casino — a las
+carteras, el póker, las empresas y las carreras — y nombra cada sitio donde Kelly os miente
+calladamente.
+</Callout>

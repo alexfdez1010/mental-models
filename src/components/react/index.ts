@@ -279,3 +279,15 @@ export type { DoseResponseExplorerProps, DoseResponseShape } from '@/components/
 
 export { OptimalStoppingLab, default as OptimalStoppingLabDefault } from '@/components/react/OptimalStoppingLab';
 export type { OptimalStoppingLabProps, StoppingObjective } from '@/components/react/OptimalStoppingLab';
+
+export { LemonsMarket, default as LemonsMarketDefault } from '@/components/react/LemonsMarket';
+export type { LemonsMarketProps, LemonsRemedy } from '@/components/react/LemonsMarket';
+
+export { KellyGrowthCurve, default as KellyGrowthCurveDefault } from '@/components/react/KellyGrowthCurve';
+export type { KellyGrowthCurveProps } from '@/components/react/KellyGrowthCurve';
+
+export { KellyBankrollSimulator, default as KellyBankrollSimulatorDefault } from '@/components/react/KellyBankrollSimulator';
+export type { KellyBankrollSimulatorProps, KellyView } from '@/components/react/KellyBankrollSimulator';
+
+export { SatisficingLab, default as SatisficingLabDefault } from '@/components/react/SatisficingLab';
+export type { SatisficingLabProps } from '@/components/react/SatisficingLab';

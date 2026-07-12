@@ -5,13 +5,13 @@
  * Gemelo en inglés: src/pages/index.astro.
  *
  * Esta página es **independiente de la materia y dirigida por datos**: los
- * recuentos, la marquesina, las rutas y la cola de construcción salen del
- * contenido y de lib, así que se adapta a cualquier materia sin editarla.
+ * recuentos, la marquesina y las rutas salen del contenido y de lib, así que se
+ * adapta a cualquier materia sin editarla.
  *
  * Orden narrativo (una escalera de conversión, no una lista de funciones):
  * promesa (hero) → por qué funciona (banda de valor) → el camino (escalera
  * cero→experto) → prueba de amplitud (marquesina) → método → rutas curadas →
- * próximamente → CTA final.
+ * CTA final.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Reveal } from '@/components/react';
@@ -20,7 +20,6 @@ import { useTranslations, localizePath, alternates as alternatesFor } from '@/i1
 import { getTopics, getLessons } from '@/lib/content';
 import { getRoadmapSummaries, roadmapHref } from '@/lib/roadmaps';
 import { getDifficultyLabels } from '@/lib/catalog';
-import { upcomingCourses } from '@/lib/upcoming';
 
 const lang = 'es' as const;
 const t = useTranslations(lang);
@@ -46,10 +45,6 @@ const featured = topics[0];
 
 const roadmaps = await getRoadmapSummaries(lang);
 const difficultyLabels = getDifficultyLabels(lang);
-
-// Los próximos cursos en la cola de construcción (desde @/lib/upcoming).
-const upcomingHref = localizePath('/upcoming', lang);
-const nextUp = [...upcomingCourses].sort((a, b) => a.order - b.order).slice(0, 3);
 
 // La escalera cero→experto, con recuentos de cursos en vivo por nivel.
 type Tier = 'beginner' | 'intermediate' | 'advanced' | 'expert';
@@ -491,57 +486,6 @@ const trust = ['Gratis para siempre', 'Sin cuenta', 'Sin anuncios', 'Código abi
                   </span>
                 </div>
               </a>
-            );
-          })}
-        </div>
-      </Reveal>
-    )
-  }
-
-  <!-- Próximamente — lo siguiente en la cola de construcción (desde @/lib/upcoming) -->
-  {
-    nextUp.length > 0 && (
-      <Reveal client:visible as="section" className="pb-8 pt-12">
-        <div class="mb-10 flex flex-wrap items-end justify-between gap-4">
-          <div class="max-w-2xl">
-            <span class="text-sm font-semibold uppercase tracking-wide text-accent-600">
-              {t('upcoming.title')}
-            </span>
-            <h2 class="mt-2 font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
-              La escalera sigue creciendo.
-            </h2>
-            <p class="mt-3 text-lg leading-relaxed text-ink-600">{t('upcoming.subtitle')}</p>
-          </div>
-          <a
-            href={upcomingHref}
-            class="inline-flex items-center gap-1 font-semibold text-brand-600 hover:text-brand-700"
-          >
-            {t('nav.upcoming')} →
-          </a>
-        </div>
-
-        <div class="grid gap-4 sm:grid-cols-3">
-          {nextUp.map((c) => {
-            const tint = c.accent === 'accent' ? 'bg-accent-50' : 'bg-brand-50';
-            return (
-              <article class="brutal flex flex-col border-dashed bg-surface p-5">
-                <div class="flex items-center justify-between gap-3">
-                  <span class={`grid h-10 w-10 shrink-0 place-items-center rounded-card border-2 border-edge text-xl ${tint}`}>
-                    {c.icon}
-                  </span>
-                  <span class={`difficulty-badge difficulty-${c.difficulty}`}>
-                    {difficultyLabels[c.difficulty]}
-                  </span>
-                </div>
-                <h3 class="mt-3 font-display text-lg font-semibold leading-snug text-ink-900">
-                  {c.title.es}
-                </h3>
-                <p class="mt-1.5 flex-1 text-sm leading-relaxed text-ink-600">{c.description.es}</p>
-                <p class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-400">
-                  <span aria-hidden="true">⏳</span>
-                  {t('catalog.comingSoon')}
-                </p>
-              </article>
             );
           })}
         </div>

@@ -1,0 +1,225 @@
+---
+title: "Por qué la optimización fracasa"
+description: El optimizador perfecto es imposible, no solo poco práctico — la explosión combinatoria, conjuntos de opciones que ni siquiera puedes enumerar y el coste del propio cálculo. Por qué "encontrar lo mejor" es un plan que no puedes ejecutar, y por qué eso obliga a otro tipo de racionalidad.
+topic: "es/bounded-rationality-and-satisficing"
+order: 2
+minutes: 12
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize } from '@/components/react';
+
+Para tomarte en serio el satisficing, primero tienes que matar a un ídolo: la creencia de que
+con suficiente disciplina *podrías* optimizar, y que el satisficing no es más que el atajo
+perezoso con el que te conformas. Es un error. Para una enorme clase de decisiones reales,
+optimizar no es solo difícil — es **imposible en principio**, por muy listo, paciente o bien
+provisto de recursos que estés. Esta lección lo concreta en tres frentes: los problemas
+estallan demasiado rápido para poder recorrerlos (**la explosión combinatoria**, combinatorial
+explosion), las opciones ni siquiera se pueden **enumerar**, y **pensar cuesta** algo que
+estás intentando conservar. Cuando sientas los tres, el satisficing deja de parecer un
+compromiso y empieza a parecer la única jugada sobre el tablero.
+
+<MCQ
+  client:visible
+  pretest
+  question="Un ajedrecista quiere jugar la jugada verdaderamente óptima: la que conduce al mejor resultado suponiendo juego perfecto de ambos bandos para siempre. ¿Cómo de factible es, más o menos, calcular esa jugada para una posición de mediojuego?"
+  options={[
+    { text: "Imposible para cualquier ordenador concebible — el número de posiciones que comprobar empequeñece al número de átomos del universo observable", correct: true },
+    { text: "Fácil — los motores de ajedrez modernos ya calculan la jugada perfecta cada vez", correct: false },
+    { text: "Difícil pero factible con un portátil lo bastante rápido y una tarde libre", correct: false },
+    { text: "Trivial, porque solo hay unas pocas decenas de jugadas legales en cada turno", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar — arriésgate a adivinar"
+  explanation="Se estima que el árbol de juego del ajedrez ronda las 10^120 posiciones — muchísimas más que los ~10^80 átomos del universo observable. Ningún ordenador que jamás pueda construirse puede recorrerlo. Motores como Stockfish son fuertes precisamente porque NO optimizan: podan, aproximan y usan heurísticas para encontrar una jugada muy buena rápido. Hasta las máquinas hacen satisficing."
+/>
+
+## La explosión combinatoria: los números detonan
+
+El primer muro es aritmético. Muchas decisiones son **combinatorias**: el número de respuestas
+posibles no crece sumando sino *multiplicando* a medida que el problema se agranda — y la
+multiplicación se te escapa de las manos a una velocidad aterradora.
+
+Toma **el problema del viajante** (travelling salesman problem): visitar N ciudades una sola
+vez cada una y volver a casa por la ruta total más corta. Para *optimizar* — garantizar el
+único recorrido más corto — debes, en el peor de los casos, comparar todas las ordenaciones
+distintas. Con 5 ciudades son un puñado. Con 15 ya son **más de 43.000 millones**. Con 25
+ciudades el número de recorridos supera con creces el número de **segundos transcurridos desde
+el Big Bang**. Nada cambió salvo añadir unos cuantos puntos más al mapa, y sin embargo el
+espacio de búsqueda detonó.
+
+| Tamaño del problema (N) | Número de disposiciones que comprobar | Sensación |
+| --- | --- | --- |
+| 5 ciudades | 12 (½ de 4!) | trivial |
+| 10 ciudades | ~181.000 | un aperitivo para un ordenador |
+| 15 ciudades | ~43.600.000.000 | ahora sí que duele |
+| 20 ciudades | ~6 × 10¹⁶ | territorio de superordenador |
+| 25 ciudades | ~3 × 10²³ | más que segundos desde el Big Bang |
+| Ajedrez (árbol de juego) | ~10¹²⁰ | más que átomos en el universo |
+
+Esto es **la explosión combinatoria** (combinatorial explosion), y no es un fallo de esfuerzo
+ni de hardware. Es la matemática del propio problema. Un optimizador de fuerza bruta no se
+vuelve *lento* según crece N; choca contra un muro donde el cálculo no puede terminar antes de
+que el sol se apague. Y, lo crucial, las decisiones que nos importan — rutas, planificación de
+horarios, empaquetado, elegir una secuencia de movimientos profesionales, planificar varios
+pasos por adelantado en *cualquier cosa* — están atravesadas por esta estructura.
+
+<Callout variant="info" title="Por qué 'usa un ordenador y ya' no te salva">
+Los ordenadores no vencen a la explosión combinatoria optimizando más rápido — la vencen
+**negándose a optimizar.** Los motores de ajedrez podan ramas enteras, evalúan posiciones con
+heurísticas aprendidas y dejan de buscar a una profundidad "suficientemente buena". Los
+planificadores de rutas usan aproximaciones que se acercan *mucho* al recorrido más corto sin
+demostrar que sea el más corto. Hasta nuestras máquinas más potentes son satisficers con bata
+de laboratorio. Lo máximo que prometen es "muy bueno, rápido", no "demostrablemente óptimo".
+</Callout>
+
+## Opciones inenumerables: no puedes clasificar lo que no puedes ver
+
+El segundo muro es más sutil y, para las decisiones humanas, más importante. Todo el
+procedimiento del optimizador empieza con un paso que suena inocente: *considera todas las
+opciones.* Pero para la mayoría de las decisiones reales, **el conjunto completo de opciones no
+se puede enumerar en absoluto.**
+
+¿Cuáles son todas las carreras profesionales que podrías seguir? ¿Todas las personas con las
+que podrías casarte? ¿Todas las ideas de negocio que podrías arrancar, todas las formas en que
+podrías pasar la próxima década? No son listas grandes — son **abiertas, generativas y en parte
+incognoscibles.** Muchas de las mejores opciones aún no existen (el puesto de trabajo, la
+empresa, la persona que aún no has conocido). No puedes calcular el máximo de un conjunto que no
+puedes escribir. El primer paso del optimizador ya es imposible.
+
+Aquí es donde la racionalidad limitada muerde con más fuerza, y conecta directamente con tu
+**círculo de competencia** (circle of competence, un prerrequisito de este curso): la razón por
+la que no puedes optimizar fuera de lo que entiendes es que *fuera de tu competencia ni siquiera
+ves con claridad el conjunto de opciones* — no sabes lo que no sabes. La optimización asume una
+mirada divina sobre un menú cerrado. La realidad te entrega una niebla y una linterna.
+
+<Callout variant="warning" title="El menú que ves frente al menú que existe">
+Elegir un cereal entre diez cajas de una estantería es una decisión rara y mansa: las opciones
+son **finitas, visibles y fijas.** Podrías, en principio, optimizar. Pero elegir una *carrera
+profesional*, una *pareja* o una *estrategia* no se parece en nada a esa estantería — las
+opciones son ilimitadas, muchas aún no existen, y el conjunto cambia a medida que te mueves por
+él. Tratar una decisión abierta y generativa como si fuera una estantería de cereales es una de
+las formas más comunes en que la gente inteligente se paraliza a sí misma.
+</Callout>
+
+<MCQ
+  client:visible
+  question="¿Por qué 'elige la carrera profesional óptima' es fundamentalmente distinto de 'elige la más barata de diez cajas de cereales visibles'?"
+  options={[
+    { text: "El conjunto de opciones de carrera es abierto, en parte incognoscible y cambia con el tiempo — ni siquiera puedes enumerar todas las opciones, menos aún puntuarlas y clasificarlas", correct: true },
+    { text: "Las carreras son en realidad fáciles de optimizar; la gente simplemente no se esfuerza lo suficiente", correct: false },
+    { text: "No existe tal cosa como una carrera buena o mala", correct: false },
+    { text: "La decisión del cereal es la más difícil de las dos", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="La optimización requiere un conjunto cerrado y enumerable de opciones que puedas puntuar una a una. Diez cajas de cereales cumplen: finitas, visibles, fijas. Una carrera no: el conjunto es ilimitado, muchas opciones aún no existen o te son invisibles, y cambia según actúas. No puedes tomar el máximo de un conjunto que no puedes enumerar — así que el primerísimo paso del optimizador fracasa."
+/>
+
+## El coste del cálculo: pensar no es gratis
+
+El tercer muro es el que la teoría clásica ignoró por completo: **deliberar tiene un coste.**
+Cada minuto dedicado a reunir información, comparar opciones y hacer las cuentas es un minuto
+(y a menudo dinero, atención y energía emocional) que no recuperas. El tiempo empleado en
+decidir es tiempo no empleado en hacer — y a veces la opción que estabas analizando **caduca**
+mientras la analizas.
+
+Esto replantea todo el problema. Lo "racional" no es calcular la mejor respuesta sin importar
+el coste. Es tener en cuenta el coste de calcular. Un procedimiento de decisión que encuentra
+una respuesta ligeramente mejor pero tarda diez veces más puede ser **peor, considerándolo
+todo**, que una regla rápida que te lleva al 95% del camino. Esta es exactamente la lógica de
+**el valor de la información** (the value of information, otro prerrequisito): seguir buscando
+solo merece la pena mientras la mejora esperada que compra supere lo que cuesta la búsqueda.
+Pasado ese punto, reunir más no es diligencia — es desperdicio.
+
+Herbert Simon llamó al ideal que ignora esto **racionalidad "olímpica"** — un optimizador con
+mirada divina y cálculo ilimitado — y sostuvo que era inútil como modelo de cualquier agente
+real, humano o máquina. Lo que los agentes tienen de verdad es **la racionalidad
+"procedimental"** (procedural rationality): ser sensato *acerca del proceso de decidir*, dado
+que el proceso mismo es escaso y costoso.
+
+<Callout variant="info" title="Las tijeras de Simon">
+La imagen más famosa de Simon: la conducta racional está moldeada por **las dos hojas de un
+par de tijeras** — los **límites cognitivos** de la mente y la **estructura del entorno.** No
+puedes explicar cómo corta alguien estudiando una sola hoja. Una decisión que parece
+"irracional" frente al ideal olímpico suele ser perfectamente afilada una vez tienes en cuenta
+los límites reales y el mundo real que está atravesando al cortar. Volveremos a encontrarnos
+con la segunda hoja en la Lección 4, donde la estructura del *entorno* es precisamente lo que
+hace que las reglas simples funcionen.
+</Callout>
+
+## Tres muros, una conclusión
+
+Junta los muros y el veredicto es ineludible. La optimización fracasa no porque nos falte
+voluntad, sino porque:
+
+- **El espacio de búsqueda estalla** — para los problemas combinatorios, ningún cálculo
+  alcanzable puede comprobar todas las opciones (ajedrez, rutas, planificación de horarios,
+  planificación de varios pasos).
+- **Las opciones no se pueden enumerar** — para las decisiones abiertas, no hay un menú cerrado
+  del que tomar el máximo (carreras, parejas, estrategias, ideas de negocio).
+- **El propio cálculo es costoso** — incluso cuando optimizar es posible, el tiempo, el dinero
+  y la atención que consume pueden convertirlo en *lo incorrecto* que hacer.
+
+Así que el optimizador perfecto no es un listón alto que no alcanzamos. Es una **ficción** que
+no describe a ningún decisor real, ni siquiera a un superordenador. Y eso es liberador, no
+deprimente: significa que la meta nunca fue "encontrar lo mejor". La meta es tomar una **buena
+decisión a un coste razonable** — que es precisamente para lo que está diseñado el satisficing,
+y lo que construye el resto de este curso.
+
+<Categorize
+  client:visible
+  question="Clasifica cada decisión según si un verdadero OPTIMIZADOR podría, en principio, encontrar la única mejor opción — o si la optimización está fundamentalmente bloqueada (explosión, opciones inenumerables o coste prohibitivo)."
+  buckets={["La optimización es factible en principio", "La optimización está fundamentalmente bloqueada"]}
+  items={[
+    { text: "Elegir el más barato de 8 vuelos con precios claros mostrados en una sola pantalla", bucket: "La optimización es factible en principio" },
+    { text: "Elegir la cuenta de mayor interés entre 5 cuentas de ahorro listadas", bucket: "La optimización es factible en principio" },
+    { text: "Encontrar la ruta demostrablemente más corta a través de 30 paradas de reparto", bucket: "La optimización está fundamentalmente bloqueada" },
+    { text: "Seleccionar la única mejor carrera profesional que jamás podrías haber seguido", bucket: "La optimización está fundamentalmente bloqueada" },
+    { text: "Calcular la jugada de ajedrez perfecta desde una posición de mediojuego", bucket: "La optimización está fundamentalmente bloqueada" },
+    { text: "Elegir la pareja de vida objetivamente ideal de entre todos los vivos", bucket: "La optimización está fundamentalmente bloqueada" },
+    { text: "Comprar el litro más barato de una marca de leche entre 3 tiendas cercanas", bucket: "La optimización es factible en principio" },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas"
+  explanation="La optimización solo es factible cuando el conjunto de opciones es pequeño, enumerable y barato de puntuar: un puñado de vuelos, cuentas listadas, precios de la leche en tres tiendas. Está bloqueada cuando el espacio estalla combinatoriamente (rutas de 30 paradas, ajedrez) o cuando las opciones ni siquiera se pueden enumerar (cada carrera o pareja posible). Los casos mansos son la excepción, no la regla — e incluso ellos pueden no merecer el esfuerzo una vez cuentas el coste de decidir."
+/>
+
+<MCQ
+  client:visible
+  question="Simon distinguió la racionalidad 'olímpica' de la racionalidad 'procedimental'. ¿Cuál es la diferencia clave?"
+  options={[
+    { text: "La racionalidad olímpica es un optimizador de cálculo ilimitado (una ficción inútil para agentes reales); la racionalidad procedimental trata de decidir con sensatez dado que el propio cálculo es escaso y costoso", correct: true },
+    { text: "La racionalidad olímpica es para dioses, la procedimental es para gobiernos", correct: false },
+    { text: "Son la misma cosa con nombres distintos", correct: false },
+    { text: "Racionalidad procedimental significa seguir siempre un procedimiento fijo sin importar el resultado", correct: false },
+  ]}
+  checkLabel="Comprobar"
+  retryLabel="Inténtalo de nuevo"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  explanation="La racionalidad olímpica asume un optimizador con mirada divina y cálculo ilimitado — Simon sostuvo que no describe a ningún decisor real. La racionalidad procedimental plantea una pregunta distinta: dado que pensar es lento, costoso y limitado, ¿cuál es un PROCESO sensato para decidir? Juzga la calidad del procedimiento, no la adhesión a un ideal imposible."
+/>
+
+<Callout variant="success" title="Lo único que hay que recordar">
+La optimización no es solo poco práctica — para los problemas combinatorios, los conjuntos de
+opciones abiertos y las decisiones costosas de calcular, es **imposible en principio.** Ninguna
+cantidad alcanzable de esfuerzo o hardware encuentra "lo mejor", porque la búsqueda estalla, el
+menú no se puede enumerar o el propio cálculo cuesta más de lo que vale. El optimizador perfecto
+es una ficción. Por eso necesitamos otro tipo de racionalidad — una que fije un listón para
+"suficientemente bueno" y se detenga. Eso es el satisficing, y es lo que viene ahora.
+</Callout>

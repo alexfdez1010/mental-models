@@ -1,0 +1,246 @@
+---
+title: "The Coin Flip That Ruins You"
+description: A coin biased in your favour, a strategy that maximises your average wealth, and why that strategy still wipes out almost everyone who plays it. The ergodicity punchline — ensemble average versus time-average growth, why multiplicative wealth makes a wipeout permanent, and why the fix is to maximise log wealth.
+topic: "en/the-kelly-criterion"
+order: 2
+minutes: 12
+updated: 2026-07-12
+---
+
+import { Callout, MCQ, Categorize, MatchConcepts, ErgodicityEngine, KellyBankrollSimulator } from '@/components/react';
+
+Back to the rigged coin. It comes up heads **60%** of the time and pays even money: stake a
+fraction of your bankroll, win that much on heads, lose it on tails. You may play as long as
+you like. This is a *good* bet — genuinely, provably in your favour — and I am going to show
+you that the "obvious" way to exploit it, the way that literally maximises your expected
+wealth, will **bankrupt almost everyone who tries it.** Not through bad luck. By design.
+
+That sentence should feel wrong. A favourable bet and a wealth-maximising strategy that
+*ruins* you? Surely if a plan grows your average fortune, it grows *your* fortune? It does
+not, and the reason is one of the most important and least intuitive ideas in all of
+risk-taking. The average of many gamblers is not the experience of one gambler over time.
+This lesson takes that idea apart on our coin, and the repair — maximising **log** wealth —
+is what the rest of the course is built on.
+
+<MCQ
+  client:visible
+  pretest
+  question="On the 60/40 even-money coin, betting your ENTIRE bankroll every round maximises your expected (average) wealth. What actually happens to a typical player who follows that strategy over many rounds?"
+  options={[
+    { text: "They are almost certainly ruined — a single tail multiplies their bankroll by zero, and over many flips a tail is essentially guaranteed", correct: true },
+    { text: "They get rich fastest, because the strategy maximises expected wealth", correct: false },
+    { text: "They break even in the long run, since the coin is only slightly biased", correct: false },
+    { text: "They grow steadily but slowly, like every other betting fraction", correct: false },
+  ]}
+  explanation="Betting everything wins ×2 on heads and ×0 on tails. Expected wealth genuinely rises fastest this way — but that average is a mirage held up by the one-in-a-billion player who never once flips tails. Everyone else hits a tail, their bankroll is multiplied by zero, and zero times any future winnings is still zero. Over many rounds a tail is a near-certainty, so ruin is a near-certainty. The average soars while the typical player busts: that's the whole paradox."
+/>
+
+## The bet that's brilliant on paper
+
+Let's make the edge concrete. Stake a fraction $f$ of your bankroll on each flip. Win
+(probability $p = 0.6$) and your wealth is multiplied by $1 + f$; lose (probability
+$q = 0.4$) and it's multiplied by $1 - f$. The **expected multiplier** for one round is:
+
+$$E[\text{factor}] = p(1 + f) + q(1 - f) = 1 + f(p - q) = 1 + 0.2f.$$
+
+Read that formula. It is a straight line that **rises with $f$**. The more you bet, the
+higher your expected wealth after the round — with no peak, no catch, no diminishing returns
+in sight. Push $f$ all the way to **1** (bet the farm) and you maximise it: your expected
+wealth grows a fat **20% per round**. By the logic of expected value — the same logic that
+correctly tells you to take a +EV bet in the first place — you should bet **everything,
+every time.**
+
+| Fraction bet $f$ | Win → ×  | Lose → × | Expected factor $1+0.2f$ | Expected wealth after round |
+| --- | --- | --- | --- | --- |
+| 10% | 1.10 | 0.90 | 1.02 | +2% |
+| 20% | 1.20 | 0.80 | 1.04 | +4% |
+| 50% | 1.50 | 0.50 | 1.10 | +10% |
+| **100%** | **2.00** | **0.00** | **1.20** | **+20% (the maximum)** |
+
+Everything about this table says *bet more*. And every cell of it is **true**. The expected
+wealth really is maximised at $f = 1$. The catch is not in the arithmetic — it's in the
+quiet assumption that "expected wealth" is the thing you should care about. Watch it fall
+apart.
+
+<Callout variant="warning" title="What 'expected wealth' secretly averages over">
+$E[\text{wealth}]$ is an average across **parallel universes** — all the ways the coin
+*could* fall, weighted by probability. Betting everything wins that contest because in the
+one dazzling universe where you flip heads forever, your wealth is astronomical, and that
+single term drags the average to the sky. But you don't get to live in all the universes at
+once. **You live one sequence of flips, in order.** The question is what happens *along that
+one path* — and there, the story inverts.
+</Callout>
+
+## Why betting everything is a death sentence
+
+Follow a single player who bets everything. Round one, they flip heads: bankroll doubles.
+Round two, heads again: doubles again. This can go on for a thrilling while. But wealth here
+is **multiplicative** — each round *multiplies* the last — and the losing factor is
+$1 - f = 1 - 1 = \mathbf{0}$. The very first time this player sees **tails**, their bankroll
+is multiplied by zero. Not dented. Zeroed. And here is the cruelty of compounding: **zero
+times anything is zero, forever.** No future winning streak, however long, can lift a
+bankroll of \$0 back above \$0. There is no road back from ruin.
+
+Now ask how likely that fatal tail is. The chance of *never* flipping tails in $n$ rounds is
+$0.6^n$ — which collapses fast:
+
+| Rounds played | Chance of surviving (no tails yet) with $f = 1$ |
+| --- | --- |
+| 1 | 60% |
+| 5 | 7.8% |
+| 10 | 0.60% |
+| 20 | 0.0037% |
+| 50 | 0.0000000066% |
+
+Play long enough and survival probability races to **zero**. The strategy that maximises
+your *average* wealth ruins you with **probability approaching 1**. Both statements are true
+at once, and they are not in contradiction — they are just measuring different things. The
+average is propped up entirely by the vanishing sliver of players who get impossibly lucky;
+the **typical** player — the median one, the one in the middle of the pack — is flat broke.
+
+<MCQ
+  client:visible
+  question="Why can't a player who bet everything and hit a tail ever recover, no matter how lucky they get afterward?"
+  options={[
+    { text: "Because wealth compounds multiplicatively — a bankroll multiplied by zero stays zero, and any later winning factor multiplies zero by itself", correct: true },
+    { text: "Because the coin becomes biased against them after a loss", correct: false },
+    { text: "Because expected value forbids recovery once you've lost", correct: false },
+    { text: "Because they run out of rounds to play", correct: false },
+  ]}
+  explanation="It's pure compounding. Multiplicative wealth updates by multiplying, and once you multiply by zero you're pinned at zero — every future factor, win or lose, leaves you there (0 × 2 = 0). This is why ruin in a multiplicative game is ABSORBING: it's a one-way door. An additive game (fixed dollar bets you can always top up) doesn't have this trap; a compounding bankroll does."
+/>
+
+## Two averages that disagree: ensemble vs time
+
+We've been sloppily saying "average." There are in fact **two** averages, and the whole
+lesson is that on a multiplicative bet they **disagree**.
+
+- The **ensemble average** (arithmetic mean) is what you get by lining up a huge crowd of
+  players who each bet once, and averaging their wealth *across the crowd*. This is
+  $E[\text{wealth}]$, and for our coin at $f = 1$ it grows **+20%/round**. It answers: *if I
+  could clone myself into a million parallel bettors, what's my average outcome?*
+- The **time-average** (geometric growth) is what a **single player experiences down one
+  sequence of flips, over time**. Because the rounds multiply, the right way to average them
+  is on a **log scale**: the long-run growth rate per round is
+
+$$g(f) = p\ln(1 + f) + q\ln(1 - f).$$
+
+At $f = 1$ that second term is $q\ln(0) = -\infty$: the time-average growth is negative
+infinity — a mathematician's way of writing **"certain ruin."** The two averages don't just
+differ in size; they point in **opposite directions**. Ensemble says *soar*; time says
+*sink*.
+
+A process where these two averages agree is called **ergodic**; one where they part ways —
+like multiplicative wealth — is **non-ergodic**. Almost every bet you will ever size in real
+life is non-ergodic, which is exactly why "maximise expected wealth" is such a treacherous
+default.
+
+<ErgodicityEngine
+  client:visible
+  title="Ensemble average vs the typical player"
+  initialUpPct={100}
+  initialDownPct={95}
+  initialWinPct={60}
+  initialRounds={60}
+  initialBetPct={100}
+  caption="A coin close to our 60/40 even-money bet, staked in full. The ENSEMBLE line (average of 400 parallel players) drifts up while the TYPICAL player is ground toward the floor and most players are wiped out — non-ergodicity in one picture. Now drag the bet-fraction slider down: shrink your stake and the typical path stops decaying and finally turns upward. That safe region is where Kelly lives."
+/>
+
+The single most useful move you can make with this sandbox: drag the **bet-fraction** slider
+downward and watch the *typical* line lift off the floor. You are not changing the coin — the
+edge is the same — you are changing **how much of it you expose to ruin each round.** Below a
+certain fraction the time-average growth flips from negative to positive, and the typical
+player finally compounds upward. Finding that fraction is the Kelly problem.
+
+<MatchConcepts
+  client:visible
+  question="Match each idea to what it actually describes."
+  pairs={[
+    { term: "Ensemble average", definition: "The mean wealth across a huge crowd of parallel players — dragged skyward by a lucky few" },
+    { term: "Time-average", definition: "The growth a single player experiences down one sequence of flips over time" },
+    { term: "Non-ergodic", definition: "A process where the crowd average and the single-path average disagree" },
+    { term: "Multiplicative ruin", definition: "A bankroll multiplied by zero that can never climb back — a one-way door" },
+  ]}
+  explanation="Ensemble vs time is the crux: the ensemble average answers 'average across many players at once', the time-average answers 'what happens to me down one path'. On a multiplicative bet these disagree (non-ergodic), and the reason the disagreement is fatal is multiplicative ruin — zero is absorbing. Kelly picks the bet size that maximises the time-average, i.e. the growth of the typical path, not the crowd mean."
+/>
+
+## Seeing the gap directly
+
+Put the coin back to exactly **60/40 at even money** and watch three staking fractions race:
+half-Kelly, full Kelly, and a deliberate over-bet. Run it on the **Typical player (median)**
+view first, then flip to **Ensemble average (mean)** and watch the over-bet line's story
+completely change.
+
+<KellyBankrollSimulator
+  client:visible
+  title="The same coin, median vs mean"
+  initialWinPct={60}
+  initialOdds={1}
+  initialBetPct={70}
+  initialRounds={90}
+  caption="At 70% staked — well past twice Kelly — the TYPICAL player collapses toward the floor and most are wiped out. Toggle to the ENSEMBLE AVERAGE and the very same over-bet strategy suddenly reads as a triumph, its mean hauled into the millions by a handful of lucky paths. Two views of one strategy: ruin for the individual, riches 'on average'. The median is the honest number."
+/>
+
+This is the ergodicity gap made visible. On the median view, the over-bet strategy is a
+catastrophe. Flip to the mean and it looks like the best idea you've ever had — because the
+mean is a story told by survivors. When someone quotes you the *expected return* of an
+aggressive strategy, they are quoting the ensemble average, the number that describes the
+lucky few and almost no one else. **You are not the ensemble. You are one path.** Kelly sizing
+maximises the number that describes *your* path: the time-average, equivalently the median
+long-run wealth.
+
+<Categorize
+  client:visible
+  question="Sort each statement into whether it's TRUE or FALSE for the 60/40 even-money coin played repeatedly."
+  buckets={["True", "False"]}
+  items={[
+    { text: "Betting everything maximises expected (average) wealth", bucket: "True" },
+    { text: "Betting everything ruins the typical player with probability approaching 1", bucket: "True" },
+    { text: "Wealth here compounds multiplicatively, so a wipeout is permanent", bucket: "True" },
+    { text: "The ensemble average and the time-average growth can point in opposite directions", bucket: "True" },
+    { text: "The ensemble average describes what a typical single player will experience", bucket: "False" },
+    { text: "Because the bet is +EV, any staking fraction grows your wealth over time", bucket: "False" },
+    { text: "A single tail can be recovered from later if you get lucky enough", bucket: "False" },
+    { text: "Maximising average wealth and surviving are the same goal", bucket: "False" },
+  ]}
+  explanation="True: betting all-in does maximise E[wealth], yet it near-certainly ruins the typical player; multiplicative wealth makes ruin permanent; and the two averages genuinely diverge. False: the ensemble average is inflated by lucky outliers and describes almost nobody; a +EV bet can still have negative TIME-AVERAGE growth if you over-bet (staking 50% of this coin loses ground over time!); zero is absorbing so there's no recovering from a full-stake wipeout; and maximising the average is exactly the goal that gets you ruined — survival is a different, better objective."
+/>
+
+<MCQ
+  client:visible
+  question="A friend insists: 'The coin is +EV, so as long as I don't bet literally everything, betting a big chunk — say 50% each round — will grow my money over time.' On the 60/40 even-money coin, what's the flaw?"
+  options={[
+    { text: "Even 50% over-bets this coin: its time-average growth g = 0.6·ln 1.5 + 0.4·ln 0.5 ≈ −3.4%/round is negative, so the typical player still decays toward ruin", correct: true },
+    { text: "Nothing — any fraction below 100% grows a +EV bet over time", correct: false },
+    { text: "50% is fine; only betting more than 60% (the win probability) loses money", correct: false },
+    { text: "The flaw is that 50% grows too slowly, not that it loses money", correct: false },
+  ]}
+  explanation="Being +EV is not enough — how much you stake decides whether the TIME-AVERAGE growth is positive. Plug f = 0.5 into g(f) = p·ln(1+f) + q·ln(1−f): 0.6·ln(1.5) + 0.4·ln(0.5) = 0.243 − 0.277 ≈ −0.034, about −3.4% per round. Negative growth means the typical bankroll shrinks over time. The break-even fraction here is about 40% (twice the Kelly fraction), and anything above it — including 50% — quietly ruins you despite the positive edge."
+/>
+
+## The fix, in one word: logarithms
+
+Here's the escape, set up now and derived in full next lesson. The trouble with
+$E[\text{wealth}]$ is that it averages wealth on a **linear** scale, where a doubling and a
+halving don't cancel (up \$100 then down \$100 from \$200 leaves you at \$100 — but the
+*multiplicative* round-trip ×2 then ×0.5 lands you right back where you started). The honest
+scale for a compounding bankroll is the **logarithm**, because logs turn multiplication into
+addition, so the growth of a single path is the *sum* of per-round log-factors — a thing the
+law of large numbers actually governs.
+
+So the winning objective is not "maximise expected wealth" but **maximise expected *log*
+wealth**, $E[\ln W]$ — which is exactly the **time-average growth rate** $g(f)$ we wrote
+above. Maximise that, and you maximise the growth of the *typical* path and the *median*
+long-run wealth. Do the calculus on $g(f)$ and out drops a single optimal fraction: the
+**Kelly fraction** $f^* = p - \dfrac{q}{b}$, which for our coin is $0.6 - 0.4 = 0.20$. Twenty
+percent — not one hundred, not fifty. That derivation is Lesson 2.
+
+<Callout variant="success" title="The one thing to remember">
+On a repeated, multiplicative bet, **maximising your average (expected) wealth is not the
+same as growing your money — it can guarantee ruin.** The average is an *ensemble* number,
+propped up by a lucky few; what *you* experience down one sequence of flips is the
+**time-average** growth, and on a multiplicative process the two can point in opposite
+directions. Because a bankroll multiplied by zero never recovers, **survival must come
+first** — and the way to get it is to stop maximising wealth and start maximising **log**
+wealth. That single switch hands you the Kelly fraction, and it's where we go next.
+</Callout>
