@@ -267,3 +267,9 @@ export type { PreferenceCascadeProps } from '@/components/react/PreferenceCascad
 
 export { WinnerCurseSim, default as WinnerCurseSimDefault } from '@/components/react/WinnerCurseSim';
 export type { WinnerCurseSimProps } from '@/components/react/WinnerCurseSim';
+
+export { EntropyBox, default as EntropyBoxDefault } from '@/components/react/EntropyBox';
+export type { EntropyBoxProps } from '@/components/react/EntropyBox';
+
+export { CarnotGauge, default as CarnotGaugeDefault } from '@/components/react/CarnotGauge';
+export type { CarnotGaugeProps } from '@/components/react/CarnotGauge';

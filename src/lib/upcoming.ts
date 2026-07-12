@@ -55,11 +55,11 @@
  * `evolutionarily-stable-strategies`, `goodharts-law`,
  * `information-cascades-and-herding`, `the-value-of-information`,
  * `creative-destruction`, `punctuated-equilibrium`,
- * `preference-falsification`, `winners-curse`, …)
+ * `preference-falsification`, `winners-curse`,
+ * `entropy-and-the-second-law`, …)
  * have graduated and been removed; their topic MDX is now the record. Lowest
  * `order` is built next. The remaining entries all sit in the **expert tier**,
  * deliberately kept tag-diverse so no single roadmap tag races ahead:
- * science-engineering/systems-thinking (`entropy-and-the-second-law`, 54),
  * biology-evolution/science-engineering (`hormesis-and-the-dose-response`, 55),
  * decision-making/probability (`optimal-stopping-and-the-secretary-problem`, 56),
  * economics/strategy (`adverse-selection-and-the-lemons-problem`, 57) and
@@ -102,35 +102,15 @@ export interface UpcomingCourse {
  */
 export const upcomingCourses: UpcomingCourse[] = [
   // -- Expert tier -- kept tag-diverse ----------------------------------------
-  // The winners-curse rung (order 53) has graduated and been removed; its topic
-  // MDX under src/content/topics/ (en + es) is now the record. The lowest-order
-  // entry below (`entropy-and-the-second-law`, order 54) is built next. The queue
-  // is kept tag-diverse across the expert tier -- science-engineering/
-  // systems-thinking (`entropy-and-the-second-law`), biology-evolution/
-  // science-engineering (`hormesis-and-the-dose-response`), decision-making/
-  // probability (`optimal-stopping-and-the-secretary-problem`), economics/
-  // strategy (`adverse-selection-and-the-lemons-problem`) and probability/
-  // decision-making/economics (`the-kelly-criterion`) -- so no single roadmap tag
-  // races ahead.
-  {
-    slug: 'entropy-and-the-second-law',
-    icon: '🔥',
-    difficulty: 'expert',
-    order: 54,
-    accent: 'accent',
-    title: {
-      en: 'Entropy & the Second Law',
-      es: 'La Entropía y la Segunda Ley',
-    },
-    description: {
-      en: 'Left alone, everything runs down: heat spreads, order dissolves, batteries drain, and the tidy room turns messy — never the reverse. The second law of thermodynamics is the deepest arrow in nature, and it quietly governs why maintenance is forever, why perpetual motion is a scam, and why life must burn energy just to stay ordered.',
-      es: 'Si lo dejas a su aire, todo se degrada: el calor se dispersa, el orden se disuelve, las pilas se agotan y la habitación ordenada se vuelve un caos — nunca al revés. La segunda ley de la termodinámica es la flecha más profunda de la naturaleza, y gobierna en silencio por qué el mantenimiento es eterno, por qué el movimiento perpetuo es un timo y por qué la vida debe quemar energía solo para mantenerse ordenada.',
-    },
-    dependencies: ['emergence', 'feedback-loops', 'compounding'],
-    tags: ['science-engineering', 'systems-thinking'],
-    buildNotes:
-      'Entropy & the second law of thermodynamics — the expert science-engineering/systems-thinking rung, one of the most transferable models in the whole latticework. Core claim: in an isolated system, entropy (a measure of the number of microscopic arrangements consistent with the macroscopic state — loosely, disorder or "spread-out-ness" of energy) never decreases; the second law gives time its ARROW. Assumes emergence (macroscopic order/temperature as a statistical property of many particles), feedback-loops (systems relax toward equilibrium) and compounding (many independent microstates multiply, so the overwhelmingly probable macrostates dominate). Organising idea: there are vastly more disordered arrangements than ordered ones, so "running down" is not a force but a counting fact — disorder wins because it is overwhelmingly more probable. Sections, each mechanism + worked example: (1) the statistical definition — microstates vs macrostates, why a shuffled deck / a spread gas / a cooled coffee is just the astronomically-more-likely configuration (Boltzmann S = k ln W, kept intuitive; show the counting with a tiny toy system); (2) the arrow of time — why you can tell a film is running backwards (smoke un-mixing, a shattered cup reassembling) and why the past is lower-entropy; (3) energy quality, not quantity — the first law conserves energy, the second degrades its USEFULNESS (free energy → waste heat), so you can never break even; heat engines, Carnot limit, why 100%-efficient engines and perpetual motion are impossible; (4) local order costs global disorder — a fridge, a body, a company, or a living cell can build LOCAL order only by dumping MORE entropy into the surroundings (Schrödinger\'s "life feeds on negative entropy / free energy"); maintenance is forever because order decays on its own; (5) entropy as missing information — the Shannon bridge, why erasing information has a thermodynamic cost (Landauer), gentle. Transfer far beyond physics: why every machine/house/relationship/codebase needs constant energy input or it degrades (bit rot, technical debt, rust, forgetting); why "reversing" a mess always costs more work than making it; why concentrated resources (talent, capital, attention) dissipate unless actively contained; the heat-death end-state as a thinking tool for run-down systems. Pitfalls & where the model lies: entropy is NOT simply "disorder" (a crystallising system can look more ordered while total entropy rises; oil-water separation increases entropy) — it is about the number of accessible microstates and energy dispersal, so avoid the sloppy tidy-room-only metaphor without the counting; the law applies to ISOLATED/closed systems — Earth is OPEN (sunlight in, infrared out), so local complexity and life do NOT violate it, a favourite creationist misreading to debunk; "entropy always increases" is statistical, not absolute — tiny fluctuations can dip locally; do not stretch it into pop-philosophy about society being "doomed to decay" (that is metaphor, not thermodynamics). Fixes/uses: budget for maintenance as a law, not a failure; to keep order somewhere, arrange to export disorder somewhere else; treat any "free energy" or perpetual-motion pitch as a red flag; design for graceful degradation. Build an interactive island (an entropy/mixing sim: a box of particles or a two-colour gas starting neatly separated on one side, with a Play that lets them diffuse, a slider for particle count showing how irreversibility SHARPENS with N, a live entropy/микростate-count readout and an "arrow of time" toggle that tries — and visibly fails at large N — to run the film backwards; plus a simple heat-engine efficiency gauge bounded by the Carnot limit). Plus a Categorize (spontaneous entropy-increasing processes vs those that require work / would violate the 2nd law, or isolated vs open systems) and MatchConcepts (entropy, microstate/macrostate, the arrow of time, free/usable energy, Carnot limit, local-order-at-global-cost), Quiz + MindMap. en + es twin.',
-  },
+  // The entropy-and-the-second-law rung (order 54) has graduated and been
+  // removed; its topic MDX under src/content/topics/ (en + es) is now the record.
+  // The lowest-order entry below (`hormesis-and-the-dose-response`, order 55) is
+  // built next. The queue is kept tag-diverse across the expert tier --
+  // biology-evolution/science-engineering (`hormesis-and-the-dose-response`),
+  // decision-making/probability (`optimal-stopping-and-the-secretary-problem`),
+  // economics/strategy (`adverse-selection-and-the-lemons-problem`) and
+  // probability/decision-making/economics (`the-kelly-criterion`) -- so no single
+  // roadmap tag races ahead.
   {
     slug: 'hormesis-and-the-dose-response',
     icon: '💊',
