@@ -291,3 +291,6 @@ export type { KellyBankrollSimulatorProps, KellyView } from '@/components/react/
 
 export { SatisficingLab, default as SatisficingLabDefault } from '@/components/react/SatisficingLab';
 export type { SatisficingLabProps } from '@/components/react/SatisficingLab';
+
+export { SurvivorshipPlane, default as SurvivorshipPlaneDefault } from '@/components/react/SurvivorshipPlane';
+export type { SurvivorshipPlaneProps, PlaneRegionKey } from '@/components/react/SurvivorshipPlane';
