@@ -294,3 +294,6 @@ export type { SatisficingLabProps } from '@/components/react/SatisficingLab';
 
 export { SurvivorshipPlane, default as SurvivorshipPlaneDefault } from '@/components/react/SurvivorshipPlane';
 export type { SurvivorshipPlaneProps, PlaneRegionKey } from '@/components/react/SurvivorshipPlane';
+
+export { AnchorEstimator, default as AnchorEstimatorDefault } from '@/components/react/AnchorEstimator';
+export type { AnchorEstimatorProps } from '@/components/react/AnchorEstimator';
