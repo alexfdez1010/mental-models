@@ -1,339 +1,674 @@
 ---
-title: "Retardos y oscilación: por qué escaldan las duchas"
-description: "Un bucle equilibrador solo se desliza hasta su objetivo si puede ver el resultado de su última jugada. Añade un retardo —un desfase antes de que el efecto aparezca— y el mismo bucle se pasa de largo, vuelve atrás y empieza a vibrar. Aquí está por qué los sistemas dan tumbos."
+title: "Retardos y oscilación"
+description: "Distingue la acumulación lenta de la información antigua, reproduce trayectorias distintas con una misma regla de corrección y contrasta las causas de un vaivén."
 topic: "es/feedback-loops"
 order: 5
-minutes: 14
+minutes: 24
 updated: 2026-11-06
 ---
 
-import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, Reveal, Callout, MindMap, LoopSimulator } from '@/components/react';
+import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, Callout, MindMap, LoopSimulator, ConsequenceTree } from '@/components/react';
 
-Estáis en una ducha que no conocéis. El agua sale helada, así que abrís a tope el grifo del agua caliente. No pasa nada —sigue fría—, así que lo abrís todavía más. Entonces, unos segundos después, os golpea una pared de agua hirviendo. Soltáis un grito y abrís a tope el grifo del agua fría. ¿Vuelve a estar fría? No, sigue hirviendo, así que lo abrís más —y un instante después estáis tiritando bajo un chorro gélido. Acabáis de ejecutar, con vuestras propias manos, el fenómeno más importante de todo este curso: un **bucle equilibrador con un retardo (balancing loop with a delay)**, oscilando.
+Una ducha que no conocéis sale fría. Giráis el mando, notáis poco cambio y volvéis a girarlo. Puede que el primer ajuste siga viajando por las tuberías cuando se le una el siguiente. Con varios ajustes seguidos, el agua puede salir demasiado caliente y luego demasiado fría. El mando se convierte en una conversación bastante torpe con el pasado.
 
-En la lección anterior, un bucle equilibrador era un modelo de competencia: detectaba la brecha hasta su objetivo y la cerraba, deslizándose con suavidad hasta una meta y manteniéndose ahí. Aquella estampa tenía un supuesto oculto: que el bucle puede *ver el resultado de su última acción de inmediato*. Romped ese supuesto y el termostato bien educado se convierte en el maníaco del grifo de la ducha. El villano es el **retardo (delay)**, y es la razón de que los sistemas reales rara vez se asienten con calma. Se pasan de largo (overshoot). Dan tumbos. Vibran como una campana golpeada.
+Ese es un posible mecanismo de retroalimentación con retardo, no una predicción que se deduzca solo de la palabra «retardo». Un **bucle equilibrador (balancing loop)** se opone a una desviación; sus tiempos, su regla de corrección y las demás dinámicas determinan si la trayectoria se aproxima, sobrepasa el objetivo o sigue oscilando. Vamos a explicitar esas condiciones.
 
-## Qué es un retardo
-
-Un **retardo (delay)** es un desfase entre una acción y el momento en que su efecto se puede detectar o sentir. El agua caliente *ya* va de camino; lo que pasa es que aún no la notáis, porque todavía está viajando por la tubería. El retardo no es un fallo del bucle: es un hueco en el *tiempo* entre la causa y el efecto percibido. Y casi todo bucle real tiene uno: lleva tiempo que un pedido se entregue, que una nueva contratación sea productiva, que una política haga efecto, que una población crezca, que un cuerpo metabolice un fármaco, que un bosque plantado madure.
-
-Recordad de la lección 1 que **las existencias crean retardo (stocks create delay)** — una bañera no se vacía en el instante en que quitáis el tapón. Un retardo es lo que ocurre cuando aquello que vuestro bucle intenta controlar está detrás de una de esas existencias lentas de cambiar. El bucle actúa, pero la existencia responde tarde, así que el bucle está siempre, en la práctica, reaccionando a *noticias viejas*.
-
-<Callout label="Consejo" variant="tip" title="La versión de una sola frase">
-Un **retardo** es el desfase entre actuar y ver el resultado. Un bucle equilibrador que aún no puede ver el efecto de su última jugada sigue actuando sobre **información caduca** —así que se pasa de largo de su objetivo, vuelve atrás, se pasa otra vez y **oscila**.
-</Callout>
+## Identificar qué llega tarde
 
 <MCQ
   client:visible
-  pretest
-  pretestLabel="Antes de leer — adivina"
-  question="Ajustas la temperatura de una ducha, pero hay un retardo de 3 segundos en la tubería antes de notar cada cambio. Sigues abriendo el grifo hasta que la temperatura te parezca bien. ¿Cuál es el resultado más probable?"
+  pretestLabel={"Antes de seguir"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisad la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Una válvula empieza a vaciar un depósito en cuanto se abre, pero queda agua durante un rato. ¿Qué demuestra el agua restante?"}
   options={[
-    { text: 'Te pasas de caliente, luego te pasas de frío, luego de caliente otra vez — rebotando de un lado a otro antes de (quizá) estabilizarte', correct: true },
-    { text: 'La temperatura se desliza con suavidad hasta el punto perfecto, exactamente como si no hubiera retardo' },
-    { text: 'El agua se queda permanentemente a su temperatura inicial hagas lo que hagas' },
-    { text: 'El retardo vuelve reforzador el bucle, así que el agua se calienta hasta el infinito' },
-  ]}
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  explanation="En un pretest no hay respuestas incorrectas, pero esta es toda la lección. Como aún no notas tu último ajuste, sigues ajustando, así que para cuando el cambio llega ya te has pasado de ajuste. El resultado es un sobrepaso del objetivo, y luego una corrección que se pasa hacia el otro lado: oscilación. Sin el retardo, el mismo bucle se deslizaría directo hasta la meta."
+  {
+    "text": "Que mover una cantidad acumulada lleva tiempo, aunque el caudal ya haya cambiado.",
+    "correct": true
+  },
+  {
+    "text": "Que la válvula sigue cerrada, aunque se haya medido un caudal de salida."
+  },
+  {
+    "text": "Que toda existencia introduce un periodo inicial sin ningún cambio de nivel."
+  },
+  {
+    "text": "Que la información disponible debe ser antigua, aunque el nivel se observe ahora."
+  }
+]}
+  explanation={"Un caudal finito cambia el nivel gradualmente. El agua restante no demuestra un tiempo muerto ni un informe desactualizado."}
+  pretest={true}
 />
 
-## Por qué un retardo convierte un estabilizador en un oscilador
+Un **retardo (delay)** es una demora especificada en un enlace: el transporte lleva tiempo, una orden tarda en actuar o un informe describe un estado anterior. Identificad el enlace antes de decidir qué cambiar. Un termómetro junto a la salida puede reducir la demora de medición; no hace que el agua recorra instantáneamente una tubería larga.
 
-Aquí está el mecanismo, paso a paso. La tarea de un bucle equilibrador es cerrar la brecha entre dónde *está* el sistema y dónde *queréis* que esté. Para hacerlo, necesita saber dónde está el sistema **ahora mismo**. El retardo le roba justo eso: solo puede ver dónde estaba el sistema hace unos instantes. Así que dimensiona su corrección según información *caduca* —y para cuando la corrección aterriza, la situación ya ha avanzado, la corrección ahora es demasiado grande (o apunta en la dirección equivocada), y el bucle se ha pasado de largo.
+Una existencia también necesita tiempo para variar porque los caudales finitos se acumulan. Suponed un depósito con **50 L** que empieza a vaciarse de inmediato a **10 L por minuto**, sin entrada y con observación sin demora. Al cabo de un minuto contiene 50 − 10 = **40 L**; al cabo de dos, **30 L**. La respuesta empezó inmediatamente. Vaciarlo sigue requiriendo cinco minutos a ese ritmo.
 
-Luego hace lo mismo a la inversa. Ve el sobrepaso (tarde), corrige fuerte (demasiado fuerte, porque aún no puede ver que la primera corrección ya está funcionando), se pasa hacia el otro lado. En cada ronda está luchando contra un fantasma: el sistema tal como *solía ser*. Ese vaivén es la **oscilación (oscillation)**: un balanceo repetido alrededor del objetivo en lugar de una aproximación limpia hacia él.
+| Mecanismo temporal | Qué cambia primero | Qué tiene que esperar |
+| --- | --- | --- |
+| Acumulación finita | El caudal neto y el nivel empiezan a cambiar | Un cambio total grande lleva tiempo |
+| Demora de transporte o actuación | Se emite una orden o un pedido | Su efecto físico llega después |
+| Demora de información | El estado real ya puede cambiar | La persona que decide recibe después la lectura actualizada |
 
-No os lo creáis por fe: provocadlo vosotros. Cambiad el simulador de abajo a **Equilibrador**, luego subid el deslizador de **Retardo** desde cero y observad cómo el suave deslizamiento de la lección 3 se dobla en una onda:
-
-<LoopSimulator
-  client:visible
-  title="Añade un retardo y míralo vibrar"
-  eyebrow="Pon el bucle en marcha"
-  instructions="Elige un tipo de bucle, ajusta su fuerza y —en un bucle equilibrador— añade un retardo. Observa cómo un bucle reforzador se dispara, un equilibrador se desliza hasta su objetivo y un retardo hace que ese mismo bucle se pase de largo y oscile."
-  caption="Cambia el interruptor a Equilibrador. Con el Retardo a 0, la existencia se desliza hasta su objetivo y se para. Ahora sube el Retardo: el mismo bucle se pasa de largo del objetivo, vuelve atrás y oscila. Sube a tope tanto la Fuerza del bucle como el Retardo para que los vaivenes crezcan en vez de encoger. El retardo no cambió el objetivo — cambió el comportamiento de asentarse a dar tumbos."
-  modeLabel="Tipo de bucle"
-  reinforcingLabel="Reforzador"
-  balancingLabel="Equilibrador"
-  gainLabel="Fuerza del bucle"
-  delayLabel="Retardo (pasos)"
-  timeAxisLabel="Tiempo →"
-  stockAxisLabel="Existencia"
-  stockLegendLabel="Nivel de existencia"
-  goalLegendLabel="Objetivo"
-  runawayReadout="Un bucle reforzador se alimenta de sí mismo: {start} se compone hasta unos {final} (unas {multiple}× el inicio) y sigue subiendo. Aquí nada lo frena; la salida es su propia entrada."
-  smoothReadout="Un bucle equilibrador sin retardo se desliza directo hasta su objetivo de {goal} y se queda ahí (se estabiliza cerca de {final}). La brecha encoge en cada paso, así que nunca se pasa de largo."
-  overshootReadout="Añade un retardo y el bucle corrige con información caduca: se pasa del objetivo de {goal} hasta unos {peak} antes de volver y estabilizarse cerca de {final}. Esa joroba por encima del objetivo es el coste de actuar con datos viejos."
-  oscillateReadout="Con tanto retardo y fuerza, el bucle no se estabiliza: sigue persiguiendo el objetivo de {goal}, oscilando de unos {peak} a {low} y vuelta. El retardo convierte un estabilizador en un oscilador."
-/>
-
-Fijaos en los dos mandos que controlan lo grave que se pone: el **tamaño del retardo** y la **fuerza de la corrección**. Un retardo más largo significa más tiempo para sobreajustar antes de que la realidad alcance al bucle. Una corrección más agresiva significa que cada sobreajuste es mayor. Empujad ambos lo bastante lejos y la oscilación deja de encoger y empieza a *crecer* — un sistema haciéndose pedazos a sí mismo, lo que los ingenieros llaman **inestabilidad**.
-
-<Callout label="Advertencia" variant="warning" title="La trampa: ignorar el retardo">
-La intuición lineal dice "hice un cambio, así que el efecto debería aparecer ya". En un sistema con retardo, esa intuición es veneno: el efecto de vuestra *última* jugada aún no ha llegado, así que si seguís empujando hasta ver un resultado, *siempre* empujaréis demasiado. El arreglo es contraintuitivo: actuad y luego **esperad** a que el retardo se desarrolle antes de volver a actuar.
+<Callout label="Información" variant="info" title="Localizad la demora antes de elegir el remedio">
+Que quede agua no demuestra una respuesta tardía de la válvula. Una lectura desactualizada no demuestra una respuesta física lenta. Ambas pueden coexistir, pero son afirmaciones distintas y necesitan observaciones diferentes.
 </Callout>
-
-### Cuándo usarlo
-
-Echad mano de la lente del retardo y la oscilación siempre que un sistema dé tumbos, vaya a la caza o pase de auge a caída (boom and bust) en lugar de asentarse. El instinto es culpar de los vaivenes a algún choque externo. Normalmente no hay choque alguno: solo un bucle equilibrador intentando hacer su trabajo a través de un desfase. Preguntad: *¿qué intenta estabilizar este bucle, y con cuánto retraso ve el resultado?*
-
-## Una oscilación resuelta, trazada paso a paso
-
-Pongámosle números a la ducha. Vuestra temperatura objetivo es **100** (unidades cómodas), el agua empieza en **60** (fría), y hay un retardo antes de que cada ajuste se note. Un operador *paciente* que afloja —ajustando con suavidad y dando tiempo al retardo— obtiene una oscilación **amortiguada (damped)** que encoge hacia el objetivo:
-
-| Paso | Lo que sientes | Tu reacción | Sobrepaso vs. objetivo (100) |
-|---|---|---|---|
-| 1 | 60 (helado) | Abrir el caliente | −40 |
-| 2 | 140 (hirviendo) | Bajar al frío | +40 |
-| 3 | 80 (fresquito) | Un toque de caliente | −20 |
-| 4 | 110 (un poco caliente) | Un toque de frío | +10 |
-| 5 | 95 (casi) | Un toquecito | −5 |
-| 6 | 102 (básicamente bien) | Listo | +2 |
-
-Los vaivenes se reducen a la mitad cada ronda: 40 → 20 → 10 → 5 → 2. Eso es una **oscilación amortiguada** — vibra, pero la vibración se apaga y el sistema se asienta. Ahora mirad lo que hace un operador *impaciente*: alguien que entra en pánico y se pasa de corrección cada vez, negándose a esperar al retardo:
-
-| Paso | Lo que sientes | Tu reacción | Sobrepaso vs. objetivo (100) |
-|---|---|---|---|
-| 1 | 60 | Abrir el caliente, fuerte | −40 |
-| 2 | 150 | Cerrar de golpe al frío, más fuerte | +50 |
-| 3 | 40 | Abrir de golpe el caliente, aún más | −60 |
-| 4 | 170 | Pánico | +70 |
-
-Mismo retardo, mismo objetivo — pero como las correcciones *crecen* en lugar de aflojarse, los vaivenes crecen: 40 → 50 → 60 → 70. Esta es una **oscilación creciente (inestable)**, y es el fallo peor: intentarlo *con más fuerza* lo empeora. La broma cruel de los sistemas con retardo es que la respuesta agresiva del "¡haz algo ya!" es exactamente la que los hace estallar.
-
-<MCQ
-  client:visible
-  question="Dos personas usan la misma ducha con retardo. Una se estabiliza en lo cómodo en seis ajustes; la otra acaba rebotando salvajemente entre hirviendo y helado. ¿Qué hizo mal la segunda persona?"
-  options={[
-    { text: 'Se pasó de corrección cada vez en lugar de aflojar y esperar al retardo — así que sus vaivenes crecieron en vez de encoger', correct: true },
-    { text: 'Usó menos agua caliente en total' },
-    { text: 'Eliminó el retardo, lo que siempre causa oscilación' },
-    { text: 'Nada — el tamaño de la oscilación es puramente aleatorio y no tiene relación con cómo reaccionas' },
-  ]}
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  explanation="El retardo es el mismo para ambas. La diferencia es la fuerza de la corrección. Las correcciones suaves dan una oscilación amortiguada que se apaga; los sobrecorrecciones agresivas dan una que crece. En un sistema con retardo, la jugada que se siente más reactiva —abre más fuerte hasta que pase algo— es precisamente la que amplifica el vaivén."
-/>
-
-## El efecto látigo: oscilación que viaja y crece
-
-La ducha es una sola persona luchando contra un retardo. Ahora encadenad varios bucles equilibradores con retardo y obtendréis uno de los fenómenos más caros del mundo de los negocios: el **efecto látigo (bullwhip effect)** (a menudo enseñado a través del "juego de la cerveza", una simulación de cadena de suministro).
-
-Imaginad una cadena: clientes → minorista → mayorista → fábrica. Cada eslabón reordena para mantener sus estanterías surtidas (un bucle equilibrador, con el objetivo de "suficiente inventario"), y cada pedido tarda en llegar (un retardo). Ahora un *pequeño* repunte único en la demanda de los clientes se propaga aguas arriba:
-
-| Eslabón | Ve… | Pide… | Por qué se pasa de largo |
-|---|---|---|---|
-| Minorista | La demanda sube un poco, las estanterías bajan | Un poco más, *más* un colchón de seguridad | No puede reponer al instante (retardo), así que sobrepide |
-| Mayorista | El pedido *inflado* del minorista | Aún más, más su propio colchón | Lee el repunte como mayor de lo que es |
-| Fábrica | El pedido *doblemente inflado* del mayorista | Dispara la producción enormemente | Ve un maremoto que era una onda |
-
-Para cuando todo ese producto por fin llega, el repunte de demanda original hace tiempo que desapareció — así que ahora todos se ahogan en inventario y bajan los pedidos a cero, lo que mata de hambre a la cadena, lo que desencadena pedidos de pánico, y todo el sistema oscila entre la saturación y la escasez. Un cambio diminuto y suave en la demanda real se convierte en una oscilación violenta que se hace **más grande** cuanto más aguas arriba viaja — el chasquido de un látigo. La causa no es la estupidez ni la avaricia; es estructural: **retardos apilados más cada eslabón reaccionando a señales caducas y amplificadas.**
 
 <Categorize
   client:visible
-  question="Cada uno es un sistema que da tumbos o se asienta. Ordénalo según lo que hace el retardo."
-  buckets={['Amortiguado — los vaivenes encogen, se asienta', 'Creciente/sostenido — los vaivenes persisten o crecen']}
+  instructions={"Asignad cada afirmación a su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todo está bien clasificado"}
+  partialResultWord={"correctas"}
+  question={"Clasificad el mecanismo que se ha especificado, sin añadir otro."}
+  buckets={[
+  "Acumulación con respuesta inmediata",
+  "Demora explícita en un enlace"
+]}
   items={[
-    { text: 'Un cocinero paciente que prueba un guiso, ajusta la sal un poco, espera, vuelve a probar', bucket: 'Amortiguado — los vaivenes encogen, se asienta' },
-    { text: 'Un conductor sobrecorrigiendo un derrape, dando volantazos a cada lado más fuerte', bucket: 'Creciente/sostenido — los vaivenes persisten o crecen' },
-    { text: 'Un control de crucero soltando el acelerador con suavidad al acercarse una cuesta', bucket: 'Amortiguado — los vaivenes encogen, se asienta' },
-    { text: 'Una cadena de suministro donde cada eslabón sobrepide a partir del último pedido inflado', bucket: 'Creciente/sostenido — los vaivenes persisten o crecen' },
-    { text: 'Un banco central que espera a ver si su último cambio de tipos funcionó antes del siguiente', bucket: 'Amortiguado — los vaivenes encogen, se asienta' },
-    { text: 'Contratación de auge y caída: contratación masiva en el auge, despidos masivos en la crisis, y vuelta a empezar', bucket: 'Creciente/sostenido — los vaivenes persisten o crecen' },
-  ]}
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  instructions="Coloca cada elemento en su grupo."
-  allCorrectLabel="✓ Todo ordenado"
-  partialResultWord="correctas"
-  explanationLabel="Explicación"
-  explanation="La corrección suave y paciente que respeta el retardo produce una oscilación amortiguada que se asienta. La sobrecorrección agresiva que reacciona a señales caducas o amplificadas produce vaivenes que persisten o crecen. Mismos retardos — distinta disciplina en cuánto empujas."
+  {
+    "text": "El desagüe ya funciona; el agua tarda en salir por completo.",
+    "bucket": "Acumulación con respuesta inmediata"
+  },
+  {
+    "text": "La pantalla muestra el nivel de la revisión anterior.",
+    "bucket": "Demora explícita en un enlace"
+  },
+  {
+    "text": "El pedido pasa un periodo en transporte antes de recibirse.",
+    "bucket": "Demora explícita en un enlace"
+  },
+  {
+    "text": "El nivel empieza a subir con el caudal de entrada y se observa al instante.",
+    "bucket": "Acumulación con respuesta inmediata"
+  }
+]}
+  explanation={"Una existencia puede empezar a cambiar inmediatamente. En los otros casos se ha indicado qué enlace tarda: la información o el transporte."}
 />
 
-## Auge y caída: la ducha de la economía
+### Cuándo usar la distinción
 
-La misma maquinaria mueve los ciclos más grandes en los que vivimos. Los precios de las materias primas son el caso clásico. Los precios se disparan (digamos, el petróleo está caro), así que los productores invierten en nuevos pozos y minas — pero una mina nueva tarda *años* en entrar en funcionamiento (un retardo largo). Para cuando toda esa nueva oferta por fin inunda el mercado, los precios ya han estado lo bastante altos como para frenar la demanda, así que la saturación hunde el precio. Los precios bajos matan la inversión, así que años después la oferta se seca y el precio se dispara de nuevo. El ciclo se repite aproximadamente con la duración del retardo. La cría de cerdos, el sector inmobiliario, las fábricas de semiconductores y la contratación de trabajadores tecnológicos bailan todos lo mismo, exactamente por la misma razón: un bucle equilibrador (la oferta persiguiendo al precio) intentando dar a un blanco móvil a través de un retardo largo.
+Registrad el momento de la orden, la primera respuesta física y el informe usado para la siguiente decisión. Así separaréis esperar un efecto de esperar información sobre un efecto que ya ocurrió. También evitaréis describir toda existencia que cambia despacio como inmóvil hasta que vence un retardo.
 
-Aquí es también donde los modelos del curso se apilan. Un auge es a menudo un bucle **reforzador** (precios al alza → optimismo → más inversión → más demanda) que finalmente choca con un bucle **equilibrador** (la oferta poniéndose al día), y el **retardo** entre ambos es lo que convierte una corrección suave en una caída violenta. Ya podéis nombrar las tres partes de un ciclo de auge y caída por su maquinaria.
+## Ejecutar una regla de corrección reproducible
 
-<MatchConcepts
+<MCQ
   client:visible
-  question="Empareja cada término con su significado preciso."
-  pairs={[
-    { term: 'Retardo', definition: 'Un desfase entre una acción y el momento en que su efecto se puede detectar o sentir.' },
-    { term: 'Sobrepaso', definition: 'Pasarse de largo del objetivo porque el bucle actuó sobre información caduca.' },
-    { term: 'Oscilación amortiguada', definition: 'Un vaivén alrededor del objetivo cuya amplitud encoge cada ronda hasta que se asienta.' },
-    { term: 'Efecto látigo', definition: 'Un pequeño cambio de demanda amplificado en vaivenes cada vez mayores a medida que viaja por una cadena de pedidos con retardo.' },
-  ]}
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  instructions="Elige un término y luego haz clic en su definición."
-  allCorrectLabel="✓ Todo emparejado"
-  partialResultWord="correctas"
-  pickDefinitionHint="Elige ahora una definición"
-  notLinkedHint="Sin enlazar"
-  termsLabel="Términos"
-  definitionsLabel="Definiciones"
-  explanation="Un retardo es el desfase; un sobrepaso es lo que el desfase provoca; una oscilación amortiguada es el efecto del desfase apagándose con elegancia; y el efecto látigo es el desfase apilado a lo largo de toda una cadena de suministro, amplificándose a su paso."
+  pretestLabel={"Antes de seguir"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisad la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Dos bucles usan información de la revisión anterior y persiguen el mismo objetivo. ¿Qué falta para predecir sus trayectorias?"}
+  options={[
+  {
+    "text": "La regla de corrección, su intensidad y las demás dinámicas del modelo.",
+    "correct": true
+  },
+  {
+    "text": "Solo el nombre de la variable; el retardo fija la trayectoria por sí solo."
+  },
+  {
+    "text": "Solo saber si el operador es paciente; las cantidades ya no importan."
+  },
+  {
+    "text": "Solo contar los enlaces; todos los bucles equilibradores tardíos oscilan igual."
+  }
+]}
+  explanation={"La demora no especifica cuánto ni cómo se corrige. El modelo siguiente mantiene el objetivo y cambia intensidad y retardo de forma explícita."}
+  pretest={true}
 />
 
-## Cómo domar un bucle con retardo
+El simulador usa un nivel abstracto, no una temperatura de ducha calibrada. Su regla equilibradora es:
 
-Si los retardos causan el problema, los arreglos se siguen directamente — y ninguno de ellos es "empuja más fuerte". Hay tres palancas reales:
+$$S_{t+1}=S_t+g(G-\widehat S_t),\qquad \widehat S_t=S_{\max(0,t-d)}.$$
 
-1. **Acortar el retardo.** La cura más rápida es ver los resultados antes. Cuadros de mando en tiempo real, retroalimentación más rápida, cadenas de suministro más cortas, lotes más pequeños. Una ducha con un termómetro de lectura instantánea en el cabezal apenas oscila. (Esto es un *punto de apalancamiento*, el tema de la próxima lección.)
-2. **Aflojar la corrección.** Si no podéis acortar el retardo, reaccionad con más suavidad y **esperad** a que el retardo se desarrolle antes de volver a ajustar. Por eso los buenos bancos centrales se mueven en pasos pequeños y espaciados, y por eso "esperemos a ver si el último cambio funcionó" es a menudo lo más sabio que se dice en la sala.
-3. **Anticipar en lugar de reaccionar.** Pronosticad hacia dónde se *dirige* el sistema, no dónde *estaba*, y corregid hacia ahí. Un conductor experto dirige el coche hacia donde estará; un novato reacciona a donde ya está y colea.
+Aquí **S** es el nivel actual en unidades del modelo, **G** es el objetivo fijo, **g** es la fracción de la brecha indicada que se añade en cada actualización y **d** es la antigüedad de la lectura en pasos completos. El acento circunflejo marca la lectura usada por el controlador. Una corrección positiva añade unidades; una negativa las retira. Toda la historia anterior al inicio utiliza el nivel inicial.
 
-<Reveal client:visible label="¿Por qué 'simplemente esfuérzate más' empeora un sistema con retardo?" buttonLabel="Mostrar la respuesta">
-Porque "más fuerte" aumenta la *fuerza de la corrección* sin hacer nada respecto al *retardo*. Una corrección mayor aplicada a información caduca es un sobrepaso mayor — que entonces exige una contracorrección aún mayor. Esa es la receta de una oscilación *creciente*. En un sistema con retardo, el instinto heroico, decidido, del "haz más ya" es la trampa; la paciencia y los movimientos más pequeños y espaciados son la habilidad. El sistema no necesita más fuerza. Necesita que dejéis de reaccionar a su pasado.
-</Reveal>
+El simulador fija el nivel inicial en **20**, el objetivo en **70** y muestra **46 actualizaciones**. No hay perturbaciones externas, límites de capacidad ni ruido en la medición. Una actualización no equivale automáticamente a un segundo ni a un minuto. Esas elecciones forman parte del modelo.
+
+<LoopSimulator
+  client:visible
+  title={"Comparad la misma regla con información de distinta antigüedad"}
+  eyebrow={"Modelo discreto"}
+  instructions={"El simulador empieza en Reforzador. Elegid Equilibrador y reproducid los casos de la tabla cambiando intensidad y retardo de uno en uno."}
+  caption={"Cada punto es una actualización, no un minuto. El modelo admite correcciones positivas y negativas sin límites de capacidad; no está calibrado para una ducha ni un depósito real."}
+  modeLabel={"Tipo de bucle"}
+  reinforcingLabel={"Reforzador"}
+  balancingLabel={"Equilibrador"}
+  gainLabel={"Intensidad de la corrección"}
+  delayLabel={"Retardo de la lectura en pasos"}
+  timeAxisLabel={"Pasos de actualización →"}
+  stockAxisLabel={"Nivel del modelo"}
+  stockLegendLabel={"Nivel calculado"}
+  goalLegendLabel={"Objetivo"}
+  runawayReadout={"En el modo reforzador, cada actualización multiplica el nivel. Parte de {start} y termina cerca de {final} en el intervalo mostrado; aquí no hay un límite de capacidad."}
+  smoothReadout={"El recorrido termina cerca de {final} con objetivo {goal}. Este mensaje abarca aproximaciones por debajo y sobrepasos pequeños; revisad la línea en vez de deducir que el retardo es nulo."}
+  overshootReadout={"El recorrido cruza el objetivo de {goal}, alcanza un máximo cercano a {peak} y termina cerca de {final}. La variación final es pequeña en esta ventana; seguid la regla para estudiar su estabilidad."}
+  oscillateReadout={"El nivel todavía varía al final de esta ventana respecto al objetivo de {goal}; el máximo mostrado ronda {peak} y el mínimo, {low}. Comprobad si las oscilaciones decrecen, se mantienen o crecen ampliando el análisis."}
+/>
+
+Probad estos ajustes y comparad lo que ocurre manteniendo el objetivo y la historia inicial:
+
+| Caso | Intensidad g | Retardo de la lectura d | Primeros niveles, incluido el inicial | Resultado de este recorrido |
+| --- | --- | --- | --- | --- |
+| A | 50 % | 0 pasos | 20 → 45 → 57,5 → 63,75 | Se aproxima por debajo |
+| B | 10 % | 1 paso | 20 → 25 → 30 → 34,5 | También se aproxima por debajo, pese al retardo |
+| C | 50 % | 1 paso | 20 → 45 → 70 → 82,5 | Sobrepasa el objetivo y después se amortiguan los vaivenes |
+| D | 50 % | 3 pasos | 20 → 45 → 70 → 95 → 120 | Los vaivenes crecen en el intervalo mostrado |
+
+El **sobrepaso (overshoot)** consiste en cruzar el objetivo en el sentido de la aproximación. La **oscilación (oscillation)** es un movimiento repetido de un lado a otro alrededor de un nivel. En una **oscilación amortiguada (damped oscillation)** las desviaciones disminuyen; en una creciente aumentan. Un cruce aislado no basta para demostrar oscilación repetida, y un gráfico breve no es por sí solo una prueba general de estabilidad.
+
+B y C tienen el mismo retardo y trayectorias distintas. A, C y D mantienen la intensidad y cambian el retardo. Las comparaciones establecen qué hacen esos parámetros **dentro de esta regla**. El bucle sigue siendo equilibrador: su corrección se opone a la brecha que lee, aunque esa lectura sea antigua.
+
+### Seguir el primer sobrepaso
+
+En C, la intensidad es 0,5 y la lectura tiene un paso de antigüedad. En la primera actualización, la historia inicial proporciona la lectura de partida. Cada fila suma su corrección al nivel actual:
+
+| Actualización t | S actual | Lectura usada | Corrección | S siguiente |
+| --- | --- | --- | --- | --- |
+| 0 | 20 | 20 | 0,5 × (70 − 20) = 25 | 45 |
+| 1 | 45 | 20 | 0,5 × (70 − 20) = 25 | 70 |
+| 2 | 70 | 45 | 0,5 × (70 − 45) = 12,5 | 82,5 |
+| 3 | 82,5 | 70 | 0,5 × (70 − 70) = 0 | 82,5 |
+| 4 | 82,5 | 82,5 | 0,5 × (70 − 82,5) = −6,25 | 76,25 |
+| 5 | 76,25 | 82,5 | 0,5 × (70 − 82,5) = −6,25 | 70 |
+| 6 | 70 | 76,25 | 0,5 × (70 − 76,25) = −3,125 | 66,875 |
+
+En la actualización 2, el nivel real ya está en el objetivo, pero la lectura anterior aún pide un aumento. Ese es el mecanismo del primer sobrepaso. Las correcciones posteriores producen el vaivén. **La mitad de la brecha indicada no equivale a reducir a la mitad la desviación actual en cada fila.** Seguid la regla declarada en vez de inventar una secuencia suave de reacciones después de ver la curva.
 
 <FillBlank
   client:visible
-  question="Completa el principio central."
-  text="Un bucle equilibrador con un {{retardo|objetivo}} se pasa de largo de su meta y {{oscila|desaparece}}, porque sigue corrigiendo sobre información {{caduca|fresca}}. Los vaivenes crecen cuando la corrección es demasiado {{fuerte|débil}} — así que el arreglo es acortar el retardo o aflojar, nunca empujar más fuerte."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  explanationLabel="Explicación"
-  instructions="Elige la opción correcta para cada hueco y comprueba."
-  correctResultLabel="✓ Correcto"
-  partialResultWord="correctas"
-  explanation="El retardo obliga al bucle a actuar sobre información caduca (desactualizada), así que se pasa de largo y oscila; las correcciones demasiado fuertes convierten un vaivén amortiguado en uno creciente. Acortar el retardo o corregir con más suavidad lo doma — añadir fuerza lo amplifica."
+  instructions={"Elegid la opción correcta en cada hueco."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Correcto"}
+  partialResultWord={"correctas"}
+  question={"Seguid qué lectura utiliza cada paso."}
+  text={"En el caso C, la corrección usa el nivel de {{la revisión anterior|la revisión siguiente|la revisión actual}}. Cuando el nivel actual ya alcanza el objetivo, una lectura anterior inferior aún pide {{añadir unidades|retirar unidades|no cambiar el nivel}}. El retardo {{puede contribuir a un sobrepaso|garantiza oscilación en todo sistema|convierte siempre el bucle en reforzador}}."}
+  explanation={"La fórmula añade parte de la brecha respecto a la lectura antigua. Esa corrección puede seguir siendo positiva cuando el nivel actual ya está en el objetivo; el resultado depende también de la intensidad y de las otras dinámicas."}
 />
 
-### Cuándo usarlo
+Los mensajes del simulador resumen una ventana finita mediante umbrales sencillos. D incluso produce niveles negativos más adelante. Una existencia física que no pueda ser negativa necesitaría otro modelo con límites y caudales acotados. No toméis esa línea sin límites como pronóstico de un depósito real.
 
-Usad estos arreglos en cuanto detectéis un sistema yendo a la caza de un lado a otro. Resistid el reflejo de intervenir con más fuerza o más rápido; preguntad en cambio: *¿puedo ver los resultados antes, y puedo permitirme esperar un retardo antes de mi próxima jugada?* La mayoría de los problemas de oscilación se resuelven eliminando la impaciencia, no añadiendo esfuerzo.
+## Elegir un cambio según el problema real
 
-## Resumen
+Las correcciones menores pueden reducir el sobrepaso en un modelo con retardo. Esperar puede evitar órdenes duplicadas mientras una anterior sigue surtiendo efecto. Ninguna es una prescripción universal. La respuesta puede ser demasiado débil, el objetivo puede moverse, una entrada externa puede dominar o la espera puede incumplir los requisitos de la tarea.
+
+Considerad otra regla construida, con **información actual**, objetivo **70**, nivel actual **20** y una pérdida conocida de **10 unidades por actualización**:
+
+$$S_{t+1}=S_t+g(70-S_t)-10.$$
+
+| Intensidad | Corrección bruta desde el nivel inicial | Primer cambio neto tras la pérdida | Primer nivel siguiente | Nivel estacionario con esta regla |
+| --- | --- | --- | --- | --- |
+| 20 % | 0,2 × 50 = 10 | 10 − 10 = 0 | 20 | 70 − 10 ÷ 0,2 = 20 |
+| 50 % | 0,5 × 50 = 25 | 25 − 10 = 15 | 35 | 70 − 10 ÷ 0,5 = 50 |
+
+Un **nivel estacionario** tiene cambio neto nulo; no tiene por qué coincidir con el objetivo. Al igualar el cambio neto a cero obtenemos g × (70 − S) = 10. Aquí una corrección más intensa reduce la brecha restante, mientras que suavizarla deja al sistema detenido mucho más abajo. Ninguna de las dos intensidades elimina por completo el error estacionario. Compensar por separado la pérdida conocida sería otro diseño de control que comparar.
+
+Esta pérdida **no está incluida en el simulador**. El ejemplo muestra por qué «nunca aumentéis la intensidad correctora» es demasiado amplio. [Meadows examina la intensidad de la retroalimentación respecto a la perturbación que debe contrarrestar y el retardo respecto al ritmo de cambio](https://donellameadows.org/archives/leverage-points-places-to-intervene-in-a-system/). Los cambios apropiados dependen de esas relaciones.
+
+### Probar un cálculo independiente
+
+Para otro nivel abstracto, usad la regla original con **objetivo 100**, **nivel actual 80**, **lectura anterior 50**, **un paso de retardo** e **intensidad del 20 %**. Tomad esos dos niveles como historia inicial proporcionada para este cálculo independiente. No hay otras entradas ni pérdidas durante la actualización. ¿Qué candidato es el nivel siguiente?
+
+| Candidato | Nivel siguiente propuesto |
+| --- | --- |
+| A | 84 |
+| B | 90 |
+| C | 100 |
+| D | 110 |
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de seguir"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisad la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Qué candidato sigue la regla indicada en el caso independiente?"}
+  options={[
+  {
+    "text": "Candidato A"
+  },
+  {
+    "text": "Candidato B",
+    "correct": true
+  },
+  {
+    "text": "Candidato C"
+  },
+  {
+    "text": "Candidato D"
+  }
+]}
+  explanation={"Aplicad la intensidad a la brecha entre el objetivo y la lectura antigua. Después sumad esa corrección al nivel actual. Usar la lectura actual produciría otra regla."}
+/>
+
+La brecha demorada es 100 − 50 = 50, la corrección es 0,2 × 50 = 10 y el nivel siguiente es 80 + 10 = **90**. Usar la brecha actual daría 80 + 0,2 × (100 − 80) = **84**, que corresponde a la regla con lectura actual. Una lectura antigua no tiene por qué ser una medida falsa; mide otro momento.
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de seguir"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisad la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Seleccionad las propuestas cuya justificación respeta el mecanismo descrito."}
+  options={[
+  {
+    "text": "Si los informes llegan tarde, comprobar si una lectura más reciente mejora la corrección.",
+    "correct": true
+  },
+  {
+    "text": "Si la corrección apenas compensa una pérdida conocida, comprobar su intensidad y capacidad.",
+    "correct": true
+  },
+  {
+    "text": "Si aparece un vaivén, esperar un retardo completo aunque el objetivo y las entradas cambien."
+  },
+  {
+    "text": "Si existe alguna demora, reducir siempre la respuesta sin comprobar sus otras consecuencias."
+  }
+]}
+  explanation={"Las primeras propuestas identifican qué aspecto comprobar. Esperar o suavizar puede servir en un caso y fallar en otro; hay que evaluar los cambios con los supuestos y criterios pertinentes."}
+  allowMultiple={true}
+/>
+
+## Seguir la señal del pedido por una cadena de suministro
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de seguir"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisad la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Un minorista tiene poco producto en la estantería y varios pedidos confirmados en camino. ¿Qué dato permite evitar una reposición duplicada?"}
+  options={[
+  {
+    "text": "El producto ya pedido, junto con las existencias y los compromisos pendientes.",
+    "correct": true
+  },
+  {
+    "text": "Solo las existencias visibles; lo que viaja no forma parte de ninguna decisión."
+  },
+  {
+    "text": "Solo el último pedido del proveedor; equivale a las ventas del consumidor."
+  },
+  {
+    "text": "Solo la duración del transporte; fija por sí sola cuánto hay que pedir."
+  }
+]}
+  explanation={"Lo ya pedido puede cambiar la necesidad de una nueva reposición. Los pedidos en camino no son existencias disponibles, pero omitirlos puede inflar la nueva orden."}
+  pretest={true}
+/>
+
+El **efecto látigo (bullwhip effect)** se refiere a la amplificación de la variabilidad de los pedidos respecto a las ventas al avanzar aguas arriba, hacia los productores. No afirma que toda demora produzca un vaivén mayor en cada eslabón.
+
+Tomad una decisión pequeña de inventario. Un minorista tiene **8 unidades disponibles**, **10 en pedidos confirmados pendientes de recibir**, **ningún pedido de cliente atrasado** y una política que fija una **posición de inventario objetivo de 20**. La posición suma las existencias disponibles y los pedidos en camino, y resta los pedidos de cliente atrasados. En esta decisión construida no entran otros compromisos.
+
+La posición es 8 + 10 − 0 = **18**, así que la política pide 20 − 18 = **2 unidades**. Si ignorase lo que viene en camino, pediría 20 − 8 = **12**, elevando la posición a **30**. Esas diez unidades adicionales no se han convertido en demanda del consumidor por aparecer en una orden de compra. El cálculo se refiere a la cuenta de pedidos, no a las existencias físicas de una fecha futura.
+
+<ConsequenceTree
+  client:visible
+  title={"Cómo una decisión local puede alterar la señal siguiente"}
+  eyebrow={"Hipótesis de transmisión"}
+  instructions={"Desplegad los enlaces y distinguid el pedido del minorista de las ventas al consumidor."}
+  decisionLabel={"Situación inicial"}
+  orderLabels={[
+  "Decisión local",
+  "Señal recibida",
+  "Respuesta siguiente",
+  "Posible retorno"
+]}
+  promptLabel={"Seguir el enlace"}
+  expandAllLabel={"Mostrar el recorrido"}
+  collapseLabel={"Contraer"}
+  valenceLabels={{
+  "good": "Reduce la duplicación supuesta",
+  "bad": "Amplifica la señal supuesta",
+  "mixed": "Efecto condicionado",
+  "neutral": "Enlace del modelo"
+}}
+  decision={{
+  "label": "Bajan las existencias visibles mientras hay reposición en camino",
+  "children": [
+    {
+      "label": "El minorista omite lo ya pedido y aumenta su nueva orden",
+      "valence": "mixed",
+      "children": [
+        {
+          "label": "El proveedor interpreta la orden como una subida de demanda final",
+          "valence": "mixed",
+          "children": [
+            {
+              "label": "Aumenta su previsión y su propio pedido",
+              "valence": "mixed",
+              "children": [
+                {
+                  "label": "Las llegadas posteriores pueden provocar un recorte de pedidos",
+                  "note": "El retorno depende de las reglas, las ventas y los plazos reales.",
+                  "valence": "mixed"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}}
+  caption={"El árbol muestra un mecanismo posible. No calcula una trayectoria, demuestra causalidad observada ni establece que todos los eslabones amplifiquen."}
+/>
+
+Este recorrido construido es un mecanismo posible. El [análisis original de Lee, Padmanabhan y Whang](https://doi.org/10.1287/mnsc.43.4.546) también examina los lotes, las respuestas al racionamiento y las variaciones de precios bajo supuestos concretos. Identificad el mecanismo real antes de elegir un cambio.
+
+Para investigar un caso real, alinead ventas al consumidor, pedidos y recepciones en periodos comparables, revisad los compromisos pendientes e inspeccionad las reglas de decisión de cada eslabón. Un pedido grande aislado no demuestra una **variabilidad** amplificada, y observar esa amplificación no identifica por sí solo su causa.
+
+<MatchConcepts
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  instructions={"Elegid un término y después su definición."}
+  allCorrectLabel={"✓ Todas las parejas son correctas"}
+  partialResultWord={"correctas"}
+  pickDefinitionHint={"→ elegid ahora una definición"}
+  notLinkedHint={"sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+  question={"Relacionad cada concepto con lo que afirma, sin añadir una causa universal."}
+  pairs={[
+  {
+    "term": "Retardo de información",
+    "definition": "El dato usado para decidir describe un estado anterior."
+  },
+  {
+    "term": "Sobrepaso",
+    "definition": "La variable cruza el objetivo en el sentido de su aproximación."
+  },
+  {
+    "term": "Oscilación amortiguada",
+    "definition": "Las desviaciones alternas alrededor de un nivel se reducen con el tiempo."
+  },
+  {
+    "term": "Efecto látigo",
+    "definition": "La variabilidad de los pedidos puede amplificarse aguas arriba respecto a las ventas."
+  }
+]}
+  explanation={"Un sobrepaso puede ocurrir una vez sin oscilación sostenida. El efecto látigo describe amplificación de variabilidad; identificar su mecanismo requiere más que reconocer una curva."}
+/>
+
+## Contrastar la explicación en vez de diagnosticar la curva
+
+Una línea ondulada puede reflejar sobrecorrecciones tardías, entregas alternas, un objetivo móvil o varios mecanismos a la vez. Considerad dos hipótesis para el nivel de un almacén: el controlador reacciona al informe de ayer o el calendario alterna lotes grandes y pequeños. Ambas pueden coexistir. Llamar impaciente al personal no permite elegir entre ellas.
+
+| Comprobación | Qué predice la hipótesis de corrección tardía | Qué predice la hipótesis del calendario de entregas |
+| --- | --- | --- |
+| Fechar informes y órdenes | Las correcciones dependen de niveles anteriores | Esa relación no es necesaria |
+| Revisar cantidades entrantes y fechas | Puede haber vaivenes con llegadas constantes | Las llegadas alternas ayudan a explicar los tiempos |
+| Comparar una lectura más reciente con la misma regla de respuesta | La trayectoria prevista cambia si importa la antigüedad de la lectura | El patrón de llegadas sigue mientras no cambie el calendario |
+
+Son predicciones para distinguir explicaciones, no garantías de que una prueba aísle todas las causas. Un informe más rápido también puede cambiar la conducta; otro calendario de entradas puede modificar la brecha que ve el controlador. Mantened comparables las condiciones pertinentes, registrad qué ha cambiado de verdad y revisad el modelo si falla su mecanismo previsto.
+
+<Categorize
+  client:visible
+  instructions={"Asignad cada afirmación a su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todo está bien clasificado"}
+  partialResultWord={"correctas"}
+  question={"Separad lo registrado de lo que necesita una prueba causal."}
+  buckets={[
+  "Registro descrito",
+  "Hipótesis por comprobar"
+]}
+  items={[
+  {
+    "text": "Los informes llevan una marca temporal de la revisión anterior.",
+    "bucket": "Registro descrito"
+  },
+  {
+    "text": "La demora del informe es la causa principal del vaivén.",
+    "bucket": "Hipótesis por comprobar"
+  },
+  {
+    "text": "El calendario de entradas alterna entregas grandes y pequeñas.",
+    "bucket": "Registro descrito"
+  },
+  {
+    "text": "Reducir la intensidad hará desaparecer cualquier oscilación futura.",
+    "bucket": "Hipótesis por comprobar"
+  }
+]}
+  explanation={"Los tiempos y las entradas registrados delimitan hipótesis. Para atribuir el vaivén a una de ellas, comprobad el enlace y comparad predicciones que permitan distinguirlas."}
+/>
+
+### Cuándo usar este enfoque
+
+Usad la lente del retardo cuando las correcciones repetidas llegan después de que cambie el estado o su información. Reconstruid las acciones pendientes y la regla de actualización, comparad explicaciones temporales plausibles y fijad sobrepasos y tiempos de respuesta aceptables antes de probar un cambio. La instrucción fija de «esperar un retardo» no sustituye ese trabajo.
+
+## Reconstruir el razonamiento
 
 <MindMap
   client:visible
-  eyebrow="Visión de conjunto"
-  outlineLabel="Esquema"
-  title="Retardos y oscilación"
+  eyebrow={"Visión de conjunto"}
+  outlineLabel={"Esquema en texto"}
+  title={"Reconstruid el diagnóstico de un vaivén"}
   root={{
-    label: 'Retardos y oscilación',
-    children: [
-      {
-        label: 'Qué es un retardo',
-        children: [
-          { label: 'Un desfase entre actuar y sentir el efecto' },
-          { label: 'Las existencias crean retardos — el bucle reacciona a noticias viejas' },
-        ],
-      },
-      {
-        label: 'Por qué causa oscilación',
-        children: [
-          { label: 'El bucle equilibrador actúa sobre info CADUCA → se pasa del objetivo' },
-          { label: 'Corrige tarde → se pasa hacia el otro lado → vaivenes' },
-          { label: 'Amortiguado (los vaivenes encogen) vs. creciente (inestable)' },
-        ],
-      },
-      {
-        label: 'Qué lo empeora',
-        children: [
-          { label: 'Retardo más largo = más tiempo para sobreajustar' },
-          { label: 'Corrección más fuerte = sobrepaso mayor' },
-          { label: 'Intentarlo MÁS FUERTE amplifica el vaivén' },
-        ],
-      },
-      {
-        label: 'En la naturaleza',
-        children: [
-          { label: 'La ducha que escalda' },
-          { label: 'Efecto látigo / juego de la cerveza: los vaivenes crecen por la cadena' },
-          { label: 'Auge y caída: la oferta persiguiendo al precio con un retardo largo' },
-        ],
-      },
-      {
-        label: 'Cómo domarlo',
-        children: [
-          { label: 'Acortar el retardo (retroalimentación más rápida)' },
-          { label: 'Aflojar; esperar un retardo antes de volver a corregir' },
-          { label: 'Anticipar hacia dónde se dirige, no dónde estaba' },
-        ],
-      },
-    ],
-  }}
+  "label": "Retardos y oscilación",
+  "children": [
+    {
+      "label": "Identificar los tiempos",
+      "children": [
+        {
+          "label": "Acumulación puede empezar ya"
+        },
+        {
+          "label": "Localizar la demora en el enlace"
+        }
+      ]
+    },
+    {
+      "label": "Especificar la regla",
+      "children": [
+        {
+          "label": "Lectura, intensidad e historia"
+        },
+        {
+          "label": "Límites y entradas externas"
+        }
+      ]
+    },
+    {
+      "label": "Comparar trayectorias",
+      "children": [
+        {
+          "label": "Retardo no fija el resultado"
+        },
+        {
+          "label": "Distinguir amplitud y duración"
+        }
+      ]
+    },
+    {
+      "label": "Comprobar la explicación",
+      "children": [
+        {
+          "label": "Contar acciones pendientes"
+        },
+        {
+          "label": "Contrastar causas alternativas"
+        }
+      ]
+    }
+  ]
+}}
+  caption={"Explicad qué dato permitiría refutar vuestro diagnóstico antes de elegir una intervención."}
 />
 
 <Quiz
   client:visible
-  title="Ponte a prueba con los retardos"
-  questionLabel="Pregunta"
-  ofLabel="de"
-  scoreLabel="Tu puntuación"
-  restartLabel="Reiniciar"
-  nextLabel="Siguiente"
-  backLabel="Atrás"
-  seeResultsLabel="Ver resultados"
-  completeLabel="Completado"
-  completeTitleLabel="Cuestionario completado"
-  correctCountLabel="correctas"
-  gateLabel="Comprueba tu respuesta para continuar."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  perfectMessage="Puntuación perfecta, ¡bien hecho!"
-  goodMessage="Buen trabajo, repasa las que has fallado."
-  keepPracticingMessage="Sigue practicando, lo tienes."
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"correctas"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso completado"}
+  perfectMessage={"Habéis distinguido los tiempos, las reglas y lo que permiten concluir."}
+  goodMessage={"Revisad las explicaciones de los pasos que os hayan faltado."}
+  keepPracticingMessage={"Volved a las tablas y seguid qué dato utiliza cada corrección."}
+  gateLabel={"Comprobad la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Habéis acertado"}
+  restartLabel={"Volver a empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisad la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  title={"Comprobad tiempos, reglas y pruebas"}
   questions={[
-    {
-      question: '¿Por qué un retardo hace que un bucle equilibrador oscile en lugar de deslizarse hasta su objetivo?',
-      options: [
-        { text: 'El bucle solo puede ver dónde estaba el sistema, así que sigue corrigiendo sobre información caduca y se pasa del objetivo, y luego se pasa de vuelta', correct: true },
-        { text: 'El retardo convierte el bucle equilibrador en un bucle reforzador' },
-        { text: 'El retardo elimina el objetivo, así que el bucle no tiene a qué apuntar' },
-        { text: 'Los retardos solo ralentizan un bucle; nunca causan oscilación' },
-      ],
-      explanation: 'Un retardo significa que el bucle actúa sobre información desactualizada de la brecha. Para cuando su corrección aterriza, la situación ha cambiado, así que se ha sobrecorregido —sobrepaso— y lo mismo ocurre a la inversa, produciendo un vaivén alrededor del objetivo.',
-    },
-    {
-      question: 'En un sistema con retardo, ¿qué respuesta tiende a convertir una oscilación amortiguada (que se asienta) en una creciente (inestable)?',
-      options: [
-        { text: 'Reaccionar más fuerte y más rápido — correcciones mayores aplicadas a datos caducos producen sobrepasos mayores', correct: true },
-        { text: 'Hacer correcciones más pequeñas y esperar a que el retardo se desarrolle' },
-        { text: 'Instalar un sensor más rápido para acortar el retardo' },
-        { text: 'No hacer absolutamente nada durante un periodo de retardo completo' },
-      ],
-      explanation: 'La fuerza de la corrección fija cuánto de grande es cada sobrepaso. Súbela y los vaivenes crecen en vez de encoger. La verdad contraintuitiva de los sistemas con retardo: la respuesta agresiva del "haz más ya" es lo que los desestabiliza.',
-    },
-    {
-      question: 'Una subida única y pequeña de la demanda de los clientes hace que una fábrica dispare la producción enormemente, luego la recorte a cero, oscilando entre la saturación y la escasez. Esto es:',
-      options: [
-        { text: 'El efecto látigo — los retardos apilados de los pedidos más cada eslabón reaccionando a señales infladas y caducas amplifican un cambio pequeño en grandes vaivenes aguas arriba', correct: true },
-        { text: 'Un bucle reforzador sin retardo alguno implicado' },
-        { text: 'La prueba de que la propia demanda de los clientes oscilaba salvajemente' },
-        { text: 'Un bucle equilibrador funcionando a la perfección sin ningún inconveniente' },
-      ],
-      explanation: 'Cada eslabón sobrepide para cubrir un retardo y un colchón de seguridad, así que la señal crece a medida que viaja por la cadena. La demanda real apenas se movió; la oscilación está fabricada por retardos apilados — el efecto látigo.',
-    },
-    {
-      question: '¿Cuál es la forma MENOS eficaz de evitar que un bucle con retardo oscile?',
-      options: [
-        { text: 'Corregir con más agresividad para que el sistema salte a su objetivo más rápido', correct: true },
-        { text: 'Acortar el retardo con retroalimentación más rápida' },
-        { text: 'Hacer correcciones más suaves y esperar un retardo antes de la siguiente' },
-        { text: 'Anticipar hacia dónde se dirige el sistema y dirigirse hacia ahí' },
-      ],
-      explanation: 'La corrección agresiva es la única jugada que empeora la oscilación, porque agranda cada sobrepaso. Los arreglos genuinos son acortar el retardo, aflojar la corrección o anticipar — nunca añadir fuerza.',
-    },
-  ]}
+  {
+    "question": "Un depósito empieza a vaciarse de inmediato, pero tarda en quedar vacío. ¿Qué distinción conserva el mecanismo?",
+    "options": [
+      {
+        "text": "Un caudal puede cambiar ahora y tardar en modificar mucho el nivel.",
+        "correct": true
+      },
+      {
+        "text": "Toda agua restante demuestra que la válvula aún no ha respondido."
+      },
+      {
+        "text": "Un nivel acumulado solo puede cambiar después de un tiempo muerto."
+      },
+      {
+        "text": "La existencia de agua demuestra que el sensor informa con retraso."
+      }
+    ],
+    "explanation": "Cambiar el caudal modifica la tasa de acumulación. Mover una cantidad grande requiere tiempo aunque no haya tiempo muerto ni demora en la lectura."
+  },
+  {
+    "question": "Comparad B y C en la tabla del modelo. ¿Qué variable cambia entre ambos casos?",
+    "options": [
+      {
+        "text": "El objetivo y la unidad de tiempo cambian a la vez."
+      },
+      {
+        "text": "El nivel inicial cambia mientras la intensidad permanece fija."
+      },
+      {
+        "text": "La intensidad cambia, con el mismo retardo y objetivo.",
+        "correct": true
+      },
+      {
+        "text": "Solo el nombre del operador cambia entre las simulaciones."
+      }
+    ],
+    "explanation": "B y C mantienen objetivo, historia inicial y retardo; cambia la intensidad. Por eso ofrecen una comparación controlada del modelo, sin atribuir el resultado a la paciencia de una persona."
+  },
+  {
+    "question": "Seleccionad las afirmaciones compatibles con los ejemplos.",
+    "options": [
+      {
+        "text": "Un bucle con retardo puede aproximarse sin cruzar el objetivo.",
+        "correct": true
+      },
+      {
+        "text": "Un control más intenso puede compensar mejor una pérdida conocida.",
+        "correct": true
+      },
+      {
+        "text": "Esperar un retardo completo garantiza la mejor respuesta en cualquier sistema."
+      },
+      {
+        "text": "Una gráfica ondulada demuestra por sí sola que los informes son la causa."
+      }
+    ],
+    "explanation": "El caso B y el ejemplo con pérdida respaldan las dos primeras afirmaciones bajo sus reglas. Los otros enunciados convierten estrategias o observaciones locales en garantías generales.",
+    "allowMultiple": true
+  },
+  {
+    "question": "En el caso independiente, el cálculo usa la lectura antigua. ¿Por qué no basta con reducir la brecha actual?",
+    "options": [
+      {
+        "text": "Porque la intensidad solo se aplica cuando el nivel ya está por encima del objetivo."
+      },
+      {
+        "text": "Porque sustituir la lectura cambia la regla que se está poniendo a prueba.",
+        "correct": true
+      },
+      {
+        "text": "Porque la cantidad actual se elimina de cualquier fórmula con retardo."
+      },
+      {
+        "text": "Porque todos los datos antiguos son necesariamente incorrectos y deben borrarse."
+      }
+    ],
+    "explanation": "La corrección usa el dato especificado por la regla, mientras que el cambio se añade al estado actual. Comparar reglas exige mantener clara esa diferencia."
+  },
+  {
+    "question": "El minorista omite un pedido confirmado en camino al decidir una nueva orden. ¿Qué error puede introducir?",
+    "options": [
+      {
+        "text": "Contar como disponible producto que ya se ha vendido y entregado."
+      },
+      {
+        "text": "Reducir siempre la demanda real del consumidor en la siguiente revisión."
+      },
+      {
+        "text": "Convertir cualquier flujo de entrada en una existencia que nunca cambia."
+      },
+      {
+        "text": "Pedir otra vez producto que ya forma parte de la reposición comprometida.",
+        "correct": true
+      }
+    ],
+    "explanation": "Lo que está en camino no está disponible en la estantería, pero sí influye en cuánto falta por encargar. Omitirlo puede duplicar reposición; la trayectoria posterior depende del resto del sistema."
+  },
+  {
+    "question": "El vaivén continúa después de mejorar la rapidez del informe. ¿Cuál es la respuesta más informativa?",
+    "options": [
+      {
+        "text": "Insistir en la misma explicación porque el retardo figuraba en el diagrama."
+      },
+      {
+        "text": "Abandonar cualquier medición porque una propuesta no explicó el resultado."
+      },
+      {
+        "text": "Revisar la hipótesis y comprobar entradas, objetivo y dinámica de respuesta.",
+        "correct": true
+      },
+      {
+        "text": "Afirmar que la mejora causó el vaivén solo porque ocurrió antes."
+      }
+    ],
+    "explanation": "La discrepancia cuestiona el diagnóstico o su alcance. Investigad mecanismos alternativos y si la mejora cambió realmente la antigüedad del dato, sin deducir causalidad de una secuencia temporal."
+  }
+]}
 />
+
+### Fuentes y límites
+
+Los casos numéricos son modelos didácticos deterministas. Se declaran reglas, historia, unidades y omisiones para reproducir las cuentas. El simulador tiene un objetivo fijo y una ventana finita; sus etiquetas describen el recorrido y no constituyen un análisis general de estabilidad. La fuente sobre suministro respalda posibles mecanismos de amplificación, no un diagnóstico a partir de una curva.
 
 ## Hacia dónde va esto
 
