@@ -1,0 +1,653 @@
+---
+title: "Taller: audita una regla de recompensa"
+description: "Calcula qué trabajo favorece una recompensa, compara una prima acotada y revisa lo que deja fuera la puntuación."
+topic: "es/incentives"
+order: 7
+minutes: 25
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, Callout, OpportunityCostChooser, FirstPrinciplesBuilder, InversionFlip, MindMap } from '@/components/react';
+
+Un archivo quiere reducir su cola de catalogación. También quiere que se atiendan los registros difíciles, en lugar de dejarlos para el turno de otro. La primera propuesta es muy sencilla: conceder un crédito por cada registro aceptado. De pronto, los registros más cortos se vuelven muy populares. La declaración de objetivos sigue estando muy bien redactada.
+
+Este taller audita la **regla de recompensa**: el procedimiento que convierte una acción y su resultado registrado en una recompensa. Calcularemos qué favorece, la cambiaremos y examinaremos una forma de manipular la medición revisada. Todos los tiempos, premios y registros son **datos didácticos inventados**. Los créditos son puntos de este ejercicio, no una propuesta de contrato laboral.
+
+## Declara el objetivo y el trabajo disponible
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+
+  client:visible
+  pretest
+  question="Un archivo recompensa por igual cada registro aceptado, pero los complejos requieren más tiempo. ¿Qué deberías examinar primero?"
+  options={[
+    {
+        "text": "Qué combinación de trabajo factible obtiene más créditos con la regla real.",
+        "correct": true
+    },
+    {
+        "text": "Solo la prioridad escrita del trabajo complejo, sin revisar cuánto paga la regla."
+    },
+    {
+        "text": "Solo los créditos del turno anterior, sin conocer la mezcla ni el tiempo disponible."
+    }
+]}
+  explanation="Una declaración de intenciones no cambia los créditos de las acciones disponibles. Compara esas acciones, sus tiempos y la recompensa real."
+/>
+
+Nuestro archivo asigna a una persona **120 minutos** y una cola fija:
+
+| Tipo de registro | Disponibles | Tiempo por registro aceptado |
+|---|---|---|
+| Rutinario | 24 | 5 minutos |
+| Complejo | 8 | 15 minutos |
+
+El objetivo de servicio tiene un orden: **primero completar al menos cuatro registros complejos y después completar el mayor número total posible de registros aceptados**. El mínimo es una decisión del ejercicio, no una afirmación de que cuatro sea el objetivo correcto para los archivos reales.
+
+Solo cuentan registros enteros. No se puede trabajar fuera de turno, dividir un registro en varias unidades premiadas ni contar dos veces el mismo identificador. Los tiempos son fijos e incluyen la comprobación de quien cataloga. En el cálculo inicial, todos los registros terminados superan una revisión de aceptación independiente. Otra persona puede revisar hasta 24 registros; suponemos disponible esa capacidad y no consume los 120 minutos de quien cataloga. El modelo no optimiza los costes de la revisión.
+
+El registro de entrada asigna la categoría rutinaria o compleja antes de elegir el trabajo. Por ahora, las categorías permanecen fijas. Supón que la persona elige el plan factible con más créditos. Así aislamos el efecto de la regla; las personas reales también pueden valorar el oficio, la equidad, ayudar y otras recompensas.
+
+### Un primer plan completo
+
+Cuatro registros complejos ocupan **4 × 15 = 60 minutos**. En los **120 − 60 = 60 minutos** restantes caben **60 ÷ 5 = 12 registros rutinarios**. El plan acepta **4 + 12 = 16 registros**, incluidos los cuatro complejos requeridos.
+
+Un quinto registro complejo ocuparía el tiempo de tres rutinarios. El total bajaría a **5 + 9 = 14**. Una vez cumplido el mínimo, hacer más registros complejos reduce el total aceptado en este ejemplo de tiempo fijo. Por tanto, el mejor plan para el objetivo es **cuatro complejos y doce rutinarios**.
+
+### Cuándo concretar así el objetivo
+
+Hazlo antes de premiar una cifra. «Reducir la cola» deja abierto si tienen prioridad los casos difíciles, el volumen total, la calidad o un plazo. La recompensa no puede alinearse con un objetivo sin especificar.
+
+<MatchConcepts
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  instructions="Elige un término y después su definición."
+  allCorrectLabel="✓ Todas las parejas correctas"
+  partialResultWord="correctas"
+  pickDefinitionHint="→ elige ahora una definición"
+  notLinkedHint="todavía sin enlazar"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+
+  client:visible
+  question="Relaciona cada parte del planteamiento con su función"
+  pairs={[
+    { term: 'Mínimo complejo y después máximo total', definition: 'El objetivo de servicio con el que se juzga el plan de trabajo.' },
+    { term: 'Puntuación en créditos', definition: 'La recompensa que la persona del modelo intenta maximizar.' },
+    { term: 'Identificadores y categorías originales', definition: 'Las reglas de medición que definen qué se cuenta.' },
+    { term: 'Tiempo del turno y registros disponibles', definition: 'Los límites que determinan qué planes son factibles.' }
+  ]}
+  explanation="Objetivo, recompensa, medición y viabilidad son partes distintas del diseño. Repetir una de ellas no corrige sin más un fallo en otra."
+/>
+
+## Calcula qué selecciona la recompensa uniforme
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+
+  client:visible
+  pretest
+  question="Cada registro aceptado recibe el mismo crédito. ¿Qué trabajo resulta más atractivo por minuto en este modelo?"
+  options={[
+    { text: 'El rutinario, porque cada registro aceptado tarda menos.', correct: true },
+    { text: 'El complejo, porque la dirección dice que importa.' },
+    { text: 'Los dos por igual, porque reciben el mismo crédito por registro.' }
+  ]}
+  explanation="La misma recompensa por registro no implica la misma recompensa por unidad de tiempo escaso. Un registro complejo ocupa el tiempo de tres rutinarios."
+/>
+
+Con la **regla uniforme**, cada registro aceptado obtiene **1 crédito**. Dedicar todo el turno a trabajo rutinario acepta **24 registros** en 120 minutos y obtiene **24 créditos**. El plan que cumple el objetivo acepta 16 y obtiene solo **16 créditos**. Quien maximiza la puntuación puede cumplir perfectamente la regla de recompensa sin completar **ningún registro complejo**.
+
+Esa respuesta no requiere mentir ni trabajar mal. Es **selección de tareas**: elegir los trabajos cortos que la recompensa hace atractivos. Una auditoría de incentivos busca atajos legítimos además de trampas.
+
+Esta es la comparación completa. Para cada número posible de registros complejos, la tabla llena el tiempo restante con trabajo rutinario. Como cada registro adicional aceptado recibe un crédito positivo y todos los tiempos son múltiplos de cinco minutos, dejar hueco para otro rutinario no mejora la puntuación.
+
+Las dos columnas siguientes anticipan los rediseños que veremos después. Una prima sin límite concede cuatro créditos por cada complejo. Una prima acotada concede cuatro por cada uno de los primeros cuatro complejos y después uno por cada complejo adicional. Los rutinarios siempre reciben un crédito.
+
+| Complejos | Rutinarios | Total aceptado | Créditos uniformes | Créditos con prima sin límite | Créditos con prima acotada |
+|---|---|---|---|---|---|
+| 0 | 24 | 24 | 24 | 24 | 24 |
+| 1 | 21 | 22 | 22 | 25 | 25 |
+| 2 | 18 | 20 | 20 | 26 | 26 |
+| 3 | 15 | 18 | 18 | 27 | 27 |
+| 4 | 12 | 16 | 16 | 28 | 28 |
+| 5 | 9 | 14 | 14 | 29 | 26 |
+| 6 | 6 | 12 | 12 | 30 | 24 |
+| 7 | 3 | 10 | 10 | 31 | 22 |
+| 8 | 0 | 8 | 8 | 32 | 20 |
+
+Cada fila ocupa **120 minutos**. La puntuación uniforme coincide con el total aceptado, así que su máximo está en la primera fila. No hemos observado la conducta de nadie; hemos encontrado la acción que maximiza la puntuación de un modelo explícito.
+
+Gibbons distingue la contribución total de una persona y la medida de rendimiento por la que se le paga. No tienen por qué avanzar juntas. Nuestra recompensa por registros aceptados omite el requisito de mezcla aunque cada registro contado sea correcto. [Gibbons sobre medición del rendimiento](https://www.aeaweb.org/articles?id=10.1257/jep.12.4.115)
+
+### Cuándo examinar todas las opciones
+
+Pregunta si las personas pueden elegir clientes, casos, tamaños de tarea o unidades de declaración. Contar bien el trabajo terminado aún puede fomentar que se descuide el trabajo exigido por el objetivo. Aumentar la recompensa por el mismo recuento refuerza esa comparación en lugar de cambiarla.
+
+<FillBlank
+  instructions="Elige la opción adecuada en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctos"
+
+  client:visible
+  question="Nombra el desajuste sin inventar deshonestidad"
+  text="La regla uniforme favorece {{tareas cortas aceptadas|el mínimo complejo|identificadores falsos}}. Eso es posible aunque cada registro aceptado sea {{correcto|duplicado|inacabado}}."
+  explanation="El desajuste procede de elegir tareas con tiempos distintos. Este primer fallo no requiere trabajo incorrecto ni declaraciones falsas."
+/>
+
+## Compara una prima sin límite con una acotada
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+
+  client:visible
+  pretest
+  question="¿Pagar más créditos por cada registro complejo produciría necesariamente la mejor combinación para el objetivo declarado?"
+  options={[
+    {
+        "text": "Sí, cualquier prima alinea automáticamente todo el objetivo."
+    },
+    {
+        "text": "No, la prima puede seguir favoreciendo el trabajo complejo después de cubrir el mínimo.",
+        "correct": true
+    },
+    {
+        "text": "Sí, porque añadir una prima elimina el coste de oportunidad del tiempo dedicado a complejos."
+    }
+]}
+  explanation="El objetivo cambia tras el mínimo: entonces prioriza el total aceptado. Una prima sin límite no tiene por qué hacer el mismo cambio."
+/>
+
+La **prima sin límite** concede **4 créditos por registro complejo** y 1 por rutinario. Cuatro complejos y doce rutinarios obtienen **4 × 4 + 12 = 28 créditos**. Ocho complejos obtienen **8 × 4 = 32 créditos**. La recompensa favorece ahora hacer solo complejos: cumple el mínimo, pero produce ocho registros aceptados en lugar de los dieciséis factibles.
+
+La **prima acotada** concede 4 créditos por cada uno de los **primeros cuatro complejos del turno** y después 1 por cada complejo adicional. El trabajo rutinario sigue recibiendo 1 por registro. Cuatro complejos y doce rutinarios obtienen **16 + 12 = 28 créditos**. Un quinto complejo desplaza tres rutinarios y solo añade un crédito, con lo que la puntuación baja a **16 + 1 + 9 = 26**.
+
+La tabla completa muestra un único máximo en cuatro complejos y doce rutinarios. Coincide con el objetivo **bajo los supuestos indicados de categorías, tiempos, verificación y elección**. El cálculo no demuestra que un equipo real adopte ese plan ni que la regla cubra toda actividad valiosa.
+
+<OpportunityCostChooser
+  client:visible
+  title="Lee la recompensa por separado del objetivo de servicio"
+  eyebrow="Compara tres planes factibles"
+  instructions="Elige un plan con cada regla. Busca la mayor puntuación y comprueba después si ese plan cumple el objetivo del archivo."
+  resourceLabel="Cada plan consume"
+  choiceLabel="Plan seleccionado"
+  costLabel="Mejor recompensa alternativa"
+  costHint="entre los planes factibles mostrados"
+  alsoLabel="Otros planes disponibles"
+  alsoHint="cada uno usa el mismo turno"
+  worthLabel="recompensa"
+  soundVerdict="Es un plan de puntuación máxima entre los mostrados. Mejor alternativa: {cost}. Comprueba por separado el objetivo de servicio."
+  costlyVerdict="Un plan mostrado tiene mayor puntuación: {cost}. Compara esa recompensa con el objetivo de servicio."
+  stepLabel="Regla {n} de {total}"
+  prevLabel="Regla anterior"
+  nextLabel="Regla siguiente"
+  resetLabel="Elegir de nuevo"
+  scenarios={[
+    { prompt: 'Recompensa uniforme', resource: 'Un turno completo definido', unit: ' créditos', options: [
+      { label: 'Solo rutinarios', value: 24, detail: 'Sin progreso en los complejos.' },
+      { label: 'Cubrir el mínimo y después rutinarios', value: 16, detail: 'El plan del objetivo de servicio.' },
+      { label: 'Solo complejos', value: 8, detail: 'Supera el mínimo, pero reduce el total.' }
+    ] },
+    { prompt: 'Prima compleja sin límite', resource: 'Un turno completo definido', unit: ' créditos', options: [
+      { label: 'Solo rutinarios', value: 24, detail: 'Sin progreso en los complejos.' },
+      { label: 'Cubrir el mínimo y después rutinarios', value: 28, detail: 'El plan del objetivo de servicio.' },
+      { label: 'Solo complejos', value: 32, detail: 'Supera el mínimo, pero reduce el total.' }
+    ] },
+    { prompt: 'Prima compleja acotada', resource: 'Un turno completo definido', unit: ' créditos', options: [
+      { label: 'Solo rutinarios', value: 24, detail: 'Sin progreso en los complejos.' },
+      { label: 'Cubrir el mínimo y después rutinarios', value: 28, detail: 'El plan del objetivo de servicio.' },
+      { label: 'Solo complejos', value: 20, detail: 'Los complejos adicionales solo reciben el crédito base.' }
+    ] }
+  ]}
+  caption="Los menús comparan tres planes definidos. La tabla completa comprueba también las mezclas intermedias. Una recompensa alta no implica un buen resultado de servicio."
+/>
+
+<FirstPrinciplesBuilder
+  revealAllLabel="Añadir todas las partes"
+  resetLabel="Empezar de nuevo"
+
+  client:visible
+  locale="es"
+  title="Reconstruye la puntuación ganadora de la regla acotada"
+  eyebrow="La misma unidad en todo el gráfico"
+  analogyValue={24}
+  analogyLabel="Puntuación de solo rutinarios con la regla acotada"
+  parts={[
+    { label: 'Créditos por el trabajo complejo requerido', value: 16, note: 'Los primeros complejos reciben la prima.' },
+    { label: 'Créditos por el trabajo rutinario restante', value: 12, note: 'Cada registro rutinario terminado recibe el crédito base.' }
+  ]}
+  rebuiltLabel="Créditos de las contribuciones seleccionadas"
+  valuePrefix=""
+  valueSuffix=" créditos"
+  instructions="Añade las dos contribuciones y compara el plan completo con solo trabajo rutinario."
+  verdictTemplate="Las contribuciones suman {total}. El plan completo obtiene más puntuación y cubre el mínimo complejo."
+  caption="Las barras comparan recompensas, no números de registros aceptados. El plan del objetivo completa menos registros que solo rutinarios porque también atiende la cola compleja."
+/>
+
+### Qué cuesta y qué deja abierto el rediseño
+
+El plan acotado concede más créditos que el plan máximo de la antigua regla uniforme. Si los créditos tienen un coste real, importa el presupuesto. El archivo también podría asignar directamente una mezcla mínima de tareas en lugar de intentar inducirla con puntos. Ambas opciones necesitan procedimientos viables de clasificación y aceptación.
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+
+  client:visible
+  allowMultiple
+  question="¿Qué afirmaciones se desprenden de la tabla de recompensas?"
+  options={[
+    { text: 'La regla uniforme favorece no hacer complejos en el modelo que maximiza la puntuación.', correct: true },
+    { text: 'La prima sin límite sigue premiando el trabajo complejo más allá del mínimo.', correct: true },
+    { text: 'El máximo acotado demuestra que ya no se pueden manipular la clasificación ni la calidad.' },
+    { text: 'Toda persona real tiene que elegir el máximo de puntos sin importar otros motivos.' }
+  ]}
+  explanation="La tabla establece comparaciones condicionales de recompensa. No elimina fallos de medición ni convierte un modelo simple de elección en una predicción universal sobre personas."
+/>
+
+## Audita la categoría que recibe la prima
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+
+  client:visible
+  pretest
+  question="La regla acotada funciona con categorías fijadas al entrar. ¿Qué cambia si el sistema acepta en su lugar las etiquetas de quien recibe los puntos?"
+  options={[
+    { text: 'Aparece una nueva acción premiada: etiquetar trabajo rutinario como complejo.', correct: true },
+    { text: 'Nada puede cambiar porque la fórmula de créditos sigue igual.' },
+    { text: 'El mínimo se cumple siempre que lo diga el panel.' }
+  ]}
+  explanation="La regla de medición ayuda a definir las acciones disponibles. Aceptar categorías propias abre un camino a la prima que el cálculo de categorías fijas no incluía."
+/>
+
+Considera una aplicación defectuosa de la regla acotada. Acepta categorías autodeclaradas en lugar de cruzar los identificadores terminados con el registro de entrada. Una auditoría inventada encuentra **un registro rutinario etiquetado como complejo**. Los dieciocho registros completados están bien catalogados; el error afecta a la clasificación premiada.
+
+| Vista de los mismos identificadores terminados | Complejos | Rutinarios | Tiempo según los tiempos fijos | Puntuación acotada |
+|---|---|---|---|---|
+| Panel autodeclarado | 4 | 14 | 4 × 15 + 14 × 5 = 130 minutos | 4 × 4 + 14 = 30 créditos |
+| Cruce con las categorías originales | 3 | 15 | 3 × 15 + 15 × 5 = 120 minutos | 3 × 4 + 15 = 27 créditos |
+
+El panel parece superar el máximo legítimo de 28 créditos y cumplir el mínimo complejo. El registro de entrada muestra **tres complejos terminados**, por lo que se incumple el mínimo. Los diez minutos aparentes de producción adicional son otra señal de alarma con los tiempos fijos del ejercicio.
+
+Una categoría falsa añade **4 − 1 = 3 créditos** a la recompensa registrada. No convierte un registro rutinario de cinco minutos en quince minutos de servicio complejo. En trabajo real, un tiempo inesperado también podría revelar que los tiempos supuestos eran incorrectos; aquí se dan como hechos las categorías originales y el identificador mal etiquetado.
+
+<FirstPrinciplesBuilder
+  revealAllLabel="Añadir todas las partes"
+  resetLabel="Empezar de nuevo"
+
+  client:visible
+  locale="es"
+  title="Recalcula la puntuación con las categorías originales"
+  eyebrow="Audita la medición premiada"
+  analogyValue={30}
+  analogyLabel="Puntuación autodeclarada"
+  parts={[
+    { label: 'Créditos por los complejos verificados', value: 12, note: 'Usa las categorías fijadas al entrar.' },
+    { label: 'Créditos por los rutinarios verificados', value: 15, note: 'El registro mal etiquetado pertenece a este grupo.' }
+  ]}
+  rebuiltLabel="Puntuación auditada de las contribuciones seleccionadas"
+  valuePrefix=""
+  valueSuffix=" créditos"
+  instructions="Reconstruye la recompensa aceptada con los identificadores y categorías originales."
+  verdictTemplate="Las contribuciones auditadas suman {total}. El cambio de categoría infló el panel sin cubrir el mínimo de servicio."
+  caption="Las entradas bien catalogadas y las clasificaciones correctas de recompensa son comprobaciones distintas en este ejemplo."
+/>
+
+### Una respuesta acotada al resquicio
+
+Usa identificadores estables y la categoría original para calcular la recompensa. Registra las excepciones y encarga la revisión de cambios de categoría a alguien ajeno al puesto premiado. Comprueba también duplicados, divisiones de registros y traslados de trabajo. Esto cierra la vía de reetiquetado demostrada; no prueba que hayan desaparecido todas las vías posibles.
+
+<FillBlank
+  instructions="Elige la opción adecuada en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctos"
+
+  client:visible
+  question="Completa qué ha establecido la auditoría"
+  text="La puntuación inflada procede de {{cambiar la clasificación|más servicio complejo|un turno más largo autorizado}}. Mantener fija la fórmula no basta cuando {{pueden cambiar los datos contados|las categorías se fijan de forma independiente|cada identificador válido cuenta una vez}}."
+  explanation="Una fórmula de recompensa opera sobre datos registrados. Si pueden manipularse esos datos, cambia el sistema efectivo de recompensa aunque la fórmula siga igual."
+/>
+
+## Busca el trabajo que puede desplazar la nueva puntuación
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+
+  client:visible
+  pretest
+  question="Supón cerrado el resquicio de las categorías. ¿Mide ya la recompensa todas las partes valiosas del trabajo del archivo?"
+  options={[
+    {
+        "text": "Sí, la puntuación corregida es todo el valor del archivo."
+    },
+    {
+        "text": "No, ayudar, preparar la entrada u otras tareas pueden quedar fuera.",
+        "correct": true
+    },
+    {
+        "text": "No, pero añadir una prima a cada actividad omitida captura automáticamente todo el objetivo."
+    }
+]}
+  explanation="Una medida corregida puede seguir teniendo un alcance limitado. La atención a registros terminados con recompensa puede competir con actividades útiles que no dan créditos por registro."
+/>
+
+El cálculo cubría registros aceptados y un mínimo de mezcla. Un archivo real también necesita ayudar a compañeros nuevos, preparar el trabajo entrante y cuidar equipos compartidos. Esas tareas quedaban fuera del ejercicio finito. Si hacerlas cuesta puntos a quien cataloga, pueden ser el siguiente aspecto descuidado.
+
+El modelo multitarea de Holmström y Milgrom examina este problema: los incentivos pueden redistribuir la atención entre obligaciones, sobre todo cuando unas se miden mejor que otras. No afirma que cualquier prima cause siempre descuido; sus conclusiones dependen de los supuestos del modelo. [Análisis multitarea original, introducción](https://www.sfu.ca/~allen/HolmstromMilgrom.pdf)
+
+Antes de una prueba piloto pequeña, concreta qué registrarás y qué exigiría revisar el diseño. Usa las mismas definiciones y comprobaciones independientes con la regla actual y con la candidata.
+
+| Pregunta | Evidencia que conservar | Qué significaría una señal de alarma |
+|---|---|---|
+| ¿Se cubrió realmente el mínimo? | Identificadores originales y categorías de entrada de los registros aceptados | El avance declarado en registros complejos puede deberse al reetiquetado o a un recuento selectivo |
+| ¿Se mantuvo la calidad? | Resultados de aceptación independiente y trabajo de corrección | Una puntuación mayor puede acompañar a trabajo peor |
+| ¿Se desplazó trabajo a otras personas? | Cola asignada, traslados y pendientes por tipo | El resultado de una persona puede trasladar la carga sin resolverla |
+| ¿Consumió más recursos la nueva regla? | Tiempo de catalogación y revisión, y créditos concedidos | La mejora aparente puede requerir más revisión o coste de recompensa |
+| ¿Se conservaron las tareas sin puntos? | Registro directo de la ayuda y preparación programadas | El recuento de registros terminados puede ocultar trabajo descuidado |
+
+No añadas de inmediato otra prima por cada medida de alarma. Añadir un objetivo también cambia lo que compensa manipular. Algunas comprobaciones pueden seguir siendo evidencia de auditoría independiente o servir para asignar tareas sin convertirse en otra puntuación.
+
+<InversionFlip
+  client:visible
+  title="Pon a prueba la regla rediseñada"
+  eyebrow="Busca el siguiente atajo atractivo"
+  forwardLabel="Objetivo de servicio"
+  invertedLabel="Atajo premiado que conviene examinar"
+  safeguardLabel="Mostrar una comprobación"
+  flipHint="Descubrir un atajo"
+  flipAllLabel="Descubrir todos los atajos"
+  resetLabel="Empezar de nuevo"
+  instructions="Propón una forma de ganar puntos perjudicando el servicio y examina después la comprobación sugerida."
+  pairs={[
+    { forward: 'Avanzar en la cola compleja.', inverted: 'Reetiquetar registros rutinarios terminados como complejos.', safeguard: 'Calcular los créditos con las categorías originales y conservar las excepciones revisadas.' },
+    { forward: 'Mejorar el archivo además de un panel.', inverted: 'Trasladar trabajo difícil o costes de revisión a compañeros no medidos.', safeguard: 'Seguir la cola asignada, los traslados y el tiempo de revisión en todo el grupo.' },
+    { forward: 'Conservar el trabajo útil fuera del recuento.', inverted: 'Saltarse la ayuda y la preparación porque no dan créditos.', safeguard: 'Reservar y examinar esas tareas directamente, sin suponer que las captura la puntuación de registros terminados.' }
+  ]}
+  caption="Las comprobaciones apuntan a resquicios concretos. Su presencia aporta evidencia que examinar, no garantiza un diseño seguro."
+/>
+
+### Qué puede establecer una prueba piloto
+
+Un turno mejor por sí solo no establece el efecto causal de una recompensa. Pueden variar las tareas, la experiencia y la carga. Una prueba justa debería comparar colas y plazos equivalentes, preferiblemente asignando las reglas por sorteo cuando sea viable, y conservar a todas las personas asignadas y sus resultados. Juzga juntos el objetivo concreto, los efectos secundarios y los recursos. La aritmética anterior justifica probar un candidato bajo sus supuestos, no adoptarlo automáticamente. Una comparación pequeña aún puede mostrar diferencias debidas al azar. Quienes comparten una cola también pueden influir unos en otros; elige los grupos de comparación y la asignación de forma que se limiten los traslados entre grupos. [J-PAL sobre asignación al azar, incertidumbre y efectos entre grupos](https://www.povertyactionlab.org/resource/randomization)
+
+<Categorize
+  instructions="Coloca cada elemento en el grupo adecuado."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo clasificado"
+  partialResultWord="correctos"
+
+  client:visible
+  question="Separa una afirmación útil de diseño de otra que necesita más evidencia"
+  buckets={['Establecido en el ejercicio', 'Requiere evidencia real']}
+  items={[
+    { text: 'La regla acotada tiene una única mezcla máxima con los tiempos y categorías indicados.', bucket: 'Establecido en el ejercicio' },
+    { text: 'Toda persona real elegirá esa mezcla.', bucket: 'Requiere evidencia real' },
+    { text: 'Clasificar mal el registro rutinario auditado infla la recompensa registrada.', bucket: 'Establecido en el ejercicio' },
+    { text: 'La regla nueva mejora todo el archivo con un coste total aceptable.', bucket: 'Requiere evidencia real' }
+  ]}
+  explanation="El modelo y los hechos de auditoría dados establecen cálculos concretos. La conducta, los efectos más amplios y los costes de aplicación todavía necesitan observación."
+/>
+
+## Comprueba el rediseño si cambian los tiempos
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+
+  client:visible
+  pretest
+  question="Los registros complejos tardan ahora más y la fórmula de recompensa sigue igual. ¿Qué deberías hacer antes de confiar en la alineación anterior?"
+  options={[
+    { text: 'Recalcular los planes factibles y sus recompensas con el nuevo tiempo.', correct: true },
+    { text: 'Suponer alineada la fórmula para siempre porque una vez tuvo el máximo correcto.' },
+    { text: 'Ignorar los tiempos porque la recompensa es por registro.' }
+  ]}
+  explanation="El máximo anterior dependía del trabajo que desplazaba un registro complejo. Cambiar el tiempo de la tarea cambia esa comparación."
+/>
+
+Prueba una variación independiente. El turno sigue siendo de **120 minutos**, los rutinarios siguen tardando **5 minutos**, pero los complejos tardan ahora **20 minutos**. Mantén la misma cola, el mismo mínimo de cuatro complejos y la misma prima acotada.
+
+Compara estos dos planes factibles. Antes de abrir la solución, calcula sus puntuaciones y pregunta si el objetivo declarado queda favorecido de forma única.
+
+| Plan | Complejos | Rutinarios | Tiempo |
+|---|---|---|---|
+| Solo rutinarios | 0 | 24 | 120 minutos |
+| Mínimo complejo y después rutinarios | 4 | 8 | 4 × 20 + 8 × 5 = 120 minutos |
+
+<details>
+<summary>Comprueba la comparación con los tiempos nuevos</summary>
+
+<Callout variant="tip" label="Consejo" title="Empatar no es una alineación única">
+Solo hacer rutinarios obtiene **24 créditos**. Cuatro complejos y ocho rutinarios también obtienen **4 × 4 + 8 = 24 créditos**. Cada uno de los primeros cuatro complejos desplaza ahora cuatro rutinarios y recibe esos mismos cuatro créditos. Después de los cuatro primeros, otro complejo sigue desplazando cuatro rutinarios, pero solo obtiene un crédito, así que no puede elevar la puntuación por encima de 24.
+
+La recompensa permite, por tanto, un plan de puntuación máxima que incumple el mínimo complejo. Alguien puede elegir el plan del objetivo por otros motivos, pero los puntos solos no lo seleccionan de forma única. Revisa la recompensa o la asignación de tareas y vuelve a comprobar la medición.
+</Callout>
+
+<FirstPrinciplesBuilder
+  revealAllLabel="Añadir todas las partes"
+  resetLabel="Empezar de nuevo"
+
+  client:visible
+  locale="es"
+  title="Reconstruye la puntuación con los tiempos nuevos"
+  eyebrow="Compara el empate"
+  analogyValue={24}
+  analogyLabel="Recompensa de solo rutinarios"
+  parts={[
+    { label: 'Créditos por el mínimo complejo', value: 16, note: 'La prima no cambia.' },
+    { label: 'Créditos por los rutinarios que aún caben', value: 8, note: 'Los complejos más largos dejan menos tiempo.' }
+  ]}
+  rebuiltLabel="Contribuciones seleccionadas a la recompensa"
+  valuePrefix=""
+  valueSuffix=" créditos"
+  instructions="Añade las dos contribuciones y compara el total con solo rutinarios."
+  verdictTemplate="El total es {total}. Empata con el plan de solo rutinarios, por lo que la recompensa sola no favorece de forma única el plan del objetivo."
+  caption="Cambia el tiempo por complejo. El objetivo y la fórmula de recompensa permanecen fijos."
+/>
+</details>
+
+### Cuándo repetir la auditoría
+
+Recalcula si cambian los tiempos, el trabajo disponible, las categorías, la verificación o los valores de recompensa. La alineación de incentivos es una afirmación sobre opciones y mediciones concretas. Proteger los motivos intrínsecos y consultar a quienes hacen el trabajo sigue importando; una tabla de puntos no sustituye esas partes del diseño.
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+
+  client:visible
+  question="¿Por qué importa el empate con tiempos nuevos aunque algunas personas harían voluntariamente el trabajo complejo?"
+  options={[
+    {
+        "text": "Muestra que la regla sola ya no selecciona de forma única el objetivo declarado.",
+        "correct": true
+    },
+    {
+        "text": "Demuestra que toda persona debe abandonar los complejos aunque otros motivos los favorezcan."
+    },
+    {
+        "text": "Demuestra que un empate garantiza el mínimo si uno de los planes empatados lo cumple."
+    }
+]}
+  explanation="Otros motivos pueden sostener trabajo útil. La conclusión más limitada es que no se puede atribuir la alineación solo a esta comparación de recompensas."
+/>
+
+## Mantén el objetivo junto a la recompensa
+
+<MindMap
+  client:visible
+  title="Audita una recompensa antes de fiarte de su puntuación"
+  eyebrow="El taller en conjunto"
+  outlineLabel="Esquema en texto"
+  caption="Sigue la regla a través de las acciones factibles, la medición y los efectos más amplios."
+  root={{ label: 'Auditar una recompensa', children: [
+    { label: 'Declarar', children: [{ label: 'Objetivo de servicio y prioridades' }, { label: 'Tiempo y trabajo disponible' }, { label: 'Qué cuenta como trabajo aceptado' }] },
+    { label: 'Comparar', children: [{ label: 'Recompensa de cada plan factible' }, { label: 'Elegir tareas puede perjudicar sin trampas' }, { label: 'Una prima sin límite puede pasarse' }] },
+    { label: 'Acotar', children: [{ label: 'La prima termina tras cubrir el mínimo' }, { label: 'La alineación única exige condiciones' }, { label: 'Otros tiempos pueden crear empates' }] },
+    { label: 'Verificar', children: [{ label: 'Identificadores y categorías originales' }, { label: 'Calidad y excepciones revisadas fuera' }, { label: 'Puntos registrados y servicio pueden diferir' }] },
+    { label: 'Observar', children: [{ label: 'Trabajo desplazado y otras personas' }, { label: 'Tareas sin puntos y coste de revisión' }, { label: 'Evidencia piloto antes de adoptar' }] }
+  ] }}
+/>
+
+<Quiz
+  title="Comprueba tu auditoría de la recompensa"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Repaso completado"
+  perfectMessage="Todo correcto. Comprueba que puedes explicar cada respuesta."
+  goodMessage="Revisa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Repasa los ejemplos y vuelve a comprobar qué regla se aplica."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Empezar de nuevo"
+
+  client:visible
+  questions={[
+    {
+    "question": "¿Por qué favorece la regla uniforme el trabajo rutinario en el turno original?",
+    "options": [
+        {
+            "text": "Un complejo usa el tiempo de varios rutinarios y recibe el mismo crédito.",
+            "correct": true
+        },
+        {
+            "text": "La regla uniforme paga por tiempo trabajado, así que toda mezcla de turno completo obtiene los mismos créditos."
+        },
+        {
+            "text": "Los complejos reciben automáticamente una prima porque el objetivo de servicio les da prioridad."
+        }
+    ],
+    "explanation": "La recompensa por registro es igual y el tiempo difiere. El plan máximo aprovecha esa comparación y puede producir registros correctos."
+},
+    { question: '¿Qué mezcla original cubre el mínimo complejo y maximiza el total aceptado?', options: [
+      { text: 'Cuatro complejos y doce rutinarios.', correct: true },
+      { text: 'Ningún complejo y veinticuatro rutinarios.' },
+      { text: 'Ocho complejos y ningún rutinario.' }
+    ], explanation: 'El mínimo complejo consume la mitad del turno. Llenar el resto con rutinarios da el mayor total factible después de cumplirlo.' },
+    {
+    "question": "¿Por qué no cumple todo el objetivo la prima compleja sin límite?",
+    "options": [
+        {
+            "text": "Sigue haciendo atractivo el trabajo complejo después de cubrir el mínimo.",
+            "correct": true
+        },
+        {
+            "text": "Solo concede el crédito base a los complejos y reserva la prima para los registros rutinarios."
+        },
+        {
+            "text": "Mantiene fijo el total aceptado mientras cambia las recompensas de los planes disponibles."
+        }
+    ],
+    "explanation": "El objetivo pasa a maximizar el total después del mínimo. La recompensa sin límite no hace ese cambio."
+},
+    { question: '¿Qué hechos hacen engañoso el resultado del panel dado?', allowMultiple: true, options: [
+      { text: 'Un rutinario figura como complejo en los datos premiados.', correct: true },
+      { text: 'El número complejo real incumple el mínimo declarado.', correct: true },
+      { text: 'Todas las entradas deben estar mal para que engañe la puntuación.' },
+      { text: 'Una fórmula fija garantiza que no cambien las categorías registradas.' }
+    ], explanation: 'La auditoría trata la clasificación y la mezcla de servicio. Todas las entradas pueden ser correctas y estar equivocadas las categorías premiadas y la afirmación del objetivo.' },
+    { question: '¿Qué debe hacerse con las tareas sin puntos durante la prueba piloto?', options: [
+      { text: 'Examinarlas directamente en lugar de suponer que las representa la puntuación de registros terminados.', correct: true },
+      { text: 'Ignorarlas porque no aparecen en la puntuación.' },
+      { text: 'Convertir inmediatamente toda tarea posible en una prima nueva.' }
+    ], explanation: 'Una puntuación puede desplazar la atención de trabajo útil ajeno a su alcance. La evidencia y la asignación pueden ser preferibles a añadir más objetivos premiados.' },
+    {
+    "question": "¿Qué cambia al tardar más los complejos con la misma regla acotada?",
+    "options": [
+        {
+            "text": "El plan del objetivo empata con solo rutinarios y la recompensa ya no lo selecciona de forma única.",
+            "correct": true
+        },
+        {
+            "text": "Mantener los créditos intactos garantiza el máximo único anterior aunque los complejos tarden más."
+        },
+        {
+            "text": "Ambos planes empatados deben cubrir el mínimo complejo porque obtienen los mismos créditos."
+        }
+    ],
+    "explanation": "Un complejo desplaza ahora trabajo rutinario que vale lo mismo que su prima. La alineación anterior dependía de los tiempos originales."
+},
+    {
+    "question": "¿Qué establece un máximo demostrado en la tabla de recompensa inventada?",
+    "options": [
+        {
+            "text": "Un resultado condicional sobre recompensa, medición y planes factibles concretos.",
+            "correct": true
+        },
+        {
+            "text": "Una predicción de que toda persona maximizará esos puntos sin importar otros motivos o restricciones."
+        },
+        {
+            "text": "Una garantía de que toda vía a una puntuación alta mejora el servicio global del archivo."
+        }
+    ],
+    "explanation": "El cálculo se reproduce dentro de sus supuestos. La conducta, la aplicación, los costes más amplios y otros motivos requieren más evidencia."
+}
+  ]}
+/>
+
+Después viene el [examen final](/es/incentives/final-exam), incluida esta distinción entre el objetivo, la puntuación premiada y la medición que los conecta.
