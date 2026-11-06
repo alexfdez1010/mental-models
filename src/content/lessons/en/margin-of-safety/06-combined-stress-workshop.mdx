@@ -1,0 +1,617 @@
+---
+title: "Size a reserve for combined stresses"
+description: "Test a museum's reserve against simultaneous demand and device losses, account for readiness and compare the cost of extra cover."
+topic: "en/margin-of-safety"
+order: 7
+minutes: 27
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, FirstPrinciplesBuilder, ConsequenceTree, MindMap } from '@/components/react';
+
+A museum expects a group of visitors and prepares spare audio guides. The organiser checks two things: the pool can handle a larger group, and it can handle some broken devices. Both checks pass. The opening can still be short of guides if those two stresses happen together.
+
+This workshop turns “leave a buffer” into a decision you can reproduce. You will define the promise, test a bounded set of combined demands, compare the effort needed for different reserves and identify what would invalidate the conclusion. The museum and all quantities below are hypothetical.
+
+## Define what the reserve must do
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Which statement makes an audio-guide reserve testable?"}
+  options={[
+    {
+      "text": "Every visitor in the covered group receives a working guide by the stated opening time.",
+      "correct": true
+    },
+    {
+      "text": "The museum owns more guides than the number usually written in the weekly forecast."
+    },
+    {
+      "text": "The reserve is described as generous compared with a similar event held elsewhere."
+    },
+    {
+      "text": "The pool contains extra units, with no condition or availability deadline specified."
+    }
+  ]}
+  explanation={"A usable requirement states the demand to serve, the condition of the resource and when it must be available. Ownership and an impressive extra count do not settle those questions."}
+/>
+
+The promise for this constructed event is: **each visitor in the group can receive a working guide at 10:00**, when the tour starts. Each visitor needs a separate device for the whole tour; devices are not reused within the group. The case assumes the handover staff and preparation schedule can support the stated pool. We are counting resources at a deadline, rather than estimating a queue or structural breaking strength.
+
+Use **90 visitors** as a reference forecast. The covered demand range is **80 to 110 visitors**. For any candidate pool below, **up to 12 prepared devices may be unusable at the opening**. This is an absolute count bound, not a failure percentage that scales with the pool. The larger group and the unavailable devices may occur together.
+
+For now, all prepared devices are physically at the handover point by the opening. No extra arrivals, battery replacements or transport can be counted after the deadline. We relax the readiness assumption later.
+
+| Symbol | Meaning | Unit |
+|---|---|---|
+| N | Devices prepared and present by the opening | Guides |
+| F | Prepared devices unusable at the opening | Guides |
+| D | Visitors needing guides at that opening | Visitors, with one guide each |
+| N − F | Usable capacity for this group | Guides |
+| N − F − D | Headroom remaining after serving the group | Guides |
+
+**Headroom** is what remains after the demand is served. A negative value is a shortage. A value of zero means the count serves the stated group exactly, with no remaining spare. That is an availability statement for this case, not a general engineering rule about ultimate failure loads.
+
+[NASA’s decision-analysis guidance](https://www.nasa.gov/reference/6-8-decision-analysis/) starts with the intended outcome and evaluation criteria, and calls for documenting assumptions and limitations. Here those choices determine which count we need before choosing a percentage.
+
+<MatchConcepts
+  client:visible
+  question={"Match each planning quantity to its role."}
+  pairs={[
+    {
+      "term": "Reference attendance",
+      "definition": "The forecast used to describe how much extra has been prepared."
+    },
+    {
+      "term": "Covered demand bound",
+      "definition": "The largest group included in this conditional test."
+    },
+    {
+      "term": "Usable pool at the deadline",
+      "definition": "Prepared, present devices after unavailable units are removed."
+    },
+    {
+      "term": "Remaining headroom",
+      "definition": "The difference between usable guides and the group’s requirement."
+    }
+  ]}
+  explanation={"A forecast, a tested upper bound, usable capacity and remaining slack are different quantities. Keep their definitions fixed across the comparison."}
+/>
+
+## Put both stresses in the same case
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"A pool passes a high-attendance test and a device-loss test performed separately. What is still missing?"}
+  options={[
+    {
+      "text": "A test where the covered high attendance and device loss occur together.",
+      "correct": true
+    },
+    {
+      "text": "A repeat of each isolated test with the same assumptions and no combined case."
+    },
+    {
+      "text": "A larger percentage label for the unchanged pool, without changing its usable count."
+    },
+    {
+      "text": "A claim that separate passes establish coverage regardless of joint conditions."
+    }
+  ]}
+  explanation={"The same spare guide cannot be spent once on extra attendance and again on an unavailable device in the same event. Test combinations that the scenario allows."}
+/>
+
+Start with **N = 120** prepared guides. The pool is **30 above the reference forecast**. Watch the separate checks and their combination:
+
+| Covered case | Demand D | Unusable F | Usable N − F | Remaining headroom |
+|---|---|---|---|---|
+| Reference attendance, no losses | 90 | 0 | 120 | 120 − 90 = +30 |
+| Higher attendance only | 110 | 0 | 120 | 120 − 110 = +10 |
+| Device losses only | 90 | 12 | 108 | 108 − 90 = +18 |
+| Both upper stresses together | 110 | 12 | 108 | 108 − 110 = −2 |
+
+The pool passes each isolated stress, yet lacks **2 working guides** in the combined case. The spare count was not wrong; the claim made from the separate tests was too broad.
+
+To cover every allowed pair of demand and loss counts, require:
+
+**N − F ≥ D**, or equivalently **N ≥ D + F**.
+
+Within the stated ranges, more demand and more unusable units can only reduce headroom. The most demanding pair is therefore **D = 110 and F = 12**. It requires **110 + 12 = 122 prepared guides**. Relative to the reference of 90, that is **20 for additional visitors plus 12 for unavailable units: 32 extra guides**.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  title={"Rebuild the prepared-pool requirement"}
+  eyebrow={"Keep the stresses in the same case"}
+  analogyValue={122}
+  analogyLabel={"Prepared pool needed for the covered upper case"}
+  analogyNote={"This reference follows the stated simultaneous demand and unavailability bounds."}
+  rebuiltLabel={"Requirements included in your count"}
+  instructions={"Add the reference attendance, its possible increase and the unavailable-unit allowance. Check which contribution disappears when you test only one stress."}
+  valuePrefix={""}
+  valueSuffix={" guides"}
+  revealAllLabel={"Include all contributions"}
+  resetLabel={"Start again"}
+  parts={[
+    {
+      "label": "Reference attendance",
+      "value": 90,
+      "note": "Each visitor needs a separate working guide at the opening."
+    },
+    {
+      "label": "Attendance above the reference",
+      "value": 20,
+      "note": "The upper demand bound exceeds the reference case."
+    },
+    {
+      "label": "Guides unavailable at the opening",
+      "value": 12,
+      "note": "Prepared inventory must also cover this loss of usable units."
+    }
+  ]}
+  verdictTemplate={"The requirement totals {total}. It includes both stresses together; the conclusion holds only for the stated bounds and readiness assumptions."}
+  caption={"The bars add device counts. They do not estimate probabilities or assign a value to avoiding a shortage."}
+/>
+
+This is coverage of a **bounded scenario set**: all combinations allowed by the stated ranges and readiness assumptions. It does not require the stresses to be statistically independent, because we are not multiplying probabilities. It also does not assign a probability that the real opening will fall inside those ranges. The boundaries are assumptions whose credibility still matters.
+
+### When to use this calculation
+
+Use it when the same reserve must absorb more than one simultaneous demand on it. First check that the categories are distinct: if a quoted unavailable count already includes late devices, adding the late count again would double-count the loss. Here the loss allowance concerns unusable devices among those already present.
+
+<MCQ
+  client:visible
+  question={"Which statements follow from this bounded test? Select all that apply."}
+  allowMultiple={true}
+  options={[
+    {
+      "text": "Passing separate stress tests can coexist with failing their allowed combination.",
+      "correct": true
+    },
+    {
+      "text": "Covering all allowed pairs does not establish how likely the bounds are to hold.",
+      "correct": true
+    },
+    {
+      "text": "Any correlation makes it impossible to check a finite set of resource requirements."
+    },
+    {
+      "text": "The largest isolated need can always replace the combined resource requirement."
+    }
+  ]}
+  explanation={"Joint coverage concerns the allowed combinations. Probabilities need a separate model or evidence, and the same reserve cannot be allocated twice to simultaneous uses."}
+/>
+
+## Count only reserve that is ready in time
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Extra guides are in a separate store and arrive after the tour starts. What can they establish about the opening promise?"}
+  options={[
+    {
+      "text": "They may help later service, but do not fill a shortage at the opening deadline.",
+      "correct": true
+    },
+    {
+      "text": "They satisfy the opening promise as soon as their ownership is confirmed."
+    },
+    {
+      "text": "They erase the earlier shortage once the delivery eventually reaches the museum."
+    },
+    {
+      "text": "They count as ready capacity whenever the total inventory exceeds the forecast."
+    }
+  ]}
+  explanation={"A reserve has an activation time as well as a quantity. Evaluate it at the moment the requirement must be met; later recovery and uninterrupted service are different objectives."}
+/>
+
+Keep **120 prepared guides on site** and the combined case of **110 visitors and 12 unusable guides**. The usable count at 10:00 is still **108**, leaving the shortage of **2**. Suppose another **8 guides** can be fetched, but only arrive at **10:20**. They can raise later availability to **116** if they work, but they were not available at the promised opening.
+
+A backup may be genuinely useful without meeting this particular deadline. If the museum instead accepts a delayed start or a different form of guide, it has changed the service requirement and must evaluate that alternative explicitly. More inventory and a different promise should not be quietly treated as the same plan.
+
+<ConsequenceTree
+  client:visible
+  title={"A reserve has to reach the point of need"}
+  eyebrow={"Compare readiness, not ownership"}
+  instructions={"Reveal how the reserve’s location affects the opening promise. These are alternative arrangements."}
+  decisionLabel={"Reserve arrangement"}
+  orderLabels={[
+    "Placement",
+    "Readiness",
+    "Effect on the opening"
+  ]}
+  promptLabel={"Follow the availability"}
+  expandAllLabel={"Show both arrangements"}
+  collapseLabel={"Collapse arrangements"}
+  valenceLabels={{
+    "good": "Helps the stated opening promise",
+    "bad": "Leaves the opening shortfall",
+    "mixed": "Depends on the condition",
+    "neutral": "Timing link"
+  }}
+  decision={{
+    "label": "Choose where the spare guides wait",
+    "children": [
+      {
+        "label": "Checked spares are already at the handover point",
+        "valence": "good",
+        "children": [
+          {
+            "label": "Staff can issue them before the group starts",
+            "valence": "good",
+            "children": [
+              {
+                "label": "They can count toward the opening requirement",
+                "valence": "good"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Spares wait in a store that requires transport",
+        "valence": "mixed",
+        "children": [
+          {
+            "label": "Transport finishes after the opening deadline",
+            "valence": "bad",
+            "children": [
+              {
+                "label": "They may help later, but cannot fill the opening deficit",
+                "valence": "bad"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }}
+  caption={"Quantity, condition, location and activation time are separate assumptions. The tree compares two paths; it does not simulate transport or certify a real event plan."}
+/>
+
+In real planning, readiness can depend on charging, keys, access permissions, staff, transport and compatible content. Those dependencies may have their own bounds. They do not become usable capacity merely because the inventory record lists the devices.
+
+<FillBlank
+  client:visible
+  question={"Complete the readiness distinction."}
+  text={"For a deadline promise, count {{usable capacity in time|owned inventory in total|later recovery in full}}. A late backup can support {{a later service objective|the earlier opening promise|an unchanged initial count}}."}
+  explanation={"Define when capacity becomes usable. A resource arriving later can aid recovery while leaving the original opening requirement unmet."}
+/>
+
+## Compare the cost of the covered reserve
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Several pools cover the stated combined bounds. Which comparison answers the narrow planning objective here?"}
+  options={[
+    {
+      "text": "The preparation effort among pools that meet the same opening requirement.",
+      "correct": true
+    },
+    {
+      "text": "The largest possible pool, regardless of what other work its preparation displaces."
+    },
+    {
+      "text": "The thinnest pool, even if it fails the covered combined attendance and loss case."
+    },
+    {
+      "text": "The most impressive percentage, even if its denominator differs across options."
+    }
+  ]}
+  explanation={"Define feasibility first, then compare the chosen cost measure. A bigger buffer may have other benefits, but those benefits and costs need to be stated rather than assumed."}
+/>
+
+Assume preparing each guide uses **3 volunteer-minutes**, including work spent on a unit later found unusable. The available preparation allocation is **400 volunteer-minutes**. All listed preparation can be completed before the opening under the case’s staffing and scheduling assumptions. Each guide also needs storage; that resource is adequate here and is not separately priced.
+
+The narrow objective is **to meet every covered opening case with the least preparation time**. Compare:
+
+| Prepared pool N | Usable with 12 unavailable | Headroom for 110 visitors | Preparation effort | Covers all stated combinations? |
+|---|---|---|---|---|
+| 110 guides | 98 | −12 | 110 × 3 = 330 volunteer-minutes | No |
+| 120 guides | 108 | −2 | 120 × 3 = 360 volunteer-minutes | No |
+| 122 guides | 110 | 0 | 122 × 3 = 366 volunteer-minutes | Yes |
+| 130 guides | 118 | +8 | 130 × 3 = 390 volunteer-minutes | Yes |
+
+Under these assumptions, **122** is the smallest feasible pool and uses the least preparation time. The reference pool of 90 would use **270 minutes**. Covering the combined bounds therefore adds **32 guides and 96 volunteer-minutes**, because **32 × 3 = 96**.
+
+Moving from 122 to 130 buys **8 further working guides of headroom in the upper covered case** and costs another **24 volunteer-minutes**. Those minutes could be used for other preparation. We have not valued the displaced tasks or the consequences of a shortage, so this is not an all-purpose optimum for a real museum.
+
+### What extra reserve buys beyond the stated bound
+
+At demand of 110, the larger pool can absorb **20 unusable guides**, since **130 − 20 = 110**. The smaller pool cannot: **122 − 20 = 102**, a shortage of **8**. That is an additional condition covered by the larger pool. It does not show how likely that condition is or make the larger pool immune to every shared failure.
+
+A pool of 122 uses all its headroom in the covered upper case. Choosing further reserve could be reasonable if the bound is doubtful or the objective requires a working spare after serving the group. State that added requirement and its cost. [The Green Book’s appraisal guidance](https://www.gov.uk/government/publications/the-green-book--2/the-green-book-2026) asks decision makers to compare options and examine how uncertain assumptions affect their results.
+
+<MCQ
+  client:visible
+  question={"Why does the smallest feasible pool not automatically become the best real-world choice?"}
+  options={[
+    {
+      "text": "The result uses specified bounds and preparation effort, while omitted consequences may change the objective.",
+      "correct": true
+    },
+    {
+      "text": "The arithmetic proves all larger pools are wasteful regardless of how the real requirement changes."
+    },
+    {
+      "text": "The time budget supplies a failure probability even though no probability model has been given."
+    },
+    {
+      "text": "The reference forecast is guaranteed to be exceeded whenever the reserve has positive cost."
+    }
+  ]}
+  explanation={"The calculation answers a deliberately narrow question. Costs of shortages, accessibility, lasting failures, other tasks and uncertainty about the bounds can justify a different comparison."}
+/>
+
+## Check what could invalidate the bound
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"The attendance bound is simply the largest group seen last month. What does that record establish?"}
+  options={[
+    {
+      "text": "An observed maximum in that sample, which needs justification before becoming a future bound.",
+      "correct": true
+    },
+    {
+      "text": "A permanent limit on future attendance, provided the same average forecast is retained."
+    },
+    {
+      "text": "A guarantee that a reserve above that maximum absorbs every form of unavailable capacity."
+    },
+    {
+      "text": "A probability of future coverage determined solely by the number at the top of the sample."
+    }
+  ]}
+  explanation={"A sample maximum describes the sample. The source of the bound, changes in booking rules and omitted groups matter before treating it as a planning constraint."}
+/>
+
+The arithmetic can be correct while its boundary is unreliable. For example:
+
+- The demand range excludes walk-ins, a merged booking or visitors omitted from the count.
+- The loss allowance came from a limited check and does not cover the actual battery, content or access failures.
+- A shared configuration fault disables the whole prepared pool. In that stipulated case F equals N, usable capacity is zero and adding more identically affected devices does not restore service.
+- The spare is present but cannot be issued by the opening, contrary to the readiness assumption.
+
+These are reasons to investigate the model’s scope. A bound should have a recorded basis: what it covers, which period and operating conditions it describes, and what evidence or enforceable constraint supports it. A label such as “conservative” supplies none of those details by itself.
+
+A useful review plan checks attendance commitments, working-unit tests, shared dependencies and readiness before relying on the reserve. If group demand exceeds the covered limit, losses exceed their allowance or readiness changes, recalculate or revise the service promise. [NASA’s technical-risk guidance](https://www.nasa.gov/reference/6-4-technical-risk-management/) includes monitoring measures and triggers for reconsidering mitigation as conditions change.
+
+The conclusion is **conditional coverage**, not a measured zero probability of failure. No failure probability has been supplied in this workshop. Nor have we claimed that the proposed reserve is suitable for a real event without verifying the inputs.
+
+<Categorize
+  client:visible
+  question={"Separate arithmetic consequences from assumptions needing evidence."}
+  buckets={[
+    "Follows from the stated model",
+    "Needs evidence about the event"
+  ]}
+  items={[
+    {
+      "text": "Increasing demand while holding usable capacity fixed reduces headroom.",
+      "bucket": "Follows from the stated model"
+    },
+    {
+      "text": "The chosen attendance limit includes everyone who can join the group.",
+      "bucket": "Needs evidence about the event"
+    },
+    {
+      "text": "All prepared guides can be issued before the required start.",
+      "bucket": "Needs evidence about the event"
+    },
+    {
+      "text": "A shared fault disabling the whole pool leaves no working guides.",
+      "bucket": "Follows from the stated model"
+    }
+  ]}
+  explanation={"The model establishes relationships under its assumptions. Attendance coverage, actual loss limits and readiness need evidence; they do not become facts when the arithmetic balances."}
+/>
+
+### Transfer to a sketching session
+
+A community sketching session needs **up to 24 working kits at its start**. Each kit is used for the whole session. In every covered case, **up to 3 of the kits present at the start are unusable**. Late kits are a separate category, disjoint from those unusable present kits. Preparation costs **2 volunteer-minutes per kit in the total prepared pool**, including kits arriving late. All other resources are adequate.
+
+| Plan | Total prepared | Arrive only after the start | Present at the start | Usable after the covered loss | Preparation effort |
+|---|---|---|---|---|---|
+| A | 32 | 6 | 26 | To calculate | 64 volunteer-minutes |
+| B | 34 | 4 | 30 | To calculate | 68 volunteer-minutes |
+| C | 30 | 0 | 30 | To calculate | 60 volunteer-minutes |
+
+<MCQ
+  client:visible
+  question={"Which plan meets the opening requirement with the least preparation effort among these alternatives?"}
+  options={[
+    {
+      "text": "Plan C",
+      "correct": true
+    },
+    {
+      "text": "Plan A"
+    },
+    {
+      "text": "Plan B"
+    },
+    {
+      "text": "None of the plans"
+    }
+  ]}
+  explanation={"Remove late kits first, then unusable kits from the present pool, and compare feasible plans by the stated preparation cost. The worked check below supplies the counts."}
+/>
+
+Plan A has **32 − 6 − 3 = 23 usable kits**, so it fails the upper demand by one. B has **34 − 4 − 3 = 27**; C has **30 − 0 − 3 = 27**. Both B and C leave **3** working kits after serving 24 people. C uses **60 minutes**, versus B’s **68**, so C answers the stated least-effort objective. A’s larger total inventory does not compensate for arriving late.
+
+This conclusion still depends on the declared upper loss, lateness and work assumptions. If “unavailable” already included late kits, subtracting them again would be wrong. The categories have to match the definition before the formula travels to a new case.
+
+## Rebuild the reserve decision
+
+<MindMap
+  client:visible
+  title={"A reserve claim with conditions you can check"}
+  root={{
+    "label": "Size a usable reserve",
+    "children": [
+      {
+        "label": "Define the promise",
+        "children": [
+          {
+            "label": "What resource, for whom and by when"
+          },
+          {
+            "label": "Usable capacity differs from ownership"
+          }
+        ]
+      },
+      {
+        "label": "Combine covered stresses",
+        "children": [
+          {
+            "label": "Demand and unavailable units may coincide"
+          },
+          {
+            "label": "Do not allocate the same spare twice"
+          }
+        ]
+      },
+      {
+        "label": "Compare feasible options",
+        "children": [
+          {
+            "label": "Meet the common requirement first"
+          },
+          {
+            "label": "Account for preparation and displaced work"
+          }
+        ]
+      },
+      {
+        "label": "Keep the bounds honest",
+        "children": [
+          {
+            "label": "A sample maximum is not an automatic future limit"
+          },
+          {
+            "label": "Shared failures and readiness can exceed the model"
+          },
+          {
+            "label": "Review conditions and recalculate when they change"
+          }
+        ]
+      }
+    ]
+  }}
+/>
+
+<Quiz
+  client:visible
+  title={"Check the claim the reserve supports"}
+  questions={[
+    {
+      "question": "A pool passes separate attendance and loss tests. What is the decisive missing check?",
+      "options": [
+        {
+          "text": "The combined case if both stresses are allowed to occur together.",
+          "correct": true
+        },
+        {
+          "text": "The same isolated attendance test with a different reserve label."
+        },
+        {
+          "text": "The average of the two isolated headroom values as a substitute."
+        },
+        {
+          "text": "The larger isolated headroom value used for every possible case."
+        }
+      ],
+      "explanation": "Separate passes do not establish simultaneous coverage. Count the demand and losses that compete for the reserve in the same event."
+    },
+    {
+      "question": "A covered upper case leaves zero headroom. What does that mean here?",
+      "options": [
+        {
+          "text": "The working count exactly serves the specified group, with no spare left for an additional loss.",
+          "correct": true
+        },
+        {
+          "text": "The group necessarily experiences a shortage even though usable capacity equals its demand."
+        },
+        {
+          "text": "The remaining reserve gives a measured probability of complete future protection."
+        },
+        {
+          "text": "The same pool covers any larger group provided its reference forecast remains unchanged."
+        }
+      ],
+      "explanation": "Equality meets this resource-count requirement. It leaves no additional slack beyond the stated upper case and says nothing about whether the real bounds hold."
+    },
+    {
+      "question": "Select the claims supported by the workshop’s comparison.",
+      "allowMultiple": true,
+      "options": [
+        {
+          "text": "A larger pool can cover some losses beyond the original allowance at additional preparation cost.",
+          "correct": true
+        },
+        {
+          "text": "The least-effort feasible pool depends on the specified requirement and covered conditions.",
+          "correct": true
+        },
+        {
+          "text": "A bound written without probabilities establishes that the event cannot fail in practice."
+        },
+        {
+          "text": "A spare arriving after the deadline fulfils the earlier promise once it eventually arrives."
+        }
+      ],
+      "explanation": "Extra reserve has both an extension of coverage and a cost. Conditional coverage, physical readiness and observed failure probabilities remain distinct."
+    },
+    {
+      "question": "Why can the sketching plan with fewer total kits match another plan’s usable reserve?",
+      "options": [
+        {
+          "text": "A larger share of its prepared kits is present by the required start.",
+          "correct": true
+        },
+        {
+          "text": "A smaller total pool changes the covered loss allowance automatically."
+        },
+        {
+          "text": "Preparation minutes can be handed out instead of missing physical kits."
+        },
+        {
+          "text": "Late arrivals count twice when the total pool exceeds the demand bound."
+        }
+      ],
+      "explanation": "Usable capacity is evaluated at the deadline. Equal present pools and equal losses yield equal working counts even when ownership totals differ."
+    },
+    {
+      "question": "A shared fault disables every identically configured guide. Which response best fits the model’s limits?",
+      "options": [
+        {
+          "text": "Revisit the shared dependency and coverage claim; extra identically affected units are insufficient.",
+          "correct": true
+        },
+        {
+          "text": "Keep the original unavailable-unit bound because it was labelled conservative before the fault."
+        },
+        {
+          "text": "Infer independent failures from the fact that the inventory contains several physical devices."
+        },
+        {
+          "text": "Use the reference attendance as proof that working capacity remains available after the fault."
+        }
+      ],
+      "explanation": "A common cause can exceed the loss count the model covered. Additional units subject to that same stipulated fault do not restore usable capacity; the assumptions and the response must be reconsidered."
+    }
+  ]}
+/>
+
+### Sources and scope
+
+The linked NASA and HM Treasury guidance supports defining criteria, comparing alternatives, stating uncertainty and reviewing assumptions. The event datasets and deterministic calculations are invented for teaching. They are not measurements of museum demand, certified device reliability, a structural safety-factor standard or a probability-of-failure estimate.
+
+Continue to the [final exam](/margin-of-safety/final-exam), which now includes combined stresses, readiness and conditional reserve claims.

@@ -1,0 +1,716 @@
+---
+title: "Dimensiona la reserva para demanda y fallos simultáneos"
+description: "Prueba una reserva de audioguías ante demanda y pérdidas simultáneas, comprueba su disponibilidad y compara el esfuerzo de ampliar la cobertura."
+topic: "es/margin-of-safety"
+order: 7
+minutes: 27
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, FirstPrinciplesBuilder, ConsequenceTree, MindMap } from '@/components/react';
+
+Un museo espera a un grupo y prepara audioguías de repuesto. La organizadora comprueba dos cosas: hay suficientes para un grupo mayor y hay suficientes si algunos aparatos no funcionan. Las dos pruebas salen bien. Aun así, pueden faltar audioguías al inicio si ambas exigencias coinciden.
+
+Este taller convierte «deja un colchón» en una decisión que puedes reproducir. Definirás el compromiso, probarás un conjunto acotado de demandas simultáneas, compararás el esfuerzo de distintas reservas e identificarás qué invalidaría la conclusión. El museo y todas las cantidades siguientes son hipotéticos.
+
+## Define qué debe conseguir la reserva
+
+<MCQ
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, prueba a responder"}
+  pretest={true}
+  question={"¿Qué afirmación permite comprobar una reserva de audioguías?"}
+  options={[
+    {
+      "text": "Cada visitante del grupo cubierto recibe una audioguía operativa a la hora de inicio declarada.",
+      "correct": true
+    },
+    {
+      "text": "El museo posee más audioguías que la cifra habitual de su previsión semanal."
+    },
+    {
+      "text": "La reserva se describe como generosa frente a otra actividad celebrada en otro lugar."
+    },
+    {
+      "text": "Hay unidades adicionales sin especificar su estado ni cuándo estarán disponibles."
+    }
+  ]}
+  explanation={"Un requisito útil declara la demanda que atender, el estado del recurso y cuándo debe estar disponible. La propiedad y un recuento adicional llamativo no resuelven esas preguntas."}
+/>
+
+El compromiso de esta actividad construida es: **cada visitante del grupo puede recibir una audioguía operativa a las 10:00**, cuando empieza la visita. Cada uno necesita un aparato propio durante toda la visita; no se reutilizan dentro del grupo. El caso supone que el personal de entrega y el calendario de preparación pueden atender el conjunto indicado. Contamos recursos en una fecha límite, en lugar de estimar una cola o una resistencia estructural de rotura.
+
+Usa **90 visitantes** como previsión de referencia. El rango de demanda cubierto va de **80 a 110 visitantes**. Para cualquiera de las alternativas siguientes, **hasta 12 aparatos preparados pueden ser inutilizables al inicio**. Es un límite absoluto de unidades, no un porcentaje de fallos que crezca con el conjunto. El grupo mayor y los aparatos no utilizables pueden coincidir.
+
+Por ahora, todas las audioguías preparadas están físicamente en el punto de entrega antes de empezar. No se pueden contar llegadas adicionales, cambios de batería ni transportes posteriores a la hora límite. Más adelante relajaremos el supuesto de disponibilidad.
+
+| Símbolo | Significado | Unidad |
+|---|---|---|
+| N | Aparatos preparados y presentes al inicio | Audioguías |
+| F | Aparatos preparados no utilizables al inicio | Audioguías |
+| D | Visitantes que necesitan audioguía al inicio | Visitantes, con una audioguía por persona |
+| N − F | Capacidad útil para este grupo | Audioguías |
+| N − F − D | Holgura restante tras atender al grupo | Audioguías |
+
+La **holgura (headroom)** es lo que queda después de atender la demanda. Un valor negativo es una falta. Un valor cero significa que el recuento atiende exactamente al grupo declarado, sin ningún repuesto restante. Es una afirmación de disponibilidad para este caso, no una regla general de ingeniería sobre cargas últimas de fallo.
+
+La [guía de análisis de decisiones de la NASA](https://www.nasa.gov/reference/6-8-decision-analysis/) empieza por el resultado buscado y los criterios de evaluación, y pide documentar supuestos y límites. Aquí esas elecciones determinan qué recuento necesitamos antes de elegir un porcentaje.
+
+<MatchConcepts
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"Todas las parejas son correctas"}
+  partialResultWord={"correctas"}
+  pickDefinitionHint={"Elige ahora una definición"}
+  notLinkedHint={"Sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+  question={"Relaciona cada cantidad del plan con su función."}
+  pairs={[
+    {
+      "term": "Asistencia de referencia",
+      "definition": "La previsión usada para describir cuánto se ha preparado de más."
+    },
+    {
+      "term": "Límite de demanda cubierto",
+      "definition": "El grupo más grande incluido en esta prueba condicionada."
+    },
+    {
+      "term": "Conjunto útil a la hora límite",
+      "definition": "Aparatos preparados y presentes tras retirar las unidades no utilizables."
+    },
+    {
+      "term": "Holgura restante",
+      "definition": "La diferencia entre audioguías útiles y las necesidades del grupo."
+    }
+  ]}
+  explanation={"Una previsión, un límite superior probado, la capacidad útil y la holgura restante son cantidades distintas. Mantén fijas sus definiciones durante la comparación."}
+/>
+
+## Combina ambas exigencias en un mismo caso
+
+<MCQ
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, prueba a responder"}
+  pretest={true}
+  question={"Una reserva supera por separado una prueba de asistencia alta y otra de aparatos no utilizables. ¿Qué falta todavía?"}
+  options={[
+    {
+      "text": "Una prueba en la que coincidan la asistencia alta y las pérdidas cubiertas.",
+      "correct": true
+    },
+    {
+      "text": "Repetir cada prueba aislada con los mismos supuestos y sin un caso combinado."
+    },
+    {
+      "text": "Una etiqueta de porcentaje mayor para el mismo conjunto, sin cambiar su cantidad útil."
+    },
+    {
+      "text": "Afirmar que los resultados aislados cubren cualquier combinación de condiciones."
+    }
+  ]}
+  explanation={"La misma audioguía de repuesto no puede gastarse una vez en más visitantes y otra en un aparato no utilizable dentro de la misma actividad. Prueba las combinaciones que el escenario permite."}
+/>
+
+Empieza con **N = 120** audioguías preparadas. Son **30 más que la previsión de referencia**. Observa las comprobaciones aisladas y su combinación:
+
+| Caso cubierto | Demanda D | No utilizables F | Útiles N − F | Holgura restante |
+|---|---|---|---|---|
+| Asistencia de referencia, sin pérdidas | 90 | 0 | 120 | 120 − 90 = +30 |
+| Solo asistencia mayor | 110 | 0 | 120 | 120 − 110 = +10 |
+| Solo pérdidas de aparatos | 90 | 12 | 108 | 108 − 90 = +18 |
+| Ambas exigencias superiores a la vez | 110 | 12 | 108 | 108 − 110 = −2 |
+
+El conjunto supera cada exigencia aislada, pero le faltan **2 audioguías operativas** en el caso combinado. El recuento de repuestos no estaba equivocado; la afirmación deducida de las pruebas aisladas era demasiado amplia.
+
+Para cubrir cada pareja permitida de demanda y pérdidas, exige:
+
+**N − F ≥ D**, o de forma equivalente **N ≥ D + F**.
+
+Dentro de los rangos declarados, más demanda y más unidades no utilizables solo pueden reducir la holgura. La pareja más exigente es, por tanto, **D = 110 y F = 12**. Necesita **110 + 12 = 122 audioguías preparadas**. Frente a la referencia de 90, son **20 para los visitantes adicionales y 12 para las unidades no utilizables: 32 audioguías de más**.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"es"}
+  title={"Reconstruye el número de audioguías que hay que preparar"}
+  eyebrow={"Mantén las exigencias en un mismo caso"}
+  analogyValue={122}
+  analogyLabel={"Cantidad preparada necesaria en el caso superior cubierto"}
+  analogyNote={"La referencia sigue los límites declarados de demanda y unidades no utilizables simultáneas."}
+  rebuiltLabel={"Necesidades incluidas en tu recuento"}
+  instructions={"Añade la asistencia de referencia, su posible aumento y el límite de unidades no utilizables. Comprueba qué contribución desaparece si pruebas una sola exigencia."}
+  valuePrefix={""}
+  valueSuffix={" audioguías"}
+  revealAllLabel={"Incluir todas las contribuciones"}
+  resetLabel={"Empezar de nuevo"}
+  parts={[
+    {
+      "label": "Asistencia de referencia",
+      "value": 90,
+      "note": "Cada visitante necesita una audioguía propia y operativa al inicio."
+    },
+    {
+      "label": "Asistencia por encima de la referencia",
+      "value": 20,
+      "note": "El límite superior de demanda supera el caso de referencia."
+    },
+    {
+      "label": "Audioguías no utilizables al inicio",
+      "value": 12,
+      "note": "El conjunto preparado también debe cubrir esta pérdida de unidades útiles."
+    }
+  ]}
+  verdictTemplate={"La necesidad suma {total}. Incluye ambas exigencias a la vez; la conclusión solo vale con los límites y supuestos de disponibilidad declarados."}
+  caption={"Las barras suman unidades. No estiman probabilidades ni valoran cuánto importa evitar una falta."}
+/>
+
+Esto cubre un **conjunto acotado de escenarios (bounded scenario set)**: todas las combinaciones permitidas por los rangos y supuestos de disponibilidad. No exige independencia estadística entre las exigencias porque no estamos multiplicando probabilidades. Tampoco asigna una probabilidad a que el inicio real quede dentro de esos rangos. Los límites son supuestos cuya credibilidad sigue importando.
+
+### Cuándo usar este cálculo
+
+Úsalo cuando una misma reserva deba absorber varias necesidades simultáneas. Comprueba antes que las categorías sean distintas: si una cifra de unidades no disponibles ya incluye los aparatos que llegan tarde, sumar otra vez los retrasados contaría dos veces la pérdida. Aquí el límite de pérdidas se refiere a aparatos no utilizables entre los que ya están presentes.
+
+<MCQ
+  pretestLabel={"Antes de leer, prueba a responder"}
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Qué afirmaciones se deducen de esta prueba acotada? Selecciona todas las correctas."}
+  allowMultiple={true}
+  options={[
+    {
+      "text": "Superar pruebas aisladas puede coexistir con fallar su combinación permitida.",
+      "correct": true
+    },
+    {
+      "text": "Cubrir todas las parejas permitidas no establece la probabilidad de que se cumplan los límites.",
+      "correct": true
+    },
+    {
+      "text": "Cualquier correlación impide comprobar un conjunto finito de necesidades de recursos."
+    },
+    {
+      "text": "La mayor necesidad aislada siempre puede sustituir a la necesidad conjunta."
+    }
+  ]}
+  explanation={"La cobertura conjunta se refiere a las combinaciones permitidas. Las probabilidades necesitan otro modelo o evidencia, y una misma reserva no se puede asignar dos veces a usos simultáneos."}
+/>
+
+## Cuenta solo la reserva lista a tiempo
+
+<MCQ
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, prueba a responder"}
+  pretest={true}
+  question={"Hay audioguías adicionales en otro almacén y llegan después de empezar la visita. ¿Qué establecen sobre el compromiso inicial?"}
+  options={[
+    {
+      "text": "Pueden ayudar al servicio posterior, pero no cubren una falta a la hora de inicio.",
+      "correct": true
+    },
+    {
+      "text": "Cumplen el compromiso inicial en cuanto se confirma que pertenecen al museo."
+    },
+    {
+      "text": "Borran la falta anterior cuando la entrega termina por llegar al museo."
+    },
+    {
+      "text": "Cuentan como capacidad lista si el inventario total supera la previsión."
+    }
+  ]}
+  explanation={"Una reserva tiene un tiempo de activación además de una cantidad. Evalúala cuando debe cumplirse el requisito; recuperarse después y dar servicio sin interrupción son objetivos distintos."}
+/>
+
+Mantén **120 audioguías preparadas en el museo** y el caso conjunto de **110 visitantes y 12 aparatos no utilizables**. La cantidad útil a las 10:00 sigue siendo **108** y faltan **2**. Supón que se pueden traer otras **8**, pero solo llegan a las **10:20**. Pueden elevar la disponibilidad posterior a **116** si funcionan, pero no estaban a la hora prometida.
+
+Un repuesto puede ser útil sin cumplir esta fecha límite concreta. Si el museo acepta retrasar el inicio u ofrecer otra forma de guía, ha cambiado el requisito de servicio y debe evaluar expresamente esa alternativa. No conviene tratar más inventario y otro compromiso como si fueran el mismo plan.
+
+<ConsequenceTree
+  client:visible
+  title={"La reserva debe llegar al lugar y al momento necesarios"}
+  eyebrow={"Compara disponibilidad, no propiedad"}
+  instructions={"Revela cómo influye la ubicación de la reserva en el compromiso de inicio. Son alternativas."}
+  decisionLabel={"Ubicación de la reserva"}
+  orderLabels={[
+    "Ubicación",
+    "Disponibilidad",
+    "Efecto al inicio"
+  ]}
+  promptLabel={"Sigue la disponibilidad"}
+  expandAllLabel={"Mostrar ambas alternativas"}
+  collapseLabel={"Contraer alternativas"}
+  valenceLabels={{
+    "good": "Ayuda al compromiso de inicio",
+    "bad": "Deja la falta al inicio",
+    "mixed": "Depende de la condición",
+    "neutral": "Vínculo temporal"
+  }}
+  decision={{
+    "label": "Elige dónde esperan las audioguías de reserva",
+    "children": [
+      {
+        "label": "Los repuestos revisados ya están en el punto de entrega",
+        "valence": "good",
+        "children": [
+          {
+            "label": "El personal puede entregarlos antes de empezar",
+            "valence": "good",
+            "children": [
+              {
+                "label": "Pueden contar para cubrir la necesidad inicial",
+                "valence": "good"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Los repuestos esperan en un almacén y requieren transporte",
+        "valence": "mixed",
+        "children": [
+          {
+            "label": "El transporte termina después de la hora de inicio",
+            "valence": "bad",
+            "children": [
+              {
+                "label": "Pueden ayudar después, pero no cubrir la falta inicial",
+                "valence": "bad"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }}
+  caption={"La cantidad, el estado, el lugar y el tiempo de activación son supuestos distintos. El árbol compara dos rutas; no simula el transporte ni certifica un plan real."}
+/>
+
+En un plan real, estar listo puede depender de la carga, las llaves, los permisos de acceso, el personal, el transporte y la compatibilidad del contenido. Esas dependencias pueden tener sus propios límites. No se convierten en capacidad útil solo porque el inventario enumere los aparatos.
+
+<FillBlank
+  client:visible
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Correcto"}
+  partialResultWord={"correctas"}
+  question={"Completa la distinción de disponibilidad."}
+  text={"Para un compromiso con hora límite, cuenta {{capacidad útil a tiempo|propiedad total del inventario|recuperación posterior completa}}. Un repuesto tardío puede apoyar {{otro objetivo posterior|el compromiso inicial previo|el recuento inicial intacto}}."}
+  explanation={"Define cuándo se vuelve utilizable la capacidad. Un recurso que llega después puede ayudar a recuperarse y dejar incumplido el requisito original de inicio."}
+/>
+
+## Compara el coste de la reserva cubierta
+
+<MCQ
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, prueba a responder"}
+  pretest={true}
+  question={"Varios conjuntos cubren los límites simultáneos declarados. ¿Qué comparación responde al objetivo acotado del plan?"}
+  options={[
+    {
+      "text": "El esfuerzo de preparación entre conjuntos que cumplen el mismo requisito inicial.",
+      "correct": true
+    },
+    {
+      "text": "El conjunto más grande posible, sin considerar qué otro trabajo desplaza prepararlo."
+    },
+    {
+      "text": "El conjunto más pequeño, aunque falle el caso combinado de asistencia y pérdidas."
+    },
+    {
+      "text": "El porcentaje más llamativo, aunque su denominador cambie entre alternativas."
+    }
+  ]}
+  explanation={"Define primero la viabilidad y compara después la medida de coste elegida. Una reserva mayor puede tener otras ventajas, pero esas ventajas y costes se deben declarar en lugar de darlos por supuestos."}
+/>
+
+Supón que preparar cada audioguía consume **3 minutos de voluntariado**, incluido el trabajo dedicado a una unidad que después se detecta como no utilizable. Hay **400 minutos de voluntariado** asignados. Toda la preparación indicada puede terminar antes del inicio con los supuestos del caso sobre personal y calendario. Cada audioguía también necesita almacenaje; aquí ese recurso es suficiente y no se valora por separado.
+
+El objetivo acotado es **cubrir cada caso de inicio permitido con el menor tiempo de preparación**. Compara:
+
+| Cantidad preparada N | Útiles con 12 no utilizables | Holgura para 110 visitantes | Esfuerzo de preparación | ¿Cubre todas las combinaciones declaradas? |
+|---|---|---|---|---|
+| 110 audioguías | 98 | −12 | 110 × 3 = 330 minutos de voluntariado | No |
+| 120 audioguías | 108 | −2 | 120 × 3 = 360 minutos de voluntariado | No |
+| 122 audioguías | 110 | 0 | 122 × 3 = 366 minutos de voluntariado | Sí |
+| 130 audioguías | 118 | +8 | 130 × 3 = 390 minutos de voluntariado | Sí |
+
+Con estos supuestos, **122** es el conjunto viable más pequeño y el que menos tiempo de preparación utiliza. Las 90 unidades de referencia consumirían **270 minutos**. Cubrir los límites conjuntos añade por tanto **32 audioguías y 96 minutos de voluntariado**, porque **32 × 3 = 96**.
+
+Pasar de 122 a 130 compra **8 audioguías operativas adicionales de holgura en el caso superior cubierto** y cuesta otros **24 minutos de voluntariado**. Esos minutos podrían dedicarse a otra preparación. No hemos valorado las tareas desplazadas ni las consecuencias de una falta, así que no es un óptimo general para un museo real.
+
+### Qué compra la reserva adicional fuera del límite declarado
+
+Con una demanda de 110, el conjunto mayor puede absorber **20 audioguías no utilizables**, ya que **130 − 20 = 110**. El menor no: **122 − 20 = 102**, una falta de **8**. Es una condición adicional que cubre el conjunto mayor. No indica su probabilidad ni vuelve inmune al conjunto frente a cualquier fallo compartido.
+
+El conjunto de 122 consume toda su holgura en el caso superior cubierto. Elegir más reserva puede ser razonable si el límite es dudoso o si el objetivo exige conservar un repuesto operativo tras atender al grupo. Declara ese requisito añadido y su coste. La [guía de evaluación del Green Book](https://www.gov.uk/government/publications/the-green-book--2/the-green-book-2026) pide comparar alternativas y examinar cómo afectan los supuestos inciertos a sus resultados.
+
+<MCQ
+  pretestLabel={"Antes de leer, prueba a responder"}
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Por qué el conjunto viable más pequeño no se convierte automáticamente en la mejor elección real?"}
+  options={[
+    {
+      "text": "El resultado usa límites y esfuerzo especificados, mientras que otras consecuencias pueden cambiar el objetivo.",
+      "correct": true
+    },
+    {
+      "text": "La aritmética demuestra que todos los conjuntos mayores sobran aunque cambie el requisito real."
+    },
+    {
+      "text": "La asignación de tiempo da una probabilidad de fallo aunque no se haya proporcionado un modelo probabilístico."
+    },
+    {
+      "text": "La previsión de referencia se supera siempre que la reserva tenga un coste positivo."
+    }
+  ]}
+  explanation={"El cálculo responde a una pregunta acotada deliberadamente. Los costes de las faltas, la accesibilidad, los fallos duraderos, otras tareas y las dudas sobre los límites pueden justificar otra comparación."}
+/>
+
+## Comprueba qué podría invalidar el límite
+
+<MCQ
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, prueba a responder"}
+  pretest={true}
+  question={"El límite de asistencia es simplemente el mayor grupo visto el mes pasado. ¿Qué establece ese registro?"}
+  options={[
+    {
+      "text": "Un máximo observado en esa muestra que necesita justificación para convertirse en un límite futuro.",
+      "correct": true
+    },
+    {
+      "text": "Un límite permanente de asistencia futura si se conserva la misma previsión media."
+    },
+    {
+      "text": "Una garantía de que superar ese máximo absorbe cualquier forma de capacidad no disponible."
+    },
+    {
+      "text": "Una probabilidad de cobertura futura determinada solo por el número mayor de la muestra."
+    }
+  ]}
+  explanation={"Un máximo muestral describe la muestra. Importan el origen del límite, los cambios en las normas de reserva de plazas y los grupos omitidos antes de tratarlo como una restricción del plan."}
+/>
+
+La aritmética puede ser correcta y su frontera poco fiable. Por ejemplo:
+
+- El rango de demanda excluye visitantes sin reserva, una reserva fusionada o personas omitidas del recuento.
+- El límite de pérdidas procede de una comprobación limitada y no cubre los fallos reales de batería, contenido o acceso.
+- Un fallo de configuración compartido inutiliza todo el conjunto preparado. En ese caso supuesto, F es igual a N, la capacidad útil es cero y añadir aparatos idénticos afectados no restaura el servicio.
+- El repuesto está presente, pero no se puede entregar al inicio, en contra del supuesto de disponibilidad.
+
+Son motivos para investigar el alcance del modelo. Un límite necesita una base registrada: qué cubre, qué periodo y condiciones describe y qué evidencia o restricción aplicable lo respalda. La etiqueta «conservador» no aporta por sí sola esos detalles.
+
+Un plan útil de revisión comprueba los compromisos de asistencia, las pruebas de funcionamiento, las dependencias compartidas y la disponibilidad antes de confiar en la reserva. Si el grupo supera el límite cubierto, las pérdidas exceden su límite o cambia la disponibilidad, recalcula o revisa el compromiso de servicio. La [guía de riesgo técnico de la NASA](https://www.nasa.gov/reference/6-4-technical-risk-management/) incluye medidas de seguimiento y criterios para reconsiderar la respuesta cuando cambian las condiciones.
+
+La conclusión es **cobertura condicionada**, no una probabilidad medida de fallo nula. En este taller no se ha dado ninguna probabilidad de fallo. Tampoco se afirma que la reserva propuesta sirva para una actividad real sin verificar las entradas.
+
+<Categorize
+  client:visible
+  instructions={"Asigna cada afirmación a su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"Todo está bien clasificado"}
+  partialResultWord={"correctas"}
+  question={"Separa consecuencias aritméticas y supuestos que necesitan evidencia."}
+  buckets={[
+    "Se deduce del modelo declarado",
+    "Necesita evidencia sobre la actividad"
+  ]}
+  items={[
+    {
+      "text": "Aumentar la demanda con capacidad útil fija reduce la holgura.",
+      "bucket": "Se deduce del modelo declarado"
+    },
+    {
+      "text": "El límite de asistencia elegido incluye a todas las personas que pueden incorporarse.",
+      "bucket": "Necesita evidencia sobre la actividad"
+    },
+    {
+      "text": "Todas las audioguías preparadas se pueden entregar antes de la hora necesaria.",
+      "bucket": "Necesita evidencia sobre la actividad"
+    },
+    {
+      "text": "Un fallo compartido que inutiliza todo el conjunto no deja audioguías operativas.",
+      "bucket": "Se deduce del modelo declarado"
+    }
+  ]}
+  explanation={"El modelo establece relaciones bajo sus supuestos. La cobertura de asistencia, los límites reales de pérdidas y la disponibilidad necesitan evidencia; no se convierten en hechos al cuadrar la aritmética."}
+/>
+
+### Transfiere el método a una sesión de dibujo
+
+Una sesión comunitaria de dibujo necesita **hasta 24 juegos de materiales operativos al inicio**. Cada juego se usa durante toda la sesión. En cada caso cubierto, **hasta 3 de los juegos presentes al inicio son inutilizables**. Los juegos tardíos forman otra categoría, sin coincidir con esos juegos presentes no utilizables. Preparar cada juego del conjunto total consume **2 minutos de voluntariado**, incluidos los que llegan tarde. Los demás recursos son suficientes.
+
+| Plan | Total preparado | Llegan después de empezar | Presentes al inicio | Utilizables tras la pérdida cubierta | Esfuerzo de preparación |
+|---|---|---|---|---|---|
+| A | 32 | 6 | 26 | Por calcular | 64 minutos de voluntariado |
+| B | 34 | 4 | 30 | Por calcular | 68 minutos de voluntariado |
+| C | 30 | 0 | 30 | Por calcular | 60 minutos de voluntariado |
+
+<MCQ
+  pretestLabel={"Antes de leer, prueba a responder"}
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Qué plan cumple el requisito de inicio con el menor esfuerzo de preparación entre estas alternativas?"}
+  options={[
+    {
+      "text": "El plan C",
+      "correct": true
+    },
+    {
+      "text": "El plan A"
+    },
+    {
+      "text": "El plan B"
+    },
+    {
+      "text": "Ningún plan"
+    }
+  ]}
+  explanation={"Retira primero los juegos tardíos y después los no utilizables del conjunto presente. Compara los planes viables por el coste de preparación declarado. La comprobación resuelta de abajo aporta los recuentos."}
+/>
+
+A tiene **32 − 6 − 3 = 23 juegos útiles**, así que falla la demanda superior por uno. B tiene **34 − 4 − 3 = 27**; C tiene **30 − 0 − 3 = 27**. B y C dejan **3** juegos operativos después de atender a 24 personas. C usa **60 minutos**, frente a los **68** de B, así que C responde al objetivo de menor esfuerzo. El mayor inventario total de A no compensa llegar tarde.
+
+Esta conclusión sigue dependiendo de los límites de pérdida, retraso y trabajo declarados. Si «no disponible» ya incluyera los juegos tardíos, restarlos de nuevo sería incorrecto. Las categorías deben coincidir con la definición antes de trasladar la fórmula a otro caso.
+
+## Reconstruye la decisión sobre la reserva
+
+<MindMap
+  client:visible
+  eyebrow={"Visión de conjunto"}
+  outlineLabel={"Esquema"}
+  title={"Una afirmación de reserva con condiciones comprobables"}
+  root={{
+    "label": "Dimensiona una reserva utilizable",
+    "children": [
+      {
+        "label": "Define el compromiso",
+        "children": [
+          {
+            "label": "Qué recurso, para quién y a qué hora"
+          },
+          {
+            "label": "La capacidad útil difiere de la propiedad"
+          }
+        ]
+      },
+      {
+        "label": "Combina las exigencias cubiertas",
+        "children": [
+          {
+            "label": "La demanda y las unidades no utilizables pueden coincidir"
+          },
+          {
+            "label": "No asignes el mismo repuesto dos veces"
+          }
+        ]
+      },
+      {
+        "label": "Compara alternativas viables",
+        "children": [
+          {
+            "label": "Cumple primero el requisito común"
+          },
+          {
+            "label": "Cuenta preparación y trabajo desplazado"
+          }
+        ]
+      },
+      {
+        "label": "Mantén honestos los límites",
+        "children": [
+          {
+            "label": "Un máximo muestral no es un límite futuro automático"
+          },
+          {
+            "label": "Los fallos compartidos y los tiempos pueden exceder el modelo"
+          },
+          {
+            "label": "Revisa las condiciones y recalcula si cambian"
+          }
+        ]
+      }
+    ]
+  }}
+/>
+
+<Quiz
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"correctas"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso completado"}
+  perfectMessage={"Has acertado todas. Revisa también el razonamiento."}
+  goodMessage={"Revisa las explicaciones de las preguntas falladas."}
+  keepPracticingMessage={"Vuelve a los casos y comprueba sus condiciones."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Atrás"}
+  scoreLabel={"Has acertado"}
+  restartLabel={"Reiniciar"}
+  title={"Comprueba qué afirmación sostiene la reserva"}
+  questions={[
+    {
+      "question": "Un conjunto supera pruebas aisladas de asistencia y pérdidas. ¿Qué comprobación decisiva falta?",
+      "options": [
+        {
+          "text": "El caso conjunto si se permite que ambas exigencias coincidan.",
+          "correct": true
+        },
+        {
+          "text": "La misma prueba de asistencia con otra etiqueta para la reserva."
+        },
+        {
+          "text": "La media de las dos holguras aisladas como sustituto del caso conjunto."
+        },
+        {
+          "text": "La mayor holgura aislada aplicada a cualquier caso posible."
+        }
+      ],
+      "explanation": "Superar pruebas aisladas no establece cobertura simultánea. Cuenta la demanda y las pérdidas que compiten por la reserva dentro de una misma actividad."
+    },
+    {
+      "question": "Un caso superior cubierto deja holgura cero. ¿Qué significa aquí?",
+      "options": [
+        {
+          "text": "La cantidad útil atiende exactamente al grupo especificado, sin repuesto para otra pérdida.",
+          "correct": true
+        },
+        {
+          "text": "El grupo sufre necesariamente una falta aunque la capacidad útil iguale su demanda."
+        },
+        {
+          "text": "La reserva restante da una probabilidad medida de protección futura completa."
+        },
+        {
+          "text": "El mismo conjunto cubre cualquier grupo mayor si su previsión de referencia no cambia."
+        }
+      ],
+      "explanation": "La igualdad cumple este requisito de recuento. No deja holgura adicional más allá del caso superior declarado ni demuestra que los límites reales se cumplan."
+    },
+    {
+      "question": "Selecciona las afirmaciones respaldadas por la comparación del taller.",
+      "allowMultiple": true,
+      "options": [
+        {
+          "text": "Un conjunto mayor puede cubrir pérdidas fuera del límite original con más preparación.",
+          "correct": true
+        },
+        {
+          "text": "El conjunto viable de menor esfuerzo depende del requisito y las condiciones cubiertas.",
+          "correct": true
+        },
+        {
+          "text": "Un límite escrito sin probabilidades demuestra que la actividad no puede fallar en la práctica."
+        },
+        {
+          "text": "Un repuesto posterior al plazo cumple el compromiso previo en cuanto termina por llegar."
+        }
+      ],
+      "explanation": "Más reserva tiene una ampliación de cobertura y un coste. La cobertura condicionada, la disponibilidad física y las probabilidades de fallo observadas siguen siendo distintas."
+    },
+    {
+      "question": "¿Por qué el plan de dibujo con menos juegos totales puede igualar la reserva útil de otro?",
+      "options": [
+        {
+          "text": "Una proporción mayor de sus juegos preparados está presente a la hora necesaria.",
+          "correct": true
+        },
+        {
+          "text": "Un conjunto total menor cambia automáticamente el límite cubierto de pérdidas."
+        },
+        {
+          "text": "Los minutos de preparación se pueden entregar en lugar de los juegos físicos que falten."
+        },
+        {
+          "text": "Las llegadas tardías cuentan dos veces si el conjunto supera el límite de demanda."
+        }
+      ],
+      "explanation": "La capacidad útil se evalúa a la hora límite. Conjuntos presentes iguales y pérdidas iguales dan el mismo recuento operativo aunque difieran los totales en propiedad."
+    },
+    {
+      "question": "Un fallo compartido inutiliza todas las audioguías de igual configuración. ¿Qué respuesta encaja mejor con los límites del modelo?",
+      "options": [
+        {
+          "text": "Revisar la dependencia compartida y la cobertura; más unidades afectadas no bastan.",
+          "correct": true
+        },
+        {
+          "text": "Mantener el límite de pérdidas original porque antes del fallo se llamó conservador."
+        },
+        {
+          "text": "Inferir independencia de los fallos porque el inventario contiene varios aparatos físicos."
+        },
+        {
+          "text": "Usar la asistencia de referencia como prueba de que queda capacidad útil tras el fallo."
+        }
+      ],
+      "explanation": "Una causa común puede superar las pérdidas que cubría el modelo. Añadir unidades sometidas al mismo fallo supuesto no restaura capacidad útil; hay que reconsiderar los supuestos y la respuesta."
+    }
+  ]}
+/>
+
+### Fuentes y alcance
+
+Las guías enlazadas de la NASA y el Tesoro británico respaldan definir criterios, comparar alternativas, declarar incertidumbre y revisar supuestos. Los datos y cálculos deterministas de las actividades son inventados para enseñar. No son medidas de demanda de museos, fiabilidad certificada de aparatos, una norma de factores estructurales ni una estimación de probabilidad de fallo.
+
+Continúa con el [examen final](/es/margin-of-safety/final-exam), que ahora incluye exigencias simultáneas, disponibilidad y afirmaciones condicionadas sobre reservas.
