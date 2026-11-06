@@ -99,7 +99,7 @@ export interface VoiLabProps {
 
   /**
    * Live readout template. Placeholders: `{evpi}`, `{evsi}`, `{net}`, `{prior}`
-   * (as a percent), `{decision}` (best prior action), `{cost}`.
+   * and `{decision}` (both name the best prior action), `{cost}`.
    */
   readoutTemplate?: string;
 
@@ -131,9 +131,9 @@ const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n
  * **prior alone**, the expected value **with the noisy test** (its information
  * gain tinted on top, its price deducted), and the **perfect-information
  * ceiling** a clairvoyant would reach. Read straight off it: EVSI ≤ EVPI always,
- * and the moment the prior grows lopsided enough — or the decision one-sided —
- * the test stops being able to flip the action and its value collapses to **zero**,
- * no matter how accurate or how cheap it is.
+ * and a test whose possible results leave the optimal action unchanged has zero
+ * gross information value at those settings. A different reliability or payoff
+ * table needs its own comparison.
  *
  * All maths is pure and deterministic (no `Math.random`), so the server render
  * matches the client. Controls are native range inputs; the verdict is announced
@@ -174,10 +174,10 @@ export function VoiLab({
   decisionTemplate = 'On the prior alone you would {prior}. After {pos} you would {posAction}; after {neg} you would {negAction}.',
   positiveResultLabel = 'a green light',
   negativeResultLabel = 'a red flag',
-  worthlessVerdict = 'This test cannot change your decision → its value is 0. Whatever it says, you would {prior} anyway, so a green light and a red flag lead to the same move. No accuracy and no discount can rescue a test that never flips the action.',
-  worthItVerdict = 'Worth buying: the test is worth {evsi} in averted mistakes and costs {cost}, so it nets you {net}. It can flip your decision, and the flip is worth more than the price.',
+  worthlessVerdict = 'At these settings, both possible results leave the decision unchanged: {prior}. Gross information value is 0. A different reliability or payoff table needs its own comparison; any test cost still counts.',
+  worthItVerdict = 'This test policy ties or beats no test: its information value is {evsi}, its cost is {cost}, and its incremental net is {net}. A zero net is a tie, rather than a strict improvement.',
   overpricedVerdict = 'Informative but overpriced: the test is worth only {evsi} yet costs {cost}, so buying it nets {net}. The answer could change your mind — but not by enough to pay for it. Act on your prior instead.',
-  readoutTemplate = 'Acting on your prior ({prior} good) you would {decision}. A crystal ball would be worth {evpi} (the ceiling); this noisy test is worth {evsi} and costs {cost}, for a net of {net}.',
+  readoutTemplate = 'Without a test you would {decision}. Perfect information would add {evpi}; this noisy test adds {evsi} before its cost of {cost}, for an incremental net of {net}.',
   className,
 }: VoiLabProps) {
   const reactId = useId();
@@ -187,39 +187,118 @@ export function VoiLab({
   const [gain, setGain] = useState(initialGain);
   const [loss, setLoss] = useState(initialLoss);
 
-  const money = (n: number) =>
-    `${n < 0 ? '−' : ''}${currencyPrefix}${Math.abs(n).toFixed(0)}`;
+  const money = (n: number) => {
+    const rounded = Math.abs(n).toFixed(0);
+    return `${n < 0 && rounded !== '0' ? '−' : ''}${currencyPrefix}${rounded}`;
+  };
 
   const m = useMemo(() => {
-    const p = clamp(prior, 0, 100) / 100;
-    const r = clamp(reliability, 50, 100) / 100;
+    const priorPercent = clamp(prior, 0, 100);
+    const reliabilityPercent = clamp(reliability, 50, 100);
+    const p = priorPercent / 100;
+    const q = (100 - priorPercent) / 100;
+    const r = reliabilityPercent / 100;
+    const error = (100 - reliabilityPercent) / 100;
     const g = gain;
     const l = loss;
 
+    // Integer controls give exact rational action values. Retain their
+    // numerators for close comparisons before converting back to numbers.
+    const exactWeights = [priorPercent, reliabilityPercent, g, l].every(Number.isInteger)
+      ? (() => {
+          const P = BigInt(priorPercent);
+          const Q = 100n - P;
+          const R = BigInt(reliabilityPercent);
+          const E = 100n - R;
+          const G = BigInt(g);
+          const L = BigInt(l);
+          return {
+            prior: P * G - Q * L,
+            positive: P * R * G - Q * E * L,
+            negative: P * E * G - Q * R * L,
+          };
+        })()
+      : undefined;
+
     // Best action on the prior alone. Acting pays g in the good state and −l in
     // the bad one; walking away pays 0. So the value of acting is p·g − (1−p)·l.
-    const evAct = p * g - (1 - p) * l;
+    const priorGain = p * g;
+    const priorLoss = q * l;
+    // Products of decimal probabilities can leave a residual at an exact action
+    // tie. Near that boundary, integer inputs distinguish exact ties from real
+    // representable differences; fractional inputs use a weighted error bound.
+    const weightedDifference = (
+      a: number,
+      b: number,
+      numerator: bigint | undefined,
+      denominator: number,
+    ) => {
+      const difference = a - b;
+      const tolerance = 8 * Number.EPSILON * (Math.abs(a) + Math.abs(b));
+      if (Math.abs(difference) > tolerance) return difference;
+      return numerator === undefined ? 0 : Number(numerator) / denominator;
+    };
+    const evAct = weightedDifference(priorGain, priorLoss, exactWeights?.prior, 100);
     const v0 = Math.max(evAct, 0); // walking away is always available at 0
     const priorActs = evAct > 0;
 
     // Perfect information: a clairvoyant acts only in the good state.
     const evPerfect = p * Math.max(g, 0);
-    const evpi = Math.max(evPerfect - v0, 0);
+    // This is the incremental value directly, without subtracting a potentially
+    // huge baseline from a nearly equal perfect-information policy value.
+    const evpi = Math.max(Math.min(priorGain, priorLoss), 0);
 
     // A noisy test. P(positive | good) = P(negative | bad) = r (symmetric).
-    const pPos = p * r + (1 - p) * (1 - r);
-    const pNeg = p * (1 - r) + (1 - p) * r;
-    const postPos = pPos > 0 ? (p * r) / pPos : p; // P(good | positive)
-    const postNeg = pNeg > 0 ? (p * (1 - r)) / pNeg : p; // P(good | negative)
+    const goodPos = p * r;
+    const badPos = q * error;
+    const goodNeg = p * error;
+    const badNeg = q * r;
+    const posGain = goodPos * g;
+    const posLoss = badPos * l;
+    const negGain = goodNeg * g;
+    const negLoss = badNeg * l;
 
-    const evActPos = postPos * g - (1 - postPos) * l;
-    const evActNeg = postNeg * g - (1 - postNeg) * l;
-    const actPos = evActPos > 0;
-    const actNeg = evActNeg > 0;
+    // Each difference is P(result) times that result's conditional act value.
+    // For a possible result its sign selects the same action, without dividing
+    // by P(result) and then subtracting a near-one posterior from one.
+    const weightedActPos = weightedDifference(posGain, posLoss, exactWeights?.positive, 10000);
+    const weightedActNeg = weightedDifference(negGain, negLoss, exactWeights?.negative, 10000);
+    const actPos = goodPos + badPos > 0 ? weightedActPos > 0 : priorActs;
+    const actNeg = goodNeg + badNeg > 0 ? weightedActNeg > 0 : priorActs;
 
-    const evTest = pPos * Math.max(evActPos, 0) + pNeg * Math.max(evActNeg, 0);
-    const evsi = Math.max(evTest - v0, 0);
-    const net = evsi - cost;
+    // Compare each result's best action with the action chosen without a test.
+    // Summing these nonnegative improvements preserves a small information value
+    // even when both complete policies have a much larger shared baseline.
+    const improvementPos = Math.max(priorActs ? -weightedActPos : weightedActPos, 0);
+    const improvementNeg = Math.max(priorActs ? -weightedActNeg : weightedActNeg, 0);
+    const evsi = improvementPos + improvementNeg;
+    const evTest = v0 + evsi;
+    const rawNet = evsi - cost;
+    // Normalize only roundoff at a positive information/price tie. The scale
+    // contains the improving branches, never an unchanged policy's large payoff
+    // or an unused loss. A zero information value keeps every real test cost.
+    // There is no one-unit floor: changing payoff units must scale this bound.
+    const roundingScale = Math.max(
+      Math.abs(evsi), Math.abs(cost),
+      improvementPos > 0 ? Math.abs(posGain) + Math.abs(posLoss) : 0,
+      improvementNeg > 0 ? Math.abs(negGain) + Math.abs(negLoss) : 0,
+    );
+    const tieTolerance = 16 * Number.EPSILON * roundingScale;
+    let net = rawNet;
+    if (evsi > 0 && cost > 0 && Math.abs(rawNet) <= tieTolerance) {
+      if (exactWeights && Number.isInteger(cost)) {
+        // Native controls use integers. Their joint weighted payoffs have the
+        // common denominator 10,000, so compare them exactly before calling a
+        // small residual a tie. Relative tolerances alone can swallow a real
+        // one-unit difference when the information value itself is very large.
+        const exactEvsi = (exactWeights.positive > 0n ? exactWeights.positive : 0n)
+          + (exactWeights.negative > 0n ? exactWeights.negative : 0n)
+          - (exactWeights.prior > 0n ? exactWeights.prior * 100n : 0n);
+        net = Number(exactEvsi - BigInt(cost) * 10000n) / 10000;
+      } else {
+        net = 0;
+      }
+    }
 
     // The test only has value if the two possible results lead to different
     // actions. If they don't, EVSI is 0 and no price makes it worth buying.
@@ -487,7 +566,7 @@ export function VoiLab({
           max={maxPayoff}
           step={5}
           onChange={setLoss}
-          display={`−${money(loss)}`}
+          display={money(-loss)}
         />
       </div>
 
