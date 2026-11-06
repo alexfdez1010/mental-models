@@ -1,288 +1,418 @@
 ---
-title: "Amdahl's Law: The Math of Speedup"
-description: "There's a hard ceiling on how much faster you can make a system by speeding up one part of it — and a single tidy formula tells you exactly where that wall is, before you waste a dollar trying to climb past it."
+title: "Amdahl's Law: Time Saved and Its Limits"
+description: "Calculate a fixed job's speedup, distinguish latency from pipeline capacity, and account for unchanged work, overhead and realistic alternatives."
 topic: "en/bottlenecks-and-constraints"
 order: 5
-minutes: 12
+minutes: 28
 updated: 2026-11-06
 ---
 
-import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, Callout, MindMap } from '@/components/react';
+import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, Callout, FirstPrinciplesBuilder, PipelineThroughput, MindMap } from '@/components/react';
 
-You've learned the rule three times now and from three angles: throughput is the *minimum*, Goldratt's five steps are the procedure for governing the slowest one, and polishing a non-bottleneck adds exactly zero to what the system delivers. All true, all qualitative. This lesson hands you the *number*. When someone says "let's make the database twice as fast," you'll be able to answer, on the back of a napkin, "great — that buys us a 1.43x speedup overall, and not one drop more." The formula that does this is **Amdahl's law**, and once it's in your head you'll never again be fooled by an impressive-sounding optimization aimed at the wrong place.
+A faster finishing step can deliver your first job sooner without increasing how many jobs a busy production line can finish each hour. Both statements can be true. The trick is to keep the stopwatch and the output counter separate.
+
+**Amdahl's law** calculates the speedup of a fixed job when one portion becomes faster and the remaining time stays unchanged. It connects to the course's concern with whole-system performance, but it is a time calculation, not the minimum-capacity rule for a production line. All timings below are constructed teaching data.
+
+## Choose the quantity before the formula
 
 <MCQ
   client:visible
   pretest
-  question="A task spends 90% of its time in step A and 10% in step B. You make step B infinitely fast — instant, zero time, magic. How much faster does the whole task run now?"
+  question="A change shortens one job from eight minutes to seven, but the busy line still completes a job every six minutes after filling. What improved?"
   options={[
-    { text: 'About 1.11x faster — the 90% you never touched still has to run, and it now dominates everything', correct: true },
-    { text: '10x faster — you eliminated a whole step' },
-    { text: 'Infinitely faster — step B now takes zero time' },
-    { text: '1.9x faster — roughly double' },
+    { text: 'The isolated job time improved; the steady completion rate did not.', correct: true },
+    { text: 'Both quantities improved by the same eight-to-seven time ratio.' },
+    { text: 'Neither improved, because the completion interval stayed unchanged.' }
   ]}
-  explanation="No wrong guesses on a pretest — but the answer stings: only about 1.11x. The task took 100 units of time (90 in A, 10 in B). Erase B entirely and you're left with 90 units. 100/90 ≈ 1.11. You deleted a step completely and the whole thing got barely 11% faster, because the part you couldn't touch was 90% of the work. That ceiling — set by what you *don't* fix — is the entire lesson."
+  explanation="An individual job can finish sooner while successive jobs remain six minutes apart. We need separate measurements for elapsed time and completed jobs per unit of time."
 />
 
-## The setup: every system is part-improvable, part-fixed
+**Latency** is elapsed time from a declared start to finish for one job. **Throughput** is completed output per unit of time over a declared observation window. **Capacity** is a sustainable rate limit under stated resource and operating assumptions; observed throughput can be below it.
 
-In 1967 a computer architect named **Gene Amdahl** stood up at a conference to argue against the hype around massively parallel computers. His point was arithmetic, not opinion: a program is never *entirely* parallelizable. Some fraction of it is stubbornly sequential — it has to run start-to-finish on one processor no matter how many you throw at the problem. And that fixed fraction, he showed, puts a hard cap on how much all your extra processors can ever buy you. The argument was about parallel computing, but the math is universal — it applies to anything you can split into "the part I can speed up" and "the part I can't."
-
-So set it up generally. Take any task and split its total time into two buckets:
-
-- The fraction $p$ of the work you **can** speed up — the parallelizable stage, the slow query, the manual step you can automate. ($p$ is between 0 and 1; if 80% of the time is improvable, $p = 0.8$.)
-- The fraction $(1 - p)$ you **can't** — the fixed overhead, the irreducibly sequential bit, the part of the task that's stuck at its current speed.
-
-Now suppose you speed up the improvable part by a factor $s$. Make it twice as fast, $s = 2$; ten times as fast, $s = 10$; infinitely fast, $s \to \infty$. The question Amdahl answers is the only one that matters: *how much faster does the whole task get?* Not the part you tuned — the **whole thing**, end to end, which is what anyone actually cares about.
-
-<Callout variant="tip" title="The one-sentence version">
-Split a task into the part you can speed up ($p$) and the part you can't ($1-p$). However hard you push on $p$, the fixed part $(1-p)$ stays exactly where it was — and it sets a wall you can never cross.
-</Callout>
-
-## The formula
-
-Here it is, the whole of Amdahl's law in one line:
-
-$$\text{Speedup} = \frac{1}{(1-p) + \dfrac{p}{s}}$$
-
-"Speedup" means old time divided by new time — a speedup of 2 means the task now runs in half the time. Read the denominator as "the new total time, measured as a fraction of the old total time," and it falls apart into two honest pieces:
-
-- $(1-p)$ — the fixed part, which takes the **same** time as before. You didn't touch it, so it contributes its full original share to the new total.
-- $\dfrac{p}{s}$ — the improvable part, which used to take $p$ of the time and now, sped up by a factor $s$, takes only $p/s$. Speed it up 4x and it shrinks to a quarter of its old share.
-
-Add those two and you have the new total time as a fraction of the old; flip it over (the $1$ on top) and you have the speedup. That's it. No calculus, no hidden assumptions — just "the part you fixed got smaller, the part you didn't stayed the same, add them up and invert."
-
-Sanity-check it against the pretest. There, $p = 0.1$ (only step B, the 10%, was improvable) and we made it infinite, so $p/s \to 0$:
-
-$$\text{Speedup} = \frac{1}{(1-0.1) + 0} = \frac{1}{0.9} \approx 1.11$$
-
-Exactly the 1.11x that felt so disappointing. The formula isn't lying to you — it's the same disappointment, made precise.
-
-<MCQ
-  client:visible
-  question="A report takes 200 seconds to generate: 50 seconds of fixed setup and 150 seconds of number-crunching you can speed up. You make the crunching 3x faster. Using Amdahl's law, what's the overall speedup?"
-  options={[
-    { text: 'About 2x — new time is 50 + 150/3 = 100 s, and 200/100 = 2x', correct: true },
-    { text: '3x — the crunching is 3x faster, so the report is 3x faster' },
-    { text: '1.33x — you saved a third of the time' },
-    { text: '2.5x — the average of 2x and 3x' },
-  ]}
-  explanation="Here p = 150/200 = 0.75 and s = 3. New time = fixed + sped-up = 50 + 150/3 = 50 + 50 = 100 seconds. Speedup = 200/100 = 2x. Or straight from the formula: 1 / (0.25 + 0.75/3) = 1 / (0.25 + 0.25) = 1/0.5 = 2. The crunching got 3x faster, but the whole report only got 2x faster, because that fixed 50 seconds refuses to shrink."
-/>
-
-## The hard ceiling
-
-Now push $s$ all the way to infinity — speed up the improvable part *perfectly*, make it instantaneous, the best you could ever possibly do. The $p/s$ term vanishes, and the formula collapses to something beautiful and brutal:
-
-$$\lim_{s \to \infty} \text{Speedup} = \frac{1}{1 - p}$$
-
-That's the **ceiling**. The single most important fact in the whole lesson. No matter how much money, talent, or magic you pour into the improvable part, the overall speedup can *never* exceed $\frac{1}{1-p}$, because the part you didn't fix still has to run. If 25% of the work is un-improvable, then $1-p = 0.25$ and your ceiling is $1/0.25 = 4$x — you could make the other 75% literally instantaneous and the whole task would still only run 4x faster. The fixed part has become the new bottleneck, in exactly the sense lessons 1 through 3 trained you to see. Amdahl's law is the bottleneck idea written as continuous arithmetic: relieve everything except one stubborn part, and that part *becomes* the constraint and caps you.
-
-Here's the ceiling at a few fractions worth memorizing:
-
-| Un-improvable fraction $(1-p)$ | Improvable fraction $p$ | Max possible speedup $\frac{1}{1-p}$ |
+| Quantity | Example unit | Question |
 |---|---|---|
-| 10% | 90% | **10x** |
-| 25% | 75% | **4x** |
-| 50% | 50% | **2x** |
-| 90% | 10% | **1.11x** |
+| One job's latency | Minutes per job | How long until this job finishes? |
+| Observed throughput | Finished jobs per hour | How much output actually finished in this window? |
+| Line capacity | Jobs per hour | What rate could the stated resources sustain? |
+| Speedup factor | A ratio, with no time unit | How does an old duration compare with the new duration? |
 
-Read the bottom row and feel it: when 90% of the work is stuck, the absolute best you can ever do — perfect, infinite speedup of the other 10% — is a measly 1.11x. That's the pretest, sitting right there in the table. And notice the table answers a question before you've spent a cent: it tells you the *most* an optimization could ever be worth, which is often reason enough to not bother.
+A job's speedup factor is **old elapsed time ÷ new elapsed time**. Reducing eight minutes to seven gives **8 ÷ 7 ≈ 1.14×**. It does not, by itself, establish a new production-line rate. We will work through that exact distinction below.
 
-<Callout variant="warning" title="The ceiling is set by what you DON'T fix">
-Your maximum speedup is $1/(1-p)$ — a number that depends *entirely* on the fraction you're leaving alone, and not at all on how clever your optimization is. You can't out-engineer this wall. The only way to raise the ceiling is to make more of the work improvable (shrink $1-p$) — which is to say, go attack a bigger part of the problem.
-</Callout>
+### When to make this choice
 
-## A full worked example
-
-Make it concrete with a data pipeline. Total runtime: **100 minutes**. Of that, **80 minutes** is a parallelizable transform stage (this is your $p$ — 80% of the work, so $p = 0.8$) and **20 minutes** is fixed overhead: reading the source, writing the result, the sequential glue you can't parallelize ($1 - p = 0.2$). Your boss wants it faster and asks how much speeding up the transform stage will help. Let's compute it for a range of efforts and watch what happens.
-
-For each $s$, the new time is $20 + \frac{80}{s}$ minutes, and the speedup is $100$ divided by that:
-
-| Speedup factor $s$ of the transform | New transform time | New total time | Overall speedup |
-|---|---|---|---|
-| 1 (do nothing) | 80 min | 100 min | 1.00x |
-| 2 | 40 min | 60 min | **1.67x** |
-| 4 | 20 min | 40 min | **2.5x** |
-| 8 | 10 min | 30 min | **3.33x** |
-| $\infty$ (instant) | 0 min | 20 min | **5x** |
-
-Walk down that last column. Doubling the transform's speed ($s=2$) gets you 1.67x. Going to 4x gets you 2.5x. Going to 8x — eight times faster, a serious engineering effort — gets you only 3.33x. And making it *infinitely* fast, the theoretical maximum, caps out at 5x ($= 1/0.2$, straight from the ceiling formula). That 20 minutes of fixed overhead is the wall: even with the transform gone entirely, the pipeline can't run in less than 20 minutes, so it can't beat a 5x speedup. Ever.
-
-<MCQ
-  client:visible
-  question="In that same 100-minute pipeline (80 min improvable, 20 min fixed), your team spends a month getting the transform stage 8x faster, then proposes another month to push it from 8x to 16x. Roughly how much *additional* overall speedup does that second month buy?"
-  options={[
-    { text: 'Almost nothing — about 3.33x → 3.85x, a gain of ~0.5x for a whole month of work', correct: true },
-    { text: 'Another 2x on top — speedup roughly doubles again' },
-    { text: 'About 1.6x more — proportional to the effort' },
-    { text: 'It would finally break the 5x ceiling' },
-  ]}
-  explanation="At s = 16: new time = 20 + 80/16 = 20 + 5 = 25 min, speedup = 100/25 = 4x... let's be precise: that's 4x, up from 3.33x at s=8 — a gain of about 0.67x. (At s=8 the time was 30 min → 3.33x.) Either way, a full month doubling the transform's speed nudges the overall result from ~3.33x toward the 5x ceiling by less than a point. The closer you get to the wall, the more each doubling costs and the less it buys. You're paying month-by-month for crumbs."
-/>
-
-## Diminishing returns, and where to actually spend
-
-Stare at that worked example and a pattern jumps out: **each doubling of $s$ buys less than the one before.** The first doubling (1x → 2x) bought 0.67x of overall speedup. The next (2x → 4x) bought 0.83x. By the time you're going 8x → 16x you're scraping up fractions of a fraction. This is the law of diminishing returns, and Amdahl tells you exactly *why* it bites: as you speed the improvable part up, it shrinks toward zero, so the fixed part takes over as the dominant cost — and you can't touch the fixed part, by definition. You're asymptotically slamming into the ceiling.
-
-So where *should* you spend? The formula answers cleanly: to get the biggest overall speedup, target the **biggest $p$** — the part that eats the most total time. A part with a large $p$ has a generous ceiling ($1/(1-p)$ is high) and rewards every bit of speedup you give it. A part with a small $p$ has a ceiling barely above 1x; even infinite cleverness there is wasted. And "find the part that dominates the total time, and push there" is *precisely* throughput = min and Goldratt's first focusing step — **identify the constraint** — dressed up in algebra. Amdahl's law doesn't contradict the earlier lessons; it *quantifies* them. The bottleneck is the stage with the biggest share of the time, the one optimization with real headroom, and the math tells you so.
+Before judging any improvement, declare the output, quality, workload and time window. A shorter response time, more completed work and less waiting inventory are different objectives. A useful improvement for one need not change the others by the same proportion.
 
 <MatchConcepts
   client:visible
-  question="Match each piece of Amdahl's law to what it means."
+  question="Match the measurement to the question it answers"
   pairs={[
-    { term: 'p', definition: 'The fraction of total time spent in the part you can speed up' },
-    { term: '1 − p', definition: "The fraction you can't speed up — the fixed, irreducible part" },
-    { term: 's', definition: 'The factor by which you speed up the improvable part (2x, 8x, infinite...)' },
-    { term: '1 / (1 − p)', definition: 'The hard ceiling: the best overall speedup you can ever reach' },
-    { term: 'Diminishing returns', definition: 'Each extra doubling of s buys less, as the fixed part comes to dominate' },
+    { term: 'Seven minutes from one job\'s start to finish', definition: 'Latency of that job under the declared conditions.' },
+    { term: 'Nine jobs completed in the first hour', definition: 'Observed throughput in a particular finite window.' },
+    { term: 'A sustainable limit of ten jobs per hour', definition: 'Capacity under stated resource and operating assumptions.' },
+    { term: 'Eight minutes divided by seven minutes', definition: 'A dimensionless speedup factor for the job time.' }
   ]}
-  explanation="The whole law lives in these five ideas: p and 1−p split the work, s is how hard you push the improvable slice, 1/(1−p) is the wall set by the slice you can't touch, and diminishing returns is what you feel as you approach that wall. Memorize the ceiling formula and you can estimate any speedup in your head."
+  explanation="Time, counted output, sustainable capacity and a ratio of times have different roles. A capacity ceiling is not automatically the observed output of an empty line's first hour."
 />
 
-<Categorize
+## Rebuild the fixed job's elapsed time
+
+Gene Amdahl's 1967 paper discusses limits imposed by sequential work and practical complications in parallel computing. We will derive the usual fixed-work formula, using a local speed factor rather than assuming a processor count automatically provides that factor. [Amdahl's original paper](https://www.cs.cmu.edu/~18742/papers/Amdahl1967.pdf)
+
+A report job takes **100 minutes**: 20 minutes of preparation and finalisation, plus 80 minutes of transformation. The phases do not overlap. The proposal changes only the transformation, making it twice as fast.
+
+| Time contribution | Original | After the proposal |
+|---|---|---|
+| Unchanged preparation and finalisation | 20 minutes | 20 minutes |
+| Transformation | 80 minutes | 80 ÷ 2 = 40 minutes |
+| Whole job | 100 minutes | 20 + 40 = 60 minutes |
+
+The overall speedup is **100 ÷ 60 ≈ 1.67×**. Elapsed time falls by **40%**, from 100 to 60 minutes. A 1.67× speedup and a 40% time reduction describe the same change using different ratios.
+
+Define the symbols from the **original timing**:
+
+- $T_0$ is the original elapsed time, in minutes here.
+- $p$ is the selected portion's fraction of that original time: $80/100 = 0.8$.
+- $1-p$ is the unchanged fraction: $20/100 = 0.2$.
+- $s$ is the selected portion's local speedup factor: $s=2$ halves its duration.
+- $T_1$ is the new elapsed time; $S(s)$ is the whole job's speedup factor.
+
+The new time adds the unchanged duration and the revised duration:
+
+$$
+T_1=T_0\left((1-p)+\frac{p}{s}\right)
+$$
+
+Dividing original time by new time gives Amdahl's familiar form:
+
+$$
+S(s)=\frac{T_0}{T_1}=\frac{1}{(1-p)+p/s}
+$$
+
+Here, **20 + 80 ÷ 2 = 60 minutes**, or equivalently **100 × (0.2 + 0.8 ÷ 2) = 60 minutes**. The two calculations are the same decomposition.
+
+<FirstPrinciplesBuilder
   client:visible
-  question="A web request takes 1000 ms: 950 ms in a slow database query and 50 ms in everything else. Sort each proposed optimization by whether it's worth doing."
-  buckets={['Worth it (big p)', 'Barely helps (small p)']}
-  items={[
-    { text: 'Cache the database query so it returns in 50 ms instead of 950 ms', bucket: 'Worth it (big p)' },
-    { text: 'Hand-optimize the 50 ms of glue code down to 25 ms', bucket: 'Barely helps (small p)' },
-    { text: 'Add an index that cuts the 950 ms query roughly in half', bucket: 'Worth it (big p)' },
-    { text: 'Rewrite the JSON serializer (part of the 50 ms) to shave 10 ms', bucket: 'Barely helps (small p)' },
-    { text: 'Move the database query to a faster machine (it dominates the time)', bucket: 'Worth it (big p)' },
-    { text: 'Micro-optimize the request logger (a few ms of the 50)', bucket: 'Barely helps (small p)' },
+  title="Rebuild the twice-as-fast transformation case"
+  eyebrow="Add elapsed-time contributions"
+  analogyValue={100}
+  analogyLabel="Original whole-job time"
+  parts={[
+    { label: 'Unchanged preparation and finalisation', value: 20, note: 'This proposal leaves that duration alone.' },
+    { label: 'Revised transformation time', value: 40, note: 'Divide the original transformation duration by its local speed factor.' }
   ]}
-  explanation="The database query is 95% of the time (p = 0.95, ceiling = 20x) — every optimization aimed at it has enormous headroom and is worth it. Everything else combined is 5% (ceiling = 1.05x); the absolute best you could do by perfecting all of it is a 1.05x speedup, so polishing the glue, the serializer, or the logger is wasted motion no matter how clever. Same lesson as 'don't polish the wrong stone,' now with the math to prove the stone is wrong."
+  rebuiltLabel="Selected new-time contributions"
+  valuePrefix=""
+  valueSuffix=" min"
+  instructions="Add both contributions, then divide the original duration by their complete total."
+  verdictTemplate="The rebuilt job takes {total}. Dividing the original 100 minutes by that duration gives about 1.67× overall speedup."
+  caption="The bars show durations. A shorter completed total is the improvement; the parts-to-reference ratio is not itself the speedup."
 />
 
-## When to use it
+### Assumptions that make the sum valid
 
-### When to use it
+Use the same job, input and required output quality. The selected and unchanged contributions must form a non-overlapping decomposition of elapsed time. The unchanged duration must actually remain unchanged, and new coordination or transfer time must be absent or counted separately.
 
-Reach for Amdahl's law the moment someone proposes an optimization and you want to know — *before* building it — whether it's worth the effort. You need two numbers: $p$ (what fraction of the total time does this part take?) and a guess at $s$ (how much faster can I realistically make it?). Plug them in. If the answer is "1.1x for three weeks of work," you've just saved three weeks. It's a five-second filter that catches the most expensive mistake in engineering: pouring effort into a part too small to matter. Profile first to find the big $p$, then aim there — Amdahl turns "where should we optimize?" from a debate into an arithmetic problem.
+Use $0\leq p\leq1$ and $s>0$; an improvement has $s\geq1$. If $s=1$, nothing changes. If the original job ran on several cores, do not sum their overlapping CPU times and call that elapsed time. Adding processors gives $s$ equal to their count only under an ideal scaling assumption for the selected work.
 
-<Callout variant="warning" title="The pitfall: optimizing a small slice of the time">
-You can't get back more than a part is worth. If something is only 10% of the total time, perfecting it — *infinite* speedup — buys you at most 1.11x, and any realistic speedup buys far less. The most seductive version of this trap is optimizing the part you *understand best* or find most *fun*, rather than the part that's actually big. Measure the slice before you sharpen the knife: a brilliant fix to a 5% slice is still a rounding error.
-</Callout>
+“Unchanged” means **left unchanged by this proposal**, not impossible to improve by any future proposal.
 
 <FillBlank
   client:visible
-  question="State the ceiling rule from memory."
-  text="No matter how much you speed up one part of a system, your overall speedup can never exceed {{1 / (1 − p)|p / s}}, a wall set entirely by the fraction of the work you {{cannot|can}} improve. To raise that ceiling, you must {{make more of the work improvable|push the same part harder}}."
-  explanation="The ceiling is 1/(1−p) — determined by the part you DON'T fix, not by how hard you push the part you do. Speeding up a fixed-size improvable slice runs into diminishing returns against that wall; the only way to move the wall is to enlarge p, i.e. attack a bigger share of the total time."
+  question="Apply the decomposition to another duration"
+  text="A job takes 240 seconds: 60 unchanged and 180 in a portion made three times faster. Its new time is {{120 seconds|80 seconds|180 seconds}}, giving {{2×|3×|4×}} whole-job speedup."
+  explanation="The new time is 60 + 180 ÷ 3 = 120 seconds. Divide 240 by 120 to get 2×. The selected portion's 3× factor does not apply to the unchanged 60 seconds."
+/>
+
+## Read the ceiling and specify what diminishes
+
+<MCQ
+  client:visible
+  pretest
+  question="In the report job, a local factor of eight gives a 30-minute job. Raising that factor to sixteen gives what time and speedup relative to the current version?"
+  options={[
+    { text: '25 minutes, with an additional whole-job factor of 30 ÷ 25 = 1.2×.', correct: true },
+    { text: '25 minutes, with an additional whole-job factor of sixteen ÷ eight = 2×.' },
+    { text: 'About 26 minutes, with baseline whole-job speedup of about 3.85×.' }
+  ]}
+  explanation="The unchanged 20 minutes remain. The selected time becomes 80 ÷ 16 = 5 minutes, so the total is 25. Compare the current 30 minutes with 25 to get the additional 1.2× factor."
+/>
+
+For the report, the same baseline gives **new time = 20 + 80 ÷ s minutes**:
+
+| Local speed factor | Selected time | Whole-job time | Speedup relative to the original 100 minutes |
+|---|---|---|---|
+| 1 | 80 minutes | 100 minutes | 1× |
+| 2 | 40 minutes | 60 minutes | 1.67× |
+| 4 | 20 minutes | 40 minutes | 2.5× |
+| 8 | 10 minutes | 30 minutes | 3.33× |
+| 16 | 5 minutes | 25 minutes | 4× |
+| Infinite-speed limit | 0 minutes | 20 minutes | 5× |
+
+The eight-to-sixteen change saves **5 minutes**, a **5 ÷ 30 ≈ 16.7%** reduction from the current duration. It changes baseline speedup from about **3.33× to 4×**, while its additional factor relative to the current version is **30 ÷ 25 = 1.2×**. Keep the reference version explicit.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Compare the factor-sixteen job with the current version"
+  eyebrow="Keep the reference version visible"
+  analogyValue={30}
+  analogyLabel="Current duration with local factor eight"
+  parts={[
+    { label: 'Unchanged work', value: 20 },
+    { label: 'Transformation at local factor sixteen', value: 5 }
+  ]}
+  rebuiltLabel="Selected revised-time contributions"
+  valuePrefix=""
+  valueSuffix=" min"
+  instructions="Add both contributions and compare the new duration with the current thirty-minute version."
+  verdictTemplate="The revised job takes {total}. Against the current 30 minutes, the additional speed factor is 1.2×; against the original 100 minutes, it is 4×."
+  caption="The reference bar is the current version. The two speed factors use different whole-job baseline durations."
+/>
+
+Successive local doublings save **40, 20, 10 and 5 minutes**. Those time savings halve. The increments in the baseline speedup number do **not** have to shrink on every doubling: 1× to 1.67× adds about 0.67, while 1.67× to 2.5× adds about 0.83. Say which quantity exhibits diminishing gains.
+
+If the unchanged fraction is positive, making the selected portion arbitrarily fast leaves that unchanged duration:
+
+$$
+\lim_{s\to\infty}S(s)=\frac{1}{1-p}\qquad(0\leq p<1)
+$$
+
+For $p=0.8$, the limiting speedup is **1 ÷ 0.2 = 5×**. With a finite speed factor and a positive selected portion, the job still takes more than 20 minutes. Infinite local speed is an ideal limit, not an implementation plan.
+
+<Callout variant="warning" title="The ceiling belongs to the stated model">
+If $p=0$, the proposal selects none of the time and $S(s)=1$. If $p=1$, there is no unchanged time and the ideal formula gives $S(s)=s$, with no finite ceiling from this term. Changing the work or the supposedly unchanged duration requires revisiting the model. The fraction is measured from the original job, not repeatedly redefined from each new duration.
+</Callout>
+
+### When the limit is useful
+
+Use it to reject a target that the proposed scope cannot meet. If the report's selected portion is the only one being changed, a ten-minute whole-job target is incompatible with the unchanged twenty minutes. The limit does not decide whether saving five minutes is valuable; a deadline or operating cost may make those minutes matter.
+
+<FillBlank
+  client:visible
+  question="Keep the reference and units straight"
+  text="The report's 8-to-16 local improvement saves {{5 minutes|10 minutes|16 minutes}}. Relative to the previous 30-minute version, its additional speed factor is {{1.2×|4×|2×}}; relative to the original 100-minute version, the final factor is {{4×|1.2×|16×}}."
+  explanation="The new duration is 25 minutes. Subtract 30 − 25 for time saved, divide 30 by 25 for the additional factor, and divide 100 by 25 for the baseline factor."
+/>
+
+## Contrast one job with a line of overlapping jobs
+
+A different process gives an exact contrast. Every job needs **stage A for six minutes, then stage B for two minutes**. Each stage has its own dedicated resource. One job cannot overlap its own A and B work, but A can work on the next job while B handles the previous one.
+
+Assume constant service times, one visit to each stage, enough waiting jobs and buffers, instant transfers, no failures or rework, and unchanged quality. The line starts empty at minute zero.
+
+For the first job, **latency = 6 + 2 = 8 minutes**. For a stream, stage capacities are **60 ÷ 6 = 10 jobs/hour** and **60 ÷ 2 = 30 jobs/hour**. The sustainable line capacity is **min(10, 30) = 10 jobs/hour**.
+
+Now make B twice as fast, reducing it from two minutes to one. The first job finishes in **6 + 1 = 7 minutes**, a speedup of **8 ÷ 7 ≈ 1.14×**. B's capacity rises to **60 jobs/hour**, but the line capacity remains **min(10, 60) = 10 jobs/hour**.
+
+For this one job, the selected fraction is $p=2/8=0.25$ and $s=2$. Amdahl gives the same **1 ÷ (0.75 + 0.25 ÷ 2) = 8 ÷ 7** time ratio.
+
+| Job | A runs | B runs before the change | Original completion | B runs after the change | Revised completion |
+|---|---|---|---|---|---|
+| First | 0–6 minutes | 6–8 minutes | Minute 8 | 6–7 minutes | Minute 7 |
+| Second | 6–12 minutes | 12–14 minutes | Minute 14 | 12–13 minutes | Minute 13 |
+| Third | 12–18 minutes | 18–20 minutes | Minute 20 | 18–19 minutes | Minute 19 |
+
+The completion interval stays **six minutes**. Reducing B shifts the finishing times earlier without shortening that steady interval. The completions are at minutes 8, 14, …, 56 before the change and 7, 13, …, 55 after it. The first hour of an empty line completes only nine jobs in either case; a ten-jobs/hour sustainable capacity is not a promise of ten completions in every finite window.
+
+<PipelineThroughput
+  client:visible
+  title="Change B's capacity without confusing it with latency"
+  eyebrow="Two dedicated resources"
+  instructions="Move B from 30 to 60 jobs/hour to represent the two-to-one-minute change. The capacity ceiling stays at A's rate."
+  stageLabels={['A', 'B']}
+  initialCapacities={[10, 30]}
+  unitLabel="jobs/hour"
+  min={5}
+  max={60}
+  bottleneckLabel="Limiting stage"
+  throughputLabel="Sustainable capacity ceiling"
+  capacityLabel="Capacity above the line ceiling"
+  pileupLabel="Position before the limiting stage"
+  starvedLabel="Position after the limiting stage"
+  readout="For these separate stage capacities, the line ceiling is {rate} {unit}, limited by {stage}. This is a rate calculation, not a one-job duration."
+  caption="Position markers do not measure actual queues. The schedule above supplies first-job and finite-window timings; the chart compares capacities under the dedicated-resource assumptions."
+/>
+
+### What changes with one shared resource
+
+If **one worker** must perform both A and B and repeats whole jobs without overlap, the relevant busy time is eight minutes per job. The corresponding long-run capacity is **60 ÷ 8 = 7.5 jobs/hour**. Reducing B to one minute changes that to **60 ÷ 7 ≈ 8.57 jobs/hour**. The two dedicated capacities are not simultaneously available in this arrangement.
+
+Amdahl's time sum can therefore also describe a rate increase when jobs are repeated serially without overlap. It still does not replace the dedicated-line minimum. Name the resource arrangement before translating time into jobs/hour.
+
+<Categorize
+  client:visible
+  question="Choose the quantity that each calculation describes"
+  buckets={['Isolated-job latency', 'Dedicated-line capacity', 'Shared-resource long-run rate']}
+  items={[
+    { text: '6 + 1 = 7 minutes for one job after B is improved.', bucket: 'Isolated-job latency' },
+    { text: 'min(10, 60) = 10 jobs/hour after B is improved.', bucket: 'Dedicated-line capacity' },
+    { text: '60 ÷ (6 + 2) = 7.5 jobs/hour when one worker does all work.', bucket: 'Shared-resource long-run rate' },
+    { text: '6 + 2 = 8 minutes from the first job\'s start to its completion.', bucket: 'Isolated-job latency' }
+  ]}
+  explanation="The time sum describes a job's duration. Its reciprocal describes a long-run rate only with the matching no-overlap resource arrangement. Separate dedicated stages can overlap different jobs, giving a different rate model."
+/>
+
+## Count overhead and compare realistic alternatives
+
+The fixed-work formula is an ideal prediction only when its contributions remain valid. Let $H(s)$ be additional, non-overlapping coordination time, in minutes, introduced by a particular implementation beyond the original measured work:
+
+$$
+T_1=T_0\left((1-p)+\frac{p}{s}\right)+H(s)
+$$
+
+For the report at a local factor of eight, suppose a proposed implementation adds **six minutes of coordination**. The new whole-job time is **20 + 80 ÷ 8 + 6 = 36 minutes**, giving **100 ÷ 36 ≈ 2.78×**, rather than the overhead-free 3.33×.
+
+| Implementation | Local factor | Unchanged time | Revised transformation | Additional coordination | Whole job |
+|---|---|---|---|---|---|
+| First proposal | 8 | 20 minutes | 10 minutes | 6 minutes | 36 minutes |
+| More parallel proposal | 16 | 20 minutes | 5 minutes | 12 minutes | 37 minutes |
+
+Under these supplied overhead estimates, the second proposal makes the selected work faster but the whole job **one minute slower** than the first. The table is a calculation to validate, not evidence that real implementations always incur those overheads.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Include coordination in the new job time"
+  eyebrow="Use one time unit"
+  analogyValue={30}
+  analogyLabel="Ideal duration with local factor eight"
+  parts={[
+    { label: 'Unchanged work', value: 20 },
+    { label: 'Revised transformation', value: 10 },
+    { label: 'Additional coordination', value: 6 }
+  ]}
+  rebuiltLabel="Selected total-time contributions"
+  valuePrefix=""
+  valueSuffix=" min"
+  instructions="Add the work and the additional coordination before calculating overall speedup."
+  verdictTemplate="Including all contributions gives {total}. Relative to the original 100 minutes, this gives about 2.78× overall speedup under the implementation estimate."
+  caption="The reference is the ideal revised duration, not the original job. Nonnegative extra overhead cannot improve the ideal time prediction."
+/>
+
+If overhead is nonnegative and the twenty unchanged minutes really remain, the ideal 5× limit remains an upper bound. An implementation may stay well below it. Re-measure if parallelism changes the rest of the time, memory behaviour or the output requirements.
+
+A larger workload is another question. Gustafson's original analysis distinguishes a fixed-size job from work that grows with the available computing resources. Keeping the old fraction while increasing the work can invalidate this particular prediction. [Gustafson, Reevaluating Amdahl's law](https://users.cs.utah.edu/~hari/teaching/paralg/Gustafson88.pdf)
+
+### A small share is not automatically worthless
+
+At the **same local factor and overhead**, accelerating a larger time share saves more time. Real proposals need not have the same factor, effort or consequences.
+
+Suppose the report must finish in **at most 90 minutes**, and two mutually exclusive proposals have equal implementation cost and preserve quality:
+
+| Proposal | Change from the original job | New whole-job time |
+|---|---|---|
+| Change the original 80-minute portion | Reduce it to 76 minutes; leave the other 20 alone | 76 + 20 = 96 minutes |
+| Change the original 20-minute portion | Reduce it to 10 minutes; leave the other 80 alone | 10 + 80 = 90 minutes |
+
+Only the second meets that deadline. “Unchanged” was relative to a proposal: the former twenty-minute remainder can become the selected portion in a different proposal. Amdahl supplies the time comparison, while the objective, achievable changes and costs determine what is worth doing.
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Which claims are justified by these implementation comparisons?"
+  options={[
+    { text: 'Additional coordination belongs in the end-to-end time estimate.', correct: true },
+    { text: 'A smaller selected share can meet a deadline when a different proposal cannot.', correct: true },
+    { text: 'Doubling selected-work speed guarantees another whole-job improvement.' },
+    { text: 'The ideal time ceiling proves every small-share optimisation is wasteful.' }
+  ]}
+  explanation="The overhead table supplies a case where extra local speed worsens the total. The deadline table supplies a case where changing a smaller share is useful. Neither the selected fraction nor a local factor alone determines value."
+/>
+
+## Test the model on a different job
+
+A document export takes **180 seconds**: 60 seconds stay unchanged, while a 120-second conversion is made four times faster. The implementation also adds **ten seconds** of transfer time beyond the original work. The input, output quality and sequence remain the same. The target is to finish in at most **95 seconds**.
+
+Calculate the complete new time and speedup before opening the worked answer.
+
+<FillBlank
+  client:visible
+  question="Evaluate the complete proposal"
+  text="Including the transfer, the export takes {{100 seconds|90 seconds|45 seconds}}. Its speedup relative to the original is {{1.8×|2×|4×}}, so it {{misses|meets|finishes exactly at}} the stated time target."
+  explanation="The conversion becomes 120 ÷ 4 = 30 seconds. Add 60 unchanged, 30 conversion and ten transfer seconds to get 100. The speedup is 180 ÷ 100 = 1.8×, and 100 exceeds the 95-second target."
+/>
+
+<details>
+<summary>Compare the worked calculation and its scope</summary>
+
+The selected fraction of the original export is **120 ÷ 180 = two thirds**. Without added transfer time, the new duration would be **60 + 30 = 90 seconds**, giving **180 ÷ 90 = 2×** and meeting the target. With the supplied transfer time it is **100 seconds**, giving **1.8×** and missing the target by **five seconds**.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Rebuild the complete export time"
+  eyebrow="Account for the transfer"
+  analogyValue={180}
+  analogyLabel="Original export duration"
+  parts={[
+    { label: 'Unchanged work', value: 60 },
+    { label: 'Revised conversion', value: 30 },
+    { label: 'Added transfer', value: 10 }
+  ]}
+  rebuiltLabel="Selected revised-time contributions"
+  valuePrefix=""
+  valueSuffix=" s"
+  instructions="Add all three contributions and compare the result with the stated deadline."
+  verdictTemplate="The complete export takes {total}. It exceeds the 95-second target, despite improving on the original duration."
+  caption="This predicts one fixed export's elapsed time under the supplied assumptions. It does not specify a concurrent export service's capacity."
+/>
+
+A real trial should time the whole job, verify unchanged output quality and test whether the supposedly fixed time and transfer estimate hold under representative conditions. Queueing or concurrent jobs can require a different model from this isolated timing.
+</details>
+
+## Keep the models and references separate
+
+<MindMap
+  client:visible
+  title="Amdahl's law within its scope"
+  eyebrow="Connect the quantities"
+  outlineLabel="Text outline"
+  root={{ label: 'Choose the performance question', children: [
+    { label: 'One fixed job', children: [{ label: 'Elapsed time contributions add' }, { label: 'Original time divided by new time' }, { label: 'Selected fraction uses the original baseline' }] },
+    { label: 'Conditional limit', children: [{ label: 'Positive unchanged time bounds the gain' }, { label: 'All selected time has no finite ideal ceiling' }, { label: 'Minutes saved halve on successive local doublings' }] },
+    { label: 'A stream of jobs', children: [{ label: 'Dedicated stages can overlap different jobs' }, { label: 'Minimum compatible capacity limits the rate' }, { label: 'Shared resources and startup windows need separate accounting' }] },
+    { label: 'A useful proposal', children: [{ label: 'Count added overhead' }, { label: 'Preserve workload and output quality' }, { label: 'Compare the achievable change with the objective' }] }
+  ] }}
 />
 
 <Quiz
   client:visible
-  title="Check yourself: the math of speedup"
+  title="Check the time calculation and its limits"
   questions={[
-    {
-      question: "Amdahl's law says overall Speedup = 1 / ((1−p) + p/s). What does the term p/s represent?",
-      options: [
-        { text: 'The new, shrunken time of the improvable part — it used to take p of the time and now takes p/s', correct: true },
-        { text: 'The total speedup of the whole system', correct: false },
-        { text: 'The fraction of work you cannot improve', correct: false },
-        { text: 'The number of processors you added', correct: false },
-      ],
-      explanation: "The improvable part originally took a fraction p of the time; speeding it up by a factor s shrinks it to p/s. Add that to the untouched fixed part (1−p) to get the new total time as a fraction of the old, then invert for the speedup.",
-    },
-    {
-      question: "A job is 60% improvable and 40% fixed. You speed the improvable part up infinitely. What's the maximum overall speedup?",
-      options: [
-        { text: '1.67x — the ceiling is 1/(1−p) = 1/0.4 = 2.5... wait, recompute', correct: false },
-        { text: '2.5x — the ceiling is 1/(1−0.6) = 1/0.4 = 2.5x', correct: true },
-        { text: '5x — you eliminated 60% of the work', correct: false },
-        { text: 'Unlimited — infinite speedup means infinite gain', correct: false },
-      ],
-      explanation: "The ceiling is 1/(1−p) = 1/(1−0.6) = 1/0.4 = 2.5x. The fixed 40% can't shrink, so even making the other 60% instantaneous leaves you at a 2.5x overall speedup and no more. (The first option's arithmetic is wrong — watch for that.)",
-    },
-    {
-      question: "Two parts of a system: part A is 70% of the time, part B is 30%. You can make either one 10x faster, but only one. Which gives the bigger overall speedup?",
-      options: [
-        { text: 'Speeding up A (the bigger p) — its larger share of the time gives the bigger overall gain', correct: true },
-        { text: 'Speeding up B — smaller parts respond better to optimization', correct: false },
-        { text: 'They give identical speedups since s is the same', correct: false },
-        { text: 'Neither helps unless you speed up both', correct: false },
-      ],
-      explanation: "Speeding A 10x: time = 0.7/10 + 0.3 = 0.07 + 0.3 = 0.37, speedup ≈ 2.7x. Speeding B 10x: time = 0.7 + 0.3/10 = 0.7 + 0.03 = 0.73, speedup ≈ 1.37x. Same s, but aiming at the bigger p wins decisively — which is exactly 'attack the bottleneck.'",
-    },
-    {
-      question: "Why do you hit diminishing returns as you keep speeding up the improvable part?",
-      options: [
-        { text: 'As the improvable part shrinks toward zero, the fixed part comes to dominate the total — and you can\'t touch the fixed part', correct: true },
-        { text: 'The formula breaks down for large s', correct: false },
-        { text: 'Hardware physically cannot go faster than a certain point', correct: false },
-        { text: 'Because p increases every time you optimize', correct: false },
-      ],
-      explanation: "Each doubling of s halves what's left of the improvable part, so it contributes ever less to the total — while the untouched fixed part (1−p) stays put and increasingly dominates. You're asymptotically approaching the 1/(1−p) ceiling, and the last stretch costs the most for the least.",
-    },
-    {
-      question: "Your profiler shows a program spends 5% of its time in a function. A teammate has spent two weeks making that function 50x faster. What does Amdahl's law predict about the overall result?",
-      options: [
-        { text: 'Almost nothing — the ceiling for a 5% part is only 1/(1−0.05) ≈ 1.05x, so two weeks bought at most a ~5% speedup', correct: true },
-        { text: 'A roughly 50x overall speedup, matching the function\'s improvement', correct: false },
-        { text: 'A 2.5x overall speedup', correct: false },
-        { text: 'No way to estimate without rerunning the whole program', correct: false },
-      ],
-      explanation: "A 5% slice has a ceiling of 1/0.95 ≈ 1.05x — making it 50x faster (new share 0.1%) yields about 1/(0.95 + 0.001) ≈ 1.05x. Two weeks of brilliant work on a 5% part bought a ~5% speedup at best. The fix should have aimed at whatever big-p part the profiler also revealed.",
-    },
+    { question: 'What does the selected fraction p measure in the fixed-job formula?', options: [
+      { text: 'The selected duration as a share of original elapsed time.', correct: true },
+      { text: 'The selected stage\'s share of all workstation capacity.' },
+      { text: 'The selected duration as a share of every revised runtime.' }
+    ], explanation: 'Use the original fixed job as the baseline. Overlapping core times or capacity shares are different measurements.' },
+    { question: 'The report changes from 30 to 25 minutes. Which ratio gives the additional speedup relative to that current version?', options: [
+      { text: '30 ÷ 25 = 1.2×.', correct: true },
+      { text: '100 ÷ 25 = 4×.' },
+      { text: '16 ÷ 8 = 2×.' }
+    ], explanation: 'Compare the old and new whole-job times for the versions named in the question. Four is relative to the original baseline, and two is the local factor change.' },
+    { question: 'What does the ideal formula predict when the selected fraction is one?', options: [
+      { text: 'Whole-job speedup equals the local factor, with no finite unchanged-time ceiling.', correct: true },
+      { text: 'Whole-job speedup remains one, because the selected fraction cannot change time.' },
+      { text: 'Whole-job speedup has a finite ceiling set by a positive unchanged fraction.' }
+    ], explanation: 'When p is one, the unchanged fraction is zero and the ideal time becomes the original time divided by the local factor. Added overhead still needs separate treatment.' },
+    { question: 'In the dedicated six-minute-A, two-minute-B line, B becomes a one-minute stage. What follows under the stated conditions?', options: [
+      { text: 'First-job latency falls to seven minutes; sustainable capacity stays ten jobs/hour.', correct: true },
+      { text: 'First-job latency stays eight minutes; sustainable capacity doubles to twenty jobs/hour.' },
+      { text: 'First-job latency falls to seven minutes; sustainable capacity becomes sixty jobs/hour.' }
+    ], explanation: 'The time sum is six plus one. For the dedicated resources the rate ceiling is the minimum of ten and sixty jobs/hour, so A still limits it.' },
+    { question: 'Select the statements established by the ideal 20-plus-80 report model.', allowMultiple: true, options: [
+      { text: 'Successive local doublings halve the minutes saved by each doubling.', correct: true },
+      { text: 'The positive twenty-minute remainder gives a limiting baseline speedup of five.', correct: true },
+      { text: 'Each doubling must add a smaller increment to the baseline speedup number.' },
+      { text: 'Any proposal affecting less than half the time is economically worthless.' }
+    ], explanation: 'The minutes saved are forty, twenty, ten and five, and the limiting time is twenty. Baseline speedup increments need not decrease at every doubling; economic value requires an objective and costs.' },
+    { question: 'Why can the factor-sixteen implementation take longer than the factor-eight implementation in the overhead example?', options: [
+      { text: 'The additional coordination grows by more than the selected-time saving.', correct: true },
+      { text: 'The selected work necessarily grows whenever its local speed factor increases.' },
+      { text: 'Amdahl\'s ideal formula predicts that faster selected work must increase elapsed time.' }
+    ], explanation: 'The transformation saves five minutes, but the added coordination rises from six to twelve, costing six more. The whole job rises from thirty-six to thirty-seven minutes.' },
+    { question: 'What evidence should guide applying the prediction to a live service?', options: [
+      { text: 'Whole-job timings and the actual workload, overlap, overhead and quality conditions.', correct: true },
+      { text: 'Only the fastest timing of the selected function on a different workload.' },
+      { text: 'Only a sum of workstation capacities without an elapsed-time measurement.' }
+    ], explanation: 'The equation is conditional on the decomposition. Representative measurements test that decomposition; concurrent work and queues may require a different performance model.' }
   ]}
 />
 
-## Recap
-
-<MindMap
-  client:visible
-  title="Amdahl's Law — the math of speedup"
-  root={{
-    label: "Amdahl's Law",
-    children: [
-      {
-        label: 'The setup',
-        children: [
-          { label: 'Split a task: p = improvable fraction, 1−p = fixed' },
-          { label: 'Speed the improvable part up by factor s' },
-          { label: 'Gene Amdahl, 1967 — parallel computing, but universal' },
-        ],
-      },
-      {
-        label: 'The formula',
-        children: [
-          { label: 'Speedup = 1 / ((1−p) + p/s)' },
-          { label: '(1−p): fixed part, same time as before' },
-          { label: 'p/s: improvable part, now shrunken' },
-        ],
-      },
-      {
-        label: 'The hard ceiling',
-        children: [
-          { label: 'As s → ∞, speedup → 1/(1−p)' },
-          { label: 'Set by the part you DON\'T fix, not your cleverness' },
-          { label: '25% fixed → 4x max; 90% fixed → 1.11x max' },
-          { label: 'The fixed part becomes the new bottleneck' },
-        ],
-      },
-      {
-        label: 'Diminishing returns',
-        children: [
-          { label: 'Each doubling of s buys less than the last' },
-          { label: 'Fixed part dominates as improvable part shrinks' },
-        ],
-      },
-      {
-        label: 'Where to spend',
-        children: [
-          { label: 'Target the BIGGEST p — the part that dominates time' },
-          { label: '= throughput is min = identify the constraint' },
-          { label: 'Small-p optimizations are capped near 1x — skip them' },
-        ],
-      },
-    ],
-  }}
-/>
-
-## Where this goes next
-
-You now hold the quantitative key to the whole course: throughput is the minimum, the constraint is whichever part has the biggest $p$, and Amdahl's law tells you in advance exactly how much a fix is worth — ceiling and all. You can look at any proposed optimization and say, before building it, "that's worth 2x" or "that's worth nothing," which is a genuine superpower.
-
-But there's one twist the math has been quietly hinting at. Speed up the big-$p$ part enough and it stops being the biggest — some *other* part now dominates the time, with its own $p$, its own ceiling. The constraint didn't disappear; it **moved**. The next lesson, *The Constraint Always Moves*, is about riding that endless game — why fixing one bottleneck always reveals the next, how to cycle through them deliberately (Goldratt's fifth step: go back to the beginning), and where this never-ending hunt is hiding in your traffic, your team, your queries, and your mornings.
+Next, [The Constraint Always Moves](/bottlenecks-and-constraints/05-the-constraint-always-moves) returns to identifying the current limiting resource. Keep the objective and units explicit when recalculating after a change. The later upgrade-selection workshop applies the serial-capacity model to a full improvement decision.
