@@ -171,7 +171,7 @@ export function MindMap({
         <>
           <div
             role="img"
-            aria-label={`Mind map: ${title ?? root.label}`}
+            aria-label={title?.trim() || root.label}
             className="mt-4 overflow-x-auto [&_svg]:mx-auto [&_svg]:h-auto [&_svg]:max-w-full"
             // Mermaid output is generated locally from author data, not user input.
             dangerouslySetInnerHTML={{ __html: svg }}
