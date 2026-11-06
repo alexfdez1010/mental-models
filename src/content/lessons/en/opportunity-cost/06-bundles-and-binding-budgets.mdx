@@ -1,0 +1,309 @@
+---
+title: "Choose the Bundle That Fits"
+description: "Compare indivisible jobs within a time budget, find the best feasible alternative and avoid hourly-rate shortcuts or counting the same cost twice."
+topic: "en/opportunity-cost"
+order: 7
+minutes: 18
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MindMap, OpportunityCostChooser } from '@/components/react';
+
+The best-paying job on your list can fit your Saturday badly. It may leave a gap too small for anything useful, while two less impressive jobs fit together and earn more. A calendar has the same annoying habit as a suitcase: the shape of what you pack matters.
+
+Earlier lessons compared alternative uses of a scarce resource. This lesson changes the menu: you can complete more than one job, but each must fit in full. You will compare whole schedules, name the best alternative to the schedule you choose and recalculate when the time available changes.
+
+## Define what is available and what counts as success
+
+<MCQ client:visible pretest
+  question="Several jobs compete for a fixed afternoon, and some fit together. What should you compare?"
+  options={[
+    { text: "Complete schedules that meet the time limit.", correct: true },
+    { text: "Only the single job with the largest fee." },
+    { text: "Every job added together, regardless of its hours." }
+  ]}
+  explanation="The alternatives are feasible schedules. A schedule can contain several compatible jobs, but it cannot exceed the time available."
+/>
+
+An editor has **six hours** available before tonight's deadline. Four one-off commissions are offered. Each is **indivisible**: the client pays for the completed job, and a half-finished job earns nothing. Each can be accepted at most once. Jobs can be completed sequentially in any order, and their times include their administration. There are no dependencies between them.
+
+For this worked case, the editor wants to maximise **cash contribution**: fee minus the direct cash expenses of doing the job. The amounts are before tax and fixed overheads. The fees, times and expenses below are teaching data, not market estimates.
+
+| Job | Time required | Fee | Direct expense | Cash contribution |
+|---|---|---|---|---|
+| A — Long report | 4 hours | €330 | €30 | €330 − €30 = €300 |
+| B — Museum brochure | 3 hours | €230 | €20 | €230 − €20 = €210 |
+| C — Exhibition catalogue | 3 hours | €240 | €30 | €240 − €30 = €210 |
+| D — Event poster | 2 hours | €110 | €10 | €110 − €10 = €100 |
+
+A **feasible schedule** meets all the stated restrictions. A plus B needs **4 + 3 = 7 hours**, so it is unavailable with six hours. A plus D needs **4 + 2 = 6 hours**, so it is feasible. Doing half of A to squeeze in another commission is unavailable under these contracts.
+
+Keep the objective separate from the restriction. Six hours is the limit; cash contribution is what the editor is maximising. Filling every minute is not itself the goal. If another schedule earned more in less time, unused time would not disqualify it.
+
+### When to use it
+
+Use complete schedules when smaller choices can coexist. Before doing arithmetic, check deadlines, dependencies and whether work can really be split. If the editor also values rest or portfolio development, those considerations belong in the decision; this cash-only comparison does not price them.
+
+<Categorize client:visible
+  question="Use the stated contracts and original time limit."
+  buckets={["Feasible schedule", "Unavailable under the rules"]}
+  items={[
+    { text: "Complete the report and the poster", bucket: "Feasible schedule" },
+    { text: "Complete the brochure and the catalogue", bucket: "Feasible schedule" },
+    { text: "Complete the report and the brochure", bucket: "Unavailable under the rules" },
+    { text: "Deliver half a report and collect half its fee", bucket: "Unavailable under the rules" }
+  ]}
+  explanation="The first pair exactly fills the time budget, as does the second. The report plus brochure exceeds it, and fractional payment is not available."
+/>
+
+## Build the menu from bundles
+
+<MCQ client:visible pretest
+  question="The report has the largest individual contribution. What is missing before declaring it the best use of the afternoon?"
+  options={[
+    { text: "The value of other complete job combinations that fit.", correct: true },
+    { text: "The sum of every rejected job, even incompatible ones." },
+    { text: "A rule requiring the largest job to be selected first." }
+  ]}
+  explanation="A valuable individual job can lose to a better combination. Compare the full feasible bundles before ranking schedules."
+/>
+
+A **bundle** is a set of jobs accepted together. Its time and contribution are the sums for those jobs, because the case assumes no shared setup costs or effects between them. Choosing valuable indivisible items within a capacity limit is the structure of a **knapsack problem**: here the capacity is time rather than the weight a bag can carry. [Google's knapsack explanation](https://developers.google.com/optimization/pack/knapsack)
+
+With four jobs, listing the possibilities is manageable. The table contains **every feasible bundle**, including declining all the work. The unavailable pairs A + B and A + C each require seven hours; every three-job bundle requires at least eight hours, so none fits.
+
+| Feasible bundle | Total time | Cash contribution |
+|---|---|---|
+| No commission | 0 hours | €0 |
+| A | 4 hours | €300 |
+| B | 3 hours | €210 |
+| C | 3 hours | €210 |
+| D | 2 hours | €100 |
+| A + D | 6 hours | €300 + €100 = €400 |
+| B + C | 6 hours | €210 + €210 = €420 |
+| B + D | 5 hours | €210 + €100 = €310 |
+| C + D | 5 hours | €210 + €100 = €310 |
+
+The best bundle for the stated objective is **B + C, worth €420**. The next-best complete schedule is **A + D, worth €400**. This is a comparison between two ways to use the afternoon. It is not a choice between A and B in isolation.
+
+Use the chooser to select different schedules and reveal the strongest alternative. It shows the leading feasible plans from the complete table above; the omitted single-job plans cannot beat them on the stated cash objective.
+
+<OpportunityCostChooser client:visible
+  eyebrow="Compare complete schedules"
+  instructions="Choose a bundle, predict its best alternative, then compare that prediction with the result."
+  resourceLabel="Resource allocated"
+  costHint="best alternative schedule not chosen"
+  alsoHint="other feasible schedules, not values to add together"
+  soundVerdict="No other listed schedule has a higher cash contribution."
+  costlyVerdict="Another available schedule has a higher cash contribution."
+  scenarios={[{
+    prompt: "Which schedule would you choose for the original time budget?",
+    resource: "The available Saturday afternoon",
+    unit: " €",
+    options: [
+      { label: "Brochure and catalogue", value: 420 },
+      { label: "Report and poster", value: 400 },
+      { label: "Brochure and poster", value: 310 },
+      { label: "Catalogue and poster", value: 310 }
+    ]
+  }]}
+/>
+
+### When to use it
+
+Enumerate bundles when the list is short and complete. For hundreds of jobs, use an appropriate optimisation method rather than pretend a long handwritten list proves the best result. If accepting one job changes another's duration or value, update the bundle values instead of adding standalone figures blindly.
+
+<FillBlank client:visible
+  question="Choose the unit of comparison."
+  text="Here the alternative is a complete {{schedule|receipt|hourly rate}}. Compatible jobs may be {{combined|ignored|split up}}, provided their total fits the constraint."
+  explanation="Compare full schedules that could actually replace one another. Several jobs can form one alternative; that does not make the sum of every incompatible schedule a valid alternative."
+/>
+
+## Name the opportunity cost and count cash expenses once
+
+<MCQ client:visible pretest
+  question="After choosing the brochure and catalogue, which counterfactual should the editor value?"
+  options={[
+    { text: "The report and poster as the best available replacement schedule.", correct: true },
+    { text: "Every other feasible schedule as if all could replace it together." },
+    { text: "Only the unused minutes, because the chosen work earns money." }
+  ]}
+  explanation="The best forgone use of the afternoon is the report-plus-poster schedule. Other schedules compete with it; their values do not accumulate into a single available replacement."
+/>
+
+**Opportunity cost** is the value of the best feasible alternative given up. OpenStax connects this definition to a budget constraint: an unaffordable option lies outside the available choice set. Here we apply that idea to complete schedules and a time limit. [OpenStax on budget constraints and opportunity cost](https://openstax.org/books/principles-economics-3e/pages/2-1-how-individuals-make-choices-based-on-their-budget-constraint)
+
+Choosing B + C gives up the best alternative schedule, A + D. Its opportunity cost on our cash-contribution scale is **€400**. The chosen schedule's **advantage over that alternative** is **€420 − €400 = €20**. The €20 difference is not the opportunity cost: it answers a different question, how much better this schedule performs.
+
+Now check the cash accounting behind that comparison.
+
+| Calculation | B + C | A + D |
+|---|---|---|
+| Fees received | €230 + €240 = €470 | €330 + €110 = €440 |
+| Direct expenses | €20 + €30 = €50 | €30 + €10 = €40 |
+| Cash contribution | €470 − €50 = €420 | €440 − €40 = €400 |
+| Difference between schedules | €30 more fees minus €10 more expenses | B + C contributes €20 more |
+
+The direct expenses have already been deducted from each contribution. Subtracting the chosen schedule's €50 again would count the same cash expense twice. Likewise, once you compare the afternoon's complete alternative schedules, do not add a second charge for the **same forgone afternoon's earnings**. A separate expense not yet included would need adding; a second label for an included sacrifice would not.
+
+Nor should you add €400 + €310 + €310 as the cost of choosing B + C. Those are competing schedules, not three afternoons you could otherwise have worked. Inside A + D, summing the two compatible jobs is valid; across mutually exclusive schedules, summing invents capacity you do not have.
+
+### When to use it
+
+Use a consistent scale and accounting boundary when alternatives have different fees and expenses. Cash contribution supports this narrow comparison. It does not establish personal satisfaction or long-run business value, and it should not be relabelled as take-home income.
+
+<MCQ client:visible allowMultiple
+  question="Select the valid statements about the original choice."
+  options={[
+    { text: "The best forgone schedule determines the opportunity cost.", correct: true },
+    { text: "The contribution gap measures the advantage over that schedule.", correct: true },
+    { text: "The chosen direct expenses should be deducted a second time." },
+    { text: "All rejected schedules should be combined into the cost." }
+  ]}
+  explanation="Opportunity cost names the best replacement's value; the gap compares it with the chosen schedule. The contribution figures already include direct expenses, and incompatible schedules cannot all replace one afternoon."
+/>
+
+## Test the hourly-rate shortcut
+
+<MCQ client:visible pretest
+  question="The report has the largest cash contribution per hour. Does choosing it first prove the best total schedule?"
+  options={[
+    { text: "Yes, a higher hourly figure always settles a whole-job decision." },
+    { text: "No, the remaining time may fit the other indivisible jobs badly.", correct: true },
+    { text: "Yes, provided some unused time remains after accepting it." }
+  ]}
+  explanation="A rate compares a job with its own duration. It does not check which complete combinations fit the rest of the available time."
+/>
+
+An **hourly contribution** divides a job's contribution by its duration. A **greedy rule** takes the apparently best next item before checking the complete combination. The numbers show exactly why the rule “take the highest hourly contribution first” fails in this case.
+
+| Job | Contribution divided by time | Hourly contribution |
+|---|---|---|
+| A | €300 ÷ 4 | €75/hour |
+| B | €210 ÷ 3 | €70/hour |
+| C | €210 ÷ 3 | €70/hour |
+| D | €100 ÷ 2 | €50/hour |
+
+Choose A first and two hours remain. Only D fits, giving **€300 + €100 = €400**. Choose B and C instead and both fit exactly, giving **€210 + €210 = €420**. The lower-rate pair earns **€20 more** because its pieces fit the time budget better. Both schedules use six hours, so the difference is not caused by leaving time idle.
+
+This example disproves the claim that the shortcut always works for indivisible jobs. It does not prove hourly figures are useless. They can help investigate alternatives, and different assumptions about divisible work would create a different problem. Here the complete bundle comparison settles the choice.
+
+### When to use it
+
+Check the shortcut whenever accepting a job leaves a remainder too small for other work, or whenever an apparently weaker pair fits well. Similar packing issues arise with equipment bookings and project windows. Verify their own constraints rather than transferring the editor's numbers.
+
+<Categorize client:visible
+  question="Distinguish a useful calculation from a claim it does not establish."
+  buckets={["Supported in this case", "Not established by the calculation"]}
+  items={[
+    { text: "The report has the highest individual hourly contribution", bucket: "Supported in this case" },
+    { text: "The brochure and catalogue form the highest-contribution original schedule", bucket: "Supported in this case" },
+    { text: "The highest individual hourly contribution always produces the best bundle", bucket: "Not established by the calculation" },
+    { text: "Hourly comparisons are useless for every kind of scheduling problem", bucket: "Not established by the calculation" }
+  ]}
+  explanation="The table establishes the individual rates and the complete enumeration establishes this schedule's result. Neither supports a universal claim about every scheduling problem."
+/>
+
+## Recalculate when the constraint changes
+
+<MCQ client:visible pretest
+  question="An extra hour becomes available before any job is accepted. What is the relevant comparison?"
+  options={[
+    { text: "The best complete schedule under each of the two time limits.", correct: true },
+    { text: "The original schedule plus the highest hourly figure on the list." },
+    { text: "The average fee from every job regardless of whether it now fits." }
+  ]}
+  explanation="New time may make a different bundle available. Its value depends on that changed menu, not on mechanically multiplying an individual job's rate."
+/>
+
+A **binding constraint** is met exactly by the chosen solution. The original best schedule uses all six available hours. Changing the time budget can change both the chosen bundle and the best forgone alternative. Re-enumerate the feasible schedules rather than cling to a choice made for a different afternoon.
+
+| Time available | Best schedule or tied schedules | Maximum cash contribution |
+|---|---|---|
+| 5 hours | B + D or C + D | €310 |
+| 6 hours | B + C | €420 |
+| 7 hours | A + B or A + C | €510 |
+| 8 hours | B + C + D | €520 |
+
+With seven hours, A + B fits: **4 + 3 = 7 hours**, contributing **€300 + €210 = €510**. A + C ties it. Neither three-job bundle fits in seven hours, so €510 is the maximum. Moving from six to seven hours creates a **€510 − €420 = €90** improvement in the best available cash result.
+
+The following hour has a different value. With eight hours, B + C + D fits and contributes **€210 + €210 + €100 = €520**, only **€10** above the seven-hour maximum. The report plus brochure plus poster still needs nine hours, so that tempting combination remains unavailable. Two extra hours beyond the original budget improve the maximum by **€100**, not twice €90.
+
+These differences describe this menu before acceptance. They are not a universal hourly wage. If the extra time costs money, reduces valued rest or introduces a late-delivery risk, compare those consequences with the improvement. If a job is already contractually accepted, treat that commitment as a new constraint; do not cancel it on the fiction that the original menu is still open.
+
+Try the expanded menus below. The tied top choices at the middle limit also show why equal cash contribution may leave the editor with a genuine preference to resolve.
+
+<OpportunityCostChooser client:visible
+  eyebrow="Change the available time"
+  instructions="Choose a complete schedule at each time limit. Compare the best forgone plan, then advance to the changed menu."
+  resourceLabel="Resource allocated" choiceLabel="Chosen schedule"
+  costHint="best alternative schedule not chosen"
+  alsoHint="other feasible plans, not amounts to add together"
+  soundVerdict="No other listed schedule has a higher cash contribution."
+  costlyVerdict="Another available schedule has a higher cash contribution."
+  scenarios={[
+    { prompt: "Choose after the first expansion of the original time budget.", resource: "The afternoon with an extra hour", unit: " €", options: [
+      { label: "Report and brochure", value: 510 },
+      { label: "Report and catalogue", value: 510 },
+      { label: "Brochure and catalogue", value: 420 },
+      { label: "Report and poster", value: 400 }
+    ]},
+    { prompt: "Choose after the next expansion of the time budget.", resource: "The afternoon with another extra hour", unit: " €", options: [
+      { label: "Brochure, catalogue and poster", value: 520 },
+      { label: "Report and brochure", value: 510 },
+      { label: "Report and catalogue", value: 510 },
+      { label: "Brochure and catalogue", value: 420 }
+    ]}
+  ]}
+/>
+
+### When to use it
+
+Recalculate after a changed deadline, job duration, fee or commitment. If durations are uncertain, allow for that uncertainty before accepting a tightly packed schedule. Our exact figures demonstrate the comparison; they do not guarantee that real editing work will finish to the minute.
+
+<FillBlank client:visible
+  question="Interpret the added time."
+  text="The value of extra time depends on the {{newly feasible bundles|largest standalone fee|sum of rejected jobs}}. Once work is committed, that commitment becomes a {{constraint|cash receipt|sunk benefit}} in the remaining decision."
+  explanation="More time changes which combinations fit. A binding commitment changes what is still available, so the relevant comparison must use the current menu."
+/>
+
+## Rebuild the decision
+
+<MindMap client:visible
+  root={{ label: "Choose a feasible bundle", children: [
+    { label: "State the problem", children: [{ label: "Objective and time limit" }, { label: "Whole jobs and dependencies" }] },
+    { label: "Build the menu", children: [{ label: "Enumerate feasible schedules" }, { label: "Compare on one consistent scale" }] },
+    { label: "Price the alternative", children: [{ label: "Best forgone schedule" }, { label: "Different from the advantage gap" }, { label: "Deduct each expense once" }] },
+    { label: "Challenge shortcuts", children: [{ label: "Hourly ranking can pack badly" }, { label: "Changed constraints change the menu" }] }
+  ]}}
+/>
+
+<Quiz client:visible
+  questions={[
+    { question: "Why does the relevant alternative sometimes contain several jobs?", options: [
+      { text: "Compatible jobs can form a single feasible replacement schedule.", correct: true },
+      { text: "Every rejected job belongs to the same forgone schedule." },
+      { text: "A bundle eliminates the need to check the total time required." }
+    ], explanation: "The alternative is a whole way to use the scarce resource. It may contain several compatible jobs, but its total time must still fit." },
+    { question: "The editor chooses the original highest-contribution bundle. What separates its opportunity cost from its advantage?", options: [
+      { text: "Cost is the best forgone schedule's value; advantage is the gap.", correct: true },
+      { text: "Cost is the chosen fee; advantage is every rejected fee added up." },
+      { text: "Cost is unused time; advantage ignores all the direct expenses." }
+    ], explanation: "The next-best schedule supplies the opportunity cost on this scale. Subtracting its contribution from the chosen contribution gives the advantage, which is a different quantity." },
+    { question: "Spot the accounting error after each bundle has been valued net of direct expenses.", options: [
+      { text: "Deducting the chosen bundle's same direct expenses again.", correct: true },
+      { text: "Checking whether the bundle meets the delivery deadline." },
+      { text: "Comparing its contribution with a feasible replacement." }
+    ], explanation: "The expenses were already included when the contribution was calculated. Repeating that deduction counts the same cash outlay twice." },
+    { question: "Select the conclusions supported by the expanded-time example.", allowMultiple: true, options: [
+      { text: "A changed time limit can make a different bundle best.", correct: true },
+      { text: "Successive extra hours can create different cash gains.", correct: true },
+      { text: "The largest hourly rate always prices every extra hour." },
+      { text: "A previous contract can be ignored when a better fee appears." }
+    ], explanation: "The best bundle changes when new combinations fit, and the gains from successive hours differ. Existing commitments and the consequences of changing them remain part of the feasible set." }
+  ]}
+/>
+
+### Sources and scope
+
+[OpenStax](https://openstax.org/books/principles-economics-3e/pages/2-1-how-individuals-make-choices-based-on-their-budget-constraint) supplies the economic definitions. [Google's OR-Tools guide](https://developers.google.com/optimization/pack/knapsack) describes the capacity-and-value structure. The editor's menu and all calculations are a local worked example with additive values, known durations and no dependencies.

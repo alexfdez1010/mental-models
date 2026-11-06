@@ -1,0 +1,326 @@
+---
+title: "Elige la combinación que cabe"
+description: "Compara encargos indivisibles con tiempo limitado, identifica la mejor alternativa viable y evita atajos por hora o contar el mismo coste dos veces."
+topic: "es/opportunity-cost"
+order: 7
+minutes: 18
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MindMap, OpportunityCostChooser } from '@/components/react';
+
+El encargo que más paga de la lista puede encajar mal en tu sábado. Quizá deje un hueco demasiado pequeño para aprovecharlo, mientras dos trabajos menos llamativos caben juntos y dejan más dinero. El calendario tiene la misma manía que una maleta: importa la forma de lo que metes.
+
+Las lecciones anteriores comparaban usos alternativos de un recurso escaso. Aquí cambia el menú: puedes completar varios encargos, pero cada uno debe caber entero. Compararás horarios completos, identificarás la mejor alternativa al que elijas y volverás a calcular cuando cambie el tiempo disponible.
+
+## Define qué está disponible y qué quieres conseguir
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Varios encargos compiten por una tarde fija y algunos caben juntos. ¿Qué deberías comparar?"
+  options={[
+    { text: "Horarios completos que respeten el tiempo disponible.", correct: true },
+    { text: "Solo el encargo individual con los mayores honorarios." },
+    { text: "Todos los trabajos sumados, sin atender a sus horas." }
+  ]}
+  explanation="Las alternativas son horarios viables. Un horario puede incluir varios encargos compatibles, pero no superar el tiempo disponible."
+/>
+
+Una editora dispone de **seis horas** antes del plazo de entrega de esta noche. Le ofrecen cuatro encargos puntuales. Cada uno es **indivisible**: el cliente paga el trabajo completo y un encargo a medias no cobra nada. Cada trabajo puede aceptarse una sola vez. Se pueden realizar uno tras otro en cualquier orden y sus duraciones incluyen las gestiones necesarias. No dependen unos de otros.
+
+En este caso resuelto, la editora quiere maximizar el **margen del encargo**: los honorarios menos los gastos directos de realizarlo. Las cantidades son anteriores a impuestos y gastos fijos. Honorarios, duraciones y gastos son datos didácticos, no estimaciones del mercado.
+
+| Encargo | Tiempo necesario | Honorarios | Gasto directo | Margen |
+|---|---|---|---|---|
+| A — Informe largo | 4 horas | 330 € | 30 € | 330 € − 30 € = 300 € |
+| B — Folleto del museo | 3 horas | 230 € | 20 € | 230 € − 20 € = 210 € |
+| C — Catálogo de exposición | 3 horas | 240 € | 30 € | 240 € − 30 € = 210 € |
+| D — Cartel de un acto | 2 horas | 110 € | 10 € | 110 € − 10 € = 100 € |
+
+Un **horario viable** cumple todas las restricciones indicadas. A más B exige **4 + 3 = 7 horas**, por lo que queda fuera de las seis disponibles. A más D exige **4 + 2 = 6 horas**, así que sí es viable. Hacer medio A para encajar otro encargo no es una opción con estos contratos.
+
+Separa el objetivo de la restricción. Seis horas es el límite; el margen es lo que la editora maximiza. Ocupar cada minuto no es el objetivo. Si otro horario dejara más dinero en menos tiempo, el rato libre no lo descartaría.
+
+### Cuándo usarlo
+
+Compara horarios completos cuando las elecciones pequeñas puedan coexistir. Antes de calcular, comprueba plazos, dependencias y si el trabajo se puede dividir de verdad. Si la editora también valora el descanso o ampliar su cartera de trabajos, eso debe entrar en la decisión; esta comparación monetaria no lo valora.
+
+<Categorize client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" allCorrectLabel="Todo clasificado" partialResultWord="correctas" instructions="Coloca cada elemento en su grupo."
+  question="Aplica los contratos indicados y el límite de tiempo original."
+  buckets={["Horario viable", "Opción fuera de las reglas"]}
+  items={[
+    { text: "Completar el informe y el cartel", bucket: "Horario viable" },
+    { text: "Completar el folleto y el catálogo", bucket: "Horario viable" },
+    { text: "Completar el informe y el folleto", bucket: "Opción fuera de las reglas" },
+    { text: "Entregar medio informe y cobrar la mitad de sus honorarios", bucket: "Opción fuera de las reglas" }
+  ]}
+  explanation="La primera pareja ocupa exactamente el tiempo disponible, igual que la segunda. Informe y folleto lo superan, y el pago fraccionado no está disponible."
+/>
+
+## Construye el menú con combinaciones
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="El informe tiene el mayor margen individual. ¿Qué falta antes de declararlo el mejor uso de la tarde?"
+  options={[
+    { text: "El valor de las otras combinaciones completas que caben.", correct: true },
+    { text: "La suma de todos los encargos descartados, aunque sean incompatibles." },
+    { text: "Una regla que obligue a seleccionar primero el trabajo más grande." }
+  ]}
+  explanation="Un encargo individual valioso puede perder frente a una combinación mejor. Compara las combinaciones viables completas antes de ordenar los horarios."
+/>
+
+Una **combinación** es un conjunto de encargos aceptados juntos. Su duración y margen son las sumas de los trabajos, porque el caso supone que no hay preparativos compartidos ni efectos entre ellos. Elegir elementos indivisibles con valor dentro de una capacidad limitada tiene la estructura del **problema de la mochila (knapsack problem)**: aquí la capacidad es tiempo, en lugar del peso que soporta una bolsa. [Explicación de Google sobre el problema de la mochila](https://developers.google.com/optimization/pack/knapsack)
+
+Con cuatro trabajos, enumerar las posibilidades es manejable. La tabla contiene **todas las combinaciones viables**, incluida rechazar todos los encargos. Las parejas descartadas A + B y A + C necesitan siete horas cada una; cualquier combinación de tres exige al menos ocho horas, así que ninguna cabe.
+
+| Combinación viable | Tiempo total | Margen |
+|---|---|---|
+| Ningún encargo | 0 horas | 0 € |
+| A | 4 horas | 300 € |
+| B | 3 horas | 210 € |
+| C | 3 horas | 210 € |
+| D | 2 horas | 100 € |
+| A + D | 6 horas | 300 € + 100 € = 400 € |
+| B + C | 6 horas | 210 € + 210 € = 420 € |
+| B + D | 5 horas | 210 € + 100 € = 310 € |
+| C + D | 5 horas | 210 € + 100 € = 310 € |
+
+La mejor combinación para el objetivo indicado es **B + C, con 420 €**. El siguiente mejor horario completo es **A + D, con 400 €**. Comparamos dos formas de utilizar la tarde. No estamos eligiendo entre A y B por separado.
+
+Usa el selector para elegir distintos horarios y descubrir la alternativa más valiosa. Muestra los mejores planes viables de la tabla completa; los encargos individuales omitidos no pueden superarlos en el objetivo monetario indicado.
+
+<OpportunityCostChooser client:visible
+  eyebrow="Compara horarios completos"
+  instructions="Elige una combinación, anticipa su mejor alternativa y contrasta tu predicción con el resultado."
+  resourceLabel="Recurso asignado" choiceLabel="Horario elegido" costLabel="Coste de oportunidad"
+  costHint="mejor horario alternativo no elegido"
+  alsoLabel="También disponibles" alsoHint="otros horarios viables, no valores que debas sumar"
+  soundVerdict="Ningún otro horario de la lista deja más margen de caja."
+  costlyVerdict="Otro horario disponible deja más margen de caja que el elegido."
+  worthLabel="con un valor de" stepLabel="Decisión {n} de {total}" prevLabel="Anterior" nextLabel="Siguiente" resetLabel="Elegir de nuevo"
+  scenarios={[{
+    prompt: "¿Qué horario elegirías con el tiempo disponible original?",
+    resource: "La tarde del sábado disponible",
+    unit: " €",
+    options: [
+      { label: "Folleto y catálogo", value: 420 },
+      { label: "Informe y cartel", value: 400 },
+      { label: "Folleto y cartel", value: 310 },
+      { label: "Catálogo y cartel", value: 310 }
+    ]
+  }]}
+/>
+
+### Cuándo usarlo
+
+Enumera combinaciones cuando la lista sea corta y completa. Para cientos de trabajos, usa un método de optimización adecuado en lugar de suponer que una lista larga escrita a mano demuestra el mejor resultado. Si aceptar un encargo cambia la duración o el valor de otro, actualiza los valores de las combinaciones en vez de sumar las cifras individuales sin comprobarlo.
+
+<FillBlank client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" correctResultLabel="Correcto" partialResultWord="correctas" instructions="Elige la opción correcta para cada hueco y comprueba."
+  question="Elige la unidad de comparación."
+  text="Aquí la alternativa es un {{horario|recibo|precio horario}} completo. Los encargos compatibles pueden {{combinarse|ignorarse|fraccionarse}}, siempre que el total respete la restricción."
+  explanation="Compara horarios completos que puedan sustituirse de verdad. Varios trabajos pueden formar una alternativa; eso no convierte la suma de todos los horarios incompatibles en una alternativa disponible."
+/>
+
+## Nombra el coste de oportunidad y cuenta cada gasto una vez
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Después de elegir folleto y catálogo, ¿qué alternativa debería valorar la editora?"
+  options={[
+    { text: "Informe y cartel como mejor horario disponible para sustituirlo.", correct: true },
+    { text: "Todos los demás horarios como si pudieran sustituirlo juntos." },
+    { text: "Solo los minutos libres, porque el trabajo elegido deja dinero." }
+  ]}
+  explanation="El mejor uso alternativo de la tarde es el horario de informe y cartel. Los otros horarios compiten con él; sus valores no se acumulan en una única sustitución disponible."
+/>
+
+El **coste de oportunidad (opportunity cost)** es el valor de la mejor alternativa viable a la que renuncias. OpenStax conecta esta definición con la restricción presupuestaria: una opción que no puedes costear queda fuera del conjunto disponible. Aquí aplicamos esa idea a horarios completos y un límite de tiempo. [OpenStax sobre restricciones y coste de oportunidad](https://openstax.org/books/principles-economics-3e/pages/2-1-how-individuals-make-choices-based-on-their-budget-constraint)
+
+Elegir B + C supone renunciar al mejor horario alternativo, A + D. Su coste de oportunidad en nuestra escala de márgenes es **400 €**. La **ventaja del horario elegido frente a esa alternativa** es **420 € − 400 € = 20 €**. La diferencia de 20 € no es el coste de oportunidad: responde a otra pregunta, cuánto mejora este horario el resultado.
+
+Comprueba ahora las cuentas de caja que sostienen la comparación.
+
+| Cálculo | B + C | A + D |
+|---|---|---|
+| Honorarios cobrados | 230 € + 240 € = 470 € | 330 € + 110 € = 440 € |
+| Gastos directos | 20 € + 30 € = 50 € | 30 € + 10 € = 40 € |
+| Margen | 470 € − 50 € = 420 € | 440 € − 40 € = 400 € |
+| Diferencia entre horarios | 30 € más de honorarios menos 10 € más de gastos | B + C deja 20 € más |
+
+Los gastos directos ya se han descontado de cada margen. Restar de nuevo los 50 € del horario elegido contaría dos veces el mismo gasto. Del mismo modo, después de comparar los horarios completos de la tarde, no añadas un segundo cargo por **los mismos ingresos de esa tarde a los que renuncias**. Un gasto distinto aún no incluido sí debe añadirse; un segundo nombre para un sacrificio ya contado, no.
+
+Tampoco debes sumar 400 € + 310 € + 310 € como coste de elegir B + C. Son horarios que compiten entre sí, no tres tardes que podrías haber trabajado. Dentro de A + D, sumar los dos encargos compatibles es válido; sumar entre horarios mutuamente excluyentes inventa capacidad que no tienes.
+
+### Cuándo usarlo
+
+Usa una escala y un criterio contable coherentes cuando las alternativas tengan honorarios y gastos diferentes. El margen respalda esta comparación concreta. No demuestra satisfacción personal ni valor a largo plazo para el negocio, y no debe rebautizarse como ingreso disponible después de impuestos.
+
+<MCQ client:visible allowMultiple
+  checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Selecciona las afirmaciones válidas sobre la elección original."
+  options={[
+    { text: "El mejor horario descartado determina el coste de oportunidad.", correct: true },
+    { text: "La diferencia de márgenes mide la ventaja frente a ese horario.", correct: true },
+    { text: "Los gastos directos elegidos deben descontarse una segunda vez." },
+    { text: "Hay que combinar todos los horarios rechazados para obtener el coste." }
+  ]}
+  explanation="El coste de oportunidad nombra el valor de la mejor sustitución; la diferencia lo compara con el horario elegido. Los márgenes ya incluyen los gastos directos y varios horarios incompatibles no pueden sustituir una sola tarde."
+/>
+
+## Comprueba el atajo del margen por hora
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="El informe tiene el mayor margen por hora. ¿Elegirlo primero demuestra cuál es el mejor horario total?"
+  options={[
+    { text: "Sí, una cifra por hora mayor siempre resuelve una decisión de encargos enteros." },
+    { text: "No, el tiempo restante puede encajar mal con los otros trabajos indivisibles.", correct: true },
+    { text: "Sí, siempre que quede algo de tiempo libre después de aceptarlo." }
+  ]}
+  explanation="Una tasa compara un encargo con su propia duración. No comprueba qué combinaciones completas caben en el resto del tiempo disponible."
+/>
+
+El **margen por hora** divide el margen de un encargo entre su duración. Una **regla voraz (greedy rule)** elige lo que parece el mejor elemento siguiente antes de comprobar la combinación completa. Las cifras muestran por qué la regla «acepta primero el mayor margen por hora» falla en este caso.
+
+| Encargo | Margen dividido entre tiempo | Margen por hora |
+|---|---|---|
+| A | 300 € ÷ 4 | 75 €/hora |
+| B | 210 € ÷ 3 | 70 €/hora |
+| C | 210 € ÷ 3 | 70 €/hora |
+| D | 100 € ÷ 2 | 50 €/hora |
+
+Si eliges A primero, quedan dos horas. Solo cabe D, para un total de **300 € + 100 € = 400 €**. Si eliges B y C, ambos caben exactamente y dejan **210 € + 210 € = 420 €**. La pareja con menor margen por hora deja **20 € más** porque sus piezas encajan mejor en el tiempo disponible. Ambos horarios ocupan seis horas: la diferencia no se debe a dejar tiempo sin utilizar.
+
+El ejemplo refuta que el atajo funcione siempre con encargos indivisibles. No demuestra que las cifras por hora sean inútiles. Pueden ayudar a investigar alternativas, y otros supuestos sobre trabajo divisible producirían un problema diferente. Aquí la comparación de combinaciones completas resuelve la elección.
+
+### Cuándo usarlo
+
+Comprueba el atajo cuando aceptar un encargo deje un hueco demasiado pequeño para otros trabajos o cuando una pareja aparentemente peor encaje bien. Surgen problemas parecidos al reservar equipos y planificar proyectos. Comprueba sus restricciones concretas, sin trasladar las cifras de la editora.
+
+<Categorize client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" allCorrectLabel="Todo clasificado" partialResultWord="correctas" instructions="Coloca cada elemento en su grupo."
+  question="Distingue un cálculo útil de una afirmación que no demuestra."
+  buckets={["Respaldado en este caso", "No demostrado por el cálculo"]}
+  items={[
+    { text: "El informe tiene el mayor margen individual por hora", bucket: "Respaldado en este caso" },
+    { text: "Folleto y catálogo forman el horario original con mayor margen", bucket: "Respaldado en este caso" },
+    { text: "El mayor margen individual por hora siempre produce la mejor combinación", bucket: "No demostrado por el cálculo" },
+    { text: "Comparar por horas es inútil en cualquier problema de planificación", bucket: "No demostrado por el cálculo" }
+  ]}
+  explanation="La tabla demuestra las tasas individuales y la enumeración completa demuestra el resultado de este horario. Ninguna sostiene una afirmación universal sobre cualquier problema de planificación."
+/>
+
+## Vuelve a calcular cuando cambie la restricción
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Queda disponible una hora más antes de aceptar ningún encargo. ¿Qué comparación corresponde?"
+  options={[
+    { text: "El mejor horario completo con cada uno de los dos límites de tiempo.", correct: true },
+    { text: "El horario original más la mayor cifra por hora de toda la lista." },
+    { text: "La media de honorarios de todos los encargos, aunque sigan sin caber." }
+  ]}
+  explanation="El tiempo nuevo puede permitir otra combinación. Su valor depende del menú modificado, no de multiplicar mecánicamente la tasa de un encargo individual."
+/>
+
+Una **restricción activa (binding constraint)** se cumple exactamente en la solución elegida. El mejor horario original usa las seis horas disponibles. Cambiar el tiempo disponible puede cambiar tanto la combinación elegida como la mejor alternativa descartada. Vuelve a enumerar los horarios viables en lugar de aferrarte a una elección hecha para otra tarde.
+
+| Tiempo disponible | Mejor horario u horarios empatados | Margen máximo |
+|---|---|---|
+| 5 horas | B + D o C + D | 310 € |
+| 6 horas | B + C | 420 € |
+| 7 horas | A + B o A + C | 510 € |
+| 8 horas | B + C + D | 520 € |
+
+Con siete horas cabe A + B: **4 + 3 = 7 horas**, con un margen de **300 € + 210 € = 510 €**. A + C empata. Ninguna combinación de tres cabe en siete horas, así que 510 € es el máximo. Pasar de seis a siete horas mejora el mejor resultado monetario disponible en **510 € − 420 € = 90 €**.
+
+La hora siguiente tiene otro valor. Con ocho horas cabe B + C + D, que deja **210 € + 210 € + 100 € = 520 €**, solo **10 €** por encima del máximo de siete horas. Informe, folleto y cartel siguen necesitando nueve horas: esa combinación tentadora aún queda fuera. Dos horas adicionales respecto al tiempo original mejoran el máximo en **100 €**, no en dos veces 90 €.
+
+Estas diferencias describen este menú antes de aceptar los encargos. No son un salario universal por hora. Si el tiempo adicional cuesta dinero, reduce un descanso valioso o aumenta el riesgo de entregar tarde, compara esas consecuencias con la mejora. Si ya has aceptado un trabajo por contrato, trata ese compromiso como una restricción nueva; no lo canceles fingiendo que el menú original sigue abierto.
+
+Prueba los menús ampliados. El empate entre las mejores opciones del límite intermedio también muestra por qué un margen idéntico puede dejar una preferencia real por resolver.
+
+<OpportunityCostChooser client:visible
+  eyebrow="Cambia el tiempo disponible"
+  instructions="Elige un horario completo con cada límite de tiempo. Compara el mejor plan descartado y pasa después al menú modificado."
+  resourceLabel="Recurso asignado" choiceLabel="Horario elegido" costLabel="Coste de oportunidad"
+  costHint="mejor horario alternativo no elegido"
+  alsoLabel="También disponibles" alsoHint="otros planes viables, no cantidades que debas sumar"
+  soundVerdict="Ningún otro horario de la lista deja más margen de caja."
+  costlyVerdict="Otro horario disponible deja más margen de caja que el elegido."
+  worthLabel="con un valor de" stepLabel="Decisión {n} de {total}" prevLabel="Anterior" nextLabel="Siguiente" resetLabel="Elegir de nuevo"
+  scenarios={[
+    { prompt: "Elige tras la primera ampliación del tiempo original.", resource: "La tarde con una hora adicional", unit: " €", options: [
+      { label: "Informe y folleto", value: 510 },
+      { label: "Informe y catálogo", value: 510 },
+      { label: "Folleto y catálogo", value: 420 },
+      { label: "Informe y cartel", value: 400 }
+    ]},
+    { prompt: "Elige tras la siguiente ampliación del tiempo.", resource: "La tarde con otra hora adicional", unit: " €", options: [
+      { label: "Folleto, catálogo y cartel", value: 520 },
+      { label: "Informe y folleto", value: 510 },
+      { label: "Informe y catálogo", value: 510 },
+      { label: "Folleto y catálogo", value: 420 }
+    ]}
+  ]}
+/>
+
+### Cuándo usarlo
+
+Recalcula después de un cambio de plazo, duración, honorarios o compromiso. Si las duraciones son inciertas, ten en cuenta esa incertidumbre antes de aceptar un horario sin apenas margen. Las cifras exactas demuestran la comparación; no garantizan que un trabajo editorial real termine al minuto.
+
+<FillBlank client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" correctResultLabel="Correcto" partialResultWord="correctas" instructions="Elige la opción correcta para cada hueco y comprueba."
+  question="Interpreta el tiempo añadido."
+  text="El valor del tiempo extra depende de las {{combinaciones recién viables|mayores tarifas individuales|sumas de encargos rechazados}}. Una vez aceptado un trabajo, el compromiso actúa como {{restricción|recibo|beneficio hundido}} en la decisión restante."
+  explanation="Más tiempo cambia qué combinaciones caben. Un compromiso vinculante cambia lo que aún está disponible, por lo que la comparación debe usar el menú actual."
+/>
+
+## Reconstruye la decisión
+
+<MindMap client:visible
+  eyebrow="Visión de conjunto" outlineLabel="Esquema"
+  root={{ label: "Elegir una combinación viable", children: [
+    { label: "Plantear el problema", children: [{ label: "Objetivo y límite de tiempo" }, { label: "Encargos enteros y dependencias" }] },
+    { label: "Construir el menú", children: [{ label: "Enumerar horarios viables" }, { label: "Comparar en una escala coherente" }] },
+    { label: "Valorar la alternativa", children: [{ label: "Mejor horario descartado" }, { label: "Distinto de la ventaja obtenida" }, { label: "Descontar cada gasto una vez" }] },
+    { label: "Cuestionar atajos", children: [{ label: "Ordenar por hora puede encajar mal" }, { label: "Otra restricción cambia el menú" }] }
+  ]}}
+/>
+
+<Quiz client:visible
+  questionLabel="Pregunta" ofLabel="de" correctCountLabel="correctas" completeLabel="Completado" completeTitleLabel="Práctica terminada"
+  perfectMessage="Has resuelto todos los casos." goodMessage="Revisa las explicaciones de los casos fallados." keepPracticingMessage="Repasa los casos y sus explicaciones antes de repetir."
+  gateLabel="Comprueba la respuesta para continuar." nextLabel="Siguiente" seeResultsLabel="Ver resultados" backLabel="Atrás" scoreLabel="Has acertado" restartLabel="Reiniciar"
+  checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  questions={[
+    { question: "¿Por qué la alternativa pertinente puede contener varios encargos?", options: [
+      { text: "Los trabajos compatibles pueden formar un único horario viable de sustitución.", correct: true },
+      { text: "Todos los encargos rechazados pertenecen al mismo horario descartado." },
+      { text: "Una combinación evita tener que comprobar el tiempo total que necesita." }
+    ], explanation: "La alternativa es una forma completa de utilizar el recurso escaso. Puede incluir varios trabajos compatibles, pero su tiempo total sigue teniendo que caber." },
+    { question: "La editora elige la combinación original con mayor margen. ¿Qué distingue su coste de oportunidad de su ventaja?", options: [
+      { text: "El coste es el valor del mejor horario descartado; la ventaja es la diferencia.", correct: true },
+      { text: "El coste son los honorarios elegidos; la ventaja suma todos los rechazados." },
+      { text: "El coste es el tiempo libre; la ventaja ignora todos los gastos directos." }
+    ], explanation: "El siguiente mejor horario aporta el coste de oportunidad en esta escala. Restar su margen al del horario elegido da la ventaja, que es otra cantidad." },
+    { question: "Detecta el error contable después de valorar cada combinación descontando los gastos directos.", options: [
+      { text: "Descontar de nuevo los mismos gastos directos de la combinación elegida.", correct: true },
+      { text: "Comprobar si la combinación cumple el plazo de entrega establecido." },
+      { text: "Comparar su margen con el de una sustitución realmente viable." }
+    ], explanation: "Los gastos ya se incluyeron al calcular el margen. Repetir la resta cuenta dos veces el mismo desembolso." },
+    { question: "Selecciona las conclusiones respaldadas por el ejemplo de tiempo ampliado.", allowMultiple: true, options: [
+      { text: "Otro límite de tiempo puede convertir una combinación distinta en la mejor.", correct: true },
+      { text: "Horas adicionales sucesivas pueden crear mejoras monetarias diferentes.", correct: true },
+      { text: "La mayor tasa por hora siempre pone precio a cualquier hora adicional." },
+      { text: "Un contrato previo puede ignorarse cuando aparecen mejores honorarios." }
+    ], explanation: "La mejor combinación cambia cuando caben opciones nuevas y las mejoras de horas sucesivas difieren. Los compromisos existentes y las consecuencias de cambiarlos siguen formando parte del conjunto viable." }
+  ]}
+/>
+
+### Fuentes y alcance
+
+[OpenStax](https://openstax.org/books/principles-economics-3e/pages/2-1-how-individuals-make-choices-based-on-their-budget-constraint) aporta las definiciones económicas. La [guía de OR-Tools de Google](https://developers.google.com/optimization/pack/knapsack) describe la estructura de capacidad y valor. El menú de la editora y todos los cálculos son un ejemplo resuelto con valores aditivos, duraciones conocidas y sin dependencias.
