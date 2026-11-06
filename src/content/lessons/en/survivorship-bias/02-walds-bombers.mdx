@@ -1,0 +1,329 @@
+---
+title: "Wald's Bombers, in Full: Armour the Gaps"
+description: "The bullet-hole map on planes that came home is not a map of where planes get hit — it is a map of where they get hit and live, which makes it a near-perfect photographic negative of where planes actually die."
+topic: "en/survivorship-bias"
+order: 3
+minutes: 11
+updated: 2026-07-13
+---
+
+import { MCQ, Quiz, Callout, Reveal, SurvivorshipPlane, FillBlank } from '@/components/react';
+
+You already met the bombers in the intro at a jog: returning planes showed holes on the
+wings, engines looked clean, and Wald said *armour the clean parts*. Neat story. But a
+neat story is not the same as understanding *why* it works — and the "why" is where the
+whole model lives. This lesson slows the plane down to a hover and takes the engine apart.
+By the end you'll be able to derive Wald's conclusion yourself, from two numbers per
+region and a single line of arithmetic, and you'll see the punchline in its sharpest
+form: **the damage map on survivors is the mathematical inverse of the map of where
+planes die.**
+
+<MCQ
+  client:visible
+  pretest
+  question="Returning bombers show heavy bullet damage on the wings and almost none on the engines. Before reading further: what is the single best reason armour should go on the engines, not the wings?"
+  options={[
+    { text: 'Planes hit in the engine mostly crashed and never came back to be examined, so the missing holes there mark the fatal region — armour saves the planes that never made it into the sample', correct: true },
+    { text: 'The wings are already strong enough, so adding armour there is redundant', correct: false },
+    { text: 'Engines are more expensive to replace, so they are worth protecting', correct: false },
+    { text: 'Bullets naturally cluster in the middle of any object they hit', correct: false },
+  ]}
+  explanation="No penalty on a pretest — this is the whole lesson stated in advance. The clean engines are not evidence that engines rarely get hit. They are evidence that engine hits are usually fatal, so those planes are absent from the sample of returners. The empty region of the survivor map is exactly the region where armour buys you the most lives. We are about to prove it with numbers."
+/>
+
+## The setup, precisely
+
+**Survivorship bias** is easiest to see when you can pin down every moving part, and the
+1943 bomber problem is the rare case where you can. So let's fix the scenario exactly.
+
+It's the middle of the war. American bombers flying daylight raids over occupied Europe
+are getting torn up by flak and fighters, and too many aren't coming home. The Navy hands
+the problem to the **Statistical Research Group** at Columbia — a room of very sharp
+mathematicians, **Abraham Wald** among them — with a deceptively simple question: *where
+should we bolt on extra armour plating?*
+
+The catch is a hard physical constraint. Armour is heavy. A plane sheathed head to tail
+in steel would be a magnificent brick that never leaves the runway — too heavy to reach
+its range, carry its payload, or climb away from trouble. So you get a **weight budget**:
+enough plating for a region or two, no more. This is not a "protect everything" problem.
+It is a *ruthless triage* problem. You must choose **where**, and every square foot you
+armour is a square foot you can't armour somewhere else.
+
+The military had already done the "obvious" homework. They inspected the planes that came
+back, chalked a dot on every bullet hole, and pooled the results into a damage map. The
+holes were **dense on the wings and fuselage** and **sparse on the engines and cockpit.**
+The naive proposal wrote itself: *put the armour where the bullets obviously go — the
+wings.*
+
+<Callout variant="info" title="The naive rule, stated fairly">
+"Reinforce where the damage is" is not a stupid rule. It's the default rule almost
+everyone reaches for, in almost every field, because it feels like following the data. The
+trouble is *whose* data. The map was drawn entirely from planes that survived — and that
+one word quietly poisons the whole inference.
+</Callout>
+
+## Two different quantities: hit rate vs. lethality
+
+Here's the move that unlocks everything. The survivor damage map looks like it measures
+one thing — "where planes get shot" — but that single intuition is actually **two
+completely different quantities tangled together**, and prying them apart is the whole
+game.
+
+- **Hit rate** — how often a given region gets *struck* at all. To a first approximation
+  this tracks exposure and surface area: a bigger, more exposed region catches more
+  rounds. A wing is a large flat target; hit rate there is high. Crucially, hit rate is a
+  fact about *the shooting*, and it's roughly the same whether or not the plane survives.
+- **Lethality** — given that a region *is* hit, the probability that the hit *downs the
+  plane.* An engine hit is often a death sentence; a wing can be shredded and still fly.
+  Lethality is a fact about *the plane's anatomy*, not about the shooting.
+
+Now the key realisation. The survivor bullet-hole map measures **neither of these
+cleanly.** It doesn't count hits (it can't see the hits on planes that fell). It doesn't
+measure lethality (dead planes don't show up to be measured). What it actually counts is a
+*product*: **hits that were survived.** A region shows up riddled on returners only if it
+gets hit often **and** hits there are survivable. In symbols, with the population of all
+hits as the backdrop:
+
+> survivor holes in a region ≈ hit rate × (1 − lethality)
+
+Read that formula slowly, because it contains the entire paradox. A region can be dark
+with holes for two very different reasons — lots of hits, or high survivability — and a
+region can be *empty* of holes for two very different reasons too: it's rarely hit, **or
+every hit there kills.** The naive reader assumes "empty = rarely hit" and never considers
+the second door. Let's put numbers on four regions and watch the trap spring.
+
+| Region   | Hit rate (of all hits) | Lethality (hit → downed) | Survivability (1 − lethality) | Survivor holes ≈ hit rate × survivability |
+|----------|-----------------------:|-------------------------:|------------------------------:|------------------------------------------:|
+| Engines  | 25% (heavily exposed)  | 0.90                     | 0.10                          | 25 × 0.10 = **2.5**                        |
+| Cockpit  | 10%                    | 0.85                     | 0.15                          | 10 × 0.15 = **1.5**                        |
+| Fuselage | 30%                    | 0.30                     | 0.70                          | 30 × 0.70 = **21**                         |
+| Wings    | 35%                    | 0.10                     | 0.90                          | 35 × 0.90 = **31.5**                       |
+
+Work two rows by hand so the mechanism is yours, not the table's:
+
+- **Engines.** They're *hit often* — 25% of all incoming rounds, second only to the wings.
+  But lethality is a brutal 0.90, so only 1 in 10 engine-hit planes limps home. Multiply:
+  `25 × 0.10 = 2.5`. On the survivor map the engines look **nearly pristine** — despite
+  being one of the most-hit regions on the aircraft. The holes didn't vanish. The *planes*
+  vanished.
+- **Wings.** Hit even more often (35%), but wing hits are survivable 90% of the time, so
+  almost every wing-hit plane comes home to display its scars: `35 × 0.90 = 31.5`. The
+  wings look like Swiss cheese — not because wing hits are especially dangerous, but
+  precisely because they *aren't.*
+
+Look at the last column against the lethality column. The regions with the **most**
+survivor holes (wings, fuselage) have the **lowest** lethality. The regions with the
+**fewest** survivor holes (engines, cockpit) have the **highest** lethality. The visible
+map and the danger map are pointing in opposite directions.
+
+<MCQ
+  client:visible
+  question="A region of the plane is hit in 40% of engagements, and its lethality is 0.90 (nine of ten planes hit there go down). Among the planes that RETURN, will this region show many holes or few — and why?"
+  options={[
+    { text: 'Few holes — survivor holes scale with hit rate times survivability, and here that is 40 × 0.10 = 4. The heavy hit rate is nearly cancelled by the low survivability, so returners rarely display damage there even though it is struck constantly', correct: true },
+    { text: 'Many holes — it is hit 40% of the time, which is very frequent, so returning planes will be covered in damage there', correct: false },
+    { text: 'Few holes — because a 40% hit rate is actually quite low, so the region is rarely struck in the first place', correct: false },
+    { text: 'Impossible to say without knowing the total number of planes launched', correct: false },
+  ]}
+  explanation="Multiply the two numbers: survivor holes scale as hit rate × (1 − lethality) = 40 × 0.10 = 4 — very few. Distractor 2 falls for the trap of reading a high hit rate straight off the survivor map, ignoring that 90% of those hit planes are gone. Distractor 3 gets the right answer for the wrong reason — the region is hit OFTEN, not rarely; the sparse holes come from lethality, not from a lack of hits. The whole point is that a heavily hit, deadly region looks nearly untouched on survivors."
+/>
+
+### When to reach for this split
+
+Any time you're handed a "map of where the damage is" — bug reports, injuries, complaints,
+failures, returns — ask whether it's really a map of *incidents* or a map of *incidents
+that were survived long enough to be recorded.* If a severe-enough incident removes the
+subject from your dataset entirely, your damage map is measuring the product, not the
+danger, and the emptiest cells may be the most dangerous.
+
+## The inversion: survivor map = photographic negative of the danger map
+
+Now stack the two facts. The region you should armour is the one where **armour saves the
+most planes** — that is, the region with the **highest lethality**, where hits are turning
+into losses. And we just showed that the survivor map runs *inversely* to lethality:
+high-lethality regions show *few* survivor holes; low-lethality regions show *many.* Chain
+those together and you get the result the whole lesson is built around.
+
+<Callout variant="tip" title="The key result: armour the gaps, not the holes">
+On a filtered (survived-only) sample, the map of **visible damage** is approximately the
+**inverse** of the map of **danger.** Where survivors are riddled with holes, hits were
+survivable — armour there mostly protects planes that were coming home anyway. Where
+survivors show **no** holes, hits were fatal — and *that* is exactly where a plate of
+steel converts a loss into a survivor. Armour the empty regions of the survivor map.
+</Callout>
+
+This is why Wald's answer feels like sorcery until you see the arithmetic and then feels
+inevitable. He didn't have secret data. He had the *same* damage map everyone else had —
+and read it as a *negative.* Every clean patch was a confession: *planes hit here don't
+make it back to leave a mark.* The gaps weren't the safe zones. They were the graveyards.
+
+<Reveal client:visible title="Predict: where does the armour go?">
+Before you read Wald's verdict, commit to an answer. You have a weight budget for **one**
+region. The survivor map shows: wings riddled, fuselage riddled, cockpit nearly clean,
+engines nearly clean. Where do you bolt the plate — and can you say, in one sentence, why
+the "obvious" choice is the trap?
+
+Wald's answer: **armour the engines** (and the cockpit) — the regions that look *cleanest*
+on the survivors. Their emptiness isn't safety; it's the silhouette of the planes that
+never came home. Plating the bullet-riddled wings would lavish protection on aircraft that
+had already proven they survive wing hits — protecting the planes that didn't need it,
+while the ones dying in flames over the Channel get nothing.
+</Reveal>
+
+## A tiny concrete model you can hold in your hand
+
+Formulas are convincing; a body count is unforgettable. Strip the fleet down to two clean
+experiments, each with a round 100 planes taking a hit in exactly one region, and just
+*count.*
+
+| | Engine-hit planes | Wing-hit planes |
+|---|---:|---:|
+| Planes hit there | 100 | 100 |
+| Lethality (hit → downed) | 0.90 | 0.05 |
+| Planes **downed** (never seen) | 90 | 5 |
+| Planes **returning** (holes visible) | 10 | 95 |
+| Holes on the survivor map | ~10 | ~95 |
+
+Read the bottom row the way the 1943 committee did, then the way Wald did.
+
+- **The naive reading:** "95 holes on the wings, 10 on the engines — clearly the wings are
+  where the action is. Armour the wings." But look at *who* those 95 wing-hole planes are:
+  they're the 95 that **already came home.** Armour buys them almost nothing — they were
+  going to survive a wing hit regardless. You'd be reinforcing the winners.
+- **Wald's reading:** Those 10 lonely engine holes are the *survivors of a massacre.* For
+  every 10 you see, **90 are at the bottom of the sea**, unmarked and uncounted. Put the
+  armour on the engines and you go after those 90 — the planes the survivor map can't show
+  you because they aren't survivors. That's where a weight budget turns into lives.
+
+Same map. Same holes. Two readings — one that protects the 5 planes already limping home
+and one that fights for the 90 that never did. The entire discipline of thinking about
+survivorship bias is learning to reflexively see the second number: **the 90 that aren't
+in the picture.**
+
+<MCQ
+  client:visible
+  question="In the two-experiment model above, someone argues: 'The engines only show 10 holes and the wings show 95, so wing damage is clearly the bigger threat to the fleet.' What is the precise flaw?"
+  options={[
+    { text: 'It counts holes only on survivors. The 90 engine-hit planes that were downed leave no holes to count, so the low engine-hole count reflects those planes being ABSENT, not engine hits being harmless — the engine is the far bigger threat', correct: true },
+    { text: 'It is correct: 95 is much larger than 10, so wings genuinely are the bigger threat and should be armoured', correct: false },
+    { text: 'The flaw is that 100 planes per experiment is too small a sample to draw any conclusion', correct: false },
+    { text: 'The flaw is that wing hits and engine hits cannot be compared because the regions are different sizes', correct: false },
+  ]}
+  explanation="The hole count is taken only from planes that returned. The 90 downed engine-hit planes are physically gone — they contribute zero holes to the map — so the engine's tiny count of 10 is a measure of its DEADLINESS, not its safety. The threat ranking is exactly inverted by the filter: the region with fewer visible holes is the one killing the fleet. Sample size (distractor 3) and region size (distractor 4) are red herrings; the fault is the missing 90."
+/>
+
+## Fly it yourself: watch the two maps mirror
+
+You saw the fleet once in the intro. Fly it again, but this time keep the hit-rate-vs-
+lethality machinery in mind. First map the planes that **came back**: holes pile onto the
+wings and fuselage — the low-lethality, high-survivability regions from our table. Then
+flip to the planes that **never returned** and watch the fatal hits bloom in the engines
+and cockpit — the exact "clean" spots on the survivor map. The two views are near mirror
+images because they're the two factors of that product, split apart in front of you.
+
+<SurvivorshipPlane
+  client:visible
+  title="Hit rate meets lethality: the two maps are mirror images"
+  caption="Toggle 'came back' vs 'never returned' and watch the holes swap places. Survivors are riddled where lethality is low (wings ~0.10) and clean where lethality is high (engines ~0.90); the lost planes are the exact negative. Then bolt the armour on the clean engines and read the survival rate climb — you are protecting the 90 the survivor map could never show you."
+/>
+
+Bolt the armour onto the bullet-riddled fuselage and the survival rate barely twitches —
+you're plating planes that already fly home. Bolt it onto the hole-free engines and the
+rate jumps, because you're finally reaching into the region that was quietly emptying the
+sky. The buttons make the whole argument physical: acting on the *visible* data saves
+almost no one; acting on the *missing* data saves the fleet.
+
+<FillBlank
+  client:visible
+  question="Fill in Wald's logic in one sentence."
+  text="On the returning bombers, the engines showed {{few|many|average}} bullet holes. That emptiness meant engine hits were usually {{fatal|harmless|cosmetic}}, so those planes were {{missing from the sample|already reinforced|shot down by accident}}. Therefore armour belongs where survivors show {{no damage|the most damage|moderate damage}}, because that marks the {{deadliest|safest|least-hit}} region."
+  explanation="Read start to finish it is the whole model: few holes on the engines → engine hits were usually fatal → those planes are missing from the survivor sample → so armour the regions with NO visible damage → because absence of damage among survivors marks the deadliest region, not the safest."
+/>
+
+## Why this generalises (and it really does)
+
+Pull the bombers up to altitude and the shape is everywhere. Wald's fleet is just the
+cleanest instance of a rule that fires in any domain where **a filter runs before you get
+to look, and the worst outcomes remove themselves from view.** "Reinforce where the
+visible damage is" is a universal instinct — and it inverts wherever the fatal cases
+disappear instead of complaining:
+
+- **Software.** You harden the modules that generate the most *bug reports.* But a bug
+  bad enough to make users rage-quit and never return files no report at all — the silent
+  churn is your engine hit, and it hides in the module that looks "clean."
+- **Medicine.** You study the patients who show up for follow-up. The ones the treatment
+  killed or drove away don't come to the appointment; their absence can make a dangerous
+  therapy look serene.
+- **Management.** You survey the employees who stayed to find what keeps people happy. The
+  ones the culture drove out — the fatal hits — aren't at their desks to fill in the form.
+
+Every one of these is the *engines look clean* mistake in new clothes, and every one is
+disarmed by the same reflex: **ask what the filter deleted before you trust the map.** The
+next lesson walks a gallery of these cases in the wild.
+
+## The misconception to burn out
+
+The instinct this lesson exists to kill is compact and seductive: **"no damage there means
+it's safe."** Or its cousins — "no holes means it's rarely hit," "no complaints means
+they're happy," "no reports means it works."
+
+<Callout variant="warning" title="Absence of damage is not evidence of safety">
+In an *unfiltered* sample, a region with no damage really might be safe. But the moment
+your sample is **survivors only**, that inference flips: absence of damage can mark the
+region where every hit was *fatal* — the deadliest spot on the whole aircraft. Whether
+"clean" means "safe" or "lethal" depends entirely on **who got filtered out before you
+looked.** Always ask that first.
+</Callout>
+
+The engines weren't clean because they were safe. They were clean because the planes that
+proved otherwise were gone. Absence of evidence, in a filtered world, is very often
+evidence of the most dangerous thing of all.
+
+<Quiz
+  client:visible
+  questions={[
+    {
+      question: "Which statement correctly separates hit rate from lethality?",
+      options: [
+        { text: "Hit rate is how often a region is struck (a fact about the shooting); lethality is the chance a strike there downs the plane (a fact about the plane's anatomy) — the survivor map cleanly measures neither, only their product", correct: true },
+        { text: "Hit rate and lethality are two names for the same thing: how dangerous a region is", correct: false },
+        { text: "Hit rate is the chance a hit is fatal; lethality is how often the region gets hit", correct: false },
+        { text: "Lethality only matters for regions that survivors never show damage on; elsewhere it is irrelevant", correct: false },
+      ],
+      explanation: "They are independent axes. A region can be hit constantly yet rarely fatal (wings) or hit less yet almost always fatal (engines). Survivor holes ≈ hit rate × (1 − lethality) tangles both together, which is exactly why you cannot read danger straight off the map. Distractor 3 simply swaps the two definitions.",
+    },
+    {
+      question: "Why is the survivor damage map called the 'inverse' of the danger map?",
+      options: [
+        { text: "Because survivor holes scale with survivability (1 − lethality), so high-lethality regions show the fewest holes and low-lethality regions show the most — the visible pattern runs opposite to actual danger", correct: true },
+        { text: "Because the map is literally printed upside down when planes land", correct: false },
+        { text: "Because engineers deliberately reverse the map before armouring", correct: false },
+        { text: "Because bullets that miss create phantom holes that reverse the pattern", correct: false },
+      ],
+      explanation: "'Inverse' is meant mathematically, not literally. Survivor holes track (1 − lethality), the complement of danger, so the emptiest regions of the survivor map are the deadliest regions of the real one. Reading the map as a negative is precisely Wald's move.",
+    },
+    {
+      question: "A hospital reviews only patients who returned for a one-year check-up and finds a drug's side effects are mild. A colleague warns this could be the 'clean engines' mistake. What is the colleague worried about?",
+      options: [
+        { text: "Patients the drug harmed most may have died or stopped coming, removing the worst outcomes from the reviewed sample — so mild observed side effects could reflect a deadly filter, not a safe drug", correct: true },
+        { text: "One year is too short to see any side effects at all", correct: false },
+        { text: "The hospital used the wrong statistical test on the side-effect data", correct: false },
+        { text: "Side effects are always underreported by patients regardless of survival", correct: false },
+      ],
+      explanation: "This is Wald's bombers in a clinic. The follow-up sample is survivors only; the patients harmed worst are filtered out by death or dropout, so their absence can make the drug look serene exactly the way missing engine-hit planes made the engines look safe. The fix is the same: find the cohort that left.",
+    },
+  ]}
+/>
+
+## Where this goes next
+
+You can now derive Wald's conclusion from scratch: separate **hit rate** from
+**lethality**, notice that survivor holes measure their product, see that this makes the
+visible map the *inverse* of the danger map, and armour the empty regions. That's the
+flagship worked example of the entire course — the sharpest picture we have of how a filter
+turns your evidence into its own opposite.
+
+Next up, **Lesson 3: Survivorship in the Wild** — we leave the runway and hunt the same
+inversion through vanishing mutual funds, "the habits of successful people," suspiciously
+sturdy old buildings, and business bestsellers built entirely on winners. Same clean
+engines, a hundred new disguises.

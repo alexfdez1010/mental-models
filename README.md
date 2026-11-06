@@ -202,6 +202,10 @@ Each push to `main` in `alexfdez1010/mental-models` publishes production; branch
 previews are handled by Pages. No deployment workflow or repository deployment
 secrets are required.
 
+The Pages project is `mental-models`; its Cloudflare URL is
+`https://mental-models-3fp.pages.dev`. Cloudflare Web Analytics is enabled in the
+project and injects its script during deployment.
+
 Configure the Pages project with the repository root as its root directory:
 
 | Setting | Value |
@@ -232,6 +236,11 @@ and its preview has working bilingual pages, exercises, redirects, assets and SE
 metadata. Record the previous DNS target before changing it; restoring that target
 routes traffic back to Vercel if required. Check HTTPS and the same routes on the
 production domain after the switch.
+
+The previous DNS record is a DNS-only CNAME from `mental-models` to
+`0d45d95974119627.vercel-dns-017.com` with automatic TTL. Keep the Vercel project
+available while validating the Cloudflare deployment so this target remains a
+working rollback.
 
 ## 📄 License
 
