@@ -228,7 +228,7 @@ export function ConsequenceTree({
   };
 
   return (
-    <figure className={cx('brutal my-6 bg-surface p-5 sm:p-6', className)}>
+    <figure className={cx('not-prose brutal my-6 bg-surface p-5 sm:p-6', className)}>
       <p className="font-display text-xs font-semibold uppercase tracking-wide text-brand-600">
         {eyebrow}
       </p>

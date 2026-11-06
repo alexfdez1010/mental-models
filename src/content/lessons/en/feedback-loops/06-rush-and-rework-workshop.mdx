@@ -1,0 +1,624 @@
+---
+title: "When rushing creates tomorrow's work"
+description: "Trace a print shop's delayed rework loop, compare durable output and test whether a faster policy really reduces waiting work."
+topic: "en/feedback-loops"
+order: 7
+minutes: 28
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, ConsequenceTree, RateComparison, MindMap } from '@/components/react';
+
+A print shop has a wall of overdue jobs. The manager asks the team to spend less time checking proofs and get more work out of the door. The first weekly report looks excellent. Then customers start asking for reprints.
+
+The extra work has a return address: the same team. In this workshop you will trace that return, separate a temporary improvement from a durable one, and decide what evidence would justify keeping the faster policy. The print shop and all its numbers are constructed teaching examples.
+
+## Find the return path
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"What should be checked before treating the first queue fall as durable progress?"}
+  options={[
+    {
+      "text": "Follow completed jobs until their reprint window has passed.",
+      "correct": true
+    },
+    {
+      "text": "Check first-week deliveries without linking their later returns."
+    },
+    {
+      "text": "Rank policies by their largest immediate fall in waiting work."
+    },
+    {
+      "text": "Use the manager’s target pace instead of later repeat-work records."
+    }
+  ]}
+  explanation={"The first fall can be real while part of its cost has not returned yet. Follow the proposed mechanism and its timing before judging the policy."}
+/>
+
+The objective is **to reduce unfinished customer work without shifting the burden into defects and repeat visits**. Completed jobs per week is a useful activity count, but it leaves part of that objective out.
+
+Start with two competing paths. More waiting work creates deadline pressure. If the team responds by completing more jobs, waiting work falls: this is a **balancing response**, opposing the original increase. If the same pressure reduces proof-checking time, defects may rise. Reprints then add work and renew the pressure: this is a **reinforcing response**, amplifying the original problem.
+
+A **proof** is the version checked before printing; **rework** is effort spent correcting work already attempted. The return path must reach a quantity that influences the response again. “Pressure causes errors” alone is a causal chain, not yet a closed feedback loop.
+
+<ConsequenceTree
+  client:visible
+  title={"Follow the short relief and the delayed return"}
+  eyebrow={"Two paths from the same pressure"}
+  instructions={"Open each path. The final rework node returns to the waiting work that started the story."}
+  decisionLabel={"Starting condition"}
+  orderLabels={[
+    "Response",
+    "Mechanism",
+    "Effect",
+    "Return link"
+  ]}
+  promptLabel={"Follow the next link"}
+  expandAllLabel={"Show both paths"}
+  collapseLabel={"Collapse paths"}
+  valenceLabels={{
+    "good": "Helps the stated objective",
+    "bad": "Opposes the stated objective",
+    "mixed": "Conditional effect",
+    "neutral": "Modelled link"
+  }}
+  decision={{
+    "label": "More waiting print work increases deadline pressure",
+    "children": [
+      {
+        "label": "More print jobs completed this week",
+        "valence": "good",
+        "children": [
+          {
+            "label": "Less work remains waiting immediately",
+            "note": "This path opposes the original increase in waiting work.",
+            "valence": "good"
+          }
+        ]
+      },
+      {
+        "label": "Less time spent checking proofs",
+        "valence": "mixed",
+        "children": [
+          {
+            "label": "More defective print jobs leave the shop",
+            "valence": "bad",
+            "children": [
+              {
+                "label": "Customers request reprints after a delay",
+                "valence": "bad",
+                "children": [
+                  {
+                    "label": "More waiting work increases deadline pressure again",
+                    "note": "The path returns to the original quantity and reinforces the pressure.",
+                    "valence": "bad"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }}
+  caption={"This is a hypothesis about behaviour. The tree unfolds one pass around the feedback; it does not estimate effect size or prove that either path dominates."}
+/>
+
+The two paths can operate together. Their labels do not tell you their strength or the resulting trajectory. A reinforcing rework mechanism need not produce an exponential backlog, and a balancing delivery response need not empty it. The [government systems toolkit](https://www.gov.uk/government/publications/systems-thinking-for-civil-servants/toolkit) treats loop maps as provisional structures to test and refine.
+
+### When to use this map
+
+Use it when a fix brings quick relief and repeated work later. Check whether pressure actually changes checking behaviour, whether the reported defects cause repeat work, and whether that work renews the original pressure. A plausible loop is a research question, rather than a diagnosis established by a rising line.
+
+<MatchConcepts
+  client:visible
+  question={"Match the part of the story to its role."}
+  pairs={[
+    {
+      "term": "More deliveries reduce waiting work",
+      "definition": "The balancing path opposes the original increase in unfinished work."
+    },
+    {
+      "term": "Reprints renew deadline pressure",
+      "definition": "The return link closes the reinforcing rework path."
+    },
+    {
+      "term": "Customers report defects later",
+      "definition": "The delay separates delivery from the arrival of repeat work."
+    },
+    {
+      "term": "Skipping checks increases defects",
+      "definition": "A behavioural link that needs evidence in a real shop."
+    }
+  ]}
+  explanation={"Polarity, closure, timing and evidence answer different questions. A loop label does not supply a measured effect size."}
+/>
+
+## Follow the work until it returns
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"The faster policy starts this week. Which deliveries generate this week’s returning reprints in the model below?"}
+  options={[
+    {
+      "text": "The earlier completion cohort whose return window falls this week.",
+      "correct": true
+    },
+    {
+      "text": "The current completion cohort, regardless of its stated reporting delay."
+    },
+    {
+      "text": "Every unfinished job, whether or not it has previously been delivered."
+    },
+    {
+      "text": "Only newly accepted jobs, because reprints count as external demand."
+    }
+  ]}
+  explanation={"The return schedule connects a reprint to its earlier delivery. Assigning the current defect rate to the current returns would erase the transition you need to evaluate."}
+/>
+
+Use these explicit assumptions. The shop starts with **120 unfinished print jobs**. It receives **30 new jobs each week**. A job is either waiting or has been delivered; reprinting brings it back into the waiting count. There are no cancellations, transfers or other movements. Every delivery attempt consumes one work slot, including a reprint. Work remains available throughout the comparison.
+
+A **completion cohort** groups delivery attempts made in the same week. Link later reprints to those delivery dates; the same job can appear in a later cohort when it is attempted again.
+
+Under ordinary working, the team delivers **40 jobs per week** and exactly **10%** require reprinting **one week later**. Under the rush policy, it delivers **50 jobs per week**, with exactly **40%** returning one week later. These are fixed model inputs, not measured capacities or claims about real printers. Each return is attributed to its delivery cohort; repeat attempts follow the policy in force when they are delivered again.
+
+| Weekly policy | Delivery attempts per week | Share returning the next week | Reprints generated per week |
+|---|---|---|---|
+| Ordinary checks | 40 jobs | 10% | 40 × 0.10 = 4 jobs |
+| Rush policy | 50 jobs | 40% | 50 × 0.40 = 20 jobs |
+
+The week before the comparison used ordinary checks, so **4 inherited reprints arrive in the first week under either policy**. Thereafter each policy receives the returns generated by its own previous week. All counts are deterministic here; a real share would vary and need estimation.
+
+The brief stock identity is:
+
+**End-of-week waiting work = starting waiting work + new jobs + reprints arriving − delivery attempts**
+
+Ordinary working in the first week gives **120 + 30 + 4 − 40 = 114**. Rushing gives **120 + 30 + 4 − 50 = 104**. The faster policy really does leave fewer jobs waiting at that snapshot. Its own reprints have not arrived yet.
+
+<ConsequenceTree
+  client:visible
+  title={"Separate the delivery date from the reprint date"}
+  eyebrow={"Follow a completion cohort"}
+  instructions={"Reveal what happens now and what is scheduled to return later. Both belong to the same completed work."}
+  decisionLabel={"Completion cohort"}
+  orderLabels={[
+    "Immediate accounting",
+    "Delayed return"
+  ]}
+  promptLabel={"Follow this cohort"}
+  expandAllLabel={"Show the full timing"}
+  collapseLabel={"Hide the timing"}
+  valenceLabels={{
+    "good": "Accounting event",
+    "bad": "Accounting event",
+    "mixed": "Accounting event",
+    "neutral": "Accounting event"
+  }}
+  decision={{
+    "label": "Jobs delivered during the current week",
+    "children": [
+      {
+        "label": "Every delivered job leaves the waiting count now",
+        "valence": "neutral"
+      },
+      {
+        "label": "The defective share generates reprint work",
+        "valence": "neutral",
+        "children": [
+          {
+            "label": "That work re-enters during the following week",
+            "note": "The first-week dashboard has not received this cohort’s return yet.",
+            "valence": "neutral"
+          }
+        ]
+      }
+    ]
+  }}
+  caption={"The delay moves the cost into a later observation window. Delivery volume and the eventual reprint share must be linked to the same completion cohort."}
+/>
+
+This is a delay before rework re-enters the queue. Reporting sooner can reveal defects earlier, but does not itself remove the effort of reprinting. [Meadows distinguishes delays, information flows and the strength of feedback as different intervention points](https://donellameadows.org/archives/leverage-points-places-to-intervene-in-a-system/). In this comparison, we hold each policy fixed to isolate its consequences; we have not specified an automatic rule that changes the policy whenever the queue changes.
+
+<FillBlank
+  client:visible
+  question={"Complete the timing rule."}
+  text={"A return belongs to its {{earlier delivery cohort|current new-job cohort|whole waiting snapshot}}. An early improvement can hide {{work due back later|another external demand stream|a permanent capacity increase}}."}
+  explanation={"Link returns to delivery dates and follow the cohort through its return window. Current deliveries and current returns need not come from the same policy."}
+/>
+
+## Compare what survives the delay
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Once each policy is receiving its own reprints, which comparison addresses durable progress?"}
+  options={[
+    {
+      "text": "Delivery attempts minus the rework those attempts generate.",
+      "correct": true
+    },
+    {
+      "text": "Delivery attempts alone, with every attempt treated as permanent resolution."
+    },
+    {
+      "text": "The first weekly fall, with later cohorts left outside the comparison."
+    },
+    {
+      "text": "The reprint percentage alone, without considering delivery volume."
+    }
+  ]}
+  explanation={"Attempt volume and repeat work must be considered together. A lower reprint share can help, but the resulting work rate and the incoming load still matter."}
+/>
+
+Now carry the same rules forward:
+
+| End of week | Ordinary: reprints arriving | Ordinary: waiting jobs | Rush: reprints arriving | Rush: waiting jobs |
+|---|---|---|---|---|
+| Start | — | 120 | — | 120 |
+| First | 4 | 114 | 4 | 104 |
+| Second | 4 | 108 | 20 | 104 |
+| Third | 4 | 102 | 20 | 104 |
+| Fourth | 4 | 96 | 20 | 104 |
+
+The second rush week is **104 + 30 + 20 − 50 = 104**. More deliveries are being made, but the queue stops shrinking. This is not an oscillation: delayed repeat work arrives and the waiting count then stays flat under the fixed inputs. Delay does not, by itself, prove a particular pattern.
+
+For this model, define the **durable completion rate** as delivery attempts minus the reprints they generate. If delivery attempts are C jobs per week and the returning share is r, that rate is **C × (1 − r)**. It measures net removal of work after the return window while work remains available, not the number of different customers served.
+
+- Ordinary checks: **40 × (1 − 0.10) = 36 jobs per week**. Against 30 new jobs, waiting work falls by **6 per week** once the return pattern is established.
+- Rushing: **50 × (1 − 0.40) = 30 jobs per week**. It only matches new arrivals, leaving **no continuing reduction**.
+
+<RateComparison
+  client:visible
+  title={"Reprint share of the same policy’s delivery cohort"}
+  scenarios={[
+    {
+      "label": "Constructed weekly completion cohorts",
+      "groups": [
+        {
+          "label": "Rush policy",
+          "events": 20,
+          "total": 50
+        },
+        {
+          "label": "Ordinary checks",
+          "events": 4,
+          "total": 40
+        }
+      ]
+    }
+  ]}
+  locale={"en"}
+  countsLabel={"Reprints / delivery attempts"}
+  differenceLabel={"Difference in reprint share"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+/>
+
+The chart compares proportions, not raw reprint totals or the size of the waiting stock. Neither the chart nor the table estimates an observed causal effect: both follow the supplied inputs.
+
+### Do not stop the clock with work still returning
+
+At the fourth snapshot, the ordinary policy has **96 waiting jobs and 4 scheduled returns** from its latest deliveries. Rushing has **104 waiting jobs and 20 scheduled returns**. Including that known return exposure gives **100 versus 124 jobs**, respectively. This extra comparison prevents the cutoff from rewarding work whose defect cost has merely moved beyond the reporting date.
+
+In the toy model, every scheduled return is known. In a real shop, some are still unreported: follow delivery cohorts for a justified observation window and show uncertainty about later returns. Jobs of different size, costs, urgency and customer inconvenience would need additional measures.
+
+<MCQ
+  client:visible
+  question={"Which conclusions follow from the comparison? Select all that apply."}
+  allowMultiple={true}
+  options={[
+    {
+      "text": "The rush policy’s early queue fall can coexist with worse durable progress.",
+      "correct": true
+    },
+    {
+      "text": "The larger delivery count can be partly spent completing earlier reprints.",
+      "correct": true
+    },
+    {
+      "text": "The delay converts the reinforcing rework path into a balancing loop."
+    },
+    {
+      "text": "The returning share alone determines progress regardless of job volume."
+    }
+  ]}
+  explanation={"The transition hides some reprints at first. Once returns arrive, attempts must cover both fresh and repeated work. Polarity is about the stated causal path; output and return share jointly determine this model’s durable rate."}
+/>
+
+## Choose the change and its falsification test
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"A manager proposes retaining the faster delivery rate while reducing reprints. What must be checked together?"}
+  options={[
+    {
+      "text": "Whether the claimed pace and lower return share are achievable with the same quality requirements.",
+      "correct": true
+    },
+    {
+      "text": "Whether the policy sounds structural enough to guarantee its improvement without a trial."
+    },
+    {
+      "text": "Whether the first report can omit old reprints to isolate the desired improvement."
+    },
+    {
+      "text": "Whether a smaller observed queue makes workload and customer outcomes unnecessary."
+    }
+  ]}
+  explanation={"The proposal changes coupled quantities. Extra checking can take time, and an attractive return share does not establish that the advertised pace remains feasible."}
+/>
+
+Suppose a revised rush process claims it can maintain **50 attempts per week** while reducing the returning share to **20%**. Conditional on both claims, durable completion becomes **50 × 0.80 = 40 jobs per week**. That would exceed ordinary working’s 36 and new arrivals of 30. This is a candidate to test, not a result already achieved.
+
+The comparison also gives a useful threshold. To beat ordinary working’s durable 36 at a pace of 50, returns must be **below 28%**, because **50 × (1 − 0.28) = 36**. Merely keeping returns at or below **40%** would prevent growth at the stated arrival rate; it would not necessarily beat the alternative. Equality is not improvement.
+
+Protecting proof-checking time may weaken the error link. Giving the team cohort-linked defect feedback may improve its information. Evaluating durable completions alongside customer repeat work may change the goal. These are different proposals with different costs; a rung on a leverage ladder does not tell you their actual benefit. Even a parameter can matter when it changes a feedback relationship.
+
+### Turn the causal map into a test
+
+Record delivery dates, checking effort, defect reasons, reprint dates and work difficulty. Compare suitably similar work under the candidate and ordinary process; random allocation may help when feasible, but shared staff, learning and spillovers can contaminate the comparison. Allow cohorts to complete the expected return window and check for later returns. A busy week before the change and a quiet week afterwards are not interchangeable conditions.
+
+The [official impact-evaluation guidance](https://www.gov.uk/government/publications/the-magenta-book/quality-in-policy-impact-evaluation-qpie-html) explains why a before-and-after change alone gives weak evidence about what an intervention caused. Mechanism records help test the proposed links; a credible comparison helps assess the resulting difference.
+
+Agree review criteria before extending the candidate: it should improve durable completions against the alternative without unacceptable repeat visits, waiting for urgent work or extra staff burden. Revise the model if the pace falls when proofing is protected, the return share exceeds its proposed bound, or returns arrive later than assumed. Reassess the choice if the decision-relevant comparison changes.
+
+<Categorize
+  client:visible
+  question={"Distinguish what the calculation establishes from what the trial must establish."}
+  buckets={[
+    "Consequence of the stated inputs",
+    "Claim needing real-world evidence"
+  ]}
+  items={[
+    {
+      "text": "A proposed pace and return share imply a durable completion rate.",
+      "bucket": "Consequence of the stated inputs"
+    },
+    {
+      "text": "The team can maintain that pace while preserving proof checks.",
+      "bucket": "Claim needing real-world evidence"
+    },
+    {
+      "text": "The candidate changes the return share in otherwise comparable work.",
+      "bucket": "Claim needing real-world evidence"
+    },
+    {
+      "text": "At the equality threshold, durable output matches the alternative.",
+      "bucket": "Consequence of the stated inputs"
+    }
+  ]}
+  explanation={"Arithmetic evaluates supplied conditions. Feasibility and causal improvement require evidence about the actual process and a comparison that addresses other explanations."}
+/>
+
+## Transfer the timing rule
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"A new team has a longer return delay than the print shop. Which input should travel with each completed batch?"}
+  options={[
+    {
+      "text": "Its completion date and its own scheduled return window.",
+      "correct": true
+    },
+    {
+      "text": "The latest return count, copied into every future period."
+    },
+    {
+      "text": "The current new-arrival count, treated as all repeat work."
+    },
+    {
+      "text": "The largest delivery total, treated as permanent resolution."
+    }
+  ]}
+  explanation={"The method transfers through cohort timing, not by copying the print shop’s delay or return total."}
+/>
+
+A volunteer subtitling team starts with **72 unfinished clips**. It accepts **18 new clips per week** and completes **30 attempts per week**. Exactly **40%** of each completed cohort needs correction **two weeks later**. Repeated corrections consume the same attempt slots and follow the same rule. Older work already scheduled **4 returns in the first week** and **6 in the second**. There are no other movements, and enough work is available throughout.
+
+Compute the end-of-week waiting counts using those inherited returns, then the returns from the first completed cohort. Which row follows the rules?
+
+| Candidate row | First week | Second week | Third week |
+|---|---|---|---|
+| A | 64 clips | 58 clips | 58 clips |
+| B | 64 clips | 58 clips | 46 clips |
+| C | 64 clips | 56 clips | 48 clips |
+| D | 72 clips | 72 clips | 72 clips |
+
+<MCQ
+  client:visible
+  question={"Choose the row that uses the specified return schedule."}
+  options={[
+    {
+      "text": "Row A",
+      "correct": true
+    },
+    {
+      "text": "Row B"
+    },
+    {
+      "text": "Row C"
+    },
+    {
+      "text": "Row D"
+    }
+  ]}
+  explanation={"Use the inherited returns first, then the returning share of the matching earlier completion cohort. An initially falling queue can flatten once the new policy’s correction work arrives. The calculation below shows each step."}
+/>
+
+### Check the calculation
+
+The first week ends at **72 + 18 + 4 − 30 = 64**. The second ends at **64 + 18 + 6 − 30 = 58**. In the third, the first cohort sends back **30 × 0.40 = 12** clips, so the result is **58 + 18 + 12 − 30 = 58**. Row A follows the schedule. Row B omits the delayed returns; C repeats the first inherited return count; D applies the eventual net rate before the transition has played out.
+
+Here durable completion is **30 × 0.60 = 18 clips per week**, equal to new arrivals. That explains the later flat queue, but it cannot reconstruct the early weeks without the inherited return schedule. If correction complexity or the returning share changes, recompute rather than treating this illustrative rate as a guarantee.
+
+## Rebuild the policy comparison
+
+<MindMap
+  client:visible
+  title={"From quick relief to a tested feedback claim"}
+  root={{
+    "label": "Evaluate a delayed rework loop",
+    "children": [
+      {
+        "label": "Close the mechanism",
+        "children": [
+          {
+            "label": "Pressure changes checking effort"
+          },
+          {
+            "label": "Defects return as work and renew pressure"
+          }
+        ]
+      },
+      {
+        "label": "Follow cohorts through time",
+        "children": [
+          {
+            "label": "Inherited returns differ from new-policy returns"
+          },
+          {
+            "label": "Keep work beyond the cutoff visible"
+          }
+        ]
+      },
+      {
+        "label": "Compare durable progress",
+        "children": [
+          {
+            "label": "Attempts minus generated repeat work"
+          },
+          {
+            "label": "Compare with arrivals and the alternative"
+          }
+        ]
+      },
+      {
+        "label": "Test and revise",
+        "children": [
+          {
+            "label": "Measure pace and quality together"
+          },
+          {
+            "label": "Check comparison conditions and delayed returns"
+          }
+        ]
+      }
+    ]
+  }}
+/>
+
+<Quiz
+  client:visible
+  title={"Check the model and its limits"}
+  questions={[
+    {
+      "question": "Which link closes the reinforcing path rather than merely extending a consequence chain?",
+      "options": [
+        {
+          "text": "Reprints add waiting work that renews the original deadline pressure.",
+          "correct": true
+        },
+        {
+          "text": "The printer uses less paper for a proof before production starts."
+        },
+        {
+          "text": "The manager sees a lower waiting count during the first report."
+        },
+        {
+          "text": "The team records delivery dates alongside the same job identifiers."
+        }
+      ],
+      "explanation": "The return to the original pressure makes it feedback. Recording dates supports evaluation but does not, by itself, create that behavioural loop."
+    },
+    {
+      "question": "Why does the first rush week look better than the later comparison?",
+      "options": [
+        {
+          "text": "It receives inherited ordinary-process reprints before its own larger return cohort arrives.",
+          "correct": true
+        },
+        {
+          "text": "It establishes that the rush process has permanently eliminated repeated work."
+        },
+        {
+          "text": "It receives the rush process’s own defect reports before its deliveries occur."
+        },
+        {
+          "text": "It proves that all extra deliveries are different customers with no future corrections."
+        }
+      ],
+      "explanation": "The transition mixes current deliveries with an older cohort’s returns. Compare mature cohorts and preserve the delay when interpreting the early snapshot."
+    },
+    {
+      "question": "Select the distinctions needed to interpret the reprint chart.",
+      "allowMultiple": true,
+      "options": [
+        {
+          "text": "A cohort’s reprints and delivery attempts define its returning share.",
+          "correct": true
+        },
+        {
+          "text": "The share alone does not specify durable completions or incoming load.",
+          "correct": true
+        },
+        {
+          "text": "A larger percentage-point difference is a count of additional waiting jobs."
+        },
+        {
+          "text": "A plotted policy difference proves what an actual intervention caused."
+        }
+      ],
+      "explanation": "The chart displays constructed event proportions. Quantities, rates and causal evidence have different roles, even when the chart is easy to read."
+    },
+    {
+      "question": "A revised process can reduce reprints only by slowing attempts. What should happen to the policy comparison?",
+      "options": [
+        {
+          "text": "Recalculate durable completion using both changed quantities and review the wider costs.",
+          "correct": true
+        },
+        {
+          "text": "Keep the advertised fast rate because return quality has improved."
+        },
+        {
+          "text": "Choose the lowest returning share without considering its output rate."
+        },
+        {
+          "text": "Ignore the return share because attempts already measure permanent resolution."
+        }
+      ],
+      "explanation": "A quality change and a pace change can offset each other. The coupled inputs, arrivals, alternative and customer burden determine whether the candidate serves the objective."
+    },
+    {
+      "question": "What does the subtitling case add to the lesson?",
+      "options": [
+        {
+          "text": "The same eventual net rate can coexist with a different early path because return timing and inherited cohorts differ.",
+          "correct": true
+        },
+        {
+          "text": "A stable eventual net rate makes the inherited return schedule irrelevant to all earlier snapshots."
+        },
+        {
+          "text": "A longer delay changes reinforcing feedback into balancing feedback without any change in the links."
+        },
+        {
+          "text": "A falling initial queue proves that the team can keep reducing it at that same pace indefinitely."
+        }
+      ],
+      "explanation": "Separate the long-run rate implication from the transition. The earlier cohorts and their return dates determine the first snapshots; the eventual balance does not replace those records."
+    }
+  ]}
+/>
+
+### Sources and boundaries
+
+The two shop policies and the subtitling case are deterministic demonstrations, not observed performance data. The linked primary accounts support the distinctions between feedback structure, delay, intervention and evaluation. No automatic controller, cost optimum or general claim that rushing always backfires is being estimated. Real work can vary in size, urgency, return timing and how pressure affects behaviour.
+
+Next, take the [final exam](/feedback-loops/final-exam). It now includes delayed rework and policy testing alongside the earlier feedback concepts.
