@@ -180,9 +180,9 @@ function selectRoutes(allRoutes: string[], argv: string[]): string[] {
 
 /* ---- helpers ------------------------------------------------------------ */
 
-/** Recursively collect every directory containing an index.html under dist. */
+/** Collect extensionless routes from both flat HTML and directory-index builds. */
 function collectRoutes(dir: string): string[] {
-  const routes: string[] = [];
+  const routes = new Set<string>();
   const walk = (current: string) => {
     let entries: string[];
     try {
@@ -190,17 +190,21 @@ function collectRoutes(dir: string): string[] {
     } catch {
       return;
     }
-    if (entries.includes('index.html')) {
-      const rel = relative(DIST, current).split('\\').join('/');
-      routes.push(rel === '' ? '/' : `/${rel}`);
-    }
     for (const name of entries) {
       const full = join(current, name);
-      if (statSync(full).isDirectory()) walk(full);
+      if (statSync(full).isDirectory()) {
+        walk(full);
+      } else if (name.endsWith('.html')) {
+        const rel = relative(dir, full).split('\\').join('/');
+        const route = name === 'index.html'
+          ? rel.slice(0, -'index.html'.length).replace(/\/$/, '')
+          : rel.slice(0, -'.html'.length);
+        routes.add(route === '' ? '/' : `/${route}`);
+      }
     }
   };
   walk(dir);
-  return routes;
+  return [...routes];
 }
 
 /** Wait until the preview server answers on the port (or time out). */
