@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { cx } from '@/components/react/cx';
 
 /** A single zoom/detail step in a {@link MapTerritoryZoom}. */
@@ -6,8 +6,8 @@ export interface MapTerritoryStep {
   /** Short label for this level of detail (e.g. "Subway map"). */
   label: string;
   /**
-   * How many points the simplified coastline keeps at this step. Higher = more
-   * faithful to the "territory". The component samples the full coastline down
+   * How many points the simplified coastline keeps at this step. More points
+   * can retain smaller features of the reference outline. The component samples the full coastline down
    * to this many vertices, so each step visibly drops detail.
    */
   detail: number;
@@ -22,17 +22,19 @@ export interface MapTerritoryZoomProps {
    * faithful (most points). At least two are required. The slider walks them.
    */
   steps?: MapTerritoryStep[];
+  /** Language for built-in steps, number formatting, and accessible text. */
+  locale?: 'en' | 'es';
   /** Heading above the figure. */
   title?: string;
-  /** Eyebrow label. Defaults to `'Map vs. territory'`. */
+  /** Eyebrow label. Defaults to `'Map vs territory'`. */
   eyebrow?: string;
   /** Caption beneath the figure. */
   caption?: string;
   /** Label for the simplified ("map") layer in the legend. Defaults to `'The map'`. */
   mapLabel?: string;
-  /** Label for the full-detail ("territory") layer in the legend. Defaults to `'The territory'`. */
+  /** Label for the full-detail ("territory") layer in the legend. Defaults to `'The territory reference'`. */
   territoryLabel?: string;
-  /** Prefix for the detail readout, e.g. "Detail kept". Defaults to `'Detail kept'`. */
+  /** Prefix for the detail readout. Defaults to `'Points retained'`. */
   detailLabel?: string;
   /** Accessible label for the step slider. Defaults to `'Level of detail'`. */
   sliderLabel?: string;
@@ -40,33 +42,22 @@ export interface MapTerritoryZoomProps {
   className?: string;
 }
 
-const DEFAULT_STEPS: MapTerritoryStep[] = [
-  {
-    label: 'Subway map',
-    detail: 5,
-    note: 'Almost no real geography — just which stops connect. Perfect for catching a train, useless for walking.',
-  },
-  {
-    label: 'Road atlas',
-    detail: 11,
-    note: 'The big bends are back, but coves and inlets are smoothed away. Good enough to drive the coast.',
-  },
-  {
-    label: 'Hiking map',
-    detail: 24,
-    note: 'Most bays and headlands appear. Close enough to plan a walk along the shore.',
-  },
-  {
-    label: 'Survey chart',
-    detail: 60,
-    note: 'Nearly every wrinkle of the coast. Detailed — but slow to read and expensive to make.',
-  },
-  {
-    label: 'The real coastline',
-    detail: 240,
-    note: 'The territory itself: infinitely detailed. No map can ever fully contain it.',
-  },
-];
+const DEFAULT_STEPS: Record<'en' | 'es', MapTerritoryStep[]> = {
+  en: [
+    { label: 'Coarse outline', detail: 5, note: 'The main shape is visible. Small bays disappear, so this outline cannot locate a landing spot.' },
+    { label: 'Main bends', detail: 11, note: 'More bends appear. Compare the coloured line with the grey reference to find what is still missing.' },
+    { label: 'Bays and headlands', detail: 24, note: 'Smaller features become visible. Whether they are enough depends on the journey you need to plan.' },
+    { label: 'Fine shoreline', detail: 60, note: 'The outline follows more of the reference, while details between the sampled points can still be lost.' },
+    { label: 'Reference outline', detail: 240, note: 'Both drawings now match at this scale. The reference is still a drawing: it leaves out tides, rocks and changes over time.' },
+  ],
+  es: [
+    { label: 'Contorno básico', detail: 5, note: 'Se reconoce la forma general. Las calas pequeñas desaparecen, así que este contorno no permite elegir dónde desembarcar.' },
+    { label: 'Curvas principales', detail: 11, note: 'Aparecen más curvas. Compara la línea de color con la referencia gris para encontrar lo que aún falta.' },
+    { label: 'Calas y cabos', detail: 24, note: 'Se distinguen accidentes más pequeños. Que basten depende de la ruta que necesites planificar.' },
+    { label: 'Orilla detallada', detail: 60, note: 'El contorno sigue mejor la referencia, aunque aún puede perder detalles entre los puntos de la muestra.' },
+    { label: 'Contorno de referencia', detail: 240, note: 'Los dos dibujos coinciden a esta escala. La referencia sigue siendo un dibujo: omite mareas, rocas y cambios con el tiempo.' },
+  ],
+};
 
 /**
  * A smooth, wiggly reference "coastline" sampled across the full width. We
@@ -92,59 +83,55 @@ const BASELINE = 96; // y of the mean coast line
 const LEFT = 12;
 const RIGHT = W - 12;
 
-/** Build an SVG path for a coast sampled to `count` vertices, as a filled land mass. */
-function buildPath(count: number): string {
-  const n = Math.max(2, count);
-  const pts: Array<[number, number]> = [];
-  for (let i = 0; i < n; i++) {
-    const t = i / (n - 1);
-    const x = LEFT + t * (RIGHT - LEFT);
-    const y = BASELINE + coastlineY(t);
-    pts.push([x, y]);
-  }
-  const top = pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L ');
-  // Close the shape down to the bottom edge so it reads as a landmass below the coast.
+/** A fixed number of vertices lets the outline morph without changing its topology. */
+function sampleOutline(detail: number, samples: number): number[] {
+  return Array.from({ length: samples }, (_, i) => {
+    const t = i / (samples - 1);
+    const position = t * (detail - 1);
+    const left = Math.floor(position);
+    const right = Math.min(detail - 1, left + 1);
+    const fraction = position - left;
+    return BASELINE + coastlineY(left / (detail - 1)) * (1 - fraction) + coastlineY(right / (detail - 1)) * fraction;
+  });
+}
+
+function buildPath(outline: number[]): string {
+  const top = outline.map((y, i) => `${(LEFT + i / (outline.length - 1) * (RIGHT - LEFT)).toFixed(2)},${y.toFixed(2)}`).join(' L ');
   return `M ${LEFT},${H - 8} L ${top} L ${RIGHT},${H - 8} Z`;
 }
 
 /**
- * Interactive **map-vs-territory** island.
- *
- * A reference "coastline" (the territory) is drawn faintly in the background.
- * On top, a bold simplified coastline is redrawn at the detail level the learner
- * selects with a slider — from a 5-point subway-style sketch up to a 240-point
- * near-faithful survey. Stepping toward "simpler" visibly erases coves and
- * inlets, making concrete the core idea that **every model omits detail**: the
- * map is not the territory.
- *
- * The control is a real, keyboard-operable `<input type="range">` with a label
- * and a live text readout, so the information is fully available without motion
- * and to screen readers. No animation is essential — the SVG is static at each
- * step — so `prefers-reduced-motion` users lose nothing; the path transition is
- * purely cosmetic and disabled by the global reduced-motion rule.
+ * Scrub a simplified coastline against a stable reference. A short, interruptible
+ * morph makes the loss of bays visible. The selected step and its explanation
+ * remain available immediately; reduced motion snaps directly to the same result.
  */
 export function MapTerritoryZoom({
-  steps = DEFAULT_STEPS,
+  steps: authoredSteps,
+  locale = 'en',
   title,
-  eyebrow = 'Map vs. territory',
+  eyebrow,
   caption,
-  mapLabel = 'The map',
-  territoryLabel = 'The territory',
-  detailLabel = 'Detail kept',
-  sliderLabel = 'Level of detail',
+  mapLabel,
+  territoryLabel,
+  detailLabel,
+  sliderLabel,
   className,
 }: MapTerritoryZoomProps) {
+  const spanish = locale === 'es';
+  const steps = authoredSteps ?? DEFAULT_STEPS[locale];
+  eyebrow ??= spanish ? 'Mapa frente a territorio' : 'Map vs territory';
+  mapLabel ??= spanish ? 'El mapa' : 'The map';
+  territoryLabel ??= spanish ? 'La referencia del territorio' : 'The territory reference';
+  detailLabel ??= spanish ? 'Puntos conservados' : 'Points retained';
+  sliderLabel ??= spanish ? 'Nivel de detalle' : 'Level of detail';
   // Fail the build on a mis-authored figure rather than shipping a broken slider.
   // Runs during SSR/prerender → red build.
   if (!Array.isArray(steps) || steps.length < 2) {
     throw new Error('MapTerritoryZoom: needs at least two `steps`.');
   }
-  const bad = steps.find((s) => !s?.label?.trim() || !s?.note?.trim() || !(s.detail >= 2));
-  if (bad) {
-    throw new Error(
-      `MapTerritoryZoom: every step needs a non-empty \`label\`, a \`note\`, and a ` +
-        `\`detail\` of at least 2. Offending step: "${bad?.label ?? '(missing label)'}".`,
-    );
+  const badIndex = steps.findIndex((s) => !s?.label?.trim() || !s?.note?.trim() || !Number.isSafeInteger(s.detail) || s.detail < 2);
+  if (badIndex !== -1) {
+    throw new Error(`MapTerritoryZoom: every step needs a non-empty \`label\`, a \`note\`, and a finite integer \`detail\` of at least 2. Invalid step: ${badIndex}.`);
   }
 
   const reactId = useId();
@@ -152,13 +139,49 @@ export function MapTerritoryZoom({
   const [index, setIndex] = useState(0);
   const step = steps[index];
 
-  // The faint reference layer always shows the richest available detail.
-  const territoryDetail = useMemo(
-    () => Math.max(...steps.map((s) => s.detail)),
-    [steps],
-  );
-  const territoryPath = useMemo(() => buildPath(territoryDetail), [territoryDetail]);
-  const mapPath = useMemo(() => buildPath(step.detail), [step.detail]);
+  const territoryDetail = useMemo(() => Math.max(...steps.map((s) => s.detail)), [steps]);
+  const samples = Math.max(240, territoryDetail);
+  const territoryPath = useMemo(() => buildPath(sampleOutline(territoryDetail, samples)), [territoryDetail, samples]);
+  const targetOutline = useMemo(() => sampleOutline(step.detail, samples), [step.detail, samples]);
+  const displayedOutline = useRef(targetOutline);
+  const initialPath = useRef(buildPath(targetOutline));
+  const mapPathRef = useRef<SVGPathElement>(null);
+
+  useEffect(() => {
+    const element = mapPathRef.current;
+    if (!element) return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+    const finish = () => {
+      cancelAnimationFrame(frame);
+      displayedOutline.current = targetOutline;
+      element.setAttribute('d', buildPath(targetOutline));
+    };
+    const onPreferenceChange = () => { if (preference.matches) finish(); };
+    if (preference.matches || displayedOutline.current.length !== targetOutline.length) {
+      finish();
+      return;
+    }
+    const from = displayedOutline.current;
+    if (from.every((value, i) => value === targetOutline[i])) return;
+    const started = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - started) / 280);
+      const eased = 1 - (1 - progress) ** 3;
+      const next = targetOutline.map((y, i) => from[i] + (y - from[i]) * eased);
+      displayedOutline.current = next;
+      element.setAttribute('d', buildPath(next));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    preference.addEventListener('change', onPreferenceChange);
+    return () => {
+      cancelAnimationFrame(frame);
+      preference.removeEventListener('change', onPreferenceChange);
+    };
+  }, [targetOutline]);
+
+  const pointsText = step.detail.toLocaleString(spanish ? 'es-ES' : 'en-US');
 
   return (
     <figure
@@ -174,30 +197,29 @@ export function MapTerritoryZoom({
         <p className="mt-1 font-display text-lg font-semibold text-ink-900">{title}</p>
       ) : null}
 
-      <div className="mt-4 overflow-hidden rounded-card border border-ink-100 bg-surface-sunken">
+      <div className="mt-4 overflow-hidden rounded-card bg-surface-sunken">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           className="h-auto w-full"
           role="img"
-          aria-label={`${step.label}: a coastline drawn with ${step.detail} points — ${step.note}`}
+          aria-label={`${step.label}. ${detailLabel}: ${pointsText}. ${step.note}`}
         >
-          {/* Sea label tint band, purely decorative. */}
-          <rect x="0" y="0" width={W} height={H} fill="var(--color-surface-sunken)" />
-          {/* Territory: the faint, full-detail truth underneath. */}
+          {/* Stable reference: still a drawing, rather than the territory itself. */}
           <path
             d={territoryPath}
             fill="var(--color-ink-200)"
-            stroke="var(--color-ink-300)"
-            strokeWidth="1"
+            stroke="var(--color-ink-500)"
+            strokeWidth="1.5"
+            strokeDasharray="3 3"
           />
           {/* Map: the bold simplified coastline the learner controls. */}
           <path
-            d={mapPath}
+            ref={mapPathRef}
+            d={initialPath.current}
             fill="color-mix(in oklab, var(--color-brand-400) 32%, transparent)"
             stroke="var(--color-brand-600)"
             strokeWidth="2.5"
             strokeLinejoin="round"
-            className="transition-all duration-500 ease-out motion-reduce:transition-none"
           />
           {/* Vertex dots on the map so dropped detail is unmistakable. */}
           {Array.from({ length: step.detail }).map((_, i) => {
@@ -209,7 +231,7 @@ export function MapTerritoryZoom({
                 key={i}
                 cx={x}
                 cy={y}
-                r="2.6"
+                r={step.detail > 60 ? 1 : 2.6}
                 fill="var(--color-brand-700)"
               />
             );
@@ -254,7 +276,8 @@ export function MapTerritoryZoom({
           value={index}
           onChange={(e) => setIndex(Number(e.target.value))}
           aria-valuetext={step.label}
-          className="h-2 w-full cursor-pointer appearance-none rounded-pill bg-surface-sunken accent-brand-600"
+          aria-describedby={`${reactId}-readout`}
+          className="h-6 w-full cursor-pointer accent-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
         />
         <div className="mt-1 flex justify-between text-[0.65rem] font-medium uppercase tracking-wide text-ink-400">
           <span>{steps[0].label}</span>
@@ -264,11 +287,13 @@ export function MapTerritoryZoom({
 
       {/* Live readout */}
       <p
+        id={`${reactId}-readout`}
         aria-live="polite"
-        className="mt-3 rounded-card border border-brand-200 bg-brand-50/70 p-3 text-sm leading-relaxed text-ink-700"
+        aria-atomic="true"
+        className="mt-3 rounded-card bg-brand-50/70 p-3 text-sm leading-relaxed text-ink-700"
       >
         <span className="font-semibold text-brand-700">
-          {detailLabel}: {step.detail} {step.detail === 1 ? 'point' : 'points'}.
+          {detailLabel}: {pointsText}.
         </span>{' '}
         {step.note}
       </p>

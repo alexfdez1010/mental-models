@@ -61,6 +61,12 @@ the es file:
 - `MCQ`: `checkLabel="Comprobar"`, `retryLabel="Reintentar"`
 - `Quiz`: `questionLabel="Pregunta"`, `ofLabel="de"`, `scoreLabel="Tu puntuación"`,
   `restartLabel="Reiniciar"`, `nextLabel="Siguiente"`, `backLabel="Atrás"`
+- `FinalExam`: `ariaLabel="Examen final"` when no visible title is provided,
+  plus all submission, lock, result, and review labels. Explain that answers
+  remain locked during the current exam; do not suggest an in-session retry.
+- `MapTerritoryZoom` / `FirstPrinciplesBuilder`: `locale="es"` localizes their
+  built-in steps, instructions, accessible descriptions, and number formatting.
+  Also translate any explicitly authored labels, notes, parts, or verdicts.
 - `MCQ pretest`: `pretestLabel="Antes de leer — adivina"` (+ the usual MCQ labels)
 - `MatchConcepts` / `Categorize` / `FillBlank`: `checkLabel="Comprobar"`,
   `retryLabel="Reintentar"`, `explanationLabel="Explicación"`, and translate

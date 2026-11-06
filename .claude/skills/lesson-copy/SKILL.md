@@ -11,13 +11,41 @@ teaching feature, not fluff. **Accuracy always wins** — humor never distorts a
 fact. (See `TOPIC.md` for the subject and any domain-specific tone rules — read
 it first; match its voice.)
 
+For explanation structure, use the global `made-to-stick-presentations` skill
+(adapted from Pasapuzzle) and `es-editorial-manuals` when available. Their
+SUCCESs criteria guide choices; they are not six mandatory sections. Keep the
+guidance below usable even when those global skills are unavailable.
+
+## Make the reasoning reproducible
+
+Start a difficult idea with a concrete decision, object, or question the reader
+can inspect. Define unfamiliar terms, then work the first example through its
+data, assumptions, operation, and consequence. An analogy should preserve the
+relationship being taught; state its limit when a reader might transfer it too
+far. Familiarity with one field does not establish expertise in another.
+
+Show what would change the answer. Preserve units, denominators, time periods,
+exceptions, and the strength of the evidence. Describe invented scenarios as
+scenarios, and avoid presenting illustrative outcomes as historical facts.
+Do not add a historical anecdote or an impressive quotation just for authority.
+
+After teaching a relationship, ask the learner to use it in a different case.
+Feedback explains the decisive step and a plausible error; it should not just
+repeat the correct option. Use numbers when they clarify a relationship, rather
+than announcing a "worked example" that contains no calculation or decision.
+
+Review the complete English and Spanish twins, including titles, figure labels,
+answer options, feedback, and recap. Each landing page should identify its own
+decision and limits instead of repeating a site-wide sales formula. Explanations
+need enough context for a beginner, even when a shorter sentence sounds sharper.
+
 ## The voice
 
 - **Conversational & direct.** Second person ("you"), short sentences, active
   voice. Talk *to* the learner.
-- **Witty, lightly sarcastic.** Dry humor, playful asides, the occasional
-  knowing wink at how confusing the topic usually is. Punch up at the jargon,
-  never down at the learner.
+- **Lightly witty when useful.** Keep humor that makes the idea clearer or fits
+  an existing example. Do not add jokes, sarcasm, or a closing punchline to meet
+  a quota. Never make the learner the target.
 - **Analogy-first.** Open hard concepts with a concrete, everyday analogy before
   the formal definition (e.g. "a key signature is basically the song agreeing in
   advance which notes get the funny accent" — illustrative; use one fit to your

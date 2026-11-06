@@ -13,6 +13,8 @@ export interface FirstPrinciplesPart {
 
 /** Props for the {@link FirstPrinciplesBuilder} island. */
 export interface FirstPrinciplesBuilderProps {
+  /** Language used for number formatting and built-in labels. */
+  locale?: 'en' | 'es';
   /** Heading above the figure. */
   title?: string;
   /** Eyebrow label. Defaults to `'Decompose, then rebuild'`. */
@@ -30,9 +32,9 @@ export interface FirstPrinciplesBuilderProps {
   analogyNote?: string;
   /** The irreducible parts. Adding them all up gives the first-principles total. */
   parts: FirstPrinciplesPart[];
-  /** Label for the rebuilt running total. Defaults to `'Rebuilt from first principles'`. */
+  /** Label for the running sum of selected parts. */
   rebuiltLabel?: string;
-  /** Instruction line above the parts. Defaults to `'Add each irreducible part to rebuild the real cost:'`. */
+  /** Instruction line explaining how to add and remove parts. */
   instructions?: string;
   /** Text prefix on every number (e.g. a currency sign). Defaults to `'$'`. */
   valuePrefix?: string;
@@ -44,8 +46,7 @@ export interface FirstPrinciplesBuilderProps {
   resetLabel?: string;
   /**
    * Verdict shown once every part is added. Use `{ratio}` and `{total}` as
-   * placeholders, e.g. "Built from scratch it costs {total} — about {ratio} of
-   * the assumed price." Defaults to a generic English sentence.
+   * placeholders. Distinguish the parts subtotal from a finished-product price.
    */
   verdictTemplate?: string;
   /** Extra classes merged onto the root element. */
@@ -53,59 +54,61 @@ export interface FirstPrinciplesBuilderProps {
 }
 
 /** Format a number with optional prefix/suffix, trimming trailing `.0`. */
-function fmt(n: number, prefix: string, suffix: string): string {
-  const rounded = Math.round(n * 100) / 100;
-  const body = Number.isInteger(rounded)
-    ? rounded.toLocaleString('en-US')
-    : rounded.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+function fmt(n: number, prefix: string, suffix: string, locale: string): string {
+  const body = n.toLocaleString(locale, { maximumFractionDigits: 2 });
   return `${prefix}${body}${suffix}`;
 }
 
 /**
- * Interactive **decompose-then-rebuild** island — the engine of first-principles
- * thinking made tangible.
- *
- * One big number sits at the top: the price everyone *assumes* a thing costs,
- * because that's what it has always cost ("reasoning by analogy"). Below it, the
- * learner clicks the thing's irreducible parts one at a time. Each click adds
- * that part's real cost to a running total and grows a bar — so the rebuilt,
- * from-scratch figure assembles in front of them and the gap against the assumed
- * price becomes visible. When every part is in, a verdict spells out the ratio.
- *
- * Every part is a real `<button>` with `aria-pressed`, the running total is in an
- * `aria-live` region, and nothing depends on motion — the bar simply snaps wider
- * for `prefers-reduced-motion` users. Fully keyboard-operable.
+ * Compare an assumed price with a learner-built subtotal on one shared scale.
+ * Adding and removing parts changes the total immediately; the bar follows with
+ * a brief transform transition. A parts subtotal need not include every cost of
+ * the finished product. Labels and verdicts can make that scope explicit.
  */
 export function FirstPrinciplesBuilder({
   title,
-  eyebrow = 'Decompose, then rebuild',
+  locale = 'en',
+  eyebrow,
   caption,
   analogyValue,
-  analogyLabel = 'The "by analogy" price',
+  analogyLabel,
   analogyNote,
   parts,
-  rebuiltLabel = 'Rebuilt from first principles',
-  instructions = 'Add each irreducible part to rebuild the real cost:',
+  rebuiltLabel,
+  instructions,
   valuePrefix = '$',
   valueSuffix = '',
-  revealAllLabel = 'Add all parts',
-  resetLabel = 'Start over',
-  verdictTemplate = 'From scratch it comes to {total} — about {ratio} of the price everyone assumed. That gap is what reasoning from first principles uncovers.',
+  revealAllLabel,
+  resetLabel,
+  verdictTemplate,
   className,
 }: FirstPrinciplesBuilderProps) {
+  const spanish = locale === 'es';
+  const numberLocale = spanish ? 'es-ES' : 'en-US';
+  eyebrow ??= spanish ? 'Descomponer y reconstruir' : 'Decompose, then rebuild';
+  analogyLabel ??= spanish ? 'Precio de referencia' : 'Reference price';
+  rebuiltLabel ??= spanish ? 'Suma de las partes seleccionadas' : 'Selected parts total';
+  instructions ??= spanish ? 'Añade o retira partes para comprobar su contribución al total.' : 'Add or remove parts to check their contribution to the total.';
+  revealAllLabel ??= spanish ? 'Añadir todas las partes' : 'Add all parts';
+  resetLabel ??= spanish ? 'Empezar de nuevo' : 'Start over';
+  verdictTemplate ??= spanish
+    ? 'Las partes suman {total}, {ratio} del precio de referencia. Comprueba qué costes faltan antes de comparar el producto completo.'
+    : 'The parts total {total}, {ratio} of the reference price. Check which costs are missing before comparing the finished product.';
+  const format = (value: number) => fmt(value, valuePrefix, valueSuffix, numberLocale);
   // Fail the build on a mis-authored figure rather than shipping a broken island.
   if (!Array.isArray(parts) || parts.length < 2) {
     throw new Error('FirstPrinciplesBuilder: needs at least two `parts`.');
   }
-  if (!(analogyValue > 0)) {
-    throw new Error('FirstPrinciplesBuilder: `analogyValue` must be a positive number.');
+  if (!Number.isFinite(analogyValue) || analogyValue <= 0) {
+    throw new Error('FirstPrinciplesBuilder: `analogyValue` must be a finite positive number.');
   }
-  const badPart = parts.find((p) => !p?.label?.trim() || !(p.value >= 0));
-  if (badPart) {
-    throw new Error(
-      `FirstPrinciplesBuilder: every part needs a non-empty \`label\` and a non-negative ` +
-        `\`value\`. Offending part: "${badPart?.label ?? '(missing label)'}".`,
-    );
+  const badIndex = parts.findIndex((part) => !part?.label?.trim() || !Number.isFinite(part.value) || part.value < 0);
+  if (badIndex !== -1) {
+    throw new Error(`FirstPrinciplesBuilder: every part needs a non-empty \`label\` and a finite non-negative \`value\`. Invalid part: ${badIndex}.`);
+  }
+  const fullTotal = parts.reduce((sum, part) => sum + part.value, 0);
+  if (!Number.isFinite(fullTotal)) {
+    throw new Error('FirstPrinciplesBuilder: the sum of `parts` must be finite.');
   }
 
   const reactId = useId();
@@ -116,60 +119,49 @@ export function FirstPrinciplesBuilder({
     [parts, added],
   );
   const allIn = added.every(Boolean);
-  const fullTotal = useMemo(() => parts.reduce((s, p) => s + p.value, 0), [parts]);
 
-  // The bar is scaled so the analogy price spans the full track; the rebuilt
-  // total is drawn as a proportion of it (capped at 100% in the rare case the
-  // parts exceed the assumption).
-  const pct = Math.min(100, (rebuilt / analogyValue) * 100);
-  const ratioText = `${(fullTotal / analogyValue).toFixed(2)}×`;
+  // Both bars share one scale, even when the parts exceed the reference price.
+  const scale = Math.max(analogyValue, fullTotal);
+  const ratioText = `${(fullTotal / analogyValue).toLocaleString(numberLocale, { maximumFractionDigits: 2 })}×`;
 
   const toggle = (i: number) =>
     setAdded((prev) => prev.map((v, j) => (j === i ? !v : v)));
 
   const verdict = verdictTemplate
-    .replace('{total}', fmt(fullTotal, valuePrefix, valueSuffix))
+    .replace('{total}', format(fullTotal))
     .replace('{ratio}', ratioText);
 
   return (
-    <figure className={cx('brutal my-6 bg-surface p-5 sm:p-6', className)}>
-      <p className="font-display text-xs font-semibold uppercase tracking-wide text-accent-600">
+    <figure className={cx('not-prose brutal my-6 bg-surface p-5 sm:p-6', className)}>
+      <p className="font-display text-xs font-semibold uppercase tracking-wide text-brand-700">
         {eyebrow}
       </p>
       {title ? (
         <p className="mt-1 font-display text-lg font-semibold text-ink-900">{title}</p>
       ) : null}
 
-      {/* The assumption everyone starts from. */}
-      <div className="mt-4 rounded-card border border-ink-200 bg-surface-sunken p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">
-          {analogyLabel}
-        </p>
-        <p className="mt-0.5 font-display text-3xl font-bold text-ink-400 line-through decoration-ink-300 decoration-2">
-          {fmt(analogyValue, valuePrefix, valueSuffix)}
-        </p>
-        {analogyNote ? (
-          <p className="mt-1 text-sm leading-relaxed text-ink-500">{analogyNote}</p>
-        ) : null}
-      </div>
-
-      {/* The rebuilt figure, assembled live. */}
-      <div className="mt-4">
-        <div className="mb-1.5 flex items-baseline justify-between gap-3">
-          <span className="text-sm font-semibold text-ink-800">{rebuiltLabel}</span>
-          <span className="font-display text-2xl font-bold text-accent-600">
-            {fmt(rebuilt, valuePrefix, valueSuffix)}
-          </span>
+      <div className="mt-4 space-y-4 rounded-card bg-surface-sunken p-4">
+        <div>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <span className="text-sm font-semibold text-ink-700">{analogyLabel}</span>
+            <span className="font-display text-2xl font-semibold text-ink-700">{format(analogyValue)}</span>
+          </div>
+          <div className="mt-2 h-3 overflow-hidden rounded-pill bg-ink-200" aria-hidden="true">
+            <div className="h-full origin-left rounded-pill bg-ink-500" style={{ width: `${analogyValue / scale * 100}%` }} />
+          </div>
+          {analogyNote ? <p className="mt-2 text-sm leading-relaxed text-ink-600">{analogyNote}</p> : null}
         </div>
-        <div
-          className="relative h-4 w-full overflow-hidden rounded-pill border border-ink-200 bg-surface-sunken"
-          role="img"
-          aria-label={`Rebuilt total is ${fmt(rebuilt, valuePrefix, valueSuffix)} of an assumed ${fmt(analogyValue, valuePrefix, valueSuffix)}.`}
-        >
-          <div
-            className="h-full rounded-pill bg-accent-500 transition-[width] duration-500 ease-out motion-reduce:transition-none"
-            style={{ width: `${pct}%` }}
-          />
+        <div>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1" aria-live="polite" aria-atomic="true">
+            <span className="text-sm font-semibold text-ink-800">{rebuiltLabel}</span>
+            <span className="font-display text-2xl font-semibold text-brand-700">{format(rebuilt)}</span>
+          </div>
+          <div className="mt-2 h-3 overflow-hidden rounded-pill bg-ink-200" aria-hidden="true">
+            <div
+              className="h-full origin-left rounded-pill bg-brand-600 transition-transform duration-300 ease-out motion-reduce:transition-none"
+              style={{ transform: `scaleX(${rebuilt / scale})` }}
+            />
+          </div>
         </div>
       </div>
 
@@ -216,10 +208,10 @@ export function FirstPrinciplesBuilder({
                 <span
                   className={cx(
                     'flex-none font-display text-sm font-bold',
-                    on ? 'text-accent-600' : 'text-ink-400',
+                    on ? 'text-brand-700' : 'text-ink-400',
                   )}
                 >
-                  {fmt(p.value, valuePrefix, valueSuffix)}
+                  {format(p.value)}
                 </span>
               </button>
             </li>
@@ -232,24 +224,26 @@ export function FirstPrinciplesBuilder({
         <button
           type="button"
           onClick={() => setAdded(parts.map(() => true))}
-          className="brutal-btn bg-accent-500 px-4 py-2 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+          disabled={allIn}
+          className="brutal-btn bg-accent-500 px-4 py-2 text-sm text-ink-900 disabled:cursor-default disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
         >
           {revealAllLabel}
         </button>
         <button
           type="button"
           onClick={() => setAdded(parts.map(() => false))}
-          className="brutal-btn bg-surface px-4 py-2 text-sm text-ink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+          disabled={!added.some(Boolean)}
+          className="brutal-btn bg-surface px-4 py-2 text-sm text-ink-700 disabled:cursor-default disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
         >
           {resetLabel}
         </button>
       </div>
 
       {/* Live verdict, announced when the rebuild is complete. */}
-      <p aria-live="polite" className="mt-4 min-h-[1.25rem]">
+      <p aria-live="polite" aria-atomic="true" className="mt-4 min-h-[1.25rem]">
         {allIn ? (
-          <span className="block rounded-card border border-accent-400 bg-accent-300/20 p-3 text-sm leading-relaxed text-ink-700">
-            <span className="font-semibold text-accent-600">{verdict}</span>
+          <span className="block rounded-card bg-accent-300/20 p-3 text-sm leading-relaxed text-ink-700">
+            <span className="font-semibold text-brand-700">{verdict}</span>
           </span>
         ) : null}
       </p>

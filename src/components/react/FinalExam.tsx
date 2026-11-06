@@ -21,6 +21,8 @@ export interface FinalExamQuestion {
 
 /** Props for the {@link FinalExam} component. */
 export interface FinalExamProps {
+  /** Accessible section name when no visible title is provided. */
+  ariaLabel?: string;
   /** The pool of questions, presented one at a time, in order. */
   questions: FinalExamQuestion[];
   /** Optional heading shown above the exam. */
@@ -105,6 +107,7 @@ function normalizeOptions(q: FinalExamQuestion, groupId: string): NormalizedOpti
  * locale-agnostic.
  */
 export function FinalExam({
+  ariaLabel = 'Final exam',
   questions,
   title,
   passPercent = 70,
@@ -231,7 +234,7 @@ export function FinalExam({
 
   return (
     <section
-      aria-label={title ?? 'Final exam'}
+      aria-label={title ?? ariaLabel}
       className={cx(
         'brutal-lg bg-surface-muted p-5 sm:p-6',
         className,

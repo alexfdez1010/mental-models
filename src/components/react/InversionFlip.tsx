@@ -15,7 +15,7 @@ export interface InversionPair {
 export interface InversionFlipProps {
   /** Heading above the cards. */
   title?: string;
-  /** Eyebrow label. Defaults to `'Invert, always invert'`. */
+  /** Eyebrow label. Defaults to `'Invert the goal'`. */
   eyebrow?: string;
   /** Caption beneath the cards. */
   caption?: string;
@@ -23,11 +23,11 @@ export interface InversionFlipProps {
   instructions?: string;
   /** The goal/anti-goal pairs. Each renders as one flippable card. */
   pairs: InversionPair[];
-  /** Badge on the forward (un-flipped) face. Defaults to `'Forward goal'`. */
+  /** Label for the goal, which stays visible throughout the exercise. */
   forwardLabel?: string;
-  /** Badge on the inverted (flipped) face. Defaults to `'How to guarantee failure'`. */
+  /** Label introducing the actions that undermine the goal. */
   invertedLabel?: string;
-  /** Label above the safeguard line on the flipped face. Defaults to `'So protect against it'`. */
+  /** Label of the separate disclosure for a suggested safeguard. */
   safeguardLabel?: string;
   /** Hint shown on the forward face inviting a flip. Defaults to `'Flip to invert →'`. */
   flipHint?: string;
@@ -40,29 +40,19 @@ export interface InversionFlipProps {
 }
 
 /**
- * Interactive **forward-goal ↔ inverted-anti-goal** island — the core move of
- * inversion made tangible.
- *
- * Each card starts on its *forward* face: a goal you're chasing ("Keep the team
- * motivated"). Flip it and the same card shows the **inverted** question —
- * everything you'd do to *guarantee the opposite* ("Micromanage every decision
- * and never give credit") — plus the safeguard that anti-goal hands you for
- * free. Inversion in one gesture: stop asking how to succeed, ask how you'd
- * fail, then don't do that.
- *
- * Every card is a real `<button>` with `aria-pressed`, only the active face is
- * in the DOM (so screen readers read the current side), and the flip degrades to
- * an instant swap under `prefers-reduced-motion`. Fully keyboard-operable.
+ * Keep a goal in view while revealing the actions that could undermine it.
+ * A second disclosure lets the learner propose a safeguard before reading one.
+ * Keyboard, touch and reduced-motion users follow the same reasoning steps.
  */
 export function InversionFlip({
   title,
-  eyebrow = 'Invert, always invert',
+  eyebrow = 'Invert the goal',
   caption,
-  instructions = 'Each card is a goal. Flip it to see how you’d guarantee the opposite — then read off what to avoid:',
+  instructions = 'Reveal what could undermine each goal. Work out a safeguard before opening the suggested response.',
   pairs,
   forwardLabel = 'Forward goal',
-  invertedLabel = 'How to guarantee failure',
-  safeguardLabel = 'So protect against it',
+  invertedLabel = 'What could cause failure',
+  safeguardLabel = 'Reveal a safeguard',
   flipHint = 'Flip to invert →',
   flipAllLabel = 'Invert all',
   resetLabel = 'Flip back',
@@ -72,12 +62,9 @@ export function InversionFlip({
   if (!Array.isArray(pairs) || pairs.length < 2) {
     throw new Error('InversionFlip: needs at least two `pairs`.');
   }
-  const bad = pairs.find((p) => !p?.forward?.trim() || !p?.inverted?.trim());
-  if (bad) {
-    throw new Error(
-      `InversionFlip: every pair needs a non-empty \`forward\` and \`inverted\`. ` +
-        `Offending pair: "${bad?.forward ?? '(missing forward)'}".`,
-    );
+  const badIndex = pairs.findIndex((p) => !p?.forward?.trim() || !p?.inverted?.trim());
+  if (badIndex !== -1) {
+    throw new Error(`InversionFlip: every pair needs a non-empty \`forward\` and \`inverted\`. Invalid pair: ${badIndex}.`);
   }
 
   const reactId = useId();
@@ -90,7 +77,7 @@ export function InversionFlip({
     setFlipped((prev) => prev.map((v, j) => (j === i ? !v : v)));
 
   return (
-    <figure className={cx('brutal my-6 bg-surface p-5 sm:p-6', className)}>
+    <figure className={cx('not-prose brutal my-6 bg-surface p-5 sm:p-6', className)}>
       <p className="font-display text-xs font-semibold uppercase tracking-wide text-brand-600">
         {eyebrow}
       </p>
@@ -101,64 +88,38 @@ export function InversionFlip({
       <p className="mt-3 text-sm font-medium text-ink-700">{instructions}</p>
 
       <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-        {pairs.map((p, i) => {
+        {pairs.map((pair, i) => {
           const on = flipped[i];
+          const resultId = `${reactId}-${i}-inverted`;
           return (
-            <li key={`${reactId}-${i}`}>
+            <li key={`${reactId}-${i}`} className={cx('flex flex-col rounded-card p-4 transition-colors motion-reduce:transition-none', on ? 'bg-brand-50' : 'bg-surface-sunken')}>
+              <p className="text-xs font-semibold text-ink-600">{forwardLabel}</p>
+              <p className="mt-1 font-medium leading-relaxed text-ink-900">{pair.forward}</p>
               <button
                 type="button"
                 onClick={() => toggle(i)}
-                aria-pressed={on}
-                className={cx(
-                  'flex h-full w-full flex-col rounded-card border-2 p-4 text-left transition-colors',
-                  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600',
-                  on
-                    ? 'border-brand-500 bg-brand-50'
-                    : 'border-ink-200 bg-surface hover:border-brand-400 hover:bg-brand-50/50',
-                )}
+                aria-expanded={on}
+                aria-controls={resultId}
+                className="mt-3 flex min-h-11 w-fit items-center rounded-pill bg-surface px-4 py-2 text-left text-sm font-semibold text-brand-700 shadow-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
               >
-                <span
-                  className={cx(
-                    'inline-flex w-fit items-center gap-1.5 rounded-pill px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide',
-                    on ? 'bg-brand-600 text-white' : 'bg-surface-sunken text-ink-500',
-                  )}
-                >
-                  {on ? (
-                    <>
-                      <span aria-hidden>↺</span>
-                      {invertedLabel}
-                    </>
-                  ) : (
-                    forwardLabel
-                  )}
-                </span>
-
-                {/* Only the active face is rendered, so assistive tech reads the
-                    current side. The opacity transition is purely cosmetic. */}
-                <span
-                  key={on ? 'back' : 'front'}
-                  className="mt-2 block animate-fade-up font-medium text-ink-900 motion-reduce:animate-none"
-                >
-                  {on ? p.inverted : p.forward}
-                </span>
-
-                {on && p.safeguard ? (
-                  <span className="mt-3 block border-t border-brand-200 pt-2">
-                    <span className="block text-[0.65rem] font-bold uppercase tracking-wide text-brand-600">
-                      {safeguardLabel}
-                    </span>
-                    <span className="mt-0.5 block text-sm leading-snug text-ink-700">
-                      {p.safeguard}
-                    </span>
-                  </span>
-                ) : null}
-
-                {!on ? (
-                  <span className="mt-auto pt-3 text-xs font-semibold text-brand-600">
-                    {flipHint}
-                  </span>
-                ) : null}
+                {on ? resetLabel : flipHint}
               </button>
+              <div id={resultId} hidden={!on}>
+                {on ? (
+                  <div className="mt-4 animate-fade-up motion-reduce:animate-none">
+                    <p className="text-xs font-semibold text-brand-700">{invertedLabel}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-ink-800">{pair.inverted}</p>
+                    {pair.safeguard ? (
+                      <details className="mt-3 rounded-card bg-surface p-3">
+                        <summary className="min-h-6 cursor-pointer text-sm font-semibold text-brand-700 focus-visible:rounded-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600">
+                          {safeguardLabel}
+                        </summary>
+                        <p className="mt-2 text-sm leading-relaxed text-ink-700">{pair.safeguard}</p>
+                      </details>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             </li>
           );
         })}
@@ -169,14 +130,16 @@ export function InversionFlip({
         <button
           type="button"
           onClick={() => setFlipped(pairs.map(() => true))}
-          className="brutal-btn bg-brand-600 px-4 py-2 text-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+          disabled={allFlipped}
+          className="brutal-btn bg-brand-600 px-4 py-2 text-sm text-white disabled:cursor-default disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
         >
           {flipAllLabel}
         </button>
         <button
           type="button"
           onClick={() => setFlipped(pairs.map(() => false))}
-          className="brutal-btn bg-surface px-4 py-2 text-sm text-ink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+          disabled={flippedCount === 0}
+          className="brutal-btn bg-surface px-4 py-2 text-sm text-ink-700 disabled:cursor-default disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
         >
           {resetLabel}
         </button>

@@ -2,8 +2,8 @@
  * generate-og.ts — Open Graph image generator (run with `bun`).
  *
  * Pipeline:
- *   1. Boot `astro preview` on a fixed port as a child process and wait until
- *      the port answers (the npm script runs `astro build` first).
+ *   1. Start Astro preview on an isolated, automatically assigned port
+ *      (the package script runs `astro build` first).
  *   2. Walk the built `dist/` tree to enumerate the real page routes.
  *   3. Drive a pool of Playwright/chromium pages (OG_CONCURRENCY, default 8) that
  *      pull routes off a shared queue in parallel, open the *actual page* in a
@@ -17,18 +17,17 @@
  * than imported) because this script lives outside src/ and the `@` alias /
  * astro:content imports are unavailable to plain bun.
  */
-import { spawn, execFileSync, type ChildProcess } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { preview } from 'astro';
 import { chromium } from 'playwright';
 import { readdirSync, statSync, mkdirSync, existsSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DIST = join(ROOT, 'dist');
 const OUT_DIR = join(ROOT, 'public', 'og');
-const PORT = 4321;
 const HOST = '127.0.0.1';
-const BASE = `http://${HOST}:${PORT}`;
 const WIDTH = 1200;
 const HEIGHT = 630;
 
@@ -180,6 +179,19 @@ function selectRoutes(allRoutes: string[], argv: string[]): string[] {
 
 /* ---- helpers ------------------------------------------------------------ */
 
+/** Start only this project's preview and retain the URL it actually owns. */
+export async function startPreview(root = ROOT) {
+  const server = await preview({
+    root,
+    server: { host: HOST, port: 0, open: false },
+    logLevel: 'warn',
+  });
+  return {
+    base: `http://${HOST}:${server.port}`,
+    stop: () => server.stop(),
+  };
+}
+
 /** Collect extensionless routes from both flat HTML and directory-index builds. */
 function collectRoutes(dir: string): string[] {
   const routes = new Set<string>();
@@ -205,21 +217,6 @@ function collectRoutes(dir: string): string[] {
   };
   walk(dir);
   return [...routes];
-}
-
-/** Wait until the preview server answers on the port (or time out). */
-async function waitForServer(url: string, timeoutMs = 30_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { method: 'HEAD' });
-      if (res.ok || res.status === 404) return;
-    } catch {
-      /* not up yet */
-    }
-    await new Promise((r) => setTimeout(r, 300));
-  }
-  throw new Error(`Preview server did not become ready at ${url} within ${timeoutMs}ms`);
 }
 
 async function main() {
@@ -248,21 +245,18 @@ async function main() {
 
   console.log(`▸ Found ${pageRoutes.length} page route(s) needing OG images.`);
 
-  // Boot astro preview.
-  console.log(`▸ Starting astro preview on ${BASE} …`);
-  const server: ChildProcess = spawn(
-    'bunx',
-    ['astro', 'preview', '--host', HOST, '--port', String(PORT)],
-    { cwd: ROOT, stdio: 'ignore' },
-  );
-
+  // Resolve readiness and the actual port from our own server, never another
+  // project's process that happens to answer on Astro's usual port.
+  console.log('▸ Starting isolated Astro preview …');
+  let server: Awaited<ReturnType<typeof startPreview>> | null = null;
   let browser: Awaited<ReturnType<typeof chromium.launch>> | null = null;
   const ok: string[] = [];
   const failed: { route: string; error: string }[] = [];
 
   try {
-    await waitForServer(`${BASE}/`);
-    console.log('▸ Preview ready. Launching chromium …');
+    server = await startPreview();
+    const { base } = server;
+    console.log(`▸ Preview ready at ${base}. Launching chromium …`);
 
     browser = await chromium.launch();
     const context = await browser.newContext({
@@ -284,7 +278,7 @@ async function main() {
       const slug = ogSlug(pathname);
       const outFile = join(OUT_DIR, `${slug}.png`);
       try {
-        const res = await page.goto(`${BASE}${pathname}`, {
+        const res = await page.goto(`${base}${pathname}`, {
           waitUntil: 'networkidle',
           timeout: 20_000,
         });
@@ -323,8 +317,11 @@ async function main() {
 
     await Promise.all(Array.from({ length: workerCount }, () => worker()));
   } finally {
-    if (browser) await browser.close();
-    server.kill('SIGTERM');
+    try {
+      if (browser) await browser.close();
+    } finally {
+      if (server) await server.stop();
+    }
   }
 
   console.log(`\n▸ OG generation complete: ${ok.length} ok, ${failed.length} failed.`);
@@ -334,7 +331,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('✗ OG generation crashed:', err);
-  process.exit(1);
-});
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error('✗ OG generation crashed:', err);
+    process.exit(1);
+  });
+}
