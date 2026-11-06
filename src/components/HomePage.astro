@@ -1,0 +1,148 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTopics, getLessons } from '@/lib/content';
+import { getRoadmapSummaries, roadmapHref } from '@/lib/roadmaps';
+import { getDifficultyLabels } from '@/lib/catalog';
+import { useTranslations, localizePath, alternates as alternatesFor, type Lang } from '@/i18n/utils';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const [topics, lessons, roadmaps] = await Promise.all([
+  getTopics(lang), getLessons(lang), getRoadmapSummaries(lang),
+]);
+const alts = alternatesFor(Astro.url).map((a) => ({ lang: a.lang, href: a.path }));
+const catalogHref = localizePath('/catalog', lang);
+const featured = topics[0];
+const introductoryLessons = lessons.filter((l) => l.topicSlug === featured?.slug);
+const firstLesson = introductoryLessons[0];
+const firstLessonHref = firstLesson
+  ? localizePath(`/${firstLesson.topicSlug}/${firstLesson.lessonSlug}`, lang)
+  : catalogHref;
+const difficultyLabels = getDifficultyLabels(lang);
+const tiers = ['beginner', 'intermediate', 'advanced', 'expert'] as const;
+const nextCourses = topics.filter((tp) => tp.entry.data.difficulty === 'beginner').slice(1, 4);
+const lessonCount = (slug: string) => lessons.filter((l) => l.topicSlug === slug).length;
+const lessonHrefs = lessons.map((l) => localizePath(`/${l.topicSlug}/${l.lessonSlug}`, lang));
+---
+
+<BaseLayout title={t('home.seoTitle')} description={t('home.description')} lang={lang} alternates={alts} mainClass="mx-auto w-full max-w-6xl px-5 sm:px-8">
+  <section class="grid items-center gap-10 py-12 sm:gap-14 sm:py-20 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
+    <div>
+      <p class="text-sm font-medium text-brand-700">{t('home.format')}</p>
+      <h1 class="mt-4 max-w-xl text-[clamp(2.5rem,5vw,4rem)] font-semibold leading-[1.08] tracking-tight">{t('home.title')}</h1>
+      <p class="mt-6 max-w-lg text-lg leading-relaxed text-ink-600">{t('home.description')}</p>
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <a href={firstLessonHref} class="brutal-btn min-h-12 bg-brand-700 px-6 py-3 text-sm text-white hover:bg-brand-800">{t('hero.cta.start')} <span aria-hidden="true">→</span></a>
+        <a href={catalogHref} class="inline-flex min-h-12 items-center rounded-pill px-4 py-3 text-sm font-semibold text-ink-700 transition-colors hover:bg-surface-sunken hover:text-brand-700">{t('hero.cta.catalog')}</a>
+      </div>
+      <p class="mt-6 text-sm text-ink-500">{t('home.access')}</p>
+      <dl class="mt-9 flex flex-wrap gap-x-8 gap-y-4">
+        <div class="flex items-baseline gap-2">
+          <dt class="order-2 text-sm text-ink-600">{t('roadmap.courses')}</dt>
+          <dd class="text-xl font-semibold tabular-nums text-ink-900">{topics.length}</dd>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <dt class="order-2 text-sm text-ink-600">{t('catalog.lessons')}</dt>
+          <dd class="text-xl font-semibold tabular-nums text-ink-900">{lessons.length}</dd>
+        </div>
+      </dl>
+    </div>
+
+    {featured && (
+      <div class="rounded-[1.5rem] bg-surface-sunken p-3 sm:p-4">
+        <div class="rounded-[1rem] bg-surface p-5 shadow-soft sm:p-7">
+          <div class="flex items-center justify-between gap-4">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-card bg-brand-100 text-2xl" aria-hidden="true">{featured.entry.data.icon}</span>
+            <span class="text-xs font-medium text-brand-700">{t('home.firstCourse')}</span>
+          </div>
+          <h2 class="mt-5 text-2xl font-semibold leading-tight sm:text-3xl">
+            <a href={localizePath(`/${featured.slug}`, lang)} class="transition-colors hover:text-brand-700">{featured.entry.data.title}</a>
+          </h2>
+          <p class="mt-3 text-sm text-ink-500">{difficultyLabels[featured.entry.data.difficulty]}<span aria-hidden="true" class="mx-2">/</span>{introductoryLessons.length} {t('catalog.lessons')}</p>
+          <ol class="mt-6 space-y-1">
+            {introductoryLessons.slice(0, 3).map((lesson, i) => (
+              <li>
+                <a href={localizePath(`/${lesson.topicSlug}/${lesson.lessonSlug}`, lang)} class="group -mx-2 flex min-h-14 items-center gap-3 rounded-card px-2 py-3 transition-colors hover:bg-brand-50 focus-visible:bg-brand-50">
+                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-sunken text-xs font-medium tabular-nums text-ink-600">{i + 1}</span>
+                  <span class="min-w-0 flex-1 text-sm font-medium leading-snug text-ink-800 group-hover:text-brand-700">{lesson.entry.data.title}</span>
+                  {lesson.entry.data.minutes && <span class="shrink-0 text-xs tabular-nums text-ink-500">{lesson.entry.data.minutes} {t('lesson.minutes')}</span>}
+                </a>
+              </li>
+            ))}
+          </ol>
+          <a href={localizePath(`/${featured.slug}`, lang)} class="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-900">{t('home.viewCourse')} <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    )}
+  </section>
+
+  {nextCourses.length > 0 && (
+    <section class="py-8 sm:py-12" aria-labelledby="foundation-heading">
+      <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <h2 id="foundation-heading" class="text-2xl font-semibold sm:text-3xl">{t('home.foundationTitle')}</h2>
+        <a href={`${catalogHref}?level=beginner`} class="inline-flex min-h-11 items-center text-sm font-medium text-brand-700 hover:text-brand-900">{t('home.allBeginner')}</a>
+      </div>
+      <div class="grid gap-4 md:grid-cols-3">
+        {nextCourses.map((topic) => (
+          <a href={localizePath(`/${topic.slug}`, lang)} class="group flex flex-col rounded-card bg-surface p-6 transition-colors duration-200 hover:bg-brand-50 focus-visible:bg-brand-50">
+            <span class="text-2xl" aria-hidden="true">{topic.entry.data.icon}</span>
+            <h3 class="mt-5 text-xl font-semibold leading-snug group-hover:text-brand-700">{topic.entry.data.title}</h3>
+            <p class="mt-3 text-sm leading-relaxed text-ink-600">{topic.entry.data.description}</p>
+            <p class="mt-auto pt-5 text-xs font-medium text-ink-500">{lessonCount(topic.slug)} {t('catalog.lessons')}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section id="learning-paths" class="py-12 sm:py-16" aria-labelledby="paths-heading">
+    <div class="mb-8 max-w-2xl">
+      <h2 id="paths-heading" class="text-3xl font-semibold sm:text-4xl">{t('home.pathsTitle')}</h2>
+      <p class="mt-3 text-base leading-relaxed text-ink-600">{t('home.pathsDescription')}</p>
+    </div>
+    <div class="grid gap-x-8 gap-y-2 md:grid-cols-2">
+      {roadmaps.filter((r) => r.courseCount > 0).map((r) => (
+        <a href={roadmapHref(r.meta.tag, lang)} class="group -mx-3 flex items-start gap-4 rounded-card p-4 transition-colors duration-200 hover:bg-surface focus-visible:bg-surface sm:-mx-4">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-surface-sunken text-xl transition-colors group-hover:bg-brand-100" aria-hidden="true">{r.meta.icon}</span>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+              <h3 class="text-lg font-semibold leading-snug group-hover:text-brand-700">{r.meta.title[lang]}</h3>
+              <span class="shrink-0 text-xs tabular-nums text-ink-500">{r.courseCount} {t('roadmap.courses')}</span>
+            </div>
+            <p class="mt-2 text-sm leading-relaxed text-ink-600">{r.meta.description[lang]}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="mb-6 rounded-[1.5rem] bg-surface-sunken p-6 sm:p-10" aria-labelledby="levels-heading">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 id="levels-heading" class="max-w-lg text-2xl font-semibold sm:text-3xl">{t('home.levelsTitle')}</h2>
+      <a href={catalogHref} data-random-lesson data-lessons={JSON.stringify(lessonHrefs)} class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-900">{t('home.random')} <span aria-hidden="true">→</span></a>
+    </div>
+    <ol class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {tiers.map((tier, i) => (
+        <li>
+          <a href={`${catalogHref}?level=${tier}`} class="group block rounded-card focus-visible:outline-offset-4">
+            <span class="font-mono text-xs text-ink-500" aria-hidden="true">0{i + 1}</span>
+            <h3 class="mt-2 text-lg font-semibold group-hover:text-brand-700">{difficultyLabels[tier]}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-ink-600">{t(`home.tier.${tier}`)}</p>
+            <p class="mt-3 text-xs font-medium tabular-nums text-ink-500">{topics.filter((tp) => tp.entry.data.difficulty === tier).length} {t('roadmap.courses')}</p>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+  <script>
+    document.querySelectorAll<HTMLAnchorElement>('[data-random-lesson]').forEach((link) => {
+      const lessons: string[] = JSON.parse(link.dataset.lessons || '[]');
+      link.addEventListener('click', (event) => {
+        if (!lessons.length || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        window.location.assign(lessons[Math.floor(Math.random() * lessons.length)]);
+      });
+    });
+  </script>
+</BaseLayout>

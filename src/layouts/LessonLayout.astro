@@ -137,6 +137,37 @@ const jsonLd = [
     </div>
   </header>
 
+  {
+    toc.length > 0 && (
+      <details class="group mt-8 rounded-card bg-surface-sunken lg:hidden">
+        <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 font-medium text-ink-800 [&::-webkit-details-marker]:hidden">
+          {t('lesson.toc')}
+          <svg viewBox="0 0 20 20" class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path d="m5 7.5 5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </summary>
+        <nav aria-label={t('lesson.toc')} class="max-h-[55vh] overflow-y-auto overscroll-contain px-2 pb-2">
+          <ul class="space-y-1 text-sm">
+            {toc.map((h) => (
+              <li>
+                <a
+                  href={`#${h.slug}`}
+                  data-toc-link={h.slug}
+                  class:list={[
+                    'flex min-h-11 items-center rounded-card py-2 pr-3 leading-relaxed text-ink-600 transition-colors hover:bg-surface hover:text-brand-700',
+                    h.depth === 3 ? 'pl-7' : 'pl-3',
+                  ]}
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    )
+  }
+
   <!-- Body + TOC -->
   <div class="mt-10 gap-12 sm:mt-14 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem]">
     <article class="prose prose-lg prose-lesson">
@@ -146,19 +177,19 @@ const jsonLd = [
     {
       toc.length > 0 && (
         <aside class="hidden lg:block">
-          <nav aria-label={t('lesson.toc')} class="sticky top-24">
-            <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-400">
+          <nav aria-label={t('lesson.toc')} class="sticky top-24 max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain rounded-card bg-surface-sunken p-3">
+            <p class="mb-3 px-3 text-sm font-semibold text-ink-800">
               {t('lesson.toc')}
             </p>
-            <ul class="space-y-2 border-l border-ink-200 text-sm">
+            <ul class="space-y-1 text-sm">
               {toc.map((h) => (
                 <li>
                   <a
                     href={`#${h.slug}`}
                     data-toc-link={h.slug}
                     class:list={[
-                      'block border-l-2 border-transparent py-1 pr-2 text-ink-500 transition-all hover:border-brand-400 hover:text-brand-700',
-                      h.depth === 3 ? 'pl-6' : 'pl-3',
+                      'block rounded-card py-2 pr-3 leading-relaxed text-ink-600 transition-colors hover:bg-surface hover:text-brand-700',
+                      h.depth === 3 ? 'pl-7' : 'pl-3',
                     ]}
                   >
                     {h.text}
@@ -191,18 +222,29 @@ const jsonLd = [
           document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'),
         );
         const ACTIVE = ['toc-link--active'];
-        const byId = new Map(links.map((l) => [l.dataset.tocLink, l]));
-        const heads = links
-          .map((l) => document.getElementById(l.dataset.tocLink!))
+        // Both responsive menus point to the same headings. Keep their active
+        // states in sync without duplicating the article's anchor IDs.
+        const byId = new Map<string, HTMLAnchorElement[]>();
+        for (const link of links) {
+          const slug = link.dataset.tocLink!;
+          byId.set(slug, [...(byId.get(slug) ?? []), link]);
+        }
+        const heads = Array.from(byId.keys())
+          .map((slug) => document.getElementById(slug))
           .filter((el): el is HTMLElement => el !== null);
 
-        let current: HTMLAnchorElement | null = null;
+        let current: string | undefined;
         const setActive = (slug: string | undefined) => {
-          const link = slug ? byId.get(slug) : undefined;
-          if (link === current) return;
-          current?.classList.remove(...ACTIVE);
-          link?.classList.add(...ACTIVE);
-          current = link ?? null;
+          if (slug === current) return;
+          for (const link of current ? (byId.get(current) ?? []) : []) {
+            link.classList.remove(...ACTIVE);
+            link.removeAttribute('aria-current');
+          }
+          for (const link of slug ? (byId.get(slug) ?? []) : []) {
+            link.classList.add(...ACTIVE);
+            link.setAttribute('aria-current', 'location');
+          }
+          current = slug;
         };
 
         const onScroll = () => {
@@ -225,15 +267,15 @@ const jsonLd = [
   {
     (prev || next) && (
       <nav
-        aria-label="Lesson navigation"
-        class="mt-12 grid gap-4 border-t-2 border-edge pt-8 sm:mt-16 sm:grid-cols-2"
+        aria-label={t('lesson.navigation')}
+        class="mt-12 grid gap-4 sm:mt-16 sm:grid-cols-2"
       >
         {prev ? (
           <a
             href={prev.href}
-            class="brutal brutal-interactive group flex flex-col bg-surface p-5"
+            class="group flex min-h-28 flex-col justify-center rounded-card bg-surface-sunken p-5 transition-colors hover:bg-brand-100"
           >
-            <span class="text-xs font-medium uppercase tracking-wide text-ink-400">
+            <span class="text-sm font-medium text-ink-600">
               ← {t('lesson.prev')}
             </span>
             <span class="mt-1 font-display font-semibold text-ink-800 group-hover:text-brand-700">
@@ -246,9 +288,9 @@ const jsonLd = [
         {next ? (
           <a
             href={next.href}
-            class="brutal brutal-interactive group flex flex-col bg-surface p-5 text-right"
+            class="group flex min-h-28 flex-col justify-center rounded-card bg-brand-50 p-5 text-right transition-colors hover:bg-brand-100"
           >
-            <span class="text-xs font-medium uppercase tracking-wide text-ink-400">
+            <span class="text-sm font-medium text-brand-700">
               {t('lesson.next')} →
             </span>
             <span class="mt-1 font-display font-semibold text-ink-800 group-hover:text-brand-700">

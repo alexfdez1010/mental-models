@@ -26,8 +26,8 @@ const prefersReducedMotion = (): boolean =>
  * intersection). When the user prefers reduced motion — or the browser lacks
  * `IntersectionObserver` — the content is shown immediately with no transform.
  *
- * SSR-safe: because lessons mount this via `client:visible`, hydration only
- * happens near the viewport, so there is no flash of hidden content.
+ * Content is visible in server-rendered HTML. The entrance animation is a
+ * progressive enhancement, so unavailable JavaScript never hides a lesson.
  */
 export function Reveal({ children, as = 'div', delay = 0, className }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null);
@@ -35,12 +35,10 @@ export function Reveal({ children, as = 'div', delay = 0, className }: RevealPro
 
   useEffect(() => {
     if (prefersReducedMotion() || typeof IntersectionObserver === 'undefined') {
-      setVisible(true);
       return;
     }
     const node = ref.current;
     if (!node) {
-      setVisible(true);
       return;
     }
     const observer = new IntersectionObserver(
@@ -53,7 +51,7 @@ export function Reveal({ children, as = 'div', delay = 0, className }: RevealPro
           }
         }
       },
-      { threshold: 0.15, rootMargin: '0px 0px -10% 0px' },
+      { threshold: 0, rootMargin: '0px 0px -5% 0px' },
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -63,10 +61,9 @@ export function Reveal({ children, as = 'div', delay = 0, className }: RevealPro
     as,
     {
       ref,
-      style: visible && delay ? { transitionDelay: `${delay}ms` } : undefined,
+      style: visible && delay ? { animationDelay: `${delay}ms` } : undefined,
       className: cx(
-        'transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-        visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
+        visible && !prefersReducedMotion() && 'motion-safe:animate-fade-up',
         className,
       ),
     },

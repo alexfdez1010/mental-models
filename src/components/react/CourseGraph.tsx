@@ -297,10 +297,10 @@ function FilterChip({ active, onClick, activeClass, children }: FilterChipProps)
       aria-pressed={active}
       onClick={onClick}
       className={cx(
-        'brutal-chip inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300',
+        'inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
         active
-          ? (activeClass ?? 'bg-brand-600 text-white')
-          : 'bg-surface text-ink-600 hover:text-brand-700',
+          ? (activeClass ?? 'border-brand-200 bg-brand-100 text-brand-800')
+          : 'border-transparent text-ink-600 hover:bg-surface hover:text-ink-900',
       )}
     >
       {active ? (
@@ -480,9 +480,9 @@ export function CourseGraph({
     <figure className={cx('not-prose', className)}>
       {/* Filter bar — multi-select level + roadmap-tag chips, persisted in the
           URL (?level=a,b&tag=x,y) so any filtered view is shareable as a link. */}
-      <div className="brutal mb-10 flex flex-col gap-3 bg-surface p-4 sm:p-5">
-        <div role="group" aria-label={levelLabel} className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 min-w-14 text-xs font-semibold uppercase tracking-wider text-ink-400">
+      <div className="mb-10 flex flex-col gap-4 rounded-card bg-surface-sunken/70 p-4 sm:p-5">
+        <div role="group" aria-label={levelLabel} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="w-full text-sm font-semibold text-ink-800 sm:mr-2 sm:w-16 sm:shrink-0">
             {levelLabel}
           </span>
           <FilterChip active={levels.length === 0} onClick={() => persistFilters([], tags)}>
@@ -505,20 +505,26 @@ export function CourseGraph({
         </div>
 
         {tagOptions.length > 0 ? (
-          <div role="group" aria-label={tagsLabel} className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 min-w-14 text-xs font-semibold uppercase tracking-wider text-ink-400">
-              {tagsLabel}
-            </span>
-            <FilterChip active={tags.length === 0} onClick={() => persistFilters(levels, [])}>
-              {allTagsLabel}
-            </FilterChip>
-            {tagOptions.map((o) => (
-              <FilterChip key={o.tag} active={tags.includes(o.tag)} onClick={() => toggleTag(o.tag)}>
-                {o.icon ? <span aria-hidden="true">{o.icon}</span> : null}
-                {o.label}
+          <details className="group">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-lg text-sm [&::-webkit-details-marker]:hidden">
+              <span className="font-semibold text-ink-800 sm:mr-2 sm:w-16 sm:shrink-0">{tagsLabel}</span>
+              <span className="text-ink-600">{tags.length ? tagOptions.filter((o) => tags.includes(o.tag)).map((o) => o.label).join(', ') : allTagsLabel}</span>
+              <svg className="ml-auto h-4 w-4 shrink-0 text-ink-600 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path d="m5 7.5 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </summary>
+            <div role="group" aria-label={tagsLabel} className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <FilterChip active={tags.length === 0} onClick={() => persistFilters(levels, [])}>
+                {allTagsLabel}
               </FilterChip>
-            ))}
-          </div>
+              {tagOptions.map((o) => (
+                <FilterChip key={o.tag} active={tags.includes(o.tag)} onClick={() => toggleTag(o.tag)}>
+                  {o.icon ? <span aria-hidden="true">{o.icon}</span> : null}
+                  {o.label}
+                </FilterChip>
+              ))}
+            </div>
+          </details>
         ) : null}
       </div>
 
@@ -563,31 +569,27 @@ export function CourseGraph({
         {/* Card layers — plain responsive flow; arrows snap to these. */}
         <ol className="relative flex list-none flex-col gap-y-10 p-0 sm:gap-y-20">
           {rows.map((row, layer) => {
-            // A lone node (e.g. the single entry course) spans the full width on
-            // mobile; otherwise cards pair up two-per-row. On ≥sm the measured
-            // arrow graph takes over and cards return to their fixed width.
+            // Narrow screens give each course a readable full-width row.
+            // Wider mobile screens can pair cards; from sm, the measured graph
+            // uses a consistent card width and follows their actual positions.
             const single = row.length === 1;
             // Width lives on the flex ITEM (<li>), not the card, so the 50%
             // resolves against the row — not the li's shrink-wrapped content —
             // and `min-w-0` lets long titles wrap instead of spilling out.
-            const itemW = single ? 'w-full' : 'w-[calc(50%-0.375rem)]';
+            const itemW = single ? 'w-full' : 'w-full min-[520px]:w-[calc(50%-0.5rem)]';
             return (
             <li
               key={layer}
-              className={cx(
-                'm-0 p-0',
-                // Mobile-only ladder cue between layers (arrows are hidden < sm).
-                layer > 0 && 'border-t border-edge pt-10 sm:border-0 sm:pt-0',
-              )}
+              className="m-0 p-0"
             >
-              <ul className="flex list-none flex-wrap items-stretch justify-center gap-3 p-0 sm:justify-evenly sm:gap-x-12 sm:gap-y-4">
+              <ul className="flex list-none flex-wrap items-stretch justify-center gap-4 p-0 sm:justify-evenly sm:gap-x-10 sm:gap-y-5">
                 {row.map((n) => {
                   const tint =
                     n.accent === 'accent'
-                      ? 'border-2 border-edge bg-accent-100'
-                      : 'border-2 border-edge bg-brand-100';
+                      ? 'bg-surface-sunken'
+                      : 'bg-brand-50';
                   const tintText =
-                    n.accent === 'accent' ? 'group-hover:text-accent-700' : 'group-hover:text-brand-700';
+                    'group-hover:text-brand-700';
                   // Difficulty drives the card's colored left edge + tier tint.
                   const edge = n.difficulty
                     ? DIFFICULTY_EDGE_CLASS[n.difficulty]
@@ -607,7 +609,7 @@ export function CourseGraph({
                           title={`${n.title} · ${comingSoonLabel}`}
                           aria-label={`${n.title} · ${comingSoonLabel}`}
                           className={cx(
-                            'brutal relative flex h-full w-full flex-col border-dashed p-3 opacity-70 sm:w-44 sm:max-w-[80vw]',
+                            'brutal relative flex h-full w-full flex-col border-dashed p-5 opacity-70 sm:w-56 sm:max-w-[80vw]',
                             edge,
                           )}
                         >
@@ -626,10 +628,10 @@ export function CourseGraph({
                               </span>
                             ) : null}
                           </div>
-                          <h3 className="line-clamp-2 break-words font-display text-sm font-semibold leading-snug text-ink-700">
+                          <h3 className="break-words font-display text-lg font-semibold leading-snug text-ink-700">
                             {n.title}
                           </h3>
-                          <p className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-ink-400">
+                          <p className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-ink-600">
                             <span aria-hidden="true">⏳</span>
                             {comingSoonLabel}
                           </p>
@@ -647,7 +649,7 @@ export function CourseGraph({
                         href={n.href}
                         title={`${n.title} · ${prog.completed}/${prog.total} ${lessonsLabel}${isDone ? ` · ${finishedLabel}` : ''}`}
                         className={cx(
-                          'brutal brutal-interactive group relative flex h-full w-full flex-col p-3 sm:w-44 sm:max-w-[80vw]',
+                          'brutal brutal-interactive group relative flex h-full w-full flex-col p-5 sm:w-56 sm:max-w-[80vw]',
                           edge,
                           isDone && 'ring-2 ring-brand-400 ring-offset-1',
                         )}
@@ -680,16 +682,17 @@ export function CourseGraph({
                         </div>
                         <h3
                           className={cx(
-                            'line-clamp-2 break-words font-display text-sm font-semibold leading-snug text-ink-900',
+                            'break-words font-display text-lg font-semibold leading-snug text-ink-900',
                             tintText,
                           )}
                         >
                           {n.title}
                         </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-ink-600">{n.description}</p>
                         <p
                           className={cx(
-                            'mt-1.5 text-xs font-medium',
-                            isDone ? 'text-brand-700' : 'text-ink-400',
+                            'mt-auto pt-4 text-xs font-medium',
+                            isDone ? 'text-brand-700' : 'text-ink-600',
                           )}
                         >
                           {prog.completed}/{prog.total} {lessonsLabel}

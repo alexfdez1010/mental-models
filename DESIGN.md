@@ -15,7 +15,6 @@ block). Reference them with Tailwind utilities — never hard-code hex values.
 > subject-agnostic and stay the same whatever accent you choose — keep this file
 > in sync with the tokens if you re-theme.
 
----
 
 ## Philosophy
 
@@ -29,13 +28,11 @@ block). Reference them with Tailwind utilities — never hard-code hex values.
 - **Light first, warm paper.** Surfaces are near-white with a faint warm tint;
   ink is a warm stone neutral that bottoms out at a warm near-black for headings.
 - **Motion that breathes.** Fade/float/drift animations are slow and gentle,
-  always respecting `prefers-reduced-motion`. The hero carries a full-bleed
-  *latticework* — a drifting knowledge graph of connected ideas (Munger's
-  "latticework of mental models"), spanning the whole viewport width.
+  always respecting `prefers-reduced-motion`. Motion responds to interactions;
+  the home page presents a real course preview with direct lesson links.
 - **Readable above all.** A serif display for headings, a humanist sans for body,
   measured line length for long-form lessons.
 
----
 
 ## Tokens
 
@@ -116,9 +113,10 @@ via `@fontsource-variable`.
 | `edge` | `#e8e4dd` | the quiet hairline on every block: `border-edge`, `bg-edge`, `text-edge` |
 | `edge-strong` | `#d4cec4` | slightly firmer divider / hover border |
 
-Every solid block wears a **1px `edge` hairline**; on hover, interactive blocks
-firm up to `edge-strong`. Soft, low-contrast — the surface is defined by light,
-not a hard outline.
+Use **1px `edge` hairlines** where a component needs a boundary, such as a field
+or course node. Group sections and shared chrome with space and surfaces rather
+than decorative rules. On hover, bordered interactive blocks firm up to
+`edge-strong`.
 
 ### Radii
 
@@ -170,7 +168,6 @@ global `prefers-reduced-motion` rule.
 The hero latticework also uses a `.lattice-node` pulse (staggered opacity breathe).
 All are gated globally by `prefers-reduced-motion: reduce` (see Accessibility).
 
----
 
 ## Long-form lesson prose
 
@@ -178,10 +175,10 @@ Wrap an MDX lesson body in `<div class="prose-lesson">`. The
 `.prose-lesson` component class (in `global.css`) sets a `68ch` measure,
 `1.75` line-height, vertical rhythm, and styles headings, links, inline
 `code`, `pre` blocks (dark, `rounded-card`), lists and blockquotes
-(blue left-border). Prefer this single class over per-element utilities for
+(a sunken surface without a decorative edge). Horizontal rules are hidden;
+headings and spacing establish section groups. Prefer this class for
 authored content.
 
----
 
 ## Component inventory (React islands)
 
@@ -248,6 +245,7 @@ import { Quiz } from '@/components/react';
 ### Reveal
 
 Scroll-triggered fade/slide-in wrapper (`IntersectionObserver`, fires once).
+Server-rendered content stays visible before hydration and with JavaScript off.
 `as?` (wrapper tag), `delay?` (ms). Shows content immediately under reduced
 motion. Best with `client:visible`.
 
@@ -313,7 +311,6 @@ These are the generic building blocks every subject reuses. Author *subject-spec
 chart/animation islands as their own files and add them to the barrel — see the
 `exercise-components` and `lesson-animations` skills.
 
----
 
 ## Accessibility & reduced motion
 
@@ -333,7 +330,6 @@ chart/animation islands as their own files and add them to the barrel — see th
 - **Meaningful structure.** Lead with semantic HTML; headings use
   `text-wrap: balance` for tidy wrapping.
 
----
 
 ## Open Graph cards
 
