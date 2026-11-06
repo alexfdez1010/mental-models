@@ -1,0 +1,469 @@
+---
+title: "Workshop: Audit a Forecast Adjustment"
+description: "Audit a complete forecast log, separate calibration from resolution and hit rate, then test a frozen adjustment on a later batch."
+topic: "en/calibration-and-confidence"
+order: 7
+minutes: 30
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, RateComparison, FirstPrinciplesBuilder, InversionFlip, MindMap } from '@/components/react';
+
+A workshop's delivery forecasts look too extreme. The team moves its probabilities towards the middle, and the historical Brier score improves. Has it found a better forecasting rule, or a better description of outcomes it already knows?
+
+This workshop follows a complete log through that decision. The jobs, probabilities and outcomes are **constructed teaching data**. The arithmetic is exact for these records; the small batches do not reveal the population's true probabilities.
+
+## Freeze the question and preserve the log
+
+<MCQ
+  client:visible
+  pretest
+  question="You fit an adjustment after reading a forecast batch's outcomes. What record should the audit retain?"
+  options={[
+    { text: 'The original forecasts, with fitted values saved as a separate replay.', correct: true },
+    { text: 'Only the fitted values, replacing the forecasts that now look mistaken.' },
+    { text: 'Only forecasts whose outcomes agree with the revised probability rule.' }
+  ]}
+  explanation="A fitted replay can diagnose a candidate rule. It cannot replace the probabilities actually issued before the outcomes, or serve as independent evidence of future performance."
+/>
+
+A fabrication workshop forecasts whether each job will **pass the agreed quality check by Friday at 17:00**. The event is recorded as one if it does, and zero otherwise. A cancellation counts as not meeting this event. An unavailable verification record would remain unresolved rather than be silently deleted or automatically coded as a failure. An unresolved job cannot supply a Brier error yet: report its count against the eligible total, and do not present a resolved-only score as a score for all eligible jobs.
+
+Before each week's processing begins, the audit lists the first **20 jobs already scheduled by Monday at 08:00**. It freezes one forecast per job at that cutoff. Job categories are recorded at intake; later updates remain in the history but are not substituted into this primary comparison. Both methods are evaluated against the same outcomes without changing how jobs are processed.
+
+The first week is the **development batch**, used to propose an adjustment. A later week is reserved for evaluation. All outcomes in the supplied batches are resolved.
+
+| Field fixed before outcomes | Why the audit needs it |
+|---|---|
+| Eligible IDs and intake category | Prevents dropping difficult or cancelled jobs afterwards |
+| Event, quality rule and deadline | Makes the outcome comparable across jobs and methods |
+| Forecast timestamp and version | Separates issued probabilities from later revisions |
+| Outcome source and unresolved status | Makes verification and missing records visible |
+| Evaluation rule and benchmark | Prevents choosing a flattering metric after seeing results |
+
+### When to fix the protocol
+
+Do this before scoring or fitting. Counting repeated updates to the same job as independent cases, changing deadlines after delays or selecting only easy-to-resolve jobs changes the question. If an operational forecast changes which jobs receive attention, its evaluation may also need to account for that changed process.
+
+<MatchConcepts
+  client:visible
+  question="Match the audit record to the error it prevents"
+  pairs={[
+    { term: 'Original probability with its timestamp', definition: 'Rewriting an issued forecast after its outcome is known.' },
+    { term: 'Complete eligible-job register', definition: 'Retaining only jobs that make the forecast look good.' },
+    { term: 'Separate development and later batches', definition: 'Treating a fit to known outcomes as independent validation.' },
+    { term: 'A primary forecast cutoff for every job', definition: 'Selecting whichever update happened to score best.' }
+  ]}
+  explanation="The record needs cases, versions, outcomes and a declared comparison. Keeping only a probability column is not enough to reconstruct what was actually forecast."
+/>
+
+## Read calibration within the forecast groups
+
+<MCQ
+  client:visible
+  pretest
+  question="The average forecast probability equals the overall event frequency. Does that establish calibration within the forecast groups?"
+  options={[
+    { text: 'No; opposite errors in different groups can cancel in the average.', correct: true },
+    { text: 'Yes; the overall average contains every relevant calibration check.' },
+    { text: 'Yes; matching an average proves the probabilities were known exactly.' }
+  ]}
+  explanation="An aggregate average can hide forecasts that are too low in one group and too high in another. Check the event frequencies at the probabilities actually issued."
+/>
+
+The original rule assigns a probability of **0.20** to the lower-probability intake group and **0.80** to the higher-probability group. These are forecasts, not known event-generating probabilities.
+
+The grouped ledger below accounts for **every development ID**. Ranges list consecutive IDs; each job appears exactly once in an outcome column.
+
+| Intake group | IDs meeting the event | IDs not meeting it | Event count | Non-event count | Total | Original probability | Observed event frequency |
+|---|---|---|---|---|---|---|---|
+| Lower | D01–D04 | D05–D10 | 4 | 6 | 10 | 0.20 | 4 ÷ 10 = 0.40 |
+| Higher | D11–D16 | D17–D20 | 6 | 4 | 10 | 0.80 | 6 ÷ 10 = 0.60 |
+
+Overall event frequency is **10 ÷ 20 = 0.50**. The mean issued probability is **(10 × 0.20 + 10 × 0.80) ÷ 20 = 0.50** too. Yet the lower group occurs more often than forecast and the higher group less often. Their calibration gaps cancel in the overall average.
+
+<RateComparison
+  client:visible
+  title="Observed frequencies within the issued forecast groups"
+  scenarios={[
+    { label: 'Complete development batch', groups: [
+      { label: 'Higher-probability intake group', events: 6, total: 10 },
+      { label: 'Lower-probability intake group', events: 4, total: 10 }
+    ] }
+  ]}
+/>
+
+The chart shows observed event rates, not forecast probabilities or a reliability diagonal. Compare its rates with the probability column in the table. Its rate contrast is also not the squared resolution term calculated below.
+
+### Define the proposed adjustment
+
+A simple candidate maps the original lower probability to **0.40** and the original higher probability to **0.60**, matching the observed development frequencies. Save these fitted values in a **replay column**. They were chosen after these outcomes and were not the forecasts originally issued.
+
+The candidate's perfect agreement with this small table is a property of the fit. It does not establish exact future calibration. One changed result in a group would move its observed frequency by **one tenth**, or **ten percentage points**.
+
+<FillBlank
+  client:visible
+  question="Separate fitting from validation"
+  text="The adjusted development probabilities are a {{fitted replay|new independent sample|replacement historical record}}. Their agreement with the outcomes establishes {{agreement on these fitted groups|exact population calibration|guaranteed future improvement}}."
+  explanation="The adjustment was chosen to match the same group frequencies used to assess it. Keep that fit visible, but use outcomes not consulted during fitting to evaluate the frozen candidate."
+/>
+
+## Compare scores without confusing the forecast attributes
+
+<MCQ
+  client:visible
+  pretest
+  question="The adjustment changes probabilities but leaves every job on the same side of the declared classification threshold. What may change?"
+  options={[
+    { text: 'The Brier score can change while the classification hit rate stays fixed.', correct: true },
+    { text: 'The Brier score must stay fixed because the binary calls did not change.' },
+    { text: 'Every forecast attribute must improve when probabilities become less extreme.' }
+  ]}
+  explanation="A binary call discards how strongly the probability favours either outcome. A proper probability score retains that information."
+/>
+
+Use the course's binary **mean Brier score**, the mean of $(p-o)^2$, with lower values better. This convention scores one event probability, rather than summing errors over both binary outcome categories.
+
+For a classification hit rate only, declare **yes at or above 0.50, no below it**. This threshold is a comparison convention here, not a universal decision rule for unequal costs. The original and adjusted rules call no in the lower group and yes in the higher one.
+
+The original score is fully reproducible from the ledger:
+
+| Original group | Squared error for events | Squared error for non-events | Group error sum |
+|---|---|---|---|
+| Lower | 4 × (0.20 − 1)² = 2.56 | 6 × (0.20 − 0)² = 0.24 | 2.80 |
+| Higher | 6 × (0.80 − 1)² = 0.24 | 4 × (0.80 − 0)² = 2.56 | 2.80 |
+
+Thus **original Brier = (2.80 + 2.80) ÷ 20 = 0.28**. For the fitted replay:
+
+- Lower group error sum: **4 × 0.60² + 6 × 0.40² = 1.44 + 0.96 = 2.40**
+- Higher group error sum: **6 × 0.40² + 4 × 0.60² = 0.96 + 1.44 = 2.40**
+- Fitted-replay mean Brier: **(2.40 + 2.40) ÷ 20 = 0.24**
+
+A constant **0.50 benchmark** has a squared error of **0.25** on every job. Freeze that benchmark before evaluating the later batch too.
+
+| Development comparison | Mean Brier | Classification hits | What the comparison establishes |
+|---|---|---|---|
+| Original issued rule | 0.28 | 12 ÷ 20 = 60% | Performance of the probabilities actually recorded |
+| Adjusted fitted replay | 0.24 | 12 ÷ 20 = 60% | Better fit on the data used to choose the adjustment |
+| Constant benchmark | 0.25 | 10 ÷ 20 = 50% | Reference performance on the same cases and convention |
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Rebuild the fitted replay's mean Brier score"
+  eyebrow="Divide group sums by the full batch size"
+  analogyValue={0.25}
+  analogyLabel="Constant benchmark's mean Brier"
+  parts={[
+    { label: 'Lower group contribution to the full mean', value: 0.12 },
+    { label: 'Higher group contribution to the full mean', value: 0.12 }
+  ]}
+  rebuiltLabel="Selected contributions to mean Brier"
+  valuePrefix=""
+  valueSuffix=""
+  instructions="Add the contributions to the full-batch mean, then compare with the benchmark."
+  verdictTemplate="The complete mean Brier score is {total}. Compare it with the original and benchmark rows above."
+  caption="Each contribution divides its group's error sum by the whole batch size. This is a fitted-data score, not a later validation result."
+/>
+
+### Reliability, resolution and uncertainty
+
+The binary Brier decomposition separates **three terms**. For each forecast-value group, let $n_k$ be its count, $p_k$ its constant probability and $f_k$ its observed event fraction. Let $N$ be the full count and $\bar o$ the overall event fraction. Then:
+
+$$
+UNC=\bar o(1-\bar o)
+$$
+
+$$
+RES=\sum_k\frac{n_k}{N}(f_k-\bar o)^2
+$$
+
+$$
+REL=\sum_k\frac{n_k}{N}(p_k-f_k)^2
+$$
+
+$$
+BS=UNC-RES+REL
+$$
+
+**UNC**, outcome uncertainty, describes the batch's binary outcome variation. **RES**, resolution, measures how the observed event frequencies in the forecast groups differ from the overall frequency. **REL** is a reliability penalty: squared calibration gaps, weighted by the same case counts. A smaller reliability penalty is better; greater resolution reduces the Brier score when the other terms are fixed.
+
+For the original development rule:
+
+- **UNC = 0.50 × 0.50 = 0.25**
+- **RES = ½ × (0.40 − 0.50)² + ½ × (0.60 − 0.50)² = 0.01**
+- **REL = ½ × (0.20 − 0.40)² + ½ × (0.80 − 0.60)² = 0.04**
+- **BS = 0.25 − 0.01 + 0.04 = 0.28**
+
+The adjusted replay retains the **same groups and weights**, so its resolution remains **0.01**. Its reliability penalty becomes zero, giving **0.25 − 0.01 = 0.24**. The constant benchmark has one forecast-value group, hence zero resolution; its probability matches this batch's overall frequency, so its reliability penalty is also zero.
+
+This identity is exact here because each group contains a **constant forecast probability**, every outcome is available and the same jobs receive the same weights. Coarsening unequal forecast values into broad bins does not automatically give this exact decomposition of their individual scores. The empirical terms are also not exact population attributes: finite-sample estimation can be biased. [Ferro and Fricker's original analysis](https://empslocal.ex.ac.uk/people/staff/ferro/Publications/ferro-fricker2012preprint.pdf)
+
+**Sharpness** concerns the concentration of the predictive distribution, a property of forecasts alone. For binary events, probabilities nearer the endpoints are sharper. Our original rule is sharper than the fitted replay, yet both have the same empirical resolution because their group membership and outcomes are unchanged. Making a probability more extreme does not by itself create resolution. [Gneiting, Balabdaoui and Raftery on calibration and sharpness](https://sites.stat.washington.edu/raftery/Research/PDF/Gneiting2007jrssb.pdf)
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Which conclusions follow from the development calculations?"
+  options={[
+    { text: 'The fitted replay lowers the probability error without changing the binary calls.', correct: true },
+    { text: 'The original and fitted rules retain the same outcome separation across groups.', correct: true },
+    { text: 'The sharper original probabilities must therefore have greater resolution.' },
+    { text: 'The fitted replay establishes precise population probabilities for each group.' }
+  ]}
+  explanation="The fitted replay changes calibration gaps while retaining group membership, outcomes and classification calls. Sharpness and empirical resolution are distinct, and fitting a small table does not reveal exact population probabilities."
+/>
+
+## Freeze the candidate before the later batch
+
+<MCQ
+  client:visible
+  pretest
+  question="How should the team evaluate the proposed adjustment after choosing it?"
+  options={[
+    { text: 'Record both frozen rules on the same later eligible jobs before their outcomes.', correct: true },
+    { text: 'Refit after each later outcome and report the best retrospective version.' },
+    { text: 'Keep only later jobs whose adjusted forecasts scored better than the originals.' }
+  ]}
+  explanation="The later comparison needs forecasts not fitted to those outcomes, paired on the same complete set of eligible cases. A refitted rule begins a new development cycle."
+/>
+
+Lock the **adjustment map, original rule, benchmark, eligibility, outcome and primary score** before the later week. Use mean Brier as the primary probability score, with hit rate and grouped calibration as diagnostics. The later ledger is complete:
+
+| Intake group | IDs meeting the event | IDs not meeting it | Events | Non-events | Total | Original probability | Frozen adjusted probability | Observed frequency |
+|---|---|---|---|---|---|---|---|---|
+| Lower | L01–L02 | L03–L10 | 2 | 8 | 10 | 0.20 | 0.40 | 0.20 |
+| Higher | L11–L18 | L19–L20 | 8 | 2 | 10 | 0.80 | 0.60 | 0.80 |
+
+Original group sums are **2 × 0.80² + 8 × 0.20² = 1.60** in the lower group and **8 × 0.20² + 2 × 0.80² = 1.60** in the higher one. Thus **original mean Brier = 3.20 ÷ 20 = 0.16**.
+
+Adjusted group sums are **2 × 0.60² + 8 × 0.40² = 2.00** and **8 × 0.40² + 2 × 0.60² = 2.00**. Thus **adjusted mean Brier = 4.00 ÷ 20 = 0.20**. The benchmark remains **0.25**. Original and adjusted calls both achieve **16 ÷ 20 = 80%** classification hits.
+
+| Later comparison | Mean Brier | Reliability penalty | Resolution | Outcome uncertainty |
+|---|---|---|---|---|
+| Original | 0.16 | 0 | 0.09 | 0.25 |
+| Frozen adjustment | 0.20 | 0.04 | 0.09 | 0.25 |
+| Frozen constant benchmark | 0.25 | 0 | 0 | 0.25 |
+
+For example, later resolution is **½ × (0.20 − 0.50)² + ½ × (0.80 − 0.50)² = 0.09**. The adjusted rule again preserves groups, but its probabilities now miss their observed frequencies. Its paired mean Brier difference, **adjusted minus original**, is **0.20 − 0.16 = +0.04**: worse on this batch.
+
+<RateComparison
+  client:visible
+  title="Compare observed group frequencies across the two batches"
+  scenarioLabel="Choose the batch"
+  scenarios={[
+    { label: 'Development', groups: [
+      { label: 'Higher-probability intake group', events: 6, total: 10 },
+      { label: 'Lower-probability intake group', events: 4, total: 10 }
+    ] },
+    { label: 'Later evaluation', groups: [
+      { label: 'Higher-probability intake group', events: 8, total: 10 },
+      { label: 'Lower-probability intake group', events: 2, total: 10 }
+    ] }
+  ]}
+/>
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Rebuild the later adjusted mean Brier"
+  eyebrow="Keep the same later cases"
+  analogyValue={0.16}
+  analogyLabel="Original rule's later mean Brier"
+  parts={[
+    { label: 'Lower group contribution to the later mean', value: 0.10 },
+    { label: 'Higher group contribution to the later mean', value: 0.10 }
+  ]}
+  rebuiltLabel="Selected adjusted-score contributions"
+  valuePrefix=""
+  valueSuffix=""
+  instructions="Add the adjusted contributions and compare with the original rule on the same later jobs."
+  verdictTemplate="The adjusted mean Brier is {total}. A larger error is worse on the shared cases, despite the earlier fitted-data improvement."
+  caption="The chart compares probability scores, not classification hits or a causal effect on job completion."
+/>
+
+<Categorize
+  client:visible
+  question="Classify each comparison by its evidential role"
+  buckets={['Development fit', 'Later evaluation', 'Invalid selective comparison']}
+  items={[
+    { text: 'Choose the adjustment from observed frequencies and re-score that same batch.', bucket: 'Development fit' },
+    { text: 'Compare frozen probabilities on every eligible job in the next complete batch.', bucket: 'Later evaluation' },
+    { text: 'Remove later jobs on which the original rule beat the adjustment.', bucket: 'Invalid selective comparison' },
+    { text: 'Tune again using later outcomes, then call the resulting fit independent validation.', bucket: 'Invalid selective comparison' }
+  ]}
+  explanation="A later batch becomes development data when you use its outcomes to choose the rule. Reusing it can inform another candidate, but does not independently validate that candidate."
+/>
+
+## Make a review decision without inventing precision
+
+<MCQ
+  client:visible
+  pretest
+  question="The fitted improvement reverses in the later batch. What conclusion is justified now?"
+  options={[
+    { text: 'The adjustment did worse on these later cases; broader performance remains uncertain.', correct: true },
+    { text: 'The original rule now has proven population calibration for every future case.' },
+    { text: 'The later batch should be deleted because it disagrees with the development fit.' }
+  ]}
+  explanation="Keep the later result. It fails to confirm the proposed improvement, while still being a small observed comparison rather than a population guarantee."
+/>
+
+The team should **not present the candidate as a validated improvement** on this record. Retain both batches, report the adverse later comparison and keep the original as the reference while collecting a predeclared next evaluation. If it proposes another adjustment, give it a new version and evaluate it on subsequent cases.
+
+This decision does not require declaring either rule permanently correct. The change in grouped frequencies might reflect chance, changed case difficulty or a changed process. Jobs affected by the same disruption are not necessarily independent observations. More recorded rows do not automatically mean equally much independent information.
+
+| Before the next evaluation | What to declare or inspect |
+|---|---|
+| Candidate and reference versions | Freeze the mapping and comparison before new outcomes |
+| Shared eligible cases | Preserve cancellations, failures and unresolved verification records |
+| Primary score and diagnostic grouping | Avoid choosing whichever metric happens to favour the candidate |
+| Case mix and common disruptions | Check whether later jobs address the same forecasting task |
+| Evidence needed for adoption | State the practical improvement required and how uncertainty will be assessed |
+
+A real adoption rule needs a meaningful improvement target and an uncertainty method suitable for the number and dependence of cases. This toy record does not supply a universal sample-size cutoff or a confidence interval. Its grouped frequencies move in coarse steps, even though probabilities can be written with many decimal places.
+
+<InversionFlip
+  client:visible
+  title="Audit the tempting ways to improve a score on paper"
+  eyebrow="Preserve the evaluation"
+  instructions="Identify how each shortcut changes the evidence, then reveal a check."
+  forwardLabel="Evaluation goal"
+  invertedLabel="Tempting shortcut"
+  safeguardLabel="Show a check"
+  flipHint="Reveal the shortcut"
+  flipAllLabel="Reveal all shortcuts"
+  resetLabel="Start again"
+  pairs={[
+    { forward: 'Evaluate the rule that was frozen.', inverted: 'Overwrite the version after reading the later outcomes.', safeguard: 'Keep versioned probabilities with the original timestamps and begin a new development cycle.' },
+    { forward: 'Compare the same forecasting task.', inverted: 'Drop cancellations and difficult cases only from the candidate score.', safeguard: 'Reconcile both score sets with the predeclared eligible-ID register.' },
+    { forward: 'Learn about future performance.', inverted: 'Call the best fitted replay proof of permanent calibration.', safeguard: 'Separate fit, later evaluation and the uncertainty of broader conclusions.' }
+  ]}
+  caption="A clean audit makes an unfavourable result visible. It does not guarantee a favourable result next time."
+/>
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Which limits should remain in the team's report?"
+  options={[
+    { text: 'The empirical arithmetic is exact for the complete supplied records.', correct: true },
+    { text: 'Population calibration and future performance remain uncertain.', correct: true },
+    { text: 'Writing more decimal places removes the uncertainty from small groups.' },
+    { text: 'Later outcomes can be excluded whenever they make the fitted rule look worse.' }
+  ]}
+  explanation="Exact arithmetic and uncertain generalisation can coexist. Preserve unfavourable outcomes and evaluate any revised rule on a subsequent, fairly defined comparison."
+/>
+
+## Transfer the audit to a one-group forecaster
+
+<MCQ
+  client:visible
+  pretest
+  question="Two constant-probability rules make the same binary call on every case. Must their mean Brier scores be identical?"
+  options={[
+    { text: 'No; different probabilities can produce different squared errors.', correct: true },
+    { text: 'Yes; the common binary calls determine the complete probability score.' },
+    { text: 'Yes; constant forecasts are automatically calibrated whatever happens.' }
+  ]}
+  explanation="The probability score retains information lost by a yes/no threshold. Constant probabilities have no resolution across cases, but their calibration gaps and scores can differ."
+/>
+
+A separate complete batch has **ten forecasts**, of which **eight events occur and two do not**. Rule Cedar assigns **0.70** to every case; rule Birch assigns **0.50**. Both were logged before the outcomes. Keep the same classification convention as before.
+
+| Rule | Error on events | Error on non-events | Total squared error | Mean Brier | Classification hits |
+|---|---|---|---|---|---|
+| Cedar | 8 × 0.30² = 0.72 | 2 × 0.70² = 0.98 | 1.70 | 1.70 ÷ 10 = 0.17 | 8 ÷ 10 = 80% |
+| Birch | 8 × 0.50² = 2.00 | 2 × 0.50² = 0.50 | 2.50 | 2.50 ÷ 10 = 0.25 | 8 ÷ 10 = 80% |
+
+Both rules have **zero resolution**, because each has only one forecast-value group. Cedar has the smaller empirical calibration gap and mean Brier in this batch. Birch's constant midpoint is not calibrated to the observed event fraction here. Neither result establishes an exact population event probability from these few cases.
+
+<FillBlank
+  client:visible
+  question="Name the different conclusions in the transfer case"
+  text="Cedar and Birch have the {{same classification hit rate|same mean Brier|same empirical calibration gap}}. Cedar has the {{lower mean Brier|higher resolution|proven population probability}}, while both have {{zero resolution|perfect calibration|independent validation of a fitted adjustment}}."
+  explanation="Their binary calls and hits agree, but their probability errors differ. Each constant rule has only one forecast-value group, so neither separates cases with different observed frequencies."
+/>
+
+<details>
+<summary>Rebuild the score and check the three terms</summary>
+
+For Cedar, **UNC = 0.80 × 0.20 = 0.16**, **RES = 0**, and **REL = (0.70 − 0.80)² = 0.01**. Thus **BS = 0.16 − 0 + 0.01 = 0.17**. The event frequency is a sample observation, not a known population parameter.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Keep total error separate from mean Brier"
+  eyebrow="Use the full denominator"
+  analogyValue={2.5}
+  analogyLabel="Birch's total squared error on the shared batch"
+  parts={[
+    { label: 'Cedar’s total error on events', value: 0.72 },
+    { label: 'Cedar’s total error on non-events', value: 0.98 }
+  ]}
+  rebuiltLabel="Selected contributions to total squared error"
+  valuePrefix=""
+  valueSuffix=""
+  instructions="Add the total error contributions, then divide by the batch's full forecast count to obtain mean Brier."
+  verdictTemplate="The total squared error is {total}. Divide by the shared forecast count before comparing this value with a mean Brier score."
+  caption="This figure shows total error, while the earlier figures show mean error. Compare methods on the same cases and keep the aggregation explicit."
+/>
+</details>
+
+## Connect the audit steps
+
+<MindMap
+  client:visible
+  title="From an original forecast to a tested adjustment"
+  eyebrow="Keep the evidence connected"
+  outlineLabel="Text outline"
+  root={{ label: 'Audit a forecast adjustment', children: [
+    { label: 'Preserve', children: [{ label: 'Eligible cases and outcome rule' }, { label: 'Original probabilities and timestamps' }, { label: 'Separate fitted replays' }] },
+    { label: 'Measure', children: [{ label: 'Calibration within forecast groups' }, { label: 'Outcome-based resolution' }, { label: 'Threshold hit rate and proper score' }] },
+    { label: 'Decompose', children: [{ label: 'Outcome uncertainty' }, { label: 'Resolution reduces error' }, { label: 'Reliability penalty increases error' }] },
+    { label: 'Evaluate', children: [{ label: 'Freeze the adjustment' }, { label: 'Pair rules on complete later cases' }, { label: 'Retain adverse outcomes' }] },
+    { label: 'Limit the claim', children: [{ label: 'Exact sample arithmetic' }, { label: 'Uncertain population attributes' }, { label: 'New versions need subsequent evaluation' }] }
+  ] }}
+/>
+
+<Quiz
+  client:visible
+  title="Check the forecast audit"
+  questions={[
+    { question: 'Why can an overall mean forecast match the event frequency while grouped calibration is poor?', options: [
+      { text: 'Opposite group-level probability errors can cancel in the aggregate.', correct: true },
+      { text: 'An overall match makes all group frequencies equal by definition.' },
+      { text: 'The forecast log must contain only cases where the event occurred.' }
+    ], explanation: 'Calibration needs the relationship between probability and event frequency within forecast groups, not just agreement of overall averages.' },
+    { question: 'What changes when a fitted map moves each forecast group towards the middle without merging the groups?', options: [
+      { text: 'Sharpness can change while empirical resolution on the same cases stays fixed.', correct: true },
+      { text: 'Empirical resolution must rise because the probabilities become more cautious.' },
+      { text: 'Classification hit rate must fall because every probability becomes different.' }
+    ], explanation: 'Resolution uses group outcome frequencies and weights. A one-to-one relabelling preserves those groups; sharpness concerns the predictive probabilities themselves.' },
+    { question: 'How should the adjusted fitted replay be described?', options: [
+      { text: 'A candidate fitted to the development outcomes, needing later evaluation.', correct: true },
+      { text: 'The original probabilities actually issued before the development outcomes.' },
+      { text: 'Independent confirmation that population calibration is now exact.' }
+    ], explanation: 'Keep the fitted replay separate from the original log. An empirical fit is not a forward evaluation.' },
+    { question: 'Select the terms in the binary Brier decomposition used here.', allowMultiple: true, options: [
+      { text: 'Outcome uncertainty.', correct: true },
+      { text: 'A resolution term based on group event frequencies.', correct: true },
+      { text: 'A reliability penalty based on probability–frequency gaps.', correct: true },
+      { text: 'A classification hit-rate term that replaces the outcome frequencies.' }
+    ], explanation: 'The complete decomposition includes uncertainty, subtracts resolution and adds the reliability penalty. Classification hits are a separate threshold-based statistic.' },
+    { question: 'What does the later paired comparison establish?', options: [
+      { text: 'The adjustment has greater probability error on those complete later cases.', correct: true },
+      { text: 'The original rule must be perfectly calibrated in the entire population.' },
+      { text: 'The later cases should be removed before the candidate is reported.' }
+    ], explanation: 'Report the adverse later result while retaining uncertainty about broader and future performance.' },
+    { question: 'A constant rule has no forecast groups with different event frequencies. What follows?', options: [
+      { text: 'It has no resolution across cases, while calibration still depends on the event frequency.', correct: true },
+      { text: 'It is perfectly calibrated, irrespective of its probability and the observed event frequency.' },
+      { text: 'It cannot be a useful benchmark because any constant probability is logically invalid.' }
+    ], explanation: 'A constant base-rate forecast can be a useful reference without distinguishing cases. Its calibration is not guaranteed by being constant.' },
+    { question: 'Before calling an adjusted rule a forecasting improvement, what must remain visible?', options: [
+      { text: 'Later complete-case comparisons, the declared score and uncertainty about generalisation.', correct: true },
+      { text: 'Only the best score reached during repeated fitting to the original outcomes.' },
+      { text: 'Only the classification hits, discarding probabilities and unresolved cases.' }
+    ], explanation: 'The audit needs the original record, a frozen rule, fair later evaluation and honest limits on what the available evidence can establish.' }
+  ]}
+/>
+
+Next, take the [final exam](/calibration-and-confidence/final-exam), including this distinction between fitting a probability adjustment and evaluating its later forecasts.

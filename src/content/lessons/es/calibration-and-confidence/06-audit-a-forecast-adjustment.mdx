@@ -1,0 +1,592 @@
+---
+title: "Taller: audita un ajuste de previsiones"
+description: "Audita un registro completo, separa calibración, resolución y acierto, y evalúa un ajuste fijado antes de conocer los resultados de otro lote."
+topic: "es/calibration-and-confidence"
+order: 7
+minutes: 30
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, RateComparison, FirstPrinciplesBuilder, InversionFlip, MindMap } from '@/components/react';
+
+Las previsiones de entrega de un taller parecen demasiado extremas. El equipo acerca sus probabilidades al punto medio y mejora el índice de Brier histórico. ¿Ha encontrado una regla mejor para prever o una descripción mejor de resultados que ya conoce?
+
+Este taller sigue un registro completo hasta esa decisión. Los trabajos, las probabilidades y los resultados son **datos didácticos construidos**. La aritmética es exacta para estos registros; los lotes pequeños no revelan las probabilidades verdaderas de la población.
+
+## Fija la pregunta y conserva el registro
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+  client:visible
+  pretest
+  question="Ajustas una regla después de leer los resultados de un lote de previsiones. ¿Qué debería conservar la auditoría?"
+  options={[
+    { text: 'Las previsiones originales, con los valores ajustados en un recálculo separado.', correct: true },
+    { text: 'Solo los valores ajustados, sustituyendo las previsiones que ahora parecen erróneas.' },
+    { text: 'Solo las previsiones cuyos resultados coinciden con la regla de probabilidad revisada.' }
+  ]}
+  explanation="Un recálculo ajustado puede servir para diagnosticar una regla candidata. No puede sustituir las probabilidades emitidas antes de los resultados ni ser evidencia independiente del rendimiento futuro."
+/>
+
+Un taller de fabricación prevé si cada trabajo **superará el control de calidad acordado antes del viernes a las 17:00**. El evento se registra como uno si ocurre y como cero si no. Cancelar el trabajo cuenta como incumplir ese evento. Un registro de verificación no disponible quedaría pendiente; no se borraría sin aviso ni se codificaría automáticamente como fracaso. Un trabajo pendiente aún no aporta un error de Brier: comunica su recuento respecto al total incluido y no presentes una puntuación solo de casos resueltos como puntuación de todos los incluidos.
+
+Antes de empezar cada semana, la auditoría lista los primeros **20 trabajos ya programados el lunes a las 08:00**. Fija una previsión por trabajo en ese corte. Las categorías se registran al recibir el trabajo; las actualizaciones posteriores permanecen en el historial, pero no sustituyen la previsión de esta comparación principal. Ambos métodos se evalúan frente a los mismos resultados sin cambiar cómo se procesan los trabajos.
+
+La primera semana es el **lote de desarrollo**, utilizado para proponer un ajuste. Se reserva una semana posterior para evaluarlo. Todos los resultados de los lotes aportados están resueltos.
+
+| Campo fijado antes de los resultados | Para qué lo necesita la auditoría |
+|---|---|
+| Identificadores incluidos y categoría de entrada | Evita eliminar después trabajos difíciles o cancelados |
+| Evento, regla de calidad y plazo | Hace comparables los resultados entre trabajos y métodos |
+| Momento y versión de la previsión | Separa las probabilidades emitidas de las revisiones posteriores |
+| Fuente del resultado y estado pendiente | Hace visibles la verificación y los registros ausentes |
+| Regla de evaluación y referencia | Evita elegir una medida favorable después de ver los resultados |
+
+### Cuándo fijar el protocolo
+
+Hazlo antes de puntuar o ajustar. Contar las actualizaciones de un mismo trabajo como casos independientes, cambiar plazos después de un retraso o seleccionar solo trabajos fáciles de resolver cambia la pregunta. Si una previsión operativa cambia qué trabajos reciben atención, su evaluación también puede tener que contemplar ese proceso modificado.
+
+<MatchConcepts
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  instructions="Elige un concepto y después su explicación."
+  allCorrectLabel="✓ Todas las parejas correctas"
+  partialResultWord="correctas"
+  pickDefinitionHint="→ elige ahora una explicación"
+  notLinkedHint="todavía sin enlazar"
+  termsLabel="Conceptos"
+  definitionsLabel="Explicaciones"
+  client:visible
+  question="Relaciona el registro de auditoría con el error que evita"
+  pairs={[
+    { term: 'Probabilidad original con su fecha y hora', definition: 'Reescribir una previsión emitida después de conocer su resultado.' },
+    { term: 'Lista completa de trabajos incluidos', definition: 'Conservar solo trabajos que dejan bien a la previsión.' },
+    { term: 'Lotes de desarrollo y posterior separados', definition: 'Tratar el ajuste a resultados conocidos como validación independiente.' },
+    { term: 'Un corte principal de previsión para cada trabajo', definition: 'Seleccionar la actualización que obtuvo mejor puntuación.' }
+  ]}
+  explanation="El registro necesita casos, versiones, resultados y una comparación declarada. Guardar solo una columna de probabilidades no permite reconstruir qué se previó realmente."
+/>
+
+## Lee la calibración dentro de los grupos de previsión
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+  client:visible
+  pretest
+  question="La probabilidad media prevista coincide con la frecuencia global del evento. ¿Establece eso la calibración dentro de los grupos?"
+  options={[
+    { text: 'No; los errores opuestos de grupos distintos pueden cancelarse en la media.', correct: true },
+    { text: 'Sí; la media global contiene todas las comprobaciones de calibración pertinentes.' },
+    { text: 'Sí; coincidir en una media demuestra que las probabilidades se conocían exactamente.' }
+  ]}
+  explanation="Una media conjunta puede ocultar previsiones demasiado bajas en un grupo y demasiado altas en otro. Comprueba las frecuencias del evento para las probabilidades realmente emitidas."
+/>
+
+La regla original asigna una probabilidad de **0,20** al grupo de menor probabilidad y de **0,80** al de mayor probabilidad. Son previsiones, no probabilidades conocidas del proceso que genera los eventos.
+
+El registro agrupado siguiente incluye **todos los identificadores del lote de desarrollo**. Los intervalos enumeran identificadores consecutivos; cada trabajo aparece exactamente una vez en una columna de resultado.
+
+| Grupo de entrada | Identificadores que cumplen el evento | Identificadores que no lo cumplen | Eventos | No eventos | Total | Probabilidad original | Frecuencia observada |
+|---|---|---|---|---|---|---|---|
+| Menor | D01–D04 | D05–D10 | 4 | 6 | 10 | 0,20 | 4 ÷ 10 = 0,40 |
+| Mayor | D11–D16 | D17–D20 | 6 | 4 | 10 | 0,80 | 6 ÷ 10 = 0,60 |
+
+La frecuencia global del evento es **10 ÷ 20 = 0,50**. La probabilidad media emitida también es **(10 × 0,20 + 10 × 0,80) ÷ 20 = 0,50**. Sin embargo, el evento ocurre más de lo previsto en el grupo menor y menos en el mayor. Sus desviaciones de calibración se cancelan en la media global.
+
+<RateComparison
+  scenarioLabel="Escenario"
+  countsLabel="Eventos del total"
+  differenceLabel="Diferencia"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  client:visible
+  locale="es"
+  title="Frecuencias observadas según las probabilidades emitidas"
+  scenarios={[
+    { label: 'Lote de desarrollo completo', groups: [
+      { label: 'Grupo de entrada de mayor probabilidad', events: 6, total: 10 },
+      { label: 'Grupo de entrada de menor probabilidad', events: 4, total: 10 }
+    ] }
+  ]}
+/>
+
+El gráfico muestra tasas observadas, no probabilidades previstas ni una diagonal de fiabilidad. Compara sus tasas con la columna de probabilidad de la tabla. Su diferencia de tasas tampoco es el término cuadrático de resolución que calcularemos después.
+
+### Define el ajuste propuesto
+
+Un candidato sencillo transforma la probabilidad menor original en **0,40** y la mayor en **0,60**, igualando las frecuencias observadas del lote de desarrollo. Guarda esos valores en una **columna de recálculo ajustado**. Se eligieron después de estos resultados; no fueron las previsiones emitidas originalmente.
+
+La coincidencia perfecta del candidato con esta tabla pequeña es una propiedad del ajuste. No establece una calibración futura exacta. Cambiar un resultado de un grupo movería su frecuencia observada **una décima**, es decir, **diez puntos porcentuales**.
+
+<FillBlank
+  instructions="Elige la opción adecuada en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctos"
+  client:visible
+  question="Separa ajuste y validación"
+  text="Las probabilidades ajustadas del lote de desarrollo son un {{recálculo ajustado|nuevo muestreo independiente|registro histórico sustituto}}. Su coincidencia con los resultados establece {{coincidencia en estos grupos ajustados|calibración poblacional exacta|mejora futura garantizada}}."
+  explanation="El ajuste se eligió para igualar las mismas frecuencias con las que se evalúa. Conserva visible ese ajuste, pero usa resultados no consultados al fijarlo para evaluar el candidato."
+/>
+
+## Compara puntuaciones sin confundir atributos
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+  client:visible
+  pretest
+  question="El ajuste cambia las probabilidades, pero deja cada trabajo al mismo lado del umbral de clasificación declarado. ¿Qué puede cambiar?"
+  options={[
+    { text: 'El índice de Brier puede cambiar mientras se mantiene la tasa de acierto de clasificación.', correct: true },
+    { text: 'El índice de Brier debe mantenerse porque no cambiaron las respuestas binarias.' },
+    { text: 'Todos los atributos deben mejorar cuando las probabilidades se vuelven menos extremas.' }
+  ]}
+  explanation="Una respuesta binaria descarta con qué fuerza favorece la probabilidad a cada resultado. Una puntuación propia de probabilidades conserva esa información."
+/>
+
+Usa el **índice de Brier medio** binario del curso: la media de $(p-o)^2$, donde menos es mejor. Esta convención puntúa la probabilidad de un evento, en lugar de sumar errores sobre ambas categorías de resultado binario.
+
+Solo para la tasa de acierto de clasificación, declara **sí a partir de 0,50, no por debajo**. Es una convención de comparación, no una regla universal para decisiones con costes desiguales. Las reglas original y ajustada dicen no en el grupo menor y sí en el mayor.
+
+La puntuación original puede reproducirse por completo a partir del registro:
+
+| Grupo original | Error cuadrático de eventos | Error cuadrático de no eventos | Suma de errores del grupo |
+|---|---|---|---|
+| Menor | 4 × (0,20 − 1)² = 2,56 | 6 × (0,20 − 0)² = 0,24 | 2,80 |
+| Mayor | 6 × (0,80 − 1)² = 0,24 | 4 × (0,80 − 0)² = 2,56 | 2,80 |
+
+Por tanto, **Brier original = (2,80 + 2,80) ÷ 20 = 0,28**. Para el recálculo ajustado:
+
+- Suma de errores del grupo menor: **4 × 0,60² + 6 × 0,40² = 1,44 + 0,96 = 2,40**
+- Suma de errores del grupo mayor: **6 × 0,40² + 4 × 0,60² = 0,96 + 1,44 = 2,40**
+- Brier medio del recálculo: **(2,40 + 2,40) ÷ 20 = 0,24**
+
+Una **referencia constante de 0,50** tiene un error cuadrático de **0,25** en cada trabajo. Fija también esa referencia antes de evaluar el lote posterior.
+
+| Comparación en desarrollo | Brier medio | Aciertos de clasificación | Qué establece la comparación |
+|---|---|---|---|
+| Regla original emitida | 0,28 | 12 ÷ 20 = 60 % | Rendimiento de las probabilidades realmente registradas |
+| Recálculo con ajuste | 0,24 | 12 ÷ 20 = 60 % | Mejor ajuste a los datos usados para elegirlo |
+| Referencia constante | 0,25 | 10 ÷ 20 = 50 % | Rendimiento de referencia en los mismos casos y con la misma convención |
+
+<FirstPrinciplesBuilder
+  revealAllLabel="Añadir todas las partes"
+  resetLabel="Empezar de nuevo"
+  client:visible
+  locale="es"
+  title="Reconstruye el Brier medio del recálculo ajustado"
+  eyebrow="Divide las sumas de grupo entre el tamaño del lote completo"
+  analogyValue={0.25}
+  analogyLabel="Brier medio de la referencia constante"
+  parts={[
+    { label: 'Contribución del grupo menor a la media completa', value: 0.12 },
+    { label: 'Contribución del grupo mayor a la media completa', value: 0.12 }
+  ]}
+  rebuiltLabel="Contribuciones seleccionadas al Brier medio"
+  valuePrefix=""
+  valueSuffix=""
+  instructions="Suma las contribuciones a la media del lote completo y compárala con la referencia."
+  verdictTemplate="El índice de Brier medio completo es {total}. Compáralo con las filas original y de referencia de la tabla anterior."
+  caption="Cada contribución divide la suma de errores de su grupo entre el tamaño de todo el lote. Es una puntuación de los datos de ajuste, no una validación posterior."
+/>
+
+### Fiabilidad, resolución e incertidumbre
+
+La descomposición binaria de Brier separa **tres términos**. Para cada grupo de igual probabilidad prevista, $n_k$ es su recuento, $p_k$ su probabilidad constante y $f_k$ su frecuencia observada del evento. $N$ es el recuento completo y $\bar o$ la frecuencia global. Entonces:
+
+$$
+UNC=\bar o(1-\bar o)
+$$
+
+$$
+RES=\sum_k\frac{n_k}{N}(f_k-\bar o)^2
+$$
+
+$$
+REL=\sum_k\frac{n_k}{N}(p_k-f_k)^2
+$$
+
+$$
+BS=UNC-RES+REL
+$$
+
+**UNC**, incertidumbre del resultado, describe la variación de los resultados binarios del lote. **RES**, resolución, mide cuánto difieren las frecuencias observadas de los grupos respecto a la global. **REL** es una penalización de fiabilidad: desviaciones cuadráticas de calibración ponderadas por los mismos recuentos. Una penalización menor es mejor; una resolución mayor reduce Brier cuando los demás términos permanecen fijos.
+
+Para la regla original en desarrollo:
+
+- **UNC = 0,50 × 0,50 = 0,25**
+- **RES = ½ × (0,40 − 0,50)² + ½ × (0,60 − 0,50)² = 0,01**
+- **REL = ½ × (0,20 − 0,40)² + ½ × (0,80 − 0,60)² = 0,04**
+- **BS = 0,25 − 0,01 + 0,04 = 0,28**
+
+El recálculo ajustado conserva **los mismos grupos y pesos**, así que su resolución sigue siendo **0,01**. La penalización de fiabilidad pasa a cero y da **0,25 − 0,01 = 0,24**. La referencia constante tiene un único grupo de probabilidad prevista, por lo que su resolución es cero; como coincide con la frecuencia global de este lote, su penalización de fiabilidad también es cero.
+
+La identidad es exacta aquí porque cada grupo contiene una **probabilidad prevista constante**, están disponibles todos los resultados y los mismos trabajos reciben los mismos pesos. Agrupar valores de previsión desiguales en intervalos amplios no produce automáticamente esta descomposición exacta de sus puntuaciones individuales. Los términos empíricos tampoco son atributos poblacionales exactos: estimarlos con muestras finitas puede introducir sesgo. [Análisis original de Ferro y Fricker](https://empslocal.ex.ac.uk/people/staff/ferro/Publications/ferro-fricker2012preprint.pdf)
+
+La **nitidez (sharpness)** es la concentración de la distribución predictiva, una propiedad de las previsiones por sí solas. Para eventos binarios, las probabilidades cercanas a los extremos son más nítidas. Nuestra regla original es más nítida que el recálculo, pero ambas tienen la misma resolución empírica porque no cambian los grupos ni sus resultados. Hacer una probabilidad más extrema no crea resolución por sí solo. [Gneiting, Balabdaoui y Raftery sobre calibración y nitidez](https://sites.stat.washington.edu/raftery/Research/PDF/Gneiting2007jrssb.pdf)
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+  client:visible
+  allowMultiple
+  question="¿Qué conclusiones se deducen de los cálculos del lote de desarrollo?"
+  options={[
+    { text: 'El recálculo ajustado reduce el error de probabilidad sin cambiar las respuestas binarias.', correct: true },
+    { text: 'Las reglas original y ajustada conservan la misma separación de resultados entre grupos.', correct: true },
+    { text: 'Las probabilidades originales más nítidas deben tener, por ello, una resolución mayor.' },
+    { text: 'El recálculo ajustado establece las probabilidades poblacionales precisas de cada grupo.' }
+  ]}
+  explanation="El recálculo cambia las desviaciones de calibración y conserva los grupos, los resultados y las clasificaciones. Nitidez y resolución empírica son distintas; ajustar una tabla pequeña no revela probabilidades poblacionales exactas."
+/>
+
+## Fija el candidato antes del lote posterior
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+  client:visible
+  pretest
+  question="¿Cómo debería evaluar el equipo el ajuste propuesto después de elegirlo?"
+  options={[
+    { text: 'Registrar ambas reglas fijas sobre los mismos trabajos posteriores antes de sus resultados.', correct: true },
+    { text: 'Reajustar tras cada resultado posterior y publicar la mejor versión retrospectiva.' },
+    { text: 'Conservar solo trabajos posteriores donde el ajuste puntuó mejor que el original.' }
+  ]}
+  explanation="La comparación posterior necesita previsiones no ajustadas a esos resultados y emparejadas sobre el mismo conjunto completo de casos. Una regla reajustada inicia otro ciclo de desarrollo."
+/>
+
+Fija el **mapa de ajuste, la regla original, la referencia, la inclusión, el evento y la puntuación principal** antes de la semana posterior. Usa Brier medio como puntuación principal de probabilidades y el acierto y la calibración agrupada como diagnósticos. El registro posterior está completo:
+
+| Grupo | Identificadores que cumplen el evento | Identificadores que no lo cumplen | Eventos | No eventos | Total | Probabilidad original | Probabilidad ajustada | Frecuencia observada |
+|---|---|---|---|---|---|---|---|---|
+| Menor | L01–L02 | L03–L10 | 2 | 8 | 10 | 0,20 | 0,40 | 0,20 |
+| Mayor | L11–L18 | L19–L20 | 8 | 2 | 10 | 0,80 | 0,60 | 0,80 |
+
+Las sumas de errores originales son **2 × 0,80² + 8 × 0,20² = 1,60** en el grupo menor y **8 × 0,20² + 2 × 0,80² = 1,60** en el mayor. Por tanto, **Brier medio original = 3,20 ÷ 20 = 0,16**.
+
+Las sumas ajustadas son **2 × 0,60² + 8 × 0,40² = 2,00** y **8 × 0,40² + 2 × 0,60² = 2,00**. Por tanto, **Brier medio ajustado = 4,00 ÷ 20 = 0,20**. La referencia sigue en **0,25**. Ambas reglas logran **16 ÷ 20 = 80 %** de aciertos de clasificación.
+
+| Comparación posterior | Brier medio | Penalización de fiabilidad | Resolución | Incertidumbre |
+|---|---|---|---|---|
+| Original | 0,16 | 0 | 0,09 | 0,25 |
+| Ajuste fijado | 0,20 | 0,04 | 0,09 | 0,25 |
+| Referencia constante fijada | 0,25 | 0 | 0 | 0,25 |
+
+Por ejemplo, la resolución posterior es **½ × (0,20 − 0,50)² + ½ × (0,80 − 0,50)² = 0,09**. El ajuste conserva otra vez los grupos, pero ahora sus probabilidades no coinciden con las frecuencias observadas. La diferencia emparejada de Brier medio, **ajustado menos original**, es **0,20 − 0,16 = +0,04**: peor en este lote.
+
+<RateComparison
+  countsLabel="Eventos del total"
+  differenceLabel="Diferencia"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  client:visible
+  locale="es"
+  title="Compara las frecuencias de grupo entre ambos lotes"
+  scenarioLabel="Elige el lote"
+  scenarios={[
+    { label: 'Desarrollo', groups: [
+      { label: 'Grupo de entrada de mayor probabilidad', events: 6, total: 10 },
+      { label: 'Grupo de entrada de menor probabilidad', events: 4, total: 10 }
+    ] },
+    { label: 'Evaluación posterior', groups: [
+      { label: 'Grupo de entrada de mayor probabilidad', events: 8, total: 10 },
+      { label: 'Grupo de entrada de menor probabilidad', events: 2, total: 10 }
+    ] }
+  ]}
+/>
+
+<FirstPrinciplesBuilder
+  revealAllLabel="Añadir todas las partes"
+  resetLabel="Empezar de nuevo"
+  client:visible
+  locale="es"
+  title="Reconstruye el Brier medio ajustado posterior"
+  eyebrow="Conserva los mismos casos posteriores"
+  analogyValue={0.16}
+  analogyLabel="Brier medio posterior de la regla original"
+  parts={[
+    { label: 'Contribución del grupo menor a la media posterior', value: 0.10 },
+    { label: 'Contribución del grupo mayor a la media posterior', value: 0.10 }
+  ]}
+  rebuiltLabel="Contribuciones seleccionadas a la puntuación ajustada"
+  valuePrefix=""
+  valueSuffix=""
+  instructions="Suma las contribuciones ajustadas y compáralas con la regla original en los mismos trabajos posteriores."
+  verdictTemplate="El Brier medio ajustado es {total}. Un error mayor es peor en los casos compartidos, pese a la mejora anterior sobre los datos de ajuste."
+  caption="Se comparan puntuaciones de probabilidad, no aciertos de clasificación ni un efecto causal sobre las terminaciones."
+/>
+
+<Categorize
+  instructions="Coloca cada elemento en el grupo adecuado."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo clasificado"
+  partialResultWord="correctos"
+  client:visible
+  question="Clasifica cada comparación por su función como evidencia"
+  buckets={['Ajuste en desarrollo', 'Evaluación posterior', 'Comparación selectiva inválida']}
+  items={[
+    { text: 'Elegir el ajuste a partir de frecuencias observadas y volver a puntuar ese mismo lote.', bucket: 'Ajuste en desarrollo' },
+    { text: 'Comparar probabilidades fijadas antes en todos los trabajos incluidos del siguiente lote completo.', bucket: 'Evaluación posterior' },
+    { text: 'Eliminar trabajos posteriores en los que el original superó al ajuste.', bucket: 'Comparación selectiva inválida' },
+    { text: 'Volver a ajustar con resultados posteriores y llamar validación independiente al ajuste obtenido.', bucket: 'Comparación selectiva inválida' }
+  ]}
+  explanation="Un lote posterior se convierte en datos de desarrollo cuando usas sus resultados para elegir la regla. Reutilizarlo puede orientar otro candidato, pero no lo valida de forma independiente."
+/>
+
+## Decide la revisión sin inventar precisión
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+  client:visible
+  pretest
+  question="La mejora ajustada se invierte en el lote posterior. ¿Qué conclusión está justificada ahora?"
+  options={[
+    { text: 'El ajuste obtuvo peor resultado en estos casos; su rendimiento más amplio sigue siendo incierto.', correct: true },
+    { text: 'La regla original ya tiene calibración poblacional demostrada para cualquier caso futuro.' },
+    { text: 'Hay que borrar el lote posterior porque contradice el ajuste del lote de desarrollo.' }
+  ]}
+  explanation="Conserva el resultado posterior. No confirma la mejora propuesta, pero sigue siendo una comparación pequeña observada, no una garantía sobre la población."
+/>
+
+El equipo **no debería presentar el candidato como una mejora validada** con este registro. Conserva ambos lotes, comunica la comparación posterior desfavorable y mantiene el original como referencia mientras reúne la siguiente evaluación declarada de antemano. Si propone otro ajuste, le asigna una nueva versión y lo evalúa en casos posteriores.
+
+Esta decisión no exige declarar que una regla es correcta para siempre. El cambio de frecuencias puede deberse al azar, a distinta dificultad de los casos o a un proceso modificado. Los trabajos afectados por una misma interrupción no son necesariamente observaciones independientes. Más filas registradas no significan automáticamente la misma cantidad adicional de información independiente.
+
+| Antes de la siguiente evaluación | Qué declarar o examinar |
+|---|---|
+| Versiones del candidato y de referencia | Fijar el mapa y la comparación antes de los resultados nuevos |
+| Casos incluidos compartidos | Conservar cancelaciones, incumplimientos y verificaciones pendientes |
+| Puntuación principal y agrupación diagnóstica | Evitar elegir la medida que casualmente favorece al candidato |
+| Composición de casos e interrupciones comunes | Comprobar si los trabajos posteriores responden a la misma tarea de previsión |
+| Evidencia necesaria para adoptar | Declarar la mejora práctica exigida y cómo se evaluará su incertidumbre |
+
+Una regla real de adopción necesita un objetivo de mejora relevante y un método de incertidumbre adecuado al número de casos y su dependencia. Este registro didáctico no aporta un tamaño de muestra universal ni un intervalo de confianza. Sus frecuencias agrupadas avanzan en saltos grandes aunque las probabilidades puedan escribirse con muchos decimales.
+
+<InversionFlip
+  client:visible
+  title="Audita las formas tentadoras de mejorar una puntuación sobre el papel"
+  eyebrow="Conserva la evaluación"
+  instructions="Identifica cómo cambia la evidencia cada atajo y revela después una comprobación."
+  forwardLabel="Objetivo de evaluación"
+  invertedLabel="Atajo tentador"
+  safeguardLabel="Mostrar una comprobación"
+  flipHint="Revelar el atajo"
+  flipAllLabel="Revelar todos los atajos"
+  resetLabel="Empezar de nuevo"
+  pairs={[
+    { forward: 'Evaluar la regla que se había fijado.', inverted: 'Sobrescribir la versión después de leer los resultados posteriores.', safeguard: 'Conservar las probabilidades por versión con sus fechas originales e iniciar otro ciclo de desarrollo.' },
+    { forward: 'Comparar la misma tarea de previsión.', inverted: 'Eliminar cancelaciones y casos difíciles solo de la puntuación del candidato.', safeguard: 'Cruzar ambas listas de puntuación con el registro de identificadores incluido de antemano.' },
+    { forward: 'Aprender sobre el rendimiento futuro.', inverted: 'Llamar al mejor recálculo ajustado prueba de calibración permanente.', safeguard: 'Separar ajuste, evaluación posterior e incertidumbre de las conclusiones más amplias.' }
+  ]}
+  caption="Una auditoría clara hace visible un resultado desfavorable. No garantiza uno favorable la próxima vez."
+/>
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+  client:visible
+  allowMultiple
+  question="¿Qué límites deberían mantenerse en el informe del equipo?"
+  options={[
+    { text: 'La aritmética empírica es exacta para los registros completos aportados.', correct: true },
+    { text: 'La calibración poblacional y el rendimiento futuro siguen siendo inciertos.', correct: true },
+    { text: 'Escribir más decimales elimina la incertidumbre de los grupos pequeños.' },
+    { text: 'Los resultados posteriores pueden excluirse cuando empeoran el aspecto del ajuste.' }
+  ]}
+  explanation="La aritmética exacta y la generalización incierta pueden coexistir. Conserva los resultados desfavorables y evalúa cualquier revisión en una comparación posterior definida de forma justa."
+/>
+
+## Transfiere la auditoría a una previsión de grupo único
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  pretestLabel="Antes de leer, intenta responder"
+  client:visible
+  pretest
+  question="Dos reglas de probabilidad constante dan la misma respuesta binaria en todos los casos. ¿Deben tener el mismo Brier medio?"
+  options={[
+    { text: 'No; probabilidades distintas pueden producir errores cuadráticos distintos.', correct: true },
+    { text: 'Sí; las respuestas binarias comunes determinan toda la puntuación de probabilidad.' },
+    { text: 'Sí; las previsiones constantes están calibradas automáticamente ocurra lo que ocurra.' }
+  ]}
+  explanation="La puntuación de probabilidad conserva información que pierde el umbral de sí o no. Las probabilidades constantes no tienen resolución entre casos, pero sus desviaciones de calibración y puntuaciones pueden diferir."
+/>
+
+Un lote completo distinto tiene **diez previsiones**: **ocho eventos ocurren y dos no**. La regla Cedro asigna **0,70** a cada caso y Abedul asigna **0,50**. Ambas se registraron antes de los resultados. Conserva la misma convención de clasificación.
+
+| Regla | Error en eventos | Error en no eventos | Error cuadrático total | Brier medio | Aciertos de clasificación |
+|---|---|---|---|---|---|
+| Cedro | 8 × 0,30² = 0,72 | 2 × 0,70² = 0,98 | 1,70 | 1,70 ÷ 10 = 0,17 | 8 ÷ 10 = 80 % |
+| Abedul | 8 × 0,50² = 2,00 | 2 × 0,50² = 0,50 | 2,50 | 2,50 ÷ 10 = 0,25 | 8 ÷ 10 = 80 % |
+
+Ambas reglas tienen **resolución cero**, porque cada una tiene un único grupo de probabilidad prevista. Cedro tiene menor desviación empírica de calibración y menor Brier medio en este lote. El punto medio constante de Abedul no está calibrado respecto a la frecuencia observada aquí. Ningún resultado establece una probabilidad poblacional exacta a partir de estos pocos casos.
+
+<FillBlank
+  instructions="Elige la opción adecuada en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctos"
+  client:visible
+  question="Identifica las distintas conclusiones del caso de transferencia"
+  text="Cedro y Abedul tienen la {{misma tasa de acierto de clasificación|misma media de Brier|misma desviación empírica de calibración}}. Cedro tiene {{menor Brier medio|mayor resolución|una probabilidad poblacional demostrada}} y ambas tienen {{resolución cero|calibración perfecta|validación independiente de un ajuste}}."
+  explanation="Sus respuestas binarias y aciertos coinciden, pero sus errores de probabilidad difieren. Cada regla constante tiene un único grupo de probabilidad prevista y ninguna separa casos con distintas frecuencias observadas."
+/>
+
+<details>
+<summary>Reconstruye la puntuación y comprueba los tres términos</summary>
+
+Para Cedro, **UNC = 0,80 × 0,20 = 0,16**, **RES = 0** y **REL = (0,70 − 0,80)² = 0,01**. Por tanto, **BS = 0,16 − 0 + 0,01 = 0,17**. La frecuencia es una observación muestral, no un parámetro poblacional conocido.
+
+<FirstPrinciplesBuilder
+  revealAllLabel="Añadir todas las partes"
+  resetLabel="Empezar de nuevo"
+  client:visible
+  locale="es"
+  title="Separa el error total del Brier medio"
+  eyebrow="Usa el denominador completo"
+  analogyValue={2.5}
+  analogyLabel="Error cuadrático total de Abedul en el lote compartido"
+  parts={[
+    { label: 'Error total de Cedro en eventos', value: 0.72 },
+    { label: 'Error total de Cedro en no eventos', value: 0.98 }
+  ]}
+  rebuiltLabel="Contribuciones seleccionadas al error cuadrático total"
+  valuePrefix=""
+  valueSuffix=""
+  instructions="Suma los errores totales y divide después entre el recuento completo de previsiones para obtener Brier medio."
+  verdictTemplate="El error cuadrático total es {total}. Divide entre el recuento compartido de previsiones antes de compararlo con un Brier medio."
+  caption="Esta figura muestra error total; las anteriores muestran error medio. Compara métodos en los mismos casos y conserva explícita la agregación."
+/>
+</details>
+
+## Conecta los pasos de la auditoría
+
+<MindMap
+  client:visible
+  title="De una previsión original a un ajuste evaluado"
+  eyebrow="Conecta la evidencia"
+  outlineLabel="Esquema en texto"
+  root={{ label: 'Auditar un ajuste de previsiones', children: [
+    { label: 'Conservar', children: [{ label: 'Casos incluidos y regla del resultado' }, { label: 'Probabilidades y fechas originales' }, { label: 'Recálculos ajustados separados' }] },
+    { label: 'Medir', children: [{ label: 'Calibración dentro de grupos' }, { label: 'Resolución basada en resultados' }, { label: 'Acierto con umbral y puntuación propia' }] },
+    { label: 'Descomponer', children: [{ label: 'Incertidumbre del resultado' }, { label: 'La resolución reduce el error' }, { label: 'La penalización de fiabilidad aumenta el error' }] },
+    { label: 'Evaluar', children: [{ label: 'Fijar el ajuste' }, { label: 'Emparejar reglas en casos posteriores completos' }, { label: 'Conservar resultados desfavorables' }] },
+    { label: 'Limitar la afirmación', children: [{ label: 'Aritmética muestral exacta' }, { label: 'Atributos poblacionales inciertos' }, { label: 'Una nueva versión necesita otra evaluación' }] }
+  ] }}
+/>
+
+<Quiz
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Repaso completado"
+  perfectMessage="Todo correcto. Comprueba que puedes explicar cada respuesta."
+  goodMessage="Revisa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Repasa los ejemplos y comprueba qué evidencia respalda cada conclusión."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Empezar de nuevo"
+  client:visible
+  title="Comprueba la auditoría de previsiones"
+  questions={[
+    { question: '¿Por qué puede coincidir la media global de previsiones con la frecuencia del evento mientras la calibración agrupada es mala?', options: [
+      { text: 'Los errores opuestos de probabilidad pueden cancelarse al agregar los grupos.', correct: true },
+      { text: 'Una coincidencia global hace iguales todas las frecuencias de grupo por definición.' },
+      { text: 'El registro de previsiones debe contener solo casos en que ocurrió el evento.' }
+    ], explanation: 'La calibración necesita la relación entre probabilidad y frecuencia dentro de los grupos, no solo la coincidencia de medias globales.' },
+    { question: '¿Qué cambia cuando un mapa ajustado acerca cada grupo al punto medio sin fusionar grupos?', options: [
+      { text: 'Puede cambiar la nitidez mientras la resolución empírica de los mismos casos permanece fija.', correct: true },
+      { text: 'La resolución empírica debe subir porque las probabilidades se vuelven más cautas.' },
+      { text: 'La tasa de acierto debe bajar porque cambian todas las probabilidades.' }
+    ], explanation: 'La resolución usa frecuencias de grupo y pesos. Cambiar las probabilidades sin fusionar los grupos conserva esos casos; la nitidez se refiere a las probabilidades predictivas.' },
+    { question: '¿Cómo debe describirse el recálculo ajustado del lote de desarrollo?', options: [
+      { text: 'Un candidato ajustado a resultados de desarrollo que necesita evaluación posterior.', correct: true },
+      { text: 'Las probabilidades originales emitidas antes de los resultados de desarrollo.' },
+      { text: 'Confirmación independiente de que la calibración poblacional ya es exacta.' }
+    ], explanation: 'Separa el recálculo ajustado del registro original. Un ajuste empírico no es una evaluación hacia delante.' },
+    { question: 'Selecciona los términos de la descomposición binaria de Brier utilizada aquí.', allowMultiple: true, options: [
+      { text: 'Incertidumbre del resultado.', correct: true },
+      { text: 'Un término de resolución basado en frecuencias de evento por grupo.', correct: true },
+      { text: 'Una penalización de fiabilidad basada en desviaciones entre probabilidad y frecuencia.', correct: true },
+      { text: 'Un término de acierto de clasificación que sustituye a las frecuencias de resultado.' }
+    ], explanation: 'La descomposición completa incluye incertidumbre, resta resolución y suma la penalización de fiabilidad. Los aciertos son otra estadística, basada en un umbral.' },
+    { question: '¿Qué establece la comparación posterior emparejada?', options: [
+      { text: 'El ajuste tiene mayor error de probabilidad en esos casos posteriores completos.', correct: true },
+      { text: 'La regla original debe estar perfectamente calibrada en toda la población.' },
+      { text: 'Hay que retirar los casos posteriores antes de informar sobre el candidato.' }
+    ], explanation: 'Comunica el resultado posterior desfavorable y conserva la incertidumbre sobre un rendimiento más amplio y futuro.' },
+    { question: 'Una regla constante no tiene grupos de previsión con frecuencias distintas. ¿Qué se deduce?', options: [
+      { text: 'No tiene resolución entre casos; su calibración aún depende de la frecuencia del evento.', correct: true },
+      { text: 'Está perfectamente calibrada con independencia de su probabilidad y de la frecuencia.' },
+      { text: 'No puede servir de referencia porque toda probabilidad constante es lógicamente inválida.' }
+    ], explanation: 'Una previsión constante de tasa base puede servir de referencia sin distinguir casos. Ser constante no garantiza estar calibrada.' },
+    { question: 'Antes de llamar mejora de previsión a una regla ajustada, ¿qué debe seguir visible?', options: [
+      { text: 'Comparaciones posteriores completas, puntuación declarada e incertidumbre al generalizar.', correct: true },
+      { text: 'Solo la mejor puntuación alcanzada al ajustar repetidamente a los resultados originales.' },
+      { text: 'Solo los aciertos de clasificación, descartando probabilidades y casos pendientes.' }
+    ], explanation: 'La auditoría necesita el registro original, una regla fijada, evaluación posterior justa y límites honestos sobre lo que permite establecer la evidencia.' }
+  ]}
+/>
+
+Después, haz el [examen final](/es/calibration-and-confidence/final-exam), que incluye la diferencia entre ajustar probabilidades y evaluar sus previsiones posteriores.

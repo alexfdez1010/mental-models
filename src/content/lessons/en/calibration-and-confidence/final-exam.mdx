@@ -1,15 +1,15 @@
 ---
 title: "Final Exam: Calibration"
-description: "A graded, one-way final exam on calibration — the reliability curve, overconfidence and overprecision, the Brier and log scores, thinking in ranges, and getting calibrated. Pass mark 70%."
+description: "A graded exam on calibration, probability scores, ranges and the evaluation of a frozen forecast adjustment on later cases. Pass mark 70%."
 topic: "en/calibration-and-confidence"
-order: 7
+order: 8
 minutes: 20
-updated: 2026-06-29
+updated: 2026-11-06
 ---
 
 import { Callout, FinalExam, MindMap } from '@/components/react';
 
-This is the final exam for **Calibration: Knowing What You Know**. It pulls the whole course together: what calibration actually means (the match between your stated confidence and your real hit rate), the reliability curve and the two faces of overconfidence — overestimation and overprecision — the proper scoring rules that grade your honesty (the Brier and log scores), thinking in ranges instead of points, and the practical habits that get you calibrated. Several questions look easy until you notice the trap: a forecaster who is perfectly calibrated yet completely useless, a confident answer that should have been humble, or a Brier score read upside down. Reason each one through — remember that lower Brier is better, and that calibration is not the same thing as accuracy.
+This exam covers calibration, proper scoring, uncertainty ranges and forecasting practice, including the audit of a fitted probability adjustment on later cases. Distinguish empirical scores, classification hits and population claims. Use the reference table for questions about the workshop case.
 
 <Callout variant="warning" title="How this exam works">
 Read carefully — this exam is final. Each question appears one at a time. Once you
@@ -18,6 +18,21 @@ no restart. Your score is hidden until the end, where you'll see a pass/fail
 verdict. **The pass mark is 70%.** A few questions ask you to *select all* correct
 answers.
 </Callout>
+
+For the distinction between intervals for future observations and intervals for an estimated mean, see the [NIST engineering statistics handbook](https://itl.nist.gov/div898/handbook/pmd/section5/pmd512.htm).
+
+### Workshop reference
+
+The table contains constructed complete batches. The adjustment maps the original probabilities to fitted development frequencies and is frozen before the later outcomes. The constant benchmark is **0.50**. All methods use the same cases, weights and outcome rule. Classification calls are yes at or above **0.50**.
+
+| Batch | Group | Cases | Events | Non-events | Original probability | Adjusted probability |
+|---|---|---|---|---|---|---|
+| Development | Lower | 10 | 4 | 6 | 0.20 | 0.40, fitted afterwards |
+| Development | Higher | 10 | 6 | 4 | 0.80 | 0.60, fitted afterwards |
+| Later | Lower | 10 | 2 | 8 | 0.20 | 0.40, frozen beforehand |
+| Later | Higher | 10 | 8 | 2 | 0.80 | 0.60, frozen beforehand |
+
+Use the mean squared probability error for binary Brier. Each forecast-value group here has constant probability.
 
 <FinalExam
   client:visible
@@ -64,14 +79,23 @@ answers.
       explanation: 'This is the classic example that calibration is not accuracy. Both predictors are right ~50% of the time (same accuracy), but A says 50% and is right 50% of the time (perfectly calibrated), while B says 99% and is right only 50% of the time (massively overconfident, far below the diagonal). Same hit rate, opposite calibration.',
     },
     {
-      question: 'Which group is famously cited as the gold standard of real-world calibration?',
-      options: [
-        { text: 'Weather forecasters — when they say 70% chance of rain, it rains about 70% of the time', correct: true },
-        { text: 'Stock-market analysts publishing year-end price targets' },
-        { text: 'Political pundits on cable news' },
-        { text: 'Doctors estimating a patient survival odds without feedback' },
+      "question": "Which ordering of later mean Brier scores follows from the reference table, from lower error to higher error?",
+      "options": [
+        {
+          "text": "Original, adjusted, constant benchmark.",
+          "correct": true
+        },
+        {
+          "text": "Adjusted, original, constant benchmark."
+        },
+        {
+          "text": "Constant benchmark, adjusted, original."
+        },
+        {
+          "text": "Original and adjusted tie, followed by the constant benchmark."
+        }
       ],
-      explanation: 'Weather forecasters are the textbook example of excellent calibration: their "70% chance of rain" really does rain about 70% of the time. The reason is a fast, repeated feedback loop — they make probabilistic forecasts constantly and learn from the outcomes. Pundits and analysts typically lack that tight feedback and tend to be overconfident.',
+      "explanation": "Compute squared errors for both outcomes within each group and divide by the same complete batch count. The original probabilities match the later group frequencies; the adjustment has larger error, while the constant benchmark has the largest error."
     },
     {
       question: 'Overconfidence has two distinct faces. Which pair correctly names them?',
@@ -84,14 +108,23 @@ answers.
       explanation: 'Overestimation means your stated probabilities or point estimates are systematically too high — your 90%-confident answers are right only about 75% of the time. Overprecision means your uncertainty ranges are too tight — your "90% confidence intervals" capture the truth far less than 90% of the time. They are separate failures and need separate fixes.',
     },
     {
-      question: 'You take a 10-item "90% confidence interval" quiz: for each fact you give a low-high range you are 90% sure contains the true value. A well-calibrated person misses about how many? And what does missing 5 of 10 reveal?',
-      options: [
-        { text: 'About 1 miss is calibrated; missing 5 means your intervals are far too narrow — classic overprecision', correct: true },
-        { text: 'About 5 misses is calibrated; missing 1 means you are underconfident' },
-        { text: 'Zero misses is the target; any miss at all means failure' },
-        { text: 'About 9 misses is expected for a 90% interval' },
+      "question": "How should observed coverage of a batch of prediction intervals be interpreted?",
+      "options": [
+        {
+          "text": "Compare it with the declared coverage, allowing for sample size and dependence.",
+          "correct": true
+        },
+        {
+          "text": "Require every interval to contain the outcome, regardless of declared coverage."
+        },
+        {
+          "text": "Treat a small batch as an exact measure of population coverage."
+        },
+        {
+          "text": "Infer how much to multiply interval widths directly from the number of misses."
+        }
       ],
-      explanation: 'A genuine 90% interval should contain the truth 9 times out of 10, so a calibrated person misses about 1 in 10. Missing 5 of 10 means the truth fell outside your ranges half the time — your intervals were roughly half as wide as honesty required. That is overprecision: error bars too narrow, the most common and stubborn form of overconfidence.',
+      "explanation": "Nominal coverage is a probability target, not a guarantee of a fixed number of misses in every finite batch. Observed undercoverage is evidence to investigate; its uncertainty and the amount of widening needed require more than a miss-count ratio."
     },
     {
       question: 'What is the "hard-easy effect"?',
@@ -115,15 +148,24 @@ answers.
       explanation: 'Overconfidence is fed by not hunting for disconfirming evidence, by selectively remembering our successes while forgetting our failures, and by the social payoff for sounding sure (decisive people get listened to). The false option is the last one — humans can and do form probability estimates; the problem is bias in those estimates, not an inability to make them.',
     },
     {
-      question: 'What makes a scoring rule "proper"?',
-      options: [
-        { text: 'Honestly reporting your true probability maximizes your expected score — you cannot game it by bluffing', correct: true },
-        { text: 'It only ever rewards predictions of 0% or 100%' },
-        { text: 'It always gives everyone the same score regardless of their forecasts' },
-        { text: 'It rewards sounding more confident than you really are' },
-      ],
-      explanation: 'A proper scoring rule is built so that your expected score is best exactly when you report your honest probability. If you truly believe 70%, stating 70% beats stating 90% or 50% on average. That removes the incentive to bluff or hedge strategically — proper scores make honesty the optimal policy.',
+  "question": "What makes a scoring rule proper?",
+  "options": [
+    {
+      "text": "Reporting your genuine probability gives the best expected score under the rule’s stated direction.",
+      "correct": true
     },
+    {
+      "text": "It only ever rewards predictions at the endpoints."
+    },
+    {
+      "text": "It makes an exaggerated probability strictly better in expectation than the genuine belief."
+    },
+    {
+      "text": "It rewards sounding more confident than you really are."
+    }
+  ],
+  "explanation": "A proper rule makes honest reporting optimal in expectation under that belief. With Brier expressed as a loss, lower expected error is better; with a reward convention, higher is better. A strictly proper rule makes your genuine probability uniquely optimal. A single realised result can still favour another report."
+},
     {
       question: 'How is the Brier score computed, and which direction is better?',
       options: [
@@ -155,55 +197,100 @@ answers.
       explanation: 'The Brier score averages the squared errors across predictions: (0.81 + 0.01) / 2 = 0.82 / 2 = 0.41. One confident miss (0.81) dragged the average up badly even though the other prediction was nearly perfect (0.01) — a reminder that a single overconfident wrong call costs you a lot.',
     },
     {
-      question: 'Why is the log score described as "brutal," and what rule does it teach about extreme probabilities?',
-      options: [
-        { text: 'It punishes confident misses far more harshly than the Brier score — a probability of 0 on something that happens scores negative infinity, so you must never say 0% or 100%', correct: true },
-        { text: 'It rewards saying 0% or 100% as often as possible' },
-        { text: 'It is identical to the Brier score in every situation' },
-        { text: 'It ignores how confident you were and only counts right versus wrong' },
+      "question": "Why can the logarithmic score strongly penalise unsupported certainty?",
+      "options": [
+        {
+          "text": "Assigning vanishing probability to an outcome that occurs makes the loss unbounded.",
+          "correct": true
+        },
+        {
+          "text": "The logarithmic score ignores probabilities and counts only binary hits."
+        },
+        {
+          "text": "A confident miss always has a bounded loss identical to squared error."
+        },
+        {
+          "text": "A mathematically certain outcome must always be assigned a midpoint probability."
+        }
       ],
-      explanation: 'The log score grows without bound as your stated probability on the true outcome approaches zero, so being 100% sure of something false is infinitely costly. The practical lesson: leave a sliver of doubt — never claim 0% or 100% — because a single catastrophic miss can wreck your whole log score. It is far harsher on overconfidence than the Brier.',
+      "explanation": "For the loss convention, negative log probability diverges as the probability of the realised outcome approaches zero. Avoid unsupported impossibility claims; logical certainty is a different case. This concerns a scoring rule, not proof of the true probability from a finite sample."
     },
     {
-      question: 'The Brier score decomposes into two meaningful components. Which are they?',
-      options: [
-        { text: 'Calibration and resolution', correct: true },
-        { text: 'Accuracy and precision' },
-        { text: 'Mean and variance' },
-        { text: 'Optimism and pessimism' },
+      "question": "Which complete binary Brier decomposition is used in the workshop?",
+      "options": [
+        {
+          "text": "Outcome uncertainty minus resolution plus a reliability penalty.",
+          "correct": true
+        },
+        {
+          "text": "Outcome uncertainty plus resolution minus a reliability penalty."
+        },
+        {
+          "text": "Classification hit rate minus sharpness plus a reliability penalty."
+        },
+        {
+          "text": "Calibration alone, with no role for outcome uncertainty or resolution."
+        }
       ],
-      explanation: 'The Brier score splits into a calibration term (how well your stated probabilities match outcome frequencies) and a resolution term (how much your forecasts vary from the base rate — your ability to separate likely from unlikely cases). A good forecaster needs both: calibrated AND able to discriminate, not just one.',
+      "explanation": "The reliability penalty measures weighted squared probability–frequency gaps. Resolution uses group outcome frequencies relative to the overall event frequency. The identity here requires the same complete weighted cases and constant probability within each forecast-value group."
     },
     {
-      question: 'What is the difference between a point estimate and a confidence interval?',
-      options: [
-        { text: 'A point estimate is a single best-guess number; a confidence interval is a range you believe contains the true value with some stated probability', correct: true },
-        { text: 'A point estimate is always wrong; a confidence interval is always right' },
-        { text: 'They are two names for the same single number' },
-        { text: 'A confidence interval is just a point estimate rounded to the nearest ten' },
-      ],
-      explanation: 'A point estimate commits to one number ("about 8 million"); a confidence interval gives a range with a probability attached ("90% sure it is between 5 and 12 million"). The interval is honest about uncertainty — it tells you how much you do not know — whereas a bare point estimate hides it.',
+  "question": "What distinguishes a point forecast from a prediction interval?",
+  "options": [
+    {
+      "text": "The point forecast gives a single value; the prediction interval gives a range for a future observation with intended coverage.",
+      "correct": true
     },
     {
-      question: 'A reliable trick for building an honest interval is to set the bounds deliberately. What is the recommended method?',
-      options: [
-        { text: 'Set a lower bound you are 95% sure is too LOW and an upper bound you are 95% sure is too HIGH, then check the range feels uncomfortably wide', correct: true },
-        { text: 'Pick your best guess and add or subtract 1% to get the bounds' },
-        { text: 'Make the interval as narrow as possible so it looks precise' },
-        { text: 'Use whatever range your first instinct produces without adjustment' },
-      ],
-      explanation: 'Because first-draft intervals are almost always too narrow, the discipline is to push the bounds outward: choose a low end you are 95% sure is too low and a high end you are 95% sure is too high. If the resulting range feels uncomfortably wide, that is usually a sign it is finally honest — not a sign you did it wrong.',
+      "text": "The point forecast is always wrong and the prediction interval always contains the observation."
     },
     {
-      question: 'Why does the course insist that "honest error bars size your margin of safety"?',
-      options: [
-        { text: 'A truthfully wide interval tells you how much could go wrong, so you can leave room for it; a falsely narrow one hides the risk and leaves you exposed', correct: true },
-        { text: 'Wider intervals always mean you will lose money' },
-        { text: 'Error bars are decorative and have no effect on decisions' },
-        { text: 'The narrowest possible interval gives the largest margin of safety' },
-      ],
-      explanation: 'Your interval is a map of how badly your estimate could miss. If it is honestly wide, you can plan for the bad end — build slack, buffers, and a margin of safety. If you fake precision with a tight interval, you plan for a future that may not arrive and get blindsided when reality lands outside your range.',
+      "text": "Both describe the same single value without expressing any uncertainty."
     },
+    {
+      "text": "A prediction interval describes only uncertainty about a population mean, excluding future observation variability."
+    }
+  ],
+  "explanation": "A prediction interval addresses a future observation. It differs from a confidence interval for a population quantity such as a mean. Intended coverage depends on the construction and its assumptions; it does not guarantee that every future observation falls within the bounds."
+},
+    {
+      "question": "What makes a proposed forecasting interval auditable?",
+      "options": [
+        {
+          "text": "Declare the quantity, horizon, bounds and intended coverage before the outcome.",
+          "correct": true
+        },
+        {
+          "text": "Make it feel uncomfortable, which guarantees the stated coverage."
+        },
+        {
+          "text": "Choose the narrowest interval that still sounds confident in a meeting."
+        },
+        {
+          "text": "Move a bound after observing the outcome and keep the original coverage label."
+        }
+      ],
+      "explanation": "An auditable interval has a clear target and recorded bounds before resolution. Check coverage on comparable later outcomes and inspect uncertainty; how wide an interval feels is not proof of coverage."
+    },
+    {
+  "question": "Why record a prediction interval alongside a point forecast when planning?",
+  "options": [
+    {
+      "text": "It makes forecast uncertainty visible for planning, while outcomes beyond its bounds remain possible.",
+      "correct": true
+    },
+    {
+      "text": "Its endpoints are absolute best and worst outcomes under every operating condition."
+    },
+    {
+      "text": "Its declared coverage removes the need to check assumptions and later outcomes."
+    },
+    {
+      "text": "A narrower interval always establishes better forecasting and greater safety."
+    }
+  ],
+  "explanation": "Use an interval’s target, coverage and assumptions when considering buffers. Its endpoints are not absolute limits: outcomes outside the range are possible. Width alone establishes neither calibration nor a sufficient margin of safety."
+},
     {
       question: 'What is the single most important habit for fighting hindsight bias and getting calibrated?',
       options: [
@@ -222,17 +309,26 @@ answers.
         { text: 'Good decisions always produce good outcomes, so they are the same thing' },
         { text: 'Luck can be eliminated entirely with enough planning' },
       ],
-      explanation: 'In any uncertain domain, a well-reasoned bet can lose and a reckless one can win — that is variance. If you grade your thinking purely by whether it worked out, you will "learn" to repeat lucky-but-bad processes and abandon sound-but-unlucky ones. Calibration requires judging the quality of the decision given what you knew, separately from the roll of the dice.',
+      explanation: 'In any uncertain domain, a well-reasoned bet can lose and a reckless one can win — that is variance. If you grade your thinking purely by whether it worked out, you will "learn" to repeat lucky-but-bad processes and abandon sound-but-unlucky ones. Review the evidence and reasoning available at the time. Calibration is a separate probability–frequency assessment across comparable cases; a single loss or a flawed rationale does not establish its numerical error.',
     },
     {
-      question: 'How do reference classes and base rates improve a forecast, and how does this tie to Bayesian thinking?',
-      options: [
-        { text: 'They give you a calibrated starting prior — the rate at which similar cases turn out — which you then update with case-specific evidence, exactly the Bayesian move', correct: true },
-        { text: 'They tell you to ignore all general statistics and trust only the vivid details of this one case' },
-        { text: 'They guarantee the specific case will match the average exactly' },
-        { text: 'They replace probability entirely with a single yes-or-no answer' },
+      "question": "What role should an appropriate reference-class frequency play in a forecast?",
+      "options": [
+        {
+          "text": "An evidence-based starting point, with uncertainty and relevance checked.",
+          "correct": true
+        },
+        {
+          "text": "A guaranteed calibrated prior for every new case and future process."
+        },
+        {
+          "text": "A replacement for all case-specific information, however relevant."
+        },
+        {
+          "text": "A guarantee that the next individual outcome equals the historical average."
+        }
       ],
-      explanation: 'A reference class is the set of similar past situations; its base rate is how often they turned out a given way. Starting from that base rate gives you a calibrated prior, which you then adjust with the specifics of this case. Anchor on the base rate, update on the evidence — that is Bayesian reasoning, and it is a powerful antidote to being swept away by a vivid but unrepresentative story.',
+      "explanation": "A reference class can inform a prior, but its relevance, sampling uncertainty and changes in the process matter. A historical frequency is neither the certain probability of one case nor a guarantee of future calibration."
     },
     {
       question: 'Tetlock Good Judgment Project found that "superforecasters" share several habits. Which of the following are among them? (Select all that apply.)',
@@ -246,25 +342,83 @@ answers.
       explanation: 'Superforecasters anchor on base rates, nudge their estimates in small increments as evidence trickles in, and think in granular probabilities rather than vague words. The false option is the last one: refusing to update is the opposite of what they do — good forecasters revise often and proportionally, never digging in to defend a number out of pride.',
     },
     {
-      question: 'A forecaster answers every single question with "50% chance." What is true of this clock-that-always-says-50% forecaster?',
-      options: [
-        { text: 'On balanced yes/no questions they can be perfectly calibrated yet have zero resolution — calibrated but useless', correct: true },
-        { text: 'They are badly miscalibrated and wildly overconfident' },
-        { text: 'They are the ideal forecaster because 50% is the safest answer' },
-        { text: 'They have high resolution but poor calibration' },
+      "question": "A constant forecast matches the overall event frequency in the evaluated collection. Which statement follows?",
+      "options": [
+        {
+          "text": "It is empirically calibrated there but has no resolution across cases.",
+          "correct": true
+        },
+        {
+          "text": "It must be the best possible forecaster in every future population."
+        },
+        {
+          "text": "It has high resolution because the same probability is used consistently."
+        },
+        {
+          "text": "It cannot serve as a useful reference because it does not distinguish cases."
+        }
       ],
-      explanation: 'This is the central trap of the lesson. A forecaster who always says 50% on questions that genuinely split 50/50 sits right on the diagonal — perfectly calibrated. But they never distinguish a near-certain event from a coin flip, so their resolution is zero and the forecasts are decision-useless. Calibration alone is not enough; you also need resolution (decisiveness).',
+      "explanation": "The single forecast-value group matches this collection’s overall frequency and has zero resolution. That can make it a useful benchmark without providing case-specific separation or establishing population calibration."
     },
     {
-      question: 'What is the ultimate goal the course sets — the right balance between calibration and resolution?',
-      options: [
-        { text: 'Be both calibrated AND decisive — honest about uncertainty (humility) yet willing to make sharp, discriminating forecasts (resolution)', correct: true },
-        { text: 'Maximize calibration alone, even if every forecast is a useless 50%' },
-        { text: 'Maximize confidence at all costs so you always sound authoritative' },
-        { text: 'Avoid making probabilistic forecasts altogether to stay safe' },
+      "question": "Which description correctly distinguishes sharpness from resolution?",
+      "options": [
+        {
+          "text": "Sharpness concerns predictive concentration; resolution also uses group outcome frequencies.",
+          "correct": true
+        },
+        {
+          "text": "Sharpness and resolution are synonyms for moving probabilities towards extremes."
+        },
+        {
+          "text": "Sharpness needs realised outcomes, while resolution uses only probability values."
+        },
+        {
+          "text": "Resolution is the binary hit rate after a classification threshold is selected."
+        }
       ],
-      explanation: 'Calibration is humility (your probabilities tell the truth); resolution is decisiveness (you actually separate the likely from the unlikely). A perfectly-calibrated-but-always-50% forecaster has the first without the second and is useless; an overconfident pundit has neither honesty. The aim is both at once — calibrated AND decisive — so your forecasts are both trustworthy and informative.',
+      "explanation": "A one-to-one change in forecast values can change sharpness without changing group membership or its outcome frequencies. Thus empirical resolution can remain unchanged while calibration gaps and Brier scores change."
     },
+  {
+  "question": "Which protocol choices preserve a fair evaluation of a proposed adjustment?",
+  "allowMultiple": true,
+  "options": [
+    {
+      "text": "Freeze the rule and scoring protocol before later outcomes.",
+      "correct": true
+    },
+    {
+      "text": "Compare both rules on the same eligible cases with the same weights.",
+      "correct": true
+    },
+    {
+      "text": "Remove cases whenever the original probability scores better."
+    },
+    {
+      "text": "Refit using the later outcomes and call that same batch independent validation."
+    }
+  ],
+  "explanation": "A fair comparison preserves the predeclared versions, cases, outcomes and weighting. Refitting starts another development cycle; excluding adverse cases changes the evaluation."
+},
+{
+  "question": "The later group frequencies match the original probabilities in the reference case. What should the report say?",
+  "options": [
+    {
+      "text": "Report that empirical match while retaining uncertainty about population calibration.",
+      "correct": true
+    },
+    {
+      "text": "Declare the original probabilities exact for every future group and operating condition."
+    },
+    {
+      "text": "Delete the development batch because it now disagrees with the preferred conclusion."
+    },
+    {
+      "text": "Treat more decimal places as a substitute for additional independent evidence."
+    }
+  ],
+  "explanation": "The complete table supports exact arithmetic and an observed match. It remains a small collection; chance, dependence and changed case mix limit claims about the population and future performance."
+},
   ]}
 />
 
@@ -274,46 +428,85 @@ answers.
   client:visible
   title="Calibration, in one picture"
   root={{
-    label: 'Calibration: Knowing What You Know',
-    children: [
-      {
-        label: 'What calibration means',
-        children: [{ label: 'Stated confidence should match real hit rate: of all your 70% calls, ~70% come true. The reliability curve plots confidence (x) vs fraction-correct (y); the 45-degree line is perfect; below = overconfident, above = underconfident. Calibration is not accuracy — weather forecasters are the gold standard.' }],
-      },
-      {
-        label: 'Overconfidence & overprecision',
-        children: [{ label: 'Two faces: overestimation (90% answers right ~75%) and overprecision (90% intervals catch truth only ~40-50% of the time). The hard-easy effect makes overconfidence worst on hard questions. Driven by not seeking disconfirming evidence, remembering hits, and social reward for sounding sure.' }],
-      },
-      {
-        label: 'Scoring your beliefs',
-        children: [{ label: 'Proper scoring rules make honesty optimal. Brier = (p − o) squared, averaged; 0 best, 1 worst, LOWER is better. The log score is brutal on confident misses — never say 0% or 100%. Brier decomposes into calibration + resolution.' }],
-      },
-      {
-        label: 'Thinking in ranges',
-        children: [{ label: 'Point estimate vs confidence interval. First intervals are too narrow — deliberately widen. Use the 90% interval discipline (expect ~1 miss in 10); set bounds you are 95% sure are too low and too high. Honest error bars size your margin of safety.' }],
-      },
-      {
-        label: 'Getting calibrated',
-        children: [{ label: 'Journal predictions BEFORE outcomes (fights hindsight); give ranges + explicit probabilities; score, see the reliability curve, adjust. Separate decision quality from outcome luck; anchor on base rates (ties to Bayes). Superforecasters use base rates, small updates, fine-grained odds. A clock that always says 50% is calibrated but useless — aim for calibrated AND decisive.' }],
-      },
-    ],
-  }}
+  "label": "Calibration and forecast evaluation",
+  "children": [
+    {
+      "label": "Calibration",
+      "children": [
+        {
+          "label": "Probability and event frequencies"
+        },
+        {
+          "label": "Separate probability quality and hit rate"
+        }
+      ]
+    },
+    {
+      "label": "Overconfidence and overprecision",
+      "children": [
+        {
+          "label": "Probability gaps and interval coverage"
+        },
+        {
+          "label": "Investigate evidence without universal diagnoses"
+        }
+      ]
+    },
+    {
+      "label": "Proper scoring",
+      "children": [
+        {
+          "label": "Expected scoring rewards honest probabilities"
+        },
+        {
+          "label": "Uncertainty minus resolution plus reliability penalty"
+        }
+      ]
+    },
+    {
+      "label": "Ranges",
+      "children": [
+        {
+          "label": "Declare bounds and coverage before outcomes"
+        },
+        {
+          "label": "Assess observed coverage and its uncertainty"
+        }
+      ]
+    },
+    {
+      "label": "Practice",
+      "children": [
+        {
+          "label": "Version forecasts and preserve all eligible cases"
+        },
+        {
+          "label": "Use relevant base rates and later feedback"
+        }
+      ]
+    },
+    {
+      "label": "Adjustment audit",
+      "children": [
+        {
+          "label": "Separate sharpness from outcome-based resolution"
+        },
+        {
+          "label": "Fit on development and freeze before later evaluation"
+        },
+        {
+          "label": "Report paired scores and limits of population claims"
+        }
+      ]
+    }
+  ]
+}}
 />
 
 <Callout variant="success" title="Key takeaways">
-Calibration is the quiet discipline of making your confidence tell the truth: of
-all the times you say **70%**, the thing should come true about **70%** of the time —
-that is the 45-degree line on the **reliability curve**, with overconfidence sitting
-below it and underconfidence above. It is not the same as accuracy: the 50%-always
-and 99%-always coin predictors share a hit rate but live worlds apart. Overconfidence
-wears **two faces** — guesses that run too high and error bars that run too narrow —
-and the cure is to score yourself honestly. The **Brier score** (lower is better, 0 to
-1) and the brutal **log score** reward truth-telling and punish confident misses, so you
-never say 0% or 100%. Think in **ranges**, not points: widen your first interval, expect
-about 1 miss in 10 from a real 90% interval, and let honest error bars size your margin
-of safety. Then build the habit loop — **journal before outcomes**, anchor on base rates,
-update in small steps like a **superforecaster**, and separate the quality of your decision
-from the luck of the result. Above all, remember the trap of the clock that always says
-50%: perfectly calibrated, utterly useless. The goal is not just humility — it is
-calibration **and** decisiveness, together.
+Calibration compares probabilities with event frequencies; classification hits depend on a declared decision threshold. Resolution concerns outcome separation across forecast groups. Sharpness concerns predictive concentration and does not use outcomes by itself.
+
+Compare probability methods with a proper score on the same cases. The binary Brier decomposition includes outcome uncertainty, subtracts resolution and adds a reliability penalty. A constant base-rate forecast can be a useful benchmark without distinguishing cases.
+
+Preserve issued forecasts, eligible IDs and clear outcome rules. Keep fitted replays separate, freeze candidates before later outcomes and retain adverse results. Report exact sample arithmetic alongside uncertainty about population calibration and future performance. For intervals, declare the target and intended coverage, then check later outcomes rather than treating a small coverage count or how wide a range feels as proof.
 </Callout>
