@@ -1,0 +1,291 @@
+---
+title: "A Fair Pilot After a Bad Week"
+description: "Evaluate a pilot triggered by a performance spike: select fair comparison groups, keep measurement windows fixed and separate improvement from evidence of impact."
+topic: "en/regression-to-the-mean"
+order: 7
+minutes: 19
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MindMap, ConsequenceTree, InversionFlip, RateComparison } from '@/components/react';
+
+Support replies are late, the dashboard turns red and someone proposes a new triage checklist. The next week looks better. The improvement matters to customers. Whether the checklist caused it is a separate question.
+
+This workshop follows one pilot from its eligibility rule to its review decision. The queues, counts and decision threshold are teaching data. The task is to learn what the comparison can support, rather than to assume the checklist works or that every recovery is noise.
+
+## Inspect the rule that triggered the pilot
+
+<MCQ client:visible pretest
+  question="Queues enter a pilot because their latest delay rate was unusually high. What does that selection rule change?"
+  options={[
+    { text: "A later fall may partly reflect temporary variation in the selected week.", correct: true },
+    { text: "A later fall must occur, so there is no reason to investigate the delays." },
+    { text: "A later fall must be the checklist's effect, because the problem was real." }
+  ]}
+  explanation="Selecting an unusually bad measurement can select temporary adverse variation as well as persistent problems. Regression is a possibility to allow for; it neither guarantees a fall nor makes the original delay unimportant."
+/>
+
+The service defines a **late reply** as a first response after the promised deadline. Its **late-reply rate** is the number of late first replies divided by all eligible tickets received in the measurement window. Higher is worse. Follow-up continues until every ticket's deadline has passed; a ticket still unanswered at its deadline counts as late. The definition, ticket types and deadline stay the same throughout this example.
+
+The pilot admits queues with at least a 20% late-reply rate in the latest completed week. Twelve queues qualify. Their combined historical record gives context:
+
+| Completed week | Late replies | Eligible tickets | Late-reply rate |
+|---|---|---|---|
+| Three weeks before selection | 156 | 1,200 | 156 ÷ 1,200 = 13% |
+| Two weeks before selection | 144 | 1,200 | 144 ÷ 1,200 = 12% |
+| One week before selection | 168 | 1,200 | 168 ÷ 1,200 = 14% |
+| Selection week | 288 | 1,200 | 288 ÷ 1,200 = 24% |
+
+The selected week is high relative to those earlier observations. That is a reason to examine workload, staffing and measurement, not proof that the next week will return to 13%. A lasting change in demand could keep delays high. Temporary disruption or measurement variation could also have contributed to the spike.
+
+**Regression to the mean** describes a tendency for unusually high or low measurements to be followed by less extreme measurements under an appropriate repeated-measurement process. Barnett and colleagues emphasise both baseline selection and measurement variation as reasons to consider it when interpreting change. It is a candidate explanation, not a finding that every selected queue must improve. [Barnett and colleagues on regression to the mean](https://doi.org/10.1093/ije/dyh299)
+
+### When to use it
+
+Inspect the trigger whenever help, sanctions, publicity or a new process follows an exceptional result. You can address a demonstrated operational problem while keeping the evaluation honest. Waiting for a better comparison does not require ignoring customers whose replies are late.
+
+<FillBlank client:visible
+  question="Distinguish selection from explanation."
+  text="Queues were selected using the {{latest bad measurement|future pilot results|checklist's proven impact}}. Their next result may change because of {{several possible causes|a guaranteed rebound|only the intervention}}."
+  explanation="Eligibility used the extreme starting week. That creates a regression concern, but it does not establish which causes explain any subsequent change."
+/>
+
+## Select eligibility first and allocate the pilot second
+
+<MCQ client:visible pretest
+  question="Which comparison best addresses this pilot's selection problem?"
+  options={[
+    { text: "Randomly allocate similarly eligible queues to checklist or usual practice.", correct: true },
+    { text: "Give the checklist to the worst queues and compare them with routine queues." },
+    { text: "Give every eligible queue the checklist and compare only with its bad week." }
+  ]}
+  explanation="Both groups should come from the same eligibility process. Random allocation then supports a fair comparison in expectation; routine queues did not enter through the same extreme starting point."
+/>
+
+A **comparison group** estimates what would happen under the alternative being considered. Here that alternative is continuing usual triage, with the same existing service and staffing. The pilot changes only the checklist being tested; necessary routine support continues in both groups.
+
+Before revealing any follow-up results, the organiser forms pairs of eligible queues with similar prior workload and delay records. Within each pair, a lottery assigns one queue to the checklist and one to usual practice. There are six queues per group. This is **random allocation within matched pairs**: matching defines comparable pairs; the lottery determines which receives the pilot.
+
+Each queue is handled by a separate team, and the checklist is not shared with comparison teams during the review. Allocating whole queues fits the way the process is delivered. J-PAL distinguishes the unit receiving random allocation from the individual observations collected within it, and explains why interference between groups matters. [J-PAL on randomization and its unit](https://www.povertyactionlab.org/resource/randomization)
+
+<ConsequenceTree client:visible
+  eyebrow="Follow the design before reading results"
+  instructions="Open the steps in order. Notice that eligibility is fixed before the lottery and both groups are measured on the same calendar."
+  decisionLabel="Design decision"
+  orderLabels={["Eligibility", "Allocation", "Measurement"]}
+  promptLabel="Reveal the next step"
+  expandAllLabel="Reveal the design"
+  collapseLabel="Close the design"
+  valenceLabels={{ good: "Supports comparison", bad: "Threatens comparison", mixed: "Needs judgment", neutral: "Design step" }}
+  decision={{ label: "Test the checklist among queues that met the bad-week rule", children: [
+    { label: "Freeze the eligible list and form comparable pairs", children: [
+      { label: "Randomly allocate each pair between checklist and usual practice", children: [
+        { label: "Measure both groups over the same planned weeks using the same ticket definition", valence: "good" }
+      ]}
+    ]}
+  ]}}
+/>
+
+In the constructed data, both groups happen to start at a 24% late-reply rate. Random allocation does not guarantee equal starting values or equal future fluctuations in every small pilot. Its protection concerns how the comparison behaves across possible allocations, not a promise that the two realised groups are identical.
+
+### When to use it
+
+Define eligibility and allocation before knowing who improves. If random allocation is unavailable, explain how the comparison was selected and which differences may remain. A longer baseline helps understand variation; it does not turn a non-comparable group into a randomized control.
+
+<Categorize client:visible
+  question="Classify each feature by its role in the review."
+  buckets={["Supports the intended comparison", "Changes or threatens the comparison"]}
+  items={[
+    { text: "Both groups meet the same bad-week eligibility rule", bucket: "Supports the intended comparison" },
+    { text: "A lottery assigns the checklist within preformed pairs", bucket: "Supports the intended comparison" },
+    { text: "Comparison teams copy the checklist during follow-up", bucket: "Changes or threatens the comparison" },
+    { text: "Only checklist queues receive extra staff at the same time", bucket: "Changes or threatens the comparison" }
+  ]}
+  explanation="The first two features address selection and allocation. Checklist sharing changes what usual practice means; extra staffing means the contrast no longer isolates the checklist as planned."
+/>
+
+## Compute the contrast without naming every change regression
+
+<MCQ client:visible pretest
+  question="Both selected groups improve after the bad week. What does the usual-practice group's change measure?"
+  options={[
+    { text: "Observed change under usual practice, which can have several causes.", correct: true },
+    { text: "Pure regression, with every other possible influence removed." },
+    { text: "Proof that the checklist cannot have any beneficial effect." }
+  ]}
+  explanation="The comparison group's change can include regression, shared calendar conditions and other variation. It is useful without identifying a pure regression component."
+/>
+
+Each selected queue contributes 100 eligible tickets per week in these constructed data, giving 600 per group. After the first follow-up week, the record is:
+
+| Group | Selection week | First follow-up week | Reduction in late-reply rate |
+|---|---|---|---|
+| Selected checklist queues | 144 ÷ 600 = 24% | 96 ÷ 600 = 16% | 24% − 16% = 8 percentage points |
+| Selected usual-practice queues | 144 ÷ 600 = 24% | 114 ÷ 600 = 19% | 24% − 19% = 5 percentage points |
+| Routine queues not selected by the bad-week rule | 72 ÷ 600 = 12% | 66 ÷ 600 = 11% | 12% − 11% = 1 percentage point |
+
+A **percentage point** is the difference between two percentages. Moving from 24% to 16% is an eight-percentage-point reduction. The relative reduction is **8 ÷ 24 ≈ 33.3%**. Keep the units explicit; those are two descriptions of the same observed change, not two effects to add.
+
+Comparing the reductions in the **two selected groups** gives **8 − 5 = 3 percentage points** in favour of the checklist in this week. Because their baselines are equal, the after-only contrast is also **19% − 16% = 3 percentage points**. With the stated allocation and measurement conditions, that contrast is an estimate of the checklist's effect for these eligible queues and this period. It remains uncertain.
+
+Calling all eight points “the effect” ignores the selected comparison. Calling all five comparison points “regression” goes further than the data allow: shared workload conditions, regression and ordinary random variation could all contribute. This table does not separate those components.
+
+Using routine queues instead produces **8 − 1 = 7 percentage points**. That arithmetic is correct, but its causal interpretation is weak: the routine group did not enter through the same bad-week selection. An attractive subtraction cannot repair a mismatched counterfactual.
+
+### When to use it
+
+Use a between-group contrast only after checking who was compared, how they were allocated and which dates were measured. A positive contrast is evidence to assess, rather than an exact causal fact. J-PAL's randomization guidance explicitly distinguishes an estimate's behaviour in expectation from the error that can remain in a particular sample. [J-PAL's explanation of randomization error](https://www.povertyactionlab.org/resource/randomization)
+
+<MCQ client:visible allowMultiple
+  question="Select the interpretations supported by the first follow-up table."
+  options={[
+    { text: "The checklist group's own improvement includes more than the between-group contrast.", correct: true },
+    { text: "The selected comparison offers the more appropriate counterfactual here.", correct: true },
+    { text: "Every point of the comparison improvement must be pure regression." },
+    { text: "A positive observed contrast identifies the exact effect without uncertainty." }
+  ]}
+  explanation="The before-after improvement is larger than the between-group contrast. Selection and allocation support using the eligible comparison group, while the component causes and the true effect remain uncertain."
+/>
+
+## Keep the review window fixed
+
+<MCQ client:visible pretest
+  question="The first week looks promising, but the plan specified a longer review. What should determine the main summary?"
+  options={[
+    { text: "The complete review window chosen before seeing the results.", correct: true },
+    { text: "Whichever single week gives the largest apparent benefit." },
+    { text: "An indefinitely extended window ending when a favourable result appears." }
+  ]}
+  explanation="A predefined window avoids choosing the result after seeing which week looks best. New exploratory summaries can be useful, but they should not silently replace the planned one."
+/>
+
+Before the pilot, the service agreed to review **three complete follow-up weeks**, each with the same ticket eligibility rules. It also chose a practical target: at least **three percentage points fewer late replies** relative to usual practice across that window, subject to acceptable workload and a credible uncertainty assessment. This is the service's decision criterion for the case, not a universal standard.
+
+Here are all the planned follow-up observations:
+
+| Follow-up week | Checklist late replies out of 600 | Usual-practice late replies out of 600 | Observed between-group contrast |
+|---|---|---|---|
+| First | 96 = 16% | 114 = 19% | 3 percentage points |
+| Second | 102 = 17% | 108 = 18% | 1 percentage point |
+| Third | 90 = 15% | 102 = 17% | 2 percentage points |
+| Whole window | 288 ÷ 1,800 = 16% | 324 ÷ 1,800 = 18% | 2 percentage points |
+
+<RateComparison client:visible
+  title="Rates of late replies in the selected queues"
+  scenarioLabel="Measurement window"
+  countsLabel="Late replies out of eligible tickets"
+  differenceLabel="Observed contrast"
+  scenarios={[
+    { label: 'First complete observation week', groups: [
+      { label: 'Usual practice', events: 114, total: 600 },
+      { label: 'Checklist', events: 96, total: 600 }
+    ]},
+    { label: 'Full planned observation window', groups: [
+      { label: 'Usual practice', events: 324, total: 1800 },
+      { label: 'Checklist', events: 288, total: 1800 }
+    ]}
+  ]}
+/>
+
+The pooled calculation uses all eligible tickets: **(96 + 102 + 90) ÷ (600 + 600 + 600) = 16%** for the checklist, and **(114 + 108 + 102) ÷ 1,800 = 18%** for usual practice. The observed contrast is **18% − 16% = 2 percentage points**. Equal weekly denominators mean averaging the three weekly rates gives the same result here. With unequal ticket volumes, that shortcut would not generally give the pooled ticket rate.
+
+A report showing only the first week would make the result look as though it met the three-point target. The whole planned window falls below that target. It does not follow that the true effect is zero, nor that a real effect must grow each week. Effects, workload and estimates can vary over time.
+
+### When to use it
+
+Fix the window when short-term results fluctuate and people can choose when to celebrate. Repeated observations improve the record; they do not automatically eliminate selection bias, shared disruptions or dependence between observations.
+
+<FillBlank client:visible
+  question="Choose the summary that answers the planned question."
+  text="The main review uses the {{whole planned window|best-looking follow-up|first week above target}}. The pooled rate divides {{all late replies by all eligible tickets|all percentages by all queues|the largest count by one week}}."
+  explanation="Use the window decided in advance and preserve the correct denominator. A selected favourable week answers a different question."
+/>
+
+## Decide what the pilot supports next
+
+<MCQ client:visible pretest
+  question="The complete window shows a positive contrast below the chosen practical target. What is a defensible next step?"
+  options={[
+    { text: "Review precision, implementation and costs before deciding on further testing.", correct: true },
+    { text: "Roll out immediately because any observed positive number proves value." },
+    { text: "Declare the checklist ineffective because the observed target was missed." }
+  ]}
+  explanation="A result can be positive, below a practical threshold and uncertain at the same time. The next decision should use those distinctions rather than convert them into automatic success or failure."
+/>
+
+The team records: **“Across the planned window, checklist queues had two percentage points fewer late replies than selected usual-practice queues. This observed contrast is below our three-point practical target. We have not established the precision of the effect estimate from this aggregate table.”** That sentence preserves the improvement without overstating attribution.
+
+There are **twelve allocation units: queues**, even though the table contains thousands of tickets. Tickets handled by one team may share staffing and workload conditions. An uncertainty analysis must respect the queue-level allocation and pairing, rather than treat every ticket as an independently randomized trial. The aggregate counts shown here are insufficient to calculate that analysis; keep queue-level records.
+
+Before deciding on a larger test, the service checks whether teams actually used the checklist, whether comparison teams copied it, whether ticket mix or staffing changed differently, and whether any tickets disappeared from measurement. These checks can change what the contrast means. A complete-case table can look reassuring if the slowest unresolved tickets were quietly excluded.
+
+<InversionFlip client:visible
+  eyebrow="Check what would invalidate the report"
+  instructions="Predict the weakness in each conclusion, reveal it, then compare your response with the suggested check."
+  forwardLabel="Proposed conclusion" invertedLabel="What the conclusion misses"
+  safeguardLabel="Reveal a check" flipHint="Reveal the weakness"
+  flipAllLabel="Reveal both weaknesses" resetLabel="Hide weaknesses"
+  pairs={[
+    { forward: "The between-group contrast isolates the checklist exactly as planned.", inverted: "Only checklist queues also received extra staff, so the observed contrast mixes changes.", safeguard: "Record the staffing change and revise the claim or the next design; do not call this a checklist-only contrast." },
+    { forward: "The ticket count makes the effect estimate highly precise.", inverted: "Tickets within a queue share conditions, and the lottery allocated queues rather than individual tickets.", safeguard: "Retain queue-level results and assess uncertainty using the actual allocation and pairing." }
+  ]}
+/>
+
+The decision is to **defer a full rollout on this evidence**, check implementation and queue-level uncertainty, then decide whether a revised, prospectively planned test is worth its cost. Routine support continues. If a larger test is chosen, its outcomes, allocation and review date are specified before results arrive. The team does not extend the current pilot repeatedly until a favourable week appears.
+
+### When to use it
+
+Use this review when a pilot starts after an alarm. Distinguish operational improvement, an estimated causal contrast and a rollout decision. A plausible regression concern does not prove that the intervention did nothing; a surviving contrast does not prove its exact size, durability or value in other queues.
+
+<Categorize client:visible
+  question="Classify each statement by the claim it makes."
+  buckets={["Describes the observed result", "Needs additional evidence or assumptions"]}
+  items={[
+    { text: "The checklist group's recorded rate fell after selection", bucket: "Describes the observed result" },
+    { text: "The whole planned window showed a positive between-group contrast below the target", bucket: "Describes the observed result" },
+    { text: "The true checklist effect equals the observed contrast exactly", bucket: "Needs additional evidence or assumptions" },
+    { text: "All unselected queues would gain the same amount from rollout", bucket: "Needs additional evidence or assumptions" }
+  ]}
+  explanation="Recorded rates and their arithmetic describe this dataset. Exact attribution and generalization require further design conditions and evidence; even a sound pilot estimate has uncertainty."
+/>
+
+## Reconstruct the evaluation
+
+<MindMap client:visible
+  root={{ label: "Review a pilot after an extreme", children: [
+    { label: "Inspect selection", children: [{ label: "One bad week can include transient variation" }, { label: "Earlier weeks give context" }] },
+    { label: "Build the comparison", children: [{ label: "Same eligibility before allocation" }, { label: "Randomize at the delivery unit" }] },
+    { label: "Calculate carefully", children: [{ label: "Distinguish rates and percentage points" }, { label: "Comparison change has several possible causes" }] },
+    { label: "Review the planned window", children: [{ label: "Keep dates and denominators consistent" }, { label: "Assess uncertainty and practical value" }, { label: "Define the next decision prospectively" }] }
+  ]}}
+/>
+
+<Quiz client:visible
+  questions={[
+    { question: "Why is improvement in routine queues a weaker counterfactual for this pilot?", options: [
+      { text: "Routine queues were not selected through the same bad-week rule.", correct: true },
+      { text: "Routine queues cannot experience random variation in any week." },
+      { text: "A comparison is valid whenever both groups improve at all." }
+    ], explanation: "The selection process differs. Comparing changes does not, by itself, remove that difference; the eligible randomly allocated comparison is more appropriate here." },
+    { question: "What can be inferred from the usual-practice group's reduction?", options: [
+      { text: "It records what happened without the checklist under usual practice.", correct: true },
+      { text: "It identifies pure regression with all calendar effects removed." },
+      { text: "It proves the checklist's true effect must be exactly zero." }
+    ], explanation: "The observed comparison change can include regression, common conditions and other variation. It helps estimate a contrast without isolating each component." },
+    { question: "The first follow-up meets the practical target, while the full window does not. Which report answers the planned question?", options: [
+      { text: "The whole-window contrast, with the early result identified separately.", correct: true },
+      { text: "Only the first follow-up, because a target was reached at least once." },
+      { text: "Only the final day, because later observations erase earlier ones." }
+    ], explanation: "The agreed window defines the main summary. Selecting an attractive week after seeing the results changes the question." },
+    { question: "Select the conclusions a careful reviewer should retain.", allowMultiple: true, options: [
+      { text: "Regression can contribute without guaranteeing that each queue improves.", correct: true },
+      { text: "A randomized contrast is an estimate whose precision still matters.", correct: true },
+      { text: "Any control group's improvement measures pure regression exactly." },
+      { text: "Missing the practical target proves that no real effect is possible." }
+    ], explanation: "Regression is a conditional statistical tendency, and treatment contrasts remain uncertain. A practical target guides a decision; it does not transform an observed result into proof of a zero or exact effect." }
+  ]}
+/>
+
+### Sources and scope
+
+[Barnett and colleagues](https://doi.org/10.1093/ije/dyh299) describe regression to the mean and the role of baseline selection; their abstract was consulted through Paperhound. J-PAL's guides to [randomization](https://www.povertyactionlab.org/resource/randomization) and [evaluation elements](https://www.povertyactionlab.org/resource/elements-randomized-evaluation) support the design and interpretation principles. The support pilot and its rollout criterion are a worked example, not a measured intervention result.

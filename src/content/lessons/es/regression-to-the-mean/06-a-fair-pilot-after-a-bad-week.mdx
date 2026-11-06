@@ -1,0 +1,306 @@
+---
+title: "Un piloto bien comparado después de una mala semana"
+description: "Evalúa un piloto motivado por un pico de retrasos: elige grupos comparables, fija el periodo de medición y separa la mejora de las pruebas de impacto."
+topic: "es/regression-to-the-mean"
+order: 7
+minutes: 19
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MindMap, ConsequenceTree, InversionFlip, RateComparison } from '@/components/react';
+
+Las respuestas de soporte llegan tarde, el panel se pone rojo y alguien propone una nueva lista de comprobación para clasificar solicitudes. La semana siguiente mejora. Esa mejora importa a los clientes. Que la lista la haya causado es otra pregunta.
+
+Este taller sigue un piloto desde la regla de acceso hasta la decisión de revisión. Las colas, los recuentos y el umbral de decisión son datos didácticos. La tarea consiste en aprender qué permite sostener la comparación, sin dar por hecho que la lista funciona ni que toda recuperación es ruido.
+
+## Examina la regla que activó el piloto
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Unas colas entran en un piloto porque su última tasa de retraso fue inusualmente alta. ¿Qué cambia esa regla de selección?"
+  options={[
+    { text: "Una bajada posterior puede reflejar parte de la variación transitoria de esa semana.", correct: true },
+    { text: "La bajada posterior tiene que ocurrir y ya no hace falta investigar los retrasos." },
+    { text: "La bajada posterior debe ser efecto de la lista porque el problema era real." }
+  ]}
+  explanation="Elegir una medición inusualmente mala puede seleccionar variación adversa transitoria además de problemas persistentes. Hay que considerar la regresión; no garantiza una bajada ni vuelve irrelevante el retraso original."
+/>
+
+El servicio define una **respuesta tardía** como una primera respuesta posterior al plazo prometido. Su **tasa de respuestas tardías** divide el número de primeras respuestas fuera de plazo entre todas las solicitudes elegibles recibidas en el periodo de medición. Una tasa mayor es peor. El seguimiento continúa hasta que vence el plazo de todas las solicitudes; si una sigue sin respuesta al vencer, cuenta como tardía. La definición, los tipos de solicitud y el plazo se mantienen en todo el ejemplo.
+
+El piloto admite colas con una tasa de respuestas tardías de al menos el 20 % en la última semana completa. Doce colas cumplen el criterio. Su registro histórico conjunto aporta contexto:
+
+| Semana completa | Respuestas tardías | Solicitudes elegibles | Tasa de respuestas tardías |
+|---|---|---|---|
+| Tres semanas antes de la selección | 156 | 1.200 | 156 ÷ 1.200 = 13 % |
+| Dos semanas antes de la selección | 144 | 1.200 | 144 ÷ 1.200 = 12 % |
+| Una semana antes de la selección | 168 | 1.200 | 168 ÷ 1.200 = 14 % |
+| Semana de selección | 288 | 1.200 | 288 ÷ 1.200 = 24 % |
+
+La semana seleccionada es alta frente a las observaciones anteriores. Eso da motivos para examinar carga de trabajo, plantilla y medición; no demuestra que la siguiente vaya a volver al 13 %. Un cambio duradero de demanda podría mantener los retrasos. También pueden haber contribuido al pico una incidencia temporal o la variación de la medición.
+
+La **regresión a la media (regression to the mean)** describe la tendencia de mediciones inusualmente altas o bajas a ir seguidas de otras menos extremas en un proceso de medición repetida adecuado. Barnett y sus colegas señalan la selección inicial y la variación de la medición como motivos para considerarla al interpretar un cambio. Es una explicación posible, no un hallazgo de que cada cola seleccionada deba mejorar. [Barnett y sus colegas sobre la regresión a la media](https://doi.org/10.1093/ije/dyh299)
+
+### Cuándo usarlo
+
+Examina el desencadenante cuando una ayuda, sanción, campaña o proceso nuevo siga a un resultado excepcional. Puedes atender un problema operativo demostrado y evaluar la intervención con cuidado. Esperar una comparación mejor no exige desatender a quienes reciben respuestas tardías.
+
+<FillBlank client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" correctResultLabel="Correcto" partialResultWord="correctas" instructions="Elige la opción correcta para cada hueco y comprueba."
+  question="Distingue la selección de la explicación."
+  text="Las colas se seleccionaron mediante {{la última medición mala|los resultados futuros|el impacto ya demostrado}}. Su resultado siguiente puede cambiar por {{varias causas posibles|un rebote garantizado|solo la intervención}}."
+  explanation="La elegibilidad usó la semana inicial extrema. Eso plantea una preocupación por la regresión, pero no demuestra qué causas explican un cambio posterior."
+/>
+
+## Fija la elegibilidad antes de asignar el piloto
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="¿Qué comparación atiende mejor el problema de selección de este piloto?"
+  options={[
+    { text: "Asignar por sorteo colas elegibles comparables a la lista o a la práctica habitual.", correct: true },
+    { text: "Dar la lista a las peores colas y compararlas con otras de funcionamiento habitual." },
+    { text: "Dar la lista a todas las colas elegibles y comparar solo con su mala semana." }
+  ]}
+  explanation="Ambos grupos deberían proceder del mismo proceso de elegibilidad. La asignación aleatoria respalda una comparación justa en promedio; las colas habituales no entraron por el mismo extremo inicial."
+/>
+
+Un **grupo de comparación** permite estimar qué ocurriría con la alternativa que estamos considerando. Aquí esa alternativa es mantener la clasificación habitual, con el mismo servicio y plantilla existentes. El piloto solo cambia la lista que se pone a prueba; ambos grupos conservan el soporte habitual necesario.
+
+Antes de conocer resultados posteriores, la organización forma parejas de colas elegibles con registros previos parecidos de carga y retrasos. Dentro de cada pareja, un sorteo asigna una cola a la lista y otra a la práctica habitual. Hay seis colas por grupo. Es una **asignación aleatoria dentro de parejas comparables**: el emparejamiento define las parejas; el sorteo decide cuál recibe el piloto.
+
+Cada cola tiene un equipo distinto y la lista no se comparte con los equipos de comparación durante la revisión. Asignar colas completas encaja con la forma de aplicar el proceso. J-PAL distingue la unidad que recibe la asignación aleatoria de las observaciones individuales recogidas dentro de ella y explica por qué importan las interferencias entre grupos. [J-PAL sobre la asignación aleatoria y su unidad](https://www.povertyactionlab.org/resource/randomization)
+
+<ConsequenceTree client:visible
+  eyebrow="Sigue el diseño antes de leer los resultados"
+  instructions="Abre los pasos en orden. La elegibilidad se fija antes del sorteo y ambos grupos se miden en las mismas fechas."
+  decisionLabel="Decisión de diseño"
+  orderLabels={["Elegibilidad", "Asignación", "Medición"]}
+  promptLabel="Mostrar el paso siguiente"
+  expandAllLabel="Mostrar el diseño"
+  collapseLabel="Cerrar el diseño"
+  valenceLabels={{ good: "Respalda la comparación", bad: "Amenaza la comparación", mixed: "Requiere criterio", neutral: "Paso de diseño" }}
+  decision={{ label: "Probar la lista en las colas que cumplieron la regla de la mala semana", children: [
+    { label: "Cerrar la lista elegible y formar parejas comparables", children: [
+      { label: "Asignar por sorteo cada pareja entre la lista y la práctica habitual", children: [
+        { label: "Medir ambos grupos en las mismas semanas previstas y con la misma definición de solicitud", valence: "good" }
+      ]}
+    ]}
+  ]}}
+/>
+
+En los datos construidos, ambos grupos empiezan con una tasa del 24 %. La asignación aleatoria no garantiza valores iniciales iguales ni fluctuaciones futuras idénticas en cada piloto pequeño. Su protección describe cómo se comporta la comparación entre posibles asignaciones, no promete que los dos grupos obtenidos sean idénticos.
+
+### Cuándo usarlo
+
+Define la elegibilidad y la asignación antes de saber quién mejora. Si no puedes asignar al azar, explica cómo se eligió la comparación y qué diferencias pueden quedar. Una referencia histórica más larga ayuda a entender la variación; no convierte un grupo poco comparable en un control aleatorizado.
+
+<Categorize client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" allCorrectLabel="Todo clasificado" partialResultWord="correctas" instructions="Coloca cada elemento en su grupo."
+  question="Clasifica cada característica según su función en la revisión."
+  buckets={["Respalda la comparación prevista", "Cambia o amenaza la comparación"]}
+  items={[
+    { text: "Ambos grupos cumplen la misma regla de elegibilidad por mala semana", bucket: "Respalda la comparación prevista" },
+    { text: "Un sorteo asigna la lista dentro de parejas formadas previamente", bucket: "Respalda la comparación prevista" },
+    { text: "Los equipos de comparación copian la lista durante el seguimiento", bucket: "Cambia o amenaza la comparación" },
+    { text: "Solo las colas con lista reciben más personal al mismo tiempo", bucket: "Cambia o amenaza la comparación" }
+  ]}
+  explanation="Las dos primeras características atienden selección y asignación. Compartir la lista cambia lo que significa práctica habitual; añadir personal hace que el contraste deje de aislar la lista como estaba previsto."
+/>
+
+## Calcula el contraste sin llamar regresión a todo cambio
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Ambos grupos seleccionados mejoran tras la mala semana. ¿Qué mide el cambio del grupo de práctica habitual?"
+  options={[
+    { text: "El cambio observado con la práctica habitual, que puede tener varias causas.", correct: true },
+    { text: "La regresión pura, una vez eliminada cualquier otra influencia posible." },
+    { text: "La prueba de que la lista no puede tener ningún efecto beneficioso." }
+  ]}
+  explanation="El cambio del grupo de comparación puede incluir regresión, condiciones comunes de las fechas y otra variación. Es útil sin identificar un componente de regresión pura."
+/>
+
+En estos datos construidos, cada cola seleccionada aporta 100 solicitudes elegibles por semana, con 600 por grupo. Tras la primera semana de seguimiento, el registro es:
+
+| Grupo | Semana de selección | Primera semana posterior | Reducción de la tasa de respuestas tardías |
+|---|---|---|---|
+| Colas seleccionadas con lista | 144 ÷ 600 = 24 % | 96 ÷ 600 = 16 % | 24 % − 16 % = 8 puntos porcentuales |
+| Colas seleccionadas con práctica habitual | 144 ÷ 600 = 24 % | 114 ÷ 600 = 19 % | 24 % − 19 % = 5 puntos porcentuales |
+| Colas habituales no seleccionadas por la regla de mala semana | 72 ÷ 600 = 12 % | 66 ÷ 600 = 11 % | 12 % − 11 % = 1 punto porcentual |
+
+Un **punto porcentual** es la diferencia entre dos porcentajes. Pasar del 24 % al 16 % es una reducción de ocho puntos porcentuales. La reducción relativa es **8 ÷ 24 ≈ 33,3 %**. Mantén explícitas las unidades: son dos formas de describir el mismo cambio observado, no dos efectos que sumar.
+
+Comparar las reducciones de los **dos grupos seleccionados** da **8 − 5 = 3 puntos porcentuales** a favor de la lista en esa semana. Como sus valores iniciales son iguales, el contraste solo posterior también es **19 % − 16 % = 3 puntos porcentuales**. Con las condiciones de asignación y medición indicadas, ese contraste estima el efecto de la lista en estas colas elegibles y este periodo. Sigue teniendo incertidumbre.
+
+Llamar «efecto» a los ocho puntos completos ignora la comparación seleccionada. Llamar «regresión» a los cinco puntos del control va más allá de lo que permiten los datos: pueden contribuir condiciones de carga compartidas, regresión y variación aleatoria habitual. La tabla no separa esos componentes.
+
+Usar las colas habituales da **8 − 1 = 7 puntos porcentuales**. La operación es correcta, pero su interpretación causal es débil: ese grupo no entró mediante la misma selección por mala semana. Una resta atractiva no arregla una alternativa de comparación inadecuada.
+
+### Cuándo usarlo
+
+Usa un contraste entre grupos solo después de comprobar a quién se comparó, cómo se asignó y en qué fechas se midió. Un contraste positivo es una prueba que valorar, no un hecho causal exacto. La guía de J-PAL distingue el comportamiento de una estimación en promedio del error que puede permanecer en una muestra concreta. [Explicación de J-PAL sobre el error de aleatorización](https://www.povertyactionlab.org/resource/randomization)
+
+<MCQ client:visible allowMultiple
+  checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Selecciona las interpretaciones respaldadas por la primera tabla de seguimiento."
+  options={[
+    { text: "La mejora del propio grupo con lista incluye más que el contraste entre grupos.", correct: true },
+    { text: "La comparación seleccionada ofrece aquí la alternativa más adecuada.", correct: true },
+    { text: "Cada punto de mejora del grupo de comparación debe ser regresión pura." },
+    { text: "Un contraste observado positivo identifica el efecto exacto sin incertidumbre." }
+  ]}
+  explanation="La mejora antes-después supera el contraste entre grupos. La selección y la asignación respaldan usar el grupo de comparación elegible; las causas de cada componente y el efecto verdadero siguen siendo inciertos."
+/>
+
+## Mantén fijo el periodo de revisión
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="La primera semana promete, pero el plan fijó una revisión más larga. ¿Qué debe determinar el resumen principal?"
+  options={[
+    { text: "El periodo completo elegido antes de ver los resultados.", correct: true },
+    { text: "La semana aislada que muestre el mayor beneficio aparente." },
+    { text: "Un periodo alargado sin fin hasta obtener un resultado favorable." }
+  ]}
+  explanation="Un periodo definido de antemano evita elegir el resultado después de ver qué semana sale mejor. Otros resúmenes exploratorios pueden servir, pero no deben sustituir en silencio al previsto."
+/>
+
+Antes del piloto, el servicio acordó revisar **tres semanas completas de seguimiento**, con las mismas reglas de elegibilidad para las solicitudes. También fijó un objetivo práctico: al menos **tres puntos porcentuales menos de respuestas tardías** frente a la práctica habitual durante ese periodo, con una carga de trabajo aceptable y una valoración creíble de la incertidumbre. Es el criterio de decisión del servicio para este caso, no una norma universal.
+
+Estas son todas las observaciones posteriores previstas:
+
+| Semana posterior | Respuestas tardías con lista sobre 600 | Respuestas tardías con práctica habitual sobre 600 | Contraste observado entre grupos |
+|---|---|---|---|
+| Primera | 96 = 16 % | 114 = 19 % | 3 puntos porcentuales |
+| Segunda | 102 = 17 % | 108 = 18 % | 1 punto porcentual |
+| Tercera | 90 = 15 % | 102 = 17 % | 2 puntos porcentuales |
+| Periodo completo | 288 ÷ 1.800 = 16 % | 324 ÷ 1.800 = 18 % | 2 puntos porcentuales |
+
+<RateComparison client:visible locale="es"
+  title="Tasas de respuestas tardías de las colas seleccionadas"
+  scenarioLabel="Periodo de medición"
+  countsLabel="Respuestas tardías del total de solicitudes elegibles"
+  differenceLabel="Contraste observado"
+  scenarios={[
+    { label: 'Primera semana completa de seguimiento', groups: [
+      { label: 'Práctica habitual', events: 114, total: 600 },
+      { label: 'Con lista', events: 96, total: 600 }
+    ]},
+    { label: 'Todo el periodo de seguimiento previsto', groups: [
+      { label: 'Práctica habitual', events: 324, total: 1800 },
+      { label: 'Con lista', events: 288, total: 1800 }
+    ]}
+  ]}
+/>
+
+El cálculo conjunto usa todas las solicitudes elegibles: **(96 + 102 + 90) ÷ (600 + 600 + 600) = 16 %** con lista y **(114 + 108 + 102) ÷ 1.800 = 18 %** con práctica habitual. El contraste observado es **18 % − 16 % = 2 puntos porcentuales**. Como los denominadores semanales son iguales, promediar las tres tasas da aquí el mismo resultado. Con volúmenes distintos, ese atajo no daría en general la tasa conjunta de solicitudes.
+
+Un informe que mostrase solo la primera semana haría parecer que se alcanzó el objetivo de tres puntos. El periodo completo previsto queda por debajo. Eso no implica que el efecto verdadero sea cero ni que un efecto real deba crecer cada semana. Los efectos, la carga y las estimaciones pueden variar con el tiempo.
+
+### Cuándo usarlo
+
+Fija el periodo cuando los resultados a corto plazo fluctúen y se pueda elegir cuándo celebrar. Repetir observaciones mejora el registro; no elimina automáticamente el sesgo de selección, las incidencias compartidas ni la dependencia entre observaciones.
+
+<FillBlank client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" correctResultLabel="Correcto" partialResultWord="correctas" instructions="Elige la opción correcta para cada hueco y comprueba."
+  question="Elige el resumen que responde a la pregunta prevista."
+  text="La revisión principal usa {{todo el periodo previsto|la semana más favorable|la primera que supere el objetivo}}. La tasa conjunta divide {{todas las respuestas tardías entre las solicitudes elegibles|todos los porcentajes entre todas las colas|el recuento máximo entre una semana}}."
+  explanation="Usa el periodo decidido de antemano y conserva el denominador adecuado. Una semana favorable seleccionada responde a otra pregunta."
+/>
+
+## Decide qué permite hacer después el piloto
+
+<MCQ client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="El periodo completo muestra un contraste positivo por debajo del objetivo práctico. ¿Qué siguiente paso es defendible?"
+  options={[
+    { text: "Revisar precisión, aplicación y costes antes de decidir si se hacen más pruebas.", correct: true },
+    { text: "Extenderlo de inmediato porque cualquier cifra positiva demuestra su valor." },
+    { text: "Declarar inútil la lista porque el objetivo observado no se ha alcanzado." }
+  ]}
+  explanation="Un resultado puede ser positivo, quedar por debajo de un umbral práctico y ser incierto a la vez. La decisión siguiente debe conservar esas diferencias, sin convertirlas en éxito o fracaso automáticos."
+/>
+
+El equipo registra: **«En el periodo previsto, las colas con lista tuvieron dos puntos porcentuales menos de respuestas tardías que las colas seleccionadas de práctica habitual. Este contraste observado queda por debajo de nuestro objetivo práctico de tres puntos. La tabla agregada no permite establecer la precisión de la estimación del efecto».** La frase conserva la mejora sin exagerar la atribución.
+
+Hay **doce unidades de asignación: las colas**, aunque la tabla contenga miles de solicitudes. Las solicitudes atendidas por un equipo pueden compartir condiciones de personal y carga. El análisis de incertidumbre debe respetar la asignación por colas y el emparejamiento, en lugar de tratar cada solicitud como un ensayo aleatorizado independiente. Los recuentos agregados mostrados no bastan para calcular ese análisis; conserva los registros de cada cola.
+
+Antes de decidir una prueba mayor, el servicio comprueba si los equipos usaron la lista, si los de comparación la copiaron, si la mezcla de solicitudes o la plantilla cambió de manera distinta y si desaparecieron solicitudes de la medición. Esas comprobaciones pueden cambiar el significado del contraste. Una tabla de casos completos puede parecer tranquilizadora si se excluyeron sin avisar las solicitudes sin resolver más lentas.
+
+<InversionFlip client:visible
+  eyebrow="Comprueba qué invalidaría el informe"
+  instructions="Anticipa el punto débil de cada conclusión, descúbrelo y compara tu respuesta con la comprobación sugerida."
+  forwardLabel="Conclusión propuesta" invertedLabel="Qué omite la conclusión"
+  safeguardLabel="Mostrar una comprobación" flipHint="Mostrar el punto débil"
+  flipAllLabel="Mostrar ambos puntos débiles" resetLabel="Ocultar puntos débiles"
+  pairs={[
+    { forward: "El contraste entre grupos aísla la lista tal como se había previsto.", inverted: "Solo las colas con lista recibieron además personal extra, así que el contraste mezcla cambios.", safeguard: "Registrar el cambio de plantilla y revisar la afirmación o el diseño siguiente; no llamarlo un contraste de la lista aislada." },
+    { forward: "El número de solicitudes hace que la estimación del efecto sea muy precisa.", inverted: "Las solicitudes de una cola comparten condiciones y el sorteo asignó colas, no solicitudes individuales.", safeguard: "Conservar los resultados por cola y valorar la incertidumbre según la asignación y el emparejamiento reales." }
+  ]}
+/>
+
+La decisión es **posponer la extensión completa con estas pruebas**, comprobar la aplicación y la incertidumbre por colas y decidir después si una prueba revisada y planificada de antemano merece su coste. El soporte habitual continúa. Si se elige una prueba mayor, sus resultados de interés, asignación y fecha de revisión se fijan antes de conocer los datos. El equipo no alarga repetidamente el piloto actual hasta que aparezca una semana favorable.
+
+### Cuándo usarlo
+
+Usa esta revisión cuando un piloto empiece tras una alarma. Distingue mejora operativa, contraste causal estimado y decisión de extensión. Una preocupación plausible por la regresión no demuestra que la intervención no hiciera nada; un contraste que persiste no demuestra su tamaño exacto, su duración ni su valor en otras colas.
+
+<Categorize client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" allCorrectLabel="Todo clasificado" partialResultWord="correctas" instructions="Coloca cada elemento en su grupo."
+  question="Clasifica cada frase por la afirmación que hace."
+  buckets={["Describe el resultado observado", "Necesita más pruebas o supuestos"]}
+  items={[
+    { text: "La tasa registrada del grupo con lista bajó después de la selección", bucket: "Describe el resultado observado" },
+    { text: "El periodo completo mostró un contraste positivo por debajo del objetivo", bucket: "Describe el resultado observado" },
+    { text: "El efecto verdadero de la lista iguala exactamente el contraste observado", bucket: "Necesita más pruebas o supuestos" },
+    { text: "Todas las colas no seleccionadas ganarían lo mismo al extender la lista", bucket: "Necesita más pruebas o supuestos" }
+  ]}
+  explanation="Las tasas registradas y sus operaciones describen estos datos. La atribución exacta y la generalización requieren otras condiciones de diseño y pruebas; incluso una estimación bien construida tiene incertidumbre."
+/>
+
+## Reconstruye la evaluación
+
+<MindMap client:visible
+  eyebrow="Visión de conjunto" outlineLabel="Esquema"
+  root={{ label: "Revisar un piloto tras un extremo", children: [
+    { label: "Examinar la selección", children: [{ label: "Una mala semana puede incluir variación transitoria" }, { label: "Las semanas previas aportan contexto" }] },
+    { label: "Construir la comparación", children: [{ label: "Misma elegibilidad antes de asignar" }, { label: "Sortear en la unidad de aplicación" }] },
+    { label: "Calcular con cuidado", children: [{ label: "Distinguir tasas y puntos porcentuales" }, { label: "El cambio del control puede tener varias causas" }] },
+    { label: "Revisar el periodo previsto", children: [{ label: "Mantener fechas y denominadores coherentes" }, { label: "Valorar incertidumbre y utilidad práctica" }, { label: "Definir de antemano la siguiente decisión" }] }
+  ]}}
+/>
+
+<Quiz client:visible
+  questionLabel="Pregunta" ofLabel="de" correctCountLabel="correctas" completeLabel="Completado" completeTitleLabel="Práctica terminada"
+  perfectMessage="Has resuelto todos los casos." goodMessage="Revisa las explicaciones de los casos fallados." keepPracticingMessage="Repasa los casos y sus explicaciones antes de repetir."
+  gateLabel="Comprueba la respuesta para continuar." nextLabel="Siguiente" seeResultsLabel="Ver resultados" backLabel="Atrás" scoreLabel="Has acertado" restartLabel="Reiniciar"
+  checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  questions={[
+    { question: "¿Por qué la mejora de las colas habituales ofrece una comparación más débil para este piloto?", options: [
+      { text: "Las colas habituales no se eligieron mediante la misma regla de mala semana.", correct: true },
+      { text: "Las colas habituales no pueden experimentar variación aleatoria en ninguna semana." },
+      { text: "Una comparación es válida siempre que ambos grupos mejoren en algo." }
+    ], explanation: "El proceso de selección difiere. Comparar cambios no elimina por sí solo esa diferencia; aquí resulta más adecuada la comparación elegible asignada por sorteo." },
+    { question: "¿Qué puede inferirse de la reducción del grupo de práctica habitual?", options: [
+      { text: "Registra lo ocurrido sin la lista y con la práctica habitual.", correct: true },
+      { text: "Identifica regresión pura, eliminando los efectos de las fechas." },
+      { text: "Demuestra que el efecto verdadero de la lista debe ser cero." }
+    ], explanation: "El cambio observado de la comparación puede incluir regresión, condiciones comunes y otra variación. Ayuda a estimar un contraste sin aislar cada componente." },
+    { question: "La primera semana alcanza el objetivo práctico y el periodo completo no. ¿Qué informe responde a la pregunta prevista?", options: [
+      { text: "El contraste del periodo completo, identificando aparte el resultado temprano.", correct: true },
+      { text: "Solo la primera semana, porque el objetivo se alcanzó al menos una vez." },
+      { text: "Solo el último día, porque las observaciones tardías borran las anteriores." }
+    ], explanation: "El periodo acordado define el resumen principal. Elegir una semana atractiva después de ver los datos cambia la pregunta." },
+    { question: "Selecciona las conclusiones que debería conservar una revisión cuidadosa.", allowMultiple: true, options: [
+      { text: "La regresión puede contribuir sin garantizar que cada cola mejore.", correct: true },
+      { text: "Un contraste aleatorizado es una estimación cuya precisión importa.", correct: true },
+      { text: "La mejora de cualquier control mide exactamente la regresión pura." },
+      { text: "No alcanzar el objetivo práctico demuestra que no puede haber efecto real." }
+    ], explanation: "La regresión es una tendencia estadística condicional y los contrastes de intervención conservan incertidumbre. Un objetivo práctico orienta una decisión; no convierte el resultado observado en prueba de un efecto nulo o exacto." }
+  ]}
+/>
+
+### Fuentes y alcance
+
+[Barnett y sus colegas](https://doi.org/10.1093/ije/dyh299) describen la regresión a la media y la selección inicial; se consultó su resumen mediante Paperhound. Las guías de J-PAL sobre [asignación aleatoria](https://www.povertyactionlab.org/resource/randomization) y [elementos de evaluación](https://www.povertyactionlab.org/resource/elements-randomized-evaluation) respaldan los principios de diseño e interpretación. El piloto de soporte y su criterio de extensión son un caso resuelto, no un resultado medido de una intervención.

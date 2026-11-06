@@ -297,3 +297,6 @@ export type { SurvivorshipPlaneProps, PlaneRegionKey } from '@/components/react/
 
 export { AnchorEstimator, default as AnchorEstimatorDefault } from '@/components/react/AnchorEstimator';
 export type { AnchorEstimatorProps } from '@/components/react/AnchorEstimator';
+
+export { RateComparison, default as RateComparisonDefault } from '@/components/react/RateComparison';
+export type { RateComparisonProps, RateComparisonGroup, RateComparisonScenario } from '@/components/react/RateComparison';
