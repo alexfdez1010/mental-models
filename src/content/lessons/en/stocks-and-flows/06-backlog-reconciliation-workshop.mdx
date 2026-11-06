@@ -1,0 +1,371 @@
+---
+title: "Reconcile a backlog with its movements"
+description: "Audit a backlog using matching snapshots, event counts and rates. Track reopened work and internal transfers before judging progress."
+topic: "en/stocks-and-flows"
+order: 7
+minutes: 20
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, FirstPrinciplesBuilder, ConsequenceTree, MindMap } from '@/components/react';
+
+A support dashboard says the team accepted fewer new requests than it resolved. The pending count hardly moved. Before asking people to work faster, check whether the dashboard is counting every movement that enters or leaves the same stock.
+
+This workshop audits one support service over a working week. You will reconcile the count, widen the boundary from one team to the whole service and use the result to assess a target. The numbers are a teaching dataset, rather than a report from a particular company.
+
+## Fix the boundary and the clock
+
+<MCQ
+  client:visible
+  pretest
+  question="You want to reconcile Team A's unfinished requests. Which set of records can support the calculation?"
+  options={[
+    { text: 'Matching snapshots and boundary-crossing events for the same period.', correct: true },
+    { text: 'This team’s opening count and the whole service’s later completions.' },
+    { text: 'A current snapshot and last month’s average arrival rate by themselves.' },
+    { text: 'The most recent totals even if their filters and cutoff times differ.' }
+  ]}
+  explanation="The identity only reconciles one defined stock across one defined period. Different teams, states or clocks describe different quantities even when each report is individually correct."
+/>
+
+The stock is **the number of unfinished requests assigned to Team A at a particular instant**. Each request has an identifier and belongs to exactly one of two teams, A or B. A request marked resolved leaves this stock; reopening it brings it back. Requests waiting to be started are included, so this stock is not automatically the same as work in progress. The [Kanban Guide](https://kanbanguides.org/the-kanban-guide/) defines work in progress using explicit started and finished points; your measurement must likewise say which states it includes.
+
+Take an opening snapshot before Monday's first work event and a closing snapshot after Friday's last included event. The service operates five eight-hour workdays, with no events outside those hours in this case. Use the same time zone and cutoff convention for both teams and all event exports. A transfer from A to B is recorded as one exit from A and one entry to B at the same effective time.
+
+For this dataset, there are no deletions, merges, cancellations or unassigned requests. Real systems may have those movements; add them if they cross your chosen boundary rather than forcing them into “resolved”.
+
+| Measurement | Team A | Meaning |
+|---|---|---|
+| Opening stock | 40 requests | Unfinished and assigned to A before the period |
+| Closing stock | 38 requests | Unfinished and assigned to A after the period |
+| Observation period | 5 workdays | The same period for every movement below |
+
+### When to use this setup
+
+Use it before comparing dashboards, evaluating a handover or deciding whether a queue is shrinking. Freeze the definition and retain the snapshots: a report filtered by today's owner can allocate old events differently from a history of who owned the request when each event occurred. [Zendesk's reporting documentation](https://support.zendesk.com/hc/en-us/articles/4944328779162-Understanding-discrepancies-between-Explore-reports-and-exports) illustrates how reopens and later group changes can change historical report results. The ledger here uses event-time ownership and actual state transitions.
+
+<MatchConcepts
+  client:visible
+  question="Match each audit choice to what it fixes."
+  pairs={[
+    { term: 'The unfinished states included', definition: 'What counts as a member of the stock' },
+    { term: 'The team or service boundary', definition: 'Which transfers count as entries or exits' },
+    { term: 'The common observation window', definition: 'Which events belong between the snapshots' },
+    { term: 'The request and event identifiers', definition: 'How to distinguish repeated transitions from duplicate records' }
+  ]}
+  explanation="A state, a boundary, a period and an event identity answer different questions. A matching total does not compensate for mismatched definitions."
+/>
+
+## Reconstruct the missing movements
+
+<MCQ
+  client:visible
+  pretest
+  question="The opening count, new requests and resolutions do not reproduce the closing snapshot. What should happen next?"
+  options={[
+    { text: 'Check omitted state changes, transfers and measurement definitions.', correct: true },
+    { text: 'Rewrite the closing snapshot so the abbreviated calculation matches.' },
+    { text: 'Treat all unexplained change as new demand without checking records.' },
+    { text: 'Discard the opening stock because only current activity matters.' }
+  ]}
+  explanation="A mismatch identifies something to investigate. It does not tell you which record or definition is wrong, nor justify inventing an adjustment."
+/>
+
+The abbreviated dashboard includes **24 newly accepted requests** and **28 resolution events**. That gives 40 + 24 − 28 = **36**, but the closing snapshot contains **38**. The **reconciliation residual**—observed closing stock minus the stock predicted by the recorded movements—is 38 − 36 = **+2 requests**.
+
+Inspecting the event log reveals reopens and transfers. Count entries and exits during the same week:
+
+| Movement at Team A's boundary | Count during the week | Sign in the stock equation |
+|---|---|---|
+| Newly accepted requests from outside the service | 24 | Add |
+| Resolved requests reopened into A | 6 | Add |
+| Unfinished requests transferred from B to A | 4 | Add |
+| Unfinished requests marked resolved | 28 | Subtract |
+| Unfinished requests transferred from A to B | 8 | Subtract |
+
+Total entries are 24 + 6 + 4 = **34**. Total exits are 28 + 8 = **36**. Net movement is 34 − 36 = **−2 requests**, so:
+
+**Closing stock = 40 + 24 + 6 + 4 − 28 − 8 = 38 requests**
+
+The omitted movements contribute 6 + 4 − 8 = **+2**, exactly accounting for the abbreviated calculation's residual. The full calculation now matches the snapshot, giving a residual of zero. That is a consistency check on these records, not proof that every request was correctly resolved or every event recorded correctly; errors can offset each other.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Account for every entry in the balance"
+  eyebrow="Opening stock plus entries equals closing stock plus exits"
+  analogyValue={74}
+  analogyLabel="Opening stock plus all entries"
+  analogyNote="The ledger total includes reopening and transfer entries as well as new requests."
+  valuePrefix=""
+  valueSuffix=" request counts"
+  rebuiltLabel="Closing stock plus selected exits"
+  instructions="Add the closing snapshot and both kinds of exit. Compare their sum with the opening stock plus entries."
+  revealAllLabel="Complete the balance"
+  resetLabel="Reset"
+  parts={[
+    { label: 'Closing unfinished stock', value: 38, note: 'Requests still assigned to A and unfinished at the closing snapshot.' },
+    { label: 'Resolution events', value: 28, note: 'Exits from the unfinished state during the observation period.' },
+    { label: 'Transfers to Team B', value: 8, note: 'Exits from A that remain unfinished elsewhere in the service.' }
+  ]}
+  verdictTemplate="The accounted total is {total}. It matches the opening stock plus entries; the ledger balances without treating transfers as resolutions."
+  caption="A request can re-enter after resolution. The ledger totals are not counts of different customers or different request identifiers."
+/>
+
+The balancing form is 40 + 34 = 38 + 36 = **74**. Rearranging the stock equation this way lets the figure use positive counts while preserving the distinction between work remaining and exits.
+
+<FillBlank
+  client:visible
+  question="Complete the audit interpretation."
+  text="A residual is an {{unexplained difference|automatic resolution|extra workday}}. A zero residual shows {{arithmetic consistency|guaranteed service quality|unchanging future demand}}."
+  explanation="Investigate a residual using events and definitions. Matching the equation establishes consistency, while quality, completeness and future demand require their own evidence."
+/>
+
+## Follow repeated work and internal transfers
+
+<MCQ
+  client:visible
+  pretest
+  question="A request is marked resolved, reopened and resolved again during the week. How should an event-based stock ledger handle it?"
+  options={[
+    { text: 'Count each actual crossing and keep distinct-request measures separate.', correct: true },
+    { text: 'Count the identifier only once and use that number for every metric.' },
+    { text: 'Ignore the reopening because the request was not newly created.' },
+    { text: 'Call the reopening new external demand and also count it as a reopen.' }
+  ]}
+  explanation="One identifier can cross the stock boundary more than once. The ledger records the transitions that change membership; a distinct-request count answers another question."
+/>
+
+Suppose request R is unfinished at Monday's opening snapshot, is marked resolved on Tuesday, reopened on Wednesday and resolved again on Friday. Follow its membership:
+
+| Event or snapshot | Membership of the unfinished stock | Ledger contribution |
+|---|---|---|
+| Opening snapshot | Present | Included in the opening stock |
+| Tuesday resolution | Leaves | −1 |
+| Wednesday reopening | Enters | +1 |
+| Friday resolution | Leaves | −1 |
+| Closing snapshot | Absent | No longer in the closing stock |
+
+For R, the movement total is −1 + 1 − 1 = **−1**. Its two resolution events and one reopen correctly remove one initially unfinished request by the end. Counting only the final resolution while retaining the reopen would add a false net zero. Counting the reopen twice, once as a new external request and once as rework, would also break the balance.
+
+### Widen the boundary
+
+Now include Team B. Both teams use the same request identifiers, state definitions and observation period. Every unfinished request belongs to exactly one of them.
+
+| Measurement or movement | Team A | Team B | Whole service |
+|---|---|---|---|
+| Opening stock | 40 | 25 | 65 |
+| New external requests | 24 | 10 | 34 |
+| Reopens | 6 | 2 | 8 |
+| Transfers received from the other team | 4 | 8 | Internal |
+| Transfers sent to the other team | 8 | 4 | Internal |
+| Resolution events | 28 | 15 | 43 |
+| Closing stock | 38 | 26 | 64 |
+
+For B: 25 + 10 + 2 + 8 − 15 − 4 = **26**. At service level, the same transfers appear once as an exit and once as an entry, so they cancel. They do not cross the service boundary:
+
+**Service closing stock = 65 + 34 + 8 − 43 = 64 requests**
+
+This is the same accounting principle used in the [Census Bureau's demographic balancing equation](https://www.census.gov/content/dam/Census/programs-surveys/international-programs/select-topics-in-international-population-health/population-estimates-and-projections.pdf): movements within a wider boundary do not add or remove members of that wider stock. The support-service example uses its own stated membership rules.
+
+<ConsequenceTree
+  client:visible
+  title="One transfer, three boundary views"
+  eyebrow="The request stays unfinished"
+  instructions="Reveal the simultaneous effects of moving an unfinished request from A to B. The wider stock includes both teams."
+  decisionLabel="Transfer event"
+  orderLabels={['Boundary view']}
+  promptLabel="Reveal the boundary effects"
+  expandAllLabel="Show all views"
+  collapseLabel="Hide the views"
+  valenceLabels={{ neutral: 'Accounting view', good: 'Accounting view', bad: 'Accounting view', mixed: 'Accounting view' }}
+  decision={{
+    label: 'Move an unfinished request from A to B',
+    children: [
+      { label: 'It leaves Team A’s stock', note: 'An outflow across A’s boundary, without a resolution.', valence: 'neutral' },
+      { label: 'It enters Team B’s stock', note: 'The matching inflow across B’s boundary.', valence: 'neutral' },
+      { label: 'It stays in the service stock', note: 'Its location changes inside the wider boundary; its unfinished status does not.', valence: 'neutral' }
+    ]
+  }}
+  caption="The branches are simultaneous accounting views of one event, rather than separate requests or later causal stages."
+/>
+
+A's stock falls by 2 while B's rises by 1; the whole service falls by **1**. Within A's ledger, non-transfer movements add 24 + 6 − 28 = **2**, while net transfers contribute 4 − 8 = **−4**. Together they produce the local fall of 2. A lower local pending count therefore does not, by itself, show that the service resolved more work.
+
+<Categorize
+  client:visible
+  question="Classify the events using the whole-service boundary."
+  buckets={['Crosses the service stock boundary', 'Stays within the unfinished service stock']}
+  items={[
+    { text: 'A request outside the service is accepted as unfinished work.', bucket: 'Crosses the service stock boundary' },
+    { text: 'A resolved request becomes unfinished again.', bucket: 'Crosses the service stock boundary' },
+    { text: 'An unfinished request is marked resolved.', bucket: 'Crosses the service stock boundary' },
+    { text: 'An unfinished request moves from Team A to Team B.', bucket: 'Stays within the unfinished service stock' }
+  ]}
+  explanation="At service level, acceptance and reopening add members and resolution removes them. A transfer between the included teams only changes location. The same event can cross a team boundary without crossing the service boundary."
+/>
+
+## Convert totals to rates over the same period
+
+<MCQ
+  client:visible
+  pretest
+  question="A report gives arrivals during the week and a resolution rate per workday. What must happen before you subtract them?"
+  options={[
+    { text: 'Convert them to compatible totals or rates over the same period.', correct: true },
+    { text: 'Subtract the displayed numbers because both refer to requests.' },
+    { text: 'Multiply the opening stock by the arrival rate to align the units.' },
+    { text: 'Treat a workday average as the number arriving on every actual day.' }
+  ]}
+  explanation="A period total and a rate have different units. The stock equation needs accumulated movements over the period; comparable mean rates can also be multiplied by their matching duration."
+/>
+
+All Team A movements above are **counts over five workdays**. Divide by five to obtain mean rates per staffed workday. These are averages over this observation window, not claims that each day looked alike.
+
+| Team A movement | Weekly count | Mean per workday |
+|---|---|---|
+| New external requests | 24 | 24 ÷ 5 = 4.8 |
+| Reopens | 6 | 6 ÷ 5 = 1.2 |
+| Transfers received | 4 | 4 ÷ 5 = 0.8 |
+| Resolution events | 28 | 28 ÷ 5 = 5.6 |
+| Transfers sent | 8 | 8 ÷ 5 = 1.6 |
+| All entries | 34 | 6.8 |
+| All exits | 36 | 7.2 |
+
+Net mean rate is 6.8 − 7.2 = **−0.4 requests per workday**. Multiplying by the period gives −0.4 × 5 = **−2 requests**, the same stock change as the count ledger. The fractional mean does not imply fractions of individual requests arriving; it summarises whole events spread across days.
+
+### Pitfall and use
+
+You cannot combine this five-workday mean with a duration measured in calendar days without a conversion. Nor does the mean show whether a large queue formed midweek. Use event timestamps or daily snapshots when the decision concerns waiting, peak load or a promised response time. Use the period totals when reconciling the start and end.
+
+<FillBlank
+  client:visible
+  question="Complete the unit check."
+  text="A period count becomes a mean rate when divided by {{the period duration|the opening stock|the closing stock}}. To reconstruct a stock change, accumulate compatible {{net flows over time|snapshot counts per customer|rates without a duration}}."
+  explanation="Requests divided by workdays gives requests per workday. Multiplying the compatible net rate by the same number of workdays recovers a change measured in requests."
+/>
+
+## Choose the measurement that changes the decision
+
+<MCQ
+  client:visible
+  pretest
+  question="Management wants the whole-service pending count to fall faster. Which result from this audit directly tests progress toward that goal?"
+  options={[
+    { text: 'The service-level balance including new work, reopens and resolutions.', correct: true },
+    { text: 'Team A’s outgoing transfers, treated as if they were service resolutions.' },
+    { text: 'The total number of resolution events without counting entries or rework.' },
+    { text: 'The new-request count alone, without the opening or closing stock.' }
+  ]}
+  explanation="The goal concerns the wider unfinished stock. Its change depends on all entries and exits at that boundary, while internal handovers do not reduce it."
+/>
+
+Suppose the next target is to reduce the service stock by **10 requests in one comparable week**. If new external requests and reopens repeat their previous totals, entries will be 34 + 8 = **42**. With no other boundary crossings, required resolution events are:
+
+**Required exits = entries + desired reduction = 42 + 10 = 52 events**
+
+| Next-week scenario | Opening stock | Entries | Resolution events | Closing stock |
+|---|---|---|---|---|
+| Repeat the observed resolution count | 64 | 42 | 43 | 64 + 42 − 43 = 63 |
+| Reach the stated reduction target | 64 | 42 | 52 | 64 + 42 − 52 = 54 |
+
+The arithmetic gap is 52 − 43 = **9 additional resolution events**, conditional on those entry assumptions. This is a required balance, not a measured capacity or a promise. Work difficulty, staff time, repeat resolutions and demand variation may change what is achievable. Marking requests resolved prematurely may increase reopens, invalidating the fixed-entry assumption.
+
+Choose the next measurement according to the decision:
+
+| Decision | Additional evidence to collect |
+|---|---|
+| Why does finished work return? | Request-linked reopen reasons and the time since the earlier resolution |
+| Can the team handle the required workload? | Work mix, handling effort, available staff time and unresolved dependencies |
+| Are customers waiting too long despite a balanced count? | Request age, waiting-time distribution and timestamps within the week |
+| Do exports still disagree? | Event identifiers, event-time ownership, state definitions and matching cutoffs |
+
+A balanced ledger cannot establish service quality or identify the cause of rework. It tells you which quantity needs explaining and prevents an internal transfer or a renamed metric from standing in for the goal.
+
+### Transfer the method to another stock
+
+<MCQ
+  client:visible
+  question="A returned tool passes inspection, re-enters available warehouse stock and is later shipped again. How should an event ledger account for it?"
+  options={[
+    { text: 'Record the return and shipment as opposite flows; track distinct tools separately.', correct: true },
+    { text: 'Ignore the return because that tool identifier already appeared in an earlier shipment.' },
+    { text: 'Count the return as new production and also count it again as a customer return.' },
+    { text: 'Keep the tool in available stock after shipment because it was inspected earlier.' }
+  ]}
+  explanation="The stock is available tools, so an accepted return enters and a shipment leaves. One physical item can cross more than once. Counting each real transition differs from duplicating the same event record or counting different tool identifiers."
+/>
+
+## Rebuild the audit
+
+<MindMap
+  client:visible
+  title="From snapshots to a usable decision"
+  root={{
+    label: 'Reconcile the chosen stock',
+    children: [
+      { label: 'Freeze the definition', children: [{ label: 'Membership and boundary' }, { label: 'Matching clocks and cutoffs' }, { label: 'Request and event identities' }] },
+      { label: 'Account for movements', children: [{ label: 'Opening plus entries minus exits' }, { label: 'Reopens are entries' }, { label: 'Count actual repeated crossings' }] },
+      { label: 'Change the boundary', children: [{ label: 'Local handovers cross team boundaries' }, { label: 'Internal transfers cancel for the service' }] },
+      { label: 'Check the units', children: [{ label: 'Period totals differ from rates' }, { label: 'Accumulate over the matching duration' }] },
+      { label: 'Choose the next evidence', children: [{ label: 'Residuals need investigation' }, { label: 'Balanced counts do not prove quality' }, { label: 'Targets need explicit entry assumptions' }] }
+    ]
+  }}
+/>
+
+<Quiz
+  client:visible
+  title="Audit the interpretation"
+  questions={[
+    {
+      question: 'Why did the abbreviated Team A calculation miss the closing snapshot?',
+      options: [
+        { text: 'It omitted reopens and transfer movements across the team boundary.', correct: true },
+        { text: 'It treated a lower closing stock as evidence that no work arrived.' },
+        { text: 'It counted all service resolutions as Team A’s resolution events.' },
+        { text: 'It converted the snapshots into rates before recording the period.' }
+      ],
+      explanation: 'The abbreviated result was 40 + 24 − 28 = 36. The omitted movements add 6 + 4 − 8 = 2, producing the observed closing count of 38.'
+    },
+    {
+      question: 'A request leaves the unfinished state, returns and leaves again. Which quantity can exceed the number of different request identifiers?',
+      options: [
+        { text: 'The count of real resolution events across the observation period.', correct: true },
+        { text: 'The count of different identifiers present in a single snapshot.' },
+        { text: 'The number of distinct customers merely because time has passed.' },
+        { text: 'The closing stock because a resolved request remains unfinished.' }
+      ],
+      explanation: 'One identifier can have multiple resolution events separated by a reopening. Count the actual crossings for the stock identity; retain distinct-request or customer measures for their separate purposes.'
+    },
+    {
+      question: 'Select the statements that remain true when the boundary expands to include both teams.',
+      allowMultiple: true,
+      options: [
+        { text: 'A transfer between the included teams does not remove service work.', correct: true },
+        { text: 'New external work and reopens still enter the unfinished service stock.', correct: true },
+        { text: 'Every exit from Team A becomes a resolution at the service boundary.' },
+        { text: 'The whole-service stock must fall whenever Team A’s stock falls.' }
+      ],
+      explanation: 'Internal transfers cancel, while the service still gains unfinished work through new acceptance and reopening. Here A falls by 2, B rises by 1 and the service falls by 1.'
+    },
+    {
+      question: 'What does the mean net movement per workday tell you about this week?',
+      options: [
+        { text: 'Accumulating it across the same workdays reproduces the stock change.', correct: true },
+        { text: 'Every actual workday had the same fractional number of requests.' },
+        { text: 'It can be multiplied by any calendar duration without conversion.' },
+        { text: 'It identifies the maximum queue and the longest customer wait.' }
+      ],
+      explanation: 'The mean net rate is 6.8 − 7.2 = −0.4 requests per workday; over five workdays that gives −2. The mean does not reveal the within-week path or remove the need for compatible time units.'
+    },
+    {
+      question: 'Why is the next-week resolution requirement not a capacity forecast?',
+      options: [
+        { text: 'It is a conditional balance; feasibility needs workload and resource evidence.', correct: true },
+        { text: 'It has no relation to the opening stock or to the desired stock reduction.' },
+        { text: 'It proves that reopens and new demand will repeat their earlier totals.' },
+        { text: 'It guarantees quality whenever enough resolution events are recorded.' }
+      ],
+      explanation: 'Entries of 42 plus a desired reduction of 10 require 52 exits under the scenario assumptions. That arithmetic does not measure capacity, guarantee demand or establish the durability of resolutions.'
+    }
+  ]}
+/>
