@@ -1,272 +1,310 @@
 ---
-title: "Signal + Noise: The Core Mechanic"
-description: "Every measured result splits into a stable signal and transient noise. Select on an extreme and you've selected for extreme noise — which is exactly why the next measurement regresses. The mechanic behind the whole model, made precise."
+title: "Signal and Noise in Repeated Measurements"
+description: "Count every outcome in a simple signal-and-noise model. See why a selected average can regress while individual readings repeat, rise or cross the mean."
 topic: "en/regression-to-the-mean"
 order: 2
-minutes: 9
-updated: 2026-07-02
+minutes: 18
+updated: 2026-11-06
 ---
 
-import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+import { MCQ, Quiz, FillBlank, Categorize, MindMap, FirstPrinciplesBuilder, MatchConcepts } from '@/components/react';
 
-Point a bathroom scale at yourself ten times in a row and you won't read the same
-number twice. Step on, step off, shift your weight, catch the dial mid-wobble — the
-readings scatter around your real weight by a pound or two each way. Your true weight
-didn't change between readings. The *scatter* did. Every measurement you just took
-was your real weight plus a little gust of randomness, and the gust was different
-every time.
+A test station posts an excellent reading. Its next reading might fall, repeat exactly or rise further. “Regression to the mean” describes a pattern in conditional averages, not a rule that decides which of those happens next.
 
-That two-part split is the entire engine of regression to the mean. Get it precisely,
-and every strange story from the intro — the slumping rookie, the cursed cover, the
-tutor "genius" — stops being mysterious and becomes arithmetic.
+We will build that pattern from a small experiment whose possibilities you can count. No normal curve or hidden statistical software is needed. The arithmetic will also show why fresh random variation can repeat an earlier value.
 
-<MCQ
-  client:visible
-  pretest
-  question="You weigh yourself ten times and, purely by the wobble of the scale, one reading comes out unusually high. If you step on an eleventh time, that next reading will most likely be:"
+## Define the persistent part and the temporary part
+
+<MCQ client:visible pretest
+  question="A test adds fresh random variation each time. Does fresh mean that the previous random value cannot appear again?"
   options={[
-    { text: 'Closer to your true weight than the unusually high reading was — the extra bump was random and probably won’t recur', correct: true },
-    { text: 'Even higher, because a high reading means the scale is drifting upward' },
-    { text: 'Exactly the same as the high reading' },
-    { text: 'Below your true weight, to balance out the high one' },
+    { text: "Yes: a fresh random draw must avoid its previous value." },
+    { text: "No: a new independent draw can produce the same value again.", correct: true },
+    { text: "Yes: the next draw must have the opposite sign to compensate." }
   ]}
-  explanation="No penalty on a pretest. A single high reading is your true weight plus a random bump that happened to point up. The bump was luck, not a trend, so it won’t reliably repeat — the next reading drifts back toward your true weight. Note it does NOT swing below to 'compensate'; nothing is keeping score. That undershoot idea is a different error we’ll bury in lesson 05."
+  explanation="A fresh independent draw has the stated probabilities again. It does not avoid or repay earlier draws."
 />
 
-## Every result = signal + noise
+The **signal** is the persistent part of the measurement in the model. The **noise** is temporary variation around that part. “Persistent” describes what carries across tests under the model's assumptions; it does not mean the component is eternal, desirable or free from systematic measurement bias.
 
-Here are the two words the whole course rests on.
+Our experiment has four stations with fixed benchmark levels: **A = 30, B = 50, C = 50 and D = 70 points**. Choose one station at random, with each equally likely. Each test adds either **−10 or +10 points**, each with probability one half. Draw that noise independently of the station and independently on each test. Nothing changes a station's persistent level between tests.
 
-- The **signal** is the stable, repeatable part of a result — real skill, true weight,
-  genuine quality. It's what would show up again and again if you could strip the luck
-  away. It changes slowly, if at all.
-- The **noise** is the transient part — luck, timing, mood, measurement error, the
-  circumstances of one particular day. It's freshly reshuffled every time you measure,
-  and it averages to roughly zero over many measurements.
+Write the observed index as $X$, the station level as $T$ and the temporary deviation as $e$:
 
-Any single observation is the sum of the two:
+$$X=T+e.$$
 
-$$\text{observed} = \text{signal} + \text{noise}$$
+These are teaching rules, not measured laboratory data. B and C intentionally have the same level: middle-level stations are twice as common as either extreme level in this little population.
 
-A student's exam score is their real mastery plus which questions happened to come up
-and how they slept. A salesperson's month is their real ability plus which deals
-happened to close. A basketball player's game is their true skill plus whether the ball
-rattled in or out. The signal is the player; the noise is the bounce.
+For one possible test of B, the level is 50 and the temporary deviation is +10, so the observed index is **50 + 10 = 60**.
 
-<Callout variant="tip" title="The one distinction that does all the work">
-Signal repeats; noise does not. That's the whole asymmetry. When you see an extreme
-result, part of it is signal (which *will* show up next time) and part is noise (which
-*won't*). Regression is simply what happens when the noise part fails to encore.
-</Callout>
-
-## Why the extreme is built out of luck
-
-Now the key move. Ask: *who lands at the very top of a big group?*
-
-To post a record score, it helps enormously to be genuinely good — but it also helps
-to have the noise break your way. The people at the extreme top are the ones where
-**both** pointed up at once: high skill *and* good luck. Pure-skill-but-average-luck
-people sit a notch lower; so do lucky-but-mediocre people. The tip of the distribution
-is where the two lucky pushes stack. In other words:
-
-> Select the top of a sample and you have quietly selected for **positive noise**.
-
-The same thing runs in reverse at the bottom. The very worst results belong to people
-whose real ability was low *and* whose luck was rotten that day. Selecting the bottom
-selects for **negative noise**.
-
-That's the crux. When you re-measure the top group, their signal comes back (they
-really are good) but their noise is freshly drawn — and fresh noise averages to zero,
-not to the lucky spike that helped put them on top. So their new average lands lower:
-closer to the overall mean. Nobody got worse. You had simply mistaken *"skilled and
-lucky"* for *"this skilled."*
-
-<MCQ
-  client:visible
-  question="A company runs a quiz for 5,000 employees. The single top scorer aced it. When the same person retakes an equally hard quiz the next day, the most likely outcome is:"
-  options={[
-    { text: 'A high score, but lower than the record — the record combined real knowledge with a lucky run of favorable questions that won’t all repeat', correct: true },
-    { text: 'An identical perfect score — top scorers are simply perfect' },
-    { text: 'A score near the company average — one great result tells you nothing' },
-    { text: 'A worse-than-average score, as a correction for the lucky first attempt' },
+<FirstPrinciplesBuilder client:visible
+  eyebrow="Decompose one possible reading"
+  analogyValue={60} analogyLabel="This test's observed index"
+  valuePrefix="" valueSuffix=" points"
+  rebuiltLabel="Selected components of this reading"
+  instructions="Add the station level and this test's positive temporary deviation. Other tests can have a negative deviation."
+  revealAllLabel="Add both components" resetLabel="Reset"
+  parts={[
+    { label: "B's persistent level", value: 50, note: "Fixed across tests in this model." },
+    { label: "This test's temporary deviation", value: 10, note: "One possible draw; the next draw is independent." }
   ]}
-  explanation="Out of 5,000 people, the very top scorer is almost certainly both knowledgeable and lucky (the questions happened to hit their strong spots). Retake it and the knowledge stays, the luck reshuffles — so the score stays high but slides down from the record toward their true level. It won’t crash all the way to average (there’s real signal), nor dip below it (nothing is compensating)."
+  verdictTemplate="The components give {total}. A later test retains the level and draws temporary variation again."
 />
-
-## Reliability: the dial that sets how far it falls
-
-How *much* does a result regress? That depends entirely on the mix — what share of
-the wobble is signal versus noise. Statisticians call that share the **reliability**:
-
-$$r = \frac{\sigma^2_{\text{signal}}}{\sigma^2_{\text{signal}} + \sigma^2_{\text{noise}}}$$
-
-Reliability runs from 0 to 1. It answers "of all the variation I see between people,
-how much is real skill differences rather than luck?" And it gives the whole model in
-one tidy line — the best guess for the next measurement is:
-
-$$E[\text{next}] = \mu + r\,(\text{observed} - \mu)$$
-
-where $\mu$ is the overall mean. Read it out loud: take how far the observation sat
-above the mean, keep the fraction $r$ of that gap (the part that was signal), and
-throw away the rest (the noise that won't return).
-
-- **Reliability = 1** (all signal, no luck): $E[\text{next}] = \text{observed}$. No
-  regression at all. A pure-skill lead repeats exactly.
-- **Reliability = 0** (all luck, no signal): $E[\text{next}] = \mu$. Total regression —
-  the "winner" is expected to be dead average next time, because their result was pure
-  noise. This is a lottery.
-- **Anything in between**: the observation slides back toward the mean by the fraction
-  $(1 - r)$ of its distance. That's the fraction of the edge that was luck.
-
-<Callout variant="info" title="The headline number">
-The fraction of an extreme's edge that evaporates on re-measurement is about
-**1 − reliability**. More luck in the mix → lower reliability → harder regression.
-That single sentence predicts the slider in the intro's simulator: dragging toward
-"all luck" lowers reliability toward 0, and the stars crater; dragging toward "all
-skill" raises it toward 1, and they hold.
-</Callout>
-
-## Worked example: the exam that half-forgets its winners
-
-Suppose a test measures real ability (a signal with standard deviation 10 across
-students) plus luck (noise, also standard deviation 10). Then the reliability is
-
-$$r = \frac{10^2}{10^2 + 10^2} = \frac{100}{200} = 0.5.$$
-
-Half signal, half luck. The class mean is 50. Now watch what the formula
-$E[\text{next}] = 50 + 0.5\,(\text{observed} - 50)$ predicts for a retest:
-
-| Round-1 score | Distance above mean | Expected retest | How far it fell |
-|---|---|---|---|
-| 90 | +40 | 50 + 0.5×40 = **70** | halfway back |
-| 80 | +30 | 50 + 0.5×30 = **65** | halfway back |
-| 70 | +20 | 50 + 0.5×20 = **60** | halfway back |
-| 50 | 0 | 50 + 0.5×0 = **50** | doesn't move |
-| 20 | −30 | 50 + 0.5×(−30) = **35** | halfway *up* |
-
-The student who scored 90 is expected to score about 70 next time — not because they
-crammed and forgot, but because half of that towering 90 was a lucky day that won't
-recur. And notice the bottom of the table: the student who bombed with a 20 is expected
-to *rise* to about 35. Regression is not a downward force; it's a **toward-the-middle**
-force, pulling highs down and lows up by exactly the noise fraction. Change the mix so
-luck has standard deviation 17 against a signal of 10, and reliability drops to about
-0.26 — now the 90 is expected to fall all the way to about 60. Wilder luck, harder fall.
-
-<MCQ
-  client:visible
-  question="A metric has reliability 0.8 (mostly real skill, a little luck). A unit scores 100 when the average is 60. Roughly what should you expect on a fresh measurement?"
-  options={[
-    { text: 'About 92 — it keeps 0.8 of its +40 edge: 60 + 0.8×40 = 92', correct: true },
-    { text: 'About 60 — it regresses all the way to the average' },
-    { text: 'Exactly 100 — high reliability means no regression' },
-    { text: 'About 52 — it overshoots below the average' },
-  ]}
-  explanation="Plug in: expected next = mean + reliability × (observed − mean) = 60 + 0.8×(100−60) = 60 + 32 = 92. High reliability means most of the edge is real, so only a little (the 0.2 luck fraction, here 8 points) melts away. Regression is gentle when luck is a small slice — but it’s never exactly zero unless reliability is a perfect 1."
-/>
-
-## Individuals regress; big averages barely do
-
-One consequence is worth its own flag, because it connects straight back to *sample
-size* from the probability path. Noise averages out. So if you don't measure one
-person but the *average* of a large group, the lucky and unlucky bumps inside the group
-mostly cancel — the group mean is far more reliable than any single member. That means
-**extreme individuals regress a lot, but the average of an extreme large group regresses
-much less.** A single record-breaking employee will likely fade; a whole 500-person
-division that had its best quarter will fade only a little, because you can't get 500
-people all lucky in the same direction very often. When you're tempted to react to an
-extreme, ask first: *how many independent noisy things am I averaging over?*
-
-<Reveal client:visible buttonText="How does this connect to fat tails?">
-The heavier the noise, the more dramatic the reversion — and some worlds have
-genuinely wild noise. In a fat-tailed domain (the *Fat Tails* course), a single
-observation can be enormous mostly by luck, so the "record" is almost pure noise and
-the expected follow-up is far, far lower. Thin-tailed, mild noise gives gentle
-regression; fat-tailed, wild noise gives whiplash. Reliability is just the general
-knob; fat tails are what happens when you crank the noise variance sky-high.
-</Reveal>
-
-## The three ways people misread it
-
-Regression is simple but slippery. Three misconceptions to bury now:
-
-1. **It is not a force.** Nothing *pulls* results toward the center. The universe isn't
-   "balancing out" or keeping score. Regression is a fact about *what kind of results
-   you selected* (extreme ones, which are noise-enriched), not a physical hand nudging
-   the next value. The mechanism is entirely in the selection.
-2. **It does not predict a below-average follow-up.** The winner regresses *toward* the
-   mean, not *past* it. Expecting the high scorer to score below average next time — so
-   things "even out" — is a different and wrong idea (the gambler's fallacy, dismantled
-   in lesson 05).
-3. **It does not say the skill was fake.** The 90-scorer really is above average; the
-   signal is real. Regression only says the *extreme* portion was inflated by luck. Half
-   the mistakes people make with this model come from hearing "it was just luck" when the
-   claim is the far milder "it was *partly* luck."
-
-<Callout variant="warning" title="The tell to watch for">
-Whenever you're about to act on a **single extreme measurement** — hire the tutor, fire
-the rep, crown the fund, panic over the quarter — stop and ask: *how much of this was
-signal and how much was noise?* If luck had any hand in it, some of that extreme is
-already scheduled to vanish on its own, and any action you take will get the credit.
-</Callout>
 
 ### When to use it
 
-Reach for the signal + noise split the instant you find yourself reasoning from *one*
-extreme data point about a person, team, product, or site. Estimate the reliability
-(even roughly — "mostly skill" vs "coin flip"), shrink the observation toward the mean
-by $(1 - r)$, and forecast *that* instead of the raw extreme. It is the cheapest
-forecasting upgrade in this entire course.
+Use the split to state a measurement model before interpreting a peak or slump. In real work, examine what can persist and what can vary. A fault, changed task or shared disruption may require a different model rather than a convenient label of “noise”.
 
-## Recap
+<Categorize client:visible
+  question="Use the stated experiment, not a claim about every measurement system."
+  buckets={["Persistent part in this model", "Temporary draw in this model"]}
+  items={[
+    { text: "Station B's benchmark level", bucket: "Persistent part in this model" },
+    { text: "Station D's benchmark level", bucket: "Persistent part in this model" },
+    { text: "The positive deviation on one test", bucket: "Temporary draw in this model" },
+    { text: "The negative deviation on another test", bucket: "Temporary draw in this model" }
+  ]}
+  explanation="Station levels remain fixed by assumption. Each test receives a new temporary draw, whose value can match an earlier one."
+/>
 
-<Quiz
-  client:visible
+## Selection changes which possibilities remain
+
+<MCQ client:visible pretest
+  question="You keep only high initial readings. What must be checked before interpreting their average as persistent station quality?"
+  options={[
+    { text: "Which station levels and temporary draws could have produced them.", correct: true },
+    { text: "Whether every selected station must have had positive temporary noise." },
+    { text: "Whether selecting a reading changes the station's physical level." }
+  ]}
+  explanation="The selected measurements can reflect both persistent levels and temporary variation. Enumeration shows their mixture without assuming every selected case was lucky."
+/>
+
+There are **eight equally likely initial possibilities**: four station choices times two noise draws. The table lists possible runs of the experiment, not eight different stations tested together.
+
+| Station | Persistent level | Initial noise | Initial observed index | Keep if at least 60? |
+|---|---|---|---|---|
+| A | 30 | −10 | 20 | No |
+| A | 30 | +10 | 40 | No |
+| B | 50 | −10 | 40 | No |
+| B | 50 | +10 | 60 | Yes |
+| C | 50 | −10 | 40 | No |
+| C | 50 | +10 | 60 | Yes |
+| D | 70 | −10 | 60 | Yes |
+| D | 70 | +10 | 80 | Yes |
+
+The whole population's mean is **(30 + 50 + 50 + 70) ÷ 4 = 50**. Average noise is zero, so the average initial reading across all eight possibilities is also 50.
+
+Now **condition on** a high reading: restrict attention to possibilities consistent with an initial result of at least 60. Four equally likely possibilities remain. Their observed average is **(60 + 60 + 60 + 80) ÷ 4 = 65**. Their persistent-level average is **(50 + 50 + 70 + 70) ÷ 4 = 60**. Their initial-noise average is **(10 + 10 − 10 + 10) ÷ 4 = 5**. Thus:
+
+**Selected observed average 65 = selected persistent average 60 + selected temporary average 5.**
+
+The selected possibilities are enriched in positive noise **on average**. Not every selected case has positive noise: D can enter with a −10 draw. Likewise, selecting a high reading does not prove every chosen station is the population's best one.
+
+### When to use it
+
+Inspect the selection rule when someone ranks the best, targets the worst or acts after a record result. Conditioning means using the possibilities consistent with the information you have. Pishro-Nik's [conditioning chapter](https://www.probabilitycourse.com/chapter5/5_1_3_conditioning_independence.php) gives the general probability rule; this finite table makes it visible by counting.
+
+<FillBlank client:visible
+  question="Explain what the high-reading rule selected."
+  text="The selected readings combine {{persistent levels and temporary draws|only persistent station quality|only positive random noise}}. D's selected negative draw shows that the noise claim concerns {{the selected average|every selected individual|a physical compensating force}}."
+  explanation="Selection changes the mix of possible station-and-noise combinations. The average selected noise is positive here, even though one selected combination has negative noise."
+/>
+
+## Count the retest instead of prescribing a path
+
+<MCQ client:visible pretest
+  question="A selected station is tested again with fresh independent noise. Which information carries over?"
+  options={[
+    { text: "Its fixed station level, while the next noise draw keeps its ordinary probabilities.", correct: true },
+    { text: "Its entire first reading, because selection makes temporary variation permanent." },
+    { text: "A debt requiring a negative draw whenever the first draw was positive." }
+  ]}
+  explanation="The level persists under the model. The new noise is independent, so its mean is zero and either sign is still possible."
+/>
+
+Each of the four selected initial possibilities has two equally likely retests. Here are **all eight complete possibilities after selection**:
+
+| Selected initial possibility | Initial index | Fresh retest noise | Retest index |
+|---|---|---|---|
+| B with initial +10 | 60 | −10 | 40 |
+| B with initial +10 | 60 | +10 | 60 |
+| C with initial +10 | 60 | −10 | 40 |
+| C with initial +10 | 60 | +10 | 60 |
+| D with initial −10 | 60 | −10 | 60 |
+| D with initial −10 | 60 | +10 | 80 |
+| D with initial +10 | 80 | −10 | 60 |
+| D with initial +10 | 80 | +10 | 80 |
+
+Their average retest is **(40 + 60 + 40 + 60 + 60 + 80 + 60 + 80) ÷ 8 = 60**. Their initial average was 65. The expected average has moved toward the population mean of 50 while retaining a real persistent advantage.
+
+A **conditional expectation** averages the possibilities consistent with the information given, weighting each by its conditional probability. Here the information is the high initial reading rule, and the eight remaining paths are equally likely, so an ordinary average gives 60. A single retest need not equal 60, and a small realised sample need not have exactly that average. [Pishro-Nik on conditional expectation](https://www.probabilitycourse.com/chapter5/5_1_5_conditional_expectation.php)
+
+<FirstPrinciplesBuilder client:visible
+  eyebrow="Rebuild the expected retest"
+  analogyValue={65} analogyLabel="Average initial reading after selection"
+  valuePrefix="" valueSuffix=" points"
+  rebuiltLabel="Selected terms in the expected retest"
+  instructions="Add the population reference and the persistent advantage retained by selection. Fresh noise contributes zero to this expectation."
+  revealAllLabel="Add both expectation terms" resetLabel="Reset"
+  parts={[
+    { label: "Population reference", value: 50, note: "The average over all stations under the model." },
+    { label: "Selected persistent advantage", value: 10, note: "The selected station-level average remains above the population reference." }
+  ]}
+  verdictTemplate="The conditional expectation is {total}. The table, rather than this average alone, gives the possible individual retests."
+/>
+
+Read the paths individually. A first reading of 60 can be followed by **40**, crossing below the population mean of 50. It can be followed by **80**, becoming more extreme. An 80 can repeat as **80**. In four of the eight rows, the noise value repeats and the observed score is unchanged. Independence allows repetition; it does not avoid it.
+
+These outcomes do not violate the regression of the conditional average from 65 to 60. Berkeley's regression text makes the same distinction: the regression effect describes averages and does not require an individual's second observation to be less extreme. [Berkeley on the regression effect](https://www.stat.berkeley.edu/~stark/SticiGui/Text/regressionErrors.htm)
+
+### When to use it
+
+Distinguish “the selected average is expected to be less extreme” from “this unit must decline”. Use the distribution of possible outcomes for individual decisions. A single rise, repeated value or crossing of the mean is not, by itself, proof that the model failed or that a compensating force exists.
+
+<MCQ client:visible allowMultiple
+  question="Which paths are present in the complete retest table? Select all that apply."
+  options={[
+    { text: "A selected reading crosses below the population mean.", correct: true },
+    { text: "A selected reading becomes more extreme on retesting.", correct: true },
+    { text: "A selected reading and its temporary draw both repeat.", correct: true },
+    { text: "Every selected reading moves closer to the population mean." }
+  ]}
+  explanation="The individual paths include a crossing, a rise and repetition. Their conditional average still regresses, so it is not a compulsory path for every case."
+/>
+
+## Persistence changes what the first result tells you
+
+<MCQ client:visible pretest
+  question="Suppose every station instead has the same fixed level, with independent temporary variation. What would a high first reading reveal about persistent differences between stations?"
+  options={[
+    { text: "Nothing about differences that do not exist; the high reading reflects the temporary draw.", correct: true },
+    { text: "It would prove the chosen station has a permanently higher level than the others." },
+    { text: "It would force the next temporary draw to have the opposite sign." }
+  ]}
+  explanation="When all station levels match, there is no persistent between-station advantage to infer. The next independent draw still follows the same noise rule."
+/>
+
+**Persistence** means that part of what distinguishes units carries across measurements. In the main experiment, a high initial reading makes D more prominent among the remaining possibilities. That is why the expected retest remains above 50 rather than collapsing all the way to it.
+
+Compare three deliberately specified limits:
+
+| Model | Information in a high initial reading | Retest implication |
+|---|---|---|
+| Different fixed levels and fresh noise, as above | A mixture of persistent differences and temporary variation | The high-selection expectation falls from 65 to 60, not to 50 |
+| Every station fixed at 50, with fresh −10 or +10 noise | No persistent differences between stations | After a reading of 60, retests are 40 or 60 equally often in the possibilities; expectation 50 |
+| Original station levels with no temporary noise | The reading identifies the fixed station level | The reading repeats exactly while that level stays unchanged |
+
+The middle row has **zero persistence in differences between units**, not a zero baseline: all stations still have level 50. A retest of 60 can repeat with probability one half. The last row has no fresh variation to create regression, but its conclusion still depends on levels remaining fixed.
+
+In this independent additive model, **reliability** describes the fraction of observed variation attributable to persistent differences. More persistent information can support a forecast retaining more of an observed deviation. That is a statement about the model and its variation, not an instruction to label every high scorer “mostly skill” by intuition.
+
+<details>
+<summary>Optional arithmetic for reliability in this finite example</summary>
+
+**Variance** is the average squared deviation from a mean. The four persistent levels have mean 50, so their variance is **(400 + 0 + 0 + 400) ÷ 4 = 200 squared points**. The temporary deviations have mean zero and variance **(100 + 100) ÷ 2 = 100 squared points**. Independence makes the observed variance **200 + 100 = 300**.
+
+Thus the reliability is $r=200/300=2/3$. For this particular table, enumeration verifies the linear conditional-mean rule $E[Y\mid X=x]=50+(2/3)(x-50)$ at each possible initial reading: 20, 40, 60 and 80. Here $Y$ is the retest and $E[Y\mid X=x]$ is its expected value given an initial reading of $x$.
+
+Averaging the four selected forecasts gives 60. Because this verified rule is linear, using the selected initial average gives the same result: **50 + (2/3) × (65 − 50) = 60**. The 65 is an average of possible readings, not an additional possible reading to condition on.
+
+Do not assume that a reliability ratio alone determines every conditional forecast. Other signal or noise distributions can require a nonlinear conditional average. Count the possibilities here; use a justified model elsewhere. If variation is correlated across tests, the fresh-independent-noise assumption also needs revision.
+
+</details>
+
+### When to use it
+
+Ask what is persistent, which reference population is relevant and how repeat measurements are related. The special cases prevent two opposite mistakes: dismissing every strong result as noise, or assuming every high reading reveals a lasting advantage.
+
+<FillBlank client:visible
+  question="Read the zero-persistence limit carefully."
+  text="Equal station levels mean there is no persistent {{between-station advantage|population reference|repeatable baseline}}. The next independent noise draw {{may repeat the earlier value|must reverse the earlier sign|must remember the earlier value}}."
+  explanation="A common baseline can persist even when units do not differ. Independent noise does not remember its previous value, but it can produce that value again."
+/>
+
+## Check the conditions before transferring the model
+
+<MCQ client:visible pretest
+  question="A persistent fault changes the underlying process after the first reading. Should the old fixed-level forecast be applied unchanged?"
+  options={[
+    { text: "Yes: selecting an extreme guarantees the same return toward the old mean." },
+    { text: "No: a changed persistent component changes the forecast's assumptions.", correct: true },
+    { text: "Yes: any later observation must be noise because the first one was selected." }
+  ]}
+  explanation="The fixed-level calculation depends on fixed levels. A real process change does not disappear because regression is also a possible concern."
+/>
+
+The decomposition is useful when its assumptions fit. If a device's calibration changes, a team learns a new procedure or work becomes harder, the persistent component may change. If all devices share a power fluctuation, their temporary errors may move together. Averaging many affected devices does not make that shared disturbance cancel automatically.
+
+For an independent worked transfer, suppose a delivery route has a persistent travel time of **30 minutes**, plus a fresh independent temporary deviation of **−5 or +5 minutes**, equally likely. A trip lasting 35 minutes is selected for review. With the route unchanged, the next possibilities are **25 or 35 minutes**, so the expectation is **(25 + 35) ÷ 2 = 30 minutes**. Repeating 35 is allowed.
+
+Now a road closure adds **15 persistent minutes** before the next trip. The new base is **30 + 15 = 45 minutes**. The next possibilities become **40 or 50 minutes**, averaging **45**. Both are longer than the original 35. That does not refute the fixed-route arithmetic; the route no longer satisfies its assumptions.
+
+| Transfer question | Relevant check |
+|---|---|
+| Why was the trip examined? | It was selected after a high observed duration |
+| What repeats in the original model? | The route's base time, not its exact temporary delay |
+| What changed before retesting? | A closure changed the persistent route time |
+| Does a worse next trip prove the temporary-noise idea false? | No; the old unchanged-route forecast was applied to a changed process |
+
+Regression reasoning also does not establish an intervention effect. If a change is made after an extreme and the result improves, the observation can combine the intervention, selection-related regression and other conditions. Later lessons construct comparisons for that causal question; a signal-and-noise decomposition alone does not answer it.
+
+### When to use it
+
+Use the model to improve a forecast or question an attribution, then check the physical and measurement conditions. Do not treat an extreme as proof of instability, persistence or a particular cause. Preserve the observation while being explicit about what remains uncertain.
+
+<MatchConcepts client:visible
+  question="Match each model check to the mistake it prevents."
+  pairs={[
+    { term: "Check for a lasting route change", definition: "Avoid applying an unchanged-process forecast after its assumptions fail" },
+    { term: "Inspect the full retest possibilities", definition: "Avoid turning a conditional average into an individual bound" },
+    { term: "Ask whether temporary draws are independent", definition: "Avoid assuming that shared disturbances cancel when averaged" },
+    { term: "Record the rule selecting high readings", definition: "Avoid treating the selected measurement as persistent quality alone" }
+  ]}
+  explanation="Selection, possible paths, dependence and process changes affect different parts of the reasoning. The word regression cannot replace those checks."
+/>
+
+## Rebuild the mechanism
+
+<MindMap client:visible
+  root={{ label: "Signal and noise after selection", children: [
+    { label: "State the model", children: [{ label: "Persistent levels" }, { label: "Temporary variation with explicit probabilities" }] },
+    { label: "Apply selection", children: [{ label: "Keep possibilities matching the observation" }, { label: "Selected noise can be positive on average" }] },
+    { label: "Count the retest", children: [{ label: "Persistent information remains" }, { label: "Fresh variation may repeat" }, { label: "Individual paths can cross or become more extreme" }] },
+    { label: "Check the limits", children: [{ label: "Expectation is not a guarantee" }, { label: "Persistence and dependence matter" }, { label: "Changed conditions need a revised model" }] }
+  ]}}
+/>
+
+<Quiz client:visible
   questions={[
-    {
-      question: "Why does selecting the very top of a large sample tend to select for good luck?",
-      options: [
-        { text: "Because reaching the extreme top usually takes both high skill and favorable noise at once — so the top group is enriched with positive luck that won't recur.", correct: true },
-        { text: "Because skill doesn't matter at the top; only luck does.", correct: false },
-        { text: "Because the top scorers cheated.", correct: false },
-      ],
-      explanation: "The tip of the distribution is where high signal and high noise stack together. The signal stays on re-measurement; the lucky noise reshuffles to zero, so the group's new average slides down toward the mean.",
-    },
-    {
-      question: "A metric has reliability 0.5. A unit scores 30 points above the mean. What's the expected next measurement, relative to the mean?",
-      options: [
-        { text: "About 15 points above the mean — it keeps half its edge (0.5 × 30).", correct: true },
-        { text: "About 30 points above the mean — no change.", correct: false },
-        { text: "About 30 points below the mean — it flips to compensate.", correct: false },
-      ],
-      explanation: "Expected next = mean + reliability × (observed − mean) = mean + 0.5 × 30 = mean + 15. Half the edge was signal (kept), half was noise (gone). It moves toward the mean, never past it.",
-    },
-    {
-      question: "Which situation will regress the LEAST toward the mean?",
-      options: [
-        { text: "A high-reliability metric that is almost all skill and very little luck.", correct: true },
-        { text: "A single lottery draw (pure luck).", correct: false },
-        { text: "One noisy reading from a shaky instrument.", correct: false },
-        { text: "A single athlete's career-best game.", correct: false },
-      ],
-      explanation: "Regression shrinks the edge by (1 − reliability). Near-pure skill means reliability near 1, so almost nothing melts away. Pure-luck cases (lotteries, shaky instruments, single career-best games) regress hard.",
-    },
-    {
-      question: "Which statement about regression to the mean is TRUE?",
-      options: [
-        { text: "It is a consequence of having selected extreme (noise-enriched) observations, not a force pulling values to the center.", correct: true },
-        { text: "It means the next result will land below average to balance a high one out.", correct: false },
-        { text: "It proves the high scorer had no real skill.", correct: false },
-      ],
-      explanation: "Regression is about selection, not physics: extremes are enriched in luck, and fresh luck averages to zero. The follow-up moves toward — never past — the mean, and the underlying skill was real; only the extreme portion was luck-inflated.",
-    },
+    { question: "Why can a temporary deviation appear on consecutive tests?", options: [
+      { text: "Independent draws can repeat a value while keeping the same probabilities.", correct: true },
+      { text: "A temporary deviation becomes permanent whenever it occurs once." },
+      { text: "The next draw remembers the earlier one and deliberately copies it." }
+    ], explanation: "Fresh does not mean different. With the stated two-point noise rule, either sign remains possible at the next test." },
+    { question: "A selected D reading includes negative initial noise. What does that show?", options: [
+      { text: "The positive selected-noise statement concerns an average, not every case.", correct: true },
+      { text: "The complete selected average must therefore contain no temporary variation." },
+      { text: "Selection can never affect the mix of persistent and temporary components." }
+    ], explanation: "D can enter despite a negative draw because its level is high. The selected initial noise is still positive on average in the complete table." },
+    { question: "The selected retest expectation is closer to the population mean. Which individual behaviour does the table permit?", allowMultiple: true, options: [
+      { text: "Repeating the initial reading.", correct: true },
+      { text: "Becoming more extreme on retesting.", correct: true },
+      { text: "Crossing below the population mean.", correct: true },
+      { text: "Moving outside the stated model's possible values." }
+    ], explanation: "The table contains repetition, a rise and a crossing. It does not permit values excluded by its stated station levels and noise rule." },
+    { question: "Why does the main experiment's expected retest remain above the population mean?", options: [
+      { text: "Selection retained information about higher persistent station levels.", correct: true },
+      { text: "The positive temporary noise is guaranteed to repeat in every selected case." },
+      { text: "The population reference must rise whenever a high reading is selected." }
+    ], explanation: "The selected station-level average exceeds the population reference. Fresh noise has mean zero, so that persistent advantage remains in the expectation." },
+    { question: "After a road closure, the selected route's next trip is longer. Which interpretation fits the transfer case?", options: [
+      { text: "The persistent route time changed, so the old forecast needs revision.", correct: true },
+      { text: "The road must repay the earlier short journeys with a longer one." },
+      { text: "One longer trip proves that no measurement can contain temporary noise." }
+    ], explanation: "The closure changes the base time. An unchanged-process forecast is not a guarantee that overrides new conditions." }
   ]}
 />
 
-## Where this goes next
+### Sources and scope
 
-You now have the machine: observed = signal + noise, extremes are noise-enriched, and
-reliability sets exactly how far a result falls back. **Lesson 02** rewinds to the
-1880s, where Francis Galton stumbled onto this exact pattern in the heights of parents
-and children — and accidentally named the entire field of *regression* analysis after
-it. We'll work the numbers on a full skill-and-luck example and watch a top group's
-average drop on retest while the population mean doesn't budge an inch.
+Pishro-Nik's chapters on [conditioning](https://www.probabilitycourse.com/chapter5/5_1_3_conditioning_independence.php) and [conditional expectation](https://www.probabilitycourse.com/chapter5/5_1_5_conditional_expectation.php) support the probability interpretation. [Berkeley's regression chapter](https://www.stat.berkeley.edu/~stark/SticiGui/Text/regressionErrors.htm) distinguishes average regression from individual outcomes. The finite station experiment and route calculations are fully specified teaching examples, not empirical claims about equipment or delivery times.
