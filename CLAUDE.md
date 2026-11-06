@@ -2,7 +2,7 @@
 
 Interactive, animated, **bilingual (en/es)** educational webpages. Each *topic* is taught
 across multiple slug-based pages, with reusable interactive exercises (quizzes, matchers,
-reveals) and a strong SEO + Open Graph pipeline. Built to deploy on Vercel as a static site.
+reveals) and a strong SEO + Open Graph pipeline. Built to deploy on Cloudflare Pages as a static site.
 
 This is a **topic-agnostic template**: the same machine that powered a finance site can teach
 *any* subject. What it teaches is configured in one place — **`TOPIC.md`** — not hard-coded.
@@ -91,7 +91,7 @@ subagents by default**, in a single message, rather than sequentially.
 
 ## Stack
 
-- **Astro 6** (static output, `@astrojs/vercel` adapter) — fast, SEO-friendly rendering.
+- **Astro 6** (static output, no hosting adapter) — fast, SEO-friendly rendering.
 - **React 19** islands for all interactivity/animation (hydrated with `client:visible`).
 - **Tailwind CSS v4** (via `@tailwindcss/vite`) — design tokens in `src/styles/global.css`.
 - **MDX** content collections for lessons/topics.
@@ -234,7 +234,7 @@ do this).
 |---|---|
 | `bun install` + `bunx playwright install chromium` | First-time setup |
 | `bun run dev` | Dev server |
-| `bun run build` | Static build → `dist/` (+ `.vercel/output`) |
+| `bun run build` | Static build → `dist/` for Cloudflare Pages |
 | `bun run preview` | Preview the build |
 | `bun run check` | `check:latex` + `check:island-latex` + `astro check` + `tsc --noEmit` |
 | `bun run og:generate` / `og:build` | Generate OG images |

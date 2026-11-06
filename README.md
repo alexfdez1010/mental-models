@@ -29,7 +29,7 @@ What you get out of the box:
 - 🧩 **Reusable islands** — interactive React components you drop into MDX with one directive.
 - 🔍 **SEO + Open Graph baked in** — canonical URLs, `hreflang`, JSON-LD, and auto-generated share images.
 - 🤖 **Autonomous builder** — an optional cron job that researches, writes, validates and commits the next course.
-- ⚡ **Static & fast** — Astro static output deployed on Vercel.
+- ⚡ **Static & fast** — Astro static output deployed on Cloudflare Pages.
 
 The catalog is seeded with a build queue of the most important models (see
 `src/lib/upcoming.ts`) — they render as "Coming soon" nodes on the dependency graph until
@@ -77,7 +77,7 @@ After that, `TOPIC.md` is what you tweak when you want to widen scope or adjust 
 | 📝 Content | **MDX** content collections (`@astrojs/mdx`) |
 | 🌐 i18n | Astro i18n (en default, es prefixed) + `@astrojs/sitemap` |
 | 🖼️ OG images | **Playwright** (chromium) screenshots of branded card routes |
-| ▲ Hosting | **[Vercel](https://vercel.com)** (`@astrojs/vercel`) |
+| ☁️ Hosting | **[Cloudflare Pages](https://pages.cloudflare.com)** with native GitHub integration |
 
 ---
 
@@ -195,55 +195,39 @@ Tune via `CRON_TZ`, `BUILDER_SCHEDULE`, `IMPROVER_SCHEDULE`. Full operations gui
 
 ---
 
-## ▲ Deployment
+## Deployment
 
-Deployed to **Vercel** with the `@astrojs/vercel` adapter (static output).
-`vercel.json` sets the framework, `bun install` as the install command, long-cache
-(`immutable`) headers for `/og/*` and hashed `/_astro/*` assets, plus baseline
-security headers.
+Cloudflare Pages builds this static Astro site through its native GitHub integration.
+Each push to `main` in `alexfdez1010/mental-models` publishes production; branch
+previews are handled by Pages. No deployment workflow or repository deployment
+secrets are required.
 
-Set **`PUBLIC_SITE_URL`** in the environment to drive canonical URLs, the sitemap
-and absolute OG URLs (see `.env.example`). It defaults to the placeholder
-`https://lessons.example.com` — point it at your real domain.
+Configure the Pages project with the repository root as its root directory:
 
-### 🔐 Deployment secrets (GitHub Actions)
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Build command | `bun run build` |
+| Build output directory | `dist` |
+| `BUN_VERSION` | `1.3.12` |
+| `NODE_VERSION` | `24.20.0` |
+| `PUBLIC_SITE_URL` | `https://mental-models.alejandrofernandezcamello.me` |
 
-Production deploys run from **[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)**:
-GitHub builds the prebuilt output on a 16 GB runner (the hobby Vercel container
-SIGKILLs on this large static build) and ships it with `vercel deploy --prebuilt`.
-The workflow needs **three repository secrets**:
+Keep `PUBLIC_SITE_URL` set to the production domain in both production and preview
+environments so canonical URLs, hreflang, sitemaps and Open Graph URLs stay stable.
+The static build needs no Astro hosting adapter.
 
-| Secret | What it is | Where to find it |
-| --- | --- | --- |
-| `VERCEL_TOKEN` | Vercel access token | [vercel.com/account/tokens](https://vercel.com/account/tokens) → **Create Token** |
-| `VERCEL_ORG_ID` | Vercel org / team ID | Vercel **Project → Settings → General** (or run `vercel link`, then read `.vercel/project.json`) |
-| `VERCEL_PROJECT_ID` | Vercel project ID | same place as `VERCEL_ORG_ID` |
+The build generates `public/_redirects` from `roadmapTags` to preserve the retired
+learning-path URLs as HTTP 301 redirects to the catalog filters. `public/_headers`
+contains the security headers and asset cache policy. Astro copies both files into
+`dist` for Pages to apply.
 
-**Add them via the GitHub UI** — Repo → **Settings → Secrets and variables → Actions**
-→ **New repository secret** → add each name + value.
-
-**Or via the `gh` CLI** (paste the value when prompted, never commit it):
-
-```sh
-gh secret set VERCEL_TOKEN
-gh secret set VERCEL_ORG_ID
-gh secret set VERCEL_PROJECT_ID
-
-gh secret list   # verify all three are present
-```
-
-The fastest way to get the org/project IDs: run `vercel link` once locally, then read
-them from the generated `.vercel/project.json` (`orgId` and `projectId`). After the
-secrets are set, every push to `main` (or a manual **Run workflow**) deploys to production.
-
-> ⚠️ Treat `VERCEL_TOKEN` as a password. Don't print it, commit it, or paste it into
-> the workflow YAML — keep it only in GitHub secrets. Rotate it at
-> [vercel.com/account/tokens](https://vercel.com/account/tokens) if it leaks.
-
-Also disable Vercel's own git build so it doesn't try (and fail) to build on push:
-set **Project → Settings → Git → Ignored Build Step** to `exit 0`.
-
----
+The previous Vercel deployment remains available externally as a migration rollback.
+Only change the existing domain's DNS after the GitHub-triggered Pages build passes
+and its preview has working bilingual pages, exercises, redirects, assets and SEO
+metadata. Record the previous DNS target before changing it; restoring that target
+routes traffic back to Vercel if required. Check HTTPS and the same routes on the
+production domain after the switch.
 
 ## 📄 License
 

@@ -7,7 +7,7 @@
  * template (the `bootstrap-topic` skill does this for you): set the brand
  * `name`, the social handle, and the tagline so they reflect the subject you
  * are teaching. The canonical domain itself lives in `PUBLIC_SITE_URL`
- * (`.env` / Vercel) and `astro.config.mjs`, not here.
+ * (`.env` / Cloudflare Pages) and `astro.config.mjs`, not here.
  */
 export const SITE = {
   name: 'Mental Models',

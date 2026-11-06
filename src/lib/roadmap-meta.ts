@@ -1,6 +1,6 @@
 /**
  * Roadmap metadata — PURE data, no astro:content imports, so it is safe to
- * import from anywhere including `astro.config.mjs` (which uses it to emit a
+ * import from anywhere including the Cloudflare config generator (which emits a
  * 301 redirect per tag from the retired /roadmap/<tag> pages to the catalog's
  * `?tag=` filter). A roadmap is a curated learning path (a subset of the
  * catalog) with a bilingual title, description, and icon. The tag itself
