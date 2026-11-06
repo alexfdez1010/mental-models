@@ -1,0 +1,379 @@
+---
+title: "Workshop: Audit the Second Report"
+description: "Trace two reports to their inputs, calculate the second conditional likelihood ratio and distinguish a copied signal from genuinely additional evidence."
+topic: "en/bayesian-updating"
+order: 7
+minutes: 28
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, RateComparison, FirstPrinciplesBuilder, MindMap } from '@/components/react';
+
+A print-room detector flags a label. A second report also flags it. Two confirmations sound more convincing than one, until you discover that the second report simply imports the detector's first result. A new document is not necessarily a new observation.
+
+The course has already warned against double-counting. This workshop goes further: you will reconstruct three report-generating processes, calculate the information left after the first result and audit which process fits the records. Dependence does not require throwing away every later report. It requires using the likelihood that matches what you already know.
+
+## Define the hypothesis and update once
+
+<MCQ
+  client:visible
+  pretest
+  question="Two reports have the same individual true-flag and false-flag rates. Do those rates determine the posterior after both reports flag the same item?"
+  options={[
+    { text: 'No; we also need how the reports occur jointly within each hypothesis state.', correct: true },
+    { text: 'Yes; the two individual likelihood ratios can always be multiplied unchanged.' },
+    { text: 'Yes; different report names establish that each uses an independent observation.' },
+    { text: 'No; any dependence makes all later information impossible to use mathematically.' }
+  ]}
+  explanation="Individual report rates do not determine the joint likelihood of a pair of results. A copy, a fresh measurement and a partly shared process can have identical individual rates while contributing different amounts of new information."
+/>
+
+This is a **constructed probability model**, not a report of printer performance. The hypothesis **H** is “the label's alignment falls outside a predeclared tolerance.” Its alternative **not H** is “the alignment meets that tolerance.” The state stays fixed while reports are generated. A plus sign means a report flags the label; a minus sign means it does not.
+
+The prior probability of H is **10%**. Report A flags **80% of labels under H**, and **20% under not H**. These are conditional rates within the two states, not an unspecified overall “accuracy.” Their **likelihood ratio (LR)** is **0.80 ÷ 0.20 = 4**.
+
+Represent the probabilities by **1000 equally weighted model cases**: 100 have H and 900 have not H. The cases are a stipulated probability catalogue. They are neither an observed validation sample nor a promise about the next 1000 actual labels.
+
+| State | Model cases | Report A flags | Report A does not flag |
+|---|---|---|---|
+| H | 100 | 80 | 20 |
+| Not H | 900 | 180 | 720 |
+| Total | 1000 | 260 | 740 |
+
+After A flags, the relevant set contains **80 + 180 = 260 cases**. The posterior is **80/260 = 4/13 ≈ 30.77%**. In odds form:
+
+**Prior odds H : not H = 1 : 9**
+
+**After A flags: 1 : 9 × 4 = 4 : 9**, giving **4/(4 + 9) = 4/13**.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Rebuild the cases consistent with the first flag"
+  eyebrow="Condition on the observed result"
+  analogyValue={1000}
+  analogyLabel="All equally weighted model cases"
+  analogyNote="The starting catalogue includes both hypothesis states and both possible first results."
+  parts={[
+    { label: 'H and a first flag', value: 80, note: 'A flag among the hypothesis cases.' },
+    { label: 'Not H and a first flag', value: 180, note: 'A false flag among the alternative cases.' }
+  ]}
+  valuePrefix=""
+  valueSuffix=" weighted cases"
+  rebuiltLabel="Cases retained after the first flag"
+  instructions="Include both ways the observed flag can occur, then use their total as the posterior denominator."
+  revealAllLabel="Include both states"
+  resetLabel="Clear contributions"
+  verdictTemplate="The first-flag subset contains {total}. Eighty of those cases have H."
+  caption="The posterior is eighty divided by two hundred and sixty, not eighty divided by the entire catalogue. The counts encode stipulated probabilities."
+/>
+
+Keep the exact fraction for the next update. Rounding **4/13** to 31% and then treating that rounded value as exact would introduce an avoidable arithmetic difference.
+
+<MatchConcepts
+  client:visible
+  question="Match each quantity to its role in the report audit"
+  pairs={[
+    { term: 'Prior odds', definition: 'The relative probability of the two states before the observed reports' },
+    { term: 'Marginal report rate within a state', definition: 'The report probability given the state, without also conditioning on the first result' },
+    { term: 'Second conditional likelihood ratio', definition: 'The ratio of second-result probabilities in the two states after the first result is known' },
+    { term: 'Joint likelihood', definition: 'The probability of the complete observed result pattern within a state' }
+  ]}
+  explanation="The second report must be evaluated in the context of the first. A marginal rate from the whole state group is not automatically the correct conditional rate within its first-flag subset."
+/>
+
+## Specify what the second report contains
+
+<MCQ
+  client:visible
+  pretest
+  question="Which observation would establish that report B adds no new flag information under a stated copying process?"
+  options={[
+    { text: 'B deterministically imports A’s recorded result, with no extra measurement or selection event.', correct: true },
+    { text: 'B is written by another person, even though the underlying inputs are not documented.' },
+    { text: 'B appears later, so its date alone proves a fresh measurement of the label.' },
+    { text: 'B agrees with A, so agreement by itself proves that both reports must be copies.' }
+  ]}
+  explanation="The no-new-information conclusion follows from the documented deterministic process. Different authors or dates do not establish independent inputs; agreement alone also does not identify the process."
+/>
+
+Consider three separate hypothetical pipelines. In each, both A and B individually flag 80% of H cases and 20% of not-H cases. The prior remains 10%. What changes is their joint behaviour.
+
+### Pipeline C — B copies A
+
+B imports A's exact flag field and has no other input relevant to the hypothesis. The pair must agree:
+
+| A result, B result | H cases, total 100 | Not-H cases, total 900 |
+|---|---|---|
+| Plus, plus | 80 | 180 |
+| Plus, minus | 0 | 0 |
+| Minus, plus | 0 | 0 |
+| Minus, minus | 20 | 720 |
+
+Two flags retain **80 H cases and 180 not-H cases**, exactly the same subset as the first flag. The posterior stays **80/260 = 4/13 ≈ 30.77%**. Copying the result does not repeat the underlying measurement.
+
+### Pipeline I — measurements are conditionally independent
+
+Here B has the same within-state flag rates, and its result is **conditionally independent of A given H, and also given not H**. This means that once the state is fixed, learning A's result does not change B's specified result probabilities.
+
+| A result, B result | H cases, total 100 | Not-H cases, total 900 |
+|---|---|---|
+| Plus, plus | 64 | 36 |
+| Plus, minus | 16 | 144 |
+| Minus, plus | 16 | 144 |
+| Minus, minus | 4 | 576 |
+
+For example, the two-flag probabilities are **0.80 × 0.80 = 0.64 under H** and **0.20 × 0.20 = 0.04 under not H**. That produces **100 × 0.64 = 64** and **900 × 0.04 = 36** weighted cases. After two flags, the posterior is **64/(64 + 36) = 64%**.
+
+Conditional independence is a model assumption, not a synonym for “two documents.” [Berkeley's account of naive Bayes](https://inst.eecs.berkeley.edu/~cs188/textbook/ml/naive-bayes.html) makes this conditioning on the hypothesis class explicit when it factors a joint likelihood into individual terms.
+
+### Pipeline P — dependence leaves some additional information
+
+In the third model, B sometimes reuses A. For each label, an unobserved routing choice copies A with probability **3/8** and otherwise obtains the conditionally independent measurement from Pipeline I with probability **5/8**. This choice is independent of the true state and A’s result. We know the routing probabilities, but not which route generated B for the current label.
+
+For example, after A flags, B flags under H with probability **3/8 + (5/8 × 0.80) = 7/8**. Under not H, that probability is **3/8 + (5/8 × 0.20) = 1/2**. The full table of state and report outcomes is therefore:
+
+| A result, B result | H cases, total 100 | Not-H cases, total 900 |
+|---|---|---|
+| Plus, plus | 70 | 90 |
+| Plus, minus | 10 | 90 |
+| Minus, plus | 10 | 90 |
+| Minus, minus | 10 | 630 |
+
+Check B's individual rates: **(70 + 10)/100 = 80% under H**, and **(90 + 90)/900 = 20% under not H**. A has the same margins. Nevertheless, two flags now retain **70 H and 90 not-H cases**, so the posterior is **70/160 = 7/16 = 43.75%**. It is neither the copy result nor the independent-measurement result.
+
+Each table is a separate, complete probability catalogue for the state and report outcomes; Pipeline P averages over the unobserved routing choice. Its columns sum to the same state totals. None promises those exact frequencies in a realised sample. The overlap table defines one possible dependent process; it is not a universal formula for all reports that share inputs.
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Which conclusions follow from these three stipulated pipelines? Select all that apply."
+  options={[
+    { text: 'Identical individual report rates can coexist with different two-report posteriors.', correct: true },
+    { text: 'A dependent second report can add information without acting like a fully independent report.', correct: true },
+    { text: 'Any agreement between two reports proves that the second one merely copied the first.' },
+    { text: 'A different author guarantees the conditional-independence table without further evidence.' }
+  ]}
+  explanation="The posterior after two flags is about 30.77%, 64% or 43.75% under C, I or P. The rates of each report alone are unchanged. Provenance and joint likelihoods distinguish the models; agreement or authorship alone does not."
+/>
+
+## Update using the information that remains after the first report
+
+The general chaining rule comes from conditional probability, not from an assumption that every clue is independent. For the observed pair A-plus and B-plus:
+
+**P(A-plus and B-plus given H) = P(A-plus given H) × P(B-plus given H and A-plus)**
+
+Apply the same identity under not H, then divide the two expressions. [Stanford's conditional-probability lecture](https://web.stanford.edu/class/archive/cs/cs109/cs109.1202/lectures/04_cond_bayes.pdf) develops this general product rule before applying Bayes.
+
+The result is:
+
+**Final odds = prior odds × LR for A-plus × conditional LR for B-plus after A-plus**
+
+where the last factor is:
+
+**P(B-plus given H and A-plus) ÷ P(B-plus given not H and A-plus)**
+
+The multiplication remains valid for dependent reports when the conditional likelihoods are the right ones. Conditional independence in both states is a sufficient way to replace that last factor with B's marginal likelihood ratio. The essential check is whether the proposed factor equals the correct history-conditioned ratio; independence is not the only possible way an equality could happen.
+
+Here are the actual second factors:
+
+| Pipeline | B-plus given H and A-plus | B-plus given not H and A-plus | Second conditional LR | Final odds H : not H |
+|---|---|---|---|---|
+| Copy C | 80/80 = 1 | 180/180 = 1 | 1 | 4 : 9 |
+| Independent I | 64/80 = 0.80 | 36/180 = 0.20 | 4 | 16 : 9 |
+| Partial dependence P | 70/80 = 7/8 | 90/180 = 1/2 | 7/4 = 1.75 | 7 : 9 |
+
+For P, **4 : 9 × 7/4 = 7 : 9**, which converts to **7/(7 + 9) = 7/16**. Equivalently, the joint likelihood ratio is **0.70/0.10 = 7**; multiplying prior odds **1 : 9** by 7 gives the same answer. Joint and sequential calculations must agree when they use the same model.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Rebuild the smaller subset after two flags in Pipeline P"
+  eyebrow="The second report filters the first-flag cases"
+  analogyValue={260}
+  analogyLabel="Cases retained after A flags"
+  analogyNote="The first-flag subset contains eighty H cases and one hundred and eighty not-H cases."
+  parts={[
+    { label: 'H and two flags', value: 70, note: 'Seventy of the first subset’s eighty H cases remain.' },
+    { label: 'Not H and two flags', value: 90, note: 'Ninety of the first subset’s one hundred and eighty alternative cases remain.' }
+  ]}
+  valuePrefix=""
+  valueSuffix=" weighted cases"
+  rebuiltLabel="Cases retained after both reports flag"
+  instructions="Include both states in the two-flag subset. Then compare its composition with the first-flag subset."
+  revealAllLabel="Include both states"
+  resetLabel="Clear contributions"
+  verdictTemplate="The two-flag subset contains {total}. Seventy of those cases have H."
+  caption="The posterior rises because H cases are retained at a higher conditional rate, not because the count of documents appears twice. It becomes seventy out of one hundred and sixty."
+/>
+
+<RateComparison
+  client:visible
+  title="How much does the second flag change the posterior?"
+  scenarioLabel="Choose how report B is generated"
+  countsLabel="Hypothesis cases within the conditioned subset"
+  differenceLabel="Two-flag posterior minus first-flag posterior"
+  scenarios={[
+    { label: 'C: deterministic copy', groups: [
+      { label: 'H after both reports flag', events: 80, total: 260 },
+      { label: 'H after the first report flags', events: 80, total: 260 }
+    ] },
+    { label: 'I: conditionally independent measurements', groups: [
+      { label: 'H after both reports flag', events: 64, total: 100 },
+      { label: 'H after the first report flags', events: 80, total: 260 }
+    ] },
+    { label: 'P: stipulated partial dependence', groups: [
+      { label: 'H after both reports flag', events: 70, total: 160 },
+      { label: 'H after the first report flags', events: 80, total: 260 }
+    ] }
+  ]}
+/>
+
+The figure compares posterior percentages, so its difference is in **percentage points**, not a likelihood ratio. It displays approximately **0**, **33.23** or **12.98 points** of additional probability after the second flag. The exact fractions above, rather than rounded display percentages, determine the updates.
+
+A posterior number is your current belief about H, but it does not license forgetting relevant history. If the next report depends on A, its likelihood must still condition on A. Reusing the 80%/20% rates merely because your current posterior has become the new prior would insert an assumption that the record has not earned.
+
+<MCQ
+  client:visible
+  question="In Pipeline P, which factor updates the odds after A has already flagged?"
+  options={[
+    { text: 'Seven quarters: divide seven eighths by one half.', correct: true },
+    { text: 'Four: reuse the individual report ratio without the first-result condition.' },
+    { text: 'Seven: apply the complete joint ratio again to the already updated odds.' },
+    { text: 'One: assume that all dependence removes every bit of additional information.' }
+  ]}
+  explanation="Within the first-flag H cases, B flags 70/80; within the first-flag not-H cases, it flags 90/180. Their ratio is (7/8)/(1/2) = 7/4. The joint ratio of seven applies to the original prior, not to odds that have already incorporated A."
+/>
+
+## Check disagreement and patterns the model rules out
+
+<MCQ
+  client:visible
+  pretest
+  question="A supposedly deterministic copy reports minus after the original reports plus. What should happen before producing a posterior?"
+  options={[
+    { text: 'Audit the copying and logging model, because it assigned no probability to that pattern.', correct: true },
+    { text: 'Assign certainty to H because a contradiction must be infinitely strong supporting evidence.' },
+    { text: 'Assign certainty to not H because every disagreement identifies the original as wrong.' },
+    { text: 'Multiply the two marginal ratios while retaining the claim that B is an exact copy.' }
+  ]}
+  explanation="Pipeline C assigns zero probability to plus-minus under both states. Conditioning on that event gives no defined posterior in this model. Investigate whether the reports were matched correctly, whether a value was changed or whether B actually uses another input."
+/>
+
+For Pipeline P, a plus-minus pair **is** possible: its row contains **10 H cases and 90 not-H cases**. Thus **P(H given A-plus and B-minus) = 10/100 = 10%**. Sequentially, B-minus has conditional probabilities **10/80 = 1/8** under H and **90/180 = 1/2** under not H. The ratio is **1/4**, so **4 : 9 × 1/4 = 1 : 9**, returning to the original prior in this particular example.
+
+Agreement does not automatically add a fixed amount, and disagreement does not automatically cancel an earlier report. Their diagnostic strength depends on the specified likelihoods. This model happens to give a full cancellation for that pattern.
+
+For Pipeline C, plus-minus has probability zero under **both** states. It is not evidence with a calculable posterior of zero: the required normalizing probability is itself zero. A contradiction with the model is a reason to check or extend it.
+
+A zero in an observed finite validation sample would be a different kind of information. It would not by itself prove that the underlying probability is exactly zero. Our zeros are stipulated features of an ideal copying model, rather than estimates justified merely by an empty cell.
+
+<FillBlank
+  client:visible
+  question="Keep a redundant report separate from an impossible observation"
+  text="After an exact copied flag, the second conditional likelihood ratio is {{one|four|seven}}. A disagreement that the copying model rules out under both states calls for {{a model and record audit|a posterior of zero|a posterior of certainty}}."
+  explanation="A known copy has probability one after the original result under either hypothesis, giving a ratio of one. A supposedly impossible pair instead challenges the stated process; dividing zero likelihoods does not create a defined conditional probability."
+/>
+
+## Audit the process before choosing its likelihoods
+
+A source log should identify the item, original measurement, image or dataset, report version and transformations used to produce each output. “Another person wrote it” and “another organisation published it” do not specify which observations were new. A repeated method can produce additional information, while a differently named method can reuse the same failure-producing input.
+
+To estimate the required rates from real work, retain linked results for **the same items**, with independently established state labels and a relevant reference population. Check positive and negative first-result histories, not just the cases where both reports agree. Rates estimated on a selected history or another type of label may not transfer to the current question. Finite validation brings sampling uncertainty; our stipulated tables have not measured that uncertainty away.
+
+Also retain what the publication process tells you. In Pipeline C, B is a deterministic copy with no extra result-selection step. If a later investigation reveals an additional measurement or selective publication, that is a changed information set and needs a new model, rather than a blanket instruction to ignore every repeated sentence.
+
+### Conditional independence is not independence in the mixed population
+
+Even Pipeline I's reports are associated before the state is known. Each flag has overall probability **0.10 × 0.80 + 0.90 × 0.20 = 0.26**. Both flags have probability **0.10 × 0.64 + 0.90 × 0.04 = 0.10**, whereas **0.26 × 0.26 = 0.0676**. These differ. Conditional independence within each state therefore does not imply independence after the states are mixed together.
+
+For this audit, the relevant factorisation is within **each hypothesis state**, not independence tested only across the pooled labels. The same hidden state can make both reports tend to agree in the mixed population even when their remaining errors are independent within states.
+
+<Categorize
+  client:visible
+  question="Separate evidence about report provenance from an unsupported independence claim"
+  buckets={['Supports the stated process check', 'Does not establish the required process']}
+  items={[
+    { text: 'A verified transformation log shows B imports A’s exact result field without new measurements.', bucket: 'Supports the stated process check' },
+    { text: 'Linked validation records include independently established states and both report outputs.', bucket: 'Supports the stated process check' },
+    { text: 'Different logos on reports are treated as proof of conditional independence.', bucket: 'Does not establish the required process' },
+    { text: 'Agreement is observed, then all source links are discarded before assigning a second ratio.', bucket: 'Does not establish the required process' }
+  ]}
+  explanation="A transformation log can establish the stipulated copy route. Joint validation records can support or challenge the assumed conditional rates, with sampling limits. Names, logos and agreement alone do not establish those rates."
+/>
+
+## Transfer to a binding inspection
+
+A library considers whether a book's binding needs reinforcement, hypothesis H. The prior is **20%**. A first inspection flags **60% of H books** and **20% of not-H books**. After a first flag, the library receives either a copied summary or a new inspection result.
+
+For the new inspection, the following rates are supplied **conditional on the first flag**: a further flag occurs in **60% of H books** and **30% of not-H books** within that history. These are not claims about its rates after a first negative result.
+
+<MCQ
+  client:visible
+  question="What posterior follows a second flag from the new inspection, compared with an exact copied summary?"
+  options={[
+    { text: 'Three fifths after the new inspection; three sevenths after the copy.', correct: true },
+    { text: 'Nine thirteenths after either report, by applying the first ratio twice.' },
+    { text: 'Three sevenths after either report, because the second can never matter.' },
+    { text: 'Three fifths after either report, because agreement always counts twice.' }
+  ]}
+  explanation="Prior odds are 1:4. The first ratio is 0.60/0.20 = 3, giving 3:4 and probability 3/7. The new report’s conditional ratio is 0.60/0.30 = 2, giving 6:4 and probability 3/5. An exact copy has conditional ratio one and leaves 3/7 unchanged."
+/>
+
+<details>
+<summary>Check the transfer by reconstructing the cases</summary>
+
+Use a hypothetical catalogue of **1000 equally weighted books**: 200 H and 800 not H. The first flag retains **120 H and 160 not H**, giving **120/280 = 3/7**. The new flag retains **120 × 0.60 = 72 H** and **160 × 0.30 = 48 not H**, giving **72/120 = 3/5**. A copy retains the entire first-flag subset instead. The two routes agree with the odds calculation.
+
+</details>
+
+## Recap
+
+<MindMap
+  client:visible
+  title="Give each new report only the evidence it adds"
+  root={{ label: 'Audit the second report', children: [
+    { label: 'Define', children: [{ label: 'Hypothesis and alternative' }, { label: 'Original prior and known result history' }, { label: 'What each plus or minus means' }] },
+    { label: 'Trace', children: [{ label: 'Original measurements and copied fields' }, { label: 'Shared inputs and report transformations' }, { label: 'Names do not establish independence' }] },
+    { label: 'Calculate', children: [{ label: 'Joint likelihoods within each state' }, { label: 'Second likelihood conditional on history' }, { label: 'Odds multiplication, then probability conversion' }] },
+    { label: 'Check', children: [{ label: 'Copy, independent and partial models differ' }, { label: 'Impossible observations challenge the model' }, { label: 'Finite validation is not the stipulated catalogue' }] },
+    { label: 'Transfer', children: [{ label: 'Keep the no-new-information case distinct' }, { label: 'Dependent evidence can still matter' }, { label: 'Match the rates to the actual information process' }] }
+  ] }}
+/>
+
+<Quiz
+  client:visible
+  title="Check the evidence audit"
+  questions={[
+    { question: 'Why do the three pipelines produce different posteriors after two flags?', options: [
+      { text: 'They assign different joint likelihoods to the same observed pair within each state.', correct: true },
+      { text: 'They secretly change the original prior probability of the print defect.' },
+      { text: 'They use different individual true-flag and false-flag rates for report A.' },
+      { text: 'They change the conversion from odds to probability between the models.' }
+    ], explanation: 'The prior and each report’s marginal within-state rates are fixed. What varies is the joint distribution: both flags retain different proportions of the two hypothesis states.' },
+    { question: 'Which update is justified for a documented deterministic copy after a known first flag?', options: [
+      { text: 'Multiply the current odds by one, leaving the posterior unchanged.', correct: true },
+      { text: 'Multiply the current odds by the original marginal ratio a second time.' },
+      { text: 'Add the original posterior to itself because the report appeared twice.' },
+      { text: 'Set the posterior to zero because a repeated report cancels the original.' }
+    ], explanation: 'Conditional on the first flag, a copied flag is certain under either state. Its likelihood ratio is one. Leaving the posterior unchanged here is correct evidence use, not refusal to learn.' },
+    { question: 'In the partial-dependence model, which pair of calculations gives the same final odds?', options: [
+      { text: 'Original odds times seven, or first-updated odds times seven quarters.', correct: true },
+      { text: 'Original odds times seven quarters, or first-updated odds times seven.' },
+      { text: 'Original odds times sixteen, or first-updated odds times four.' },
+      { text: 'Original odds plus seven, or first-updated odds plus seven quarters.' }
+    ], explanation: 'The joint likelihood ratio is 0.70/0.10 = 7. The conditional second ratio is (70/80)/(90/180) = 7/4. Thus (1:9) × 7 equals (4:9) × 7/4: both give 7:9 and posterior 7/16.' },
+    { question: 'What would challenge the ideal copy model rather than provide a defined posterior within it?', options: [
+      { text: 'A verified plus-minus pair to which both hypothesis states assign zero probability.', correct: true },
+      { text: 'A plus-plus pair already contained in the stated copying catalogue.' },
+      { text: 'The same first-flag posterior occurring again after its exact copied field.' },
+      { text: 'A zero change in posterior after evidence whose conditional ratio is one.' }
+    ], explanation: 'The copy table rules out disagreement in both states. The observed pair then has zero normalizing probability; investigate the process or model instead of reporting certainty from an undefined calculation.' },
+    { question: 'Which checks belong in a real report audit? Select all that apply.', allowMultiple: true, options: [
+      { text: 'Trace reports to original inputs and retain transformations and result histories.', correct: true },
+      { text: 'Check linked within-state report rates on a relevant validation population.', correct: true },
+      { text: 'Treat different authors as sufficient proof that shared error mechanisms are absent.' },
+      { text: 'Assume an empty finite-sample cell establishes an exact impossibility in every population.' }
+    ], explanation: 'Provenance and linked, relevant validation can support the chosen likelihood model, subject to uncertainty. Different names and a finite zero count do not provide the required guarantees.' }
+  ]}
+/>
+
+Next, take the [final exam](/bayesian-updating/final-exam) to combine the original Bayes toolkit with this audit of report provenance and conditional evidence.

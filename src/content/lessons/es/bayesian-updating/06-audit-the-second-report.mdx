@@ -1,0 +1,469 @@
+---
+title: "Taller: audita el segundo informe"
+description: "Rastrea el origen de dos informes y calcula su evidencia condicional para distinguir una señal copiada de una observación que aporta información."
+topic: "es/bayesian-updating"
+order: 7
+minutes: 28
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, RateComparison, FirstPrinciplesBuilder, MindMap } from '@/components/react';
+
+Un detector de imprenta marca una etiqueta. Un segundo informe también la marca. Dos confirmaciones suenan más convincentes que una, hasta que descubres que el segundo informe importa el resultado del primer detector. Un documento nuevo no implica una observación nueva.
+
+El curso ya ha advertido del doble recuento. En este taller irás un paso más allá: reconstruirás tres procesos de generación de informes, calcularás qué información queda por incorporar después del primer resultado y comprobarás qué proceso encaja con los registros. La dependencia no obliga a descartar todos los informes posteriores. Obliga a usar la verosimilitud que corresponde a lo que ya sabes.
+
+## Define la hipótesis y actualiza una vez
+
+<MCQ
+  client:visible
+  pretest
+  question="Dos informes tienen las mismas tasas individuales de avisos verdaderos y falsos. ¿Bastan esas tasas para calcular la probabilidad posterior cuando ambos marcan el mismo objeto?"
+  options={[
+    { text: 'No; también hace falta saber cómo aparecen conjuntamente los informes dentro de cada estado.', correct: true },
+    { text: 'Sí; siempre se pueden multiplicar sin cambios sus dos razones de verosimilitud individuales.' },
+    { text: 'Sí; los nombres distintos demuestran que cada informe usa una observación independiente.' },
+    { text: 'No; cualquier dependencia impide aprovechar matemáticamente toda información posterior.' }
+  ]}
+  explanation="Las tasas individuales no determinan la verosimilitud conjunta de un par de resultados. Una copia, una medición nueva y un proceso parcialmente compartido pueden tener las mismas tasas individuales y aportar cantidades distintas de información nueva."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Este es un **modelo de probabilidad construido**, no un informe sobre el rendimiento de una impresora. La hipótesis **H** es «la alineación de la etiqueta queda fuera de una tolerancia definida de antemano». Su alternativa, **no H**, es «la alineación cumple esa tolerancia». El estado se mantiene fijo mientras se generan los informes. Un signo más indica que un informe marca la etiqueta; un signo menos indica que no la marca.
+
+La probabilidad previa de H es del **10 %**. El informe A marca el **80 % de las etiquetas bajo H** y el **20 % bajo no H**. Son tasas condicionadas a cada estado, no una «precisión» global sin definir. Su **razón de verosimilitud (RV)** es **0,80 ÷ 0,20 = 4**.
+
+Representamos las probabilidades mediante **1000 casos del modelo con el mismo peso**: 100 cumplen H y 900, no H. Los casos forman un catálogo de probabilidades estipulado. No son una muestra de validación observada ni una promesa sobre las próximas 1000 etiquetas reales.
+
+| Estado | Casos del modelo | A marca la etiqueta | A no la marca |
+|---|---|---|---|
+| H | 100 | 80 | 20 |
+| No H | 900 | 180 | 720 |
+| Total | 1000 | 260 | 740 |
+
+Después de que A marque la etiqueta, el conjunto relevante contiene **80 + 180 = 260 casos**. La probabilidad posterior es **80/260 = 4/13 ≈ 30,77 %**. En forma de odds:
+
+**Odds previas H : no H = 1 : 9**
+
+**Después del aviso de A: 1 : 9 × 4 = 4 : 9**, que da **4/(4 + 9) = 4/13**.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale="es"
+  title="Reconstruye los casos compatibles con el primer aviso"
+  eyebrow="Condiciona al resultado observado"
+  analogyValue={1000}
+  analogyLabel="Todos los casos del modelo con el mismo peso"
+  analogyNote="El catálogo inicial incluye ambos estados y los dos posibles resultados del primer informe."
+  parts={[
+    { label: 'H y un primer aviso', value: 80, note: 'Un aviso entre los casos que cumplen la hipótesis.' },
+    { label: 'No H y un primer aviso', value: 180, note: 'Un falso aviso entre los casos de la alternativa.' }
+  ]}
+  valuePrefix=""
+  valueSuffix=" casos ponderados"
+  rebuiltLabel="Casos que quedan después del primer aviso"
+  instructions="Incluye las dos formas en que puede aparecer el aviso observado y usa su suma como denominador de la probabilidad posterior."
+  revealAllLabel="Incluir ambos estados"
+  resetLabel="Quitar las aportaciones"
+  verdictTemplate="El subconjunto del primer aviso contiene {total}. Ochenta de esos casos cumplen H."
+  caption="La probabilidad posterior es ochenta dividido entre doscientos sesenta, no entre todo el catálogo. Los recuentos representan probabilidades estipuladas."
+/>
+
+Conserva la fracción exacta para la siguiente actualización. Redondear **4/13** al 31 % y tratar después ese valor como exacto introduciría una diferencia aritmética evitable.
+
+<MatchConcepts
+  client:visible
+  question="Relaciona cada cantidad con su papel en la auditoría de informes"
+  pairs={[
+    { term: 'Odds previas', definition: 'La probabilidad relativa de los dos estados antes de los informes observados' },
+    { term: 'Tasa marginal del informe dentro de un estado', definition: 'La probabilidad del informe dado el estado, sin condicionar además al primer resultado' },
+    { term: 'Segunda razón de verosimilitud condicional', definition: 'El cociente de las probabilidades del segundo resultado en los dos estados cuando ya se conoce el primero' },
+    { term: 'Verosimilitud conjunta', definition: 'La probabilidad del patrón completo de resultados observado dentro de un estado' }
+  ]}
+  explanation="El segundo informe se evalúa en el contexto del primero. Una tasa marginal de todo el grupo de un estado no es necesariamente la tasa condicional correcta dentro de su subconjunto con primer aviso."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un término y después su definición."
+  allCorrectLabel="✓ Todas las parejas son correctas"
+  partialResultWord="correctas"
+  pickDefinitionHint="→ elige ahora una definición"
+  notLinkedHint="sin enlazar todavía"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+/>
+
+## Especifica qué contiene el segundo informe
+
+<MCQ
+  client:visible
+  pretest
+  question="¿Qué observación demostraría que B no añade información nueva sobre el aviso bajo un proceso de copia especificado?"
+  options={[
+    { text: 'B importa de forma determinista el resultado registrado de A, sin otra medición ni selección.', correct: true },
+    { text: 'B lo redacta otra persona, aunque no se hayan documentado los datos de origen.' },
+    { text: 'B aparece más tarde, por lo que la fecha demuestra una nueva medición de la etiqueta.' },
+    { text: 'B coincide con A, por lo que la coincidencia demuestra que uno copia al otro.' }
+  ]}
+  explanation="La conclusión de que no hay información nueva se deriva del proceso determinista documentado. Tener otro autor o fecha no demuestra que haya datos independientes; la coincidencia tampoco identifica por sí sola el proceso."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Considera tres procesos hipotéticos distintos. En los tres, tanto A como B marcan individualmente el 80 % de los casos H y el 20 % de los casos no H. La probabilidad previa sigue siendo del 10 %. Lo que cambia es su comportamiento conjunto.
+
+### Proceso C — B copia a A
+
+B importa exactamente el campo de aviso de A y no tiene otra entrada relevante para la hipótesis. Los resultados tienen que coincidir:
+
+| Resultado A, resultado B | Casos H, total 100 | Casos no H, total 900 |
+|---|---|---|
+| Más, más | 80 | 180 |
+| Más, menos | 0 | 0 |
+| Menos, más | 0 | 0 |
+| Menos, menos | 20 | 720 |
+
+Dos avisos conservan **80 casos H y 180 casos no H**, exactamente el mismo subconjunto que el primer aviso. La probabilidad posterior sigue siendo **80/260 = 4/13 ≈ 30,77 %**. Copiar el resultado no repite la medición de la que procede.
+
+### Proceso I — mediciones condicionalmente independientes
+
+Aquí B mantiene las mismas tasas de aviso dentro de cada estado y su resultado es **condicionalmente independiente de A dado H y también dado no H**. Esto significa que, una vez fijado el estado, conocer el resultado de A no cambia las probabilidades especificadas para B.
+
+| Resultado A, resultado B | Casos H, total 100 | Casos no H, total 900 |
+|---|---|---|
+| Más, más | 64 | 36 |
+| Más, menos | 16 | 144 |
+| Menos, más | 16 | 144 |
+| Menos, menos | 4 | 576 |
+
+Por ejemplo, las probabilidades de dos avisos son **0,80 × 0,80 = 0,64 bajo H** y **0,20 × 0,20 = 0,04 bajo no H**. Eso produce **100 × 0,64 = 64** y **900 × 0,04 = 36** casos ponderados. Tras dos avisos, la probabilidad posterior es **64/(64 + 36) = 64 %**.
+
+La independencia condicional es un supuesto del modelo, no un sinónimo de «dos documentos». La [explicación de Naive Bayes de Berkeley](https://inst.eecs.berkeley.edu/~cs188/textbook/ml/naive-bayes.html) hace explícito este condicionamiento a la clase de la hipótesis al descomponer una verosimilitud conjunta en factores individuales.
+
+### Proceso P — la dependencia deja información adicional
+
+En el tercer modelo, B reutiliza a veces el resultado de A. Para cada etiqueta, una elección de ruta no observada copia A con probabilidad **3/8** y obtiene la medición condicionalmente independiente del proceso I con probabilidad **5/8**. Esta elección es independiente del estado real y del resultado de A. Conocemos las probabilidades de las rutas, pero no cuál generó B para la etiqueta actual.
+
+Por ejemplo, después de que A marque la etiqueta, B también la marca bajo H con probabilidad **3/8 + (5/8 × 0,80) = 7/8**. Bajo no H, esa probabilidad es **3/8 + (5/8 × 0,20) = 1/2**. La tabla completa de estados y resultados es, por tanto:
+
+| Resultado A, resultado B | Casos H, total 100 | Casos no H, total 900 |
+|---|---|---|
+| Más, más | 70 | 90 |
+| Más, menos | 10 | 90 |
+| Menos, más | 10 | 90 |
+| Menos, menos | 10 | 630 |
+
+Comprueba las tasas individuales de B: **(70 + 10)/100 = 80 % bajo H** y **(90 + 90)/900 = 20 % bajo no H**. A tiene los mismos márgenes. Sin embargo, dos avisos conservan ahora **70 casos H y 90 casos no H**, por lo que la probabilidad posterior es **70/160 = 7/16 = 43,75 %**. No coincide con el resultado de la copia ni con el de las mediciones independientes.
+
+Cada tabla es un catálogo de probabilidades completo y distinto para el estado y los resultados de los informes; el proceso P promedia la elección de ruta no observada. Sus columnas suman los mismos totales de cada estado. Ninguna promete esas frecuencias exactas en una muestra real. La tabla con solapamiento define un posible proceso dependiente; no es una fórmula universal para cualquier informe que comparta datos de origen.
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="¿Qué conclusiones se derivan de estos tres procesos estipulados? Selecciona todas las correctas."
+  options={[
+    { text: 'Las mismas tasas individuales pueden dar probabilidades posteriores distintas tras dos informes.', correct: true },
+    { text: 'Un segundo informe dependiente puede aportar información sin equivaler a uno independiente.', correct: true },
+    { text: 'Cualquier coincidencia entre dos informes demuestra que el segundo se limita a copiar al primero.' },
+    { text: 'Un autor distinto garantiza la tabla de independencia condicional sin más comprobaciones.' }
+  ]}
+  explanation="La probabilidad posterior tras dos avisos es aproximadamente del 30,77 %, el 64 % o el 43,75 % bajo C, I o P. Las tasas de cada informe por separado no cambian. El origen de los datos y las verosimilitudes conjuntas distinguen los modelos; la coincidencia o la autoría por sí solas no."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Actualiza con la información que queda tras el primer informe
+
+La regla general de encadenamiento procede de la probabilidad condicional, no de suponer que todas las pistas son independientes. Para el par observado A-más y B-más:
+
+**P(A-más y B-más dado H) = P(A-más dado H) × P(B-más dado H y A-más)**
+
+Aplica la misma identidad bajo no H y divide las dos expresiones. La [clase de probabilidad condicional de Stanford](https://web.stanford.edu/class/archive/cs/cs109/cs109.1202/lectures/04_cond_bayes.pdf) desarrolla esta regla general del producto antes de aplicar Bayes.
+
+El resultado es:
+
+**Odds finales = odds previas × RV de A-más × RV condicional de B-más después de A-más**
+
+El último factor es:
+
+**P(B-más dado H y A-más) ÷ P(B-más dado no H y A-más)**
+
+La multiplicación sigue siendo válida con informes dependientes si las verosimilitudes condicionales son las correctas. La independencia condicional en ambos estados basta para sustituir el último factor por la razón de verosimilitud marginal de B. La comprobación esencial es si el factor propuesto coincide con la razón correcta condicionada al historial; la independencia no es la única forma posible de que se cumpla una igualdad.
+
+Estos son los segundos factores reales del modelo:
+
+| Proceso | B-más dado H y A-más | B-más dado no H y A-más | Segunda RV condicional | Odds finales H : no H |
+|---|---|---|---|---|
+| Copia C | 80/80 = 1 | 180/180 = 1 | 1 | 4 : 9 |
+| Independiente I | 64/80 = 0,80 | 36/180 = 0,20 | 4 | 16 : 9 |
+| Dependencia parcial P | 70/80 = 7/8 | 90/180 = 1/2 | 7/4 = 1,75 | 7 : 9 |
+
+Para P, **4 : 9 × 7/4 = 7 : 9**, que se convierte en **7/(7 + 9) = 7/16**. De forma equivalente, la razón de verosimilitud conjunta es **0,70/0,10 = 7**; multiplicar las odds previas **1 : 9** por 7 da el mismo resultado. Los cálculos conjunto y secuencial deben coincidir cuando usan el mismo modelo.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale="es"
+  title="Reconstruye el subconjunto tras dos avisos en el proceso P"
+  eyebrow="El segundo informe filtra los casos del primer aviso"
+  analogyValue={260}
+  analogyLabel="Casos que quedan después del aviso de A"
+  analogyNote="El subconjunto del primer aviso contiene ochenta casos H y ciento ochenta casos no H."
+  parts={[
+    { label: 'H y dos avisos', value: 70, note: 'Quedan setenta de los ochenta casos H del primer subconjunto.' },
+    { label: 'No H y dos avisos', value: 90, note: 'Quedan noventa de los ciento ochenta casos de la alternativa del primer subconjunto.' }
+  ]}
+  valuePrefix=""
+  valueSuffix=" casos ponderados"
+  rebuiltLabel="Casos que quedan después de ambos avisos"
+  instructions="Incluye los dos estados del subconjunto con dos avisos y compara su composición con la del primer aviso."
+  revealAllLabel="Incluir ambos estados"
+  resetLabel="Quitar las aportaciones"
+  verdictTemplate="El subconjunto de dos avisos contiene {total}. Setenta de esos casos cumplen H."
+  caption="La probabilidad posterior sube porque los casos H se conservan a una tasa condicional mayor, no porque se cuenten dos documentos. Pasa a ser setenta de ciento sesenta."
+/>
+
+<RateComparison
+  client:visible
+  locale="es"
+  title="¿Cuánto cambia la probabilidad posterior con el segundo aviso?"
+  scenarioLabel="Elige cómo se genera el informe B"
+  countsLabel="Casos de la hipótesis dentro del subconjunto condicionado"
+  differenceLabel="Probabilidad tras dos avisos menos probabilidad tras el primero"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  scenarios={[
+    { label: 'C: copia determinista', groups: [
+      { label: 'H después de ambos avisos', events: 80, total: 260 },
+      { label: 'H después del primer aviso', events: 80, total: 260 }
+    ] },
+    { label: 'I: mediciones condicionalmente independientes', groups: [
+      { label: 'H después de ambos avisos', events: 64, total: 100 },
+      { label: 'H después del primer aviso', events: 80, total: 260 }
+    ] },
+    { label: 'P: dependencia parcial estipulada', groups: [
+      { label: 'H después de ambos avisos', events: 70, total: 160 },
+      { label: 'H después del primer aviso', events: 80, total: 260 }
+    ] }
+  ]}
+/>
+
+La figura compara porcentajes de probabilidad posterior, así que su diferencia se expresa en **puntos porcentuales**, no como razón de verosimilitud. Muestra aproximadamente **0**, **33,23** o **12,98 puntos** de probabilidad adicional después del segundo aviso. Las actualizaciones se calculan con las fracciones exactas anteriores, no con los porcentajes redondeados de la pantalla.
+
+La probabilidad posterior recoge tu creencia actual sobre H, pero no te permite olvidar un historial relevante. Si el siguiente informe depende de A, su verosimilitud debe seguir condicionada a A. Reutilizar las tasas del 80 % y el 20 % solo porque la probabilidad posterior pasa a ser la nueva previa introduciría un supuesto que los registros no han justificado.
+
+<MCQ
+  client:visible
+  question="En el proceso P, ¿qué factor actualiza las odds después de que A ya haya marcado la etiqueta?"
+  options={[
+    { text: 'Siete cuartos: dividir siete octavos entre un medio.', correct: true },
+    { text: 'Cuatro: reutilizar el cociente individual sin condicionar al primer resultado.' },
+    { text: 'Siete: aplicar de nuevo el cociente conjunto a las odds ya actualizadas.' },
+    { text: 'Uno: suponer que toda dependencia elimina cualquier información adicional.' }
+  ]}
+  explanation="Entre los casos H del primer aviso, B marca 70/80; entre los casos no H del primer aviso, marca 90/180. Su cociente es (7/8)/(1/2) = 7/4. El cociente conjunto de siete se aplica a la previa original, no a unas odds que ya han incorporado A."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Comprueba los desacuerdos y los patrones que el modelo descarta
+
+<MCQ
+  client:visible
+  pretest
+  question="Una supuesta copia determinista indica menos después de que el original indique más. ¿Qué debe hacerse antes de calcular una probabilidad posterior?"
+  options={[
+    { text: 'Auditar el modelo de copia y los registros, porque ese patrón tenía probabilidad nula.', correct: true },
+    { text: 'Asignar certeza a H porque una contradicción tiene que ser evidencia favorable infinita.' },
+    { text: 'Asignar certeza a no H porque cualquier desacuerdo demuestra que el original se equivoca.' },
+    { text: 'Multiplicar las razones marginales manteniendo que B es una copia exacta de A.' }
+  ]}
+  explanation="El proceso C asigna probabilidad cero al par más-menos bajo ambos estados. Condicionar a ese suceso no da una probabilidad posterior definida en este modelo. Investiga si los informes se han emparejado bien, si se ha cambiado algún valor o si B usa en realidad otra entrada."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+En el proceso P, el par más-menos **sí** es posible: su fila contiene **10 casos H y 90 casos no H**. Por tanto, **P(H dado A-más y B-menos) = 10/100 = 10 %**. En el cálculo secuencial, B-menos tiene probabilidades condicionales de **10/80 = 1/8** bajo H y **90/180 = 1/2** bajo no H. El cociente es **1/4**, así que **4 : 9 × 1/4 = 1 : 9**: volvemos a la previa original en este ejemplo concreto.
+
+La coincidencia no añade automáticamente una cantidad fija de evidencia, y el desacuerdo no anula automáticamente un informe anterior. Su fuerza diagnóstica depende de las verosimilitudes especificadas. Este modelo produce una cancelación completa para ese patrón concreto.
+
+En el proceso C, más-menos tiene probabilidad cero bajo **ambos** estados. No es evidencia con una probabilidad posterior calculable de cero: la probabilidad necesaria para normalizar también es cero. Una contradicción con el modelo invita a revisarlo o ampliarlo.
+
+Un cero en una muestra de validación finita observada sería otro tipo de información. Por sí solo no demostraría que la probabilidad subyacente es exactamente cero. Nuestros ceros son características estipuladas de un modelo de copia ideal, no estimaciones justificadas solo porque una casilla haya quedado vacía.
+
+<FillBlank
+  client:visible
+  question="Distingue un informe redundante de una observación imposible"
+  text="Tras un aviso copiado exactamente, la segunda razón de verosimilitud condicional es {{uno|cuatro|siete}}. Un desacuerdo que el modelo de copia descarta bajo ambos estados exige {{auditar el modelo y los registros|una probabilidad posterior de cero|una probabilidad posterior de certeza}}."
+  explanation="Una copia conocida tiene probabilidad uno tras el resultado original bajo ambas hipótesis, por lo que su razón es uno. Un par supuestamente imposible cuestiona el proceso especificado; dividir verosimilitudes nulas no produce una probabilidad condicional definida."
+  instructions="Elige la opción correcta en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+/>
+
+## Audita el proceso antes de elegir sus verosimilitudes
+
+Un registro de origen debería identificar el objeto, la medición, imagen o conjunto de datos original, la versión del informe y las transformaciones usadas para producir cada salida. «Lo ha escrito otra persona» y «lo ha publicado otra organización» no especifican qué observaciones son nuevas. Repetir un método puede aportar información adicional, mientras que un método con otro nombre puede reutilizar la misma entrada que causa el error.
+
+Para estimar las tasas necesarias con trabajo real, conserva resultados enlazados de **los mismos objetos**, con estados establecidos de forma independiente y una población de referencia pertinente. Comprueba los historiales con primer resultado positivo y negativo, no solo los casos en que ambos informes coinciden. Unas tasas estimadas en un historial seleccionado o en otro tipo de etiqueta pueden no trasladarse a la pregunta actual. La validación finita trae incertidumbre de muestreo; nuestras tablas estipuladas no la han eliminado mediante mediciones.
+
+Conserva también lo que revela el proceso de publicación. En C, B es una copia determinista sin una selección adicional de resultados. Si una investigación posterior descubre otra medición o una publicación selectiva, habrá cambiado la información disponible y hará falta un modelo nuevo. No basta con ignorar por sistema cualquier frase repetida.
+
+### La independencia condicional no es independencia en la población mezclada
+
+Incluso los informes del proceso I están asociados antes de conocer el estado. Cada aviso tiene probabilidad global **0,10 × 0,80 + 0,90 × 0,20 = 0,26**. Los dos avisos tienen probabilidad **0,10 × 0,64 + 0,90 × 0,04 = 0,10**, mientras que **0,26 × 0,26 = 0,0676**. Son distintas. La independencia condicional dentro de cada estado no implica independencia después de mezclar los estados.
+
+En esta auditoría, la descomposición relevante es la de **cada estado de la hipótesis**, no la independencia comprobada solo entre todas las etiquetas agrupadas. Un mismo estado oculto puede hacer que ambos informes tiendan a coincidir en la población mezclada, aunque sus errores restantes sean independientes dentro de cada estado.
+
+<Categorize
+  client:visible
+  question="Separa las pruebas sobre el origen del informe de una afirmación de independencia sin justificar"
+  buckets={['Apoya la comprobación del proceso', 'No demuestra el proceso necesario']}
+  items={[
+    { text: 'Un registro verificado muestra que B importa exactamente el resultado de A sin nuevas mediciones.', bucket: 'Apoya la comprobación del proceso' },
+    { text: 'Los registros de validación enlazan estados establecidos de forma independiente y ambas salidas.', bucket: 'Apoya la comprobación del proceso' },
+    { text: 'Se tratan los logotipos distintos como prueba de independencia condicional.', bucket: 'No demuestra el proceso necesario' },
+    { text: 'Se observa una coincidencia y se borran los enlaces de origen antes de asignar la segunda razón.', bucket: 'No demuestra el proceso necesario' }
+  ]}
+  explanation="Un registro de transformaciones puede demostrar la ruta de copia estipulada. Los registros de validación conjunta pueden apoyar o cuestionar las tasas condicionales supuestas, con los límites del muestreo. Los nombres, logotipos y coincidencias por sí solos no establecen esas tasas."
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo está bien clasificado"
+  partialResultWord="correctas"
+/>
+
+## Aplica la auditoría a una encuadernación
+
+Una biblioteca estudia si la encuadernación de un libro necesita un refuerzo: esa es la hipótesis H. La probabilidad previa es del **20 %**. Una primera inspección marca el **60 % de los libros H** y el **20 % de los libros no H**. Después de un primer aviso, la biblioteca recibe un resumen copiado o el resultado de una inspección nueva.
+
+Para la inspección nueva se facilitan estas tasas **condicionadas al primer aviso**: aparece otro aviso en el **60 % de los libros H** y el **30 % de los libros no H** dentro de ese historial. No se afirma que sean sus tasas después de un primer resultado negativo.
+
+<MCQ
+  client:visible
+  question="¿Qué probabilidad posterior produce un segundo aviso de la inspección nueva, en comparación con un resumen copiado exactamente?"
+  options={[
+    { text: 'Tres quintos tras la inspección nueva; tres séptimos tras la copia.', correct: true },
+    { text: 'Nueve treceavos tras cualquiera, al aplicar dos veces la primera razón.' },
+    { text: 'Tres séptimos tras cualquiera, porque el segundo nunca puede importar.' },
+    { text: 'Tres quintos tras cualquiera, porque una coincidencia siempre cuenta dos veces.' }
+  ]}
+  explanation="Las odds previas son 1:4. La primera razón es 0,60/0,20 = 3, que da 3:4 y probabilidad 3/7. La razón condicional del informe nuevo es 0,60/0,30 = 2, que da 6:4 y probabilidad 3/5. Una copia exacta tiene razón condicional uno y deja 3/7 sin cambios."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+<details>
+<summary>Comprueba la transferencia reconstruyendo los casos</summary>
+
+Usa un catálogo hipotético de **1000 libros con el mismo peso**: 200 H y 800 no H. El primer aviso conserva **120 H y 160 no H**, lo que da **120/280 = 3/7**. El aviso nuevo conserva **120 × 0,60 = 72 H** y **160 × 0,30 = 48 no H**, lo que da **72/120 = 3/5**. Una copia conserva todo el subconjunto del primer aviso. Las dos rutas coinciden con el cálculo mediante odds.
+
+</details>
+
+## Repaso
+
+<MindMap
+  client:visible
+  title="Atribuye a cada informe solo la evidencia que añade"
+  eyebrow="Mapa mental"
+  outlineLabel="Ver esquema"
+  root={{ label: 'Auditar el segundo informe', children: [
+    { label: 'Definir', children: [{ label: 'Hipótesis y alternativa' }, { label: 'Previa original e historial de resultados conocido' }, { label: 'Significado de cada más y menos' }] },
+    { label: 'Rastrear', children: [{ label: 'Mediciones originales y campos copiados' }, { label: 'Entradas compartidas y transformaciones' }, { label: 'Los nombres no demuestran independencia' }] },
+    { label: 'Calcular', children: [{ label: 'Verosimilitudes conjuntas en cada estado' }, { label: 'Segunda verosimilitud condicionada al historial' }, { label: 'Multiplicar odds y convertir a probabilidad' }] },
+    { label: 'Comprobar', children: [{ label: 'Distinguir copia, independencia y dependencia parcial' }, { label: 'Las observaciones imposibles cuestionan el modelo' }, { label: 'La validación finita no es el catálogo estipulado' }] },
+    { label: 'Transferir', children: [{ label: 'Distinguir la ausencia de información nueva' }, { label: 'La evidencia dependiente puede importar' }, { label: 'Ajustar las tasas al proceso real de información' }] }
+  ] }}
+/>
+
+<Quiz
+  client:visible
+  title="Comprueba la auditoría de evidencia"
+  questions={[
+    { question: '¿Por qué los tres procesos producen probabilidades posteriores distintas tras dos avisos?', options: [
+      { text: 'Asignan verosimilitudes conjuntas distintas al mismo par observado dentro de cada estado.', correct: true },
+      { text: 'Cambian a escondidas la probabilidad previa original del defecto de impresión.' },
+      { text: 'Usan tasas individuales distintas de avisos verdaderos y falsos para el informe A.' },
+      { text: 'Cambian la conversión de odds a probabilidad de un modelo a otro.' }
+    ], explanation: 'La previa y las tasas marginales de cada informe dentro de cada estado se mantienen. Lo que varía es la distribución conjunta: dos avisos conservan proporciones distintas de los dos estados de la hipótesis.' },
+    { question: '¿Qué actualización justifica una copia determinista documentada después de un primer aviso conocido?', options: [
+      { text: 'Multiplicar las odds actuales por uno y dejar la probabilidad posterior sin cambios.', correct: true },
+      { text: 'Multiplicar las odds actuales por la razón marginal original una segunda vez.' },
+      { text: 'Sumar la probabilidad posterior consigo misma porque el informe aparece dos veces.' },
+      { text: 'Fijar la probabilidad posterior en cero porque un informe repetido anula el original.' }
+    ], explanation: 'Condicionado al primer aviso, un aviso copiado es seguro bajo ambos estados. Su razón de verosimilitud es uno. Mantener aquí la probabilidad posterior es usar bien la evidencia, no negarse a aprender.' },
+    { question: 'En el modelo de dependencia parcial, ¿qué dos cálculos dan las mismas odds finales?', options: [
+      { text: 'Las odds originales por siete, o las odds tras el primer aviso por siete cuartos.', correct: true },
+      { text: 'Las odds originales por siete cuartos, o las odds tras el primer aviso por siete.' },
+      { text: 'Las odds originales por dieciséis, o las odds tras el primer aviso por cuatro.' },
+      { text: 'Las odds originales más siete, o las odds tras el primer aviso más siete cuartos.' }
+    ], explanation: 'La razón conjunta es 0,70/0,10 = 7. La segunda razón condicional es (70/80)/(90/180) = 7/4. Por tanto, (1:9) × 7 equivale a (4:9) × 7/4: ambas dan 7:9 y probabilidad posterior 7/16.' },
+    { question: '¿Qué pondría en duda el modelo de copia ideal en lugar de dar una probabilidad posterior definida dentro de él?', options: [
+      { text: 'Un par más-menos verificado al que ambos estados de la hipótesis asignan probabilidad cero.', correct: true },
+      { text: 'Un par más-más ya incluido en el catálogo de copia estipulado.' },
+      { text: 'La misma probabilidad posterior tras el primer aviso y tras su campo copiado exactamente.' },
+      { text: 'Un cambio nulo tras una evidencia cuya razón de verosimilitud condicional es uno.' }
+    ], explanation: 'La tabla de copia descarta el desacuerdo en ambos estados. El par observado tiene entonces probabilidad de normalización nula; investiga el proceso o el modelo en vez de extraer certeza de un cálculo indefinido.' },
+    { question: '¿Qué comprobaciones corresponden a una auditoría real de informes? Selecciona todas las correctas.', allowMultiple: true, options: [
+      { text: 'Rastrear los informes hasta sus entradas originales y conservar transformaciones e historiales.', correct: true },
+      { text: 'Comprobar las tasas enlazadas dentro de cada estado en una población de validación pertinente.', correct: true },
+      { text: 'Dar por hecho que autores distintos bastan para descartar mecanismos de error compartidos.' },
+      { text: 'Suponer que una casilla vacía en una muestra finita demuestra una imposibilidad en toda población.' }
+    ], explanation: 'El origen de los datos y una validación enlazada y pertinente pueden apoyar el modelo de verosimilitud elegido, con su incertidumbre. Los nombres distintos y un recuento finito de cero no proporcionan esas garantías.' }
+  ]}
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario terminado"
+  perfectMessage="Todas las respuestas son correctas."
+  goodMessage="Revisa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Vuelve a las secciones que necesites practicar."
+  gateLabel="Comprueba la respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Puntuación"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+A continuación, haz el [examen final](/es/bayesian-updating/final-exam) para combinar las herramientas iniciales de Bayes con esta auditoría del origen de los informes y de la evidencia condicional.
