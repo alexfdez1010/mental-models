@@ -1,0 +1,409 @@
+---
+title: "Pilot a Rule Before Scaling It"
+description: "Test a library booking rule by tracing behavioural responses, counting displaced use, checking alternative explanations, and setting revision criteria."
+topic: "en/second-order-thinking"
+order: 7
+minutes: 18
+updated: 2026-11-06
+---
+
+import { MCQ, FillBlank, Categorize, ConsequenceTree, FirstPrinciplesBuilder, MindMap, Quiz } from '@/components/react';
+
+A library's study rooms are fully booked and often empty. The manager proposes
+a rule: confirm your reservation online by the previous afternoon or it becomes
+available to someone else. The booking calendar will certainly change. Whether
+more people get useful study time is a different question.
+
+Here you will take a plausible consequence tree and turn it into a testable
+pilot: a limited trial used to learn before extending a change. The goal is to
+find which reactions matter enough to alter the decision, then collect evidence
+about them.
+
+## Trace the helpful route and the competing route
+
+<MCQ client:visible pretest
+  question="A confirmation rule releases unused reservations. Which further link is needed before that release becomes a service improvement?"
+  options={[
+    { text: 'Other people must claim the released time and actually use it', correct: true },
+    { text: 'The calendar must display more cancellations than it did before' },
+    { text: 'The confirmation form must become mandatory for every booking' },
+  ]}
+  explanation="A released reservation is an intermediate result. It improves access only if the subsequent response creates useful attendance, without larger losses elsewhere."
+/>
+
+A theatre can have empty seats and a sold-out sign at the same time. Changing
+the sign does not seat an audience. Likewise, a **causal pathway** is the sequence
+of links by which a rule is expected to produce its outcome. A **theory of
+change** records those links and the assumptions they depend on. These tools
+come from programme evaluation; the
+[Magenta Book's Test and Learn guide](https://www.gov.uk/government/publications/the-magenta-book/test-and-learn-html)
+describes both.
+
+The library's helpful route is: confirmation requirement → unconfirmed hours
+released → other readers book them → those readers attend. A competing route
+is: confirmation requirement → some intended users miss the message → their
+reservations disappear → they lose study time. A reaction can start immediately;
+it is the causal link, not a delay on the clock, that places it downstream.
+The released reservation is a direct output of the rule; its effect on study
+time is mediated by readers rebooking and attending.
+
+<ConsequenceTree client:visible
+  title="The same rule opens two routes"
+  instructions="Open both branches. Find the assumption between releasing time and improving access."
+  caption="These are hypotheses about behaviour, not measured probabilities. A branch can fail, coexist with another branch, or matter differently to different readers."
+  decision={{ label: 'Require online confirmation before the deadline', valence: 'mixed', children: [
+    { label: 'Unconfirmed reservations are released', valence: 'mixed', children: [
+      { label: 'Waiting readers book the freed time', note: 'They must notice the release and still be able to travel.', valence: 'good', children: [
+        { label: 'Replacement readers attend', note: 'Useful room time rises only when the new booking is used.', valence: 'good' },
+      ] },
+      { label: 'Some released hours are not booked again', note: 'A late release may leave too little time to arrange a visit.', valence: 'bad' },
+    ] },
+    { label: 'Some intended users miss confirmation', note: 'A missed message is not the same as a cancelled plan.', valence: 'bad', children: [
+      { label: 'Readers lose bookings they would have used', valence: 'bad', children: [
+        { label: 'They stop relying on the reservation system', note: 'Repeated losses could change future participation.', valence: 'bad' },
+      ] },
+    ] },
+  ] }}
+/>
+
+The **system boundary** determines which effects you include. Counting only the
+calendar includes released hours but excludes the reader whose booking vanished
+and the staff member handling the complaint. The
+[Government Office for Science toolkit](https://www.gov.uk/government/publications/systems-thinking-for-civil-servants/toolkit)
+recommends considering both boundaries and the perspectives of people in the
+system.
+
+### When to use it
+
+Draw competing routes when a proposal's headline result is one step short of
+the outcome you want. Include a plausible beneficial response and a plausible
+costly response. Listing only disasters is as selective as listing only gains.
+
+<Categorize client:visible
+  question="What role does each statement play in this proposed change?"
+  buckets={['Rule or immediate output', 'Behavioural response', 'Service outcome']}
+  items={[
+    { text: 'The system releases an unconfirmed reservation', bucket: 'Rule or immediate output' },
+    { text: 'A waiting reader notices and books that hour', bucket: 'Behavioural response' },
+    { text: 'A reader misses the confirmation message', bucket: 'Behavioural response' },
+    { text: 'A study room is occupied for useful study time', bucket: 'Service outcome' },
+    { text: 'A reader loses study time they would otherwise have used', bucket: 'Service outcome' },
+  ]}
+  explanation="The calendar's output, people's responses, and the service outcome are different things to measure. A tidy output does not establish the final outcome."
+/>
+
+## Count the gain after accounting for displaced use
+
+<MCQ client:visible pretest
+  question="Replacement readers use some released hours. Why is that total insufficient to calculate the rule's net benefit?"
+  options={[
+    { text: 'Some original readers may lose hours they would have used', correct: true },
+    { text: 'Every replacement reservation should count as a guaranteed gain' },
+    { text: 'Cancelled reservations can never have belonged to intended users' },
+  ]}
+  explanation="New use must be weighed against use displaced by the rule. Non-confirmation does not tell you that the original reader would have stayed away."
+/>
+
+Think of moving water between buckets: the amount poured into the new bucket
+does not tell you how much water the system gained. **Net additional use** is
+use created by the change minus use that the change removes. The following
+planning scenario supplies both quantities so that you can check the arithmetic.
+In a real pilot, the no-rule alternative would need to be estimated.
+
+The library offers 100 one-hour room slots per week. Before the rule, all are
+reserved, 60 are used, and 40 are not. Suppose the confirmation rule produces
+these responses. Count occupied slots at this library during that week, and
+assume attendance in the other bookings is unchanged. This counts room use,
+rather than numbers of readers or staff working time.
+
+| Planning assumption | Hours per week |
+|---|---|
+| Original reservations cancelled for non-confirmation | 20 |
+| Of those cancelled, hours the original readers would have used | 8 |
+| Of those cancelled, hours that would have gone unused | 12 |
+| Cancelled hours booked by replacement readers | 15 |
+| Of those replacement bookings, hours actually used | 12 |
+| Of those replacement bookings, hours not used | 3 |
+| Released hours with no replacement booking | 5 |
+
+The unchanged original bookings contribute $60 - 8 = 52$ used hours. Replacement
+readers contribute 12, so total use becomes $52 + 12 = 64$ hours. The net gain is
+$64 - 60 = 4$ hours, equivalently $12 - 8 = 4$. Releasing twenty hours did not
+create twenty hours of study.
+
+The capacity also balances: 64 hours are used; 28 unchanged bookings still go
+unused; 3 replacement bookings go unused; and 5 released slots remain unbooked.
+Together, $64 + 28 + 3 + 5 = 100$ hours. No hour has been counted twice.
+
+<FirstPrinciplesBuilder client:visible
+  title="Rebuild occupied time"
+  eyebrow="Weekly room use"
+  analogyValue={60}
+  analogyLabel="Use without the rule in this scenario"
+  analogyNote="Compare actual use with use, rather than cancellations with attendance."
+  parts={[
+    { label: 'Retained original use', value: 52, note: 'Original use minus the use displaced by the confirmation rule.' },
+    { label: 'Replacement use', value: 12, note: 'New bookings that lead to attendance.' },
+  ]}
+  valuePrefix="" valueSuffix=" h"
+  rebuiltLabel="Occupied hours from selected groups"
+  instructions="Add both groups to reconstruct room use under the rule."
+  revealAllLabel="Include both groups" resetLabel="Clear groups"
+  verdictTemplate="The groups use {total}. Compare that total with the reference, and keep displaced original use in the calculation."
+/>
+
+For this narrow outcome, the rule helps if replacement attendance exceeds
+displaced original attendance. In symbols, $\Delta U = R - L$, where $R$ is
+replacement use and $L$ is lost original use, in the same units and period. With
+eight lost hours, eight replacement hours break even; fewer reverse the gain.
+This is a conditional accounting rule, not a prediction that either response
+will happen.
+
+### When to use it
+
+Use this calculation when someone reports gross gains: new attendees, new sales,
+faster completions, or recovered capacity. Check what existing activity was
+displaced. Even a positive total does not settle who gains, who loses, or whether
+the staff effort is worth it.
+
+<FillBlank client:visible
+  question="Complete the accounting rule"
+  text="To estimate net additional use, subtract {{displaced original use|every original reservation|all released capacity}} from {{replacement attendance|replacement reservations|confirmation messages}}."
+  explanation="The calculation compares use gained with use lost. A reservation, message, or released slot is not itself attended study time."
+/>
+
+## Test the explanation as well as the total
+
+<MCQ client:visible pretest
+  question="Room use rises after the pilot starts, during the approach to exam season. What has that observation established by itself?"
+  options={[
+    { text: 'Use changed; the rule may not explain all of that change', correct: true },
+    { text: 'The rule caused the entire increase in occupied room time' },
+    { text: 'Exam season makes any comparison or measurement pointless' },
+  ]}
+  explanation="Monitoring establishes what changed. To estimate the rule's effect, investigate what would have happened without it and other changes occurring at the same time."
+/>
+
+A plant growing after you water it does not show how much of the growth came
+from the water rather than the arriving spring. A **counterfactual** is the
+outcome that would have happened without the intervention. We cannot observe
+both versions of the same room-week, so an evaluation needs a credible way to
+estimate that alternative. The
+[Magenta Book's impact-evaluation guidance](https://www.gov.uk/government/publications/the-magenta-book/quality-in-policy-impact-evaluation-qpie-html)
+distinguishes observed change from change attributable to a policy.
+
+The planning assumptions above are not pilot findings. In this separate pilot
+example, the earlier assumption of unchanged use in other bookings is no longer
+given. Suppose the manager observes these totals:
+
+| Location | Used hours before | Used hours during the pilot | Change in hours |
+|---|---|---|---|
+| Library testing the rule | 60 | 64 | +4 |
+| Comparison library keeping its old rule | 50 | 56 | +6 |
+
+If, for this illustration, both libraries would otherwise have gained the same
+six hours, the pilot library's no-rule outcome would be $60 + 6 = 66$ hours.
+The comparison-adjusted estimate is then $64 - 66 = -2$ hours, or
+$(64 - 60) - (56 - 50) = -2$. The observed increase of four hours can coexist
+with an estimated negative effect of the rule.
+
+<FirstPrinciplesBuilder client:visible
+  title="Construct the no-rule comparison"
+  eyebrow="Comparison assumption"
+  analogyValue={64}
+  analogyLabel="Observed use during the pilot"
+  parts={[
+    { label: 'Pilot library baseline', value: 60, note: 'Occupied time before the intervention.' },
+    { label: 'Assumed common increase', value: 6, note: 'The comparison library supplies the proposed no-rule change.' },
+  ]}
+  valuePrefix="" valueSuffix=" h"
+  rebuiltLabel="Estimated use without the rule"
+  instructions="Add the common increase to the baseline, then compare with the pilot observation."
+  revealAllLabel="Include both parts" resetLabel="Clear parts"
+  verdictTemplate="The no-rule estimate is {total}. Its credibility depends on the comparison assumption, which this bar cannot verify."
+/>
+
+That conclusion depends on the comparison assumption. Different opening hours,
+exam timetables, building work, or readers switching between libraries can make
+the comparator misleading. The comparison needs consistent measurement, a site
+unaffected by the pilot and no other change that would give the libraries
+different no-rule trends. One before-and-after pair at each library cannot
+demonstrate those conditions, and this tiny example does not establish a
+reliable effect size. A stronger design might allocate comparable locations
+to a pilot or comparison condition, with enough locations and time to assess
+variation.
+
+Totals also cannot reveal which branch of the tree occurred. Pair them with
+evidence about the mechanism:
+
+| Question | Evidence to collect |
+|---|---|
+| Does a release arrive in time to be useful? | Release, rebooking, and arrival timestamps |
+| Do replacement bookings become attendance? | Booked hours linked to occupied hours |
+| Are intended users losing access? | Cancellation reasons, help requests, and follow-up with affected readers |
+| Are gains concentrated among fast online bookers? | Use and failed bookings by booking channel and relevant user circumstances |
+| Is another change driving demand? | Opening hours, local exam dates, and comparable-site trends |
+
+Readers who cannot reliably confirm online may react differently from readers
+who check messages all day. Ask those readers and the staff supporting them;
+absence from the booking log does not show that they no longer need a room.
+
+### When to use it
+
+Use monitoring to find operational failures promptly. Use an appropriate
+evaluation design when deciding whether the rule caused enough benefit to
+extend it. A weak comparison cannot be repaired by drawing a more elaborate
+consequence tree.
+
+<Categorize client:visible
+  question="Which kind of evidence is being described?"
+  buckets={['Monitoring', 'Mechanism evidence', 'Counterfactual comparison']}
+  items={[
+    { text: 'Weekly occupied hours at the pilot library', bucket: 'Monitoring' },
+    { text: 'Readers explain why they could not confirm online', bucket: 'Mechanism evidence' },
+    { text: 'Release timestamps are linked to later arrivals', bucket: 'Mechanism evidence' },
+    { text: 'A credible estimate of attendance without the new rule', bucket: 'Counterfactual comparison' },
+  ]}
+  explanation="Monitoring tracks the service; mechanism evidence investigates the links; a counterfactual comparison helps estimate the change attributable to the rule. The roles complement one another."
+/>
+
+## Revise the rule at the link that fails
+
+<MCQ client:visible pretest
+  question="Readers report that online-only confirmation cancels bookings they intended to use. Which revision addresses that particular failure?"
+  options={[
+    { text: 'Offer a workable assisted confirmation route and test its costs', correct: true },
+    { text: 'Send more identical online messages and count them as success' },
+    { text: 'Shorten the deadline without investigating missed confirmations' },
+  ]}
+  explanation="An assisted route targets the access barrier. It still needs testing: staff capacity and whether people can use the route affect whether the revision works."
+/>
+
+Repairing a bridge means finding the failing joint, not repainting the whole
+structure. The same applies to a rule. If late releases are the problem, test an
+earlier release or a waiting-list process. If confirmation access is the problem,
+test telephone or desk assistance. If replacement bookings become repeated
+no-shows, investigate those bookings rather than assuming every cancellation is
+a recovered benefit.
+
+Each repair has further consequences. Follow one more branch:
+
+<ConsequenceTree client:visible
+  title="A repair also needs a response check"
+  instructions="Open each branch to see what the assisted route must achieve and what it may cost."
+  caption="A possible benefit and a possible constraint can coexist. The tree identifies evidence to seek, rather than guaranteeing either outcome."
+  decision={{ label: 'Allow telephone or desk confirmation', valence: 'mixed', children: [
+    { label: 'Readers gain another way to keep a booking', valence: 'good', children: [
+      { label: 'Fewer intended visits are cancelled', note: 'Check this with affected readers and attendance records.', valence: 'good' },
+    ] },
+    { label: 'Staff handle additional confirmation requests', valence: 'mixed', children: [
+      { label: 'Other desk services may wait longer', note: 'Measure workload and waiting time instead of treating assistance as free.', valence: 'bad' },
+    ] },
+  ] }}
+/>
+
+Agree revision criteria before the pilot, with the people running and using the
+service. In this example, the manager records these decision rules:
+
+| Evidence during the trial | Action |
+|---|---|
+| Confirmation messages fail to arrive or cancellations cannot be corrected | Suspend automatic cancellations and restore workable access |
+| Intended readers repeatedly lose access because the confirmation route is unusable | Revise that route before extending the rule |
+| Rebooking rises but occupied hours do not | Investigate the release-to-attendance link |
+| Use improves under a credible comparison, access concerns are addressed, and staff workload is manageable | Consider a larger trial, with the same monitoring |
+
+Observe complete booking-and-attendance cycles, not just launch-day clicks.
+Repeat observation after readers have had time to adapt: some may learn to
+cancel promptly; others may collect backup bookings or abandon the system.
+These are possibilities to test. They do not make a reversal inevitable.
+
+### When to use it
+
+Stop expanding the tree when the next useful step is an observation that could
+change the decision. You need not forecast every future reaction. You do need
+an owner for the evidence, a review point, and a way to change course when an
+important assumption fails.
+
+<MCQ client:visible allowMultiple
+  question="Which claims are justified by this workshop? Select all that apply."
+  options={[
+    { text: 'A positive total can coexist with lost access for some readers', correct: true },
+    { text: 'A plausible branch identifies a question for evidence to answer', correct: true },
+    { text: 'A longer consequence tree establishes a more reliable impact estimate' },
+    { text: 'A reversible rule removes the need to watch for harmful reactions' },
+  ]}
+  explanation="Second-order thinking exposes mechanisms and competing effects. Evidence is still needed, and making a rule easy to revise does not make its temporary costs disappear."
+/>
+
+## Recall and transfer
+
+<MindMap client:visible title="From consequence tree to pilot"
+  root={{ label: 'Test the downstream response', children: [
+    { label: 'Trace', children: [{ label: 'Helpful and competing pathways' }, { label: 'Affected readers and staff' }] },
+    { label: 'Count', children: [{ label: 'Replacement attendance' }, { label: 'Displaced original use' }, { label: 'Net use rather than released slots' }] },
+    { label: 'Investigate', children: [{ label: 'Mechanisms and time lags' }, { label: 'A credible no-rule comparison' }] },
+    { label: 'Revise', children: [{ label: 'Repair the failing link' }, { label: 'Review after complete cycles' }, { label: 'Keep a route to change course' }] },
+  ] }}
+/>
+
+For the first question, use the planning scenario: replacement attendance adds
+12 hours, while cancelled original bookings remove 8 hours that would have been
+used. Ignore staff time for this calculation only.
+
+<Quiz client:visible title="Choose the next useful step" questions={[
+  {
+    question: 'Which statement correctly describes the planning scenario?',
+    options: [
+      { text: 'Net occupied time increases, while some original use is lost', correct: true },
+      { text: 'Net occupied time equals the entire released capacity' },
+      { text: 'Every original reader benefits because total use increases' },
+    ],
+    explanation: 'Replacement use minus displaced use gives four additional hours. That positive total does not mean every original reader keeps access.',
+  },
+  {
+    question: 'A released slot stays empty because readers cannot arrange travel at short notice. Which link should the manager investigate?',
+    options: [
+      { text: 'Whether the release leaves enough time for someone to attend', correct: true },
+      { text: 'Whether the cancellation counter can display a larger total' },
+      { text: 'Whether a longer tree makes the cancellation seem useful' },
+    ],
+    explanation: 'Release is not attendance. The timing of the release may prevent the behavioural response required to create the intended benefit.',
+  },
+  {
+    question: 'Why can rising pilot attendance still be consistent with a harmful effect of the rule?',
+    options: [
+      { text: 'Attendance might have risen more without the intervention', correct: true },
+      { text: 'Observed attendance is never relevant to evaluation' },
+      { text: 'Any comparison site automatically disproves the pilot' },
+    ],
+    explanation: 'Impact compares the observed outcome with a credible no-rule alternative. A smaller increase than that alternative can imply a negative effect, subject to the comparison assumptions.',
+  },
+  {
+    question: 'The manager adds telephone confirmation. What further effect belongs in the revised analysis?',
+    options: [
+      { text: 'Staff workload and delays for other desk services', correct: true },
+      { text: 'Only digital confirmation totals, excluding the assisted route' },
+      { text: 'An assumption that every access barrier has vanished' },
+    ],
+    explanation: 'A repair can improve access and use staff capacity at the same time. Follow that response far enough to identify a relevant measurement.',
+  },
+  {
+    question: 'A sports centre wants the same confirmation rule for courts. What transfers from the library workshop?',
+    options: [
+      { text: 'The method, with local evidence about responses and constraints', correct: true },
+      { text: 'The exact attendance gain and the same displaced-user count' },
+      { text: 'A guarantee that assisted confirmation removes every trade-off' },
+    ],
+    explanation: 'Causal questions and the net-use accounting transfer. Response sizes, access needs, staffing costs, and the suitability of a comparator must be checked in the new setting.',
+  },
+]}/>
+
+### Sources and provenance
+
+The library figures and pilot tables are constructed teaching examples, not
+findings about an actual library. The planning table specifies alternative
+outcomes for arithmetic; a real evaluation would need evidence to estimate them.
+
+- [Government Office for Science — systems thinking toolkit](https://www.gov.uk/government/publications/systems-thinking-for-civil-servants/toolkit) supports the use of system boundaries, stakeholder perspectives, causal mapping, and monitoring questions.
+- [HM Treasury and Evaluation Task Force — Test and Learn](https://www.gov.uk/government/publications/the-magenta-book/test-and-learn-html) explains causal pathways, assumptions, small-scale testing, and adaptation before wider implementation.
+- [HM Treasury and Evaluation Task Force — quality in policy impact evaluation](https://www.gov.uk/government/publications/the-magenta-book/quality-in-policy-impact-evaluation-qpie-html) distinguishes outcome monitoring from attribution and explains the assumptions required by comparison designs.
