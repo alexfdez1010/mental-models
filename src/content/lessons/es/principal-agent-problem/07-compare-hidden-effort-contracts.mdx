@@ -1,0 +1,514 @@
+---
+title: "Taller: compara contratos con esfuerzo oculto"
+description: "Resuelve esfuerzo, participación y rendimiento esperado del principal, incluido el umbral de prima en el que el agente queda indiferente."
+topic: "es/principal-agent-problem"
+order: 8
+minutes: 30
+updated: 2026-11-06
+---
+
+import { MCQ, MatchConcepts, FillBlank, Categorize, ConsequenceTree, RateComparison, FirstPrinciplesBuilder, InversionFlip, MindMap, Quiz } from '@/components/react';
+
+Un archivo ofrece una prima por éxito a quien cataloga un lote. El lote supera el control de calidad. ¿La prima consiguió una revisión adicional o el trabajo rutinario tuvo suerte? La factura no permite distinguirlo. Antes de juzgar el resultado, calcula qué hacía conveniente el contrato.
+
+Este taller compara **esquemas de pago completamente especificados**: pagos para cada resultado de nuestro modelo pequeño. No equivalen a un contrato real que cubra todas las contingencias futuras. Resolverás la elección del agente antes de calcular el rendimiento del principal.
+
+## Especifica el juego completo
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible pretest
+  question="El principal observa un lote correcto, pero no el esfuerzo de revisión. ¿Qué permite establecer ese éxito por sí solo?"
+  options={[
+    { text: 'Se produjo el éxito acordado; cualquiera de los dos esfuerzos podía generarlo.', correct: true },
+    { text: 'Hubo revisión adicional; el éxito verifica la acción oculta que lo produjo.' },
+    { text: 'Hubo trabajo rutinario; el pago por éxito elimina la necesidad de revisar.' }
+  ]}
+  explanation="El modelo da a ambos esfuerzos una probabilidad positiva de éxito. Observar un resultado es distinto de observar la acción que contribuyó a producirlo."
+/>
+
+Considera **un único lote hipotético de un archivo**. Éxito significa superar un control de calidad independiente, acordado previamente, antes del viernes. El control resuelve siempre el resultado a la fecha límite; no entregar un lote verificable cuenta como fracaso. El archivo es el principal; Noor, que cataloga el lote, es el agente.
+
+| Magnitud | Trabajo rutinario L | Revisión adicional H |
+|---|---|---|
+| Probabilidad de éxito | 0,40 | 0,80 |
+| Probabilidad de fracaso | 0,60 | 0,20 |
+| Coste de esfuerzo | 0 créditos | 18 créditos |
+
+El éxito vale **120 créditos** para el archivo; el fracaso vale **cero**. Noor puede elegir otra oportunidad que aporta **10 créditos**, sin trabajar para el archivo. Los créditos son unidades contables inventadas para este lote. El coste de esfuerzo de Noor se expresa en unidades equivalentes de utilidad; no es otra factura que pague el archivo.
+
+Los supuestos cambian la decisión:
+
+- Ambas partes son **neutrales al riesgo**: comparan créditos netos esperados, sin prima adicional por la incertidumbre. Comparten las probabilidades declaradas y conocen los costes de esfuerzo.
+- Noor puede aceptar o rechazar y después elegir en privado uno de los dos esfuerzos. El modelo no incluye otras acciones, tipos ocultos, ascensos futuros ni recompensas intrínsecas.
+- El resultado es verificable y no se puede manipular. El pago es exigible, no negativo y depende solo de ese resultado. No hay depósitos, multas, costes de vigilancia ni renegociación.
+- Dejamos **sin especificar** las elecciones en caso de igualdad exacta. Un empate no significa a escondidas «elige lo que quiere el principal».
+
+Son datos estipulados del modelo, no previsiones medidas sobre catalogadores reales. El esquema de acción oculta procede de la teoría de contratos; su secuencia separa oferta, participación, esfuerzo y azar. [Modelo original de Holmström](https://gwern.net/doc/economics/1979-holmstrom.pdf), [secuencia y restricciones formales de MacKie-Mason](https://open.umich.edu/sites/default/files/downloads/MacKie-Mason-SI680-w08-class3-LectureNotes-asymmetric-contracting-model_0.pdf)
+
+<ConsequenceTree client:visible
+  title="Sigue las elecciones disponibles antes del resultado"
+  eyebrow="Un contrato en varias etapas"
+  instructions="Abre las ramas para separar participación, esfuerzo oculto y resultado aleatorio. Son caminos disponibles, no elecciones igual de probables."
+  decisionLabel="Oferta"
+  orderLabels={['Elección de participación', 'Esfuerzo oculto', 'Resultado aleatorio']}
+  promptLabel="Mostrar la siguiente etapa"
+  expandAllLabel="Mostrar todas las etapas"
+  collapseLabel="Plegar las etapas"
+  valenceLabels={{ good: 'Favorable', bad: 'Desfavorable', mixed: 'Mixto', neutral: 'Sin clasificar' }}
+  decision={{ label: 'Contrato Ajustado: cero por fracaso y cincuenta por éxito', children: [
+    { label: 'Rechazar', note: 'Noor conserva la alternativa exterior; el archivo no realiza este lote.' },
+    { label: 'Aceptar', children: [
+      { label: 'Trabajo rutinario', note: 'Sin coste de esfuerzo.', children: [
+        { label: 'Éxito', note: 'Probabilidad 0,40; el archivo paga cincuenta créditos.' },
+        { label: 'Fracaso', note: 'Probabilidad 0,60; el archivo paga cero créditos.' }
+      ] },
+      { label: 'Revisión adicional', note: 'El esfuerzo cuesta dieciocho créditos equivalentes de utilidad.', children: [
+        { label: 'Éxito', note: 'Probabilidad 0,80; el archivo paga cincuenta créditos.' },
+        { label: 'Fracaso', note: 'Probabilidad 0,20; el archivo paga cero créditos.' }
+      ] }
+    ] }
+  ] }}
+  caption="El archivo ve el resultado final y la transferencia. La elección de esfuerzo permanece oculta. El cálculo posterior selecciona una mejor respuesta entre estos caminos."
+/>
+
+<Categorize
+  instructions="Coloca cada elemento en el grupo adecuado."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo correcto"
+  partialResultWord="correctos"
+ client:visible
+  question="Separa lo que puede verificar el contrato de lo que permanece oculto"
+  buckets={['Verificable en este modelo', 'Oculto en este modelo']}
+  items={[
+    { text: 'El control de calidad acordado registra un éxito.', bucket: 'Verificable en este modelo' },
+    { text: 'Noor lleva a cabo la revisión adicional.', bucket: 'Oculto en este modelo' },
+    { text: 'Se realiza el pago prometido para el resultado.', bucket: 'Verificable en este modelo' },
+    { text: 'Noor elige trabajo rutinario después de aceptar.', bucket: 'Oculto en este modelo' }
+  ]}
+  explanation="El resultado y la transferencia son verificables por supuesto. Pedir más cuidado no lo convierte en una instrucción exigible si el principal no puede verificar que se llevó a cabo."
+/>
+
+## Encuentra la mejor respuesta del agente
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible pretest
+  question="Para predecir el esfuerzo tras aceptar un contrato, ¿qué comparación necesita el agente?"
+  options={[
+    { text: 'El pago esperado menos el coste de esfuerzo de cada acción disponible.', correct: true },
+    { text: 'Solo el pago por éxito de la acción que haya nombrado el principal.' },
+    { text: 'El resultado esperado del principal antes de descontar transferencias.' }
+  ]}
+  explanation="Una acción es una mejor respuesta cuando maximiza la utilidad neta esperada del agente con los pagos ofrecidos. La acción preferida por el principal puede ser otra."
+/>
+
+Denota el pago por fracaso como $w_F$ y el pago por éxito como $w_S$. Para el esfuerzo $e$, la probabilidad de éxito es $p_e$ y el coste de esfuerzo, $c_e$. La **utilidad neta esperada (expected net utility)** de Noor es:
+
+$$
+U_e=p_e w_S+(1-p_e)w_F-c_e
+$$
+
+En la oferta **Ajustada**, el fracaso paga **0** y el éxito, **50**:
+
+| Acción | Pago esperado | Coste de esfuerzo | Utilidad neta esperada |
+|---|---|---|---|
+| Rutinaria L | 0,40 × 50 + 0,60 × 0 = 20 | 0 | 20 − 0 = 20 |
+| Revisión H | 0,80 × 50 + 0,20 × 0 = 40 | 18 | 40 − 18 = 22 |
+
+Revisar es la **única mejor respuesta condicionada a trabajar**: **22 > 20**. La prima no garantiza el éxito; hace privadamente conveniente la acción con mayor probabilidad de éxito bajo estos supuestos.
+
+<FirstPrinciplesBuilder client:visible
+  locale="es"
+  title="Reconstruye el pago esperado antes de descontar esfuerzo"
+  eyebrow="Oferta Ajustada con revisión adicional"
+  analogyValue={20}
+  analogyLabel="Pago esperado con trabajo rutinario"
+  parts={[
+    { label: 'Probabilidad de éxito por pago de éxito', value: 40 },
+    { label: 'Probabilidad de fracaso por pago de fracaso', value: 0 }
+  ]}
+  rebuiltLabel="Contribuciones seleccionadas al pago esperado"
+  instructions="Añade las contribuciones de ambos resultados. Después usa el coste de esfuerzo de la tabla para obtener la utilidad neta."
+  revealAllLabel="Añadir ambas contribuciones"
+  resetLabel="Empezar de nuevo"
+  valuePrefix=""
+  valueSuffix=" créditos"
+  verdictTemplate="El pago esperado es {total}, antes del coste de esfuerzo. Descuenta el coste de revisión para comparar la utilidad neta con la del trabajo rutinario."
+  caption="Es una esperanza sobre resultados mutuamente excluyentes, no el pago de un resultado concreto. El coste de esfuerzo se resta una vez, después del pago esperado."
+/>
+
+Ahora cambia a la oferta **Fija**, que paga **15** en ambos resultados. La utilidad rutinaria es **15**; la de revisar, **15 − 18 = −3**. Noor elige trabajo rutinario. Una probabilidad mayor de éxito no genera pago adicional con ese esquema.
+
+La **restricción de compatibilidad de incentivos (incentive compatibility, IC)** exige que la acción pretendida sea una mejor respuesta. Para revisar, $U_H\ge U_L$ es la condición débil; $U_H>U_L$ hace que sea la única mejor entre estas dos acciones. Comprobar si Noor acepta es otro paso.
+
+<MatchConcepts
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  instructions="Relaciona cada concepto con su definición."
+  allCorrectLabel="✓ Todo correcto"
+  partialResultWord="correctos"
+  pickDefinitionHint="Selecciona una definición para enlazarla."
+  notLinkedHint="Todavía sin enlazar"
+  termsLabel="Conceptos"
+  definitionsLabel="Definiciones"
+ client:visible
+  question="Relaciona cada magnitud con la decisión que describe"
+  pairs={[
+    { term: 'Pago por resultado', definition: 'Transferencia debida tras registrar el éxito o el fracaso verificable.' },
+    { term: 'Coste de esfuerzo', definition: 'Coste de utilidad de una acción para el agente, aunque la acción fracase.' },
+    { term: 'Mejor respuesta', definition: 'Acción disponible que proporciona al agente utilidad neta esperada máxima.' },
+    { term: 'Compatibilidad de incentivos', definition: 'La acción pretendida está entre las mejores respuestas del agente con ese contrato.' }
+  ]}
+  explanation="Pago por éxito, pago esperado y utilidad neta son magnitudes distintas. Nombrar una acción en el contrato no la convierte en una mejor respuesta."
+/>
+
+## Comprueba la participación por separado
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible pretest
+  question="Un contrato hace que revisar sea mejor que trabajar de forma rutinaria, pero ambas opciones dan menos que la alternativa exterior. ¿Qué predice el modelo?"
+  options={[
+    { text: 'El agente rechaza, pese al incentivo condicional para revisar.', correct: true },
+    { text: 'El agente acepta porque revisar supera al trabajo rutinario.', correct: false },
+    { text: 'El principal puede ignorar la alternativa tras ofrecer el pago.', correct: false }
+  ]}
+  explanation="La comparación de esfuerzos está condicionada a tomar el trabajo. La aceptación compara la mejor utilidad del contrato con lo que el agente obtiene si lo rechaza."
+/>
+
+Una **alternativa exterior (outside option)** es lo que puede obtener el agente fuera del acuerdo. La **restricción de participación (participation constraint, PC)** exige que la mejor utilidad disponible del contrato alcance al menos esa alternativa, denotada $\bar U$:
+
+$$
+\max(U_L,U_H)\ge\bar U
+$$
+
+La oferta Ajustada cumple estrictamente: **22 > 10**. La Fija también: **15 > 10**, aunque induce trabajo rutinario. La oferta **Pequeña**, que paga **0** por fracaso y **20** por éxito, da utilidad rutinaria **8** y utilidad de revisión **16 − 18 = −2**. La mejor utilidad del contrato es **8 < 10**. Noor rechaza; la decisión efectiva del archivo es **no realizar el lote**, con valor **cero**, en vez de contar un proyecto rentable con una persona imaginaria dispuesta a trabajar.
+
+Participación e incentivos pueden cambiar por separado. Conserva los pagos de Ajustada y eleva la alternativa exterior a **26**. Revisar sigue superando al trabajo rutinario, **22 > 20**, pero se rechaza el contrato. Elevar ambos pagos en **5**, hasta fracaso **5** y éxito **55**, da:
+
+- Utilidad rutinaria: **0,40 × 55 + 0,60 × 5 = 25**
+- Utilidad de revisión: **0,80 × 55 + 0,20 × 5 − 18 = 27**
+
+La diferencia sigue siendo **2** y la aceptación pasa a ser estricta, **27 > 26**. En este modelo neutral al riesgo, añadir la misma cantidad fija eleva ambas utilidades por igual. Con aversión al riesgo u otro conjunto de acciones habría que revisar ese atajo.
+
+En la **igualdad exacta** con la alternativa exterior, aceptar y rechazar son óptimos en este modelo. La desigualdad débil de participación establece disposición en el sentido débil habitual; no selecciona aceptación sin una convención de desempate. Las ofertas que elegimos evitan ese empate de participación.
+
+<FillBlank
+  instructions="Elige la opción adecuada en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctos"
+ client:visible
+  question="Distingue las dos restricciones y los dos empates"
+  text="Comparar revisión y trabajo rutinario comprueba la {{compatibilidad de incentivos|participación|rentabilidad del principal}}. Comparar la mejor utilidad de trabajar con rechazar comprueba la {{participación|observabilidad del esfuerzo|valoración del resultado}}. Un empate exacto deja la elección {{sin especificar aquí|automáticamente a favor del principal|verificable a partir del pago}}."
+  explanation="Un contrato puede superar una comparación y fallar la otra. Ni el empate de esfuerzo ni el de aceptación deben resolverse a escondidas a favor del principal."
+/>
+
+### Cuándo usar esta separación
+
+Usa ambas comprobaciones al comparar acuerdos de trabajo delegado. Una propuesta puede tener la recompensa marginal adecuada y aun así resultar poco atractiva en conjunto. Un pago fijo generoso puede atraer a alguien y dejar sin recompensa el esfuerzo adicional pretendido.
+
+## Compara rendimientos y trata el umbral
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible pretest
+  question="Dos contratos aceptados inducen la misma revisión y tienen la misma diferencia de pagos entre éxito y fracaso. Uno añade un pago fijo en todos los resultados. ¿Qué cambia aquí?"
+  options={[
+    { text: 'Sube la utilidad del agente y el principal paga más por la misma respuesta.', correct: true },
+    { text: 'Revisar se vuelve necesariamente más probable porque todos los pagos son mayores.' },
+    { text: 'El pago fijo mayor eleva el valor del resultado para el principal en la misma cuantía.' }
+  ]}
+  explanation="Un pago fijo adicional se cancela en la diferencia de utilidad entre esfuerzos de este modelo. Si la participación ya se cumplía y el esfuerzo no cambia, suben las transferencias esperadas sin elevar la producción esperada."
+/>
+
+El rendimiento neto esperado del archivo con el esfuerzo **elegido y aceptado** es:
+
+$$
+\Pi_e=p_e\,120-\bigl[p_e w_S+(1-p_e)w_F\bigr]
+$$
+
+Ajustada induce revisión, así que el valor bruto esperado es **0,80 × 120 = 96**; la transferencia esperada, **40**; y el rendimiento del archivo, **96 − 40 = 56 créditos**. El coste de esfuerzo de Noor ya influyó en su elección. Restarlo otra vez del rendimiento del archivo mezclaría dos perspectivas contables. Para calcular el excedente conjunto, resta el esfuerzo al valor bruto y deja que la transferencia se cancele entre las partes.
+
+| Oferta | Pago por fracaso | Pago por éxito | Utilidad rutinaria | Utilidad de revisión | Respuesta predicha | Rendimiento esperado del archivo |
+|---|---|---|---|---|---|---|
+| Fija | 15 | 15 | 15 | −3 | Acepta; rutina | 48 − 15 = 33 |
+| Pequeña | 0 | 20 | 8 | −2 | Rechaza | 0 |
+| Umbral | 0 | 45 | 18 | 18 | Acepta; empate de esfuerzo | 30 con rutina o 60 con revisión |
+| Ajustada | 0 | 50 | 20 | 22 | Acepta; revisión | 96 − 40 = 56 |
+| Aumentada | 20 | 70 | 40 | 42 | Acepta; revisión | 96 − 60 = 36 |
+
+Entre las ofertas de la tabla con **respuesta determinada**, Ajustada da el mayor rendimiento al archivo. Umbral no tiene un único rendimiento predicho sin decidir cómo se resuelve el empate de esfuerzo. Si un modelo supone que los empates favorecen la acción que prefiere el principal, debe decirlo; esa convención cambiaría la comparación. No hemos resuelto el contrato óptimo entre todos los esquemas de pago posibles.
+
+¿Por qué está Umbral en una frontera? Denota la diferencia entre pago por éxito y por fracaso como $b=w_S-w_F$. La ventaja de revisar es:
+
+$$
+U_H-U_L=(0.80-0.40)b-18=0.40b-18
+$$
+
+La IC débil exige **b ≥ 45**. Con **b = 45**, la ventaja es **cero**. Una diferencia **estrictamente mayor que 45** da una única mejor respuesta de revisión. El pago fijo se cancela; pagar más en todos los estados es distinto de elevar esa diferencia.
+
+<RateComparison client:visible locale="es"
+  title="La diferencia de probabilidad del modelo que determina el umbral"
+  scenarioLabel="Modelo"
+  countsLabel="Éxitos esperados / repeticiones"
+  differenceLabel="Diferencia de probabilidad"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  scenarios={[{ label: 'Probabilidades estipuladas, expresadas por cada cien repeticiones', groups: [
+    { label: 'Revisión adicional', events: 80, total: 100 },
+    { label: 'Trabajo rutinario', events: 40, total: 100 }
+  ] }]}
+/>
+
+Las barras representan recuentos esperados que se deducen de las probabilidades dadas, **no lotes observados** ni totales garantizados. La mejora de **40 puntos porcentuales** multiplica la diferencia de pagos. En Umbral, **0,40 × 45 = 18** justo cubre el esfuerzo; en Ajustada, **0,40 × 50 = 20** lo supera en **2**. Si la mejora fuese menor o el coste mayor, la misma prima podría dejar de inducir revisión. Un cálculo cercano al umbral depende de la fiabilidad de esos datos.
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible allowMultiple
+  question="¿Qué conclusiones respalda la comparación completa de ofertas?"
+  options={[
+    { text: 'Ajustada y Aumentada inducen el mismo esfuerzo bajo las preferencias declaradas.', correct: true },
+    { text: 'Umbral necesita una convención de desempate para determinar su rendimiento.', correct: true },
+    { text: 'Pequeña puede evaluarse con producción rutinaria e ignorando el rechazo.' },
+    { text: 'La ganadora de la tabla debe ser óptima entre todos los contratos posibles.' }
+  ]}
+  explanation="Las dos primeras se deducen de las utilidades del agente. Pequeña se rechaza y comparar un menú finito no establece el óptimo contractual global."
+/>
+
+## Lee resultados sin fingir que observas el esfuerzo
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible pretest
+  question="Se ofrece Ajustada y el lote fracasa. ¿Demuestra el fracaso que el cálculo de incentivos era incorrecto?"
+  options={[
+    { text: 'No; el fracaso sigue siendo posible cuando se elige revisar.', correct: true },
+    { text: 'Sí; que revisar sea la única opción óptima garantiza el éxito.' },
+    { text: 'Sí; el resultado revela que se eligió trabajo rutinario.' }
+  ]}
+  explanation="Revisar mejora una probabilidad, no fija un resultado. La acción de revisión estipulada sigue teniendo una probabilidad positiva de fracaso."
+/>
+
+Con Ajustada y el modelo declarado, revisar es la única mejor opción y la participación es estricta. Aun así, **una entre cinco** es la probabilidad de fracaso del modelo. Con éxito, Noor recibe **50**, incurre en esfuerzo **18** y obtiene neto **32**; el archivo obtiene **120 − 50 = 70**. Con fracaso, Noor recibe **cero**, sigue incurriendo en esfuerzo **18** y obtiene neto **−18**; el archivo obtiene **cero**. Pondera los resultados y recuperarás utilidad del agente **22** y rendimiento del archivo **56**. Ninguna esperanza es el pago o rendimiento realizado en uno de los resultados.
+
+Fuera de un modelo cuyos supuestos de conducta se aceptan plenamente, un éxito aislado no revela el esfuerzo, porque el trabajo rutinario también podía acertar. Inferir esfuerzo oculto a partir de resultados requiere un modelo probabilístico pertinente y evidencia adicional; no identifica mecánicamente la acción. Los resultados repetidos pueden ayudar a evaluar el modelo, pero los cambios de composición, las interrupciones comunes, la selección y las modificaciones contractuales pueden confundir una comparación sencilla de antes y después.
+
+La neutralidad al riesgo es aquí una simplificación explícita. Un agente averso al riesgo puede valorar de otra manera las dos distribuciones de pagos. La motivación intrínseca, las tareas adicionales, un control manipulable, los costes de esfuerzo inciertos, los límites de exigibilidad y la vigilancia costosa también pueden cambiar la mejor respuesta o la participación. Los compromisos cualitativos anteriores del curso necesitan sus propios supuestos; un máximo interior ilustrativo no es un teorema sobre todos los modelos de acción oculta.
+
+<InversionFlip client:visible
+  title="Descubre tres atajos al revisar un contrato"
+  eyebrow="Audita el cálculo"
+  instructions="Revela el atajo y compáralo después con una comprobación."
+  forwardLabel="Objetivo de la revisión"
+  invertedLabel="Atajo"
+  safeguardLabel="Mostrar una comprobación"
+  flipHint="Revelar el atajo"
+  flipAllLabel="Revelar todos los atajos"
+  resetLabel="Empezar de nuevo"
+  pairs={[
+    { forward: 'Predecir la acción elegida por el agente.', inverted: 'Usar la acción nombrada en la oferta sin comparar alternativas.', safeguard: 'Calcular la utilidad esperada de cada acción disponible y compararla después con rechazar.' },
+    { forward: 'Comparar rendimientos que el principal puede obtener.', inverted: 'Puntuar un contrato rechazado como si alguien hubiera aceptado trabajar.', safeguard: 'Aplicar la participación antes de asignar una distribución de resultados al contrato.' },
+    { forward: 'Aprender de un resultado fallido.', inverted: 'Tratar el fracaso como prueba de escaqueo oculto.', safeguard: 'Conservar el resultado y examinar el modelo probabilístico y la evidencia independiente sobre esfuerzo.' }
+  ]}
+  caption="Estas comprobaciones auditan un modelo declarado. No establecen que las personas reales compartan sus preferencias o probabilidades."
+/>
+
+### Cuándo usar el modelo
+
+Úsalo cuando una acción delegada sea costosa, oculta y afecte probabilísticamente a un resultado verificable. Especifica alternativas, estados de pago y alternativa exterior antes de celebrar una prima o culpar al agente. Si los datos son inciertos, investiga si cambios razonables cruzan la frontera de incentivos o de participación.
+
+## Transfiere el método a un equipo de proyección
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible pretest
+  question="Dos ofertas tienen la misma diferencia entre pago por éxito y por fracaso, pero distinto pago fijo. ¿Puede aceptarse una y rechazarse otra?"
+  options={[
+    { text: 'Sí; la diferencia puede conservar incentivos y la base cambiar la participación.', correct: true },
+    { text: 'No; diferencias iguales fuerzan idénticas utilidades netas y aceptación.' },
+    { text: 'No; solo el valor del resultado para el principal determina la aceptación.' }
+  ]}
+  explanation="Recuerda las dos comparaciones: las diferencias de pago afectan a los incentivos de esfuerzo y el nivel de utilidad frente a la alternativa determina la participación."
+/>
+
+Un **caso construido diferente**: una persona prepara un equipo de proyección para una charla pública. Éxito significa superar la prueba de proyección acordada antes de empezar la charla; de lo contrario, hay fracaso. El éxito vale **100 créditos** para la organización; el fracaso vale **cero**. Conserva los supuestos de neutralidad al riesgo, observabilidad, exigibilidad y desempates, pero usa estos datos nuevos:
+
+| Acción | Probabilidad de éxito | Probabilidad de fracaso | Coste de esfuerzo |
+|---|---|---|---|
+| Preparación rutinaria L | 0,50 | 0,50 | 0 |
+| Prueba adicional H | 0,75 | 0,25 | 10 |
+
+La alternativa exterior es **24 créditos**. La oferta **A** paga **0 por fracaso y 44 por éxito**. La oferta **B** paga **2 por fracaso y 46 por éxito**. Predice aceptación, esfuerzo y rendimiento de la organización antes de abrir la solución.
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible
+  question="¿Qué predicción se deduce para las ofertas del equipo de proyección?"
+  options={[
+    { text: 'Solo se acepta B; se elige la prueba adicional y la organización tiene rendimiento esperado positivo.', correct: true },
+    { text: 'Se aceptan ambas; sus diferencias de pago iguales hacen idénticos los resultados de participación.' },
+    { text: 'Solo se acepta A; su menor transferencia esperada resulta más atractiva para quien prepara el equipo.' },
+    { text: 'No se acepta ninguna; la alternativa exterior supera el pago por éxito en ambas ofertas.' }
+  ]}
+  explanation="Evalúa las utilidades de ambos esfuerzos y compara el máximo con la alternativa exterior. La solución separa esos pasos y calcula el rendimiento de la organización."
+/>
+
+<details>
+<summary>Comprueba utilidades, umbral y rendimiento de la organización</summary>
+
+| Oferta | Utilidad rutinaria | Utilidad de la prueba adicional | Respuesta |
+|---|---|---|---|
+| A | 0,50 × 44 = 22 | 0,75 × 44 − 10 = 23 | Rechaza: 23 < 24 |
+| B | 0,50 × 46 + 0,50 × 2 = 24 | 0,75 × 46 + 0,25 × 2 − 10 = 25 | Acepta y prueba: 25 > 24 |
+
+Con B, la prueba supera estrictamente a la rutina en **1 crédito**. El pago esperado es **0,75 × 46 + 0,25 × 2 = 35**. El rendimiento esperado de la organización es **0,75 × 100 − 35 = 40 créditos**. A no se convierte en un acuerdo de trabajo disponible porque su acción condicional también fuera realizar la prueba.
+
+Ambas diferencias de pago son **44**. Aquí la mejora de probabilidad es **0,25**, así que el umbral débil de esfuerzo es **10 ÷ 0,25 = 40**. La prima supera ese umbral en ambas ofertas; solo B supera participación. El umbral del archivo no debe copiarse en otra tarea.
+
+</details>
+
+<FillBlank
+  instructions="Elige la opción adecuada en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctos"
+ client:visible
+  question="Recuerda el método sin tomar prestado el umbral anterior"
+  text="Primero compara utilidades entre {{acciones disponibles|éxitos realizados|ingresos del principal}}. Después compara la mejor utilidad de trabajar con la {{alternativa exterior|paga por éxito|cuantía de esfuerzo aislada}}. Calcula el rendimiento del principal usando la {{respuesta aceptada|acción solicitada|mayor producción posible}}."
+  explanation="Los datos cambiaron, pero el orden de decisión no. El contrato debe inducir la acción pretendida y ser lo bastante atractivo para entrar antes de que el principal cuente su producción."
+/>
+
+## Conecta la revisión del contrato
+
+<MindMap client:visible
+  title="Del esquema de pagos a una predicción acotada"
+  eyebrow="Conecta las decisiones"
+  outlineLabel="Esquema en texto"
+  root={{ label: 'Revisar un contrato con esfuerzo oculto', children: [
+    { label: 'Especificar', children: [{ label: 'Estados y pagos' }, { label: 'Acciones y probabilidades' }, { label: 'Esfuerzo y alternativa exterior' }] },
+    { label: 'Resolver al agente', children: [{ label: 'Pago esperado menos esfuerzo' }, { label: 'Comparar todas las acciones' }, { label: 'Comparar la mejor con rechazar' }] },
+    { label: 'Resolver fronteras', children: [{ label: 'La condición débil permite empates' }, { label: 'La comparación estricta selecciona de forma única' }, { label: 'Aceptar también puede requerir desempate' }] },
+    { label: 'Comparar para el principal', children: [{ label: 'Usar el esfuerzo aceptado' }, { label: 'Valor esperado menos transferencia esperada' }, { label: 'El menú finito limita la conclusión' }] },
+    { label: 'Comprobar el modelo', children: [{ label: 'El resultado no revela el esfuerzo oculto' }, { label: 'Revisar preferencias y probabilidades' }, { label: 'Evaluar fronteras al cambiar supuestos' }] }
+  ] }}
+/>
+
+<Quiz
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Repaso completado"
+  perfectMessage="Todo correcto. Comprueba que puedes explicar cada respuesta."
+  goodMessage="Revisa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Repasa los ejemplos y comprueba qué evidencia respalda cada conclusión."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Empezar de nuevo"
+  checkLabel="Comprobar"
+  retryLabel="Volver a intentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+ client:visible title="Comprueba la revisión del esfuerzo oculto"
+  questions={[
+    { question: '¿Por qué se incurre en esfuerzo cuando una revisión fracasa?', options: [
+      { text: 'La acción consumió esfuerzo antes de que el azar resolviera el resultado.', correct: true },
+      { text: 'El fracaso añade automáticamente una multa económica exigible.' },
+      { text: 'El principal paga otra vez el esfuerzo después de liquidar la transferencia.' }
+    ], explanation: 'El coste de esfuerzo corresponde a la acción elegida, no solo a los éxitos. En este modelo es un coste de utilidad del agente, no otro pago del principal.' },
+    { question: '¿Qué afirmación sobre la oferta Umbral del archivo está respaldada?', options: [
+      { text: 'Ambos esfuerzos maximizan la utilidad de trabajar; no hay una predicción única.', correct: true },
+      { text: 'Revisar es la única opción óptima porque se cumple la condición débil de incentivos.' },
+      { text: 'La oferta se rechaza porque la alternativa exterior del agente es mayor.' }
+    ], explanation: 'Las dos utilidades de trabajar empatan y superan la alternativa exterior. La aceptación es estricta, pero el esfuerzo queda sin especificar.' },
+    { question: '¿Qué sucede con Ajustada si solo sube la alternativa exterior por encima de su mejor utilidad?', options: [
+      { text: 'Se rechaza, aunque no cambie la ordenación condicional de esfuerzos.', correct: true },
+      { text: 'Se acepta porque el rendimiento esperado del principal sigue siendo positivo.' },
+      { text: 'La probabilidad de éxito aumenta hasta que participar resulta conveniente.' }
+    ], explanation: 'La alternativa exterior entra en participación, no en la diferencia de utilidad entre revisar y trabajar rutinariamente con pagos fijos.' },
+    { question: 'Selecciona las afirmaciones contables respaldadas.', allowMultiple: true, options: [
+      { text: 'El principal resta transferencias esperadas del valor esperado.', correct: true },
+      { text: 'El coste de esfuerzo se descuenta al calcular la utilidad del agente.', correct: true },
+      { text: 'Un contrato rechazado puede atribuirse la distribución de producción pretendida.' },
+      { text: 'Un rendimiento esperado es la cantidad recibida en cada resultado concreto.' }
+    ], explanation: 'Distingue las perspectivas. Las transferencias mueven valor entre partes y el esfuerzo entra en la utilidad del agente. Las medias no eliminan la variación de resultados ni el rechazo.' },
+    { question: '¿Cómo se comparan Ajustada y Aumentada en el archivo?', options: [
+      { text: 'Ambas inducen revisión y Aumentada deja menor rendimiento esperado al archivo.', correct: true },
+      { text: 'Aumentada induce más revisión porque su pago fijo es mayor.' },
+      { text: 'Ajustada se rechaza porque su pago por fracaso es cero.' }
+    ], explanation: 'Coinciden en diferencia de pagos y de utilidades de esfuerzo. Aumentada eleva ambas utilidades del agente y las transferencias esperadas sin cambiar la acción.' },
+    { question: 'La oferta A del equipo hace preferible la prueba adicional. ¿Por qué no basta?', options: [
+      { text: 'Su mejor utilidad de trabajar sigue por debajo de la alternativa exterior.', correct: true },
+      { text: 'La diferencia de pagos por resultado está por debajo del umbral de esfuerzo.' },
+      { text: 'El principal tiene que pagar dos veces la alternativa exterior.' }
+    ], explanation: 'Supera la comparación de esfuerzo y falla participación. La decisión completa necesita las dos restricciones.' },
+    { question: '¿Qué resultado puede trasladarse fuera de estos ejemplos construidos?', options: [
+      { text: 'Comprobar acciones alternativas, participación y supuestos antes de predecir.', correct: true },
+      { text: 'Todo agente tiene el mismo umbral de esfuerzo que quien cataloga el archivo.' },
+      { text: 'Un éxito aislado establece que la prima ofrecida causó esfuerzo adicional.' }
+    ], explanation: 'El procedimiento se transfiere; hay que volver a establecer los datos y los supuestos de conducta. Un resultado aislado no identifica la acción oculta.' }
+  ]}
+/>
+
+Continúa con el [examen final](/es/principal-agent-problem/final-exam), que incluye incentivos de esfuerzo, participación e indiferencia en estos contratos.

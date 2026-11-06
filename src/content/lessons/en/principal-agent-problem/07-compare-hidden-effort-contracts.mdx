@@ -1,0 +1,395 @@
+---
+title: "Workshop: Compare Hidden-Effort Contracts"
+description: "Solve effort choice, participation and the principal's expected return, including a bonus threshold where the agent is indifferent."
+topic: "en/principal-agent-problem"
+order: 8
+minutes: 30
+updated: 2026-11-06
+---
+
+import { MCQ, MatchConcepts, FillBlank, Categorize, ConsequenceTree, RateComparison, FirstPrinciplesBuilder, InversionFlip, MindMap, Quiz } from '@/components/react';
+
+An archive offers a success bonus to a cataloguer. The batch passes its quality check. Did the bonus buy extra checking, or did routine work get lucky? The invoice alone cannot tell you. Before judging the outcome, work out what the proposed contract made worthwhile.
+
+This workshop compares **fully specified payment schedules**. That means payments for each outcome in our small model; it does not mean a real contract covering every future contingency. You will solve the agent's choice before calculating the principal's return.
+
+## Write the whole game
+
+<MCQ client:visible pretest
+  question="The principal observes a successful batch but cannot observe the checking effort. What can that success establish by itself?"
+  options={[
+    { text: 'The agreed success outcome occurred; either effort could have produced it.', correct: true },
+    { text: 'Extra checking occurred; success verifies the hidden action behind it.' },
+    { text: 'Routine work occurred; a success payment removes the need for extra care.' }
+  ]}
+  explanation="The model gives both effort choices a positive chance of success. Observing an outcome is different from observing the action that helped produce it."
+/>
+
+Consider **one hypothetical archive batch**. Success means passing an independently applied, pre-agreed quality check by Friday. The check always resolves the result at the deadline; failing to submit a verifiable batch counts as failure. The archive is the principal; Noor, the cataloguer, is the agent.
+
+| Quantity | Routine work L | Extra checking H |
+|---|---|---|
+| Success probability | 0.40 | 0.80 |
+| Failure probability | 0.60 | 0.20 |
+| Effort cost | 0 credits | 18 credits |
+
+Success is worth **120 credits** to the archive; failure is worth **zero**. Noor can instead take an outside opportunity worth **10 credits**, with no archive work. Credits are invented accounting units for this one batch. Noor's effort cost is expressed in equivalent utility units; it is not an additional invoice paid by the archive.
+
+The assumptions do real work:
+
+- Both parties are **risk-neutral**: compare expected net credits, without an extra premium for uncertainty. They share the stated probabilities and know the effort costs.
+- Noor can accept or decline, then privately choose either effort. No other effort, hidden type, future promotion or intrinsic reward enters this model.
+- The outcome is verifiable and cannot be manipulated. Payment is enforceable, nonnegative and contingent only on that outcome. There are no deposits, fines, monitoring charges or renegotiation.
+- We leave choices at exact equality **unspecified**. A tie does not secretly mean “choose what the principal wants.”
+
+These are stipulated model inputs, not measured forecasts of real cataloguers. The hidden-action framework comes from contract theory; its sequence separates contract offer, participation, effort and chance. [Holmström's original model](https://gwern.net/doc/economics/1979-holmstrom.pdf), [MacKie-Mason's formal timing and constraints](https://open.umich.edu/sites/default/files/downloads/MacKie-Mason-SI680-w08-class3-LectureNotes-asymmetric-contracting-model_0.pdf)
+
+<ConsequenceTree client:visible
+  title="Follow the available choices before the outcome"
+  eyebrow="One contract, several stages"
+  instructions="Open the branches to separate participation, hidden effort and the chance outcome. These are available paths, not equally likely choices."
+  decisionLabel="Offer"
+  orderLabels={['Participation choice', 'Hidden effort', 'Chance outcome']}
+  promptLabel="Show the next stage"
+  expandAllLabel="Show all stages"
+  collapseLabel="Collapse the stages"
+  valenceLabels={{ good: 'Favourable', bad: 'Unfavourable', mixed: 'Mixed', neutral: 'Unclassified' }}
+  decision={{ label: 'Lean contract: zero on failure, fifty on success', children: [
+    { label: 'Decline', note: 'Noor keeps the outside opportunity; the archive does not run this batch.' },
+    { label: 'Accept', children: [
+      { label: 'Routine work', note: 'No effort cost.', children: [
+        { label: 'Success', note: 'Probability 0.40; the archive pays fifty credits.' },
+        { label: 'Failure', note: 'Probability 0.60; the archive pays zero credits.' }
+      ] },
+      { label: 'Extra checking', note: 'Effort costs eighteen utility-equivalent credits.', children: [
+        { label: 'Success', note: 'Probability 0.80; the archive pays fifty credits.' },
+        { label: 'Failure', note: 'Probability 0.20; the archive pays zero credits.' }
+      ] }
+    ] }
+  ] }}
+  caption="The archive sees the terminal outcome and transfer. The choice of effort stays hidden. The calculation below selects a best response from these paths."
+/>
+
+<Categorize client:visible
+  question="Separate what the contract can verify from what remains hidden"
+  buckets={['Verifiable in this model', 'Hidden in this model']}
+  items={[
+    { text: 'The agreed quality check records success.', bucket: 'Verifiable in this model' },
+    { text: 'Noor performs the extra checking action.', bucket: 'Hidden in this model' },
+    { text: 'The promised outcome payment is made.', bucket: 'Verifiable in this model' },
+    { text: 'Noor chooses routine work after accepting.', bucket: 'Hidden in this model' }
+  ]}
+  explanation="The output and transfer are verifiable by assumption. Extra care cannot simply be written as an enforceable instruction when the principal cannot verify whether it occurred."
+/>
+
+## Find the agent's best response
+
+<MCQ client:visible pretest
+  question="To predict effort after a contract is accepted, which comparison does the agent need?"
+  options={[
+    { text: 'Expected payment minus effort cost under each available action.', correct: true },
+    { text: 'The success payment alone under the action named by the principal.' },
+    { text: 'The principal’s expected output before deducting any transfer.' }
+  ]}
+  explanation="An action is a best response when it maximises the agent’s expected net utility under the offered payments. The principal’s preferred action need not be that choice."
+/>
+
+Write the failure payment as $w_F$ and the success payment as $w_S$. Under effort $e$, the success probability is $p_e$ and effort cost is $c_e$. Noor's **expected net utility** is:
+
+$$
+U_e=p_e w_S+(1-p_e)w_F-c_e
+$$
+
+For the **Lean** offer, failure pays **0** and success pays **50**:
+
+| Action | Expected payment | Effort cost | Expected net utility |
+|---|---|---|---|
+| Routine L | 0.40 × 50 + 0.60 × 0 = 20 | 0 | 20 − 0 = 20 |
+| Checking H | 0.80 × 50 + 0.20 × 0 = 40 | 18 | 40 − 18 = 22 |
+
+Checking is the **unique best response conditional on working**: **22 > 20**. The bonus does not guarantee success; it makes the action with the higher success probability privately worthwhile under these assumptions.
+
+<FirstPrinciplesBuilder client:visible
+  title="Rebuild the expected payment before deducting effort"
+  eyebrow="Lean offer, extra checking"
+  analogyValue={20}
+  analogyLabel="Expected payment under routine work"
+  parts={[
+    { label: 'Success probability times success payment', value: 40 },
+    { label: 'Failure probability times failure payment', value: 0 }
+  ]}
+  rebuiltLabel="Selected contributions to expected payment"
+  instructions="Add both outcome contributions. Then use the effort cost in the table to obtain net utility."
+  revealAllLabel="Add both contributions"
+  resetLabel="Start over"
+  valuePrefix=""
+  valueSuffix=" credits"
+  verdictTemplate="Expected payment is {total}, before effort cost. Deduct the checking cost to compare net utility with routine work."
+  caption="This is an expectation over mutually exclusive outcomes, not the payment in either realised outcome. Effort cost is subtracted once, after the expected payment."
+/>
+
+Now change the offer to **Flat**, paying **15** in either outcome. Routine utility is **15**; checking utility is **15 − 18 = −3**. Noor chooses routine work. A higher chance of success creates no extra payment under that schedule.
+
+The **incentive-compatibility constraint (IC)** says that the intended action must be a best response. For checking, $U_H\ge U_L$ is the weak condition; $U_H>U_L$ makes it uniquely best among these two actions. Checking whether Noor accepts is a separate step.
+
+<MatchConcepts client:visible
+  question="Match each quantity to the decision it describes"
+  pairs={[
+    { term: 'Outcome payment', definition: 'The transfer due after the verifiable success or failure is recorded.' },
+    { term: 'Effort cost', definition: 'The agent’s utility cost of an action, incurred even when that action fails.' },
+    { term: 'Best response', definition: 'An available action giving the agent maximal expected net utility.' },
+    { term: 'Incentive compatibility', definition: 'The intended action is among the agent’s best responses under the contract.' }
+  ]}
+  explanation="Success payment, expected payment and net utility are different quantities. A contract naming an action does not make that action a best response."
+/>
+
+## Check participation separately
+
+<MCQ client:visible pretest
+  question="A contract makes checking better than routine work, but both give less than the outside opportunity. What does the model predict?"
+  options={[
+    { text: 'The agent declines, despite the conditional incentive to check.', correct: true },
+    { text: 'The agent accepts because checking beats routine work.', correct: false },
+    { text: 'The principal can ignore the outside opportunity after offering pay.', correct: false }
+  ]}
+  explanation="Effort comparison is conditional on taking the work. Acceptance compares the best contract utility with what the agent can obtain by declining."
+/>
+
+An **outside option** is the agent's alternative to entering this arrangement. The **participation constraint (PC)** requires the best available contract utility to be at least as large as that option, written $\bar U$:
+
+$$
+\max(U_L,U_H)\ge\bar U
+$$
+
+Lean passes strictly: **22 > 10**. Flat also passes: **15 > 10**, although it induces routine work. The **Small** offer, paying **0** on failure and **20** on success, gives routine utility **8** and checking utility **16 − 18 = −2**. The best contract utility is **8 < 10**. Noor declines; the archive's realised decision is **no batch**, with value **zero**, rather than a profitable project using an imaginary willing worker.
+
+Participation and incentives can move separately. Keep Lean's payments but raise the outside opportunity to **26**. Checking still beats routine, **22 > 20**, yet the contract is refused. Raising both payments by **5**, to failure **5** and success **55**, gives:
+
+- Routine utility: **0.40 × 55 + 0.60 × 5 = 25**
+- Checking utility: **0.80 × 55 + 0.20 × 5 − 18 = 27**
+
+The difference remains **2** and acceptance becomes strict, **27 > 26**. In this risk-neutral model, adding the same fixed amount raises both utilities equally. Under risk aversion or a different set of actions, that shortcut needs re-examination.
+
+At **exact equality** with the outside option, accepting and declining are both optimal in this model. The weak participation inequality establishes willingness in the usual weak sense; it does not select acceptance without a tie convention. Our chosen offers avoid that participation tie.
+
+<FillBlank client:visible
+  question="Keep the two constraints and two ties distinct"
+  text="Comparing checking with routine tests {{incentive compatibility|participation|the principal’s return}}. Comparing the best work utility with declining tests {{participation|effort observability|output value}}. An exact tie leaves the chosen action {{unspecified here|automatically favourable to the principal|verifiable from the payment}}."
+  explanation="A contract can pass one comparison and fail the other. Neither an effort tie nor an acceptance tie should be silently resolved in the principal’s favour."
+/>
+
+### When to use the separation
+
+Use both checks when comparing delegated work arrangements. A proposal can have the desired marginal reward and still be unattractive overall. A generous fixed payment can attract someone while leaving the desired extra effort unrewarded.
+
+## Rank the principal's returns and handle the threshold
+
+<MCQ client:visible pretest
+  question="Two accepted contracts induce the same checking action and have the same success-payment spread. One adds a fixed payment in every outcome. What changes here?"
+  options={[
+    { text: 'Agent utility rises, while the principal pays more for the same response.', correct: true },
+    { text: 'Checking necessarily becomes more likely because every payment is larger.' },
+    { text: 'The higher fixed payment raises the principal’s output value by the same amount.' }
+  ]}
+  explanation="An added fixed payment cancels from the effort-utility difference in this model. If participation already held and effort is unchanged, it raises expected transfers without raising expected output."
+/>
+
+The archive's expected net return under the **chosen and accepted** effort is:
+
+$$
+\Pi_e=p_e\,120-\bigl[p_e w_S+(1-p_e)w_F\bigr]
+$$
+
+Lean induces checking, so expected gross value is **0.80 × 120 = 96**; expected transfer is **40**; archive return is **96 − 40 = 56 credits**. Noor's effort cost has already influenced Noor's choice. Subtracting it again from the archive's return would mix two accounting perspectives. To calculate joint surplus instead, subtract effort cost from gross value and let the transfer cancel between the parties.
+
+| Offer | Failure pay | Success pay | Routine utility | Checking utility | Predicted response | Archive expected return |
+|---|---|---|---|---|---|---|
+| Flat | 15 | 15 | 15 | −3 | Accept; routine | 48 − 15 = 33 |
+| Small | 0 | 20 | 8 | −2 | Decline | 0 |
+| Edge | 0 | 45 | 18 | 18 | Accept; effort tied | 30 with routine or 60 with checking |
+| Lean | 0 | 50 | 20 | 22 | Accept; checking | 96 − 40 = 56 |
+| Padded | 20 | 70 | 40 | 42 | Accept; checking | 96 − 60 = 36 |
+
+Among the listed offers with a **determinate response**, Lean yields the highest archive return. Edge cannot be given a single predicted return without deciding how the effort tie is resolved. If a model assumes ties go to the principal's preferred action, say so; that would change this comparison. We have not solved for an optimal contract over every possible payment schedule.
+
+Why does Edge sit on a boundary? Write the success-payment spread as $b=w_S-w_F$. The checking advantage is:
+
+$$
+U_H-U_L=(0.80-0.40)b-18=0.40b-18
+$$
+
+Thus weak IC requires **b ≥ 45**. At **b = 45**, the advantage is **zero**. A spread **strictly greater than 45** gives a unique checking best response. The fixed payment cancels; paying more in every state is different from increasing this spread.
+
+<RateComparison client:visible locale="en"
+  title="The modelled probability gap behind the bonus threshold"
+  scenarioLabel="Model"
+  countsLabel="Expected successes / repetitions"
+  differenceLabel="Probability difference"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{ label: 'Stipulated probabilities, represented per hundred repetitions', groups: [
+    { label: 'Extra checking', events: 80, total: 100 },
+    { label: 'Routine work', events: 40, total: 100 }
+  ] }]}
+/>
+
+These bars represent expected counts implied by the given probabilities, **not observed batches** or guaranteed totals. The **40 percentage-point** improvement multiplies the bonus spread. For Edge, **0.40 × 45 = 18** just covers effort cost; for Lean, **0.40 × 50 = 20** exceeds it by **2**. If the improvement were smaller or the cost higher, the same spread might no longer induce checking. A near-threshold calculation is only as reliable as those inputs.
+
+<MCQ client:visible allowMultiple
+  question="Which conclusions are supported by the complete offer comparison?"
+  options={[
+    { text: 'Lean and Padded induce the same effort under the stated preferences.', correct: true },
+    { text: 'Edge needs a tie convention before its return becomes determinate.', correct: true },
+    { text: 'Small can be ranked using routine output while ignoring refusal.' },
+    { text: 'The listed winner must be globally optimal among all possible contracts.' }
+  ]}
+  explanation="The first two follow from the agent’s utilities. Small is refused, and comparing a finite menu does not establish global contract optimality."
+/>
+
+## Read outcomes without pretending to observe effort
+
+<MCQ client:visible pretest
+  question="Lean is offered and the batch fails. Does the failure show that the incentive calculation was wrong?"
+  options={[
+    { text: 'No; failure remains possible even when checking is chosen.', correct: true },
+    { text: 'Yes; a uniquely optimal checking choice guarantees success.' },
+    { text: 'Yes; the outcome reveals that routine work was chosen.' }
+  ]}
+  explanation="Checking improves a probability rather than fixing an outcome. The specified checking action still has a positive failure probability."
+/>
+
+Under Lean and the stated model, checking is uniquely best and participation is strict. Even then, **one in five** is the model's failure probability. On success, Noor receives **50**, incurs effort cost **18**, and has net **32**; the archive receives net **120 − 50 = 70**. On failure, Noor receives **zero**, still incurs effort cost **18**, and has net **−18**; the archive receives **zero**. Weight those outcomes and you recover agent utility **22** and archive return **56**. Neither expected value is the realised payment or return in either outcome.
+
+Outside a model with fully trusted behavioural assumptions, a success alone cannot reveal effort because routine work could also succeed. Inferring hidden effort from results requires a relevant probabilistic model and additional evidence; it is not a mechanical identification of action. Repeated outcomes may help assess the model, but changed case mix, common disruptions, selection and changing contract terms can confound a simple before/after comparison.
+
+Risk neutrality is an explicit simplification here. Risk-averse agents may evaluate the two payment distributions differently. Intrinsic motivation, additional tasks, manipulable quality checks, uncertain effort costs, limited enforceability and costly monitoring can also change the best response or participation. The qualitative trade-offs earlier in the course need their own assumptions; an illustrative interior peak is not a theorem about every hidden-action model.
+
+<InversionFlip client:visible
+  title="Expose three shortcuts in a contract review"
+  eyebrow="Audit the calculation"
+  instructions="Reveal the shortcut, then compare it with a safeguard."
+  forwardLabel="Review goal"
+  invertedLabel="Shortcut"
+  safeguardLabel="Reveal a safeguard"
+  flipHint="Reveal the shortcut"
+  flipAllLabel="Reveal all shortcuts"
+  resetLabel="Start over"
+  pairs={[
+    { forward: 'Predict the agent’s chosen action.', inverted: 'Use the action named in the offer without comparing alternatives.', safeguard: 'Calculate expected utility under every available action, then compare with declining.' },
+    { forward: 'Rank returns the principal can obtain.', inverted: 'Score a refused contract as though a worker accepted it.', safeguard: 'Apply participation before assigning an output distribution to the contract.' },
+    { forward: 'Learn from an unsuccessful outcome.', inverted: 'Treat failure as proof of hidden shirking.', safeguard: 'Preserve the outcome and examine the probabilistic model and independent evidence of effort.' }
+  ]}
+  caption="These checks audit a stated model. They do not establish that real people share its preferences or probabilities."
+/>
+
+### When to use the model
+
+Use it when a delegated action is costly, hidden and affects a verifiable outcome probabilistically. Write down the alternatives, payment states and outside option before celebrating a bonus or blaming an agent. If the inputs are uncertain, investigate whether reasonable changes cross the incentive or participation boundary.
+
+## Transfer the method to a projection kit
+
+<MCQ client:visible pretest
+  question="Two offers have the same success-payment spread but different fixed payments. Can one be accepted and the other refused?"
+  options={[
+    { text: 'Yes; the spread can preserve effort incentives while the base changes participation.', correct: true },
+    { text: 'No; identical spreads force identical net utilities and acceptance decisions.' },
+    { text: 'No; the principal’s output value alone determines whether the agent accepts.' }
+  ]}
+  explanation="Recall the two comparisons: payment differences affect effort incentives, while the utility level relative to the outside option determines participation."
+/>
+
+A **different constructed case**: a technician sets up a projection kit for one public talk. Success means passing the agreed projection check before the talk begins; otherwise the result is failure. Success is worth **100 credits** to the organiser; failure is worth **zero**. Keep the earlier risk-neutrality, observability, enforcement and tie assumptions, but use these new inputs:
+
+| Action | Success probability | Failure probability | Effort cost |
+|---|---|---|---|
+| Routine setup L | 0.50 | 0.50 | 0 |
+| Extra test H | 0.75 | 0.25 | 10 |
+
+The technician's outside option is **24 credits**. Offer **A** pays **0 on failure and 44 on success**. Offer **B** pays **2 on failure and 46 on success**. Predict acceptance, effort and organiser return before opening the solution.
+
+<MCQ client:visible
+  question="Which prediction follows for the projection-kit offers?"
+  options={[
+    { text: 'Only B is accepted; extra testing is chosen and the organiser has positive expected return.', correct: true },
+    { text: 'Both are accepted; their identical spreads make their participation outcomes identical.' },
+    { text: 'Only A is accepted; its lower expected transfer makes it more attractive to the technician.' },
+    { text: 'Neither is accepted; the outside option exceeds the success payment in both offers.' }
+  ]}
+  explanation="Evaluate both effort utilities and compare the maximum with the outside option. The worked solution separates those steps and calculates the organiser’s return."
+/>
+
+<details>
+<summary>Check the utilities, threshold and organiser return</summary>
+
+| Offer | Routine utility | Extra-test utility | Response |
+|---|---|---|---|
+| A | 0.50 × 44 = 22 | 0.75 × 44 − 10 = 23 | Decline: 23 < 24 |
+| B | 0.50 × 46 + 0.50 × 2 = 24 | 0.75 × 46 + 0.25 × 2 − 10 = 25 | Accept and test: 25 > 24 |
+
+Under B, testing strictly beats routine by **1 credit**. Its expected payment is **0.75 × 46 + 0.25 × 2 = 35**. The organiser's expected return is **0.75 × 100 − 35 = 40 credits**. A is not an available working arrangement merely because its conditional action would also be testing.
+
+Both spreads are **44**. Here the probability improvement is **0.25**, so the weak effort threshold is **10 ÷ 0.25 = 40**. The spread clears that threshold in both offers; only B clears participation. The main archive threshold must not be copied into a different task.
+
+</details>
+
+<FillBlank client:visible
+  question="Recall the method without borrowing the previous threshold"
+  text="First compare utilities across {{available actions|realised successes|principal revenues}}. Then compare the best work utility with the {{outside option|success payment|effort cost alone}}. Calculate the principal’s return using the {{accepted response|requested action|largest possible outcome}}."
+  explanation="The data changed, but the decision order did not. A contract must induce its intended action and be attractive enough to enter before the principal can count its output."
+/>
+
+## Connect the contract review
+
+<MindMap client:visible
+  title="From payment schedule to a bounded prediction"
+  root={{ label: 'Review a hidden-effort contract', children: [
+    { label: 'Specify', children: [{ label: 'States and payments' }, { label: 'Actions and probabilities' }, { label: 'Effort costs and outside option' }] },
+    { label: 'Solve the agent', children: [{ label: 'Expected payment minus effort cost' }, { label: 'Compare all actions' }, { label: 'Compare the best with declining' }] },
+    { label: 'Resolve boundaries', children: [{ label: 'Weak incentive condition allows ties' }, { label: 'Strict comparison selects uniquely' }, { label: 'Acceptance ties also need a convention' }] },
+    { label: 'Rank the principal', children: [{ label: 'Use accepted effort' }, { label: 'Expected output minus expected transfer' }, { label: 'Finite-menu result has limited scope' }] },
+    { label: 'Check the model', children: [{ label: 'Outcome does not reveal hidden effort' }, { label: 'Revisit preferences and probability inputs' }, { label: 'Test boundaries under changed assumptions' }] }
+  ] }}
+/>
+
+<Quiz client:visible title="Check the hidden-effort review"
+  questions={[
+    { question: 'Why is an effort cost incurred on an unsuccessful checking attempt?', options: [
+      { text: 'The action used effort before chance resolved the outcome.', correct: true },
+      { text: 'Failure automatically adds an enforceable financial fine.' },
+      { text: 'The principal pays the effort cost again after settling the transfer.' }
+    ], explanation: 'Effort cost belongs to the chosen action, not only to successes. In this model it is the agent’s utility cost, not another principal payment.' },
+    { question: 'Which statement about the archive’s Edge offer is supported?', options: [
+      { text: 'Both effort choices maximise work utility; no unique effort prediction follows.', correct: true },
+      { text: 'Checking is uniquely optimal because weak incentive compatibility holds.' },
+      { text: 'The offer is refused because the agent’s outside option is larger.' }
+    ], explanation: 'The two work utilities tie and both exceed the outside option. Acceptance is strict, but the effort choice remains unspecified.' },
+    { question: 'What happens to the archive’s Lean offer when only the outside opportunity rises above its best utility?', options: [
+      { text: 'It is refused even though its conditional effort ranking is unchanged.', correct: true },
+      { text: 'It is accepted because the principal’s expected return remains positive.' },
+      { text: 'Its success probability rises until participation becomes worthwhile.' }
+    ], explanation: 'The outside option enters participation, not the difference between checking and routine utility under fixed payments.' },
+    { question: 'Select the supported accounting statements.', allowMultiple: true, options: [
+      { text: 'The principal subtracts expected transfers from expected output.', correct: true },
+      { text: 'Agent effort cost is deducted when calculating agent utility.', correct: true },
+      { text: 'A refused contract can be credited with its desired output distribution.' },
+      { text: 'An expected return is the amount received in every realised outcome.' }
+    ], explanation: 'Keep the perspectives separate. Transfers move value between parties; effort cost enters agent utility. Averages do not erase possible outcome variation or refusal.' },
+    { question: 'How do the archive’s Lean and Padded offers compare?', options: [
+      { text: 'Both induce checking, while Padded leaves a lower archive expected return.', correct: true },
+      { text: 'Padded induces more checking because its fixed payment is higher.' },
+      { text: 'Lean is refused because its failure payment is zero.' }
+    ], explanation: 'Their payment spreads and effort-utility differences match. Padded raises both agent utilities and expected transfers without changing the action.' },
+    { question: 'The projection-kit offer A makes extra testing better than routine. Why is that not enough?', options: [
+      { text: 'Its best work utility is still below the outside opportunity.', correct: true },
+      { text: 'The success-payment spread is below its effort threshold.' },
+      { text: 'Its principal is required to pay the technician’s outside option twice.' }
+    ], explanation: 'It passes the effort comparison and fails participation. The complete decision needs both constraints.' },
+    { question: 'Which result can be carried beyond these constructed examples?', options: [
+      { text: 'Check alternative actions, participation and assumptions before predicting a response.', correct: true },
+      { text: 'Every agent has the same effort threshold as the archive cataloguer.' },
+      { text: 'A single success establishes that the offered bonus caused extra effort.' }
+    ], explanation: 'The procedure transfers; the numerical inputs and behavioural assumptions must be established again. An outcome alone does not identify the hidden action.' }
+  ]}
+/>
+
+Continue to the [final exam](/principal-agent-problem/final-exam), which includes effort incentives, participation and indifference in these contracts.

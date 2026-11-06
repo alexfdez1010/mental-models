@@ -53,6 +53,12 @@ export interface ContractDesignerProps {
   unit?: string;
   /** Whether the unit sits before or after the number. Defaults to `'suffix'`. */
   unitPosition?: 'prefix' | 'suffix';
+  /** SVG description. Tokens: {axisLabel}, {xAxisLabel}, {mix}, {net}, {optimum}. */
+  chartDescriptionTemplate?: string;
+  /** Performance-pay slider value. Token: {weight}. */
+  weightValueTextTemplate?: string;
+  /** Risk-aversion slider value. Token: {risk}. */
+  riskValueTextTemplate?: string;
   /** Extra classes merged onto the root element. */
   className?: string;
 }
@@ -150,6 +156,9 @@ export function ContractDesigner({
   initialRisk = 50,
   unit = '',
   unitPosition = 'suffix',
+  chartDescriptionTemplate = '{axisLabel} against {xAxisLabel}. Current contract: {mix} of pay tied to output, net payoff {net}. The best mix is about {optimum}%.',
+  weightValueTextTemplate = '{weight}% performance pay',
+  riskValueTextTemplate = '{risk}% risk aversion',
   className,
 }: ContractDesignerProps) {
   const reactId = useId();
@@ -240,13 +249,20 @@ export function ContractDesigner({
     value: string;
     tone?: string;
   }) => (
-    <div className="rounded-card border border-ink-100 bg-surface-sunken px-3 py-2">
+    <div className="not-prose flex flex-col justify-center rounded-card border border-ink-100 bg-surface-sunken px-3 py-2">
       <p className="text-[0.6rem] font-bold uppercase tracking-wide text-ink-500">{label}</p>
       <p className={cx('mt-0.5 font-display text-lg font-semibold tabular-nums', tone ?? 'text-ink-900')}>
         {value}
       </p>
     </div>
   );
+
+  const chartDescription = chartDescriptionTemplate
+    .replaceAll('{axisLabel}', axisLabel)
+    .replaceAll('{xAxisLabel}', xAxisLabel)
+    .replaceAll('{mix}', mixWord)
+    .replaceAll('{net}', fmt(current.net))
+    .replaceAll('{optimum}', String(optWeight));
 
   return (
     <figure className={cx('brutal my-6 bg-surface p-5 sm:p-6', className)}>
@@ -265,7 +281,7 @@ export function ContractDesigner({
           viewBox={`0 0 ${W} ${H}`}
           className="h-auto w-full"
           role="img"
-          aria-label={`${axisLabel} against ${xAxisLabel}. Current contract: ${mixWord} of pay tied to output, net payoff ${fmt(current.net)}. The best mix is about ${optWeight}%.`}
+          aria-label={chartDescription}
         >
           <rect x="0" y="0" width={W} height={H} fill="var(--color-surface-sunken)" />
 
@@ -339,7 +355,7 @@ export function ContractDesigner({
             step={1}
             value={weight}
             onChange={(e) => setWeight(clamp(Number(e.target.value), 0, 100))}
-            aria-valuetext={`${weight}% performance pay`}
+            aria-valuetext={weightValueTextTemplate.replaceAll('{weight}', String(weight))}
             className="mt-1 h-1.5 w-full cursor-pointer accent-brand-500"
           />
         </div>
@@ -361,7 +377,7 @@ export function ContractDesigner({
             step={1}
             value={risk}
             onChange={(e) => setRisk(clamp(Number(e.target.value), 0, 100))}
-            aria-valuetext={`${risk}% risk aversion`}
+            aria-valuetext={riskValueTextTemplate.replaceAll('{risk}', String(risk))}
             className="mt-1 h-1.5 w-full cursor-pointer accent-accent-500"
           />
           <p className="mt-1 text-xs text-ink-500">{riskHint}</p>
