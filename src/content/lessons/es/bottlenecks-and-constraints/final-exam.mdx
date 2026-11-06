@@ -1,15 +1,15 @@
 ---
 title: "Examen final: cuellos de botella y la Teoría de las Restricciones"
-description: "Un examen final calificado y de un solo sentido sobre los cuellos de botella y la Teoría de las Restricciones: rendimiento (throughput), los cinco pasos de enfoque, optimización local frente a global, la ley de Amdahl y la restricción que se mueve. Nota de aprobado del 70 %."
+description: "Examen final sobre capacidad en serie, los pasos de enfoque, optimización local, ley de Amdahl y datos para elegir una mejora. Se aprueba con un 70 %."
 topic: "es/bottlenecks-and-constraints"
-order: 7
-minutes: 20
-updated: 2026-06-28
+order: 8
+minutes: 25
+updated: 2026-11-06
 ---
 
 import { Callout, FinalExam, MindMap } from '@/components/react';
 
-Este es el examen final de **Cuellos de botella y la Teoría de las Restricciones (Theory of Constraints)**. Reúne todo el curso: el rendimiento (throughput) como la capacidad del único paso más lento, las señales reveladoras que te permiten detectar una restricción, por qué un paso no cuello de botella más rápido no aporta exactamente nada, los cinco pasos de enfoque de Goldratt, el techo infranqueable que la ley de Amdahl (Amdahl's law) impone a cualquier aceleración parcial, y la forma inquieta en que la restricción se mueve en cuanto la arreglas. Varias preguntas parecen fáciles hasta que notáis una respuesta que promedia las etapas, las suma o premia a la reluciente máquina rápida. Razonad cada una a fondo.
+Este es el examen final de **Cuellos de botella y la Teoría de las Restricciones**. Incluye capacidad en serie, los cinco pasos de enfoque, mejoras locales y del conjunto, ley de Amdahl, restricciones que se desplazan y los datos necesarios para elegir una mejora. Lee el objetivo y los supuestos de cada caso antes de comparar las opciones.
 
 <Callout variant="warning" title="Cómo funciona este examen">
 Leed con atención: este examen es definitivo. Cada pregunta aparece de una en una.
@@ -20,8 +20,23 @@ donde verás un veredicto de aprobado o no superado. **La nota de aprobado es el
 correctas.
 </Callout>
 
+Para los cálculos de tasas en una línea simple en serie, supón recursos dedicados, una visita a cada etapa, capacidades efectivas estables, materiales y espacios de espera suficientes, calidad sin cambios y ausencia de reprocesos. La línea ya está funcionando. Cuando se pregunta por el rendimiento a plena capacidad, hay trabajo suficiente para aprovecharla. Estos supuestos no convierten una foto de una cola en una prueba ni una estimación de capacidad en un recuento de terminaciones observadas.
+
+### Caso de mejora de calibración
+
+Una de las preguntas de aplicación utiliza este caso **hipotético**. Se cumplen los supuestos de la línea en serie indicados arriba, no quedan pedidos antiguos pendientes y no hay un objetivo de aumentar inventario. Se busca atender los pedidos nuevos confirmados con la misma calidad.
+
+| Magnitud | Antes de la mejora | Después de la mejora propuesta |
+|---|---|---|
+| Capacidad de recepción en kits/día | 48 | 48 |
+| Capacidad de calibración en kits/día | 20 | 35 |
+| Capacidad de verificación en kits/día | 30 | 30 |
+| Capacidad de embalaje en kits/día | 40 | 40 |
+| Demanda nueva confirmada en kits/día | 26 | 26 |
+
 <FinalExam
   client:visible
+  ariaLabel="Examen final de cuellos de botella y restricciones"
   passPercent={70}
   questionLabel="Pregunta"
   ofLabel="de"
@@ -37,18 +52,29 @@ correctas.
   completeTitleLabel="Examen completado"
   scoreLabel="Has acertado"
   passLabel="Aprobado"
+  passMessage="Has alcanzado la nota de aprobado de este examen."
   failLabel="No superado"
+  failMessage="Tu puntuación ha quedado por debajo de la nota de aprobado de este examen."
   reviewLabel="Tus respuestas"
   questions={[
     {
-      question: '¿Cuál es el rendimiento (throughput) de una cadena de pasos?',
-      options: [
-        { text: 'La capacidad del único paso más lento: el cuello de botella (bottleneck)', correct: true },
-        { text: 'La capacidad media de todos los pasos' },
-        { text: 'La suma de las capacidades de todos los pasos' },
-        { text: 'La capacidad del paso más rápido y potente' },
+      "question": "¿Qué fija el techo de capacidad de una cadena simple en serie bajo los supuestos indicados?",
+      "options": [
+        {
+          "text": "La menor capacidad sostenible entre las etapas necesarias.",
+          "correct": true
+        },
+        {
+          "text": "La capacidad sostenible media de todas las etapas necesarias."
+        },
+        {
+          "text": "La suma de las capacidades sostenibles de las etapas necesarias."
+        },
+        {
+          "text": "La mayor capacidad sostenible entre las etapas necesarias."
+        }
       ],
-      explanation: 'El trabajo tiene que pasar por todos los pasos antes de poder salir, así que el sistema solo puede terminar producción tan deprisa como lo permita su paso más lento. El rendimiento es igual a la capacidad mínima de la cadena: nunca la media y nunca la suma. Los pasos más rápidos simplemente quedan parcialmente ociosos o acumulan trabajo delante del lento.',
+      "explanation": "Cada unidad debe pasar por todas las etapas necesarias. La menor capacidad compatible limita la tasa sostenible de la línea. La salida observada puede ser inferior por la demanda, las interrupciones u otras condiciones excluidas del modelo simple."
     },
     {
       question: 'Una línea de montaje tiene cinco etapas que pueden procesar 50, 30, 45, 35 y 60 unidades por hora, con materia prima siempre disponible. ¿Cuál es su rendimiento?',
@@ -71,24 +97,42 @@ correctas.
       explanation: 'El cuello de botella es el paso que tenga la MENOR capacidad, sin importar su posición en la línea. Aquí es la etapa de 40 cajas/h, así que toda la línea se topa con un máximo de 40 cajas/h. La posición no lo decide: lo decide la capacidad.',
     },
     {
-      question: 'Entras en una fábrica desconocida y quieres encontrar el cuello de botella a simple vista. ¿Cuál es la señal reveladora?',
-      options: [
-        { text: 'El trabajo se acumula (una cola o un inventario crecientes) DELANTE de un puesto, mientras los puestos posteriores están desabastecidos y ociosos', correct: true },
-        { text: 'El puesto con la máquina más nueva y cara', correct: false },
-        { text: 'El puesto donde más operarios están de charla sin hacer nada' },
-        { text: 'El puesto físicamente más cercano al muelle de carga' },
+      "question": "¿Qué observación sugiere con más fuerza investigar un puesto como posible restricción, aunque aún haya que comprobar la causa?",
+      "options": [
+        {
+          "text": "Una cola creciente delante y falta de trabajo detrás durante periodos comparables.",
+          "correct": true
+        },
+        {
+          "text": "Una cola justo tras un lote programado, antes de su plazo habitual de procesamiento."
+        },
+        {
+          "text": "El mayor aumento de velocidad anunciado por un proveedor de maquinaria."
+        },
+        {
+          "text": "La mayor plantilla de un puesto sin medir tiempos de trabajo ni disponibilidad."
+        }
       ],
-      explanation: 'Un cuello de botella se delata con una acumulación delante y un desabastecimiento detrás. Las etapas aguas arriba alimentan trabajo más deprisa de lo que la restricción puede procesar, así que el inventario crece por delante; las etapas aguas abajo solo reciben lo que gotea, así que quedan ociosas. Busca la cola y la hambruna a ambos lados del mismo puesto.',
+      "explanation": "El crecimiento persistente de una cola y la falta de trabajo posterior son pistas que conviene combinar con llegadas, terminaciones, trabajo requerido y disponibilidad. Los lotes, la falta de materiales y los bloqueos posteriores pueden crear fotos engañosas; la apariencia no demuestra por sí sola la restricción."
     },
     {
-      question: 'Una etapa puede procesar 200 unidades/h, pero la demanda de los clientes es de solo 90 unidades/h. ¿Es esa etapa la restricción vinculante del negocio?',
-      options: [
-        { text: 'No: tiene mucha más capacidad de la que exige la demanda, así que no es la restricción; aquí la restricción se ha movido FUERA, al mercado', correct: true },
-        { text: 'Sí: cualquier etapa es automáticamente una restricción si procesa algo' },
-        { text: 'Sí: 200 es un número grande, así que debe de ser el factor limitante' },
-        { text: 'No, pero solo porque la etapa es demasiado rápida para medirla' },
+      "question": "Todas las etapas internas superan de forma sostenible la demanda nueva, sin pedidos antiguos ni objetivo de inventario. ¿Qué limita las terminaciones sostenidas previstas?",
+      "options": [
+        {
+          "text": "La tasa de demanda nueva, por debajo de la capacidad interna que queda sin usar.",
+          "correct": true
+        },
+        {
+          "text": "La mayor capacidad de una etapa, porque puede terminar pedidos antes de que lleguen."
+        },
+        {
+          "text": "La suma de capacidades, porque el tiempo de procesamiento sobrante se acumula."
+        },
+        {
+          "text": "La tasa del antiguo cuello, aunque ya todas las capacidades superen la demanda."
+        }
       ],
-      explanation: 'Una etapa más rápida que la demanda no es vinculante: tiene holgura de sobra. Cuando toda etapa interna puede superar lo que los clientes quieren, la restricción ya no está dentro de la fábrica; se ha movido al mercado. La restricción es una posición, no necesariamente un lugar de la planta de producción.',
+      "explanation": "Sin pedidos antiguos ni objetivo de inventario, las terminaciones sostenidas previstas solo deben atender la demanda nueva. El techo interno puede superar esa tasa; la capacidad sobrante no crea pedidos. Si hubiera pedidos atrasados, producir por encima de la demanda nueva podría reducirlos."
     },
     {
       question: 'En la Teoría de las Restricciones (Theory of Constraints) de Goldratt, ¿cuál es el orden correcto de los cinco pasos de enfoque?',
@@ -98,27 +142,45 @@ correctas.
         { text: 'Identificar, Elevar, Explotar, Subordinar, Repetir' },
         { text: 'Subordinar, Identificar, Explotar, Elevar, Repetir' },
       ],
-      explanation: 'Primero IDENTIFICAR la restricción, luego EXPLOTARLA (exprimir cada gota de producción gratuita), luego SUBORDINAR todo lo demás a ella, luego ELEVARLA (gastar para añadir capacidad) y luego REPETIR. Crucialmente, explotar y subordinar van antes que elevar: exprimes y proteges la restricción antes de pagar por ampliarla.',
+      explanation: 'Primero IDENTIFICAR la restricción, luego EXPLOTARLA (buscar capacidad recuperable con la misma calidad), luego SUBORDINAR todo lo demás a ella, luego ELEVARLA (gastar para añadir capacidad) y luego REPETIR. Crucialmente, explotar y subordinar van antes que elevar: exprimes y proteges la restricción antes de pagar por ampliarla.',
     },
     {
-      question: '¿Qué te pide hacer en realidad el paso EXPLOTAR?',
-      options: [
-        { text: 'Exprimir hasta la última pizca de producción gratuita de la restricción existente: no dejarla nunca ociosa, no dejar que procese defectos ni trabajo que no necesita', correct: true },
-        { text: 'Comprar más capacidad para la restricción lo más deprisa posible' },
-        { text: 'Acelerar la etapa no restrictiva más rápida para alimentarla más' },
-        { text: 'Identificar primero qué paso es la restricción' },
+      "question": "¿Qué pide investigar el paso EXPLOTAR antes de ampliar la restricción?",
+      "options": [
+        {
+          "text": "Pérdidas recuperables en la restricción existente, conservando calidad y seguridad.",
+          "correct": true
+        },
+        {
+          "text": "La mayor ampliación disponible antes de medir cómo funciona el proceso actual."
+        },
+        {
+          "text": "Una tasa de liberación mayor en todas las etapas previas, sin mirar las colas."
+        },
+        {
+          "text": "El uso completo de cada etapa rápida como única medida del éxito del sistema."
+        }
       ],
-      explanation: 'Explotar significa obtener la máxima producción de la restricción que ya tienes, gratis, antes de gastar un céntimo. Mantenla en marcha durante las pausas, aliméntala solo con piezas buenas (no defectuosas) y no malgastes su tiempo en trabajo que podría hacerse en otra parte. Un minuto ocioso en el cuello de botella se pierde para siempre; explotar caza cada uno de esos desperdicios.',
+      "explanation": "Busca esperas evitables, trabajo inadecuado, reprocesos y pérdidas de preparación en la restricción actual. Recuperar capacidad puede requerir trabajo, coordinación u otros recursos; no es automáticamente gratis. Respeta los descansos y las exigencias de seguridad, en vez de tratarlos como capacidad prescindible."
     },
     {
-      question: '¿Por qué debes EXPLOTAR antes de ELEVAR?',
-      options: [
-        { text: 'Elevar cuesta dinero; primero deberías capturar toda la capacidad gratuita oculta en la restricción, porque explotarla puede revelar que necesitas comprar mucho menos, o nada', correct: true },
-        { text: 'Elevar es ilegal hasta que la restricción se haya explotado' },
-        { text: 'Los pasos solo se pueden hacer en orden alfabético' },
-        { text: 'Explotar elimina la restricción de forma permanente, así que elevar se vuelve inútil' },
+      "question": "¿Por qué conviene investigar la explotación y la subordinación antes de comprar más capacidad?",
+      "options": [
+        {
+          "text": "Las pérdidas recuperables medidas pueden reducir la ampliación que hace falta.",
+          "correct": true
+        },
+        {
+          "text": "El equipo actual siempre puede atender cualquier demanda futura sin inversión."
+        },
+        {
+          "text": "Una compra mayor eliminará automáticamente los problemas de liberación del trabajo."
+        },
+        {
+          "text": "Mejorar una etapa no restrictiva garantiza la misma ganancia que ampliar la restricción."
+        }
       ],
-      explanation: 'Elevar significa gastar para añadir capacidad: máquinas nuevas, nuevas contrataciones, horas extra. Pero la restricción a menudo desperdicia en silencio capacidad que ya posees (tiempo ocioso, reprocesos, trabajos mal secuenciados). Explotar la recupera gratis, y puede que descubras que el cuello de botella ahora da abasto sin compra alguna. Gastar antes de explotar compra capacidad que no necesitabas.',
+      "explanation": "Mide qué puede recuperarse con el sistema existente y cuánto cuesta hacerlo. Puede reducir o eliminar la necesidad de ampliar, pero no garantiza capacidad suficiente ni una intervención gratuita. Compara la ganancia del conjunto con el objetivo."
     },
     {
       question: '¿Qué significa SUBORDINAR el resto del sistema a la restricción?',
@@ -232,25 +294,25 @@ correctas.
       explanation: 'A medida que s tiende a infinito, p/s se desvanece y la aceleración se acerca a 1 / (1 − p). Con un 25 % no mejorable, el techo es 1 / 0,25 = 4x, y nunca podrás superarlo, ni con hardware infinito. El 25 % secuencial es el cuello de botella permanente de todo el trabajo. Ese techo infranqueable es el corazón de la ley de Amdahl.',
     },
     {
-      question: '¿Cuáles de estas afirmaciones sobre la ley de Amdahl son correctas? (Selecciona todas las que correspondan.)',
+      question: "En el modelo de Amdahl para una tarea fija, con una fracción sin mejorar 1 − p positiva y sin tiempo adicional de coordinación, ¿qué afirmaciones son correctas? Elige todas las que correspondan.",
       allowMultiple: true,
       options: [
-        { text: 'La aceleración global está limitada por la fracción que no puedes mejorar, vía 1 / (1 − p)', correct: true },
-        { text: 'Una aceleración infinita de una parte aún produce solo una aceleración global finita', correct: true },
-        { text: 'Cuanto menor es la fracción mejorable p, más bajo es el techo de la aceleración total', correct: true },
-        { text: 'Si aceleras parte de un trabajo 10x, todo el trabajo siempre se acelera 10x' },
+        { text: "La aceleración límite al hacer más rápida la parte elegida es 1 / (1 − p).", correct: true },
+        { text: "Acelerar arbitrariamente la parte elegida aún deja el tiempo positivo de la parte sin mejorar.", correct: true },
+        { text: "Una fracción elegida p menor da una aceleración límite menor.", correct: true },
+        { text: "Acelerar diez veces una parte garantiza que toda la tarea sea diez veces más rápida." },
       ],
-      explanation: 'La ley de Amdahl dice que la fracción no mejorable fija un techo infranqueable de 1 / (1 − p); que incluso una aceleración infinita del resto da un total finito; y que un p menor implica un techo más bajo. La opción falsa es justo la intuición que la ley demuele: la aceleración local nunca se traslada uno a uno al conjunto.',
+      explanation: "Para la misma tarea fija, aceleración = 1 / ((1 − p) + p / s). Una fracción sin mejorar positiva da el límite finito 1 / (1 − p). Si p = 1, esa fracción es cero y la fórmula ideal da aceleración = s, sin ese techo finito. Los tiempos adicionales de coordinación necesitarían su propio modelo.",
     },
     {
-      question: '¿Cuál es la relación entre la ley de Amdahl y la idea del cuello de botella?',
+      question: "¿Cómo debes combinar la ley de Amdahl con el modelo de capacidad de una línea en serie?",
       options: [
-        { text: 'Son la misma lección con distinto ropaje: la parte que no puedes (o no quieres) acelerar es la restricción, y pone tope a la ganancia de mejorar todo lo demás', correct: true },
-        { text: 'Se contradicen: Amdahl dice aceléralo todo, los cuellos de botella dicen no aceleres nada' },
-        { text: 'La ley de Amdahl solo se aplica a botellas de agua, no a la informática' },
-        { text: 'No tienen relación; una trata del tiempo y la otra de la capacidad' },
+        { text: "Usar fracciones de tiempo para una tarea fija y capacidades para una tasa de la línea; las cuentas tienen supuestos distintos.", correct: true },
+        { text: "Sumar las capacidades de etapa en el denominador temporal de Amdahl para obtener la tasa de la línea." },
+        { text: "Usar 1 / (1 − p) como tasa de la línea sin especificar unidades de producción ni de tiempo." },
+        { text: "Sustituir todo el tiempo sin mejorar por el de la etapa más corta antes de aplicar cualquier modelo." },
       ],
-      explanation: 'La ley de Amdahl es el principio del cuello de botella expresado en aritmética. La fracción secuencial, no mejorable, es el cuello de la botella; verter velocidad infinita en el resto no puede hacer que el sistema vierta más deprisa de lo que ese cuello permite. Ambas dicen: tus ganancias están limitadas por la parte que no arreglaste.',
+      explanation: "Amdahl usa la suma de tiempos (1 − p) + p / s para una tarea fija. El modelo de recursos dedicados en serie usa la menor capacidad compatible para limitar la tasa de la línea. Ambos exigen evaluar el conjunto, pero una fórmula de duración y un límite de tasa no son intercambiables.",
     },
     {
       question: 'Por fin elevas el cuello de botella —la etapa de 30 unidades de una línea 50/30/45/35/60—, subiéndola a 55 unidades/h. ¿Cuál pasa a ser el nuevo rendimiento y dónde está la nueva restricción?',
@@ -263,35 +325,30 @@ correctas.
       explanation: 'Sube la de 30 a 55 y deja de ser la más lenta: la etapa de 35 unidades pone ahora tope a la línea, así que el rendimiento pasa a ser 35. La restricción no desapareció; se MOVIÓ al siguiente eslabón más débil. Cada vez que arreglas un cuello de botella, deberías preguntarte de inmediato a dónde se fue el nuevo.',
     },
     {
-      question: '¿Por qué se describe mejor la restricción como «una posición, no un lugar»?',
+      question: "¿Por qué conviene tratar la restricción como una función que revisar y no como el nombre permanente de un puesto?",
       options: [
-        { text: 'Porque ser la restricción es un papel que cualquier paso puede ocupar: arregla el actual y el papel pasa a lo que ahora sea más lento; migra por el sistema', correct: true },
-        { text: 'Porque el cuello de botella siempre está en la misma sala física' },
-        { text: 'Porque las restricciones son imaginarias y no existen de verdad' },
-        { text: 'Porque solo el primer paso de una cadena puede ser jamás la restricción' },
+        { text: "La función depende de las capacidades, el trabajo disponible y el objetivo actuales; hay que revisarla tras un cambio.", correct: true },
+        { text: "Cualquier ajuste pequeño debe mover la restricción a otro puesto físico." },
+        { text: "Una vez identificado, un puesto debe ser la única restricción posible para siempre." },
+        { text: "Una foto de la cola fija la restricción futura sin medir ningún flujo." },
       ],
-      explanation: 'Ningún paso es permanentemente «el cuello de botella». El que resulte ser el más lento ostenta el título, y el título se transfiere en cuanto elevas ese paso. Así que la restricción es un papel que viaja: una posición en el sistema, no un lugar fijo. Gestionarla es una persecución continua, no un arreglo único.',
+      explanation: "Una mejora parcial puede dejar la misma etapa como limitante. Si varias empatan, mejorar una puede dejar a otra limitando. Si todas las capacidades internas superan la demanda nueva y no hay atraso acumulado ni objetivo de inventario, la demanda puede limitar la salida prevista. Recalcula en vez de dar por hecho el desplazamiento.",
     },
     {
-      question: 'Arreglar un cuello de botella solo para encontrar otro esperando parece un juego del topo (whack-a-mole). ¿Cuál es la actitud correcta ante esto?',
+      question: "Una línea tiene capacidades de 50, 30, 45, 35 y 60 unidades/h. La etapa de 30 mejora a 32. ¿Qué se deduce con los supuestos de la línea en serie?",
       options: [
-        { text: 'Es progreso genuino: cada movimiento eleva el rendimiento a un techo nuevo y más alto; el ciclo es el trabajo, recogido por el paso Repetir', correct: true },
-        { text: 'Demuestra que el esfuerzo fue en vano, ya que siempre queda una restricción' },
-        { text: 'Significa que deberías dejar de optimizar por completo y aceptar el primer cuello de botella' },
-        { text: 'Indica que identificaste mal el cuello de botella original' },
+        { text: "El techo de capacidad sube a 32 unidades/h y sigue limitando la misma etapa.", correct: true },
+        { text: "Que la restricción no se desplace demuestra que el techo no ha mejorado." },
+        { text: "Cualquier aumento en la etapa limitante convierte de inmediato a otra en restricción." },
+        { text: "El techo pasa a 35 unidades/h porque la segunda etapa más lenta toma el relevo automáticamente." },
       ],
-      explanation: 'Cada golpe levanta el techo: el rendimiento pasó de 30 a 35 y a lo que venga después. Que aparezca una nueva restricción es la señal de que tuviste éxito, no de que fracasaste. La Teoría de las Restricciones lo integra con Repetir: gobernar un sistema es un ciclo continuo de encontrar y aliviar el paso más lento del momento.',
+      explanation: "El nuevo mínimo es mín(50, 32, 45, 35, 60) = 32 unidades/h. Un alivio parcial puede elevar el techo sin mover la restricción. Que esa capacidad produzca más trabajo terminado sigue dependiendo del trabajo disponible y de los supuestos de funcionamiento.",
     },
     {
-      question: '¿Cuáles de estas situaciones cotidianas son cuellos de botella clásicos de restricción móvil? (Selecciona todas las que correspondan.)',
+      question: "¿Qué afirmaciones distinguen correctamente límites de tasa, duración de tareas y pruebas de una restricción? Elige todas las que correspondan.",
       allowMultiple: true,
-      options: [
-        { text: 'Una autopista de seis carriles que se estrecha a dos: el estrechamiento pone tope al flujo y el tráfico hace cola delante de él', correct: true },
-        { text: 'Un único aprobador lento cuyo visto bueno todo debe esperar, mientras los pasos posteriores quedan ociosos', correct: true },
-        { text: 'La única consulta más lenta a la base de datos que domina el tiempo de carga de una página', correct: true },
-        { text: 'El único baño que controla la rutina matutina de una casa', correct: true },
-      ],
-      explanation: 'Las cuatro son cuellos de botella: el estrechamiento, el aprobador, la consulta lenta y el baño solitario ponen tope, cada uno, al rendimiento de todo un sistema, con una acumulación delante y un desabastecimiento detrás. Y cada uno muestra la migración: ensancha el estrechamiento y aparece otro punto de estrangulamiento; acelera la consulta lenta y la siguiente más lenta domina la página.',
+      options: [{"text":"Una cola en un estrechamiento de carretera exige revisar llegadas, capacidad efectiva y condiciones posteriores antes de diagnosticar la causa.","correct":true},{"text":"La tasa de servicio medida de un aprobador importa si todo caso requiere su visto bueno, aunque deban comprobarse otros límites.","correct":true},{"text":"Una consulta lenta en la ruta secuencial crítica de una página contribuye a su tiempo de carga; esa duración no es una tasa de producción.","correct":true},{"text":"Si dos etapas necesarias empatan en la capacidad mínima, mejorar una sola conserva el límite de la otra.","correct":true},{"text":"Cualquier aumento local de capacidad garantiza más producción terminada y un cambio inmediato de restricción."}],
+      explanation: "Una cola es una pista que investigar y la tasa de una aprobación necesaria puede entrar en una comparación de capacidades. La duración de una consulta trata del tiempo de carga, no de una tasa de procesamiento en serie. Los mínimos empatados muestran por qué mejorar una etapa no tiene por qué elevar el techo ni desplazar el límite que queda. Recalcula con los supuestos de trabajo, demanda y funcionamiento indicados.",
     },
     {
       question: '¿Cómo conecta el cuello de botella con el curso de bucles de retroalimentación sobre el que este se construye?',
@@ -304,14 +361,73 @@ correctas.
       explanation: 'El pensamiento sistémico te enseñó a observar cómo se comporta el conjunto, no solo las partes. El cuello de botella es esa lección en su forma más afilada, y su movimiento es un bucle de retroalimentación: cada arreglo se realimenta para reubicar la restricción. Aprendes a cabalgar ese bucle —esperando y persiguiendo el siguiente cuello de botella— en vez de que te sorprenda.',
     },
     {
-      question: 'Uniéndolo todo: ante un sistema lento, ¿cuál te dice este curso que es el punto de apalancamiento más concreto?',
+      question: "Con recursos de mejora limitados, ¿qué debe orientar dónde investigar primero un proceso lento?",
       options: [
-        { text: 'El cuello de botella: empuja ahí y todo el sistema se transforma; empuja en cualquier otro sitio y absorberá tu esfuerzo y apenas se moverá', correct: true },
-        { text: 'La etapa más rápida e impresionante, porque muestra lo que es posible' },
-        { text: 'Todas las etapas por igual, subiéndolas todas un poco a la vez' },
-        { text: 'La etapa que sea más barata y fácil de mejorar' },
+        { text: "El límite medido del objetivo del sistema y, después, la ganancia y el coste estimados del plan completo.", correct: true },
+        { text: "El mayor aumento local de velocidad anunciado, sin importar el recorrido actual del trabajo." },
+        { text: "El mismo esfuerzo en cada etapa antes de comparar capacidades u objetivo de salida." },
+        { text: "La tarea aislada más barata sin comprobar si cambia el resultado del sistema." },
       ],
-      explanation: 'Por el curso de puntos de apalancamiento sabes que un empujón pequeño y bien dirigido puede mover todo un sistema; el cuello de botella es el más concreto de esos puntos. El esfuerzo en la restricción se convierte directamente en rendimiento, mientras que el esfuerzo en cualquier otro sitio se absorbe sin ganancia. Deja de optimizar las partes: encuentra la restricción y gobiérnala.',
+      explanation: "Una restricción medida es un objetivo útil, pero actuar ahí no garantiza más salida: otra etapa puede empatar o tomar el relevo, y la demanda puede limitar el plan. Una mejora conjunta también puede hacer que interese mejorar otra etapa. Comprueba el plan, la calidad, los recursos y la demanda pertinente en vez de prometer ganancia nula en cualquier otro lugar.",
+    },
+    {
+      "question": "En el caso de mejora de calibración, ¿qué conclusión separa correctamente el techo en serie y el plan de salida limitado por la demanda?",
+      "options": [
+        {
+          "text": "Verificación fija el nuevo techo interno; la salida prevista sigue la demanda nueva.",
+          "correct": true
+        },
+        {
+          "text": "Calibración fija la salida terminada en su nueva cifra, al margen de las otras etapas."
+        },
+        {
+          "text": "El nuevo techo interno es la salida prevista aunque los pedidos no la requieran."
+        },
+        {
+          "text": "El sistema gana todo el aumento de calibración porque toda mejora local se transmite."
+        }
+      ],
+      "explanation": "Tras la mejora, el techo en serie es mín(48, 35, 30, 40) = 30 kits/día en verificación. Con demanda de 26, sin pedidos antiguos ni objetivo de inventario, las terminaciones sostenidas previstas son mín(26, 30) = 26 kits/día. El aumento local de calibración no es la ganancia de salida del sistema."
+    },
+    {
+      "question": "Una cola de aprobaciones aparece tras cada entrega semanal y se vacía antes de la siguiente. ¿Qué datos ayudarían más a elegir entre cambiar la entrega por lotes y añadir capacidad?",
+      "options": [
+        {
+          "text": "Horarios de llegada, trabajo y disponibilidad, junto con el objetivo de espera.",
+          "correct": true
+        },
+        {
+          "text": "La mayor foto de la cola, tratando su tamaño como prueba de déficit persistente."
+        },
+        {
+          "text": "El número de aprobaciones anterior a los lotes, sin igualar el periodo observado."
+        },
+        {
+          "text": "La ausencia de trabajo antiguo, como prueba de que se cumple cualquier plazo."
+        }
+      ],
+      "explanation": "Vaciar el lote antes de la siguiente entrega sugiere que la capacidad media puede cubrir las llegadas, pero no demuestra una espera aceptable. Los registros comparables de tiempos y trabajo ayudan a comprobar si conviene suavizar las entregas, cambiar la capacidad o intervenir de otra manera."
+    },
+    {
+      "question": "¿Qué comprobaciones corresponden a la validación de un plan de mejora? Selecciona todas las que procedan.",
+      "options": [
+        {
+          "text": "Medir capacidades efectivas con trabajo representativo y la misma calidad.",
+          "correct": true
+        },
+        {
+          "text": "Recalcular los límites posteriores y contrastarlos con demanda y pedidos atrasados.",
+          "correct": true
+        },
+        {
+          "text": "Sumar las capacidades en serie para estimar cuántas unidades terminará el plan."
+        },
+        {
+          "text": "Conservar la salida anunciada aunque los tiempos de prueba contradigan sus datos."
+        }
+      ],
+      "explanation": "Una validación útil comprueba las estimaciones de capacidad y el trabajo que deben atender. Una etapa posterior puede convertirse en el límite, y los pedidos antiguos pueden cambiar el objetivo de salida. Las capacidades en serie no se suman; los datos de pruebas representativas deben actualizar el modelo.",
+      "allowMultiple": true
     },
   ]}
 />
@@ -327,49 +443,37 @@ correctas.
     label: 'Cuellos de botella y la Teoría de las Restricciones',
     children: [
       {
-        label: 'Rendimiento = el cuello de botella',
-        children: [{ label: 'Un sistema funciona a la velocidad de su paso más lento: la capacidad mínima, nunca la media ni la suma. El cuerpo ancho de la botella es irrelevante; solo importa el cuello.' }],
+        label: 'Techo de capacidad en serie',
+        children: [{ label: 'En el modelo de recursos dedicados en serie, la menor capacidad efectiva fija el techo interno. La demanda y las condiciones de funcionamiento pueden reducir la salida real.' }],
       },
       {
         label: 'Detectar la restricción',
-        children: [{ label: 'El trabajo se acumula DELANTE de ella (cola/inventario creciente); las etapas POSTERIORES quedan desabastecidas y ociosas. Una etapa más rápida que la demanda no es vinculante: la restricción puede moverse FUERA, al mercado.' }],
+        children: [{ label: 'El crecimiento de la cola y la falta de trabajo posterior son pistas que combinar con registros compatibles de carga, flujo y disponibilidad. Comprueba lotes e interrupciones antes de diagnosticar la causa.' }],
       },
       {
         label: 'Teoría de las Restricciones (5 pasos)',
-        children: [{ label: 'Identificar, Explotar (exprimir producción gratuita), Subordinar (acompasarlo todo a ella; las etapas no cuello de botella ociosas están bien), Elevar (gastar para añadir capacidad, solo tras explotar), Repetir. Una hora perdida en el cuello de botella se pierde para todos; una hora ahorrada en otro sitio es un espejismo.' }],
+        children: [{ label: 'Identificar, Explotar (recuperar pérdidas), Subordinar (coordinar el resto), Elevar (ampliar cuando se justifique), Repetir. Recuperar capacidad exige valorar esfuerzo, calidad y seguridad.' }],
       },
       {
-        label: 'Optimización local frente a global',
-        children: [{ label: 'Mejorar un paso no cuello de botella añade CERO rendimiento y puede ser peor que inútil: acumulación de WIP, plazos de entrega más largos, la trampa de utilización de «mantener a todos ocupados».' }],
+        label: "Mejoras locales y del conjunto",
+        children: [{ label: "Si el mínimo actual no cambia, acelerar otra etapa dedicada por sí sola no eleva el techo en serie. Un conjunto de cambios puede hacer útil otra mejora; liberar más trabajo local también puede añadir esperas." }],
       },
       {
-        label: 'Ley de Amdahl',
-        children: [{ label: 'aceleración = 1 / ((1 − p) + p / s). La fracción no mejorable pone tope a todo: techo = 1 / (1 − p). Un 25 % secuencial significa un máximo de 4x, ni con hardware infinito. Es el cuello de botella en aritmética.' }],
+        label: "Ley de Amdahl",
+        children: [{ label: "Para una tarea fija, aceleración = 1 / ((1 − p) + p / s). Una fracción sin mejorar positiva da el límite 1 / (1 − p); con p = 1 ese término no da un límite finito. Esta cuenta de tiempos difiere del mínimo de capacidades en serie." }],
       },
       {
-        label: 'La restricción siempre se mueve',
-        children: [{ label: 'Arregla un cuello de botella y un nuevo paso más lento toma el relevo: es una posición, no un lugar. El juego del topo es progreso. Ojo con las restricciones de política (inercia). Autopistas, aprobadores, consultas lentas, el único baño.' }],
+        label: "Revisar tras un cambio",
+        children: [{ label: "Un alivio parcial puede dejar limitando la misma etapa, pueden persistir empates y la demanda puede limitar la salida prevista. Comprueba capacidades y objetivo antes de afirmar una ganancia o un cambio de restricción." }],
+      },
+      {
+        label: 'Elegir una mejora con datos',
+        children: [{ label: 'Combinar demanda, carga y registros comparables de colas' }, { label: 'Recalcular todos los límites en serie tras cada cambio' }, { label: 'Separar capacidad, demanda, pedidos antiguos y salida real' }, { label: 'Validar trabajo representativo y revisar los supuestos que cambien' }],
       },
     ],
   }}
 />
 
 <Callout variant="success" title="Ideas clave">
-Todo sistema es una cadena, y su producción real —el **rendimiento (throughput)**—
-la fija el único **paso más lento** y nada más: ni la media de las etapas, ni su
-suma, ni la reluciente máquina rápida. **Detecta** la restricción por la
-acumulación que tiene delante y la ociosidad que tiene detrás; recuerda que una
-etapa más rápida que la demanda no es vinculante, y que la restricción puede estar
-**fuera**, en el mercado. Luego gobiérnala con los cinco pasos de enfoque de
-Goldratt —**Identificar, Explotar, Subordinar, Elevar, Repetir**—, exprimiendo
-producción gratuita antes de gastar jamás en añadir capacidad, y aceptando que las
-etapas no cuello de botella ociosas están bien. Cuidado con el instinto profundo de
-pulir la piedra equivocada: mejorar un **paso no cuello de botella** añade *cero*
-rendimiento y puede ser peor que inútil, acumulando trabajo en curso y estirando los
-plazos de entrega. La **ley de Amdahl** lo pone en números: la fracción no mejorable
-limita toda la ganancia a $1 / (1 - p)$, así que un 25 % secuencial significa 4x como
-mucho, sea cual sea el hardware. Y espera que la restricción se **mueva** en cuanto
-la arregles: es una posición, no un lugar, y perseguirla desde los estrechamientos de
-autopista hasta las consultas lentas o el único baño es el trabajo. *Deja de
-optimizar las partes. Gobierna la restricción.*
+En una línea simple en serie, compara capacidades efectivas compatibles para encontrar el techo interno. Comprueba después la demanda, los pedidos antiguos y los supuestos de funcionamiento antes de usar ese techo como plan de salida. Los registros de colas ayudan a diagnosticar la causa cuando se combinan con llegadas, procesamiento y disponibilidad del mismo periodo. Usa los pasos de enfoque para comparar la recuperación de pérdidas y la ampliación, conservando calidad y seguridad. Recalcula tras cada cambio: la siguiente etapa o la demanda pueden limitar la ganancia. Por su parte, la ley de Amdahl cuantifica cómo las partes sin cambios limitan la reducción del tiempo de una tarea. Compromete recursos cuando la ganancia estimada del conjunto responda al objetivo y supere una prueba representativa.
 </Callout>

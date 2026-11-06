@@ -1,15 +1,15 @@
 ---
 title: "Final Exam: Bottlenecks & the Theory of Constraints"
-description: "A graded, one-way final exam on bottlenecks and the Theory of Constraints — throughput, the five focusing steps, local vs. global optimization, Amdahl's law, and the moving constraint. Pass mark 70%."
+description: "A graded final exam on serial capacity, the focusing steps, local optimisation, Amdahl’s law and evidence for choosing an upgrade. Pass mark 70%."
 topic: "en/bottlenecks-and-constraints"
-order: 7
-minutes: 20
-updated: 2026-06-28
+order: 8
+minutes: 25
+updated: 2026-11-06
 ---
 
 import { Callout, FinalExam, MindMap } from '@/components/react';
 
-This is the final exam for **Bottlenecks & the Theory of Constraints**. It pulls together the whole course: throughput as the capacity of the single slowest step, the tell-tale signs that let you spot a constraint, why a faster non-bottleneck adds exactly nothing, Goldratt's five focusing steps, the hard ceiling that Amdahl's law puts on any partial speedup, and the restless way the constraint moves the instant you fix it. Several questions look easy until you notice an answer that averages the stages, sums them, or credits the shiny fast machine. Reason each one through.
+This is the final exam for **Bottlenecks & the Theory of Constraints**. It covers serial capacity, the five focusing steps, local and system gains, Amdahl’s law, moving constraints and the evidence needed to choose an upgrade. Read the objective and assumptions in each case before comparing the alternatives.
 
 <Callout variant="warning" title="How this exam works">
 Read carefully — this exam is final. Each question appears one at a time. Once you
@@ -19,19 +19,42 @@ verdict. **The pass mark is 70%.** A few questions ask you to *select all* corre
 answers.
 </Callout>
 
+For the simple serial-line rate calculations, assume dedicated resources, one visit to each stage, stable effective capacities, sufficient materials and buffers, unchanged quality and no rework. Treat the line as already operating. Where the question asks for throughput at capacity, enough work is available to use that capacity. These assumptions do not turn a queue snapshot into proof or make a capacity estimate an observed completion count.
+
+### Calibration-upgrade case
+
+The following **hypothetical** case is used by one applied question. It has the serial-line assumptions above, no older backlog and no inventory-building target. The objective is to serve confirmed new orders, with unchanged quality.
+
+| Quantity | Before the upgrade | After the proposed upgrade |
+|---|---|---|
+| Intake capacity in kits/day | 48 | 48 |
+| Calibration capacity in kits/day | 20 | 35 |
+| Verification capacity in kits/day | 30 | 30 |
+| Packing capacity in kits/day | 40 | 40 |
+| Confirmed new demand in kits/day | 26 | 26 |
+
 <FinalExam
   client:visible
   passPercent={70}
   questions={[
     {
-      question: 'What is the throughput of a chain of steps?',
-      options: [
-        { text: 'The capacity of the single slowest step — the bottleneck', correct: true },
-        { text: 'The average capacity across all the steps' },
-        { text: 'The sum of the capacities of all the steps' },
-        { text: 'The capacity of the fastest, most powerful step' },
+      "question": "What sets the capacity ceiling of a simple serial chain under the stated assumptions?",
+      "options": [
+        {
+          "text": "The lowest sustainable capacity among the required stages.",
+          "correct": true
+        },
+        {
+          "text": "The average sustainable capacity across the required stages."
+        },
+        {
+          "text": "The sum of the sustainable capacities of the required stages."
+        },
+        {
+          "text": "The highest sustainable capacity among the required stages."
+        }
       ],
-      explanation: 'Work has to pass through every step before it can leave, so the system can only finish output as fast as its slowest step allows. Throughput equals the minimum capacity in the chain — never the average and never the sum. The faster steps just sit partly idle or pile up work in front of the slow one.',
+      "explanation": "Every item must pass through every required stage. The lowest compatible stage capacity bounds the sustainable line rate. Observed output can be lower because of demand, interruptions or other conditions excluded from the simple model."
     },
     {
       question: 'An assembly line has five stages that can process 50, 30, 45, 35, and 60 units per hour, with raw material always available. What is its throughput?',
@@ -54,24 +77,42 @@ answers.
       explanation: 'The bottleneck is whichever step has the LEAST capacity, regardless of its position in the line. Here that is the 40-box/hr stage, so the whole line tops out at 40 boxes/hr. Position does not decide it — capacity does.',
     },
     {
-      question: 'You walk into an unfamiliar factory and want to find the bottleneck by eye. What is the tell-tale sign?',
-      options: [
-        { text: 'Work piles up (a growing queue or inventory) IN FRONT of one station, while the stations after it sit starved and idle', correct: true },
-        { text: 'The station with the newest, most expensive machine', correct: false },
-        { text: 'The station where the most workers are standing around chatting' },
-        { text: 'The station physically closest to the loading dock' },
+      "question": "Which observation most strongly suggests a station to investigate as a constraint, while still requiring a check of the cause?",
+      "options": [
+        {
+          "text": "A growing upstream queue and downstream starvation over comparable periods.",
+          "correct": true
+        },
+        {
+          "text": "A queue visible just after a scheduled batch, before its normal processing window."
+        },
+        {
+          "text": "The largest workstation speed increase advertised by an equipment supplier."
+        },
+        {
+          "text": "The most staff at a station without work-time or availability measurements."
+        }
       ],
-      explanation: 'A bottleneck betrays itself with a pile-up in front of it and starvation behind it. Upstream stages feed work faster than the constraint can process, so inventory grows ahead of it; downstream stages can only get what trickles through, so they idle. Look for the queue and the famine on either side of the same station.',
+      "explanation": "Persistent queue growth and downstream starvation are useful clues to combine with arrivals, completions, work content and availability. Batches, material shortages and downstream blocking can produce misleading snapshots; appearance alone does not establish the constraint."
     },
     {
-      question: 'A stage can process 200 units/hr, but customer demand is only 90 units/hr. Is that stage the binding constraint on the business?',
-      options: [
-        { text: 'No — it has far more capacity than demand requires, so it is not the constraint; here the constraint has moved OUTSIDE to the market', correct: true },
-        { text: 'Yes — any stage is automatically a constraint if it processes anything' },
-        { text: 'Yes — 200 is a big number, so it must be the limiting factor' },
-        { text: 'No — but only because the stage is too fast to measure' },
+      "question": "Every internal stage can sustain more than confirmed new demand, with no old backlog or inventory target. What limits planned sustained completions?",
+      "options": [
+        {
+          "text": "The new-demand rate, rather than unused internal processing capacity.",
+          "correct": true
+        },
+        {
+          "text": "The highest stage capacity, because it can finish orders ahead of demand."
+        },
+        {
+          "text": "The sum of stage capacities, because spare processing time accumulates."
+        },
+        {
+          "text": "The original bottleneck rate, even after all stage capacities exceed demand."
+        }
       ],
-      explanation: 'A stage faster than demand is not binding — it has slack to spare. When every internal stage can out-pace what customers want, the constraint is no longer inside the factory at all; it has moved to the market. The constraint is a position, not necessarily a place on the production floor.',
+      "explanation": "With no older orders or inventory objective, planned sustained completions need only serve new demand. The internal serial ceiling can remain above that rate; spare capacity does not create orders. If a backlog existed, output above new demand could instead reduce it."
     },
     {
       question: 'In Goldratt\'s Theory of Constraints, what is the correct order of the five focusing steps?',
@@ -81,27 +122,45 @@ answers.
         { text: 'Identify, Elevate, Exploit, Subordinate, Repeat' },
         { text: 'Subordinate, Identify, Exploit, Elevate, Repeat' },
       ],
-      explanation: 'First IDENTIFY the constraint, then EXPLOIT it (wring out every drop of free output), then SUBORDINATE everything else to it, then ELEVATE it (spend to add capacity), then REPEAT. Crucially, exploit and subordinate come before elevate — you squeeze and protect the constraint before paying to expand it.',
+      explanation: 'First IDENTIFY the constraint, then EXPLOIT it (look for recoverable capacity at unchanged quality), then SUBORDINATE everything else to it, then ELEVATE it (spend to add capacity), then REPEAT. Crucially, exploit and subordinate come before elevate — you squeeze and protect the constraint before paying to expand it.',
     },
     {
-      question: 'What does the EXPLOIT step actually ask you to do?',
-      options: [
-        { text: 'Squeeze every bit of free output from the existing constraint — never let it sit idle, never let it process defects or work it doesn\'t need to', correct: true },
-        { text: 'Buy more capacity for the constraint as fast as possible' },
-        { text: 'Speed up the fastest non-constraint stage to feed it more' },
-        { text: 'Identify which step is the constraint in the first place' },
+      "question": "What does the EXPLOIT step ask you to investigate before expanding the constraint?",
+      "options": [
+        {
+          "text": "Recoverable losses at the existing constraint while preserving quality and safety.",
+          "correct": true
+        },
+        {
+          "text": "The largest capacity purchase available before measuring the existing process."
+        },
+        {
+          "text": "A higher release rate from every upstream stage regardless of waiting work."
+        },
+        {
+          "text": "Full utilisation of every faster stage as the sole measure of system success."
+        }
       ],
-      explanation: 'Exploit means getting maximum output from the constraint you already have, for free, before spending a cent. Keep it running through breaks, feed it only good (non-defective) parts, and don\'t waste its time on work that could be done elsewhere. An idle minute at the bottleneck is gone forever; exploit hunts down every such waste.',
+      "explanation": "Look for avoidable waiting, unsuitable work, rework and setup losses at the current constraint. Recovering capacity can require labour, coordination or other resources; it is not automatically free. Protect breaks and safety requirements rather than treating them as expendable capacity."
     },
     {
-      question: 'Why must you EXPLOIT before you ELEVATE?',
-      options: [
-        { text: 'Elevating costs money; you should first capture all the free capacity hidden in the constraint, because exploiting it may reveal you need to buy far less — or nothing', correct: true },
-        { text: 'Elevating is illegal until the constraint has been exploited' },
-        { text: 'You can only ever do the steps in alphabetical order' },
-        { text: 'Exploiting permanently removes the constraint, so elevating becomes pointless' },
+      "question": "Why investigate exploitation and subordination before buying additional capacity?",
+      "options": [
+        {
+          "text": "Measured recoverable losses may reduce the size of the expansion actually needed.",
+          "correct": true
+        },
+        {
+          "text": "Existing equipment can always satisfy any future demand without investment."
+        },
+        {
+          "text": "A larger equipment purchase will automatically remove release-policy problems."
+        },
+        {
+          "text": "Improving a non-constraint guarantees the same gain as expanding the constraint."
+        }
       ],
-      explanation: 'Elevate means spending to add capacity — new machines, new hires, overtime. But the constraint is often quietly wasting capacity you already own (idle time, rework, badly sequenced jobs). Exploit recovers that for free, and you may find the bottleneck now keeps up without any purchase. Spending before exploiting buys capacity you didn\'t need.',
+      "explanation": "Measure what can be recovered with the existing system and what that recovery costs. It may reduce or remove the need for an expansion, but it does not guarantee enough capacity or a costless intervention. Compare the resulting whole-system gain with the objective."
     },
     {
       question: 'What does it mean to SUBORDINATE the rest of the system to the constraint?',
@@ -215,25 +274,25 @@ answers.
       explanation: 'As s goes to infinity, p/s vanishes and speedup approaches 1 / (1 - p). With 25% un-improvable, the ceiling is 1 / 0.25 = 4x — and you can never beat it, even with infinite hardware. The serial 25% is the permanent bottleneck on the whole job. That hard ceiling is the heart of Amdahl\'s law.',
     },
     {
-      question: 'Which statements about Amdahl\'s law are correct? (Select all that apply.)',
+      question: "Under the fixed-task Amdahl model, with a positive unchanged fraction 1 − p and no added overhead, which statements are correct? Select all that apply.",
       allowMultiple: true,
       options: [
-        { text: 'The overall speedup is capped by the fraction you cannot improve, via 1 / (1 - p)', correct: true },
-        { text: 'An infinite speedup of one part still yields only a finite overall speedup', correct: true },
-        { text: 'The smaller the improvable fraction p, the lower the ceiling on total speedup', correct: true },
-        { text: 'If you speed up part of a job by 10x, the whole job always speeds up by 10x' },
+        { text: "The limiting speedup as the selected portion becomes faster is 1 / (1 − p).", correct: true },
+        { text: "Arbitrarily fast execution of the selected portion still leaves the positive unchanged time.", correct: true },
+        { text: "A smaller selected fraction p gives a lower limiting speedup.", correct: true },
+        { text: "Speeding one portion up tenfold guarantees that the whole job becomes ten times faster." },
       ],
-      explanation: 'Amdahl\'s law says the un-improvable fraction sets a hard ceiling of 1 / (1 - p); even infinite speedup of the rest gives a finite total; and a smaller p means a lower ceiling. The false option is the very intuition the law demolishes — local speedup never transfers one-for-one to the whole.',
+      explanation: "For the same fixed task, speedup = 1 / ((1 − p) + p / s). A positive unchanged fraction gives the finite limit 1 / (1 − p). If p = 1, that fraction is zero and the ideal formula instead gives speedup = s, without this finite ceiling. Additional overhead would need its own model.",
     },
     {
-      question: 'What is the relationship between Amdahl\'s law and the bottleneck idea?',
+      question: "How should Amdahl's law be used alongside the serial-line capacity model?",
       options: [
-        { text: 'They are the same lesson in different clothes: the part you can\'t (or don\'t) speed up is the constraint, and it caps the gain from improving everything else', correct: true },
-        { text: 'They contradict each other — Amdahl says speed everything up, bottlenecks say speed nothing up' },
-        { text: 'Amdahl\'s law only applies to water bottles, not computing' },
-        { text: 'They are unrelated; one is about time and the other about capacity' },
+        { text: "Use time shares for a fixed job and stage capacities for a line rate; the two calculations have different assumptions.", correct: true },
+        { text: "Add all stage capacities inside Amdahl's time denominator to obtain the line rate." },
+        { text: "Use 1 / (1 − p) as a line rate without specifying a production or time unit." },
+        { text: "Replace all unchanged job time with the shortest stage time before applying either model." },
       ],
-      explanation: 'Amdahl\'s law is the bottleneck principle expressed in arithmetic. The serial, un-improvable fraction is the neck of the bottle; pouring infinite speed into the rest can\'t make the system pour faster than that neck allows. Both say: your gains are capped by the part you didn\'t fix.',
+      explanation: "Amdahl uses the time sum (1 − p) + p / s for a fixed task. The dedicated serial-line model uses the minimum compatible stage capacity to bound its rate. Both require a whole-system comparison, but a latency formula and a pipeline rate bound are not interchangeable.",
     },
     {
       question: 'You finally elevate the bottleneck — the 30-unit stage in a 50/30/45/35/60 line — boosting it to 55 units/hr. What becomes the new throughput, and where is the new constraint?',
@@ -246,35 +305,30 @@ answers.
       explanation: 'Raise the 30 to 55 and it is no longer the slowest — the 35-unit stage now caps the line, so throughput becomes 35. The constraint didn\'t vanish; it MOVED to the next weakest link. Every time you fix a bottleneck, you should immediately ask where the new one went.',
     },
     {
-      question: 'Why is the constraint best described as "a position, not a place"?',
+      question: "Why treat the constraint as a role to reassess rather than a permanent name for one station?",
       options: [
-        { text: 'Because being the constraint is a role any step can occupy — fix the current one and the role passes to whatever is now slowest; it migrates around the system', correct: true },
-        { text: 'Because the bottleneck is always located in the same physical room' },
-        { text: 'Because constraints are imaginary and don\'t really exist' },
-        { text: 'Because only the first step in a chain can ever be the constraint' },
+        { text: "The role follows present capacities, available work and the objective, so it must be reassessed after a change.", correct: true },
+        { text: "Every small adjustment must move the constraint to a different physical workstation." },
+        { text: "Once identified, one station must remain the only possible constraint forever." },
+        { text: "A queue photograph establishes the future constraint without any flow measurements." },
       ],
-      explanation: 'No single stage is permanently "the bottleneck." Whichever step happens to be slowest holds the title, and the title transfers the moment you elevate that step. So the constraint is a role that travels — a position in the system, not a fixed place. Managing it is an ongoing chase, not a one-time fix.',
+      explanation: "A partial improvement can leave the same stage limiting. Tied stages can remain binding after one is improved. If all internal capacities exceed new demand and there is no backlog or inventory target, demand can limit planned output. Recalculate instead of assuming automatic migration.",
     },
     {
-      question: 'Fixing one bottleneck only to find a new one waiting feels like whack-a-mole. What is the right attitude toward this?',
+      question: "A line's capacities are 50, 30, 45, 35 and 60 units/hr. The 30-unit stage is improved to 32. What follows under the serial-line assumptions?",
       options: [
-        { text: 'It is genuine progress — each move raises throughput to a new, higher ceiling; the cycle is the work, captured by the Repeat step', correct: true },
-        { text: 'It proves the effort was wasted, since a constraint always remains' },
-        { text: 'It means you should stop optimizing entirely and accept the first bottleneck' },
-        { text: 'It signals that you misidentified the original bottleneck' },
+        { text: "The capacity ceiling rises to 32 units/hr while the same stage remains limiting.", correct: true },
+        { text: "The absence of migration proves that the capacity ceiling did not improve." },
+        { text: "Any increase at the limiting stage immediately makes another stage the constraint." },
+        { text: "The ceiling becomes 35 units/hr because the former second-slowest stage takes over automatically." },
       ],
-      explanation: 'Every whack lifts the ceiling: throughput went 30 to 35 to whatever comes next. A new constraint appearing is the sign you succeeded, not failed. The Theory of Constraints bakes this in with Repeat — governing a system is a continuous cycle of finding and relieving the current slowest step.',
+      explanation: "The new minimum is min(50, 32, 45, 35, 60) = 32 units/hr. Partial relief can raise a ceiling without moving the constraint. Whether that capacity produces more completed work still depends on the work available and the operating assumptions.",
     },
     {
-      question: 'Which everyday situations are classic moving-constraint bottlenecks? (Select all that apply.)',
+      question: "Which statements correctly distinguish rate limits, task duration and evidence for a constraint? Select all that apply.",
       allowMultiple: true,
-      options: [
-        { text: 'A six-lane highway that merges to two lanes — the merge caps the flow, and traffic queues in front of it', correct: true },
-        { text: 'One slow approver whose sign-off everything must wait on, while later steps sit idle', correct: true },
-        { text: 'The single slowest database query that dominates a page\'s load time', correct: true },
-        { text: 'The one bathroom that gates a household\'s morning routine', correct: true },
-      ],
-      explanation: 'All four are bottlenecks: the merge, the approver, the slow query, and the lone bathroom each cap a whole system\'s throughput, with a pile-up in front and starvation behind. And each shows the migration — widen the merge and a different chokepoint appears; speed up the slow query and the next-slowest one dominates the page.',
+      options: [{"text":"A queue at a road merge calls for arrival, effective-capacity and downstream-condition records before diagnosing the cause.","correct":true},{"text":"An approver's measured service rate is relevant when every case requires that approval, while other limits still need checking.","correct":true},{"text":"A slow query on a page's critical sequential path contributes to load time; that duration is not a production-line rate.","correct":true},{"text":"When two required stages tie at the minimum capacity, improving one alone leaves the other's bound in place.","correct":true},{"text":"Every local capacity increase guarantees more completed output and an immediate move of the constraint."}],
+      explanation: "A queue is a clue to investigate, and a required approval's rate can be part of a capacity comparison. Query duration concerns latency rather than a serial processing rate. Tied minima show why improving one stage need not raise the ceiling or move the remaining limit. Recalculate under the stated work, demand and operating assumptions.",
     },
     {
       question: 'How does the bottleneck connect to the feedback-loops course this one builds on?',
@@ -287,14 +341,73 @@ answers.
       explanation: 'Systems thinking taught you to watch how the whole behaves, not just the parts. The bottleneck is that lesson at its sharpest, and its movement is a feedback loop: each fix feeds back to relocate the constraint. You learn to ride that loop — expecting and chasing the next bottleneck — rather than being surprised by it.',
     },
     {
-      question: 'Pulling it all together: faced with a slow system, what does this course tell you the single most concrete leverage point is?',
+      question: "With limited improvement resources, what should guide where to investigate a slow process first?",
       options: [
-        { text: 'The bottleneck — push there and the whole system transforms; push anywhere else and it absorbs your effort and barely moves', correct: true },
-        { text: 'The fastest, most impressive stage, because it shows what\'s possible' },
-        { text: 'Every stage equally, raising them all a little at once' },
-        { text: 'Whatever stage is cheapest and easiest to improve' },
+        { text: "The measured limit on the stated system objective, followed by the estimated gain and cost of the whole plan.", correct: true },
+        { text: "The largest advertised local speed increase, regardless of the current work path." },
+        { text: "Equal effort at every stage before comparing capacities or the output objective." },
+        { text: "The cheapest isolated task without checking whether it changes the system outcome." },
       ],
-      explanation: 'From the leverage-points course you know a small, well-aimed push can move a whole system; the bottleneck is the most concrete such point. Effort at the constraint converts directly into throughput, while effort anywhere else is absorbed for zero gain. Stop optimizing the parts — find the constraint and govern it.',
+      explanation: "A measured constraint is a useful target, but work there does not guarantee an output gain: another stage can tie or take over, and demand can cap the plan. A combined upgrade may also make another stage worth improving. Check the full plan, quality, resources and relevant demand rather than promising zero gain everywhere else.",
+    },
+    {
+      "question": "In the calibration-upgrade case, which conclusion correctly separates the serial ceiling from the demand-limited output plan?",
+      "options": [
+        {
+          "text": "Verification sets the new internal ceiling; planned output remains at new demand.",
+          "correct": true
+        },
+        {
+          "text": "Calibration sets finished output at its new rating, regardless of the other stages."
+        },
+        {
+          "text": "The new internal ceiling is the planned output even when orders do not require it."
+        },
+        {
+          "text": "The system gains the full calibration increase because each local gain transfers."
+        }
+      ],
+      "explanation": "After the upgrade the serial ceiling is min(48, 35, 30, 40) = 30 kits/day at verification. With demand of 26, no older backlog and no inventory target, planned sustained completions are min(26, 30) = 26 kits/day. The local calibration increase is not the system output gain."
+    },
+    {
+      "question": "An approvals queue appears after each weekly release and clears before the next release. What evidence would best guide the choice between a release-policy change and more capacity?",
+      "options": [
+        {
+          "text": "Arrival timing, work and availability records, plus the required waiting-time target.",
+          "correct": true
+        },
+        {
+          "text": "The largest queue photograph, treating its size as proof of a persistent rate deficit."
+        },
+        {
+          "text": "The number of approvals before batching, without matching the observation period."
+        },
+        {
+          "text": "The absence of old work alone, treating it as proof that every service target is met."
+        }
+      ],
+      "explanation": "Clearing the batch before the next release suggests average capacity may cover arrivals, but does not establish acceptable waiting. Matched timing and work records help test whether smoothing releases, changing capacity or another intervention addresses the actual problem."
+    },
+    {
+      "question": "Which checks belong in validating an upgrade plan? Select all that apply.",
+      "options": [
+        {
+          "text": "Measure effective stage capacities on representative work with unchanged quality.",
+          "correct": true
+        },
+        {
+          "text": "Recompute downstream limits and compare the result with demand and older backlog.",
+          "correct": true
+        },
+        {
+          "text": "Add serial stage capacities to estimate how many finished items the plan will deliver."
+        },
+        {
+          "text": "Keep the advertised output estimate even if trial work times contradict its inputs."
+        }
+      ],
+      "explanation": "A useful validation checks both the capacity estimates and the work they are meant to serve. A downstream limit can take over, and older backlog can change the output objective. Serial capacities do not add; representative trial evidence should update the model.",
+      "allowMultiple": true
     },
   ]}
 />
@@ -308,47 +421,37 @@ answers.
     label: 'Bottlenecks & the Theory of Constraints',
     children: [
       {
-        label: 'Throughput = the bottleneck',
-        children: [{ label: 'A system runs at the speed of its slowest step — the minimum capacity, never the average or the sum. The wide body of the bottle is irrelevant; only the neck matters.' }],
+        label: 'Serial capacity ceiling',
+        children: [{ label: 'For the dedicated serial model, the lowest effective stage capacity sets the internal ceiling. Demand and operating conditions can make realised output lower.' }],
       },
       {
         label: 'Spotting the constraint',
-        children: [{ label: 'Work piles up IN FRONT of it (growing queue/inventory); stages AFTER it sit starved and idle. A stage faster than demand isn\'t binding — the constraint can move OUTSIDE to the market.' }],
+        children: [{ label: 'Queue growth and downstream starvation are clues to combine with matched work, flow and availability records. Check batches and interruptions before diagnosing the cause.' }],
       },
       {
         label: 'Theory of Constraints (5 steps)',
-        children: [{ label: 'Identify, Exploit (squeeze free output), Subordinate (pace everything to it; idle non-bottlenecks are fine), Elevate (spend to add capacity — only after exploiting), Repeat. An hour lost at the bottleneck is lost for all; an hour saved elsewhere is a mirage.' }],
+        children: [{ label: 'Identify, Exploit (recover losses), Subordinate (coordinate the rest), Elevate (expand when justified), Repeat. Recovery has its own effort, quality and safety requirements.' }],
       },
       {
-        label: 'Local vs. global optimization',
-        children: [{ label: 'Improving a non-bottleneck adds ZERO throughput and can be worse than useless — WIP pile-up, longer lead times, the "keep everyone busy" utilization trap.' }],
+        label: "Local and system gains",
+        children: [{ label: "If the current minimum remains fixed, speeding another dedicated stage alone does not raise the serial ceiling. A bundle can change which other improvement matters; extra local release can also add waiting work." }],
       },
       {
-        label: 'Amdahl\'s law',
-        children: [{ label: 'speedup = 1 / ((1 - p) + p / s). The un-improvable fraction caps everything: ceiling = 1 / (1 - p). 25% serial means 4x max, even with infinite hardware. It\'s the bottleneck in arithmetic.' }],
+        label: "Amdahl's law",
+        children: [{ label: "For a fixed task, speedup = 1 / ((1 − p) + p / s). A positive unchanged fraction gives limit 1 / (1 − p); p = 1 has no finite limit from that term. This time calculation differs from a serial capacity minimum." }],
       },
       {
-        label: 'The constraint always moves',
-        children: [{ label: 'Fix one bottleneck and a new slowest step takes over — it\'s a position, not a place. Whack-a-mole is progress. Watch for policy constraints (inertia). Highways, approvers, slow queries, the one bathroom.' }],
+        label: "Reassess after a change",
+        children: [{ label: "Partial relief can leave the same stage limiting, ties can remain and demand can cap planned output. Check the new capacities and objective before claiming a gain or a migrated constraint." }],
+      },
+      {
+        label: 'Choosing an upgrade with evidence',
+        children: [{ label: 'Combine demand, workload and matched queue histories' }, { label: 'Recompute all serial limits after each proposed change' }, { label: 'Separate capacity, demand, old backlog and realised output' }, { label: 'Validate representative work and revise changed assumptions' }],
       },
     ],
   }}
 />
 
 <Callout variant="success" title="Key takeaways">
-Every system is a chain, and its real output — **throughput** — is set by the single
-**slowest step** and by nothing else: not the average of the stages, not their sum,
-not the shiny fast machine. **Spot** the constraint by the pile-up in front of it and
-the idleness behind it; remember a stage faster than demand isn't binding, and the
-constraint can sit **outside** in the market. Then govern it with Goldratt's five
-focusing steps — **Identify, Exploit, Subordinate, Elevate, Repeat** — squeezing free
-output before you ever spend to add capacity, and accepting that idle non-bottlenecks
-are fine. Beware the deep instinct to polish the wrong stone: improving a
-**non-bottleneck** adds *zero* throughput and can be worse than useless, piling up
-work-in-progress and stretching lead times. **Amdahl's law** puts that in numbers —
-the un-improvable fraction caps the whole gain at $1 / (1 - p)$, so 25% serial means
-4x at most no matter the hardware. And expect the constraint to **move** the instant
-you fix it: it's a position, not a place, and chasing it from highway merges to slow
-queries to the one bathroom is the work. *Stop optimizing the parts. Govern the
-constraint.*
+For a simple serial line, compare compatible effective stage capacities to find its internal ceiling. Then check demand, older backlog and the operating assumptions before treating that ceiling as an output plan. Queue histories help diagnose the cause when combined with matched arrival, service and availability records. Use the focusing steps to compare recoverable losses and expansion, preserving quality and safety. After every change, recalculate: the next stage or demand may limit the gain. Amdahl’s law separately quantifies how unchanged portions of a task limit its time reduction. Commit to an upgrade only when the estimated system gain serves the objective and survives a representative trial.
 </Callout>

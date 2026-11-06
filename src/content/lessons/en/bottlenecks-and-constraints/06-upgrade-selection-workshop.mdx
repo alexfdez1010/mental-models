@@ -1,0 +1,323 @@
+---
+title: "Choose an upgrade with flow evidence"
+description: "Diagnose a constraint from demand, workload and measured flow. Compare upgrades, follow the next limit and test what would change the decision."
+topic: "en/bottlenecks-and-constraints"
+order: 7
+minutes: 20
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, PipelineThroughput, MindMap } from '@/components/react';
+
+A workshop prepares sensor kits for science classes. Orders are waiting, and someone proposes a faster intake station because it has the most visible paperwork. Before choosing an upgrade, connect the proposed change to the number of acceptable kits the whole process can finish.
+
+This workshop uses one **hypothetical** teaching dataset to compare the choices. The objective is to sustain the confirmed new-order rate without increasing unfinished work, while retaining the same quality checks. Reducing the backlog's size is a separate objective; matching new arrivals alone leaves the total number waiting unchanged.
+
+## Define the output and comparable capacities
+
+<MCQ
+  client:visible
+  pretest
+  question="A team wants more checked and packed kits from a serial process. Which comparison should guide an upgrade?"
+  options={[
+    { text: 'The proposed change in end-to-end output under the same demand and quality.', correct: true },
+    { text: 'The largest percentage increase advertised for any individual workstation.' },
+    { text: 'The sum of the separate workstation capacities before and after the upgrade.' },
+    { text: 'The workstation with the most visible waiting work at one chosen instant.' }
+  ]}
+  explanation="The goal concerns finished acceptable kits. Local speed, a capacity sum and a queue snapshot each omit part of the system-level comparison."
+/>
+
+The process is **intake → calibration → verification → packing**. Every kit visits every stage once. Each stage has its own dedicated resource with **480 available productive minutes per production day**, after planned breaks. That is available time, not time necessarily spent busy: a fast stage may wait for work. There is no shared worker or machine between stages in this model.
+
+Assume one kit type, unchanged quality requirements, sufficient materials and buffers, no rework or yield loss, and stable operation. The listed work minutes include the routine work required at that stage. We model sustainable flow after the pipeline is operating, rather than the exact timing of the first kit in a newly started shift. Additional downtime, batching or shared resources would require revising the model.
+
+**Capacity** is the sustainable processing-rate limit under the stated conditions, not the same as observed output. [MIT's Lean Academy glossary](https://ocw.mit.edu/courses/16-660j-introduction-to-lean-six-sigma-methods-january-iap-2012/cb7b7689f877c88831caea046d125a59_MIT16_660JIAP12_Glossary.pdf) distinguishes actual capacity from a theoretical rate that ignores losses. The [Lean Enterprise Institute's timing definitions](https://www.lean.org/lexicon-terms/cycle-time/) also make clear why routine loading, handling and changeover assumptions matter when estimating a rate.
+
+For each dedicated resource, divide available productive time by required minutes per kit:
+
+| Stage | Productive minutes available per production day | Work minutes per kit | Capacity in kits per production day |
+|---|---|---|---|
+| Intake | 480 | 10 | 480 ÷ 10 = 48 |
+| Calibration | 480 | 20 | 480 ÷ 20 = 24 |
+| Verification | 480 | 16 | 480 ÷ 16 = 30 |
+| Packing | 480 | 12 | 480 ÷ 12 = 40 |
+
+The serial capacity ceiling is **min(48, 24, 30, 40) = 24 kits per production day**. Every kit needs calibration, so the other stages' spare capacity cannot bypass it. Adding or averaging the stage capacities would count capabilities that the same kit must pass through, rather than independent streams of finished kits. If resources were shared, even these separately calculated capacities might not be simultaneously available.
+
+<MatchConcepts
+  client:visible
+  question="Match each quantity to its meaning in this case."
+  pairs={[
+    { term: 'Stage capacity', definition: 'A processing-rate limit for one dedicated resource under stated conditions' },
+    { term: 'Observed throughput', definition: 'Acceptable finished kits actually counted per production period' },
+    { term: 'Demand rate', definition: 'Confirmed new kit orders arriving per production period' },
+    { term: 'Improvement effort', definition: 'Work needed to implement an upgrade, separate from production flow' }
+  ]}
+  explanation="Capacity, completed output, incoming orders and implementation effort have different roles. The comparison needs matching production units, while the effort budget remains a separate constraint on the choice."
+/>
+
+## Diagnose with load and event evidence
+
+<MCQ
+  client:visible
+  pretest
+  question="Work is waiting before calibration. What would make that queue stronger evidence of the current constraint?"
+  options={[
+    { text: 'Matched arrival, service and availability records showing a persistent shortfall.', correct: true },
+    { text: 'A single photograph showing more boxes there than at a different workstation.' },
+    { text: 'A manager’s preference for treating the busiest-looking team as the slowest.' },
+    { text: 'A high isolated machine rating without checking work or interruptions.' }
+  ]}
+  explanation="A queue can reflect batch release, a temporary interruption, downstream blocking or a true sustained capacity limit. Rates and time records help distinguish these explanations."
+/>
+
+Confirmed new demand is **36 kits per production day**. At that demand, calculate the work each resource would need to perform. The **demand-load ratio** is required work minutes divided by available productive minutes; it is not actual utilisation. A ratio above 100% means the requested work does not fit, not that a resource can be busy for more than all its available time.
+
+| Stage | Work needed for the new daily orders | Demand-load ratio |
+|---|---|---|
+| Intake | 36 × 10 = 360 minutes | 360 ÷ 480 = 75% |
+| Calibration | 36 × 20 = 720 minutes | 720 ÷ 480 = 150% |
+| Verification | 36 × 16 = 576 minutes | 576 ÷ 480 = 120% |
+| Packing | 36 × 12 = 432 minutes | 432 ÷ 480 = 90% |
+
+Calibration has the lowest capacity, but verification also cannot sustain the full new-order rate. It may not look overloaded yet because calibration feeds it fewer kits. At the current flow of 24 kits a day, verification requires 24 × 16 = **384 minutes**, or **80%** of its available time. That spare time does not prove verification could handle all the waiting demand after calibration improves.
+
+In the teaching observation period of five production days, the logs show **180 kits admitted to intake**, **120 passing calibration** and **120 finished and packed**. Waiting work before calibration rises from **20 to 80 kits**; the other in-process totals have the same opening and closing levels. The change is consistent with 180 − 120 = **60 additional waiting kits**, or an average increase of **12 per production day**. Time records show calibration has eligible work available and is not spending the supposed processing time blocked by downstream stages or waiting for material.
+
+Together, the load calculation and those observations support investigating calibration first. A queue alone would not. For example, a scheduled batch handover can create a temporary queue before a resource whose daily capacity is adequate. MIT's glossary describes batch-and-queue as a processing pattern; its presence is not, by itself, proof of an inadequate capacity ceiling.
+
+<Categorize
+  client:visible
+  question="Sort the observations by what they establish."
+  buckets={['Useful evidence to combine', 'Insufficient on its own']}
+  items={[
+    { text: 'Comparable work-minute estimates and available productive time.', bucket: 'Useful evidence to combine' },
+    { text: 'Arrival, completion and queue changes over the same period.', bucket: 'Useful evidence to combine' },
+    { text: 'A queue photographed immediately after a batch arrives.', bucket: 'Insufficient on its own' },
+    { text: 'The number of people who describe one station as busy.', bucket: 'Insufficient on its own' }
+  ]}
+  explanation="Combine compatible measurements with an explanation of the work path. A queue snapshot or reputation for busyness can suggest where to look, but does not establish a persistent system constraint."
+/>
+
+## Compare upgrades and follow the next limit
+
+<MCQ
+  client:visible
+  pretest
+  question="An upgrade makes calibration faster than verification. Which calculation must be repeated?"
+  options={[
+    { text: 'The full capacity comparison, followed by the demand and backlog check.', correct: true },
+    { text: 'Only calibration’s local speedup, applied to all finished output.' },
+    { text: 'The sum of all workstation capacities as if the stages were parallel.' },
+    { text: 'The earlier output figure, keeping the original limiting stage fixed.' }
+  ]}
+  explanation="The next-lowest stage can take over as the internal limit. Actual planned output also depends on work available and the goal, so a local speedup is not the system gain."
+/>
+
+Four proposed upgrades have been scoped to retain the same quality criteria. Their capacities are estimates to validate in a trial, not demonstrated guarantees. Effort is measured in **technician-days of implementation work**. A technician-day is one person's planned day of upgrade work; it is not a production day, nor necessarily one calendar day of delay. The available improvement budget is seven technician-days.
+
+| Proposal | Change to capacity | Implementation effort | Serial capacity ceiling afterwards |
+|---|---|---|---|
+| A | Intake from 48 to 72 | 2 technician-days | min(72, 24, 30, 40) = 24 |
+| B | Calibration from 24 to 36 | 4 technician-days | min(48, 36, 30, 40) = 30 |
+| C | Verification from 30 to 45 | 3 technician-days | min(48, 24, 45, 40) = 24 |
+| B and C | Both changes together | 4 + 3 = 7 technician-days | min(48, 36, 45, 40) = 36 |
+| D | Calibration from 24 to 48 | 8 technician-days | min(48, 48, 30, 40) = 30 |
+
+B raises the serial ceiling by 30 − 24 = **6 kits per production day**, not by calibration's local increase of 12. Verification becomes the limiting stage. C alone does not change the ceiling, but C **after B** permits another increase of 36 − 30 = **6**. Its value depends on the rest of the plan. D alone reaches the same ceiling as B, requires more effort and exceeds this budget; that comparison does not establish whether D could be useful under a different demand or backlog objective.
+
+<PipelineThroughput
+  client:visible
+  title="Change capacities and locate the new ceiling"
+  eyebrow="Serial capacity model"
+  instructions="Adjust the stages to the proposal values in the table. The line shows the lowest stage capacity. This figure does not include a demand cap or measure actual queues."
+  stageLabels={['Intake', 'Calibrate', 'Verify', 'Pack']}
+  initialCapacities={[48, 24, 30, 40]}
+  unitLabel="kits/production day"
+  min={10}
+  max={80}
+  bottleneckLabel="Limit"
+  throughputLabel="Serial capacity ceiling"
+  capacityLabel="Capacity above that ceiling"
+  pileupLabel="Upstream of the limiting stage"
+  starvedLabel="Downstream of the limiting stage"
+  readout="With these stage capacities, the serial ceiling is {rate} {unit}, limited by {stage}. This is a capacity bound under the case assumptions, not an observation of demand-limited output or waiting work."
+  caption="Separate dedicated resources, one visit per kit, unchanged quality and no rework are assumed. Position markers locate stages; they do not report measured queue sizes or actual idleness."
+/>
+
+The diagram's bars use the same capacities and units as the table. When two stages tie for the minimum, both can constrain the serial ceiling even if the figure highlights only one. An upgrade must leave the other stage's limit in the calculation.
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Which conclusions follow from the proposal table under its assumptions? Select all that apply."
+  options={[
+    { text: 'Verification limits the serial ceiling after the calibration-only trial.', correct: true },
+    { text: 'The two-stage bundle has a different effect from verification alone.', correct: true },
+    { text: 'The larger calibration upgrade alone guarantees the new-order rate.' },
+    { text: 'The intake upgrade is sufficient because it has the highest final rating.' }
+  ]}
+  explanation="B moves the capacity limit to verification. C alone leaves calibration limiting, while B and C together reach the new-order rate in this model. D still leaves verification limiting, and A never relieves calibration."
+/>
+
+## Keep demand and old waiting work in the calculation
+
+<MCQ
+  client:visible
+  pretest
+  question="The internal line can process more kits than new customers order. What else must you know before capping planned output at new demand?"
+  options={[
+    { text: 'Whether older orders or an explicit inventory target still require output.', correct: true },
+    { text: 'Whether the highest-rated station can be made faster once again.' },
+    { text: 'Whether adding the stage capacities gives a more impressive number.' },
+    { text: 'Whether a capacity chart can replace the confirmed order record.' }
+  ]}
+  explanation="New-order demand is not all work available when an older backlog remains. The output plan must distinguish serving new demand, clearing old orders and deliberately building inventory."
+/>
+
+For sustained new-order demand of **36 kits a day**, the baseline can finish at most **24** under the model. B alone raises that to **30**, still leaving 36 − 30 = **6 new orders a day** accumulating. The B-and-C bundle reaches **36**: it can stop further growth if the estimated capacities are achieved, but matching arrivals does not reduce the total backlog. Older orders can be completed while new ones replace them in the waiting count.
+
+Now consider a separate operating condition in the same workshop: there is no backlog to reduce, demand is lower, and there is no inventory-building target. In that condition, a planned demand-limited rate is given by the smaller of demand and the serial capacity ceiling:
+
+**Planned sustainable output = min(confirmed demand, serial capacity ceiling)**
+
+| Operating condition | Confirmed new demand in kits/day | Serial ceiling in kits/day | Planned sustained completions in kits/day |
+|---|---|---|---|
+| Baseline with waiting orders | 36 | 24 | 24 |
+| B with waiting orders | 36 | 30 | 30 |
+| B and C with waiting orders | 36 | 36 | 36; the total backlog does not shrink |
+| B and C, no backlog or inventory target | 20 | 36 | 20 |
+
+The last row's spare capacity may be useful for resilience or later demand, but the capacity chart's higher line is not observed output. If old orders were still waiting, the line could use capacity above new demand to reduce them. State which objective you are evaluating rather than treating every case as “produce at the minimum”.
+
+### Pitfall and use
+
+The goal here concerns a sustainable rate, not a guaranteed delivery date for an individual kit. Variability, outages, batches and finite buffers can reduce achieved output or increase waiting even when the simple capacity ceiling looks adequate. A proposal that just matches average demand leaves no margin in this model; validate actual performance and acceptable waiting before making a service promise.
+
+<FillBlank
+  client:visible
+  question="Complete the output interpretation."
+  text="A capacity ceiling is a {{limit under assumptions|count of completed orders|record of customer demand}}. Matching new arrivals can {{stop backlog growth|guarantee an empty queue|prove unchanged quality}} without reducing the total waiting count."
+  explanation="The ceiling constrains a possible rate. Actual output needs work, materials and an operable process; an equal completion and arrival rate leaves an existing backlog unchanged."
+/>
+
+## Choose a trial and the evidence that could change it
+
+<MCQ
+  client:visible
+  pretest
+  question="The bundle meets the rate target on paper. Which trial result would directly challenge that conclusion?"
+  options={[
+    { text: 'Its effective calibration rate is below the trial estimate at unchanged quality.', correct: true },
+    { text: 'The intake station has spare time while finishing the required work.' },
+    { text: 'A non-limiting packing station could process more than it receives.' },
+    { text: 'The vendor reports a higher nameplate rating without changing the measured work time.' }
+  ]}
+  explanation="The conclusion depends on achievable capacities for acceptable output. Spare capacity elsewhere is expected in a serial line and does not by itself invalidate the plan."
+/>
+
+For the stated objective and budget, B and C are the model's candidate: together they meet the new-order rate using seven technician-days. Test B's capacity estimate before relying on the bundle's promised result, and plan how C would be validated without weakening verification. Implementation downtime and sequencing need their own plan; effort totals alone do not give the rollout's elapsed duration or near-term lost production.
+
+Suppose a representative trial instead measures **15 productive minutes per acceptable kit** at the upgraded calibration stage. With the same available time, its capacity is 480 ÷ 15 = **32 kits per production day**. Even after C, the revised ceiling is min(48, 32, 45, 40) = **32**, leaving 36 − 32 = **4 additional waiting orders per day** if demand continues. Recompute the decision rather than continuing to use the advertised calibration rating.
+
+| Evidence to collect | What it could change |
+|---|---|
+| Active processing, setup and unavailable-time records | Whether the assumed productive time and per-kit effort describe achievable capacity |
+| Confirmed demand, order mix and older backlog | Whether added capacity serves the stated objective |
+| Accepted output and rework at unchanged checks | Whether a faster local rate delivers acceptable finished kits |
+| Queue histories, blockages and material availability | Whether the apparent constraint is persistent or a symptom of another interruption |
+| Upgrade effort, downtime and dependency estimates | Whether the candidate fits the budget and rollout conditions |
+
+Use the Theory of Constraints focusing steps to look for recoverable losses before adding equipment, but treat that work as an intervention with effort, safety and quality requirements. It is not automatically costless. A stage with low observed output because it receives no eligible work needs a different investigation from one with a persistent excess load.
+
+### Transfer the test to a different process
+
+<MCQ
+  client:visible
+  question="An approvals team shows a queue after a weekly batch is released, but completes the entire batch before the next release. What is the defensible diagnosis?"
+  options={[
+    { text: 'The queue warrants checking timing and waiting; it alone does not prove a rate shortfall.', correct: true },
+    { text: 'The team must have the lowest sustainable capacity because some work briefly waited.' },
+    { text: 'The process must already meet every service target because no old batch remains.' },
+    { text: 'The fastest upstream team should release larger batches to remove the waiting.' }
+  ]}
+  explanation="Batching can produce waiting even when average capacity covers the incoming work. Check delay targets, load and availability before choosing between release-policy changes and a capacity upgrade."
+/>
+
+## Rebuild the improvement decision
+
+<MindMap
+  client:visible
+  title="From a queue to an upgrade candidate"
+  root={{
+    label: 'Improve the stated system outcome',
+    children: [
+      { label: 'Define the model', children: [{ label: 'Acceptable finished output' }, { label: 'Dedicated resources and common units' }, { label: 'Available time is not busy time' }] },
+      { label: 'Diagnose with evidence', children: [{ label: 'Demand times work per item' }, { label: 'Matched flows and queue histories' }, { label: 'A queue alone is not proof' }] },
+      { label: 'Compare whole plans', children: [{ label: 'Recompute every stage limit' }, { label: 'Constraint can migrate or tie' }, { label: 'Effort and production time differ' }] },
+      { label: 'Include work available', children: [{ label: 'New demand and old backlog' }, { label: 'Capacity differs from realised output' }, { label: 'Rate targets do not guarantee waiting times' }] },
+      { label: 'Validate the candidate', children: [{ label: 'Measure effective capacity at unchanged quality' }, { label: 'Check rollout and resource assumptions' }, { label: 'Revise when evidence changes the inputs' }] }
+    ]
+  }}
+/>
+
+<Quiz
+  client:visible
+  title="Check the improvement logic"
+  questions={[
+    {
+      question: 'Why can verification look partly idle now and still limit the process after calibration improves?',
+      options: [
+        { text: 'Current incoming flow is lower than the full demand it would then have to serve.', correct: true },
+        { text: 'Observed idleness proves the station has unlimited capacity for every later demand.' },
+        { text: 'A stage that is not the original bottleneck cannot become a later constraint.' },
+        { text: 'All station capacities must be added before identifying the original constraint.' }
+      ],
+      explanation: 'Calibration currently feeds 24 kits a day, using 384 verification minutes out of 480. New demand of 36 would require 576 minutes, so verification can constrain the next improvement even though its current workload is lower.'
+    },
+    {
+      question: 'The calibration-only upgrade raises its local capacity above verification. What determines the new serial ceiling?',
+      options: [
+        { text: 'The lowest remaining stage capacity, evaluated with the unchanged stages.', correct: true },
+        { text: 'The upgraded stage’s local capacity, ignoring later processing requirements.' },
+        { text: 'The sum of the intake improvement and the original finished-output rate.' },
+        { text: 'The average of the new capacities, weighted by how busy staff appear.' }
+      ],
+      explanation: 'After B, capacities are 48, 36, 30 and 40 kits per production day. The ceiling is 30 at verification, so the system gain is 6 rather than calibration’s local gain of 12.'
+    },
+    {
+      question: 'Select every condition needed before treating the capacity model as a useful output plan.',
+      allowMultiple: true,
+      options: [
+        { text: 'Work, quality criteria and available resources match the stated assumptions.', correct: true },
+        { text: 'New demand, old waiting work and the output objective are accounted for.', correct: true },
+        { text: 'Every visible queue is assumed to prove a different permanent bottleneck.' },
+        { text: 'Improvement technician-days are substituted directly for production days.' }
+      ],
+      explanation: 'The model needs compatible work and resources plus a defined output objective. Queue appearance and implementation effort cannot replace those checks.'
+    },
+    {
+      question: 'With no backlog to reduce, new demand is below every stage’s capacity and no inventory build is planned. What does the higher capacity ceiling mean?',
+      options: [
+        { text: 'The workshop has capacity above the planned demand-limited output.', correct: true },
+        { text: 'The workshop must produce at the ceiling even without orders for the kits.' },
+        { text: 'The new demand rate equals the sum of the spare capacities at all stages.' },
+        { text: 'The capacity chart has measured the number of customers actually ordering.' }
+      ],
+      explanation: 'With no backlog to reduce or inventory target, sustained planned output is limited by demand. Spare capacity may have other value, but it is not a record of actual orders or completions.'
+    },
+    {
+      question: 'A trial finds slower acceptable calibration work than the proposal assumed. What should happen before committing to the planned rate?',
+      options: [
+        { text: 'Recalculate the ceiling with the measured work time and review the proposal.', correct: true },
+        { text: 'Keep the advertised rating because a larger verification upgrade will cancel it.' },
+        { text: 'Exclude the slower kits so the original estimate remains true by definition.' },
+        { text: 'Add the new work time to each station capacity as though the units matched.' }
+      ],
+      explanation: 'At 15 minutes per acceptable kit and 480 available productive minutes, calibration supports 32 kits a day. The bundled ceiling becomes 32, below new demand of 36, so the earlier rate conclusion needs revision.'
+    }
+  ]}
+/>
+
+Next, take the [final exam](/bottlenecks-and-constraints/final-exam) to apply these distinctions alongside the rest of the course.

@@ -1,0 +1,413 @@
+---
+title: "Elige una mejora con datos del flujo"
+description: "Diagnostica una restricción con demanda, carga y flujo medido. Compara mejoras, sigue el siguiente límite y comprueba qué cambiaría la decisión."
+topic: "es/bottlenecks-and-constraints"
+order: 7
+minutes: 20
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, PipelineThroughput, MindMap } from '@/components/react';
+
+Un taller prepara kits de sensores para clases de ciencias. Hay pedidos esperando y alguien propone acelerar recepción porque es donde más papeleo se ve. Antes de elegir una mejora, relaciona el cambio propuesto con los kits aceptables que puede terminar el proceso completo.
+
+Este taller usa un conjunto de datos didáctico **hipotético** para comparar las opciones. El objetivo es sostener el ritmo de pedidos nuevos confirmados sin aumentar el trabajo pendiente y conservando las mismas comprobaciones de calidad. Reducir el volumen acumulado es otro objetivo; igualar las llegadas nuevas conserva el número total en espera.
+
+## Define la salida y capacidades comparables
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer, prueba"
+  question="Un equipo quiere terminar más kits verificados y embalados mediante un proceso en serie. ¿Qué comparación debe orientar una mejora?"
+  options={[
+    { text: 'El cambio previsto en la salida completa con la misma demanda y calidad.', correct: true },
+    { text: 'El mayor aumento porcentual anunciado para cualquier puesto individual.' },
+    { text: 'La suma de capacidades de los puestos antes y después de la mejora.' },
+    { text: 'El puesto con más trabajo esperando a la vista en un instante elegido.' }
+  ]}
+  explanation="El objetivo afecta a kits aceptables terminados. La rapidez local, una suma de capacidades y una foto de la cola omiten partes de la comparación del sistema completo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Revisa la respuesta"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+El proceso es **recepción → calibración → verificación → embalaje**. Cada kit visita cada etapa una vez. Cada etapa tiene un recurso propio con **480 minutos productivos disponibles por jornada de producción**, después de las pausas previstas. Es tiempo disponible, no tiempo necesariamente ocupado: una etapa rápida puede esperar trabajo. En este modelo no se comparte personal ni máquinas entre etapas.
+
+Supón un solo tipo de kit, requisitos de calidad constantes, materiales y espacio de espera suficientes, ausencia de trabajo repetido y de pérdidas de unidades, y funcionamiento estable. Los minutos indicados incluyen el trabajo habitual necesario en cada etapa. Modelamos el flujo sostenible con la línea ya en marcha, no el horario exacto del primer kit de un turno recién iniciado. Más paradas, lotes o recursos compartidos exigirían revisar el modelo.
+
+La **capacidad** es el límite del ritmo sostenible de procesamiento bajo las condiciones declaradas; no equivale a la salida observada. El [glosario de la Lean Academy del MIT](https://ocw.mit.edu/courses/16-660j-introduction-to-lean-six-sigma-methods-january-iap-2012/cb7b7689f877c88831caea046d125a59_MIT16_660JIAP12_Glossary.pdf) distingue la capacidad real de una tasa teórica que ignora pérdidas. Las [definiciones temporales del Lean Enterprise Institute](https://www.lean.org/lexicon-terms/cycle-time/) también aclaran por qué importan los supuestos de carga, manipulación y cambios de preparación al estimar una tasa.
+
+Para cada recurso independiente, divide el tiempo productivo disponible entre los minutos necesarios por kit:
+
+| Etapa | Minutos productivos disponibles por jornada | Minutos de trabajo por kit | Capacidad en kits por jornada de producción |
+|---|---|---|---|
+| Recepción | 480 | 10 | 480 ÷ 10 = 48 |
+| Calibración | 480 | 20 | 480 ÷ 20 = 24 |
+| Verificación | 480 | 16 | 480 ÷ 16 = 30 |
+| Embalaje | 480 | 12 | 480 ÷ 12 = 40 |
+
+El techo de capacidad de la línea es **min(48, 24, 30, 40) = 24 kits por jornada de producción**. Cada kit necesita calibración, así que la capacidad sobrante de otras etapas no permite saltársela. Sumar o promediar las capacidades contaría recursos por los que debe pasar el mismo kit, en lugar de flujos independientes de kits terminados. Si se compartieran recursos, quizá ni siquiera pudieran alcanzarse simultáneamente estas capacidades calculadas por separado.
+
+<MatchConcepts
+  client:visible
+  question="Relaciona cada cantidad con su significado en este caso."
+  pairs={[
+    { term: 'Capacidad de una etapa', definition: 'Un límite de procesamiento para un recurso independiente bajo condiciones declaradas' },
+    { term: 'Rendimiento observado', definition: 'Kits aceptables terminados que se cuentan por periodo de producción' },
+    { term: 'Tasa de demanda', definition: 'Pedidos nuevos confirmados de kits que llegan por periodo de producción' },
+    { term: 'Esfuerzo de mejora', definition: 'Trabajo para implantar un cambio, separado del flujo de producción' }
+  ]}
+  explanation="La capacidad, la salida terminada, los pedidos entrantes y el esfuerzo de implantación cumplen funciones distintas. Hay que comparar unidades de producción compatibles y conservar el presupuesto de esfuerzo como otra restricción de la elección."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige una cantidad y después su definición."
+  allCorrectLabel="Todo emparejado"
+  partialResultWord="correctas"
+  pickDefinitionHint="Elige ahora una definición"
+  notLinkedHint="sin enlazar"
+  termsLabel="Cantidades"
+  definitionsLabel="Significados"
+/>
+
+## Diagnostica con carga y registros de eventos
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer, prueba"
+  question="Hay trabajo esperando antes de calibración. ¿Qué haría de esa cola una prueba más sólida de la restricción actual?"
+  options={[
+    { text: 'Registros compatibles de llegadas, servicio y disponibilidad que muestren un déficit persistente.', correct: true },
+    { text: 'Una sola fotografía con más cajas allí que en otro puesto de trabajo.' },
+    { text: 'La preferencia de la dirección por llamar más lento al equipo que parece más ocupado.' },
+    { text: 'Una especificación alta de la máquina sin comprobar trabajo ni interrupciones.' }
+  ]}
+  explanation="Una cola puede reflejar lotes, una interrupción temporal, bloqueo por etapas posteriores o un límite sostenido real de capacidad. Las tasas y los registros temporales ayudan a distinguir esas explicaciones."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Revisa la respuesta"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+La demanda nueva confirmada es de **36 kits por jornada de producción**. Calcula el trabajo que necesitaría cada recurso para esa demanda. La **relación entre carga de demanda y disponibilidad** divide los minutos de trabajo necesarios entre los minutos productivos disponibles; no es la utilización real. Superar el 100 % significa que el trabajo pedido no cabe, no que un recurso pueda ocuparse durante más de todo su tiempo disponible.
+
+| Etapa | Trabajo necesario para los pedidos nuevos diarios | Relación entre carga y disponibilidad |
+|---|---|---|
+| Recepción | 36 × 10 = 360 minutos | 360 ÷ 480 = 75 % |
+| Calibración | 36 × 20 = 720 minutos | 720 ÷ 480 = 150 % |
+| Verificación | 36 × 16 = 576 minutos | 576 ÷ 480 = 120 % |
+| Embalaje | 36 × 12 = 432 minutos | 432 ÷ 480 = 90 % |
+
+Calibración tiene la menor capacidad, pero verificación tampoco sostiene todos los pedidos nuevos. Puede que aún no parezca sobrecargada porque calibración le entrega menos kits. Con el flujo actual de 24 kits diarios, verificación requiere 24 × 16 = **384 minutos**, el **80 %** de su tiempo disponible. Ese tiempo sobrante no demuestra que pudiera atender toda la demanda pendiente después de mejorar calibración.
+
+En el periodo didáctico de cinco jornadas, los registros muestran **180 kits admitidos en recepción**, **120 que superan calibración** y **120 terminados y embalados**. El trabajo en espera antes de calibración pasa de **20 a 80 kits**; los demás totales en proceso tienen el mismo nivel al inicio y al final. El cambio encaja con 180 − 120 = **60 kits adicionales esperando**, un aumento medio de **12 por jornada**. Los registros temporales muestran que calibración tiene trabajo apto disponible y no consume su supuesto tiempo productivo bloqueada por etapas posteriores ni esperando materiales.
+
+Juntos, el cálculo de carga y esas observaciones respaldan investigar primero calibración. Una cola sola no bastaría. Por ejemplo, entregar trabajo por lotes programados puede crear una cola temporal ante un recurso cuya capacidad diaria es suficiente. El glosario del MIT describe la producción por lotes y colas como un patrón de procesamiento; su presencia no demuestra por sí sola un techo de capacidad insuficiente.
+
+<Categorize
+  client:visible
+  question="Clasifica las observaciones según lo que establecen."
+  buckets={['Pruebas útiles para combinar', 'Insuficiente por sí sola']}
+  items={[
+    { text: 'Estimaciones comparables de minutos de trabajo y tiempo productivo disponible.', bucket: 'Pruebas útiles para combinar' },
+    { text: 'Llegadas, salidas y cambios de cola durante el mismo periodo.', bucket: 'Pruebas útiles para combinar' },
+    { text: 'Una cola fotografiada justo después de llegar un lote.', bucket: 'Insuficiente por sí sola' },
+    { text: 'Cuántas personas describen un puesto como muy ocupado.', bucket: 'Insuficiente por sí sola' }
+  ]}
+  explanation="Combina mediciones compatibles con una explicación del recorrido del trabajo. Una foto de la cola o la fama de estar ocupado pueden indicar dónde mirar, pero no establecen una restricción persistente del sistema."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  instructions="Elige un grupo para cada observación."
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="correctas"
+/>
+
+## Compara mejoras y sigue el siguiente límite
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer, prueba"
+  question="Una mejora hace que calibración sea más rápida que verificación. ¿Qué cuenta hay que repetir?"
+  options={[
+    { text: 'La comparación completa de capacidades y después la de demanda y pendientes.', correct: true },
+    { text: 'Solo la aceleración local de calibración, aplicada a toda la salida terminada.' },
+    { text: 'La suma de capacidades de todos los puestos como si funcionaran en paralelo.' },
+    { text: 'La cifra anterior de salida, manteniendo fija la etapa limitante original.' }
+  ]}
+  explanation="La siguiente etapa de menor capacidad puede asumir el límite interno. La salida prevista también depende del trabajo disponible y del objetivo; acelerar una etapa no equivale a la ganancia del sistema."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Revisa la respuesta"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Se han definido cuatro mejoras que conservan los mismos criterios de calidad. Sus capacidades son estimaciones que validar mediante una prueba, no garantías demostradas. El esfuerzo se mide en **jornadas de trabajo técnico de implantación**. Una jornada de técnico es el trabajo previsto de una persona durante una jornada para implantar mejoras; no es una jornada de producción ni necesariamente un día natural de retraso. El presupuesto disponible es de siete jornadas de técnico.
+
+| Propuesta | Cambio de capacidad | Esfuerzo de implantación | Techo de capacidad de la línea después |
+|---|---|---|---|
+| A | Recepción de 48 a 72 | 2 jornadas de técnico | min(72, 24, 30, 40) = 24 |
+| B | Calibración de 24 a 36 | 4 jornadas de técnico | min(48, 36, 30, 40) = 30 |
+| C | Verificación de 30 a 45 | 3 jornadas de técnico | min(48, 24, 45, 40) = 24 |
+| B y C | Ambos cambios juntos | 4 + 3 = 7 jornadas de técnico | min(48, 36, 45, 40) = 36 |
+| D | Calibración de 24 a 48 | 8 jornadas de técnico | min(48, 48, 30, 40) = 30 |
+
+B eleva el techo en 30 − 24 = **6 kits por jornada de producción**, no en los 12 que aumenta calibración localmente. Verificación pasa a limitar. C sola no cambia el techo, pero C **después de B** permite otra subida de 36 − 30 = **6**. Su valor depende del resto del plan. D sola alcanza el mismo techo que B, exige más esfuerzo y supera este presupuesto; esa comparación no establece si D serviría con otra demanda u otro objetivo de pendientes.
+
+<PipelineThroughput
+  client:visible
+  title="Cambia capacidades y localiza el nuevo techo"
+  eyebrow="Modelo de capacidad en serie"
+  instructions="Ajusta las etapas a los valores de las propuestas de la tabla. La línea marca la menor capacidad. La figura no incluye un límite de demanda ni mide colas reales."
+  stageLabels={['Recepción', 'Calibración', 'Verificación', 'Embalaje']}
+  initialCapacities={[48, 24, 30, 40]}
+  unitLabel="kits/jornada productiva"
+  min={10}
+  max={80}
+  bottleneckLabel="Límite"
+  throughputLabel="Techo de capacidad de la línea"
+  capacityLabel="Capacidad por encima de ese techo"
+  pileupLabel="Antes de la etapa limitante"
+  starvedLabel="Después de la etapa limitante"
+  readout="Con estas capacidades, el techo de la línea es {rate} {unit} y lo limita {stage}. Es un límite de capacidad bajo los supuestos del caso, no una observación de salida limitada por demanda ni de trabajo esperando."
+  caption="Se suponen recursos independientes, una visita por kit, calidad constante y ausencia de trabajo repetido. Los símbolos sitúan etapas; no indican tamaños medidos de cola ni inactividad real."
+/>
+
+Las barras utilizan las mismas capacidades y unidades que la tabla. Si dos etapas empatan en el mínimo, ambas pueden limitar el techo aunque la figura destaque solo una. Una mejora debe conservar el límite de la otra en la cuenta.
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="¿Qué conclusiones se deducen de la tabla bajo sus supuestos? Elige todas las que correspondan."
+  options={[
+    { text: 'Verificación limita el techo después de mejorar solo calibración.', correct: true },
+    { text: 'El conjunto de dos mejoras tiene un efecto distinto de verificación sola.', correct: true },
+    { text: 'La mejora mayor de calibración sola garantiza el ritmo de pedidos nuevos.' },
+    { text: 'Mejorar recepción basta porque alcanza la especificación final más alta.' }
+  ]}
+  explanation="B traslada el límite de capacidad a verificación. C sola deja el límite en calibración; B y C juntas alcanzan el ritmo de pedidos nuevos en este modelo. D sigue dejando el límite en verificación y A nunca lo alivia en calibración."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Revisa la respuesta"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Conserva la demanda y los pedidos antiguos en la cuenta
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer, prueba"
+  question="La línea puede procesar más kits de los que piden los clientes nuevos. ¿Qué más necesitas saber antes de limitar la salida prevista a esa demanda?"
+  options={[
+    { text: 'Si quedan pedidos antiguos o un objetivo explícito de aumentar inventario.', correct: true },
+    { text: 'Si se puede acelerar otra vez el puesto con la especificación más alta.' },
+    { text: 'Si sumar las capacidades de las etapas da una cifra más impresionante.' },
+    { text: 'Si una gráfica de capacidad puede sustituir el registro de pedidos confirmados.' }
+  ]}
+  explanation="La demanda nueva no es todo el trabajo disponible cuando quedan pedidos antiguos. El plan debe distinguir atender demanda nueva, resolver pedidos anteriores y aumentar inventario deliberadamente."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Revisa la respuesta"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Con demanda nueva sostenida de **36 kits diarios**, la situación inicial termina como máximo **24** bajo el modelo. B sola la eleva a **30** y aún deja 36 − 30 = **6 pedidos nuevos al día** acumulándose. B y C juntas alcanzan **36**: pueden detener el crecimiento si se logran las capacidades estimadas, pero igualar las llegadas no reduce el total pendiente. Los pedidos antiguos pueden terminarse mientras otros nuevos los sustituyen en el recuento de espera.
+
+Considera ahora otra condición de funcionamiento del mismo taller: no hay un atraso acumulado que reducir, la demanda ha bajado y no se busca aumentar inventario. En esa condición se obtiene una tasa prevista limitada por demanda tomando el menor valor entre la demanda y el techo de capacidad:
+
+**Salida sostenible prevista = min(demanda confirmada, techo de capacidad de la línea)**
+
+| Condición de funcionamiento | Demanda nueva confirmada en kits/día | Techo de la línea en kits/día | Terminaciones sostenidas previstas en kits/día |
+|---|---|---|---|
+| Situación inicial con pedidos pendientes | 36 | 24 | 24 |
+| B con pedidos pendientes | 36 | 30 | 30 |
+| B y C con pedidos pendientes | 36 | 36 | 36; no disminuye el total pendiente |
+| B y C, sin atraso acumulado ni objetivo de inventario | 20 | 36 | 20 |
+
+La capacidad sobrante de la última fila puede servir ante incidencias o demanda posterior, pero la línea más alta de la gráfica no es salida observada. Si siguieran esperando pedidos antiguos, podría utilizarse capacidad por encima de la demanda nueva para reducirlos. Declara qué objetivo evalúas en lugar de tratar todos los casos como «producir al mínimo».
+
+### Trampa y uso
+
+El objetivo trata de una tasa sostenible, no de garantizar la entrega de un kit concreto en una fecha. La variación, las averías, los lotes y los espacios de espera finitos pueden reducir la salida alcanzada o aumentar las esperas aunque el techo sencillo parezca suficiente. Una propuesta que justo iguala la demanda media no deja margen en este modelo; valida el rendimiento real y la espera aceptable antes de prometer un servicio.
+
+<FillBlank
+  client:visible
+  question="Completa la interpretación de la salida."
+  text="Un techo de capacidad es un {{límite bajo supuestos|recuento de pedidos terminados|registro de demanda de clientes}}. Igualar llegadas nuevas puede {{detener el crecimiento pendiente|garantizar una cola vacía|demostrar calidad constante}} sin reducir el recuento total en espera."
+  explanation="El techo restringe una tasa posible. La salida real necesita trabajo, materiales y un proceso operativo; igualar terminaciones y llegadas conserva un volumen pendiente que ya existiera."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  instructions="Elige la opción correcta en cada hueco."
+  correctResultLabel="Correcto"
+  partialResultWord="correctas"
+/>
+
+## Elige una prueba y los datos que podrían cambiarla
+
+<MCQ
+  client:visible
+  pretest
+  pretestLabel="Antes de leer, prueba"
+  question="El conjunto de mejoras alcanza el objetivo de tasa sobre el papel. ¿Qué resultado de una prueba cuestionaría directamente esa conclusión?"
+  options={[
+    { text: 'Su tasa efectiva de calibración queda por debajo de la estimada con la misma calidad.', correct: true },
+    { text: 'Recepción conserva tiempo libre mientras termina el trabajo necesario.' },
+    { text: 'Embalaje, que no limita, puede procesar más trabajo del que recibe.' },
+    { text: 'El proveedor anuncia una especificación mayor sin cambiar el tiempo de trabajo medido.' }
+  ]}
+  explanation="La conclusión depende de capacidades alcanzables para salida aceptable. Se espera capacidad sobrante en otras etapas de una línea; eso no invalida por sí solo el plan."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Revisa la respuesta"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Para el objetivo y presupuesto declarados, B y C son la opción candidata del modelo: juntas alcanzan el ritmo de pedidos nuevos con siete jornadas de técnico. Comprueba la estimación de B antes de apoyarte en el resultado prometido por el conjunto y prepara cómo validar C sin debilitar la verificación. Las paradas y la secuencia de implantación necesitan otro plan; sumar esfuerzo no da por sí solo la duración del despliegue ni la producción que se perderá al principio.
+
+Una prueba representativa mide, en cambio, **15 minutos productivos por kit aceptable** en calibración mejorada. Con el mismo tiempo disponible, su capacidad es 480 ÷ 15 = **32 kits por jornada de producción**. Incluso después de C, el techo revisado es min(48, 32, 45, 40) = **32**, lo que deja 36 − 32 = **4 pedidos adicionales esperando por día** si sigue la demanda. Repite la decisión en lugar de conservar la especificación anunciada de calibración.
+
+| Pruebas que reunir | Qué podrían cambiar |
+|---|---|
+| Registros de procesamiento activo, preparación y tiempo no disponible | Si el tiempo productivo y el esfuerzo por kit supuestos describen una capacidad alcanzable |
+| Demanda confirmada, tipos de pedido y pendientes antiguos | Si la capacidad añadida sirve al objetivo declarado |
+| Salida aceptada y trabajo repetido con las mismas comprobaciones | Si una tasa local mayor entrega kits terminados aceptables |
+| Historial de colas, bloqueos y disponibilidad de materiales | Si la restricción aparente persiste o refleja otra interrupción |
+| Estimaciones de esfuerzo, paradas y dependencias de la mejora | Si la opción cabe en el presupuesto y las condiciones de implantación |
+
+Usa los pasos de enfoque de la Teoría de Restricciones para buscar pérdidas recuperables antes de añadir equipo, pero trata esa labor como una intervención con esfuerzo y requisitos de seguridad y calidad. No es automáticamente gratuita. Una etapa con poca salida porque no recibe trabajo apto necesita otra investigación que una con exceso persistente de carga.
+
+### Aplica la prueba a otro proceso
+
+<MCQ
+  client:visible
+  question="Un equipo de aprobaciones forma una cola al recibir un lote semanal, pero termina el lote antes del siguiente. ¿Cuál es el diagnóstico defendible?"
+  options={[
+    { text: 'La cola invita a comprobar horarios y esperas; sola no demuestra un déficit de tasa.', correct: true },
+    { text: 'El equipo debe tener la menor capacidad sostenible porque hubo trabajo esperando.' },
+    { text: 'El proceso ya debe cumplir cualquier objetivo de servicio porque no queda el lote viejo.' },
+    { text: 'El equipo anterior más rápido debe entregar lotes mayores para eliminar la espera.' }
+  ]}
+  explanation="Los lotes pueden producir espera aunque la capacidad media cubra las llegadas. Comprueba objetivos de demora, carga y disponibilidad antes de elegir entre cambiar la entrega de lotes y ampliar capacidad."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Revisa la respuesta"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Reconstruye la decisión de mejora
+
+<MindMap
+  client:visible
+  title="De una cola a una mejora candidata"
+  eyebrow="Visión de conjunto"
+  outlineLabel="Esquema"
+  root={{
+    label: 'Mejora el resultado declarado del sistema',
+    children: [
+      { label: 'Define el modelo', children: [{ label: 'Salida aceptable terminada' }, { label: 'Recursos independientes y unidades comunes' }, { label: 'Disponible no equivale a ocupado' }] },
+      { label: 'Diagnostica con pruebas', children: [{ label: 'Demanda por trabajo de cada unidad' }, { label: 'Flujos e historiales de cola compatibles' }, { label: 'Una cola sola no demuestra el límite' }] },
+      { label: 'Compara planes completos', children: [{ label: 'Recalcula el límite de cada etapa' }, { label: 'La restricción puede cambiar o empatar' }, { label: 'Esfuerzo y tiempo de producción difieren' }] },
+      { label: 'Incluye trabajo disponible', children: [{ label: 'Demanda nueva y pendientes antiguos' }, { label: 'Capacidad distinta de salida real' }, { label: 'Una tasa objetivo no garantiza esperas' }] },
+      { label: 'Valida la opción', children: [{ label: 'Mide capacidad efectiva con la misma calidad' }, { label: 'Comprueba supuestos de recursos e implantación' }, { label: 'Revisa si las pruebas cambian las entradas' }] }
+    ]
+  }}
+/>
+
+<Quiz
+  client:visible
+  title="Comprueba la lógica de la mejora"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Práctica completada"
+  perfectMessage="Has acertado todas las preguntas."
+  goodMessage="Revisa las explicaciones de las preguntas falladas."
+  keepPracticingMessage="Repasa las explicaciones y vuelve a comprobar el razonamiento."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="Revisa la respuesta"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questions={[
+    {
+      question: '¿Por qué verificación puede parecer parcialmente parada ahora y limitar después el proceso al mejorar calibración?',
+      options: [
+        { text: 'El flujo que recibe ahora es menor que la demanda completa que tendría que atender.', correct: true },
+        { text: 'La inactividad observada demuestra capacidad ilimitada para cualquier demanda posterior.' },
+        { text: 'Una etapa que no sea el cuello inicial no puede convertirse en una restricción posterior.' },
+        { text: 'Hay que sumar todas las capacidades antes de identificar la restricción original.' }
+      ],
+      explanation: 'Calibración entrega ahora 24 kits diarios, que requieren 384 minutos de verificación de los 480 disponibles. La demanda nueva de 36 requiere 576 minutos: verificación puede limitar la siguiente mejora aunque ahora reciba menos trabajo.'
+    },
+    {
+      question: 'Mejorar solo calibración eleva su capacidad local por encima de verificación. ¿Qué determina el nuevo techo de la línea?',
+      options: [
+        { text: 'La menor capacidad restante, calculada junto con las etapas sin cambiar.', correct: true },
+        { text: 'La capacidad local mejorada, ignorando los requisitos de procesamiento posterior.' },
+        { text: 'La suma de la mejora de recepción y del ritmo inicial de salida terminada.' },
+        { text: 'La media de nuevas capacidades, ponderada por lo ocupado que parezca el personal.' }
+      ],
+      explanation: 'Después de B, las capacidades son 48, 36, 30 y 40 kits por jornada de producción. El techo es 30, en verificación; la ganancia del sistema es 6, no los 12 de ganancia local de calibración.'
+    },
+    {
+      question: 'Elige las condiciones necesarias antes de tratar el modelo de capacidad como un plan útil de salida.',
+      allowMultiple: true,
+      options: [
+        { text: 'Trabajo, criterios de calidad y recursos disponibles encajan con los supuestos.', correct: true },
+        { text: 'Se incluyen la demanda nueva, el trabajo antiguo y el objetivo de salida.', correct: true },
+        { text: 'Se supone que cada cola visible demuestra una restricción permanente distinta.' },
+        { text: 'Se sustituyen jornadas de técnico directamente por jornadas de producción.' }
+      ],
+      explanation: 'El modelo necesita trabajo y recursos compatibles, además de un objetivo de salida definido. El aspecto de la cola y el esfuerzo de implantación no sustituyen esas comprobaciones.'
+    },
+    {
+      question: 'Sin un atraso acumulado que reducir, la demanda nueva queda bajo todas las capacidades y no se busca aumentar inventario. ¿Qué significa el techo superior de capacidad?',
+      options: [
+        { text: 'El taller tiene capacidad por encima de la salida prevista limitada por demanda.', correct: true },
+        { text: 'El taller debe producir al techo aunque no haya pedidos para esos kits.' },
+        { text: 'La demanda nueva iguala la suma de capacidad sobrante en todas las etapas.' },
+        { text: 'La gráfica ha medido cuántos clientes están haciendo pedidos realmente.' }
+      ],
+      explanation: 'Sin un atraso acumulado que reducir ni objetivo de inventario, la demanda limita la salida sostenida prevista. La capacidad sobrante puede tener otro valor, pero no registra pedidos ni terminaciones reales.'
+    },
+    {
+      question: 'La prueba encuentra más tiempo de calibración aceptable del supuesto. ¿Qué debe ocurrir antes de comprometer la tasa prevista?',
+      options: [
+        { text: 'Recalcular el techo con el tiempo medido y revisar la propuesta.', correct: true },
+        { text: 'Conservar la cifra anunciada porque mejorar verificación la compensará.' },
+        { text: 'Excluir los kits lentos para conservar cierta la estimación por definición.' },
+        { text: 'Sumar el tiempo nuevo a la capacidad de cada etapa como si fueran compatibles.' }
+      ],
+      explanation: 'Con 15 minutos por kit aceptable y 480 minutos productivos disponibles, calibración permite 32 kits diarios. El techo del conjunto pasa a 32, por debajo de la demanda nueva de 36; hay que revisar la conclusión anterior.'
+    }
+  ]}
+/>
+
+A continuación, realiza el [examen final](/es/bottlenecks-and-constraints/final-exam) para aplicar estas distinciones junto con el resto del curso.
