@@ -177,14 +177,14 @@ export function FirstPrinciplesBuilder({
                 onClick={() => toggle(i)}
                 aria-pressed={on}
                 className={cx(
-                  'flex w-full items-start justify-between gap-3 rounded-card border-2 p-3 text-left transition-colors',
+                  'flex w-full flex-wrap items-start justify-between gap-3 rounded-card border-2 p-3 text-left transition-colors',
                   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600',
                   on
                     ? 'border-accent-500 bg-accent-300/30'
                     : 'border-ink-200 bg-surface hover:border-accent-400 hover:bg-accent-300/15',
                 )}
               >
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1 basis-32">
                   <span className="flex items-center gap-1.5 font-semibold text-ink-900">
                     <span
                       aria-hidden
@@ -207,7 +207,7 @@ export function FirstPrinciplesBuilder({
                 </span>
                 <span
                   className={cx(
-                    'flex-none font-display text-sm font-bold',
+                    'max-w-full flex-none break-words font-display text-sm font-bold',
                     on ? 'text-brand-700' : 'text-ink-400',
                   )}
                 >
