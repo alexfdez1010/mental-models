@@ -508,7 +508,12 @@ export function CourseGraph({
           <details className="group">
             <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-lg text-sm [&::-webkit-details-marker]:hidden">
               <span className="font-semibold text-ink-800 sm:mr-2 sm:w-16 sm:shrink-0">{tagsLabel}</span>
-              <span className="text-ink-600">{tags.length ? tagOptions.filter((o) => tags.includes(o.tag)).map((o) => o.label).join(', ') : allTagsLabel}</span>
+              <span
+                className="min-w-0 flex-1 truncate text-ink-600"
+                title={tags.length ? tagOptions.filter((o) => tags.includes(o.tag)).map((o) => o.label).join(', ') : allTagsLabel}
+              >
+                {tags.length ? tagOptions.filter((o) => tags.includes(o.tag)).map((o) => o.label).join(', ') : allTagsLabel}
+              </span>
               <svg className="ml-auto h-4 w-4 shrink-0 text-ink-600 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path d="m5 7.5 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -528,6 +533,10 @@ export function CourseGraph({
         ) : null}
       </div>
 
+      {caption ? (
+        <figcaption className="mb-8 max-w-3xl text-sm leading-relaxed text-ink-600">{caption}</figcaption>
+      ) : null}
+
       {visibleNodes.length === 0 ? (
         <p className="py-12 text-center text-ink-500">{emptyLabel}</p>
       ) : null}
@@ -536,7 +545,7 @@ export function CourseGraph({
         {/* Edge overlay — measured from the cards, purely decorative. */}
         <svg
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 hidden h-full w-full overflow-visible sm:block"
+          className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
           width={size.w || undefined}
           height={size.h || undefined}
         >
@@ -566,31 +575,15 @@ export function CourseGraph({
           ))}
         </svg>
 
-        {/* Card layers — plain responsive flow; arrows snap to these. */}
-        <ol className="relative flex list-none flex-col gap-y-10 p-0 sm:gap-y-20">
-          {rows.map((row, layer) => {
-            // Narrow screens give each course a readable full-width row.
-            // Wider mobile screens can pair cards; from sm, the measured graph
-            // uses a consistent card width and follows their actual positions.
-            const single = row.length === 1;
-            // Width lives on the flex ITEM (<li>), not the card, so the 50%
-            // resolves against the row — not the li's shrink-wrapped content —
-            // and `min-w-0` lets long titles wrap instead of spilling out.
-            const itemW = single ? 'w-full' : 'w-full min-[520px]:w-[calc(50%-0.5rem)]';
-            return (
-            <li
-              key={layer}
-              className="m-0 p-0"
-            >
-              <ul className="flex list-none flex-wrap items-stretch justify-center gap-4 p-0 sm:justify-evenly sm:gap-x-10 sm:gap-y-5">
+        {/* Compact nodes keep the full learning graph scannable. On narrow
+            screens two nodes share the row, capped at the reference's 160px;
+            widths follow the container so the graph still fits at 320px. */}
+        <ol className="relative flex list-none flex-col gap-y-12 p-0 sm:gap-y-20">
+          {rows.map((row, layer) => (
+            <li key={layer} className="m-0 p-0">
+              <ul className="flex list-none flex-wrap items-stretch justify-evenly gap-x-4 gap-y-4 p-0 sm:gap-x-8 sm:gap-y-6">
                 {row.map((n) => {
-                  const tint =
-                    n.accent === 'accent'
-                      ? 'bg-surface-sunken'
-                      : 'bg-brand-50';
-                  const tintText =
-                    'group-hover:text-brand-700';
-                  // Difficulty drives the card's colored left edge + tier tint.
+                  const tint = n.accent === 'accent' ? 'bg-surface-sunken' : 'bg-brand-50';
                   const edge = n.difficulty
                     ? DIFFICULTY_EDGE_CLASS[n.difficulty]
                     : 'border-l-4 border-l-ink-200 bg-surface';
@@ -598,40 +591,37 @@ export function CourseGraph({
                     if (el) cardRefs.current.set(n.slug, el);
                     else cardRefs.current.delete(n.slug);
                   };
+                  const itemClass = 'm-0 min-w-0 w-[calc((100%-1rem)/2)] max-w-40 p-0 sm:w-56 sm:max-w-none';
+                  const cardClass = 'brutal relative flex h-full w-full flex-col p-3.5 max-[359px]:p-3 sm:p-4';
 
-                  // Planned-but-unbuilt course: a dimmed, non-clickable node
-                  // that still anchors its dependency edges on the ladder.
                   if (n.comingSoon) {
                     return (
-                      <li key={n.slug} className={cx('m-0 min-w-0 p-0 sm:w-auto', itemW)}>
+                      <li key={n.slug} className={itemClass}>
                         <div
                           ref={setRef}
                           title={`${n.title} · ${comingSoonLabel}`}
                           aria-label={`${n.title} · ${comingSoonLabel}`}
-                          className={cx(
-                            'brutal relative flex h-full w-full flex-col border-dashed p-5 opacity-70 sm:w-56 sm:max-w-[80vw]',
-                            edge,
-                          )}
+                          className={cx(cardClass, 'border-dashed opacity-70', edge)}
                         >
-                          <div className="mb-2 flex items-center justify-between gap-2">
-                            <span
-                              className={cx(
-                                'grid h-8 w-8 shrink-0 place-items-center rounded-card text-lg grayscale sm:h-9 sm:w-9 sm:text-xl',
-                                tint,
-                              )}
-                            >
+                          <div className="mb-3 flex items-center justify-between gap-2">
+                            <span className={cx('grid h-7 w-7 shrink-0 place-items-center rounded-card text-base grayscale sm:h-9 sm:w-9 sm:text-xl', tint)} aria-hidden="true">
                               {n.icon}
                             </span>
                             {n.difficulty ? (
-                              <span className={cx('difficulty-badge', DIFFICULTY_CLASS[n.difficulty])}>
+                              <span className={cx('difficulty-badge hidden sm:inline-flex', DIFFICULTY_CLASS[n.difficulty])}>
                                 {difficultyLabels[n.difficulty]}
                               </span>
                             ) : null}
                           </div>
-                          <h3 className="break-words font-display text-lg font-semibold leading-snug text-ink-700">
+                          <h3 className="break-words font-display text-sm font-semibold leading-snug text-ink-700 sm:text-base">
                             {n.title}
                           </h3>
-                          <p className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-ink-600">
+                          {n.difficulty ? (
+                            <span className={cx('difficulty-badge mt-1.5 self-start sm:hidden', DIFFICULTY_CLASS[n.difficulty])}>
+                              {difficultyLabels[n.difficulty]}
+                            </span>
+                          ) : null}
+                          <p className="mt-auto inline-flex items-center gap-1 pt-3 text-xs font-medium text-ink-600">
                             <span aria-hidden="true">⏳</span>
                             {comingSoonLabel}
                           </p>
@@ -643,16 +633,12 @@ export function CourseGraph({
                   const prog = courseProgress(n.slug, n.lessonSlugs, finishedLessons, legacyCourses);
                   const isDone = prog.finished;
                   return (
-                    <li key={n.slug} className={cx('m-0 min-w-0 p-0 sm:w-auto', itemW)}>
+                    <li key={n.slug} className={itemClass}>
                       <a
                         ref={setRef}
                         href={n.href}
                         title={`${n.title} · ${prog.completed}/${prog.total} ${lessonsLabel}${isDone ? ` · ${finishedLabel}` : ''}`}
-                        className={cx(
-                          'brutal brutal-interactive group relative flex h-full w-full flex-col p-5 sm:w-56 sm:max-w-[80vw]',
-                          edge,
-                          isDone && 'ring-2 ring-brand-400 ring-offset-1',
-                        )}
+                        className={cx(cardClass, 'brutal-interactive group', edge, isDone && 'ring-2 ring-brand-400 ring-offset-1')}
                       >
                         {isDone ? (
                           <span
@@ -665,36 +651,26 @@ export function CourseGraph({
                             <span className="sr-only">{finishedLabel}</span>
                           </span>
                         ) : null}
-                        <div className="mb-2 flex items-center justify-between gap-2">
-                          <span
-                            className={cx(
-                              'grid h-8 w-8 shrink-0 place-items-center rounded-card text-lg sm:h-9 sm:w-9 sm:text-xl',
-                              tint,
-                            )}
-                          >
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <span className={cx('grid h-7 w-7 shrink-0 place-items-center rounded-card text-base sm:h-9 sm:w-9 sm:text-xl', tint)} aria-hidden="true">
                             {n.icon}
                           </span>
                           {n.difficulty ? (
-                            <span className={cx('difficulty-badge', DIFFICULTY_CLASS[n.difficulty])}>
+                            <span className={cx('difficulty-badge hidden sm:inline-flex', DIFFICULTY_CLASS[n.difficulty])}>
                               {difficultyLabels[n.difficulty]}
                             </span>
                           ) : null}
                         </div>
-                        <h3
-                          className={cx(
-                            'break-words font-display text-lg font-semibold leading-snug text-ink-900',
-                            tintText,
-                          )}
-                        >
+                        <h3 className="break-words font-display text-sm font-semibold leading-snug text-ink-900 group-hover:text-brand-700 sm:text-base">
                           {n.title}
                         </h3>
-                        <p className="mt-2 text-sm leading-relaxed text-ink-600">{n.description}</p>
-                        <p
-                          className={cx(
-                            'mt-auto pt-4 text-xs font-medium',
-                            isDone ? 'text-brand-700' : 'text-ink-600',
-                          )}
-                        >
+                        {n.difficulty ? (
+                          <span className={cx('difficulty-badge mt-1.5 self-start sm:hidden', DIFFICULTY_CLASS[n.difficulty])}>
+                            {difficultyLabels[n.difficulty]}
+                          </span>
+                        ) : null}
+                        <p className="mt-2 hidden text-xs leading-relaxed text-ink-600 sm:line-clamp-3">{n.description}</p>
+                        <p className={cx('mt-auto pt-3 text-xs font-medium', isDone ? 'text-brand-700' : 'text-ink-600')}>
                           {prog.completed}/{prog.total} {lessonsLabel}
                         </p>
                       </a>
@@ -703,23 +679,10 @@ export function CourseGraph({
                 })}
               </ul>
             </li>
-            );
-          })}
+          ))}
         </ol>
       </div>
 
-      {/* Difficulty legend — the zero-to-expert path at a glance. */}
-      <ul className="mt-8 flex list-none flex-wrap items-center justify-center gap-3 p-0">
-        {(['beginner', 'intermediate', 'advanced', 'expert'] as Difficulty[]).map((d) => (
-          <li key={d} className="m-0 p-0">
-            <span className={cx('difficulty-badge', DIFFICULTY_CLASS[d])}>{difficultyLabels[d]}</span>
-          </li>
-        ))}
-      </ul>
-
-      {caption ? (
-        <figcaption className="mt-6 text-center text-sm text-ink-500">{caption}</figcaption>
-      ) : null}
     </figure>
   );
 }
