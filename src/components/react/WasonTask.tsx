@@ -46,13 +46,15 @@ export interface WasonTaskProps {
   /** The true rule, spelled out on reveal. */
   ruleReveal: string;
   /**
-   * Verdict shown when the learner ran **zero** disconfirming tests (every test
-   * came back "fits"). This is the confirmation-bias trap. `{total}` is replaced.
+   * Legacy prop name for descriptive feedback when no recorded result is
+   * "does not fit", including an empty log. Counts do not identify the learner's
+   * hypothesis, predictions or testing strategy. `{total}`, `{yes}`, `{no}` are replaced.
    */
   trapVerdict?: string;
   /**
-   * Verdict shown when the learner **did** run at least one disconfirming test
-   * (got at least one "does not fit"). `{no}`, `{total}` are replaced.
+   * Legacy prop name for descriptive feedback when at least one recorded result
+   * is "does not fit". This is an observed result, not evidence that the learner
+   * expected rejection or sought falsification. `{total}`, `{yes}`, `{no}` are replaced.
    */
   goodVerdict?: string;
   /** Prefix shown before the correct/incorrect mark on their guess. */
@@ -68,20 +70,18 @@ export interface WasonTaskProps {
 const isStrictlyAscending = (a: number, b: number, c: number) => a < b && b < c;
 
 /**
- * Interactive **Wason 2-4-6 task** — confirmation bias caught in the act.
+ * Interactive **Wason 2-4-6 rule-discovery task**.
  *
  * The learner is told `2, 4, 6` fits a hidden rule and must discover the rule by
  * proposing their own triples and seeing whether each fits. The hidden rule is
- * deliberately broad — *any* three numbers in increasing order — but almost
- * everyone leaps to a narrow guess ("even numbers going up by two") and then only
- * tests triples that *confirm* it (8-10-12, 20-22-24…), all of which come back
- * "fits", falsely cementing the wrong rule. The only way to find the real rule is
- * to run a **disconfirming** test: a triple you expect to *fail* (like 1-2-3 or
- * 5-4-3). That negative test is exactly the move confirmation bias suppresses.
+ * *any* three numbers in strictly increasing order. The log records only inputs
+ * and observed membership in that hidden rule. The lesson supplies explicit
+ * candidate rules and asks learners to compare their predictions with the log.
  *
- * On reveal the island scores the learner not on whether they got the rule, but
- * on whether they ever sought a "does not fit" — turning the abstract idea
- * ("seek the disconfirming case") into something they either did or didn't do.
+ * The final selected rule can be checked against the authored answer menu.
+ * Observed fit/non-fit counts cannot grade the search strategy because the
+ * component does not record a hypothesis or expected outcomes. Both legacy
+ * feedback-template branches therefore have descriptive defaults and neutral styling.
  *
  * Inputs are native, labelled number fields; the result of each test and the
  * final verdict are announced via `aria-live`; transitions collapse under
@@ -104,9 +104,9 @@ export function WasonTask({
   selectHint = 'Pick the rule you think is hiding, then reveal it.',
   ruleReveal,
   trapVerdict =
-    'Every one of your {total} tests came back “fits”. That feels like proof — but it is the confirmation-bias trap: you only tried triples you expected to pass, and a “fits” can never rule a guess out. You never once tried to break your own theory.',
+    'Test log: {total} tested, {yes} fit, {no} did not fit. The log does not record your expected outcomes, so these counts do not grade your search strategy.',
   goodVerdict =
-    'You ran {no} test(s) that came back “does not fit” out of {total}. That is the whole skill: a triple you expect to FAIL is the only kind that can actually teach you the rule.',
+    'Test log: {total} tested, {yes} fit, {no} did not fit. The log does not record your expected outcomes, so these counts do not grade your search strategy.',
   correctLabel = 'Your guess was right:',
   incorrectLabel = 'Your guess missed it:',
   caption,
@@ -154,7 +154,7 @@ export function WasonTask({
   const verdict = (no === 0
     ? trapVerdict
     : goodVerdict
-  ).replace('{total}', String(tests.length)).replace('{no}', String(no));
+  ).replace('{total}', String(tests.length)).replace('{yes}', String(yes)).replace('{no}', String(no));
 
   return (
     <figure className={cx('brutal my-6 bg-surface p-5 sm:p-6', className)}>
@@ -240,7 +240,7 @@ export function WasonTask({
       ) : null}
 
       {/* Guess the rule. */}
-      <div className="mt-5 border-t-2 border-ink-100 pt-4">
+      <div className="mt-5">
         <p className="font-display text-sm font-semibold text-ink-900">{guessHeading}</p>
         <fieldset className="mt-2 space-y-2" disabled={revealed}>
           {guesses.map((g, i) => {
@@ -296,14 +296,7 @@ export function WasonTask({
               </span>{' '}
               {ruleReveal}
             </p>
-            <p
-              className={cx(
-                'rounded-card p-3 text-sm ring-1 ring-inset',
-                no === 0
-                  ? 'bg-warning/10 text-ink-800 ring-warning/30'
-                  : 'bg-success/10 text-ink-800 ring-success/30',
-              )}
-            >
+            <p className="text-sm leading-relaxed text-ink-700">
               {verdict}
             </p>
           </div>
