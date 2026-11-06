@@ -1,242 +1,307 @@
 ---
-title: "Telling It Apart & Defending Against It"
-description: "Regression to the mean is not a real trend, and — crucially — it is NOT the gambler's fallacy, though they're constantly confused. Learn to tell the three apart, then arm yourself: control groups, bigger samples, and simply expecting the extreme to fade."
+title: "Distinguish the Forecast From the Path"
+description: "Separate expected regression from individual outcomes, changes in the underlying process and causal evidence. Work through a complete training example."
 topic: "en/regression-to-the-mean"
 order: 6
-minutes: 10
-updated: 2026-07-02
+minutes: 18
+updated: 2026-11-06
 ---
 
-import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+import { MCQ, Quiz, FillBlank, Categorize, MindMap, FirstPrinciplesBuilder, MatchConcepts } from '@/components/react';
 
-You now know what regression to the mean is and how much havoc it causes. This final
-teaching lesson is about *not overshooting* — because the model has two evil twins that
-people constantly mistake it for, and confusing them causes fresh errors of its own. On
-one side is a **real trend** (a genuine effect that regression can hide or exaggerate).
-On the other is the **gambler's fallacy** (a superficially similar idea that is flat
-wrong). Tell all three apart, add a defensive toolkit, and you're done.
+A training centre selects operators after unusually high task scores. They receive advanced practice, then their average falls. Did the practice hurt? A forecast allowing for regression could have predicted a fall even if the practice helped.
 
-<MCQ
-  client:visible
-  pretest
-  question="A roulette wheel lands on red five times in a row. A gambler reasons: 'Extreme streaks regress to the mean, so black is now more likely.' What's wrong with this?"
+To decide, separate three questions: what the model predicts on average, which paths an individual can take, and what comparison would estimate the practice effect. A line through expected values is a forecast, not a rail that every result must follow.
+
+## An expected result is not a required next result
+
+<MCQ client:visible pretest
+  question="A model forecasts a less extreme retest after a high score. Which individual outcome would contradict that forecast by itself?"
   options={[
-    { text: 'Roulette spins are independent with no skill component — nothing carries over between them, so black is not more likely. That reasoning is the gambler’s fallacy, not regression', correct: true },
-    { text: 'Nothing — this is a correct application of regression to the mean' },
-    { text: 'Black really is more likely, because the wheel must balance out' },
-    { text: 'Red is more likely, because streaks continue' },
+    { text: "A retest above the first score, because no individual may rise." },
+    { text: "A retest below the reference mean, because no individual may cross it." },
+    { text: "Neither result by itself: an average forecast still permits variation.", correct: true }
   ]}
-  explanation="No penalty on a pretest. This is the confusion the whole lesson kills. Regression to the mean is about re-measuring a stable quantity that mixes signal and noise. A roulette wheel has no memory and no stable 'skill' being measured — each spin is independent, so the odds of black are unchanged. Believing the wheel is 'due' is the gambler's fallacy. Regression and the gambler's fallacy are not the same idea."
+  explanation="A conditional average does not specify each realised result. To assess the model, examine its predictions and variation across suitable observations rather than treating one path as a deterministic rule."
 />
 
-## Regression vs. a real trend
+A **conditional expectation** is the average a model predicts given specified information. Here that information is an initial measurement. The forecast does not tell you the exact next measurement, and it does not identify the cause of a change you later observe.
 
-The first job is separating regression (which needs no cause) from a **genuine effect or
-trend** (which does). They can look identical in a bare before/after: in both, the number
-after an extreme is different from the number before. The difference is *why*.
+Consider a toy **task-performance index**, in points, with higher values better. It is an unbounded index in this model, not a percentage or a score restricted to zero through one hundred. The reference population mean is **50**, the given reliability is **0.5**, underlying ability stays fixed and each task adds fresh independent temporary variation. For this model, use:
 
-Regression is what you'd expect **even if nothing changed**. A real effect is what's
-**left over after you subtract the expected regression**. So the question is never "did
-the number move?" — extremes always move. The questions are:
+$$E[\text{next}\mid\text{initial}=x]=50+0.5(x-50).$$
 
-- **Was the unit selected *for* being extreme?** If yes, expect regression and be
-  skeptical. If the unit was chosen for some unrelated reason, regression worries shrink.
-- **Is there a plausible mechanism**, and does the effect show up against a **control**
-  that regressed too? (Lesson 03's fix.)
-- **Does it persist and scale?** Regression is a one-time reversion; a real trend keeps
-  going, shows a dose-response (more treatment → more effect), and reappears when you
-  repeat the study.
+The $E$ denotes the conditional expectation; the vertical bar means “given”. Reliability tells us how much of the initial deviation to retain in this forecast. These are stipulated teaching parameters, not estimates from actual operators.
 
-<Callout variant="info" title="A quick contrast">
-*Story A:* "We coached our 10 worst-performing stores and next quarter they improved
-15%." Selected for being extreme, no control — mostly regression until proven otherwise.
-*Story B:* "We randomly picked stores, coached half, and the coached half beat the
-uncoached half by 15% — and by 25% with double the coaching." A control group and a
-dose-response: that surplus over the control is a real effect regression can't fake.
-</Callout>
+| Forecast step after an initial index of 90 | Calculation |
+|---|---|
+| Reference mean | 50 points |
+| Initial deviation | 90 − 50 = 40 points |
+| Deviation retained in the expectation | 0.5 × 40 = 20 points |
+| Expected follow-up | 50 + 20 = 70 points |
 
-<MCQ
-  client:visible
-  question="Which finding is LEAST explainable by regression to the mean alone (i.e. most likely a real effect)?"
-  options={[
-    { text: 'A randomly chosen treatment group improves more than a randomly chosen control group, and improves even more at a higher dose', correct: true },
-    { text: 'The 10 worst hospitals last year had lower mortality this year', correct: false },
-    { text: 'A patient who sought care at peak pain felt better a week later', correct: false },
-    { text: 'The team on this month’s magazine cover slumped next month', correct: false },
+<FirstPrinciplesBuilder client:visible
+  eyebrow="Rebuild the conditional expectation"
+  analogyValue={90} analogyLabel="Observed initial index"
+  analogyNote="An observation, rather than the model's forecast for another task."
+  valuePrefix="" valueSuffix=" points"
+  rebuiltLabel="Selected forecast terms"
+  instructions="Add the reference mean and the retained deviation. Both terms are needed for the complete forecast."
+  revealAllLabel="Add both forecast terms" resetLabel="Reset"
+  parts={[
+    { label: "Reference mean", value: 50, note: "The starting level for the stated model." },
+    { label: "Retained initial deviation", value: 20, note: "The reliability-weighted deviation, not the entire initial gap." }
   ]}
-  explanation="The other three are textbook regression: units selected at an extreme (worst hospitals, peak pain, a cover-worthy peak) drifting back toward the mean. Only the first has both a control group (which would regress too) and a dose-response — the surplus over the control, growing with dose, is the fingerprint of a genuine effect."
+  verdictTemplate="The complete forecast is {total}. It is an expectation under the stated model, not a required retest score."
 />
 
-## Regression vs. the gambler's fallacy — the crucial split
+The expectation is between 50 and 90. An individual follow-up can nevertheless be below 50, between 50 and 90, or above 90. None is ruled out by this model. Berkeley's regression chapter explicitly distinguishes the average regression effect from any requirement that an individual's second observation be less extreme. [Berkeley on regression errors](https://www.stat.berkeley.edu/~stark/SticiGui/Text/regressionErrors.htm)
 
-This is the confusion that trips up even careful people, because both sentences contain
-"things return toward normal." But they describe completely different situations, and one
-is true while the other is false.
+<details>
+<summary>Optional derivation and the variation around the forecast</summary>
 
-**The gambler's fallacy** is the belief that in a sequence of **independent** trials, a
-run of one outcome makes the opposite outcome "due." After five reds, black feels
-overdue. It is *wrong*: a fair wheel has no memory. Each spin is 50/50 (minus the house
-edge) no matter what came before. Nothing is keeping a ledger; the past streak does not
-push the future toward balance.
+One precise construction is $X=T+e_0$ and $Y=T+e_1$. The stable ability $T$ has a normal distribution with mean 50 and standard deviation 10. Each temporary deviation $e_0,e_1$ is independently normal with mean zero and standard deviation 10, independent of $T$. A normal distribution is the bell-shaped, unbounded distribution used for this toy construction.
 
-**Regression to the mean** is the (true) tendency of an **extreme measurement of a
-stable, signal-plus-noise quantity** to be followed by a less extreme one. The next
-measurement is closer to the mean not because the process "owes" you a correction, but
-because you *conditioned on an extreme* — you selected an observation that was partly
-lucky, and fresh luck averages out.
+**Variance** measures spread in squared units; standard deviation is its square root. **Covariance** measures shared variation, and **correlation** divides it by the product of the two standard deviations. Each measurement has variance $100+100=200$. Their shared ability contributes covariance 100, giving correlation $100/200=0.5$. For these jointly normal measurements, the conditional mean is the forecast above and the conditional variance is:
 
-The differences, laid side by side:
+$$\operatorname{Var}(Y\mid X=90)=200(1-0.5^2)=150.$$
 
-| | Gambler's fallacy | Regression to the mean |
+The conditional standard deviation is $\sqrt{150}\approx12.25$ points, so knowing the first result does not remove variation in the next. The construction and conditional formulas follow the [bivariate-normal theorem in Pishro-Nik's probability text](https://www.probabilitycourse.com/chapter5/5_3_2_bivariate_normal_dist.php). A different distribution or dependence structure needs its own justified forecast.
+
+</details>
+
+### When to use it
+
+Use the distinction when someone turns “expected to be less extreme” into “must improve”, “cannot cross the mean” or “must decline next time”. For a real forecast, establish the relevant reference population, measurement stability and reliability rather than borrowing this example's parameters.
+
+<FillBlank client:visible
+  question="Separate the forecast from its possible realisations."
+  text="The model's forecast is a {{conditional average|compulsory path|causal estimate}}. A follow-up beyond the original extreme is {{possible|forbidden|compensatory}}."
+  explanation="The conditional average summarises a distribution of possible follow-ups. An individual can become more extreme without any compensating force."
+/>
+
+## A real change can be a step or a drift
+
+<MCQ client:visible pretest
+  question="An intervention creates a lasting improvement that stays at the same size. Must its measured benefit keep growing to count as real?"
+  options={[
+    { text: "Yes: a genuine effect must increase at every subsequent measurement." },
+    { text: "No: a persistent level change can be real without a continuing upward trend.", correct: true },
+    { text: "Yes: a flat improvement proves that regression has already ended." }
+  ]}
+  explanation="A lasting change in level differs from a continuing drift. Time-pattern shape alone does not establish causation, and a real effect need not grow each week."
+/>
+
+A **level shift** changes the underlying process by an amount that then persists. A **drift** changes it progressively over time. Either can coexist with regression associated with the initial selection.
+
+Keep the initial index of 90 and the same temporary-variation model. Compare these stated hypothetical processes, **conditioning only on that initial observation**:
+
+| Assumed process after selection | First follow-up expectation | Second follow-up expectation | Third follow-up expectation |
+|---|---|---|---|
+| Ability remains unchanged | 70 | 70 | 70 |
+| Practice adds a lasting 10 points before the first follow-up | 80 | 80 | 80 |
+| Underlying ability decreases by 5 points each period | 65 | 60 | 55 |
+
+For the lasting practice effect, **70 + 10 = 80** at every follow-up. That remains below the selected initial result of 90, even though the stipulated practice effect is beneficial. A decline from the peak can mask a positive change in the underlying process.
+
+<FirstPrinciplesBuilder client:visible
+  eyebrow="Add an assumed lasting change"
+  analogyValue={90} analogyLabel="Selected initial observation"
+  valuePrefix="" valueSuffix=" points"
+  rebuiltLabel="Selected terms in the changed-process forecast"
+  instructions="Add the unchanged-process forecast and the stipulated improvement. Compare the completed forecast with the selected observation."
+  revealAllLabel="Add both terms" resetLabel="Reset"
+  parts={[
+    { label: "Unchanged-process forecast", value: 70, note: "Already accounts for the initial selection under the toy model." },
+    { label: "Assumed persistent improvement", value: 10, note: "A hypothetical effect used to demonstrate the distinction, not an estimated benefit." }
+  ]}
+  verdictTemplate="The changed-process expectation is {total}, below the original observation despite the assumed beneficial change."
+/>
+
+For the declining process, **70 − 5 = 65**, then **70 − 10 = 60**, then **70 − 15 = 55**. The reference forecast changes because the underlying process changes; “regression explains it” would not justify ignoring that change.
+
+The unchanged row does **not** predict an automatic sequence of 90 → 70 → 60 → 55. We are using the original information throughout. New observations can update the forecast, but repeatedly shrinking the previous forecast as if it were fresh data invents information.
+
+Nor is regression identifiable as a single visible bounce that must end after one period. A selected cohort can remain below its original peak across many later measurements without any intervention. Persistence is useful to record; it is not by itself a causal test. A dose-response pattern can also be informative, but it needs a design that separates the dose from who receives it and other changing conditions.
+
+### When to use it
+
+Distinguish a forecast under fixed conditions from a process that may change. Check interventions, task difficulty, equipment and measurement rules. Avoid the rule “a real effect keeps growing”: a permanent step, a temporary effect and a gradual drift have different shapes, and their causes still need evidence.
+
+<Categorize client:visible
+  question="Use the definitions, rather than treating each shape as proof of its cause."
+  buckets={["Level shift", "Progressive drift", "Not a valid inference"]}
+  items={[
+    { text: "An underlying improvement appears and remains the same size", bucket: "Level shift" },
+    { text: "The underlying process loses the same amount each period", bucket: "Progressive drift" },
+    { text: "Any lasting observed difference proves the intervention caused it", bucket: "Not a valid inference" },
+    { text: "Every real effect must get larger at each follow-up", bucket: "Not a valid inference" }
+  ]}
+  explanation="Step and drift describe assumed process changes. Observing a shape is not the same as identifying why it occurred."
+/>
+
+## Independent trials do not owe a reversal
+
+<MCQ client:visible pretest
+  question="A fair coin has produced a run of heads. Under independent tossing, what happens to the next toss's chance of tails?"
+  options={[
+    { text: "It rises because the earlier heads require compensation." },
+    { text: "It falls because the coin has demonstrated a preference." },
+    { text: "It stays unchanged; the previous run does not alter the mechanism.", correct: true }
+  ]}
+  explanation="Independence means the prior run does not alter the next toss's distribution. Predicting a less extreme fresh block is different from claiming the opposite outcome is now overdue."
+/>
+
+The **gambler's fallacy** is the belief that independent outcomes must compensate for a run. For a fair independent coin, the next toss has probability **0.5 of tails**, even after five heads. It does not rise to repay the streak.
+
+Now define a different question: how many heads should we expect in a **fresh block of five tosses**? The answer is **5 × 0.5 = 2.5**. The first block's five heads was extreme; the expected fresh block is less extreme. That statement does not require a higher tails probability or a stable “coin skill” component. An independent follow-up has its ordinary distribution, regardless of the selected first block.
+
+| Question after five observed heads | Correct expectation or probability |
+|---|---|
+| Tails on the next toss | 0.5 |
+| Heads in the next five tosses | 2.5 |
+| Total heads after those five additional tosses | 5 + 2.5 = 7.5 out of 10 |
+| Expected cumulative heads fraction then | 7.5 ÷ 10 = 75% |
+
+The expected cumulative fraction after ten tosses is still above one half. In this expectation, fresh observations dilute the starting streak; no realised cancellation is required. A fresh block can be all heads again. Neither an average forecast nor independence forbids that outcome.
+
+### When to use it
+
+Ask exactly what is being predicted: the next event, a new block, a cumulative average or an individual's retest. The information and target determine the forecast. “Regression cannot occur without skill” and “tails is now due” both miss that distinction.
+
+<FillBlank client:visible
+  question="Keep the two predictions separate."
+  text="A fresh independent block has its {{ordinary distribution|compensating bias|guaranteed reversal}}. Claiming that tails is now more likely because of past heads is the {{gambler's fallacy|conditional expectation|level-shift model}}."
+  explanation="The selected first block does not change an independent second block's distribution. It therefore does not make the opposite result overdue."
+/>
+
+## A comparison estimates an effect without making it exact
+
+<MCQ client:visible pretest
+  question="Both an advanced-practice group and a comparable usual-practice group fall from a selected high starting point. Can the new practice still have helped?"
+  options={[
+    { text: "Yes, if the decline is smaller under new practice; assess the contrast and its uncertainty.", correct: true },
+    { text: "No, because a beneficial intervention must beat its own selected initial measurement." },
+    { text: "Yes, and any positive contrast automatically equals the exact causal effect." }
+  ]}
+  explanation="After selection on an extreme baseline, both groups can decline even if the underlying process is unchanged. A between-group contrast can support an effect estimate under the design assumptions, while retaining uncertainty."
+/>
+
+Return to the training centre. Before follow-up, similarly selected high scorers are randomly allocated to advanced practice or the usual programme. Use the same tasks and scoring rules, comparable exposure and the same follow-up dates. Retain all allocated operators, check implementation and assume the practice does not affect the comparison group's training. These conditions support the comparison; the totals alone do not verify them.
+
+Here is a separate hypothetical **observed** group record. The earlier table described assumed expectations; this table records realised averages, which need not match an expectation exactly.
+
+| Group | Selected initial average | Follow-up average | Follow-up minus initial |
+|---|---|---|---|
+| Advanced practice | 90 | 78 | 78 − 90 = −12 |
+| Usual programme | 90 | 72 | 72 − 90 = −18 |
+| Observed difference in changes | | | −12 − (−18) = +6 points |
+
+The advanced-practice average fell by twelve points. It nevertheless fell **six points less** than the comparison average. Under the stated randomized design, that contrast estimates an advantage of advanced practice in this sample and period. It neither proves a harmful twelve-point effect nor identifies a beneficial effect of exactly six points.
+
+The comparison's eighteen-point decline is not a direct measurement of regression alone. Shared conditions, regression associated with selection and random differences can all contribute. Random allocation supports balance **in expectation across possible allocations**, while realised groups can differ. J-PAL explicitly makes that distinction in its [randomization guidance](https://www.povertyactionlab.org/resource/randomization).
+
+To assess precision, retain operator-level outcomes and the allocation design; these averages alone are insufficient. A replicated contrast and well-designed variation in the practice can strengthen the evidence, but persistence or a dose-response pattern is not a substitute for checking the comparison. Self-selection into more practice, for example, can produce a dose pattern without identifying its cause.
+
+### When to use it
+
+Use this comparison after interventions following peaks or slumps. Distinguish the observed before-after change, the contrast estimating an effect and the uncertainty in that estimate. Do not mechanically subtract an assumed amount of regression and label every remainder a proven cause.
+
+<MCQ client:visible allowMultiple
+  question="Select the interpretations supported by the observed training table."
+  options={[
+    { text: "The relative contrast favours advanced practice despite its raw decline.", correct: true },
+    { text: "Its causal interpretation depends on the design and remains uncertain.", correct: true },
+    { text: "The comparison decline identifies the precise amount of regression." },
+    { text: "The practice effect is harmful because its group fell from the initial peak." }
+  ]}
+  explanation="The arithmetic gives a positive contrast. A selected baseline is not the no-practice counterfactual, and the comparison change is not a labelled component of pure regression."
+/>
+
+## Use a toolkit that can fail its own assumptions
+
+<MCQ client:visible pretest
+  question="A large service team has an extreme month because its shared software failed. Does averaging many workers remove that disturbance?"
+  options={[
+    { text: "Yes: a large headcount always eliminates temporary variation." },
+    { text: "No: a shared disturbance can affect everyone's measurement together.", correct: true },
+    { text: "Yes: team averages contain no noise after individuals are combined." }
+  ]}
+  explanation="Averaging can reduce independent temporary variation. A common outage does not cancel merely because many affected workers are averaged."
+/>
+
+Use the following checks as questions about the actual process, rather than rules that declare every extreme temporary.
+
+| Check | What to establish | What it does not establish |
 |---|---|---|
-| True or false? | **False** (a real error) | **True** (a real phenomenon) |
-| Applies to | Independent trials (coins, roulette, dice) | Repeated noisy measurements of a stable quantity (with a signal) |
-| Claim about the next value | It will *reverse* to "balance out" the streak | It will, in expectation, be *closer to the mean* than the extreme was |
-| Why | (Wrongly) assumes a compensating force / memory | You selected an extreme; the lucky part won't recur |
-| Is there a "signal"? | No — pure chance, no stable skill to measure | Yes — a stable signal plus transient noise |
+| Inspect selection | Why this period or group was chosen | That all extremeness was noise |
+| Check the reference | Which population and historical conditions are relevant | That an old mean survives a changed process |
+| Use repeated measurements | Persistence, variation and measurement stability | That a visible pattern identifies its cause |
+| Average suitable observations | Less independent measurement variation when assumptions hold | That common shocks or systematic error disappear |
+| Build a justified comparison | A defensible alternative without the intervention | An exact finite-sample effect |
+| Shrink with a supported model | A forecast balancing the observation and prior information | A universal reliability or a compulsory path |
 
-Two traps to nail shut:
+**Shrinkage** pulls an estimate toward a supported reference rather than treating one noisy observation as the full signal. In the toy normal model, the estimated stable ability after the first index of 90 is 70: the reference plus the retained deviation. That same value predicts an unchanged future task because its fresh noise has mean zero. The interpretation is **Bayesian**: it combines the population distribution of abilities with information from the observed score. It applies to the stated model; other useful shrinkage rules can have different forms.
 
-1. **Regression is not a compensating force.** It does *not* say the next value dips
-   *below* the mean to make up for a high one. It says the next value lands *closer to*
-   the mean — it stops at the middle, it doesn't overshoot. Believing in the overshoot is
-   importing the gambler's fallacy into regression.
-2. **A memoryless gamble doesn't "regress" in the RTM sense.** A single roulette spin has
-   no skill component and no stable quantity being re-measured, so there's nothing to
-   regress. What *does* happen with coins is that a running *average* of many independent
-   flips settles toward 50% — but that's the law of large numbers diluting a streak with
-   fresh flips, not any single future flip being "pulled" toward balance.
+For an independent transfer, consider a museum's visitor ratings. It changes its welcome script after the lowest-rated weekend of the year. Ratings then rise for a month, but that month also has a different visitor mix. More independent ratings can improve precision; they do not by themselves separate the script, visitor mix and selection on a poor weekend. A practical evaluation keeps the rating question consistent, records comparable periods and visitor groups, and tests the script with a justified allocation and comparison where feasible.
 
-<Reveal client:visible buttonText="So how can a coin's average settle without the gambler's fallacy being true?">
-Because dilution isn't compensation. After five heads, the next flips are still 50/50 —
-the wheel never pays back the streak (that part of the gambler's fallacy stays false).
-But as you pile on hundreds more fair flips, those five extra heads become a smaller and
-smaller share of the total, so the *average* drifts toward 50%. The streak isn't
-cancelled; it's outnumbered. Regression to the mean, similarly, isn't a debt being
-repaid — it's the luck component of one extreme observation failing to reappear in the
-next one.
-</Reveal>
-
-<MCQ
-  client:visible
-  question="Which situation is genuine regression to the mean (not the gambler's fallacy and not a real trend)?"
-  options={[
-    { text: 'The student who scored highest on a hard test scores a bit lower (but still well) on an equally hard retest', correct: true },
-    { text: 'After four straight coin-flip heads, tails is now more likely', correct: false },
-    { text: 'A loaded die keeps landing on six because it’s weighted', correct: false },
-    { text: 'A lottery number that hasn’t come up in months is "due"', correct: false },
+<MatchConcepts client:visible
+  question="Match the museum review problem to the check it needs."
+  pairs={[
+    { term: "Choosing the lowest-rated weekend", definition: "Account for selection on an extreme when defining the alternative" },
+    { term: "Different visitor mix in the later month", definition: "Check comparability rather than crediting the script with the whole rise" },
+    { term: "Many ratings collected during one shared disruption", definition: "Assess dependence and common conditions, not only headcount" },
+    { term: "A lasting rise after the script changed", definition: "Record persistence while seeking evidence that distinguishes causes" }
   ]}
-  explanation="The retest is signal+noise re-measured: the top scorer was skilled and lucky, so their fresh score regresses toward the mean while staying high — pure RTM. The coin and lottery answers are the gambler's fallacy (independent trials have no memory). The loaded die is a real, persistent effect (a biased signal), not regression at all."
-/>
-
-## A Bayesian footnote: regression is just shrinking toward the prior
-
-If you took the Bayesian-updating course, regression has a familiar face. Expecting an
-extreme observation to regress is exactly **shrinking your estimate toward the prior
-mean**. The reliability from lesson 01 plays the role of *how much you trust this one
-noisy observation versus the population average.* Low reliability (lots of noise) → trust
-the observation little → shrink it hard toward the mean → big regression. High reliability
-→ trust the observation → shrink barely. Good forecasters do this instinctively, and
-empirical-Bayes methods do it formally: never take an extreme single reading at face
-value; pull it toward what you knew before.
-
-## The defense toolkit
-
-Everything the course has taught rolls up into five habits:
-
-- **Expect reversion.** Build it into every forecast. When you see a record extreme,
-  predict a *less extreme* follow-up by default — don't extrapolate the peak. This alone
-  puts you ahead of most forecasters.
-- **Demand a control group.** The single strongest defense (lesson 03). Both the treated
-  and untreated groups regress; only the *difference* is a real effect. It's why
-  randomized trials exist.
-- **Use bigger samples and aggregates.** Noise cancels when you average. A large group's
-  mean is far more reliable than one member, so extreme *individuals* regress hard while
-  extreme *large-group averages* barely move. Don't build decisions on single extreme data
-  points.
-- **Don't select the target on a one-time extreme.** Use a long baseline, or pick before
-  you see the noise. "Worst-first" targeting bakes regression into your evaluation.
-- **Shrink your estimates toward the mean.** Treat an extreme reading as *partly* luck and
-  forecast the shrunk value — formally with the reliability, informally with "it'll
-  probably be less impressive next time."
-
-<Callout variant="success" title="The one-line defense">
-Whenever a result changed after an extreme, ask: **was this unit selected for being
-extreme, and would it have improved on its own?** If yes, subtract the regression you
-should have expected *before* you credit any cause — and prove real effects against a
-control, not against the extreme you started from.
-</Callout>
-
-<MCQ
-  client:visible
-  question="You want to test whether a tutoring program helps the students who failed a placement exam. What design best guards against the regression fallacy?"
-  options={[
-    { text: 'Randomly assign the failing students to tutoring or no-tutoring, and compare the two groups’ retest gains', correct: true },
-    { text: 'Tutor all the failing students and compare their retest scores to their placement scores', correct: false },
-    { text: 'Tutor only the very lowest scorers, since they need it most', correct: false },
-    { text: 'Give the placement exam again immediately, then decide', correct: false },
-  ]}
-  explanation="Failing students were selected at an extreme low and will regress upward on their own, so before/after on all of them (or on just the lowest) can't isolate the tutoring effect. A randomized control group of failing students who get no tutoring regresses by the same amount; the difference in gains is the real effect of the program."
+  explanation="Selection, composition, dependence and time pattern pose different questions. Naming regression does not answer all of them, and collecting more of the same biased comparison does not repair its design."
 />
 
 ### When to use it
 
-Deploy this discrimination whenever 'things reverted' is on the table. First ask which
-phenomenon you're looking at: an independent gamble (gambler's-fallacy territory — the
-streak means nothing), a stable noisy measurement selected at an extreme (regression —
-expect reversion, don't credit a cause), or a genuine effect (which must survive a
-control and ideally show dose-response). Then apply the toolkit. Get the classification
-right and you'll neither invent causes that aren't there nor dismiss effects that are.
+Apply the toolkit when a prediction or evaluation rests on an exceptional measurement. Keep the action proportionate to uncertainty and consequences. The next workshop follows a pilot through eligibility, allocation, fixed review windows and the decision about extending it; those steps put these distinctions into a full operational review.
 
-## Recap
+## Rebuild the distinctions
 
-<Quiz
-  client:visible
+<MindMap client:visible
+  root={{ label: "Read a change after an extreme", children: [
+    { label: "Specify the forecast", children: [{ label: "Conditional average rather than an individual rail" }, { label: "Relevant mean and supported reliability" }] },
+    { label: "Check the process", children: [{ label: "Stable ability or a changed signal" }, { label: "Level shifts and drifts can coexist with regression" }] },
+    { label: "Avoid invented compensation", children: [{ label: "Independent events retain their probabilities" }, { label: "A new block differs from a cumulative average" }] },
+    { label: "Evaluate the action", children: [{ label: "Comparison change is not pure regression" }, { label: "Finite contrasts retain uncertainty" }, { label: "Persistence and dose patterns need a design" }] }
+  ]}}
+/>
+
+<Quiz client:visible
   questions={[
-    {
-      question: "What is the core difference between the gambler's fallacy and regression to the mean?",
-      options: [
-        { text: "The gambler's fallacy is a false belief about independent trials 'balancing out'; regression is a true tendency of an extreme measurement of a signal-plus-noise quantity to be followed by a less extreme one.", correct: true },
-        { text: "They are two names for the same phenomenon.", correct: false },
-        { text: "Regression applies to coins; the gambler's fallacy applies to skill.", correct: false },
-      ],
-      explanation: "The gambler's fallacy wrongly assumes independent events have memory and 'owe' a correction. Regression is real and applies to repeated noisy measurements of something with a stable signal — the extreme regresses because it was partly luck, not because a force compensates.",
-    },
-    {
-      question: "Does regression to the mean predict that a record-high result will be followed by a below-average one?",
-      options: [
-        { text: "No — it predicts a result closer to the mean than the record was; it moves toward the mean, not past it.", correct: true },
-        { text: "Yes — the high must be balanced by a low.", correct: false },
-        { text: "Yes, but only for coin flips.", correct: false },
-      ],
-      explanation: "Regression pulls extremes toward the center and stops there. Expecting an overshoot below average is smuggling in the gambler's fallacy's 'balancing' idea, which is false.",
-    },
-    {
-      question: "Which single design feature most cleanly separates a real treatment effect from regression to the mean?",
-      options: [
-        { text: "A randomly assigned control group that also started at the extreme and therefore regresses by the same amount.", correct: true },
-        { text: "A much larger treated group.", correct: false },
-        { text: "Measuring the treated group many more times.", correct: false },
-      ],
-      explanation: "Both treated and control groups were selected at an extreme and both regress; the difference between them is the part regression can't explain — the real effect. Bigger or more-measured treated groups still regress as a whole, so they don't isolate the effect.",
-    },
-    {
-      question: "How does the Bayesian view describe 'expecting regression'?",
-      options: [
-        { text: "As shrinking an extreme observation toward the prior mean, by an amount set by how reliable (low-noise) the observation is.", correct: true },
-        { text: "As assuming every extreme is a measurement error.", correct: false },
-        { text: "As ignoring the prior and trusting the latest data point.", correct: false },
-      ],
-      explanation: "Regression is shrinkage toward the prior: reliability is how much you trust the noisy observation versus the population average. Low reliability shrinks hard (big regression); high reliability barely shrinks. It's the same math as Bayesian updating.",
-    },
+    { question: "A forecast lies between an extreme initial observation and the reference mean. What can the next individual observation do?", options: [
+      { text: "Cross the reference mean or become more extreme, if the model permits.", correct: true },
+      { text: "Remain within those bounds, because an expectation is a hard limit." },
+      { text: "Move the same distance as every other selected individual's result." }
+    ], explanation: "The forecast describes a conditional average. Possible individual values are determined by the distribution around it, not by treating the average as a boundary." },
+    { question: "A real improvement changes the underlying level and then stays constant. Which description fits?", options: [
+      { text: "A level shift can be real without a continuously growing benefit.", correct: true },
+      { text: "A flat benefit cannot be real because real effects must grow." },
+      { text: "Persistence alone proves the named intervention caused it." }
+    ], explanation: "Level and trend are different process descriptions. A real effect can be a step; an observed persistent pattern still needs causal evidence." },
+    { question: "After a run of heads on a fair independent coin, which statement preserves the distinction?", options: [
+      { text: "The next toss is unchanged; a fresh block retains its ordinary distribution.", correct: true },
+      { text: "Tails is more likely next because a fresh block must be less extreme." },
+      { text: "The original run makes another all-heads block impossible to observe." }
+    ], explanation: "Independence does not owe a reversal. Expected values of future blocks do not require opposite outcomes to compensate for past ones." },
+    { question: "In the observed training table, how should the practice group's decline be interpreted?", options: [
+      { text: "It is a raw change; the selected comparison gives a positive contrast.", correct: true },
+      { text: "It proves harm because the group did not repeat its selected peak." },
+      { text: "It identifies the true benefit exactly once the control is subtracted." }
+    ], explanation: "The raw change is minus twelve; the comparison change is minus eighteen, giving a positive six-point contrast. Design and uncertainty still govern the effect interpretation." },
+    { question: "Select the checks that strengthen the museum evaluation.", allowMultiple: true, options: [
+      { text: "Keep the rating definition and comparison periods consistent.", correct: true },
+      { text: "Check visitor composition and the script's allocation.", correct: true },
+      { text: "Treat a month of persistence as proof of the script's effect." },
+      { text: "Assume enough ratings eliminate every shared disruption." }
+    ], explanation: "Consistent measurement and a justified comparison help distinguish mechanisms. Persistence and larger headcount do not, by themselves, identify a cause or remove dependence." }
   ]}
 />
 
-## Where this goes next
+### Sources and scope
 
-That's the full model: the signal-plus-noise mechanic, Galton's discovery, the
-regression fallacy, the praise-and-punishment illusion, and — now — how to tell
-regression apart from a trend and from the gambler's fallacy, plus the toolkit to defend
-against it. All that's left is to prove it sticks. The **Final Exam** is graded and
-one-way: one question at a time, each answer locked once submitted, no going back. Take
-it when you can spot selection-on-an-extreme in the wild without being told to look.
+[Berkeley's regression chapter](https://www.stat.berkeley.edu/~stark/SticiGui/Text/regressionErrors.htm) explains average regression and scatter around a prediction. [Pishro-Nik's probability text](https://www.probabilitycourse.com/chapter5/5_3_2_bivariate_normal_dist.php) gives the conditional normal formulas used in the optional derivation. [J-PAL](https://www.povertyactionlab.org/resource/randomization) explains random allocation, finite-sample differences and interference. The training centre, forecasts and museum transfer are teaching examples.
