@@ -215,9 +215,11 @@ Configure the Pages project with the repository root as its root directory:
 
 Keep `PUBLIC_SITE_URL` set to the production domain in both production and preview
 environments so canonical URLs, hreflang, sitemaps and Open Graph URLs stay stable.
-The static build needs no Astro hosting adapter. Astro emits flat HTML files with
-`trailingSlash: 'never'` so Pages serves the existing extensionless URLs without
-redirecting them to a trailing slash.
+The static build needs no Astro hosting adapter. Astro renders in its default
+directory format with `trailingSlash: 'never'` to preserve page URLs and locale
+detection. After rendering, `scripts/flatten-cloudflare-html.ts` moves nested
+`index.html` pages to sibling `.html` files, leaving the root index and 404 intact.
+Pages then serves the existing extensionless URLs without adding a trailing slash.
 
 The build generates `public/_redirects` from `roadmapTags` to preserve the retired
 learning-path URLs as HTTP 301 redirects to the catalog filters. `public/_headers`

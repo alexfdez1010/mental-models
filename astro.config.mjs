@@ -15,9 +15,8 @@ const SITE = process.env.PUBLIC_SITE_URL ?? 'https://mental-models.alejandrofern
 export default defineConfig({
   site: SITE,
   output: 'static',
-  // Flat HTML files keep existing extensionless URLs on Cloudflare Pages.
+  // Render canonical URLs without trailing slashes; flatten output after rendering.
   trailingSlash: 'never',
-  build: { format: 'file' },
   // HTTP redirects are generated into public/_redirects before the build.
   // Bilingual. English is the default and served at the root (/about),
   // Spanish is prefixed (/es/about). hreflang alternates are emitted by Seo.astro
