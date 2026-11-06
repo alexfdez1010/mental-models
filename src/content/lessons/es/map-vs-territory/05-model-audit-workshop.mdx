@@ -1,0 +1,391 @@
+---
+title: "Una auditoría de modelos que puedes poner en práctica"
+description: "Compara una previsión de preparación de paquetes con lo observado y decide si conviene mantener, revisar, restringir o sustituir el modelo."
+topic: "es/map-vs-territory"
+order: 6
+minutes: 19
+updated: 2026-11-06
+---
+
+import { MCQ, FillBlank, Categorize, FirstPrinciplesBuilder, MindMap, Quiz } from '@/components/react';
+
+La hoja de cálculo del almacén dice que una tanda de paquetes estará lista en
+veinte minutos. El cronómetro dice veinticinco. Antes de añadir un misterioso
+«factor realidad», comprueba que ambos tiempos abarcan el mismo trabajo y
+averigua después qué ha dejado fuera la hoja.
+
+Este taller convierte la advertencia sobre el mapa y el territorio en una
+auditoría que puedes repetir. Dejarás por escrito qué decisión debe apoyar un
+modelo, compararás previsiones con observaciones y usarás el patrón de los
+errores para decidir qué cambiar.
+
+## Empieza por la decisión
+
+<MCQ client:visible pretest
+  question="Un modelo de tiempo de preparación sirve para acordar una franja de recogida. ¿Esas pruebas respaldan automáticamente su uso para un plazo estricto?"
+  options={[
+    { text: 'Ese uso exige comprobar sus propios errores y límites', correct: true },
+    { text: 'Sí, porque un modelo validado conserva siempre ese estado' },
+    { text: 'No, porque un modelo aproximado nunca sirve para fijar plazos' },
+  ]}
+  explanation="El error admisible depende de la decisión. Una franja orientativa y un plazo estricto necesitan pruebas distintas, aunque partan de la misma previsión."
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar"
+  correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+/>
+
+Un temporizador de cocina sirve cuando has decidido qué significa «listo».
+Controlar un huevo pasado por agua y controlar una esterilización son trabajos
+distintos. Del mismo modo, una **auditoría de modelos (model audit)** compara de
+forma ordenada un modelo, las observaciones pertinentes y la decisión que debe
+apoyar. En ingeniería, esta práctica forma parte de la **validación de modelos
+(model validation)**: evaluar hasta qué punto una representación se ajusta al
+mundo para un uso previsto. El
+[glosario de modelización de la NASA](https://public.ksc.nasa.gov/mns/ms-definitions/)
+vincula expresamente la validación con ese uso.
+
+En nuestro almacén, $n$ es el número de paquetes de una tanda y
+$\hat{T}$ su tiempo previsto de preparación, en minutos:
+
+$$\hat{T} = 8 + 2n$$
+
+El modelo reserva ocho minutos para preparar el puesto y dos minutos por
+paquete. Para seis paquetes, $8 + 2 \times 6 = 20$ minutos. Omite las pequeñas
+diferencias entre paquetes individuales. Esa omisión puede ser aceptable aunque
+el modelo no acierte cada detalle.
+
+Antes de consultar resultados nuevos, la responsable escribe esta ficha:
+
+| Pregunta | Respuesta registrada |
+|---|---|
+| ¿Qué decisión usará la previsión? | Elegir una franja de recogida para una tanda ordinaria |
+| ¿Qué se cronometra exactamente? | Desde que empieza la preparación del puesto hasta que se cierra el último paquete |
+| ¿Dónde se ha comprobado el modelo? | Tandas de uno a diez paquetes estándar, en días laborables y preparadas una detrás de otra |
+| ¿Qué error admite esta auditoría? | Como máximo tres minutos de adelanto o retraso en cada tanda comprobada |
+| ¿Qué exigiría una nueva comprobación? | Cambiar el proceso, aumentar la tanda o ajustar más el plazo |
+
+La regla de los tres minutos es un requisito operativo elegido por la
+responsable, no una ley estadística. Registrarla antes evita relajar el criterio
+cuando aparece un resultado incómodo. Superar esta pequeña auditoría respaldará
+un uso limitado; no garantizará el resultado de todas las tandas futuras.
+
+### Cuándo usarlo
+
+Escribe una ficha cuando alguien diga «el modelo está validado» sin aclarar qué
+decidirá con él. Un error frecuente consiste en exigir el máximo detalle antes
+de definir el trabajo. Un detalle merece incluirse cuando cambia una previsión
+o una decisión pertinente.
+
+<FillBlank client:visible
+  question="Completa la lógica de la ficha"
+  text="El error admisible depende de la {{decisión que se toma|cantidad de celdas de la hoja|reputación de quien lo creó}}. Las pruebas con tandas ordinarias respaldan su uso en las {{condiciones comprobadas|cargas de trabajo más grandes|fechas de entrega más exigentes}}."
+  explanation="La finalidad determina el margen admisible. Las condiciones cubiertas por las pruebas determinan dónde se ha comprobado realmente ese margen."
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" correctResultLabel="Correcto" partialResultWord="correctas"
+/>
+
+## Compara lo mismo a ambos lados
+
+<MCQ client:visible pretest
+  question="La fórmula está bien calculada, pero el tiempo medido incluye una pausa para comer que la previsión excluye. ¿Qué debes corregir primero?"
+  options={[
+    { text: 'Hacer comparables el tiempo previsto y el medido', correct: true },
+    { text: 'Aumentar el tiempo fijo para absorber cualquier pausa' },
+    { text: 'Descartar la fórmula porque aquí no sirve la aritmética' },
+  ]}
+  explanation="Si la variable de salida se define de forma distinta, todavía no sabes cuánto acierta el modelo sobre la preparación. Unifica las reglas de medición antes de diagnosticar el patrón del error."
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar"
+  correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+/>
+
+Comparar dos reglas no sirve de mucho si una mide desde el borde y la otra desde
+la primera marca impresa. Aquí, la previsión y la medición deben compartir el
+inicio, el final, las unidades y el tipo de paquete.
+
+Primero, la **verificación (verification)** comprueba que el cálculo cumple el
+modelo especificado. Introducir seis paquetes debe dar veinte minutos. Después,
+la **validación (validation)** compara esa previsión con observaciones
+pertinentes. Una fórmula perfectamente implementada puede describir un proceso
+equivocado. La NASA distingue ambas comprobaciones en sus
+[definiciones de verificación y validación](https://public.ksc.nasa.gov/mns/ms-definitions/).
+
+La responsable cronometra cuatro tandas nuevas que no se usaron para elegir la
+fórmula. Para cada tanda, el **error de predicción (prediction error)** es el
+tiempo observado menos el previsto. Un error positivo indica que la preparación
+ha tardado más de lo previsto. En un modelo estadístico ajustado, la diferencia
+equivalente entre el valor observado y el ajustado se llama **residuo
+(residual)**. El
+[NIST usa estas diferencias para examinar la adecuación de los modelos](https://itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm).
+
+| Paquetes | Previsión en minutos | Observación en minutos | Error en minutos | Error absoluto en minutos |
+|---|---|---|---|---|
+| 2 | 12 | 13 | +1 | 1 |
+| 4 | 16 | 15 | −1 | 1 |
+| 6 | 20 | 21 | +1 | 1 |
+| 8 | 24 | 23 | −1 | 1 |
+
+Para la primera tanda, la previsión es $8 + 2 \times 2 = 12$ minutos; el error es
+$13 - 12 = 1$ minuto. Para la segunda, $15 - 16 = -1$ minuto. El **error absoluto
+(absolute error)** elimina el signo y conserva el tamaño del fallo.
+
+El error medio con signo es $(1 - 1 + 1 - 1)/4 = 0$ minutos. El error absoluto
+medio es $(1 + 1 + 1 + 1)/4 = 1$ minuto. Que el error medio con signo sea cero no
+significa que las previsiones sean perfectas: los adelantos y los retrasos pueden
+compensarse. Cada fallo observado cumple el requisito de tres minutos, así que
+esta comprobación se supera en las condiciones registradas. Cuatro tandas no
+permiten saber con qué frecuencia aparece un fallo especialmente grande.
+
+### Cuándo usarlo
+
+Usa los errores con signo para buscar una dirección de fallo persistente y los
+absolutos para valorar cuánto te equivocas. Conserva los resultados de cada
+tanda: una media puede ocultar un fallo que importe para la decisión. Comprueba
+el proceso de medición antes de dar sus lecturas por indiscutibles.
+
+<Categorize client:visible
+  question="¿Qué comprobación realiza cada acción?"
+  buckets={['Verificación', 'Validación']}
+  items={[
+    { text: 'Confirmar que la hoja aplica la fórmula especificada', bucket: 'Verificación' },
+    { text: 'Comprobar que los minutos no se introducen como horas', bucket: 'Verificación' },
+    { text: 'Comparar una previsión intacta con una tanda recién cronometrada', bucket: 'Validación' },
+    { text: 'Comprobar si los fallos observados cumplen el requisito de recogida', bucket: 'Validación' },
+  ]}
+  explanation="La verificación contrasta la implementación con la especificación. La validación contrasta la representación con observaciones pertinentes para el uso previsto. Hacen falta ambas."
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" allCorrectLabel="Todo clasificado" partialResultWord="correctas"
+/>
+
+## Averigua qué ha cambiado antes de añadir una corrección
+
+<MCQ client:visible pretest
+  question="Tras introducir un control de acceso, todas las tandas ordinarias terminan más tarde de lo previsto por el modelo original. ¿Qué conviene investigar?"
+  options={[
+    { text: 'Cronometrar el paso nuevo y comprobar si su duración es estable', correct: true },
+    { text: 'Tomar los retrasos como prueba de que fallan todos los modelos', correct: false },
+    { text: 'Multiplicar cada previsión por un factor de seguridad sin justificar', correct: false },
+  ]}
+  explanation="El momento y la dirección del error apuntan a un cambio del proceso. Medir el paso nuevo permite distinguir un tiempo fijo omitido de un retraso que crece con el número de paquetes."
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar"
+  correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+/>
+
+Un abrigo que siempre te ha quedado algo holgado plantea un problema distinto de
+otro que, de repente, ya no te entra. El **error de aproximación (approximation
+error)** puede proceder de detalles que el modelo omite deliberadamente. En este
+taller, la **deriva del modelo (model drift)** significa que una relación antes
+útil ha dejado de ajustarse porque el proceso o sus condiciones han cambiado.
+Un error aislado no identifica cuál de estas explicaciones corresponde.
+
+El almacén añade un control de acceso antes de cada tanda. La medición sigue
+empezando antes de toda la preparación. Las observaciones nuevas son:
+
+| Paquetes | Previsión antigua en minutos | Nueva observación en minutos | Error en minutos |
+|---|---|---|---|
+| 2 | 12 | 17 | +5 |
+| 4 | 16 | 21 | +5 |
+| 6 | 20 | 25 | +5 |
+| 8 | 24 | 29 | +5 |
+
+En estos tamaños de tanda, todos los fallos tienen el mismo signo y tamaño. El
+patrón apunta a un paso fijo omitido, más que a un aumento del tiempo por
+paquete. La observación directa aporta el vínculo que faltaba: el nuevo control
+de acceso tarda cinco minutos por tanda en estas pruebas. El patrón del error
+ayudó a encontrar la explicación; por sí solo no demostró la causa.
+
+En la barra siguiente puedes añadir los pasos de preparación de la tanda de seis
+paquetes. Conserva la previsión antigua como referencia e incluye después el
+control de acceso.
+
+<FirstPrinciplesBuilder client:visible locale="es"
+  title="Encuentra el paso omitido"
+  eyebrow="Tiempo de preparación"
+  analogyValue={20}
+  analogyLabel="Previsión antigua"
+  analogyNote="La regla antigua incluye preparar el puesto y embalar, pero no el control de acceso."
+  valuePrefix=""
+  valueSuffix=" min"
+  rebuiltLabel="Tiempo de los pasos seleccionados"
+  instructions="Añade o retira pasos para ver qué trabajo incluye la previsión."
+  parts={[
+    { label: 'Preparar el puesto', value: 8, note: 'Se hace una vez antes de empezar a embalar.' },
+    { label: 'Embalar la tanda', value: 12, note: 'Manipular los paquetes al ritmo indicado.' },
+    { label: 'Control de acceso', value: 5, note: 'El paso fijo recién introducido.' },
+  ]}
+  revealAllLabel="Incluir todos los pasos"
+  resetLabel="Quitar los pasos seleccionados"
+  verdictTemplate="El trabajo seleccionado suma {total}. El control añadido explica el fallo en esta tanda."
+/>
+
+La revisión candidata es, por tanto, $\hat{T} = 13 + 2n$: el tiempo fijo pasa de
+ocho a trece minutos. Es una candidata, no una verdad nueva promulgada por la
+hoja de cálculo. Si el control obliga a esperar detrás de otras tandas, su
+duración puede variar; habría que reconsiderar una corrección constante.
+
+### Cuándo usarlo
+
+Compara los errores por fecha, carga de trabajo o condición operativa cuando los
+fallos se vuelvan persistentes. Un error antiguo y estable también puede ser
+inadmisible; uno reciente puede proceder de una medición defectuosa. Investiga
+antes de llamar «deriva» a cualquiera de ellos.
+
+<FillBlank client:visible
+  question="Elige la conclusión respaldada por la investigación"
+  text="Los errores positivos repetidos apuntaban a un {{paso fijo omitido|menor número de paquetes|modelo totalmente preciso}}. Cronometrar ese paso permitió proponer una {{revisión comprobable|garantía universal|excusa para ignorar fallos}}."
+  explanation="Un retraso compartido es una pista; observar el proceso refuerza la explicación de la corrección. La regla revisada sigue necesitando una comprobación nueva."
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" correctResultLabel="Correcto" partialResultWord="correctas"
+/>
+
+## Mantener, revisar, restringir o sustituir
+
+<MCQ client:visible pretest
+  question="Ajustas una regla hasta que encaja con las tandas usadas para ajustarla. ¿Qué aportaría una comprobación más sólida de la revisión?"
+  options={[
+    { text: 'Predecir nuevas tandas comparables antes de cronometrarlas', correct: true },
+    { text: 'Recalcular las mismas tandas ajustadas con mayor precisión' },
+    { text: 'Mostrar solo las tandas ajustadas con los fallos más pequeños' },
+  ]}
+  explanation="El ajuste ya utilizó esas observaciones. Los casos nuevos y comparables comprueban si la corrección sirve más allá de los ejemplos que la sugirieron."
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar"
+  correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+/>
+
+La **calibración (calibration)** consiste en ajustar los valores de un modelo
+para mejorar su correspondencia con las observaciones. Nuestra revisión del
+tiempo fijo es una calibración. Comprobar únicamente las observaciones que
+sugirieron el ajuste daría ventaja a la candidata. La misma separación entre
+ajuste y evaluación con casos nuevos aparece en la
+[guía de Google sobre división de conjuntos de datos](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets).
+
+Antes de cambiar nada más, la responsable registra las previsiones revisadas para
+otras dos tandas ordinarias:
+
+| Paquetes | Previsión revisada en minutos | Nueva observación en minutos | Error en minutos |
+|---|---|---|---|
+| 3 | 19 | 20 | +1 |
+| 7 | 27 | 26 | −1 |
+
+Para tres paquetes, $13 + 2 \times 3 = 19$ minutos, así que $20 - 19 = 1$ minuto.
+Para siete, $13 + 2 \times 7 = 27$, así que $26 - 27 = -1$ minuto. Ambas tandas
+cumplen la regla de tres minutos de esta auditoría. Aportan un respaldo limitado
+para usar la regla revisada en tandas ordinarias y sucesivas, mientras se siguen
+observando los resultados.
+
+Ahora distingue cuatro decisiones:
+
+| Decisión | Pruebas que la respaldarían | Aplicación en el almacén |
+|---|---|---|
+| **Mantener** | Los errores de casos nuevos y pertinentes cumplen el requisito y no se encuentra un patrón preocupante | Mantener la regla original antes de introducir el control |
+| **Revisar** | Una omisión diagnosticada tiene una corrección que supera una comprobación nueva | Incluir el tiempo medido del control |
+| **Restringir** | Las pruebas solo respaldan algunas condiciones o una decisión menos exigente | Usar la regla revisada para paquetes estándar, no para bultos grandes |
+| **Sustituir** | La representación omite una relación esencial para el trabajo actual | Si se solapan tandas, usar un método que tenga en cuenta la cola |
+
+Supón que una promoción de fin de semana genera tandas de veinte paquetes y
+varios equipos comparten el mismo control de acceso. Introducir veinte en la
+fórmula revisada da $13 + 2 \times 20 = 53$ minutos. La aritmética es válida; ese
+uso no está validado. Tanto el tamaño de la tanda como las condiciones de espera
+quedan fuera del ámbito comprobado. Para ese trabajo, deja de confiar en la regla
+hasta disponer de un modelo adecuado o de una evaluación directa del proceso.
+Puedes conservarla para las tandas pequeñas que se preparan una detrás de otra.
+
+### Cuándo usarlo
+
+Elige entre estas acciones cuando las pruebas cuestionen un modelo. Sustituir un
+mapa puede ser lo correcto para una decisión sin declararlo inútil en todas.
+Registra la versión, las condiciones, las pruebas y qué activará la próxima
+revisión, para que «lo comprobamos una vez» no se convierta en una exención
+permanente.
+
+<MCQ client:visible allowMultiple
+  question="¿Qué afirmaciones se desprenden de la auditoría del almacén? Selecciona todas las correctas."
+  options={[
+    { text: 'Las nuevas tandas pequeñas respaldan localmente la revisión', correct: true },
+    { text: 'El trabajo con un control compartido necesita pruebas propias', correct: true },
+    { text: 'Compensar el error medio permite garantizar todos los plazos' },
+    { text: 'Calcular bien demuestra precisión fuera del ámbito comprobado' },
+  ]}
+  explanation="La auditoría respalda un uso concreto en unas condiciones comprobadas. Ni compensar errores con signo ni aplicar correctamente una fórmula demuestra cómo funcionará en un proceso sin probar."
+  checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo"
+  correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+/>
+
+## Recuerda y aplica
+
+<MindMap client:visible title="La auditoría del modelo" eyebrow="Visión de conjunto" outlineLabel="Esquema"
+  root={{ label: 'Un modelo para una decisión', children: [
+    { label: 'Especificar', children: [{ label: 'Finalidad y error admisible' }, { label: 'Variable y condiciones comprobadas' }] },
+    { label: 'Comparar', children: [{ label: 'Verificar el cálculo' }, { label: 'Medir casos nuevos y comparables' }] },
+    { label: 'Diagnosticar', children: [{ label: 'Signo y tamaño del error' }, { label: 'Patrones y supuestos que cambian' }] },
+    { label: 'Actuar', children: [{ label: 'Mantener o revisar' }, { label: 'Restringir o sustituir' }, { label: 'Comprobar la revisión con casos nuevos' }] },
+  ] }}
+/>
+
+Para la primera pregunta del cuestionario, usa este caso distinto de
+planificación. Una estimación de reparación prevé 30 minutos. Dos trabajos
+tardan 24 y 36 minutos. Sus errores con signo son −6 y +6 minutos; el error medio
+con signo es cero. Cada trabajo admite un fallo de como máximo cuatro minutos.
+
+<Quiz client:visible title="Decide qué hacer con el modelo"
+  questionLabel="Pregunta" ofLabel="de" correctCountLabel="correctas" completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado" perfectMessage="Has resuelto todos los casos."
+  goodMessage="Revisa las explicaciones de los casos que has fallado."
+  keepPracticingMessage="Repasa las comprobaciones y vuelve a resolver los casos."
+  gateLabel="Comprueba tu respuesta para continuar." nextLabel="Siguiente" seeResultsLabel="Ver resultados"
+  backLabel="Atrás" scoreLabel="Has acertado" restartLabel="Reiniciar" checkLabel="Comprobar" retryLabel="Reintentar"
+  correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  questions={[
+  {
+    question: '¿Cumple la estimación de reparación el requisito indicado?',
+    options: [
+      { text: 'No, ambos fallos individuales superan el margen admitido', correct: true },
+      { text: 'Sí, los adelantos y retrasos se compensan en la media' },
+      { text: 'Sí, la media observada coincide con el tiempo previsto' },
+    ],
+    explanation: 'El requisito se aplica a cada trabajo. Ambos fallan por seis minutos, fuera del límite de cuatro; promediar los signos oculta ese incumplimiento.',
+  },
+  {
+    question: 'Un modelo de rutas omite deliberadamente el color del pavimento. ¿Qué determina si esa omisión es aceptable?',
+    options: [
+      { text: 'Si afecta a la decisión para la que se usa el modelo', correct: true },
+      { text: 'Si el modelo permite guardar fotografías del pavimento' },
+      { text: 'Si una persona puede ver el detalle que se ha omitido' },
+    ],
+    explanation: 'Omitir forma parte de modelizar. La relevancia depende de la finalidad: el color del pavimento puede ser irrelevante para el tiempo de viaje e importante para otro trabajo.',
+  },
+  {
+    question: 'Un escáner nuevo añade una demora una vez por tanda. ¿Qué cambio conviene probar si las mediciones confirman que dura siempre lo mismo?',
+    options: [
+      { text: 'Ajustar el tiempo fijo y comprobar nuevas tandas', correct: true },
+      { text: 'Subir el tiempo por artículo y reutilizar pruebas antiguas' },
+      { text: 'Mantener la regla y compensar la demora con la media' },
+    ],
+    explanation: 'Un paso que se hace una vez por tanda corresponde al tiempo fijo. Una comprobación nueva permite ver si la corrección medida sirve para otras tandas comparables.',
+  },
+  {
+    question: 'Un modelo supera las comprobaciones aritméticas, pero falla de forma persistente ante las observaciones actuales. ¿Qué conclusión se sostiene?',
+    options: [
+      { text: 'La implementación puede ser correcta y la representación fallar', correct: true },
+      { text: 'Una implementación correcta hace irrelevantes las observaciones' },
+      { text: 'Las previsiones fallidas demuestran un error aritmético en la regla' },
+    ],
+    explanation: 'Verificar y validar responden a preguntas distintas. Hay que investigar las mediciones y los supuestos aunque el cálculo cumpla su especificación.',
+  },
+  {
+    question: 'Un modelo revisado funciona con paquetes ordinarios. Una gerente quiere usarlo para artículos frágiles poco habituales. ¿Qué toca hacer?',
+    options: [
+      { text: 'Comprobar las condiciones nuevas antes de confiar en ese uso', correct: true },
+      { text: 'Trasladar la aprobación porque ambos trabajos usan paquetes' },
+      { text: 'Retirar inmediatamente el modelo para los paquetes ordinarios' },
+    ],
+    explanation: 'La aprobación corresponde a una finalidad y un ámbito. Probar los artículos frágiles puede respaldar un uso más amplio; carecer de esas pruebas no borra las que ya existen para los paquetes ordinarios.',
+  },
+]}/>
+
+### Fuentes y procedencia
+
+Los casos del almacén y de las reparaciones son ejemplos didácticos construidos,
+no datos medidos de un sector. Sus cálculos pueden reproducirse con las tablas.
+
+- [NASA — definiciones de modelización y simulación](https://public.ksc.nasa.gov/mns/ms-definitions/) respalda las distinciones entre uso previsto, verificación, validación, calibración y límites de funcionamiento.
+- [NIST — evaluación del ajuste de un modelo](https://itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm) explica las diferencias entre valores observados y ajustados y la importancia de sus patrones.
+- [Google — separación entre datos de ajuste y evaluación](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets) explica por qué evaluar casos nuevos aporta pruebas más allá de los usados para ajustar el modelo.

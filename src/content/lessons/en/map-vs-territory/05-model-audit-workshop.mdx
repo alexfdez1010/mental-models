@@ -1,0 +1,353 @@
+---
+title: "A Model Audit You Can Actually Run"
+description: "Compare a parcel-time forecast with measurements, diagnose its errors, and decide whether to keep, revise, restrict, or replace the model."
+topic: "en/map-vs-territory"
+order: 6
+minutes: 19
+updated: 2026-11-06
+---
+
+import { MCQ, FillBlank, Categorize, FirstPrinciplesBuilder, MindMap, Quiz } from '@/components/react';
+
+A warehouse spreadsheet says a batch of parcels will be ready in twenty minutes.
+The stopwatch says twenty-five. Before adding a mysterious “reality factor,”
+check that both timings cover the same work, then inspect what the spreadsheet
+left out.
+
+This workshop turns the map–territory warning into a repeatable audit. You will
+write down the decision a model serves, compare predictions with observations,
+and use the pattern of errors to choose what to change.
+
+## Start with the decision
+
+<MCQ client:visible pretest
+  question="A preparation-time model is accurate enough for arranging a collection slot. Does that evidence automatically support using it for a strict deadline?"
+  options={[
+    { text: 'That stricter use needs its own error check and limits', correct: true },
+    { text: 'Yes, because a validated model keeps the same status' },
+    { text: 'No, because approximate models cannot inform deadlines' },
+  ]}
+  explanation="The acceptable error belongs to the decision. A rough collection slot and a strict deadline need different evidence, even when both use the same forecast."
+/>
+
+A kitchen timer is useful only after you decide what “done” means. Timing a soft
+egg and timing sterilisation are different jobs. Likewise, a **model audit** is a
+structured comparison between a model, relevant observations, and the decision
+the model is meant to support. Its engineering home is **model validation**:
+assessing how well a representation matches the world for an intended use.
+[NASA's modelling glossary](https://public.ksc.nasa.gov/mns/ms-definitions/)
+explicitly ties validation to that use.
+
+For our warehouse, let $n$ be the number of parcels in a batch and
+$\hat{T}$ its predicted preparation time, in minutes:
+
+$$\hat{T} = 8 + 2n$$
+
+The model allows eight minutes to open the workstation and two minutes per
+parcel. For six parcels, $8 + 2 \times 6 = 20$ minutes. It omits small differences
+between individual parcels. That omission can be acceptable without being true
+in every detail.
+
+Before looking at fresh results, the supervisor writes this model card:
+
+| Question | Recorded answer |
+|---|---|
+| What decision will use the prediction? | Choose a collection slot for an ordinary batch |
+| What exactly is timed? | From starting workstation setup until the last parcel is sealed |
+| Where has the model been checked? | Weekday batches of one to ten standard parcels, handled sequentially |
+| What error is acceptable for this audit? | At most three minutes early or late for each checked batch |
+| What would require another check? | A process change, a larger batch, or a tighter deadline |
+
+The three-minute rule is the supervisor's chosen operational requirement, not a
+statistical law. Recording it first prevents quietly loosening the rule after
+seeing an inconvenient result. Passing this small audit will support limited
+use; it will not establish a guarantee for every future batch.
+
+### When to use it
+
+Write a model card when someone says “the model has been validated” without
+stating what it will decide. A common mistake is to demand maximum detail before
+defining the job. Detail earns its place when it changes a relevant prediction
+or decision.
+
+<FillBlank client:visible
+  question="Complete the model card's logic"
+  text="An acceptable error depends on the {{decision being made|number of spreadsheet cells|reputation of the author}}. Evidence from ordinary batches supports use within the {{checked conditions|largest imaginable workload|most demanding deadline}}."
+  explanation="Purpose determines the tolerance. The conditions covered by the evidence determine where that tolerance has actually been checked."
+/>
+
+## Compare the same thing on both sides
+
+<MCQ client:visible pretest
+  question="The formula is calculated correctly, but the measured duration includes a lunch break that the prediction excludes. What should you repair first?"
+  options={[
+    { text: 'Make the predicted and measured durations comparable', correct: true },
+    { text: 'Increase the fixed allowance to absorb every lunch break' },
+    { text: 'Discard the formula because arithmetic cannot help here' },
+  ]}
+  explanation="A mismatch in the definition of the output is not yet evidence about the model's preparation-time accuracy. Align the timing rules before diagnosing an error pattern."
+/>
+
+Checking a ruler against another ruler is pointless if one starts at the edge
+and the other starts at the first printed mark. Here, prediction and measurement
+must use the same start, finish, units, and parcel type.
+
+First, **verification** checks that the calculation follows the specified model.
+Entering six parcels should produce twenty minutes. Next, **validation** compares
+that prediction with relevant observations. A perfectly implemented formula can
+still describe the wrong process. NASA distinguishes these two checks in its
+[definitions of verification and validation](https://public.ksc.nasa.gov/mns/ms-definitions/).
+
+The supervisor times four new batches that were not used to choose the formula.
+For each batch, the **prediction error** is the observed time minus the predicted
+time. A positive error means preparation took longer than forecast. In a fitted
+statistical model, the corresponding observed-minus-fitted difference is called
+a **residual**. [NIST uses these differences to inspect model adequacy](https://itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm).
+
+| Parcels | Prediction in minutes | Observation in minutes | Error in minutes | Absolute error in minutes |
+|---|---|---|---|---|
+| 2 | 12 | 13 | +1 | 1 |
+| 4 | 16 | 15 | −1 | 1 |
+| 6 | 20 | 21 | +1 | 1 |
+| 8 | 24 | 23 | −1 | 1 |
+
+For the first batch, the prediction is $8 + 2 \times 2 = 12$ minutes; the error is
+$13 - 12 = 1$ minute. For the second, $15 - 16 = -1$ minute. The **absolute
+error** drops the sign and keeps the size of the miss.
+
+The average signed error is $(1 - 1 + 1 - 1)/4 = 0$ minutes. The average absolute
+error is $(1 + 1 + 1 + 1)/4 = 1$ minute. Zero average signed error does not mean
+perfect predictions: early and late errors can cancel. Each observed miss is
+within the three-minute requirement, so this check passes under the recorded
+conditions. Four batches cannot tell us how often an unusually bad miss occurs.
+
+### When to use it
+
+Use signed errors to look for a consistent direction of failure and absolute
+errors to judge the size of misses. Preserve batch-level results: an average can
+hide a single miss that matters to the decision. Check the measuring process
+before treating its readings as unquestionable truth.
+
+<Categorize client:visible
+  question="Which check does each action perform?"
+  buckets={['Verification', 'Validation']}
+  items={[
+    { text: 'Confirm that the spreadsheet applies its stated formula', bucket: 'Verification' },
+    { text: 'Check that minutes are not accidentally entered as hours', bucket: 'Verification' },
+    { text: 'Compare an untouched prediction with a newly timed batch', bucket: 'Validation' },
+    { text: 'Check whether observed misses meet the collection requirement', bucket: 'Validation' },
+  ]}
+  explanation="Verification checks implementation against the specification. Validation checks the representation against relevant observations for its intended use. Both are needed."
+/>
+
+## Diagnose what changed before adding a correction
+
+<MCQ client:visible pretest
+  question="After a new access check is introduced, all ordinary batches finish later than the unchanged model predicts. What is the best next investigation?"
+  options={[
+    { text: 'Time the new step and check whether its delay is stable', correct: true },
+    { text: 'Treat the later finishes as proof that all timing models fail' },
+    { text: 'Multiply every prediction by an unexplained safety factor' },
+  ]}
+  explanation="The timing and direction of the error suggest a changed process. Measuring the new step can distinguish a missing fixed allowance from a delay that grows with batch size."
+/>
+
+A coat that was always a little loose differs from a coat that suddenly stops
+fitting. **Approximation error** can come from details the model deliberately
+omits. **Model drift**, in this workshop, means a formerly useful relationship
+has stopped matching because the process or its conditions changed. An error
+alone does not identify which explanation applies.
+
+The warehouse adds an access check before each batch. The timing definition still
+starts before all setup work. New observations are:
+
+| Parcels | Old prediction in minutes | New observation in minutes | Error in minutes |
+|---|---|---|---|
+| 2 | 12 | 17 | +5 |
+| 4 | 16 | 21 | +5 |
+| 6 | 20 | 25 | +5 |
+| 8 | 24 | 29 | +5 |
+
+Every miss has the same direction and size across these batch sizes. That pattern
+suggests a missing fixed step, rather than a larger per-parcel allowance. Direct
+observation supplies the missing link: the new access check takes five minutes
+per batch in these trials. The error pattern helped find the explanation; it did
+not prove the cause by itself.
+
+Use the bar below to add the preparation steps for the six-parcel batch. Keep the
+old prediction as the reference, then include the access check.
+
+<FirstPrinciplesBuilder client:visible
+  title="Find the missing step"
+  eyebrow="Preparation time"
+  analogyValue={20}
+  analogyLabel="Old prediction"
+  analogyNote="The old rule includes setup and packing, but no access check."
+  valuePrefix=""
+  valueSuffix=" min"
+  rebuiltLabel="Time for selected steps"
+  instructions="Add or remove steps to see which work the prediction includes."
+  parts={[
+    { label: 'Workstation setup', value: 8, note: 'Done once before packing starts.' },
+    { label: 'Packing the batch', value: 12, note: 'Parcel handling at the stated rate.' },
+    { label: 'Access check', value: 5, note: 'The newly introduced fixed step.' },
+  ]}
+  revealAllLabel="Include every step"
+  resetLabel="Clear selected steps"
+  verdictTemplate="The selected work totals {total}. The added access step explains the miss in this batch."
+/>
+
+The candidate revision is therefore $\hat{T} = 13 + 2n$: the fixed allowance rises
+from eight to thirteen minutes. It is a candidate, not a new truth issued by
+spreadsheet decree. If the access check sometimes queues behind other batches,
+its delay may vary; a constant correction would then need reconsidering.
+
+### When to use it
+
+Compare errors by time, workload, or operating condition when misses become
+consistent. A stable old error can still be unacceptable; a recent error can
+come from a faulty measurement. Diagnose before labelling either one “drift.”
+
+<FillBlank client:visible
+  question="Choose the conclusion supported by the investigation"
+  text="The repeated positive errors suggested a {{missing fixed step|smaller parcel batch|perfectly accurate rule}}. Timing that step gave a {{testable revision|universal guarantee|reason to ignore errors}}."
+  explanation="A shared delay is a clue, and direct observation makes the proposed correction more credible. The revised rule still needs a fresh check."
+/>
+
+## Keep, revise, restrict, or replace
+
+<MCQ client:visible pretest
+  question="You adjust a rule until it matches the batches used to adjust it. What would provide a stronger check of the revision?"
+  options={[
+    { text: 'Predict fresh comparable batches before timing them', correct: true },
+    { text: 'Recalculate the same adjusted batches more precisely' },
+    { text: 'Show only the adjusted batches with the smallest misses' },
+  ]}
+  explanation="The adjustment used those observations already. New comparable cases test whether the correction travels beyond the examples that suggested it."
+/>
+
+**Calibration** means adjusting a model's numbers to improve agreement with
+observations. Our fixed-allowance revision is calibration. Checking only the
+observations that suggested the adjustment would give the candidate an unfair
+advantage. The same separation between fitting and fresh evaluation appears in
+[Google's guide to dividing datasets](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets).
+
+Before changing anything else, the supervisor records the revised predictions
+for two further ordinary batches:
+
+| Parcels | Revised prediction in minutes | Fresh observation in minutes | Error in minutes |
+|---|---|---|---|
+| 3 | 19 | 20 | +1 |
+| 7 | 27 | 26 | −1 |
+
+For three parcels, $13 + 2 \times 3 = 19$ minutes, so $20 - 19 = 1$ minute. For
+seven, $13 + 2 \times 7 = 27$, so $26 - 27 = -1$ minute. Both pass this audit's
+three-minute rule. They provide limited support for using the revised rule for
+ordinary, sequential batches while continuing to monitor results.
+
+Now distinguish four decisions:
+
+| Decision | Evidence that would support it | Warehouse application |
+|---|---|---|
+| **Keep** | Relevant fresh errors meet the requirement, with no concerning pattern found | Keep the original rule before the access change |
+| **Revise** | A diagnosed omission has a correction that survives a fresh check | Include the measured access step |
+| **Restrict** | Evidence supports only some conditions or a less demanding decision | Use the revised rule for standard batches, not oversized parcels |
+| **Replace** | The representation misses a relationship essential to the current job | For overlapping batches, use a method that accounts for the queue |
+
+Suppose a weekend sale produces twenty-parcel batches and several teams share
+the same access desk. Simply inserting twenty into the revised formula gives
+$13 + 2 \times 20 = 53$ minutes. The arithmetic is valid; its use is unvalidated.
+Both batch size and queueing conditions have left the checked domain. For that
+job, suspend reliance on this rule until a suitable model or direct process
+assessment is available. You can still keep it for the smaller sequential job.
+
+### When to use it
+
+Choose among these actions when a model meets resistance from evidence. Replacing
+a map can be right for one decision without declaring it useless everywhere.
+Record the version, conditions, evidence, and next review trigger so “we checked
+it once” does not become a permanent exemption from checking.
+
+<MCQ client:visible allowMultiple
+  question="Which statements follow from the completed warehouse audit? Select all that apply."
+  options={[
+    { text: 'Fresh small-batch results support the revised rule locally', correct: true },
+    { text: 'The shared-desk workload needs evidence of its own', correct: true },
+    { text: 'A balanced average error guarantees every deadline' },
+    { text: 'Correct arithmetic establishes accuracy outside the domain' },
+  ]}
+  explanation="The audit supports a specific use under checked conditions. Neither cancelling signed errors nor correctly applying a formula establishes performance in an untested process."
+/>
+
+## Recall and transfer
+
+<MindMap client:visible title="The model audit"
+  root={{ label: 'A model for a decision', children: [
+    { label: 'Specify', children: [{ label: 'Purpose and acceptable error' }, { label: 'Output and checked conditions' }] },
+    { label: 'Compare', children: [{ label: 'Verify the calculation' }, { label: 'Measure comparable fresh cases' }] },
+    { label: 'Diagnose', children: [{ label: 'Signed error and error size' }, { label: 'Patterns and changed assumptions' }] },
+    { label: 'Act', children: [{ label: 'Keep or revise' }, { label: 'Restrict or replace' }, { label: 'Check the revision on fresh cases' }] },
+  ] }}
+/>
+
+For the first quiz question, use this separate scheduling case. A repair estimate
+predicts 30 minutes. Two jobs take 24 and 36 minutes. Their signed errors are −6
+and +6 minutes; their average signed error is zero. Each job is allowed a miss of
+at most four minutes.
+
+<Quiz client:visible title="Make the audit decision" questions={[
+  {
+    question: 'Does the repair estimate pass the stated requirement?',
+    options: [
+      { text: 'No, both individual misses exceed the allowed size', correct: true },
+      { text: 'Yes, the early and late misses cancel on average' },
+      { text: 'Yes, the observed average equals the forecast' },
+    ],
+    explanation: 'The requirement applies to each job. Both miss by six minutes, beyond the four-minute limit; averaging the signs hides that failure.',
+  },
+  {
+    question: 'A route model deliberately omits pavement colour. What determines whether that omission is acceptable?',
+    options: [
+      { text: 'Whether it affects the decision the route model serves', correct: true },
+      { text: 'Whether the model can store photographs of the pavement' },
+      { text: 'Whether the omitted detail is visible to an observer' },
+    ],
+    explanation: 'Omission is part of modelling. Its relevance depends on purpose: pavement colour may be irrelevant to travel time but important to another task.',
+  },
+  {
+    question: 'A new scanner adds a delay once per batch. Which candidate change follows if direct measurements confirm a stable delay?',
+    options: [
+      { text: 'Adjust the fixed allowance and test fresh batches', correct: true },
+      { text: 'Increase the per-item allowance and reuse old checks' },
+      { text: 'Leave the rule unchanged and average away the delay' },
+    ],
+    explanation: 'A once-per-batch step belongs in the fixed allowance. A fresh check tests whether the measured correction generalises to further comparable batches.',
+  },
+  {
+    question: 'A model passes its arithmetic checks but misses current observations consistently. Which conclusion is justified?',
+    options: [
+      { text: 'Implementation can be correct while the representation fails', correct: true },
+      { text: 'Correct implementation makes the observations irrelevant' },
+      { text: 'Failed predictions establish an arithmetic error in the rule' },
+    ],
+    explanation: 'Verification and validation answer different questions. Investigate measurements and model assumptions even when the calculation matches its specification.',
+  },
+  {
+    question: 'A revised model works for ordinary parcels. A manager wants it to schedule unusual fragile items. What should happen next?',
+    options: [
+      { text: 'Check the new conditions before relying on that use', correct: true },
+      { text: 'Transfer approval because both jobs involve parcels' },
+      { text: 'Retire the model for ordinary parcels immediately' },
+    ],
+    explanation: 'Approval is attached to a purpose and domain. Testing fragile items can support a broader use; lack of that evidence does not erase the existing ordinary-parcel evidence.',
+  },
+]}/>
+
+### Sources and provenance
+
+The warehouse and repair cases are constructed teaching examples, not measured
+industry datasets. Their arithmetic can be reproduced from the tables.
+
+- [NASA — modelling and simulation definitions](https://public.ksc.nasa.gov/mns/ms-definitions/) supports the distinctions between intended use, verification, validation, calibration, and operating limits.
+- [NIST — assessing model fit](https://itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm) explains observed-minus-fitted errors and why their patterns matter.
+- [Google — separating fitting and evaluation data](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets) explains why fresh evaluation cases provide evidence beyond the cases used to adjust a model.
