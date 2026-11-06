@@ -1,236 +1,316 @@
 ---
-title: "Where the Model Lies"
-description: The traps that make value-of-information thinking backfire — the cost of delay, analysis paralysis, the very accurate test of the wrong question, base-rate blunders, and the answer you'll rationalise away. How to hold the model honestly.
+title: "Audit the Model Before Pricing a Test"
+description: "Check the action menu, rare-event consequences, delay and input assumptions before trusting a value-of-information calculation."
 topic: "en/the-value-of-information"
 order: 6
-minutes: 15
+minutes: 30
 updated: 2026-11-06
 ---
 
-import { Callout, MCQ, Categorize, MatchConcepts, Quiz, MindMap } from '@/components/react';
+import { MCQ, FillBlank, Categorize, MatchConcepts, Callout, FirstPrinciplesBuilder, RateComparison, MindMap, Quiz } from '@/components/react';
 
-Every good model has a shadow: the situations where following it faithfully leads you off a cliff. Value of information is one of the sharpest tools in decision analysis — but sharp tools cut the hand that holds them wrong. Over five lessons you learned to price a question: to ask what an answer would be worth *before* paying for it, to compare **EVSI** against a test's price, and to remember that a test is worth exactly **\$0** if it can't change what you do.
+A workshop compares buying a report with doing nothing. There is also a safe method the team could use today. The arithmetic may be flawless; the comparison has left an option out.
 
-This lesson is about the *other* direction — the ways the model quietly lies to you, or rather, the ways you lie to yourself while waving the model as cover. Let's start with a gut check.
+This lesson audits the **decision model**: the available actions, consequences, probabilities and timing used to calculate value. The examples use invented work-minute costs and explicitly stipulated probabilities. They describe expected work across the model's possible cases, not promised results from a real sample.
+
+## Start from the policies you can actually use
 
 <MCQ
   client:visible
-  pretest
-  question="You've built a slick value-of-information model and it says a survey is worth far more than its price. You should:"
-  options={[
-    { text: "Buy it immediately — the math says positive net value." },
-    { text: "First check whether the model quietly assumed things that aren't true here: that you'll act on the answer, that the delay is free, and that it measures the variable that actually drives the decision.", correct: true },
-    { text: "Buy two surveys to be safe." },
-    { text: "Ignore the number; intuition beats models." }
-  ]}
-  explanation="A positive net value is necessary, not sufficient. The number is only as honest as its assumptions — that you'll act on the answer, that testing is instantaneous and free of side effects, and that the tested variable is the one that changes your choice. Most VOI blunders live in a broken assumption, not in the arithmetic."
+  pretest={true}
+  question={"A report policy has expected payoff 120 minutes saved. Without a report, a feasible safe option saves 50 minutes. Gathering the report costs 30 minutes. What is its incremental net?"}
+  options={[{"text":"40 minutes: compare 120 with the available 50, then deduct 30.","correct":true},{"text":"90 minutes: deduct the report cost from its complete payoff."},{"text":"70 minutes: compare the policies without counting report effort."}]}
+  explanation={"The report adds 120 − 50 = 70 before its cost. Deducting 30 gives 40. Comparing with zero would ignore an option you already have."}
 />
 
-## The model assumes a frictionless world. Reality has friction.
+A **policy** specifies what you will do with the information available at each point. “Use the standard method” is a fixed policy. “Use the jig after a favourable report, otherwise use the standard method” is a report-dependent policy. Your comparison needs the best feasible policy in each case, with the same objective and time horizon.
 
-The clean value-of-information formula imagines a tidy universe: you have one decision, one payoff, a test that arrives instantly for a known price, and a version of you who obediently does whatever the answer recommends. Every one of those assumptions can break. When it does, the number on your spreadsheet is confidently wrong — which is the most dangerous kind of wrong. Let's walk the six ways it happens.
+For actions $a$, states $s$ and report results $r$, the gross comparison is:
 
-### Pitfall 1 — Information is never free, and delay is the hidden invoice
+$$
+V_0=\max_a\sum_s P(s)U(a,s)
+$$
 
-Ask someone the cost of a test and they'll name the sticker price: the \$30 survey, the \$5,000 lab panel, the two-week pilot. That's the *visible* cost. The one that bankrupts decisions is **delay** — the price of the time the test takes while the world keeps moving.
+$$
+V_{\text{report}}=\sum_r P(r)\max_a\sum_s P(s\mid r)U(a,s),\qquad EVSI=V_{\text{report}}-V_0
+$$
 
-Think of a surfer waiting for the "perfect" wave. Each wave he lets pass to gather more information is a wave he doesn't ride. While you run the two-week pilot, the competitor ships, the hiring candidate takes another offer, the market window narrows, the acquisition target gets a second bidder. A **good decision now** frequently beats a **better-informed decision later**, because "later" has its own body count.
+Here $U$ is the payoff for one action in one state; the policy values average those payoffs. The jig uses work-minutes saved relative to the standard method. Later batch examples instead minimise expected additional work. The maximisation is over actions that are actually available. [Berkeley's decision-network derivation](https://inst.eecs.berkeley.edu/~cs188/textbook/vpis/vpi.html) expresses the comparison in terms of expected utility; the payoff table and action menu determine what it means in a particular case.
 
-Return to our running launch example: prior 40% the product is good, payoffs of **+\$400k** if it's good and **−\$300k** if it's bad (in thousands). The 80%-accurate survey has an **EVSI of 92** and costs 30, for a tidy net of +62. But suppose running it burns a month, and in that month a rival launches something similar and shaves \$150k off your upside whether the product is good or bad. Now the survey's *real* price isn't 30 — it's 30 plus the erosion of the very payoff you're trying to protect. The test can be net-positive on paper and net-negative in the world.
+### A missing alternative changes both sides
 
-<Callout variant="warning">
-The price of a test is its sticker price **plus** the cost of the time it takes. If the opportunity is time-sensitive, delay can be the single largest term in the whole calculation — and it's the one people leave out of the spreadsheet entirely.
-</Callout>
+Return to the earlier jig model: suitability has probability **40%**, the jig saves **400 minutes** when suitable and adds **300 minutes** when unsuitable. The standard method has relative payoff zero. A report is correct **80% within each state**, and costs **30 minutes** of effort per project.
 
-### Pitfall 2 — Analysis paralysis: data past the decision threshold is procrastination with footnotes
+Now include a third option that had been omitted: a safe method saving **50 minutes in either state**. It remains available after a report. All options complete the same required work to the same quality; report effort is additional.
 
-Once you have enough information to pick an action, any *further* information that can't flip that action is pure waste. Recall the change-my-action test: if every plausible next result points to the same move, you've already decided — you're just refusing to admit it. **Analysis paralysis** is gathering more information past the point where it could change your decision: waste dressed as diligence.
+| Quantity | Only standard method and jig | Safe option also available |
+|---|---|---|
+| Best payoff without a report | 0 | 50 |
+| Best gross report-policy payoff | 92 | 120 |
+| Gross EVSI | 92 | 70 |
+| Incremental net after 30 minutes of effort | 62 | 40 |
 
-You've seen the species. The "let's just be sure" that was already sure. The fourth focus group after the first three agreed. The vanity study commissioned to confirm what the boss already wants to hear. Each extra week of "rigor" feels responsible, but if no realistic finding would change the call, the rigor is theatre — and it's carrying Pitfall 1's delay costs the whole time.
+Without a report, the jig's expected payoff is **0.40 × 400 − 0.60 × 300 = −20**, so the safe option's 50 wins. A favourable report occurs with probability **0.40 × 0.80 + 0.60 × 0.20 = 0.44**. Choosing the jig in that branch contributes **0.32 × 400 − 0.12 × 300 = 92** to the full expected payoff. Choosing the safe option there would contribute only **0.44 × 50 = 22**.
 
-Here's the tell: before you commission the next study, write down what you'd do for each possible result. If the answer is "the same thing regardless," stop. You are not being careful. You are being slow.
+The unfavourable branch has probability **0.56**. The safe option contributes **0.56 × 50 = 28**; the jig would contribute **0.08 × 400 − 0.48 × 300 = −112**. The optimal report policy therefore gives **92 + 28 = 120**. Its improvement over the best no-report policy is **120 − 50 = 70**, leaving **40 minutes** after report effort.
 
-<Callout variant="tip">
-A decision doesn't need to be *certain* before you act — it needs to be past the **threshold** where more data could realistically tip it. Chasing certainty beyond that threshold isn't diligence; it's an expensive way to avoid committing.
-</Callout>
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  valuePrefix={""}
+  valueSuffix={" min"}
+  revealAllLabel={"Add all parts"}
+  resetLabel={"Start over"}
+  title={"Rebuild the complete report-policy payoff"}
+  eyebrow={"Expected contributions across report branches"}
+  analogyValue={50}
+  analogyLabel={"Best no-report payoff"}
+  parts={[{"label":"Favourable report: choose the jig","value":92,"note":"Joint probabilities weight both suitability states."},{"label":"Unfavourable report: use the safe option","value":28,"note":"Probability 0.56 multiplied by its 50-minute payoff."}]}
+  rebuiltLabel={"Selected gross policy contributions"}
+  instructions={"Add both branches, then compare with the best no-report option and deduct report effort once."}
+  verdictTemplate={"The gross policy payoff is {total}. Subtract the 50-minute baseline and 30-minute report effort to obtain a 40-minute incremental net."}
+  caption={"These bars show expected payoffs, not information values. Complete information would give 0.40 × 400 + 0.60 × 50 = 190; its incremental ceiling is 190 − 50 = 140 minutes."}
+/>
 
-### Pitfall 3 — A flawless test of the wrong question
+### When to check the menu
 
-A test can be exquisitely precise and still worth zero, because accuracy on the wrong variable is worth exactly as much as accuracy on any other irrelevant fact: nothing. Value of information is defined against **your decision** — the payoff of your best choice *with* the info minus your best choice *without* it. If the measured variable doesn't move that difference, the difference stays zero no matter how many decimal places your instrument reports.
+Do this before pricing a test or declaring information worthless. An irreversible launch decision might leave later maintenance, mitigation or replacement decisions open. Information arriving after launch has zero launch-choice benefit if that choice cannot change; its value for a remaining decision needs a separate comparison.
 
-This is the streetlight effect: searching for your keys under the lamp because that's where the light is, not because that's where you dropped them. Teams measure what's cheap and clean — click-through rates, NPS to two decimals, server latency — while the decision actually turns on something awkward and unmeasured, like whether enterprise buyers trust the brand. A hyper-accurate reading of the easy variable is a beautifully calibrated answer to a question nobody asked.
+Likewise, a proxy is not irrelevant merely because it measures something other than the final outcome. It can inform that outcome through a defensible conditional relationship. If it changes neither the relevant beliefs nor any feasible payoff or action, it adds no benefit for this objective. Measuring the easy variable is a problem when its connection to the decision is missing, not because every indirect measurement is useless.
 
-Concretely: you're deciding whether to greenlight a product, and the decision hinges on *demand*. You commission a study that measures manufacturing defect rates to ±0.1%. Impeccable. Useless — because within the range you'd actually see, defect rate doesn't change the greenlight. **The fix:** start from the decision and work backward. Name the one or two variables whose values would actually flip your action, and test *those*, accepting a noisier answer on the right question over a razor-sharp answer to the wrong one.
+## Price a rare report against its consequences
 
-### Pitfall 4 — Base rates: how a rare target turns an accurate test into a coin toss
+<MCQ
+  client:visible
+  pretest={true}
+  question={"A positive report points to a genuine rare fault in 9 of 108 model cases. Can that fact alone show that buying the report is a poor decision?"}
+  options={[{"text":"Yes: more false positives than true positives makes any report too costly."},{"text":"No: compare the consequences, available responses and report costs.","correct":true},{"text":"Yes: an 8.33% posterior is below every rational action threshold."}]}
+  explanation={"The posterior is one input. A relatively inexpensive response can be justified at a low probability when the avoidable consequence is much larger. The threshold comes from those consequences."}
+/>
 
-This is the subtle one, and it's where people wildly *over*value tests. When the thing you're testing for is **rare**, even a highly accurate test produces a flood of false positives — so a "positive" result moves your belief far less than the headline accuracy suggests. You met this in the Bayesian-updating lesson as false-positive dilution; here it becomes a pricing error.
+A workshop processes batches. A rare fault makes an unprotected batch require **10,000 extra work-minutes**. Preparing a fallback costs **100 work-minutes in either state** and prevents that extra work completely. Otherwise an unprotected batch adds no work. Both responses remain available after the report, and testing has no other effects. The objective is to minimise expected additional work per batch.
 
-Suppose you're screening startups for a trait that only **1 in 100** genuinely has, using a test that's **90% accurate** both ways. Screen 1,000 companies: 10 truly have the trait, and the test flags about 9 of them. But of the 990 that don't, it falsely flags 10% — about 99. So a "positive" points at roughly **9 real signals buried in 99 false alarms**: your posterior is about 9 in 108, or **~8%**. The test *felt* 90% reliable and delivered an 8% confidence. If you priced this test as if a positive nearly settled the question, you overpaid by an order of magnitude.
+The model assigns a **1% fault probability**, **90% sensitivity** (a positive report given a fault) and **90% specificity** (a negative report given no fault). The following catalogue contains 1,000 equally likely hypothetical cases representing those joint probabilities:
 
-<Callout variant="warning">
-Headline accuracy is not the same as how much a result should move you. When the base rate is low, most positives are false positives, and the test's real EVSI collapses toward the price of a placebo. Always run a result through Bayes before you decide what it's worth.
-</Callout>
+| Model cases | Positive report | Negative report | Total |
+|---|---|---|---|
+| Fault | 9 | 1 | 10 |
+| No fault | 99 | 891 | 990 |
+| Total | 108 | 892 | 1,000 |
 
-The deeper lesson: **EVSI depends on the base rate, not just the test's accuracy.** A 90% test on a coin-flip question is worth a great deal; the same 90% test on a one-in-a-hundred question is worth a fraction of it. People forget the prior, anchor on the accuracy, and pay for signal they aren't getting.
+A positive report gives fault probability **9 ÷ 108 = 1/12 ≈ 8.33%**. Most positives are false alarms, but preparing the fallback is justified when **fault probability × 10,000 > 100**: the threshold is **1%**. The positive crosses it. A negative gives **1 ÷ 892 ≈ 0.112%**, below the threshold.
 
-### Pitfall 5 — VOI assumes you'll actually act on the answer
+<RateComparison
+  client:visible
+  locale={"en"}
+  title={"The prior and the positive result answer different questions"}
+  scenarioLabel={"Model comparison"}
+  countsLabel={"Fault cases out of eligible cases"}
+  differenceLabel={"Difference"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+  scenarios={[{"label":"Stipulated sensitivity and specificity: 90% each","groups":[{"label":"Fault among positive reports","events":9,"total":108},{"label":"Fault among all catalogue cases","events":10,"total":1000}]}]}
+/>
 
-The entire model rests on a quiet premise: that different answers lead to different actions *by you, in reality*. Information you'll rationalise away is worth nothing. Information that arrives after you've already committed the budget, signed the lease, or announced the plan is worth nothing. If, deep down, you know you're launching no matter what the survey says, then the survey's value isn't 92 or 30 — it's **\$0**, and the honest move is to skip it and own the decision.
+The chart compares a conditional probability with the prior. Its percentage-point difference is not the report's value in minutes.
 
-We're excellent at commissioning information for cover, then discarding it when it disagrees. The board that orders due diligence on a deal it has already emotionally closed. The founder who A/B tests but ships the version he liked regardless. That's not decision-making; it's evidence-shopping. And it's worse than free, because it costs money *and* time (hello again, Pitfall 1) to manufacture a permission slip.
+Without a report, never preparing the fallback costs **0.01 × 10,000 = 100 minutes on average**. Always preparing it also costs 100; either fixed policy is optimal in this model. With the report, prepare only after a positive:
 
-<Callout variant="tip">
-Before you pay for an answer, pre-commit to the action each answer would trigger — out loud, ideally to someone who'll hold you to it. If you can't honestly name a result that would change your course, don't buy the test. Worth-knowing and worth-buying are different things, and this is where they split.
-</Callout>
+- Preparation contributes **108 ÷ 1,000 × 100 = 10.8 minutes per batch**.
+- The one missed fault contributes **1 ÷ 1,000 × 10,000 = 10 minutes per batch**.
+- The gross report-policy cost is **20.8 minutes**, improving on 100 by **79.2 minutes**.
 
-### Pitfall 6 — The model's own edge: clean numbers, messy world
+If each report requires **20 additional minutes**, the complete expected cost is **40.8 minutes** and the expected saving is **59.2 minutes**. At a report cost of **80 minutes**, the complete cost becomes 100.8 and the expected saving is **−0.8 minutes**. The very same information can be useful and overpriced.
 
-Even used perfectly, VOI as usually taught assumes a **single, well-defined decision with a known payoff distribution**. Push past that and the clean number bends. Under **deep uncertainty** — where you can't even list the outcomes, let alone their probabilities — an EVPI of "160" is false precision dressed as rigor. And sometimes the **act of testing changes the outcome**: floating a price to gauge demand tips off competitors; polling employees about a reorg starts the rumour that reshapes the answer; measuring a system perturbs it. In those cases the thing you measured isn't the thing you'll decide on.
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  valuePrefix={""}
+  valueSuffix={" min"}
+  revealAllLabel={"Add all parts"}
+  resetLabel={"Start over"}
+  title={"Include every expected work contribution"}
+  eyebrow={"The rare-fault model"}
+  analogyValue={100}
+  analogyLabel={"Minimum expected cost without a report"}
+  parts={[{"label":"Prepare fallback after positive reports","value":10.8},{"label":"Unprotected fault missed by the report","value":10},{"label":"Report effort for each batch","value":20}]}
+  rebuiltLabel={"Selected complete policy costs"}
+  instructions={"Add the expected contributions in work-minutes per batch and compare with the no-report cost."}
+  verdictTemplate={"The complete expected cost is {total}. Compared with the 100-minute no-report baseline, this saves 59.2 minutes per batch under the stipulated model."}
+  caption={"Sensitivity and specificity are inputs to this teaching model. The catalogue is not a guarantee about the counts in a future sample."}
+/>
 
-So hold value of information as a **discipline, not a decimal**. Its enduring gift isn't the exact figure — it's the *habit* of asking "what would this answer be worth, and would it change what I do?" before reaching for your wallet.
+### When the base rate matters
 
-## Sort the tests: which ones could earn their keep?
+Use the prior to calculate each report's conditional probabilities, then apply the actual payoff threshold. A low posterior does not by itself establish a small EVSI. Here the avoidable loss is large relative to the fallback cost; another consequence table could make the same report unhelpful.
 
-Time to make the change-my-action test reflexive. For each scenario, decide whether the information could actually change the action — **Worth testing** — or whether it lands in the same place regardless, making it **Worth nothing** no matter its accuracy or price.
+## Put delay on the affected branches
+
+For this example use the original **two-action** jig model: standard method or jig, with no safe 50-minute alternative. Suitability is 40%, the report is correct 80% within each state, and report effort is 30 minutes. At the original timing, the report's gross value is 92 and its incremental net is **92 − 30 = 62 minutes**.
+
+Now suppose waiting for the report loses a setup slot. Choosing the jig afterwards adds **150 work-minutes in either suitability state**. Using the standard method is unaffected. The revised jig payoffs are **400 − 150 = 250** when suitable and **−300 − 150 = −450** when unsuitable.
+
+Recalculate the best response to each result:
+
+| Report | Joint contribution if the jig is chosen | Contribution from standard method | Best response |
+|---|---|---|---|
+| Favourable | 0.32 × 250 − 0.12 × 450 = 26 | 0 | Jig |
+| Unfavourable | 0.08 × 250 − 0.48 × 450 = −196 | 0 | Standard method |
+
+The gross report-policy value falls to **26**, so the complete incremental net is **26 − 30 = −4 minutes**. A report that paid under the original timing no longer pays under these changed consequences. The best immediate no-report action still has payoff zero.
+
+There is an equivalent accounting here. The jig is still chosen only after a favourable report, which has probability **0.44**. The expected payoff erosion is therefore **0.44 × 150 = 66 minutes**, not 150 on every project. Starting with the original gross gain gives **92 − 66 − 30 = −4**.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  valuePrefix={""}
+  valueSuffix={" min"}
+  revealAllLabel={"Add all parts"}
+  resetLabel={"Start over"}
+  title={"Compare the original information gain with all added burdens"}
+  eyebrow={"One accounting convention at a time"}
+  analogyValue={92}
+  analogyLabel={"Gross report gain at the original timing"}
+  parts={[{"label":"Expected erosion from losing the setup slot","value":66,"note":"150 extra minutes on the 44% of report branches choosing the jig."},{"label":"Report effort per project","value":30}]}
+  rebuiltLabel={"Selected expected burdens"}
+  instructions={"Add both burdens and compare their total with the original gross information gain."}
+  verdictTemplate={"The burdens total {total}, exceeding the original 92-minute gain by 4 minutes. The complete report policy loses 4 expected minutes against deciding now."}
+  caption={"Alternatively use the changed payoff table: 26 − 30 = −4. Subtracting the 66-minute erosion again from that revised 26 would count the same consequence twice."}
+/>
+
+<FillBlank
+  client:visible
+  question={"Keep the delay on its actual branch"}
+  text={"The slot loss adds 150 work-minutes only when the jig is chosen, on 44% of report outcomes. Its expected burden is {{66 minutes|150 minutes|44 minutes}}. Starting with the revised gross value of 26, deduct {{only the 30-minute effort|30 effort plus 66 erosion|30 effort plus 150 erosion}}."}
+  explanation={"Weight the branch-specific 150 by 0.44 to get 66. The changed payoff calculation already includes that erosion, so subtract only report effort from its 26-minute result."}
+/>
+
+### When delay needs a new model
+
+Put a consequence where it occurs. A fixed fee can be subtracted once; a missed slot, an expired alternative or a report that changes the system can require a new action menu, payoff table or transition model. Reoptimise the response after those changes before using a shortcut based on the old response policy.
+
+The [National Academies discussion of decision uncertainty](https://www.nationalacademies.org/read/12568/chapter/7) treats data collection, delayed action and later decision revision as costs to consider. The calculations here are authored examples of that accounting, not measurements from its environmental cases.
+
+## Test the inputs before trusting the total
+
+A correct calculation can still use the wrong report model. Sensitivity measured on one population or operating process need not describe a different one. Record where each input came from, which cases it covers and what uncertainty remains.
+
+Return to the rare-fault batch model. Keep the 1% prior, 10,000-minute unprotected fault loss, 100-minute fallback and 90% specificity. This time consider **60 minutes of report effort** under both candidate models. Compare the original 90% sensitivity assumption with an alternative 60% assumption:
+
+| Candidate input model | Fault positives / missed faults | No-fault positives / negatives | Expected policy cost before report effort | Gross EVSI | Incremental net after 60 minutes |
+|---|---|---|---|---|---|
+| Sensitivity 90% | 9 / 1 | 99 / 891 | 20.8 | 79.2 | +19.2 |
+| Sensitivity 60% | 6 / 4 | 99 / 891 | 50.5 | 49.5 | −10.5 |
+
+For the second row, positive reports occur in **6 + 99 = 105** catalogue cases. Preparing after positives costs **105 ÷ 1,000 × 100 = 10.5 minutes** on average. Four missed faults cost **4 ÷ 1,000 × 10,000 = 40 minutes**. The policy costs **50.5** before report effort, improving on the 100-minute baseline by **49.5**. At a 60-minute report cost, that improvement is insufficient.
+
+A positive still justifies the fallback in both models: **6 ÷ 105 ≈ 5.71%** also exceeds the 1% action threshold. A negative in the second model gives **4 ÷ 895 ≈ 0.447%**, still below that threshold, so the optimal response remains to prepare only after a positive. The response policy can stay the same while the expected benefit changes enough to reverse the purchase decision.
+
+<RateComparison
+  client:visible
+  locale={"en"}
+  title={"A changed sensitivity assumption changes the positive posterior"}
+  scenarioLabel={"Assumption comparison"}
+  countsLabel={"Fault cases among positive reports"}
+  differenceLabel={"Difference"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+  scenarios={[{"label":"Separate stipulated catalogues, not two measured samples","groups":[{"label":"90% sensitivity assumption","events":9,"total":108},{"label":"60% sensitivity assumption","events":6,"total":105}]}]}
+/>
+
+<MCQ
+  client:visible
+  question={"The two candidate models give incremental nets +19.2 and −10.5 at the same report price. What is justified?"}
+  options={[{"text":"The report is proven profitable because one candidate model gives a positive result."},{"text":"The price decision depends on the sensitivity assumption, which needs support.","correct":true},{"text":"The model with the higher sensitivity must be true because it saves more work."}]}
+  explanation={"These are conditional results under different inputs. Neither calculation identifies the true operating sensitivity. The sign reversal shows why the input assumption matters to the decision."}
+/>
+
+### When to use the input audit
+
+Use it when plausible input changes alter the selected policy or whether research pays. Seek evidence about the relevant process and examine coherent alternatives or ranges. If the states, probabilities or objectives cannot be defended, retain the conditional scenario comparisons rather than presenting one precise total as established fact. The course on deep uncertainty develops choices when a single agreed probability model is unavailable.
+
+## Audit a different batch
+
+A second operation has a **2%** chance of a fault. An unprotected fault adds **2,000 work-minutes**; fallback preparation costs **80 minutes in either state** and prevents that loss. The report has **80% sensitivity**, **95% specificity** and **15 minutes of additional effort per batch**. All actions remain available in time, with no other test effects. Minimise expected additional work.
+
+The stipulated catalogue is:
+
+| Model cases | Positive report | Negative report | Total |
+|---|---|---|---|
+| Fault | 16 | 4 | 20 |
+| No fault | 49 | 931 | 980 |
+| Total | 65 | 935 | 1,000 |
+
+Calculate the best fixed policy, response to each result and complete expected cost before opening the solution.
+
+<FillBlank
+  client:visible
+  question={"Evaluate the complete second report policy"}
+  text={"Without a report, the minimum expected cost is {{40 minutes|80 minutes|20 minutes}}. The positive-only fallback policy costs {{28.2 minutes|13.2 minutes|43.2 minutes}} including the report, so its incremental saving is {{11.8 minutes|26.8 minutes|15 minutes}}."}
+  explanation={"Without a report compare 0.02 × 2,000 = 40 with fallback cost 80. With the report, preparation contributes 5.2 and missed faults 8; add report effort 15 to obtain 28.2. The saving against 40 is 11.8."}
+/>
+
+<details>
+<summary>Check the response policy and all work contributions</summary>
+
+Fallback is justified above **80 ÷ 2,000 = 4% fault probability**. A positive gives **16 ÷ 65 ≈ 24.62%**; a negative gives **4 ÷ 935 ≈ 0.43%**. Prepare only after a positive. Preparation contributes **65 ÷ 1,000 × 80 = 5.2 minutes**, and missed faults contribute **4 ÷ 1,000 × 2,000 = 8 minutes**. The gross policy cost is **13.2**, so gross EVSI is **40 − 13.2 = 26.8 minutes**.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  valuePrefix={""}
+  valueSuffix={" min"}
+  revealAllLabel={"Add all parts"}
+  resetLabel={"Start over"}
+  title={"Rebuild the second policy before comparing it"}
+  eyebrow={"Expected work per batch"}
+  analogyValue={40}
+  analogyLabel={"Minimum expected cost without a report"}
+  parts={[{"label":"Fallback after positive reports","value":5.2},{"label":"Unprotected missed faults","value":8},{"label":"Report effort","value":15}]}
+  rebuiltLabel={"Selected complete policy costs"}
+  instructions={"Add the three expected costs and compare with the best fixed policy."}
+  verdictTemplate={"The complete policy costs {total}. Against the 40-minute baseline, that saves 11.8 expected minutes per batch."}
+  caption={"At a report effort of 30 instead of 15, the complete cost would be 43.2 and the incremental saving −3.2. Gross EVSI would remain 26.8 under the same report model."}
+/>
+
+</details>
+
+### When this transfer is valid
+
+The objective is expected work, and the supplied actions and probabilities define the comparison. A deadline, a hard limit on individual losses or another objective needs to enter the model explicitly. Do not carry this expected-work decision into a different objective by relabelling its answer.
+
+## Keep the audit usable
 
 <Categorize
   client:visible
-  question="Could this information change the action? Sort each into worth-testing vs worth-nothing."
-  buckets={['Worth testing', 'Worth nothing']}
-  items={[
-    { text: "A cheap survey informing a genuinely 55/45 product-launch call worth millions", bucket: 'Worth testing' },
-    { text: "A DNA test run before a decision you'll make identically whatever it shows", bucket: 'Worth nothing' },
-    { text: "A hyper-accurate reading of a variable that doesn't affect which option you pick", bucket: 'Worth nothing' },
-    { text: "A two-week pilot for a launch, but the market window slams shut in one week", bucket: 'Worth nothing' },
-    { text: "A quick A/B test between two designs you're honestly torn between, on a high-traffic page", bucket: 'Worth testing' },
-    { text: "A study commissioned to confirm a decision the CEO has already announced publicly", bucket: 'Worth nothing' }
-  ]}
-  explanation="Worth testing requires all of: the decision is close, the stakes are real, and the result could flip your action in time to matter. The four 'Worth nothing' items each fail one — action fixed either way, accuracy on an irrelevant variable, an answer that arrives too late to use, or a mind already made up. Accuracy and price are irrelevant once the answer can't change the move."
+  question={"Which part of the comparison needs attention?"}
+  buckets={["Feasible actions","Timing and effects","Probability inputs"]}
+  items={[{"text":"A fallback remains available after launch, but the model removes every later response.","bucket":"Feasible actions"},{"text":"A report uses reliability measured on a different operating process without justification.","bucket":"Probability inputs"},{"text":"Waiting loses a setup slot only if one particular action is chosen afterwards.","bucket":"Timing and effects"},{"text":"A safe option already available without research is omitted from the baseline.","bucket":"Feasible actions"}]}
+  explanation={"The action menu determines what can change, the timing model determines which consequences each policy faces, and the probability inputs determine their expected weights. Price is only one entry in that comparison."}
 />
-
-## Pin down the vocabulary
-
-Before the exam, make sure the five core terms are crisp. Match each to its precise definition.
 
 <MatchConcepts
   client:visible
-  question="Match each concept to its exact definition."
-  pairs={[
-    { term: "Value of information", definition: "The payoff of your best decision WITH the info minus the payoff of your best decision WITHOUT it; always at least zero, capped by the stakes." },
-    { term: "EVPI", definition: "The value of a perfect, 100%-certain answer — the ceiling that no real, noisy test can beat." },
-    { term: "EVSI", definition: "The value of a real, imperfect test; always at most EVPI. Buy only if EVSI minus its price is positive." },
-    { term: "The change-my-action test", definition: "Ask what you'd do for each possible answer; if the action is identical across all answers, the information is worth zero." },
-    { term: "Analysis paralysis", definition: "Gathering more information past the point where it could change your decision — waste dressed as diligence." }
-  ]}
-  explanation="Value of information is the gap between deciding with and without knowing. EVPI is the ceiling (perfect answer), EVSI is the realistic value (noisy answer, always at most EVPI), and net value subtracts the price. The change-my-action test is the fast screen; analysis paralysis is what happens when you ignore it."
+  question={"Match each quantity with its role in the audit"}
+  pairs={[{"term":"Best no-report policy","definition":"The feasible policy with the highest expected payoff, or lowest expected cost, before buying the report."},{"term":"Gross EVSI","definition":"The improvement from using the specified report optimally, before its additional acquisition costs."},{"term":"Incremental net","definition":"The complete report-policy improvement over the best alternative, with each additional burden counted once."},{"term":"Input sensitivity comparison","definition":"Recalculate under coherent alternative assumptions to see which conclusions depend on them."}]}
+  explanation={"Keep a complete policy payoff, its improvement over the baseline and the cost-adjusted improvement separate. A model comparison tests dependence on assumptions; it does not identify which assumption is true."}
 />
-
-## Recap quiz: spot the trap
-
-<Quiz
-  client:visible
-  questions={[
-    {
-      question: "A test is 95% accurate for a condition that only 1 in 500 firms actually have. A firm tests positive. Why might paying a premium for this test be a mistake?",
-      options: [
-        { text: "Because with such a low base rate, most positives are false positives, so a positive moves your belief far less than 95% suggests — the real EVSI is small.", correct: true },
-        { text: "Because 95% accuracy is too low to ever be useful." },
-        { text: "Because you should always trust base rates over test results, no matter what." },
-        { text: "Because accurate tests are always overpriced." }
-      ],
-      explanation: "Rarity dilutes the signal. Among positives, the false alarms from the huge negative population swamp the handful of true positives, so the posterior is low and the test's real value is much smaller than its headline accuracy — pay accordingly."
-    },
-    {
-      question: "Your model says a two-week study has positive net value at its sticker price. What most often makes that number a lie?",
-      options: [
-        { text: "It omits the cost of delay — what you lose while the world moves during those two weeks.", correct: true },
-        { text: "Studies are always more accurate than the model assumes." },
-        { text: "Net value can never actually be positive." },
-        { text: "Two weeks is always fast enough to ignore." }
-      ],
-      explanation: "The sticker price is the visible cost; delay is the hidden one. If opportunities close or rivals act during the test window, that erosion belongs in the price — and it's routinely left out."
-    },
-    {
-      question: "Which situation makes information genuinely worth ZERO regardless of the test's accuracy?",
-      options: [
-        { text: "When you'll take the same action whatever the result — because your mind is made up, or you'll rationalise away any disagreeing answer.", correct: true },
-        { text: "When the test costs less than \$50." },
-        { text: "When the decision is high-stakes." },
-        { text: "When the test is more than 90% accurate." }
-      ],
-      explanation: "VOI assumes different answers lead to different actions. If the action is fixed — mind made up, or answer bought only for cover — no accuracy can rescue the value. It's zero."
-    }
-  ]}
-/>
-
-## One more check
-
-<MCQ
-  client:visible
-  question="A team must choose between two well-understood suppliers. The decision hinges on reliability, but reliability data is hard to get, so they commission a razor-sharp study of each supplier's office square footage instead. What's the flaw?"
-  options={[
-    { text: "The study is too expensive." },
-    { text: "It's an accurate test of the wrong question — office size doesn't move the reliability-based decision, so its value is zero however precise it is.", correct: true },
-    { text: "Two suppliers isn't enough to compare." },
-    { text: "Square footage is impossible to measure accurately." }
-  ]}
-  explanation="This is the streetlight effect. They measured what was easy (square footage) instead of what drives the choice (reliability). High accuracy on an irrelevant variable is worth exactly zero — start from the decision and test the variable that would actually flip it."
-/>
-
-## The healthy stance
-
-Strip away the traps and a simple discipline remains. Value of information is worth reaching for when a decision is **close** (the options are genuinely competitive), **high-stakes** (being wrong is expensive), **genuinely uncertain** (you don't already know the answer), and **actionable** (the result will change what you do, in time to do it). Miss any one of those and the smart move is usually to decide now and skip the study.
-
-When those conditions *are* met, still do two things before you buy: **price the test honestly** — sticker price *plus* the cost of delay and any side effects of testing — and remember that **worth ≠ worth-buying**. An answer can be genuinely worth 92 and still be a bad purchase at a price of 100, or a delay of a month, or when you'd have acted the same anyway.
-
-That's the whole model in two sentences: information is only worth what it changes about your best decision, and you should pay for it only when that change, net of every cost including time, is worth more than the price. Everything else — EVPI as a ceiling, EVSI as the realistic value, the change-my-action test as the fast screen — is bookkeeping around that one idea.
 
 <MindMap
   client:visible
-  title="Where value-of-information thinking goes wrong"
-  root={{
-    label: 'Pitfalls of VOI',
-    children: [
-      {
-        label: 'Cost you forget',
-        children: [
-          { label: 'Delay: the world moves while you test' },
-          { label: 'Good decision now can beat better one later' }
-        ]
-      },
-      {
-        label: 'Too much / wrong data',
-        children: [
-          { label: 'Analysis paralysis past the threshold' },
-          { label: 'Accurate test of the wrong question' }
-        ]
-      },
-      {
-        label: 'Misreading the answer',
-        children: [
-          { label: 'Rare target -> false positives dilute signal' },
-          { label: 'Headline accuracy is not posterior belief' }
-        ]
-      },
-      {
-        label: "Won't act on it",
-        children: [
-          { label: "Answer you'll rationalise away = worth 0" },
-          { label: 'Info after commitment = worth 0' }
-        ]
-      },
-      {
-        label: 'Model edge',
-        children: [
-          { label: 'Deep uncertainty bends the clean number' },
-          { label: 'Testing can change the outcome' }
-        ]
-      }
-    ]
-  }}
+  title={"Audit the policy behind the information price"}
+  eyebrow={"Connect the assumptions"}
+  outlineLabel={"Text outline"}
+  root={{"label":"Compare usable policies","children":[{"label":"Actions and objective","children":[{"label":"Use the best available no-report baseline"},{"label":"Keep later choices distinct from an irreversible earlier choice"},{"label":"Check whether a proxy informs relevant outcomes"}]},{"label":"Consequences and timing","children":[{"label":"Combine posterior probabilities with actual payoffs"},{"label":"Reoptimise after delay changes the problem"},{"label":"Count each additional burden once"}]},{"label":"Evidence and uncertainty","children":[{"label":"Support the report model for the relevant process"},{"label":"Compare coherent assumptions and ranges"},{"label":"Treat conditional results as conditional"}]}]}}
 />
 
-<Callout variant="success">
+<Quiz
+  client:visible
+  title={"Check the model audit"}
+  questions={[{"question":"A report policy has expected payoff 120, the best no-report policy 50, and report effort 30. What is incremental net?","options":[{"text":"40.","correct":true},{"text":"70."},{"text":"90."}],"explanation":"Subtract the best baseline and report effort: 120 − 50 − 30 = 40. Seventy is gross EVSI; ninety ignores the available baseline."},{"question":"In the first fault model, why can a positive with only 9 genuine faults among 108 positives justify fallback?","options":[{"text":"Because every report with sensitivity above 50% justifies acting."},{"text":"Because 9/108 exceeds the payoff-derived 1% fallback threshold.","correct":true},{"text":"Because false positives disappear when the consequence is expensive."}],"explanation":"Compare posterior fault probability with 100/10,000. False positives still create preparation costs; the full expected-work comparison includes them."},{"question":"The delayed jig calculation already uses payoffs +250 and −450, giving gross value 26. Which remaining deduction gives its net?","options":[{"text":"Deduct report effort 30, giving −4.","correct":true},{"text":"Deduct expected erosion 66 and effort 30, giving −70."},{"text":"Deduct the full 150-minute erosion, giving −124."}],"explanation":"The changed payoffs already include the lost-slot erosion. Deducting it again would double count. Report effort has not yet been included in gross value."},{"question":"Which checks are needed before reusing the original information-value estimate?","allowMultiple":true,"options":[{"text":"Check whether the feasible action menu has changed.","correct":true},{"text":"Check whether the report model describes the new operating process.","correct":true},{"text":"Assume a precise instrument must be decision-relevant."},{"text":"Keep the old payoff table even when a deadline removes an option."}],"explanation":"Both available responses and the evidence distribution can change the policy value. Measurement precision cannot supply a missing link to the decision, and timing can change the alternatives."},{"question":"Two plausible sensitivity models reverse the sign of incremental net. What has the calculation established?","options":[{"text":"Which sensitivity value is true."},{"text":"That the purchase decision depends on that input assumption.","correct":true},{"text":"That the more favourable output should be averaged in twice."}],"explanation":"The comparison exposes dependence on an assumption. Supporting or replacing that assumption requires evidence or a decision method that accommodates the remaining uncertainty."},{"question":"A launch cannot be reversed, but a report can still change tomorrow's maintenance plan. Which claim is justified?","options":[{"text":"It has zero benefit for every future use because launch is complete."},{"text":"Its maintenance value requires a separate feasible-policy comparison.","correct":true},{"text":"Its maintenance value must equal the earlier launch EVPI."}],"explanation":"The zero-benefit claim applies to a specified action that cannot change. Remaining actions, objectives and report costs define another decision."},{"question":"In the transfer case, gross EVSI is 26.8 and report effort rises from 15 to 30. What changes?","options":[{"text":"Gross EVSI stays 26.8; incremental net becomes −3.2.","correct":true},{"text":"Gross EVSI rises to 41.8; incremental net stays 11.8."},{"text":"Gross EVSI becomes zero because the report is overpriced."}],"explanation":"The report model and response policy stay fixed, so the gross improvement stays 26.8. Subtract the new effort once: 26.8 − 30 = −3.2."}]}
+/>
+
+<Callout variant="success" title="Apply the audit to competing tests">
 Next, [choose a test and know when to stop](/the-value-of-information/06-choose-the-next-test). The workshop compares competing research protocols, keeps the no-test baseline explicit and checks whether an additional result could improve the action. After that comes the [graded final exam](/the-value-of-information/final-exam), where each submitted answer is locked for the run.
 </Callout>
