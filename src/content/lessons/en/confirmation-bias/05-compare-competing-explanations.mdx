@@ -1,0 +1,405 @@
+---
+title: "Workshop: compare competing explanations"
+description: "Investigate a label error with rival predictions, coexisting causes and explicit revision rules. Separate a diagnostic result from one that merely fits."
+topic: "en/confirmation-bias"
+order: 6
+minutes: 23
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, Callout, ConsequenceTree, InversionFlip, MindMap } from '@/components/react';
+
+The festival's ticket label should read **AB-CD**. The final preview reads **ABCD**. Your colleague says the exporter removed the hyphen. You suspect the badge formatter. Both of you can point at the same broken label and announce that the evidence agrees with you. A productive meeting, by the usual standards of meetings.
+
+This workshop turns the disagreement into a **prediction matrix**: a table of what each explanation predicts under each test. The ticket system and every result below are invented. You need no knowledge of a particular file format or software product; the mechanism is fully specified here.
+
+## State alternatives that could actually differ
+
+<MCQ
+  client:visible
+  pretest
+  question="A label passes through an exporter and then a formatter. Its hyphen disappears. Which candidate list avoids a false choice?"
+  options={[
+    { text: 'The exporter is wrong or the formatter is wrong; one must be innocent.' },
+    { text: 'Exporter only, formatter only, both, or neither of the specified mechanisms.', correct: true },
+    { text: 'The explanation defended by the most experienced teammate.' }
+  ]}
+  explanation="The proposed mechanisms can coexist. A broken final label alone does not force a choice between single-cause stories, and a real investigation may need explanations outside the initial list too."
+/>
+
+Our fictional system has two stages. An **exporter** writes a label string. A **formatter** reads that string and produces the displayed label. The current version of either stage might contain a setting that deletes hyphens. A stage with that setting off preserves the input exactly. Deleting a hyphen twice has the same visible result as deleting it once.
+
+For this bounded model, each setting is fixed during the investigation and either on or off. The model is **deterministic**: the same input through an unchanged path always produces the same output. There are four candidate explanations:
+
+| Candidate | Exporter deletes hyphens | Formatter deletes hyphens |
+|---|---|---|
+| Exporter only | Yes | No |
+| Formatter only | No | Yes |
+| Both | Yes | Yes |
+| Neither | No | No |
+
+This list is exhaustive **for these two binary settings**. It is not a claim that real label systems have only two possible faults. A stale preview, a different transformation or a bad inspection tool would require checking the setup or adding another model.
+
+The ordinary end-to-end result, **ABCD**, fits the first three candidates. It conflicts with “neither” only if the input was really AB-CD, the observation is accurate and nothing outside the stated mechanisms changed it. Naming a candidate and recording those assumptions are separate jobs.
+
+### When to use the matrix
+
+Use it when several explanations fit the same observation. Give each candidate an operational meaning: what it does, when it does it and what it predicts. Include combinations when causes can coexist. “Something is wrong” may describe the situation accurately, but it cannot locate a cause.
+
+<Categorize
+  client:visible
+  question="Separate a candidate's prediction from an assumption needed to test it"
+  buckets={['Candidate prediction', 'Test assumption']}
+  items={[
+    { text: 'Exporter only predicts loss after the two current stages.', bucket: 'Candidate prediction' },
+    { text: 'The input really contains a hyphen.', bucket: 'Test assumption' },
+    { text: 'The observation tool reports the label exactly.', bucket: 'Test assumption' },
+    { text: 'Neither predicts that the ordinary output keeps the hyphen.', bucket: 'Candidate prediction' }
+  ]}
+  explanation="A candidate supplies consequences. The test setup must make those consequences observable without silently changing the input or measurement."
+/>
+
+## Compare predictions before choosing a test result to like
+
+<MCQ
+  client:visible
+  pretest
+  question="Suppose the isolated exporter test produces the result your exporter-only explanation predicted. Can that result still teach you something?"
+  options={[
+    { text: 'No, a confirming result is always uninformative.' },
+    { text: 'Yes, if competing explanations predicted a different result under the same valid setup.', correct: true },
+    { text: 'Yes, it proves your explanation is the only possible one.' }
+  ]}
+  explanation="Diagnostic value depends on the rival predictions. A result can support your expectation while excluding some rivals, yet leave another explanation compatible."
+/>
+
+An observation is **diagnostic between candidates** when they predict different outcomes for it. Ask what each candidate expects under the same test. Whether you personally hope for the outcome is a different question.
+
+We have trusted substitutes for both stages. The trusted exporter writes AB-CD exactly; the trusted formatter preserves exactly the string supplied to it. They do not restore a hyphen already lost. Every run starts with a fresh input and clears the previous preview. The observation tool is independent of the formatter and compares the output characters with the intended input.
+
+Prepare these four paths:
+
+| Path | Exporter | Formatter | What the path checks |
+|---|---|---|---|
+| Ordinary path | Current | Current | Reproduce the reported symptom |
+| Exporter isolation | Current | Trusted | Observe the exporter without the current formatter |
+| Formatter isolation | Trusted | Current | Observe the formatter with a known preserved input |
+| Trusted control | Trusted | Trusted | Check that the reference path and readout preserve the hyphen |
+
+Now fill the predictions **before looking at the isolation results**. “Lost” means the output is ABCD; “kept” means it is AB-CD.
+
+| Candidate | Ordinary path | Exporter isolation | Formatter isolation | Trusted control |
+|---|---|---|---|---|
+| Exporter only | Lost | Lost | Kept | Kept |
+| Formatter only | Lost | Kept | Lost | Kept |
+| Both | Lost | Lost | Lost | Kept |
+| Neither | Kept | Kept | Kept | Kept |
+
+Repeating the ordinary path and seeing “lost” again cannot separate the first three candidates: they share that prediction. Such repetitions can check stability, but agreement on the outcome gives them no new separating power. The isolated paths do separate them.
+
+Klayman and Ha distinguish a positive testing strategy from a general tendency to favour a conclusion. They show that its usefulness depends on the task; seeking an expected outcome is not automatically a bad test. The prediction table makes that distinction concrete here. [Klayman and Ha's original paper](https://pages.ucsd.edu/~mckenzie/KlaymanHaPsychReview1987.pdf)
+
+### The practical test of a test
+
+Say aloud which candidates would become less credible under each possible outcome. If every candidate predicts the same thing, that result cannot choose among them within this model. If the candidates differ, a result you expected can still be useful. Emotional discomfort is not a measurement of diagnostic value.
+
+<MatchConcepts
+  client:visible
+  question="Link each path to the distinction it can make"
+  pairs={[
+    { term: 'Ordinary path loses the hyphen', definition: 'Compatible with either single-cause candidate and with both together.' },
+    { term: 'Exporter isolation loses the hyphen', definition: 'Compatible with exporter only or both, under valid test assumptions.' },
+    { term: 'Formatter isolation loses the hyphen', definition: 'Compatible with formatter only or both, under valid test assumptions.' },
+    { term: 'Trusted control loses the hyphen', definition: 'Contradicts every candidate in the table and calls the setup or model list into question.' }
+  ]}
+  explanation="Each result has to be read against all candidates' predictions, including the combined-cause model and the reference condition."
+/>
+
+## Declare how you will revise each candidate
+
+<MCQ
+  client:visible
+  pretest
+  question="What makes a revision plan more useful than writing 'we will be objective'?"
+  options={[
+    { text: 'It states observations, validity checks and their consequences for every candidate before the new results arrive.', correct: true },
+    { text: 'It promises to retain the favoured explanation regardless of the result.' },
+    { text: 'It specifies what would challenge the rival but leaves your own prediction flexible.' }
+  ]}
+  explanation="A specific, symmetric plan makes later changes visible. A general intention does not fix what will count as a contradiction or an invalid test."
+/>
+
+Save a dated note before the isolation runs. Record the symptom already seen, the candidate table, exact inputs, component versions, test order, readout rule and the conditions below. Someone else should be able to reproduce the procedure without guessing what “basically the same label” means.
+
+1. Run the trusted control before and after the isolation paths. If it loses the hyphen, pause interpretation and investigate the reference path or observation tool. Do not award the result to your favourite fault.
+2. If a valid isolation path loses the hyphen, retain candidates with that stage active and reject the candidates predicting preservation under the stated deterministic assumptions.
+3. If a valid isolation path keeps the hyphen, retain candidates with that stage inactive and reject the candidates predicting deletion.
+4. If repeated runs of an unchanged path disagree, the fixed-setting, deterministic model is not adequate for that run. Record the disagreement, check conditions and plan a test of a revised explanation.
+5. Keep every result in the log. Apply the same validity standard whether the result agrees with your preferred candidate or threatens it.
+
+<InversionFlip
+  client:visible
+  title="Expose the ways the investigation could protect a favourite"
+  eyebrow="Check the procedure"
+  forwardLabel="Investigation goal"
+  invertedLabel="How the procedure could fail"
+  safeguardLabel="Show a safeguard"
+  flipHint="Reveal the failure mode"
+  flipAllLabel="Reveal all failure modes"
+  resetLabel="Start again"
+  instructions="Reveal a failure mode, propose a safeguard, then compare it with the suggestion."
+  pairs={[
+    { forward: 'Judge both single-cause stories by the same standard.', inverted: 'Question the readout only when it contradicts the favoured story.', safeguard: 'Declare the same control and replication checks for every outcome.' },
+    { forward: 'Learn from an unexpected pattern.', inverted: 'Rewrite the old prediction so it appears to have anticipated the result.', safeguard: 'Preserve the dated plan and label the revised model and its new test.' },
+    { forward: 'Investigate coexisting faults.', inverted: 'Stop after finding one active stage and call the other innocent.', safeguard: 'Complete both isolations and read their joint pattern.' }
+  ]}
+  caption="These are procedural safeguards, not a guarantee that the investigator or the measurements are unbiased."
+/>
+
+This is a practical revision contract, not a formal scientific registration. The same transparency principle underlies preregistration: distinguish what was planned from what was learned after seeing data. Plans can change; preserve the original and explain the change. The Center for Open Science explicitly allows conditional plans and documented deviations. [COS guidance on preregistration and changes](https://www.cos.io/initiatives/prereg)
+
+### When an exception is legitimate
+
+A failed control can be a genuine reason to withhold a conclusion. A new explanation can be a genuine discovery. The safeguard is to name the problem, retain the earlier record and test the revised account with a new observation. Secretly changing the rules only when your candidate loses is the asymmetric scrutiny this course warns about.
+
+<FillBlank
+  client:visible
+  question="Complete the revision contract"
+  text="Validity checks should apply {{symmetrically|only to rivals|only after a surprise}}. An unexpected pattern can justify {{a documented revision|rewriting the old prediction|deleting the awkward result}}, followed by a new test."
+  explanation="A plan makes changes inspectable. It neither guarantees good measurements nor forbids learning that the original candidate list was incomplete."
+/>
+
+## Read the whole pattern rather than count agreeable results
+
+<MCQ
+  client:visible
+  pretest
+  question="The exporter isolation loses the hyphen. Your exporter-only story predicted that. What conclusion is warranted at this point?"
+  options={[
+    { text: 'Exporter only is proved and the formatter is cleared.' },
+    { text: 'Exporter only and both remain compatible; the formatter isolation still matters.', correct: true },
+    { text: 'Nothing was learned because your story was confirmed.' }
+  ]}
+  explanation="The result distinguishes candidates, but it does not distinguish exporter only from both. A useful result can narrow a set without selecting one unique explanation."
+/>
+
+Here is the complete invented run. Both trusted controls preserve the hyphen. The two isolation paths each lose it.
+
+| Recorded path | Observed output | Observation |
+|---|---|---|
+| Ordinary path | ABCD | Lost |
+| Trusted control before isolation | AB-CD | Kept |
+| Exporter isolation | ABCD | Lost |
+| Formatter isolation | ABCD | Lost |
+| Trusted control after isolation | AB-CD | Kept |
+
+Work through the exclusions. The ordinary path conflicts with “neither”. Exporter isolation conflicts with “formatter only”. Formatter isolation conflicts with “exporter only”. “Both” predicts the full pattern and is the only compatible candidate **within the stated model and valid setup**.
+
+This is not a vote where whichever hypothesis collects the most agreeable anecdotes wins. “Exporter only” matches several rows but has a contradiction in a valid isolation. Nor does rejecting it automatically prove “formatter only”: that model has its own contradiction. The combined-cause candidate is necessary to represent what these results support.
+
+<ConsequenceTree
+  client:visible
+  title="Trace the isolation pattern"
+  eyebrow="A decision tree of possible results"
+  decisionLabel="First observation"
+  orderLabels={['Exporter isolation', 'Formatter isolation']}
+  promptLabel="Show the remaining alternatives"
+  expandAllLabel="Show every branch"
+  collapseLabel="Collapse"
+  instructions="Follow one exporter outcome, then compare both possible formatter outcomes."
+  valenceLabels={{ neutral: 'Possible result', good: 'Compatible candidate', bad: 'Contradiction', mixed: 'Further check' }}
+  decision={{ label: 'Trusted control preserves the input', note: 'Interpret the isolation results only while the stated controls remain valid.', valence: 'neutral', children: [
+    { label: 'Exporter isolation loses the hyphen', valence: 'neutral', children: [
+      { label: 'Formatter also loses it — both stages active', valence: 'neutral' },
+      { label: 'Formatter keeps it — exporter only', valence: 'neutral' }
+    ] },
+    { label: 'Exporter isolation keeps the hyphen', valence: 'neutral', children: [
+      { label: 'Formatter loses it — formatter only', valence: 'neutral' },
+      { label: 'Formatter also keeps it — neither setting active', note: 'This would conflict with the original ordinary-path loss under the complete model, so recheck that symptom or expand the model.', valence: 'mixed' }
+    ] }
+  ] }}
+  caption="Branches are alternative patterns. The observed investigation follows loss in both isolations; preservation in both would not explain its original symptom."
+/>
+
+John Platt's “strong inference” calls for explicit alternatives, experiments with separating outcomes and further tests of what remains. Our small decision tree illustrates that procedure; it does not establish Platt's broader claims about scientific progress. [Platt's original argument](https://pages.cs.wisc.edu/~markhill/science64_strong_inference.pdf)
+
+### Limits of the elimination step
+
+The clean exclusions use the model's error-free, stable mechanisms and valid substitutions. In a noisy setting, a surprising result can arise without making a proposed explanation impossible. Measurement error, changing conditions and probabilistic predictions need an uncertainty assessment. A single contradiction does not carry the same force in every task. Klayman and Ha discuss this distinction explicitly; do not export the toy system's certainty into an unexamined real case.
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Which conclusions fit the complete investigation?"
+  options={[
+    { text: 'The exporter-only and formatter-only candidates each have a conflicting isolation result.', correct: true },
+    { text: 'Both specified mechanisms fit the recorded pattern under the stated conditions.', correct: true },
+    { text: 'The combined-cause model has been proved for every future label and every possible software version.' },
+    { text: 'Finding evidence against one single-cause model automatically proves the other single-cause model.' }
+  ]}
+  explanation="Read the joint pattern within its assumptions. The combined model explains this controlled case; neither unlimited generalization nor the forced choice between single causes follows."
+/>
+
+## Separate repairing a cause from erasing the symptom
+
+<MCQ
+  client:visible
+  pretest
+  question="Both stages have the deletion setting active. The exporter setting is repaired, but the formatter remains unchanged. What should the ordinary path do?"
+  options={[
+    { text: 'Lose the hyphen, because the remaining formatter still deletes it.', correct: true },
+    { text: 'Preserve the hyphen, because finding one cause removes every cause.' },
+    { text: 'Prove that the exporter was never involved.' }
+  ]}
+  explanation="With two deletion stages in series, either active setting can produce the final symptom. A remaining symptom does not by itself show that the first repair changed nothing at its own stage."
+/>
+
+The team initially wanted to pick the guilty stage and declare victory. The matrix instead predicts a practical complication: fixing one active stage leaves the other able to remove the hyphen.
+
+| Exporter setting after intervention | Formatter setting after intervention | Predicted ordinary-path output |
+|---|---|---|
+| Active | Active | ABCD |
+| Off | Active | ABCD |
+| Active | Off | ABCD |
+| Off | Off | AB-CD |
+
+Verify a repair in its isolated path and then retest the ordinary path. For this constructed run, disabling the exporter setting makes exporter isolation preserve AB-CD, but the ordinary path still produces ABCD until the formatter setting is also disabled. That persistence was predicted by “both”; it is not permission to edit the original results or exonerate the exporter after the fact.
+
+<InversionFlip
+  client:visible
+  title="Check the conclusion before declaring the repair complete"
+  eyebrow="From explanation to verification"
+  forwardLabel="Verification goal"
+  invertedLabel="How the conclusion could fail"
+  safeguardLabel="Show a check"
+  flipHint="Reveal the trap"
+  flipAllLabel="Reveal both traps"
+  resetLabel="Start again"
+  instructions="Name the observation that would check each repair claim before revealing the suggestion."
+  pairs={[
+    { forward: 'Establish that the exporter repair changed its stage.', inverted: 'Judge the exporter repair only by the ordinary path while the formatter still strips hyphens.', safeguard: 'Use exporter isolation with the trusted formatter to inspect the repaired stage.' },
+    { forward: 'Establish that the final label is preserved.', inverted: 'Stop when one isolated stage works and skip the full path.', safeguard: 'Verify both isolated stages and the ordinary path, keeping the trusted controls.' }
+  ]}
+  caption="A repair claim and a complete-system claim require different observations, even when both concern the same visible symptom."
+/>
+
+### What to claim after the repair
+
+Record which settings changed, which paths were retested and which inputs were used. A fresh label such as **JK-LM**, kept out of the diagnosis, can test the repaired system's prediction on another input. Passing that check supports the tested domain; it does not validate every possible label, character set or configuration. Keep the conclusion as specific as the evidence.
+
+<FillBlank
+  client:visible
+  question="Complete the two different verification claims"
+  text="A stage repair is checked with {{a valid isolation|a vote among colleagues|a rewritten prediction}}. The final symptom is checked with {{the ordinary path|the favourite explanation|only the original screenshot}}."
+  explanation="The isolation shows what the repaired stage does under controlled substitution. The ordinary path shows whether the full current pipeline now preserves the input."
+/>
+
+## Transfer the procedure and preserve its limits
+
+<MCQ
+  client:visible
+  pretest
+  question="A newsletter loses an accent. Which step transfers the workshop method rather than copying its conclusion?"
+  options={[
+    { text: 'Assume both stages are faulty because both were faulty in the ticket example.' },
+    { text: 'Specify the new candidate mechanisms and their predictions, then inspect the new pattern.', correct: true },
+    { text: 'Choose the colleague who sounds most confident.' }
+  ]}
+  explanation="The transferable tool is the prediction-and-revision procedure. The conclusion depends on this case's evidence and assumptions."
+/>
+
+Here is an independent fictional case. A newsletter's **exporter** may remove accents, its **renderer** may remove accents, both may do so, or neither may. An inactive stage preserves its input. Trusted substitutes preserve accents exactly; the settings and readout remain stable. The input is **CAFÉ**. These are the new observations:
+
+| Path | Observed output |
+|---|---|
+| Current exporter and trusted renderer | CAFE |
+| Trusted exporter and current renderer | CAFÉ |
+| Trusted exporter and trusted renderer | CAFÉ |
+
+Before opening the solution, identify the compatible candidate and predict the ordinary path. Then say what would happen if only the renderer were replaced while the exporter remained current.
+
+<details>
+<summary>Check the newsletter investigation</summary>
+
+<Callout variant="tip" title="Read the different pattern">
+Exporter isolation removes the accent; renderer isolation preserves it. With a valid trusted control and the stated stable mechanisms, **exporter only** is the compatible candidate. The ordinary path should produce **CAFE**. Replacing only the renderer would leave that symptom because the current exporter already removed the accent. This case does not support the ticket example's “both” conclusion.
+</Callout>
+</details>
+
+### When the procedure needs more work
+
+Real cases may have interacting causes, imperfect measurements or more mechanisms than the list includes. A trusted substitute may also change timing, data or other conditions, so it may fail to isolate the intended cause. Write those limitations down and design checks for them. Do not assign numerical confidence from the number of models that survived: “one of four” here is a logical candidate count, not a probability calculation.
+
+<Categorize
+  client:visible
+  question="Sort the next moves by whether they respect the evidence record"
+  buckets={['Defensible revision', 'Protecting a conclusion']}
+  items={[
+    { text: 'Document a failed trusted control and suspend the old interpretation.', bucket: 'Defensible revision' },
+    { text: 'Delete a contradictory run because the favoured story felt right.', bucket: 'Protecting a conclusion' },
+    { text: 'Add a new mechanism after a surprise and test its new prediction with fresh evidence.', bucket: 'Defensible revision' },
+    { text: 'Describe a newly invented explanation as the one predicted all along.', bucket: 'Protecting a conclusion' }
+  ]}
+  explanation="Learning can require changing a model. The difference is whether the old plan, the surprising result and the new test remain visible."
+/>
+
+## Keep predictions and revisions together
+
+<MindMap
+  client:visible
+  title="Investigate without appointing a favourite"
+  eyebrow="The workshop together"
+  outlineLabel="Text outline"
+  caption="Compare candidates, check the evidence path and preserve the record of change."
+  root={{ label: 'Competing explanations', children: [
+    { label: 'Specify', children: [{ label: 'Operational mechanisms' }, { label: 'Both and neither when appropriate' }, { label: 'Assumptions outside the candidate' }] },
+    { label: 'Predict', children: [{ label: 'Same test for every candidate' }, { label: 'Shared outcomes cannot separate' }, { label: 'Expected outcomes can be diagnostic' }] },
+    { label: 'Check', children: [{ label: 'Trusted substitutes' }, { label: 'Fresh inputs and stable conditions' }, { label: 'Failed controls can block inference' }] },
+    { label: 'Revise', children: [{ label: 'Symmetric conditions written beforehand' }, { label: 'Read the whole pattern' }, { label: 'Keep changes and surprises visible' }] },
+    { label: 'Verify', children: [{ label: 'A stage repair needs isolation' }, { label: 'The system needs an ordinary path check' }, { label: 'Noisy and incomplete models need caution' }] }
+  ] }}
+/>
+
+<Quiz
+  client:visible
+  questions={[
+    { question: 'Why does the ordinary ticket-label error not choose between the single-cause stories?', options: [
+      { text: 'Both single-cause stories and the combined-cause story predict that output.', correct: true },
+      { text: 'Every observation is worthless if anyone expected it.' },
+      { text: 'A team must always prefer the simplest verbal explanation.' }
+    ], explanation: 'The candidates share the ordinary-path prediction. Isolating the stages gives them different predictions to compare.' },
+    { question: 'Exporter isolation loses the hyphen. What happens to exporter only and both?', options: [
+      { text: 'Both remain compatible until another result separates them.', correct: true },
+      { text: 'Exporter only is automatically proved.' },
+      { text: 'Both must be rejected because there can only be one cause.' }
+    ], explanation: 'Both candidates predict loss on exporter isolation. The formatter isolation is needed to distinguish them under the model.' },
+    { question: 'The trusted control unexpectedly loses the hyphen. What follows first?', options: [
+      { text: 'Investigate the setup or model before interpreting the isolation pattern.', correct: true },
+      { text: 'Award the result to whichever candidate you preferred.' },
+      { text: 'Hide the control result and report the other paths.' }
+    ], explanation: 'Every candidate predicts that the trusted path preserves the input. The mismatch challenges assumptions shared by the whole comparison.' },
+    { question: 'Which practices belong in the revision contract?', allowMultiple: true, options: [
+      { text: 'Apply the same validity checks to welcome and unwelcome results.', correct: true },
+      { text: 'Preserve the original prediction when adding a new explanation.', correct: true },
+      { text: 'Change the interpretation threshold silently after seeing the result.' },
+      { text: 'Treat a written plan as a guarantee that all measurements are accurate.' }
+    ], explanation: 'Symmetry and a preserved record make revision reviewable. Neither a plan nor personal sincerity guarantees an unbiased investigation.' },
+    { question: 'Why can the ordinary path still fail after one active stage is repaired?', options: [
+      { text: 'Another active deletion stage can produce the same final symptom.', correct: true },
+      { text: 'A remaining symptom proves the repaired stage never mattered.' },
+      { text: 'The original evidence must be rewritten to fit the repair.' }
+    ], explanation: 'In this system either active stage is sufficient to remove the hyphen. Verify the repaired stage in isolation and then check the complete path.' },
+    { question: 'What conclusion fits the newsletter pattern?', options: [
+      { text: 'Exporter only, under the stated valid setup and stable mechanisms.', correct: true },
+      { text: 'Both, because the earlier ticket investigation found both.' },
+      { text: 'Renderer only, because its isolated output kept the accent.' }
+    ], explanation: 'The exporter isolation changes the input and the renderer isolation preserves it. Transfer the method rather than the earlier answer.' },
+    { question: 'How should the clean elimination logic be used when outcomes are noisy?', options: [
+      { text: 'Check measurement and uncertainty; a surprising result need not make a candidate impossible.', correct: true },
+      { text: 'Reject a candidate forever after any unexpected observation.' },
+      { text: 'Treat whichever candidate survived as certain across all future conditions.' }
+    ], explanation: 'The workshop\'s decisive exclusions use deterministic mechanisms and valid observations. Probabilistic predictions and imperfect readouts require a different strength of conclusion.' }
+  ]}
+/>
+
+Next is the [final exam](/confirmation-bias/final-exam). Carry the prediction table into it: what does each candidate expect, what checks make the result interpretable, and what conclusion would the full pattern justify?
