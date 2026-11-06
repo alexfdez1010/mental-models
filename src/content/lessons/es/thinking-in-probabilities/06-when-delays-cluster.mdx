@@ -1,0 +1,463 @@
+---
+title: "Cuando los retrasos llegan juntos"
+description: "Distingue el número esperado de retrasos de la probabilidad de que haya alguno o varios. Compara modelos con el mismo riesgo individual y distintas causas compartidas, y elige la medida que necesita tu plan."
+topic: "es/thinking-in-probabilities"
+order: 7
+minutes: 23
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, FirstPrinciplesBuilder, RateComparison, MindMap } from '@/components/react';
+
+Para montar un evento vecinal hacen falta tres entregas. Cada una tiene una probabilidad de una entre cuatro de llegar tarde. La coordinadora suma los riesgos y obtiene un número esperado de tres cuartos de entrega retrasada. ¿Bastará con reservar un hueco para gestionar incidencias?
+
+La media no responde a esa pregunta. Los retrasos pueden repartirse entre muchos lotes o acumularse cuando falla un almacén compartido. En este taller mantendremos las probabilidades individuales y cambiaremos la forma en que los retrasos coinciden. Las lecciones anteriores introdujeron el valor esperado y la dispersión; aquí construiremos la distribución que necesita una decisión operativa concreta.
+
+## Define el recuento antes de interpretar la media
+
+<MCQ
+  client:visible
+  pretest
+  question="Tres entregas tienen la misma probabilidad individual de retrasarse. ¿Qué más necesitas para calcular la probabilidad de que varias lleguen tarde juntas?"
+  options={[
+    { text: 'Cómo coinciden los retrasos, incluidas las posibles causas compartidas.', correct: true },
+    { text: 'Solo la probabilidad individual media, sin suponer ninguna relación entre entregas.' },
+    { text: 'Solo el número de entregas, considerando igual de probable cualquier recuento.' },
+    { text: 'La interrupción más llamativa, descartando todos los demás resultados.' }
+  ]}
+  explanation="Las probabilidades individuales determinan el recuento total esperado, pero no la probabilidad de cada resultado conjunto. Para eso necesitas un modelo conjunto o datos conjuntos adecuados."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Este es un **caso hipotético y acotado de planificación**, no una serie de datos sobre repartos reales. Un **lote** son las tres entregas identificadas como A, B y C que deben llegar antes de una misma hora límite de montaje. Cada entrega llega tarde o a tiempo respecto a ese plazo; no contamos retrasos parciales. «Juntas» significa dentro del mismo plazo, sin modelar las horas exactas de llegada. Llamaremos **N** al número de entregas retrasadas en el lote: cero, una, dos o tres.
+
+La **probabilidad marginal** corresponde a una entrega considerada por separado. Cada una tiene una probabilidad de retraso de **1/4 = 25 %**. Una **distribución conjunta** describe cómo coinciden los resultados de las entregas. Hay **independencia** cuando conocer los resultados de las otras entregas no cambia la probabilidad especificada; una interrupción compartida puede incumplir esa condición. Que los sucesos afecten a entregas distintas no los hace incompatibles: varias pueden llegar tarde en un mismo lote.
+
+Asigna a cada entrega un **1 si llega tarde y un 0 si llega a tiempo**. Su aportación esperada es **(1/4 × 1) + (3/4 × 0) = 1/4**. Al sumar las tres aportaciones obtenemos:
+
+**Recuento esperado de retrasos = 1/4 + 1/4 + 1/4 = 3/4 de entrega por lote**
+
+Esta suma **no requiere independencia**. La linealidad de la esperanza, explicada en el [manual de probabilidad de Stanford](https://chrispiech.github.io/probabilityForComputerScientists/en/part2/expectation/), también se aplica a recuentos dependientes. Nuestro recuento está acotado, así que todas estas esperanzas son finitas.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale="es"
+  title="Suma una aportación esperada por entrega"
+  eyebrow="Recuento esperado, no probabilidad de un suceso"
+  analogyValue={0.75}
+  analogyLabel="Media de entregas retrasadas en ambos modelos"
+  analogyNote="La unidad es entregas retrasadas por lote."
+  parts={[
+    { label: 'Entrega A', value: 0.25, note: 'Uno si llega tarde y cero si no, ponderados por su probabilidad individual.' },
+    { label: 'Entrega B', value: 0.25, note: 'Su probabilidad individual de retraso es la misma en ambos modelos.' },
+    { label: 'Entrega C', value: 0.25, note: 'Sumar su esperanza no exige que los retrasos sean independientes.' }
+  ]}
+  valuePrefix=""
+  valueSuffix=" entregas retrasadas/lote"
+  rebuiltLabel="Aportaciones al recuento esperado seleccionadas"
+  instructions="Incluye cada entrega una vez y compara la suma con la referencia."
+  revealAllLabel="Incluir todas las entregas"
+  resetLabel="Vaciar las aportaciones"
+  verdictTemplate="Las aportaciones esperadas seleccionadas suman {total}."
+  caption="Una esperanza fraccionaria es una media ponderada. Cada lote real sigue teniendo un número entero de retrasos; esta suma no es la probabilidad de que haya alguno."
+/>
+
+La media **0,75** no garantiza que se retrase como máximo una entrega, ni significa que haya un **75 % de probabilidad de algún retraso**. La probabilidad de un suceso está entre cero y uno; la esperanza de un recuento tiene unidades de recuento y podría superar uno en un problema mayor. Sus valores numéricos no son intercambiables.
+
+<MatchConcepts
+  client:visible
+  question="Relaciona cada magnitud con la pregunta a la que responde."
+  pairs={[
+    { term: 'Recuento esperado de retrasos', definition: 'Cuántas entregas llegan tarde de media según el modelo' },
+    { term: 'Probabilidad de algún retraso', definition: 'Qué probabilidad tiene un lote de incluir al menos una entrega retrasada' },
+    { term: 'Probabilidad de superar un hueco', definition: 'Qué probabilidad hay de que se retrasen dos o tres entregas juntas' },
+    { term: 'Distribución conjunta', definition: 'Qué probabilidad corresponde a cada combinación de resultados' }
+  ]}
+  explanation="La media de un recuento, la probabilidad de un suceso y un modelo conjunto sirven para cosas distintas. Define qué necesita la decisión antes de sustituirlo por una media cómoda."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un término y después su definición."
+  allCorrectLabel="✓ Todas las parejas son correctas"
+  partialResultWord="correctas"
+  pickDefinitionHint="→ elige ahora una definición"
+  notLinkedHint="sin enlazar todavía"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+/>
+
+## Construye dos catálogos completos de probabilidades
+
+<MCQ
+  client:visible
+  pretest
+  question="Dos planes tienen el mismo recuento esperado de retrasos. ¿Deben tener también la misma probabilidad de desbordar la capacidad?"
+  options={[
+    { text: 'No; una misma media puede proceder de distintos pesos en los recuentos conjuntos.', correct: true },
+    { text: 'Sí; conocer la media identifica todas las probabilidades de la distribución.' },
+    { text: 'Sí; una interrupción compartida siempre conserva las probabilidades de los sucesos conjuntos.' },
+    { text: 'No; basta con cambiar los nombres de las entregas para demostrar su independencia.' }
+  ]}
+  explanation="La media resume la distribución mediante una suma ponderada. No especifica con qué frecuencia el total será cero, uno, dos o tres. Los nombres tampoco demuestran independencia."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Compararemos dos modelos deliberadamente sencillos para el **mismo horizonte de un lote**. Ambos mantienen el 25 % de probabilidad individual de retraso. Para compararlos, dejamos fijas las demás características y costes del servicio.
+
+**Modelo I: retrasos locales independientes.** Cada entrega tiene cuatro etiquetas de condiciones locales igual de probables: una produce retraso y tres producen llegada a tiempo. Las etiquetas de las tres entregas se seleccionan de forma independiente. Hay **4 × 4 × 4 = 64 combinaciones igual de probables**. Esta construcción finita explicita el supuesto de independencia. El recuento de retrasos sigue una distribución binomial; el [glosario del NIST](https://itl.nist.gov/div898/handbook/glossary.htm) recoge la independencia entre ensayos como supuesto de ese modelo.
+
+Contemos las combinaciones según el número de retrasos:
+
+| Recuento N | Cómo se cuentan las combinaciones del modelo I | Entradas del catálogo |
+|---|---|---|
+| 0 | Tres etiquetas de llegada a tiempo por entrega: 3 × 3 × 3 | 27 |
+| 1 | Elige la entrega retrasada y una etiqueta de llegada a tiempo para cada una de las otras dos: 3 × 1 × 3 × 3 | 27 |
+| 2 | Elige la entrega que llega a tiempo y una de sus tres etiquetas de puntualidad: 3 × 3 | 9 |
+| 3 | La única etiqueta de retraso para las tres: 1 × 1 × 1 | 1 |
+| Total | 27 + 27 + 9 + 1 | 64 |
+
+**Modelo S: una interrupción compartida.** Un fallo del almacén retrasa **las tres** entregas con probabilidad **1/4**. Si no se produce, las tres llegan a tiempo; este modelo no incluye retrasos locales adicionales. Representamos esa distribución mediante un catálogo de 64 etiquetas de condiciones igual de probables: **16** indican interrupción y **48**, ausencia de interrupción. Varias etiquetas pueden producir el mismo resultado de las entregas.
+
+| Recuento N | Probabilidad en el modelo I | Probabilidad en el modelo S |
+|---|---|---|
+| 0 | 27/64 | 48/64 |
+| 1 | 27/64 | 0 |
+| 2 | 9/64 | 0 |
+| 3 | 1/64 | 16/64 |
+
+Son **catálogos de probabilidades**, no muestras observadas. No prometen que los próximos 64 lotes reales tengan esas frecuencias, ni el número 64 significa que un lote contenga 64 entregas. Cada lote sigue teniendo tres.
+
+Comprueba la media común a partir de las distribuciones completas:
+
+- Modelo I: **(0 × 27 + 1 × 27 + 2 × 9 + 3 × 1) ÷ 64 = 48/64 = 0,75**.
+- Modelo S: **(0 × 48 + 3 × 16) ÷ 64 = 48/64 = 0,75**.
+
+Ambos tienen también la misma tasa por entrega. En el catálogo ponderado hay **48 entregas retrasadas de 64 × 3 = 192 posiciones de entrega**, es decir, un **25 %**. Lo que cambia es cómo se reparten esas entregas entre los lotes.
+
+### Pregunta qué suceso conjunto importa
+
+**Algún retraso** significa que N es al menos uno. En el modelo I tiene una probabilidad de **(27 + 9 + 1)/64 = 37/64 ≈ 57,81 %**. En el S es **16/64 = 25 %**.
+
+**Dos o más retrasos** significa que N es dos o tres. Su probabilidad es **(9 + 1)/64 = 10/64 = 15,625 %** en el modelo I y **16/64 = 25 %** en el S. Para que lleguen tarde **las tres entregas**, las probabilidades son **1/64 = 1,5625 %** y **16/64 = 25 %**.
+
+<RateComparison
+  client:visible
+  locale="es"
+  title="La definición del suceso cambia la comparación"
+  scenarioLabel="Elige la magnitud que quieres comparar"
+  countsLabel="Posiciones pertinentes del catálogo"
+  differenceLabel="Modelo I menos modelo S"
+  scenarios={[
+    { label: 'Tasa individual de retraso: posiciones de entrega', groups: [
+      { label: 'Retrasos locales independientes', events: 48, total: 192 },
+      { label: 'Interrupción compartida', events: 48, total: 192 }
+    ] },
+    { label: 'Algún retraso en el lote de tres entregas', groups: [
+      { label: 'Retrasos locales independientes', events: 37, total: 64 },
+      { label: 'Interrupción compartida', events: 16, total: 64 }
+    ] },
+    { label: 'Dos o más retrasos en el lote de tres entregas', groups: [
+      { label: 'Retrasos locales independientes', events: 10, total: 64 },
+      { label: 'Interrupción compartida', events: 16, total: 64 }
+    ] },
+    { label: 'Las tres entregas del lote llegan tarde', groups: [
+      { label: 'Retrasos locales independientes', events: 1, total: 64 },
+      { label: 'Interrupción compartida', events: 16, total: 64 }
+    ] }
+  ]}
+/>
+
+El gráfico utiliza las fracciones exactas del ejemplo y redondea los porcentajes al mostrarlos. Al pasar de posiciones de entrega a sucesos por lote cambia el denominador. En ningún caso representa el recuento medio de retrasos como si fuera una probabilidad.
+
+El modelo compartido tiene **menos lotes afectados, pero más entregas retrasadas en cada lote afectado**. Es una propiedad de estos modelos, no una afirmación de que la dependencia aumente todas las probabilidades extremas o de que siempre convengan rutas independientes. Otras distribuciones conjuntas pueden compartir las mismas probabilidades marginales.
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="¿Qué comparaciones se deducen de los modelos especificados? Marca todas las correctas."
+  options={[
+    { text: 'El modelo compartido tiene menos lotes con algún retraso, pero más lotes que superan una entrega retrasada.', correct: true },
+    { text: 'La tasa marginal y el recuento esperado de retrasos son idénticos en ambos modelos.', correct: true },
+    { text: 'El modelo independiente es automáticamente la estimación más prudente para cualquier suceso conjunto.' },
+    { text: 'Un catálogo con pesos iguales garantiza esos recuentos en la siguiente muestra observada.' }
+  ]}
+  explanation="El modelo S asigna una cuarta parte de su probabilidad a tres retrasos y el resto a ninguno. El modelo I reparte las entregas retrasadas entre más lotes afectados. La media sigue siendo tres cuartos, mientras que las probabilidades de algún retraso y de desbordamiento cambian en sentidos opuestos."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Define el objetivo operativo antes de ordenar los planes
+
+<MCQ
+  client:visible
+  pretest
+  question="Una coordinadora quiere lotes sin incidencias; otra quiere evitar desbordamientos de capacidad. ¿Deben preferir el mismo modelo?"
+  options={[
+    { text: 'No; primero hay que definir el suceso o el coste que se va a comparar.', correct: true },
+    { text: 'Sí; una media común convierte todos los objetivos operativos en equivalentes.' },
+    { text: 'Sí; menos probabilidad de algún retraso siempre implica menos probabilidad de desbordamiento.' },
+    { text: 'No; basta con elegir el resultado aislado más tranquilizador e ignorar su peso.' }
+  ]}
+  explanation="Los objetivos dependen de características distintas de la distribución. Para ordenar los planes hace falta especificar el resultado, la restricción o el coste, en lugar de preferir siempre una forma de dependencia."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+El **objetivo A** exige que **al menos el 60 % de los lotes tengan todas las entregas a tiempo**. El modelo I da **27/64 ≈ 42,19 %**, así que no cumple ese objetivo según el modelo. El S da **48/64 = 75 %**, por lo que sí lo cumple.
+
+Para el **objetivo B** disponemos de un hueco de gestión para una entrega retrasada. Ese hueco permite atender una incidencia en el lote; no representa un muelle de descarga simultánea. Exigimos que **al menos el 80 % de los lotes no superen esa capacidad**, es decir, que N sea cero o uno. El modelo I da **(27 + 27)/64 = 54/64 = 84,375 %** y cumple el objetivo. El S da **48/64 = 75 %** y no lo cumple.
+
+| Objetivo según los modelos estipulados | Modelo I | Modelo S |
+|---|---|---|
+| Todas las entregas a tiempo en al menos el 60 % de los lotes | No cumple | Cumple |
+| Como máximo una entrega retrasada en al menos el 80 % de los lotes | Cumple | No cumple |
+
+Si hacen falta ambas condiciones, ninguno de los planes cumple las dos en esta comparación. Elegir uno no resuelve el problema. Una medida preventiva, más capacidad o un cambio en el reparto exigirían nuevos supuestos, costes y datos.
+
+### Calcula el coste según lo que cobra realmente
+
+Supón que gestionar cada entrega retrasada ocupa **2 minutos de trabajo**, sin coste de apertura de incidencia por lote. Ambos modelos requieren entonces **2 × 0,75 = 1,5 minutos de trabajo esperados por lote**. El coste lineal depende solo del recuento esperado.
+
+Cambiemos la política: abrir un parte ocupa **8 minutos de trabajo una sola vez por lote afectado**, además de los mismos **2 por entrega retrasada**. Esta es otra función de coste, definida de forma explícita:
+
+**Trabajo de un lote = 8 × indicador de algún retraso + 2 × N**
+
+El indicador vale uno si alguna entrega llega tarde y cero si ninguna lo hace. Se cobra una sola vez, aunque se retrasen las tres. Por tanto:
+
+| Modelo | Trabajo esperado de apertura del parte | Trabajo esperado por entrega | Trabajo total esperado por lote |
+|---|---|---|---|
+| I | 8 × 37/64 = 4,625 | 2 × 0,75 = 1,5 | 6,125 minutos de trabajo |
+| S | 8 × 16/64 = 2 | 2 × 0,75 = 1,5 | 3,5 minutos de trabajo |
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale="es"
+  title="Separa el coste por lote del coste por entrega"
+  eyebrow="Trabajo esperado de gestión de incidencias"
+  analogyValue={3.5}
+  analogyLabel="Trabajo esperado en el modelo compartido"
+  analogyNote="Apertura del parte más gestión por entrega, según la política indicada."
+  parts={[
+    { label: 'Modelo independiente: apertura del parte', value: 4.625, note: 'Ocho minutos por la probabilidad de algún retraso.' },
+    { label: 'Modelo independiente: gestión de entregas retrasadas', value: 1.5, note: 'Dos minutos por el recuento esperado de retrasos.' }
+  ]}
+  valuePrefix=""
+  valueSuffix=" min/lote"
+  rebuiltLabel="Trabajo esperado del modelo independiente incluido"
+  instructions="Incluye las dos tareas distintas y compara el resultado con la referencia del modelo compartido."
+  revealAllLabel="Incluir ambos conceptos de trabajo"
+  resetLabel="Vaciar los conceptos de trabajo"
+  verdictTemplate="El trabajo esperado del modelo independiente suma {total}; compáralo con la referencia del modelo compartido."
+  caption="Los totales exactos son seis coma uno dos cinco y tres coma cinco minutos de trabajo por lote; el gráfico redondea a dos decimales. La apertura se cobra una vez por lote afectado, no una vez por entrega retrasada."
+/>
+
+Esta política favorece al modelo S por su trabajo esperado, mientras que la restricción de un hueco favorecía al I. La conclusión cambia porque cambia el objetivo. El ejemplo no determina qué plan de reparto sería mejor al incluir tarifas reales, duración de los retrasos, accesibilidad u otros requisitos.
+
+La probabilidad de desbordamiento y su **tamaño** esperado vuelven a ser magnitudes distintas. Con un hueco, dos entregas retrasadas dejan una fuera de capacidad; tres dejan dos. El exceso esperado es **(9 × 1 + 1 × 2)/64 = 11/64 ≈ 0,172 entregas por lote** en el modelo I, y **16 × 2/64 = 0,5** en el S. La probabilidad de desbordamiento era **10/64** frente a **16/64**. Usa esa probabilidad para un objetivo sobre la frecuencia de desbordamientos y el recuento esperado del exceso para un trabajo lineal por entrega que supere la capacidad; no sustituyas una magnitud por la otra.
+
+<FillBlank
+  client:visible
+  question="Completa la comparación con las unidades adecuadas"
+  text="Sumar las probabilidades individuales de retraso da un {{recuento esperado|porcentaje de algún retraso|desbordamiento garantizado}} sin exigir independencia. Un cargo por lote afectado necesita la {{probabilidad de algún retraso|media de retrasos por sí sola|cantidad máxima de retrasos}}."
+  explanation="Cada entrega retrasada aporta una unidad al recuento. La apertura del parte se hace una sola vez, tanto si llega tarde una entrega como si lo hacen tres, así que se pondera por la probabilidad del suceso por lote."
+  instructions="Elige la opción correcta en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+/>
+
+## Conserva el patrón conjunto en los datos
+
+<MCQ
+  client:visible
+  pretest
+  question="Un panel solo muestra el porcentaje global de entregas retrasadas. ¿Qué registro adicional ayudaría a distinguir los modelos?"
+  options={[
+    { text: 'El identificador del lote y el número de retrasos dentro de un mismo plazo.', correct: true },
+    { text: 'Un recuento global mayor del que se haya eliminado toda relación entre lotes.' },
+    { text: 'Solo la media de retrasos, redondeada hasta obtener una entrega entera.' },
+    { text: 'Solo si el último lote tuvo la suerte de llegar completo a tiempo.' }
+  ]}
+  explanation="Ambos modelos tienen la misma tasa global de retraso por entrega. Los identificadores conservan la agrupación que cambia la probabilidad de incidentes conjuntos. Un lote observado no identifica toda la distribución conjunta."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Para planificar de verdad, conserva **la misma definición de lote y de plazo**, los resultados individuales y los recursos o interrupciones compartidos que sean pertinentes. Compara la distribución observada de cero, una, dos y tres entregas retrasadas, además del porcentaje global. Registrar el uso del mismo almacén, las horas comunes de salida y el momento de las interrupciones puede ayudar a investigar un mecanismo. Que los retrasos coincidan no demuestra por sí solo qué causa compartida los produjo.
+
+Los catálogos son alternativas simplificadas a propósito. En la realidad podrían combinarse una interrupción compartida y problemas locales, cambiar las probabilidades individuales o variar el proceso según la época del año. En ese caso habría otra distribución conjunta. Cambiar el nombre de las rutas no demuestra independencia; tampoco obtener la misma media en dos paneles.
+
+Un intervalo de **cero a tres** tampoco basta: ambos ejemplos tienen ese mínimo y ese máximo, pero asignan pesos distintos dentro del intervalo. Los extremos no proporcionan la probabilidad de cada recuento ni prometen que todos los valores interiores tengan probabilidad positiva. En el modelo S nunca se retrasan exactamente una o dos entregas.
+
+### Distingue la dependencia dentro de un lote y entre lotes
+
+Todos nuestros cálculos corresponden a la distribución de un lote. Sumar sus recuentos esperados no exige que los lotes sucesivos sean independientes. Sin embargo, una interrupción que dure varias sesiones también puede vincular resultados de distintos lotes. Al estimar frecuencias e incertidumbre con registros reales hay que respetar esa agrupación y comprobar si el proceso siguió siendo comparable. Un catálogo es un modelo, no una garantía de que una secuencia larga de observaciones reproduzca sus pesos.
+
+<Categorize
+  client:visible
+  question="¿Qué información basta para cada cálculo?"
+  buckets={['Bastan las probabilidades individuales', 'También hace falta el patrón conjunto']}
+  items={[
+    { text: 'Número total esperado de entregas retrasadas.', bucket: 'Bastan las probabilidades individuales' },
+    { text: 'Trabajo esperado con un coste fijo por entrega retrasada y ningún otro cargo.', bucket: 'Bastan las probabilidades individuales' },
+    { text: 'Probabilidad de que alguna entrega del lote llegue tarde.', bucket: 'También hace falta el patrón conjunto' },
+    { text: 'Probabilidad de que los retrasos superen la capacidad de un hueco.', bucket: 'También hace falta el patrón conjunto' }
+  ]}
+  explanation="La linealidad permite obtener la media del recuento y un coste puramente por entrega a partir de las probabilidades individuales. Los sucesos conjuntos dependen de cómo coincidan los resultados, por lo que las mismas probabilidades marginales pueden dar respuestas distintas."
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo está bien clasificado"
+  partialResultWord="correctas"
+/>
+
+### Aplícalo a una decisión de personal
+
+Dos ayudantes tienen, cada uno, un **50 %** de probabilidad de no estar disponibles durante un evento. En el modelo A sus estados son independientes y hay cuatro casos igual de probables: ambos disponibles, solo el primero, solo el segundo y ninguno. En el modelo B acuden a la misma reunión externa: ambos están disponibles con probabilidad de un medio y ninguno lo está con probabilidad de un medio. Los dos modelos tienen una esperanza de **un ayudante no disponible**.
+
+<MCQ
+  client:visible
+  question="Hace falta al menos un ayudante disponible en siete de cada diez eventos como mínimo. ¿Qué modelo cumple el requisito bajo estos supuestos?"
+  options={[
+    { text: 'El independiente: hay alguien disponible en tres cuartos de los casos, frente a un medio en el compartido.', correct: true },
+    { text: 'Ambos: esperar un ayudante no disponible garantiza que quede otro disponible.' },
+    { text: 'El compartido: que falten los dos a la vez garantiza cumplir el requisito medio del servicio.' },
+    { text: 'Ninguno: la probabilidad individual de ausencia de un medio impide que haya alguien disponible.' }
+  ]}
+  explanation="En el modelo A hay alguien disponible en tres de los cuatro casos equiprobables: un 75 %. En el B sucede en el 50 %. Que el número esperado de ausentes sea uno en ambos no determina esa probabilidad."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Repaso
+
+<MindMap
+  client:visible
+  title="Elige la probabilidad que necesita tu plan"
+  root={{
+    label: 'Misma media, distinto riesgo conjunto',
+    children: [
+      { label: 'Define la magnitud', children: [{ label: 'Probabilidad individual' }, { label: 'Recuento esperado por lote' }, { label: 'Probabilidad de algún suceso o de varios' }] },
+      { label: 'Especifica la dependencia', children: [{ label: 'Condiciones locales independientes' }, { label: 'Una interrupción compartida' }, { label: 'Mismas tasas marginales, distintas distribuciones conjuntas' }] },
+      { label: 'Construye la distribución finita', children: [{ label: 'Las entradas del catálogo tienen pesos de probabilidad' }, { label: 'Una muestra observada puede diferir del catálogo' }, { label: 'Los extremos de un intervalo no identifican los pesos' }] },
+      { label: 'Define el objetivo', children: [{ label: 'Lotes sin incidencias' }, { label: 'Desbordamiento de capacidad' }, { label: 'Costes por entrega y costes por lote' }] },
+      { label: 'Conserva datos útiles', children: [{ label: 'Identificadores de lote y plazos comunes' }, { label: 'Recursos compartidos y registros de interrupciones' }, { label: 'Comprueba estabilidad y agrupación antes de generalizar' }] }
+    ]
+  }}
+  eyebrow="Visión de conjunto"
+  outlineLabel="Esquema"
+/>
+
+<Quiz
+  client:visible
+  title="Comprueba el cálculo del riesgo conjunto"
+  questions={[
+    {
+      question: '¿Qué significa un recuento esperado de tres cuartos de entrega retrasada?',
+      options: [
+        { text: 'Un recuento por lote ponderado por probabilidades, aunque cada lote real tenga un recuento entero.', correct: true },
+        { text: 'Una garantía de que cada lote tendrá menos de una entrega retrasada en ambos modelos.' },
+        { text: 'Una probabilidad de tres cuartos de que alguna entrega llegue después del plazo.' },
+        { text: 'Una obligación de que los lotes observados reproduzcan exactamente los recuentos del catálogo.' }
+      ],
+      explanation: 'La esperanza es 0,25 + 0,25 + 0,25 = 0,75 en ambos modelos. La probabilidad de algún retraso es 37/64 en el I y 16/64 en el S. La esperanza no es ninguna de esas probabilidades.'
+    },
+    {
+      question: 'En el catálogo independiente, ¿qué probabilidad hay de superar la capacidad de un hueco para entregas retrasadas?',
+      options: [
+        { text: 'Diez de sesenta y cuatro', correct: true },
+        { text: 'Dieciséis de sesenta y cuatro' },
+        { text: 'Treinta y siete de sesenta y cuatro' },
+        { text: 'Cuarenta y ocho de sesenta y cuatro' }
+      ],
+      explanation: 'Superar un hueco significa tener dos o tres entregas retrasadas. Hay nueve entradas con dos y una con tres: (9 + 1)/64 = 10/64 = 15,625 %. Las treinta y siete entradas corresponden a algún retraso.'
+    },
+    {
+      question: '¿Por qué el modelo compartido puede mejorar los lotes sin incidencias y empeorar el desbordamiento?',
+      options: [
+        { text: 'Concentra los retrasos en menos lotes afectados, con las tres entregas tarde cuando falla el almacén.', correct: true },
+        { text: 'Reduce a escondidas la probabilidad marginal de retraso de cada entrega respecto al modelo I.' },
+        { text: 'Hace incompatibles los retrasos e impide que dos entregas lleguen tarde en el mismo lote.' },
+        { text: 'Invalida los recuentos esperados porque no se pueden sumar esperanzas bajo dependencia.' }
+      ],
+      explanation: 'La probabilidad marginal sigue siendo un cuarto. En el modelo S, tres cuartos de los lotes no tienen retrasos y un cuarto tiene tres. Eso reduce la frecuencia de cualquier incidencia, pero aumenta la probabilidad de superar un hueco frente al modelo I.'
+    },
+    {
+      question: 'Con un coste fijo de dos minutos por entrega retrasada y ningún otro cargo, ¿qué trabajo se espera en ambos modelos?',
+      options: [
+        { text: 'Un minuto y medio por lote en ambos modelos.', correct: true },
+        { text: 'Dos minutos por lote solo en el modelo compartido.' },
+        { text: 'Seis minutos por lote en cada resultado de ambos modelos.' },
+        { text: 'Cero minutos por lote porque la esperanza es menor que uno.' }
+      ],
+      explanation: 'El coste lineal por entrega da dos por el recuento esperado: 2 × 0,75 = 1,5. Una apertura por lote afectado dependería además de la probabilidad de algún retraso, por lo que la comparación del coste completo podría cambiar.'
+    },
+    {
+      question: '¿Qué registros ayudan a contrastar los supuestos de dependencia? Marca todas las respuestas correctas.',
+      allowMultiple: true,
+      options: [
+        { text: 'Resultados individuales con identificadores de lote y un plazo definido de forma consistente.', correct: true },
+        { text: 'Uso de recursos compartidos y momento de las interrupciones junto a los resultados agrupados.', correct: true },
+        { text: 'Solo un porcentaje global de retrasos tras eliminar a qué lote pertenecía cada entrega.' },
+        { text: 'Solo un lote afortunado, tomado como prueba de que cualquier modelo de causa compartida es falso.' }
+      ],
+      explanation: 'Los resultados agrupados conservan las coincidencias y los registros de recursos ayudan a investigar causas posibles. La tasa global no distingue estos modelos; ni un lote aislado ni la correlación por sí sola demuestran el mecanismo propuesto.'
+    }
+  ]}
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario terminado"
+  perfectMessage="Todas las respuestas son correctas."
+  goodMessage="Revisa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Vuelve a las secciones que necesites practicar."
+  gateLabel="Comprueba la respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Puntuación"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+A continuación, haz el [examen final](/es/thinking-in-probabilities/final-exam) para aplicar estas distinciones junto con el resto del curso.

@@ -1,0 +1,375 @@
+---
+title: "When Delays Arrive Together"
+description: "Separate expected delay counts from the chance of any or several delays. Compare finite models with identical individual risks and different shared causes, then choose the measure your plan needs."
+topic: "en/thinking-in-probabilities"
+order: 7
+minutes: 23
+updated: 2026-11-06
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, FirstPrinciplesBuilder, RateComparison, MindMap } from '@/components/react';
+
+A community event needs three deliveries before setup starts. Each delivery has a one-in-four chance of arriving late. A coordinator adds the risks and gets an expected three-quarters of a late delivery. Can one spare handling slot cover the problem?
+
+The average does not answer that question. Delays might be scattered across batches or arrive together when a shared depot is disrupted. This workshop keeps the individual delay probabilities fixed while changing that joint pattern. The existing lessons introduced expected value and spread; here you will build the distribution needed for a particular operating decision.
+
+## Define the count before interpreting the average
+
+<MCQ
+  client:visible
+  pretest
+  question="Three deliveries each have the same individual delay probability. What else is needed to calculate the chance that several will be late together?"
+  options={[
+    { text: 'How their delay events occur jointly, including any shared causes.', correct: true },
+    { text: 'Only the average individual probability, with no relationship assumptions.' },
+    { text: 'Only the number of deliveries, with every possible count treated as equally likely.' },
+    { text: 'The most vivid possible disruption, with the other outcomes discarded.' }
+  ]}
+  explanation="Individual probabilities determine the expected total count, but not the probability of each possible group outcome. That requires a joint model or suitable joint observations."
+/>
+
+This is a **hypothetical, bounded planning case**, not delivery-performance data. A **batch** is the three named deliveries A, B and C due before one fixed setup deadline. A delivery is either late or on time relative to that deadline, with no partial lateness counted. “Together” refers to the same deadline window; exact arrival times are not modelled. Let **N** be the number late in the batch: zero, one, two or three.
+
+The **marginal probability** concerns one delivery considered on its own. Each has a late probability of **1/4 = 25%**. A **joint distribution** describes how the deliveries' outcomes occur together. **Independence** means learning the other delivery outcomes does not change the specified probability; a shared disruption can violate that condition. Events are not mutually exclusive merely because they concern different deliveries: several can be late in the same batch.
+
+Score each delivery **1 if late and 0 otherwise**. Its expected contribution is **(1/4 × 1) + (3/4 × 0) = 1/4**. Adding the three contributions gives:
+
+**Expected late count = 1/4 + 1/4 + 1/4 = 3/4 delivery per batch**
+
+This addition **does not require independence**. Linearity of expectation, explained in [Stanford's probability reader](https://chrispiech.github.io/probabilityForComputerScientists/en/part2/expectation/), applies to dependent counts too. Our count is bounded, so all these expectations are finite.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Add one expected contribution per delivery"
+  eyebrow="Expected count, not an event probability"
+  analogyValue={0.75}
+  analogyLabel="Mean late count under either model"
+  analogyNote="The unit is delayed deliveries per batch."
+  parts={[
+    { label: 'Delivery A', value: 0.25, note: 'One if late, zero otherwise, weighted by its individual probability.' },
+    { label: 'Delivery B', value: 0.25, note: 'Its individual delay probability is the same in both models.' },
+    { label: 'Delivery C', value: 0.25, note: 'Adding its expectation does not assume that the delays are independent.' }
+  ]}
+  valuePrefix=""
+  valueSuffix=" delayed deliveries/batch"
+  rebuiltLabel="Selected expected-count contributions"
+  instructions="Include every delivery once. Compare the count total with the reference."
+  revealAllLabel="Include all deliveries"
+  resetLabel="Clear contributions"
+  verdictTemplate="The selected expected-count contributions total {total}."
+  caption="A fractional expectation is a weighted average. A real batch still has an integer late count; this total is not the probability of any delay."
+/>
+
+The average **0.75** is not a promise that at most one delivery will be late, and it is not a **75% chance of any delay**. A probability of an event lies between zero and one; a count expectation has count units and could exceed one in a larger problem. Their numerical values are not interchangeable.
+
+<MatchConcepts
+  client:visible
+  question="Match each quantity to the question it answers."
+  pairs={[
+    { term: 'Expected late count', definition: 'How many late deliveries occur on average under the model' },
+    { term: 'Probability of any delay', definition: 'How likely a batch is to contain one or more late deliveries' },
+    { term: 'Probability of exceeding one slot', definition: 'How likely two or three deliveries are to be late together' },
+    { term: 'Joint distribution', definition: 'Which combined delivery outcomes have which probability weights' }
+  ]}
+  explanation="A mean count, an event probability and a joint model serve different jobs. State which job the operational decision needs before replacing it with a convenient average."
+/>
+
+## Build two complete probability catalogues
+
+<MCQ
+  client:visible
+  pretest
+  question="Two plans have the same expected late count. Must their chances of a simultaneous overload also be the same?"
+  options={[
+    { text: 'No; the same mean can come from different weights on the possible group counts.', correct: true },
+    { text: 'Yes; a shared mean identifies every probability in the count distribution.' },
+    { text: 'Yes; any shared disruption must leave all group-event probabilities unchanged.' },
+    { text: 'No; different delivery names alone establish independent outcomes.' }
+  ]}
+  explanation="The mean is one weighted summary of the distribution. It does not specify how often the total is zero, one, two or three. Names do not establish independence."
+/>
+
+We compare two deliberately simple models for the **same one-batch horizon**. Each retains the 25% individual delay probability. Other service features and costs are held fixed for the comparison.
+
+**Model I: independent local delays.** Give each delivery four equally likely local condition labels: one produces lateness and three produce on-time arrival. The labels for the three deliveries are selected independently. There are **4 × 4 × 4 = 64 equally likely combinations**. This finite construction makes the independence assumption explicit. The corresponding late count is binomial; [NIST's glossary](https://itl.nist.gov/div898/handbook/glossary.htm) identifies independent trials as a binomial-model assumption.
+
+Count combinations by the number late:
+
+| Late count N | Counting the combinations in Model I | Catalogue entries |
+|---|---|---|
+| 0 | Three on-time labels for each delivery: 3 × 3 × 3 | 27 |
+| 1 | Choose the late delivery, then choose an on-time label for each of the other two: 3 × 1 × 3 × 3 | 27 |
+| 2 | Choose the on-time delivery and one of its three on-time labels: 3 × 3 | 9 |
+| 3 | The one late label for all three: 1 × 1 × 1 | 1 |
+| Total | 27 + 27 + 9 + 1 | 64 |
+
+**Model S: one shared disruption.** A depot disruption makes **all three** deliveries late with probability **1/4**. Without it, all three arrive on time; there are no additional local delays in this model. Represent that distribution on a catalogue of 64 equally likely condition labels: **16** select disruption and **48** select no disruption. Different labels can produce the same delivery outcome.
+
+| Late count N | Model I probability | Model S probability |
+|---|---|---|
+| 0 | 27/64 | 48/64 |
+| 1 | 27/64 | 0 |
+| 2 | 9/64 | 0 |
+| 3 | 1/64 | 16/64 |
+
+These are **probability catalogues**, not realized samples. They do not promise that the next 64 actual batches will produce those frequencies, and the number 64 does not mean a batch contains 64 deliveries. Every batch still contains three.
+
+Check the common mean from the complete distributions:
+
+- Model I: **(0 × 27 + 1 × 27 + 2 × 9 + 3 × 1) ÷ 64 = 48/64 = 0.75**.
+- Model S: **(0 × 48 + 3 × 16) ÷ 64 = 48/64 = 0.75**.
+
+Both also have the same delivery-level rate. Across the weighted catalogue there are **48 late items out of 64 × 3 = 192 delivery positions**, or **25%**. The arrangement of those late items across batches differs.
+
+### Ask which group event matters
+
+**Any delay** means N is at least one. In Model I it has probability **(27 + 9 + 1)/64 = 37/64 ≈ 57.81%**. In Model S it has probability **16/64 = 25%**.
+
+**Two or more delays** means N is two or three. Its probability is **(9 + 1)/64 = 10/64 = 15.625%** in Model I and **16/64 = 25%** in Model S. For **all three** late, the probabilities are **1/64 = 1.5625%** and **16/64 = 25%**.
+
+<RateComparison
+  client:visible
+  title="The event definition changes the comparison"
+  scenarioLabel="Choose the quantity being compared"
+  countsLabel="Relevant catalogue positions"
+  differenceLabel="Model I minus Model S"
+  scenarios={[
+    { label: 'Individual delivery delay rate: delivery positions', groups: [
+      { label: 'Independent local delays', events: 48, total: 192 },
+      { label: 'Shared disruption', events: 48, total: 192 }
+    ] },
+    { label: 'At least one delay in the three-delivery batch', groups: [
+      { label: 'Independent local delays', events: 37, total: 64 },
+      { label: 'Shared disruption', events: 16, total: 64 }
+    ] },
+    { label: 'Two or more delays in the three-delivery batch', groups: [
+      { label: 'Independent local delays', events: 10, total: 64 },
+      { label: 'Shared disruption', events: 16, total: 64 }
+    ] },
+    { label: 'All three deliveries late in the batch', groups: [
+      { label: 'Independent local delays', events: 1, total: 64 },
+      { label: 'Shared disruption', events: 16, total: 64 }
+    ] }
+  ]}
+/>
+
+The graph shows the exact authored fractions, with percentages rounded for display. Switching from delivery positions to batch events changes the denominator. It never plots the mean late count as though it were a probability.
+
+The shared model has **fewer affected batches but more late items in each affected batch**. That is a statement about these models, not a claim that dependence increases every tail probability or that independent routes are always preferable. Other joint distributions can share the same marginal probabilities.
+
+<MCQ
+  client:visible
+  allowMultiple
+  question="Which comparisons follow from the specified models? Select all that apply."
+  options={[
+    { text: 'The shared model has fewer batches with any delay, but more batches exceeding one late delivery.', correct: true },
+    { text: 'The marginal rate and the expected late count remain identical across the two models.', correct: true },
+    { text: 'The independence model is automatically the more cautious estimate for every group event.' },
+    { text: 'A catalogue with equal probability weights guarantees those counts in the next realized sample.' }
+  ]}
+  explanation="Model S assigns one quarter of its mass to all three late and the rest to none. Model I spreads late items over more affected batches. The mean remains three quarters, while the probabilities of any delay and overload move in opposite directions."
+/>
+
+## State the operational objective before ranking the plans
+
+<MCQ
+  client:visible
+  pretest
+  question="One coordinator wants batches with no disruption; another wants to avoid simultaneous overload. Must they prefer the same model?"
+  options={[
+    { text: 'No; define each event or cost function before comparing its model probabilities.', correct: true },
+    { text: 'Yes; the same mean makes every operational objective equivalent.' },
+    { text: 'Yes; lower probability of any delay always means lower overload probability.' },
+    { text: 'No; use whichever isolated outcome looks most reassuring and ignore its weight.' }
+  ]}
+  explanation="The two objectives concern different features of the distribution. A ranking needs the stated outcome, constraint or cost, rather than a universal preference for a dependence pattern."
+/>
+
+For **Objective A**, require at least **60% of batches to have every delivery on time**. Model I gives **27/64 ≈ 42.19%**, so it does not meet that modelled target. Model S gives **48/64 = 75%**, so it does.
+
+For **Objective B**, there is one handling slot for a late item. A slot covers one late-delivery exception in this batch, rather than specifying a concurrent unloading bay. Require at least **80% of batches to stay within that one-slot capacity**, meaning N is zero or one. Model I gives **(27 + 27)/64 = 54/64 = 84.375%**, so it meets that target. Model S gives **48/64 = 75%**, so it does not.
+
+| Objective, under the stipulated model | Model I | Model S |
+|---|---|---|
+| Every delivery on time in at least 60% of batches | Does not meet target | Meets target |
+| No more than one late item in at least 80% of batches | Meets target | Does not meet target |
+
+If both constraints are required, neither plan meets both in this comparison. A choice between them does not solve that problem. A mitigation, more capacity or a changed delivery process would require new assumptions, costs and evidence.
+
+### Compute a cost using the outcome it actually charges
+
+Suppose handling uses **2 staff-minutes per late item**, with no batch setup cost. Both models then require an expected **2 × 0.75 = 1.5 staff-minutes per batch**. The linear cost depends only on the expected count.
+
+Now change the policy: opening an incident record takes **8 staff-minutes once per affected batch**, plus the same **2 per late item**. This is a different, explicitly defined cost function:
+
+**Work for a batch = 8 × indicator of any delay + 2 × N**
+
+The indicator is one if any delivery is late and zero otherwise. It is charged once, even if all three are late. Thus:
+
+| Model | Expected incident-record work | Expected per-item work | Expected total work per batch |
+|---|---|---|---|
+| I | 8 × 37/64 = 4.625 | 2 × 0.75 = 1.5 | 6.125 staff-minutes |
+| S | 8 × 16/64 = 2 | 2 × 0.75 = 1.5 | 3.5 staff-minutes |
+
+<FirstPrinciplesBuilder
+  client:visible
+  title="Separate the batch charge from the item charge"
+  eyebrow="Expected incident-handling work"
+  analogyValue={3.5}
+  analogyLabel="Shared-model expected work"
+  analogyNote="Incident setup plus per-item handling, under the stated policy."
+  parts={[
+    { label: 'Independent model: incident setup', value: 4.625, note: 'Eight minutes times the probability of at least one delay.' },
+    { label: 'Independent model: late-item handling', value: 1.5, note: 'Two minutes times the expected late count.' }
+  ]}
+  valuePrefix=""
+  valueSuffix=" min/batch"
+  rebuiltLabel="Independent-model expected work included"
+  instructions="Include both distinct tasks. Compare the resulting work with the shared-model reference."
+  revealAllLabel="Include both work terms"
+  resetLabel="Clear work terms"
+  verdictTemplate="The independent-model expected work totals {total}; compare it with the shared-model reference."
+  caption="The exact totals are six point one two five versus three point five staff-minutes per batch; the figure rounds to two decimals. The incident setup is charged once per affected batch, not once per late item."
+/>
+
+This policy favours Model S on expected work, whereas the one-slot service constraint favoured Model I. The conclusion changes because the objective changes. The example does not establish which delivery plan would be best once actual fees, delay lengths, accessibility or other requirements are included.
+
+Probability of overload and expected overload **size** are different again. With one slot, two late items leave one beyond capacity; three leave two. Expected overflow is **(9 × 1 + 1 × 2)/64 = 11/64 ≈ 0.172 items per batch** in Model I, and **16 × 2/64 = 0.5** in Model S. The overload probability was **10/64** versus **16/64**. Use the event probability for an overload-frequency target and the expected overflow count for a linear per-overflow-item workload; do not substitute one for the other.
+
+<FillBlank
+  client:visible
+  question="Complete the comparison in the right units"
+  text="Adding individual late probabilities gives an {{expected count|any-delay probability|overload guarantee}} without requiring independence. A charge once per affected batch needs the {{probability of any delay|mean late count alone|largest possible late count}}."
+  explanation="A late item contributes once to the total count. A batch setup occurs only once whether one or three items are late, so it must be weighted by the probability of the batch event."
+/>
+
+## Keep the joint pattern in the evidence
+
+<MCQ
+  client:visible
+  pretest
+  question="A dashboard reports only the overall fraction of late deliveries. What extra record would help distinguish the two models?"
+  options={[
+    { text: 'Batch identifiers and the number late within each common deadline window.', correct: true },
+    { text: 'A larger pooled item count with every batch relationship removed.' },
+    { text: 'Only the average late count, rounded until it becomes a whole delivery.' },
+    { text: 'Only whether the last batch happened to have no late deliveries.' }
+  ]}
+  explanation="Both models have the same pooled delivery-level late rate. Group identifiers retain the clustering that changes the chances of simultaneous incidents. One observed batch does not identify the full joint distribution."
+/>
+
+For real planning, collect records that preserve the **same batch definition and deadline**, the individual delivery outcomes and relevant shared resources or disruptions. Compare the observed distribution of zero, one, two and three late items, not just the pooled late percentage. Records of shared depot use, common dispatch times and interruption timing can help investigate a mechanism. Co-occurrence alone does not prove which shared cause produced it.
+
+The two catalogues are deliberately simplified alternatives. Real delays could combine a shared disruption with local problems, have unequal individual probabilities or change with the season. The result is then a different joint distribution. Renaming routes does not establish independence; neither does getting the same average from two dashboards.
+
+A range of **zero to three** is also insufficient: both examples have those minimum and maximum counts, but assign different mass within them. A range does not supply the probability of each count, and it does not promise that every interior value has positive probability. In Model S, one or two late deliveries never occur.
+
+### Separate dependence within a batch from dependence across batches
+
+Everything calculated here is for a one-batch distribution. Adding its expected counts needs no claim that successive batches are independent. However, a disruption lasting several sessions can also link outcomes across batches. Estimating frequencies and uncertainty from real records must respect that clustering and whether the process stayed comparable over time. A catalogue is a model, not a guarantee that a long sequence of observations will reproduce its weights.
+
+<Categorize
+  client:visible
+  question="Which information is sufficient for each calculation?"
+  buckets={['Individual probabilities are sufficient', 'The joint pattern is also needed']}
+  items={[
+    { text: 'Expected total number of late deliveries.', bucket: 'Individual probabilities are sufficient' },
+    { text: 'Expected work at a fixed cost per late item, with no other charges.', bucket: 'Individual probabilities are sufficient' },
+    { text: 'Probability that any delivery in the batch is late.', bucket: 'The joint pattern is also needed' },
+    { text: 'Probability that late items exceed the one-slot capacity.', bucket: 'The joint pattern is also needed' }
+  ]}
+  explanation="Linearity determines the mean count and a purely per-item cost from the individual probabilities. Group-event probabilities depend on how outcomes occur together, so the same marginals can yield different answers."
+/>
+
+### Transfer to a staffing decision
+
+Two helpers each have a **50%** chance of being unavailable for one event window. In Model A their statuses are independent, giving four equally likely cases: both available, only the first available, only the second available, neither available. In Model B they attend the same outside meeting: both are available with probability one half and neither is available with probability one half. Both models have an expected **one unavailable helper**.
+
+<MCQ
+  client:visible
+  question="The requirement is at least one available helper in at least seven tenths of event windows. Which model meets it under these assumptions?"
+  options={[
+    { text: 'The independent model: someone is available in three quarters, versus one half in the shared model.', correct: true },
+    { text: 'Both models: an expected count of one unavailable helper guarantees one remains available.' },
+    { text: 'The shared model: simultaneous unavailability ensures that the average service requirement is met.' },
+    { text: 'Neither model: individual unavailability at one half makes any available helper impossible.' }
+  ]}
+  explanation="In Model A, three of the four equally likely cases have someone available, so its service probability is 75%. Model B has someone available in 50%. The equal expected unavailable count of one does not determine that probability."
+/>
+
+## Recap
+
+<MindMap
+  client:visible
+  title="Choose the probability your plan needs"
+  root={{
+    label: 'Same mean, different group risk',
+    children: [
+      { label: 'Define the measure', children: [{ label: 'Individual event probability' }, { label: 'Expected count per batch' }, { label: 'Probability of any or many events' }] },
+      { label: 'Specify dependence', children: [{ label: 'Independent local conditions' }, { label: 'A shared disruption' }, { label: 'Same marginal rates, different joint distributions' }] },
+      { label: 'Build the finite distribution', children: [{ label: 'Catalogue entries carry probability weights' }, { label: 'Realized samples need not match the catalogue' }, { label: 'A range does not identify the weights' }] },
+      { label: 'State the objective', children: [{ label: 'Uninterrupted batches' }, { label: 'Simultaneous capacity overload' }, { label: 'Per-item costs versus once-per-batch costs' }] },
+      { label: 'Keep useful evidence', children: [{ label: 'Batch identifiers and common windows' }, { label: 'Shared-resource and disruption records' }, { label: 'Check stability and clustering before generalising' }] }
+    ]
+  }}
+/>
+
+<Quiz
+  client:visible
+  title="Check the group-risk calculation"
+  questions={[
+    {
+      question: 'What does the expected late count of three quarters mean?',
+      options: [
+        { text: 'A probability-weighted count per batch, although each realized batch has an integer count.', correct: true },
+        { text: 'A guarantee that every batch has fewer than one late delivery under either model.' },
+        { text: 'A probability of three quarters that at least one delivery will arrive after the deadline.' },
+        { text: 'A requirement that the next observed batches reproduce the catalogue counts exactly.' }
+      ],
+      explanation: 'The count expectation is 0.25 + 0.25 + 0.25 = 0.75 under both models. Model I has probability 37/64 of any delay; Model S has 16/64. The expectation is neither of those event probabilities.'
+    },
+    {
+      question: 'In the independent catalogue, what is the probability of exceeding the one-slot late-item capacity?',
+      options: [
+        { text: 'Ten out of sixty-four', correct: true },
+        { text: 'Sixteen out of sixty-four' },
+        { text: 'Thirty-seven out of sixty-four' },
+        { text: 'Forty-eight out of sixty-four' }
+      ],
+      explanation: 'Exceeding one slot means two or three late items. Model I has nine entries with two late and one with three late, giving (9 + 1)/64 = 10/64 = 15.625%. Thirty-seven entries concern any delay instead.'
+    },
+    {
+      question: 'Why can the shared model perform better on uninterrupted batches but worse on simultaneous overload?',
+      options: [
+        { text: 'It concentrates late items in fewer affected batches, with all three late when disruption occurs.', correct: true },
+        { text: 'It secretly lowers each delivery’s marginal delay probability below the probability in Model I.' },
+        { text: 'It makes delays mutually exclusive, preventing two late deliveries from occurring together.' },
+        { text: 'It makes expected counts invalid because expectations cannot be added under dependence.' }
+      ],
+      explanation: 'The marginal delay probability remains one quarter. In Model S, three quarters of batches have no delays and one quarter have all three. That reduces the frequency of any incident but raises the chance of exceeding one slot relative to Model I.'
+    },
+    {
+      question: 'With only a fixed two-minute charge per late item and no other cost, what is the expected work under the two models?',
+      options: [
+        { text: 'One and a half minutes per batch under either model.', correct: true },
+        { text: 'Two minutes per batch under the shared model only.' },
+        { text: 'Six minutes per batch under both models in every realization.' },
+        { text: 'Zero minutes per batch because the expected late count is below one.' }
+      ],
+      explanation: 'A linear per-item cost gives two times the expected count: 2 × 0.75 = 1.5. A once-per-affected-batch setup charge would additionally depend on the probability of any delay, so the complete cost comparison could differ.'
+    },
+    {
+      question: 'Which records help test the dependence assumptions? Select all that apply.',
+      allowMultiple: true,
+      options: [
+        { text: 'Individual outcomes retained with batch identifiers and a consistent deadline window.', correct: true },
+        { text: 'Relevant shared-resource use and disruption timing alongside the grouped outcomes.', correct: true },
+        { text: 'Only a pooled late percentage after discarding which items belonged to each batch.' },
+        { text: 'Only one lucky batch, treated as proof that every shared-cause model is false.' }
+      ],
+      explanation: 'Grouped outcomes retain co-occurrence, while shared-resource records help investigate possible causes. The pooled rate cannot distinguish these two models, and neither one observed batch nor correlation alone proves the proposed mechanism.'
+    }
+  ]}
+/>
+
+Next, take the [final exam](/thinking-in-probabilities/final-exam) to apply these distinctions alongside the rest of the course.
