@@ -1,0 +1,467 @@
+---
+title: "Audita una regla de asignación y pago"
+description: "Audita informes, pagos, empates y financiación en un proyecto finito y revisa los incentivos cuando cambia una regla."
+topic: "es/mechanism-design"
+order: 8
+minutes: 36
+updated: 2026-11-07
+---
+
+import { Callout, MCQ, MatchConcepts, FillBlank, Categorize, ConsequenceTree, RateComparison, FirstPrinciplesBuilder, PayoffMatrix, MindMap, Quiz } from '@/components/react';
+
+Dos equipos declaran suficiente beneficio para aprobar una instalación común. Los informes superan el umbral, pero eso no demuestra que sean verdaderos ni dice quién financia la factura. Auditaremos una regla pequeña de principio a fin: mensajes de entrada, asignación y pagos de salida, y la posibilidad de que cada equipo cambie su mensaje.
+
+<Callout variant="info" label="Información" title="Un modelo finito construido">
+Todos los créditos, valores y presupuestos siguientes son inventados. Definen utilidades y cuentas, no un mercado medido ni una predicción de conducta. Comprobamos el espacio de mensajes y las desviaciones unilaterales indicados; se excluyen coaliciones y pagos laterales.
+</Callout>
+
+## Fija los tipos y el protocolo
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Al auditar otro informe, ¿qué debe permanecer fijo?"
+  options={[{"text":"El valor verdadero y el informe del otro equipo.","correct":true},{"text":"El informe y el valor deben cambiar a la vez."},{"text":"El pago debe ser fijo bajo cualquier regla."},{"text":"La asignación debe ser igual para todo mensaje."}]}
+  explanation="Una desviación cambia tu mensaje. Recalcula asignación y pagos, pero evalúa la utilidad con el mismo valor verdadero y el mismo informe ajeno."
+  pretest={true}
+/>
+
+Cada uno de dos equipos de una exposición, A y B, valora en privado una instalación común en **0, 3 o 7 créditos**. Los créditos, abreviados **cr**, son una unidad ficticia de utilidad transferible. El **tipo (type)** es ese valor privado verdadero. El **informe (report)** es el mensaje que se envía al organizador; declarar otro número no cambia el valor.
+
+El organizador se compromete con una regla determinista y su financiación antes de recibir informes simultáneos y secretos. Cada equipo puede declarar **salir, 0, 3 o 7**. Si alguno sale, se cancela el proyecto. En cualquier cancelación no hay construcción, coste del recurso, pagos ni cuota de entrada. La opción externa da utilidad cero. Si se construye, el proyecto cuesta **8 cr una sola vez** y ambos equipos reciben su beneficio verdadero.
+
+La **utilidad cuasilineal (quasilinear utility)** de un equipo es su beneficio verdadero menos su pago si se construye, y cero si se cancela. Cada equipo puede afrontar cualquier pago que cobren las reglas, como máximo 5 cr. No hay costes de enviar mensajes, pagos laterales, valores interdependientes ni colusión. El organizador aporta financiación comprometida; no es un tercer jugador cuya participación demostremos. Estas condiciones forman parte del modelo.
+
+<ConsequenceTree client:visible
+  decision={{"label":"Fijar regla y financiación","valence":"neutral","children":[{"label":"Enviar informes simultáneos y secretos","valence":"neutral","children":[{"label":"Aplicar la regla de asignación","valence":"neutral","children":[{"label":"Cobrar solo si se construye","valence":"neutral","children":[{"label":"Comparar utilidades reales entre informes propios","valence":"neutral"}]}]}]}]}}
+  title="El protocolo que se audita"
+  eyebrow=""
+  instructions="Muestra la fase siguiente. La secuencia define la regla; no predice qué declarará nadie."
+  decisionLabel="Antes de los informes"
+  orderLabels={["Informes","Asignación","Financiación","Auditoría"]}
+  promptLabel="Mostrar fase siguiente"
+  expandAllLabel="Mostrar protocolo completo"
+  collapseLabel="Contraer fases"
+  valenceLabels={{"good":"Favorable","bad":"Desfavorable","mixed":"Mixta","neutral":"Fase del protocolo"}}
+/>
+
+<MatchConcepts client:visible
+  className="not-prose"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un concepto y después su definición."
+  allCorrectLabel="Todo relacionado"
+  partialResultWord="bien"
+  pickDefinitionHint="elige ahora una definición"
+  notLinkedHint="sin relacionar"
+  termsLabel="Conceptos"
+  definitionsLabel="Definiciones"
+  question="Relaciona cada objeto con su función en la auditoría."
+  pairs={[{"term":"Tipo verdadero","definition":"El valor privado que se mantiene fijo al comparar mensajes."},{"term":"Informe","definition":"El mensaje permitido del que la regla calcula asignación y pagos."},{"term":"Utilidad","definition":"Beneficio verdadero menos pago si se construye, o cero si se cancela."},{"term":"Opción externa","definition":"La utilidad de rechazar este proyecto, estipulada como cero."}]}
+/>
+
+### Cuándo usarlo
+
+Escribe esta especificación antes de llamar sincero o voluntario a un mecanismo. Un mensaje no incluido, otra opción externa o una obligación de pago nueva cambian la pregunta.
+
+## Encuentra una desviación rentable
+
+Empieza con **cuota igual**. Se construye si ambos informes son numéricos y suman al menos 8; se cobra 4 a cada equipo. En otro caso se cancela y se cobra cero. El umbral es inclusivo, aunque las sumas numéricas posibles del dominio nunca son 8. No hace falta financiación externa.
+
+Fija valores verdaderos **(3,7)** y mantén el informe de B en 7. Si A dice la verdad, los informes (3,7) construyen. A obtiene beneficio 3 y paga 4: utilidad **−1**. Declarar cero o salir cancela: utilidad **0**. Cada desviación gana **1 cr**. Declarar siete también construye y cobra cuatro, así que conserva la utilidad −1.
+
+<div role="region" tabIndex={0} aria-label="A tiene valor verdadero 3; B declara 7; cuota igual" className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="equal-share-worked" className="w-full min-w-[40rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"A tiene valor verdadero 3; B declara 7; cuota igual"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Informe A"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Construido"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Pago A, cr"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Utilidad A, cr"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir"}</th><td className="px-3 py-2 text-left align-middle">{"No"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0"}</th><td className="px-3 py-2 text-left align-middle">{"No"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3"}</th><td className="px-3 py-2 text-left align-middle">{"Sí"}</td><td className="px-3 py-2 text-left align-middle">{"4"}</td><td className="px-3 py-2 text-left align-middle">{"-1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7"}</th><td className="px-3 py-2 text-left align-middle">{"Sí"}</td><td className="px-3 py-2 text-left align-middle">{"4"}</td><td className="px-3 py-2 text-left align-middle">{"-1"}</td></tr></tbody>
+</table>
+</div>
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Cuánto gana A al cambiar la verdad por cero en esa tabla?"
+  options={[{"text":"Pierde un crédito al detener la construcción."},{"text":"Gana un crédito al evitar utilidad negativa.","correct":true},{"text":"Gana tres créditos porque cae su valor verdadero."},{"text":"Gana cuatro créditos sin cambiar el resultado."}]}
+  explanation="La utilidad pasa de −1 a 0: la ganancia es 0−(−1)=1. La desviación cambia construcción y pago, no el valor privado de A."
+/>
+
+Un caso así refuta que la verdad sea la mejor respuesta para todo tipo e informe ajeno permitidos. No demuestra que todo el mundo vaya a mentir ni qué mejor informe elegirá alguien. La cuota igual también falla aquí la prueba de participación bajo verdad: −1 queda por debajo de la opción externa cero.
+
+### Cuándo usarlo
+
+Un contraejemplo necesita un tipo fijo, un informe ajeno fijo, una alternativa permitida y su ganancia de utilidad. Una queja sobre injusticia no sustituye esa cuenta.
+
+## Comprueba cada informe ajeno
+
+Ahora usa **pago crítico (critical payment)**. Conserva el umbral de asignación. Si se construye, A paga **8 menos el informe de B** y B paga **8 menos el informe de A**. Todo informe numérico del otro equipo queda por debajo del coste, así que cada equipo es crítico cuando se construye. Las cancelaciones siguen cobrando cero. El organizador compromete hasta 6 cr para cubrir lo que falte.
+
+Con informes (3,7), A paga 1 y B paga 5. Con valores verdaderos (3,7), sus utilidades son **2 y 2**. Para A de valor verdadero 3 frente al informe 7, salir y cero dan utilidad 0; declarar tres o siete da utilidad 2. Un informe falso puede empatar con la verdad.
+
+La razón se puede comprobar sin suponer que B dice la verdad. Si B declara salir o cero, A no puede activar la construcción con ningún mensaje permitido, así que todas sus utilidades son cero. Si B declara 3, construir cobra 5 a A: el tipo 7 prefiere construir; los tipos 0 y 3 prefieren cancelar. Si B declara 7, construir cobra 1 a A: los tipos 3 y 7 prefieren construir; el tipo 0 prefiere cancelar. En cada caso, el informe sincero produce la asignación preferida y cobra como máximo el beneficio verdadero. El mismo argumento vale para B por simetría.
+
+<div role="region" tabIndex={0} aria-label="Todos los perfiles permitidos: resultado y pagos A/B/organizador en cr" className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="original-outcomes" className="w-full min-w-[40rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Todos los perfiles permitidos: resultado y pagos A/B/organizador en cr"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Informes A/B"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Cuota igual"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Pago crítico"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir / 0"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir / 3"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir / 7"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"Construir; 4/4/0"}</td><td className="px-3 py-2 text-left align-middle">{"Construir; 1/5/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"Construir; 4/4/0"}</td><td className="px-3 py-2 text-left align-middle">{"Construir; 5/1/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"Construir; 4/4/0"}</td><td className="px-3 py-2 text-left align-middle">{"Construir; 1/1/6"}</td></tr></tbody>
+</table>
+</div>
+
+Cada celda indica el resultado y los pagos **A/B/organizador**. Es el catálogo completo, no una muestra. Dado un valor verdadero, resta el pago de A en cada fila construida para reproducir la comparación de utilidad.
+
+<div role="region" tabIndex={0} aria-label="Auditoría unilateral completa de A: verdad / mejor alternativa permitida, en cr" className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="original-audit" className="w-full min-w-[40rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Auditoría unilateral completa de A: verdad / mejor alternativa permitida, en cr"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Valor real / otro informe"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Cuota igual"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Pago crítico"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"-1 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"2 / 2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"3 / 3"}</td><td className="px-3 py-2 text-left align-middle">{"2 / 2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"3 / 3"}</td><td className="px-3 py-2 text-left align-middle">{"6 / 6"}</td></tr></tbody>
+</table>
+</div>
+
+Hay **2×3×4×4=96 comparaciones por regla**: elige jugador, tipo verdadero propio, informe ajeno y alternativa propia, incluida la propia verdad. La tabla muestra los doce casos tipo/informe ajeno de A; cada mejor alternativa es el máximo entre sus cuatro mensajes. La simetría cubre a B. Cuota igual tiene cuatro filas de comparación estrictamente rentables; pago crítico, cero. Aquí el cero constituye una prueba porque se han cubierto todas las comparaciones del dominio finito.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Comparación"
+  countsLabel="Desviaciones rentables / comparaciones auditadas"
+  differenceLabel="Primera fracción auditada menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Contraejemplos en la auditoría completa"
+  scenarios={[{"label":"Mismo dominio finito; sin probabilidad de conducta","groups":[{"label":"Cuota igual","events":4,"total":96},{"label":"Pago crítico","events":0,"total":96}]}]}
+/>
+
+Estas fracciones cuentan comparaciones; no son probabilidades de mentir. Una sola fila positiva basta para rechazar la propiedad universal; una fracción positiva menor también la rechazaría. La **compatibilidad de incentivos en estrategias débilmente dominantes (DSIC)** exige que la utilidad sincera sea al menos la alternativa para cada informe ajeno permitido, no solo en el par sincero.
+
+<FillBlank client:visible
+  className="not-prose"
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="bien"
+  text="Una desviación {{estrictamente rentable|simplemente distinta|igual de buena}} refuta DSIC débil. Un informe {{igual de bueno|estrictamente peor|no permitido}} puede coexistir con una mejor respuesta sincera."
+  explanation="La desigualdad permite utilidades iguales. Cambiar el mensaje sin aumentar la utilidad no es una desviación unilateral rentable."
+/>
+
+### Cuándo usarlo
+
+Usa una auditoría finita cuando el dominio permitido sea realmente finito. Si es mayor o continuo, unos cuantos casos visibles necesitan un argumento aparte que cubra los restantes.
+
+## Cuadra la financiación y el objetivo
+
+Con valores sinceros (3,7), los pagos críticos suman **1+5=6** y dejan **2** al organizador. Con informes (7,7), suman **1+1=2** y dejan **6**. El mismo proyecto de ocho créditos puede necesitar distinta financiación externa según los informes. La regla consigue incentivos sinceros renunciando al equilibrio presupuestario entre los dos equipos.
+
+<FirstPrinciplesBuilder client:visible
+  locale="es"
+  eyebrow=""
+  title="Financia el proyecto con informes siete y siete"
+  caption="Las partes seleccionadas son sumas de financiación. Solo la cuenta completa financia el único coste de ocho créditos."
+  analogyValue={8}
+  analogyLabel="Coste del recurso"
+  analogyNote="Un proyecto, pagado una sola vez"
+  parts={[{"label":"Pago de A","value":1},{"label":"Pago de B","value":1},{"label":"Aportación del organizador","value":6}]}
+  rebuiltLabel="Financiación seleccionada"
+  instructions="Añade cada fuente para cuadrar la construcción. Quitar una da una suma parcial, no otro mecanismo."
+  valuePrefix=""
+  valueSuffix=" cr"
+  revealAllLabel="Añadir todas las fuentes"
+  resetLabel="Vaciar selección"
+  verdictTemplate="Las fuentes suman {total} y cubren el único coste del recurso."
+/>
+
+Define aquí el **bienestar (welfare)** como los dos beneficios verdaderos menos el coste del recurso: **W=(vA+vB−8)** si se construye, y cero si se cancela. Los pagos financian ese único coste; restar todos los pagos y después el coste otra vez sería contarlo dos veces. Las cuentas cuadran como **uA+uB−aportación del organizador=W**. Con valores verdaderos (7,7), los pagos críticos dan utilidades 6 y 6; resta los 6 del organizador y obtienes bienestar 6, igual a 14−8.
+
+Bajo informes sinceros, la regla crítica construye exactamente cuando la suma real es al menos 8, por lo que maximiza este bienestar entre las dos alternativas declaradas para los nueve pares de tipos. La utilidad sincera de cada equipo es no negativa para cada informe ajeno permitido: cumple la desigualdad de **racionalidad individual (individual rationality, IR)** frente a cero. La afirmación se refiere a los equipos. El organizador aporta una subvención y no tiene un beneficio ni una prueba de participación modelizados. Empatar con la opción externa tampoco obliga a participar.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Qué justifica la comprobación de participación bajo verdad?"
+  options={[{"text":"El organizador gana necesariamente al pagar la subvención."},{"text":"Todo equipo debe entrar cuando su utilidad sea cero."},{"text":"Los dos equipos reciben al menos su opción externa.","correct":true},{"text":"Hay que restar las cuotas y también el coste del recurso."}]}
+  explanation="IR es una comparación de utilidad especificada para los dos equipos. Las preferencias del organizador quedan fuera del modelo y un empate no implica una elección observada de participar."
+/>
+
+### Cuándo usarlo
+
+Enumera quién entra en la cuenta de bienestar y de quién se afirma la participación. Financiar un proyecto y maximizar una función de bienestar especificada son pruebas distintas.
+
+## Conserva a la vista los otros equilibrios
+
+Fija ahora **ambos valores verdaderos en 3**. Solo para este diagnóstico, trata esos tipos como conocidos en el juego de informes. No se introduce una distribución previa ni un equilibrio bayesiano. Los informes sinceros (3,3) cancelan, con utilidades(0,0). Pero los informes **(7,7)** construyen con pago crítico. Cada equipo paga 1 y obtiene utilidad 2.
+
+<PayoffMatrix client:visible
+  className="not-prose"
+  title="Dos informes dentro de un juego con tipos fijados"
+  eyebrow=""
+  editable={false}
+  rowPlayer="Equipo A"
+  colPlayer="Equipo B"
+  rowStrategies={["Declarar tres","Declarar siete"]}
+  colStrategies={["Declarar tres","Declarar siete"]}
+  payoffs={[[{"row":0,"col":0},{"row":2,"col":-2}],[{"row":-2,"col":2},{"row":2,"col":2}]]}
+  unit=" cr"
+  instructions="Los dos valores verdaderos son tres. Las celdas muestran utilidades con pago crítico para los dos informes visibles, no todo el espacio de mensajes."
+  analysisLabel="Análisis de esta sección de dos informes"
+  dominantLineTemplate="{player}: informe estrictamente dominante en esta sección: {strategy}"
+  noneLabel="ninguno"
+  nashLabel="Celdas Nash puras de esta sección:"
+  noNashLabel="ninguna en esta sección"
+  bestResponseLegend="Un anillo marca una mejor respuesta, incluidos empates. Los dos anillos identifican una celda Nash en la sección. El texto comprueba también salir y cero."
+  nashBadge="EN"
+  resetLabel="Restablecer"
+  increaseLabel="aumentar"
+  decreaseLabel="disminuir"
+  tableCaptionTemplate="{rowPlayer} elige fila; {colPlayer} elige columna. Cada celda indica primero utilidad de A y después de B."
+/>
+
+La matriz es una sección de dos informes, así que comprueba los omitidos. Desde (7,7), que un solo equipo cambie a 3 sigue construyendo, cobrando 1 y dando 2. Cambiar a 0 o salir cancela y da 0. Nadie mejora unilateralmente entre los cuatro mensajes: **el perfil falso también es un equilibrio de Nash**. Los informes sinceros (3,3) también forman equilibrio; frente a 3, cambiar a 7 construye pero cobra 5 a un tipo 3, que recibe−2 en vez de 0. Hay otros equilibrios de cancelación en el juego completo; las dos celdas visibles no son una lista exhaustiva.
+
+En el perfil falso, el beneficio verdadero total es 6 y el coste 8: el bienestar es **−2**, aunque ambos equipos estratégicos reciban 2. Sus utilidades suman 4 y, al restar financiación externa 6, dan−2. DSIC débil establece un equilibrio de estrategias dominantes sinceras; no establece conducta sincera observada ni que **todo equilibrio** tenga el resultado deseado. Ese requisito más fuerte sobre todos los equilibrios necesitaría otra prueba, y este modelo aporta un contraejemplo.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Qué demuestra el equilibrio de informes falsos?"
+  options={[{"text":"Una estrategia sincera débilmente dominante no selecciona el resultado de todo equilibrio.","correct":true},{"text":"Un equilibrio de Nash debe maximizar el bienestar verdadero de todas las partes."},{"text":"Un empate de utilidad debe resolverse automáticamente a favor de la verdad."},{"text":"La regla crítica tiene una desviación unilateral estrictamente rentable."}]}
+  explanation="La auditoría y el equilibrio responden a preguntas distintas. La verdad sigue siendo débilmente dominante y otro perfil puede ser estable frente a todas las alternativas unilaterales."
+/>
+
+### Cuándo usarlo
+
+Pregunta si se requiere que funcione un equilibrio deseado o todos los equilibrios. Una prueba de incentivos no aporta por sí sola una regla de selección de equilibrio.
+
+## Vuelve a auditar al cambiar la financiación
+
+La aportación máxima del organizador baja de 6 a **2 cr**. Un arreglo propuesto conserva los pagos críticos anteriores, pero cancela cuando dejan más de 2 por financiar. El límite es inclusivo: necesitar 2 está permitido. Cambia la asignación además de la financiación. Si se cancela, los pagos y el coste del recurso siguen siendo cero.
+
+Usa valores verdaderos nuevos **(7,7)** y fija el informe de B en 7. Compara que A declare 7 o 3. Calcula construcción, pago y utilidad de A en cada caso antes de abrir la solución.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Qué ocurre con la utilidad de A bajo ese cambio de financiación?"
+  options={[{"text":"La verdad y el informe menor construyen con el mismo pago."},{"text":"La verdad construye; el informe menor cancela y pierde beneficio."},{"text":"La verdad cancela; el informe menor construye y gana seis créditos.","correct":true},{"text":"Ambos cancelan; la prueba anterior impide cualquier cambio."}]}
+  explanation="Con informes(7,7), los pagos 1+1 necesitan 6 externos y superan el límite. Con(3,7), los pagos 1+5 necesitan 2: A de valor 7 paga 1 y recibe 6."
+  pretest={true}
+/>
+
+<details>
+<summary>Comprueba el filtro y una reparación finita</summary>
+
+Los informes sinceros(7,7) necesitan **6 cr** del organizador y cancelan: A recibe 0. Los informes(3,7) necesitan **2 cr** y construyen: A paga 1 y obtiene **7−1=6**. La desviación gana 6. La regla limitada tiene dos filas rentables de auditoría, una por equipo. Conservar el nombre «pago crítico» no conserva la asignación anterior ni su prueba.
+
+El fallo no establece imposibilidad. Prueba **cuota tres**: conserva la asignación por suma de al menos ocho y cobra **3 cr a cada equipo si se construye**. El organizador aporta **2 cr**. Salir y cancelar siguen implicando pagos nulos. Es una cuarta regla explícita, no la afirmación de que una cuota cómoda funcione en cualquier dominio.
+
+<FirstPrinciplesBuilder client:visible
+  locale="es"
+  eyebrow=""
+  title="Financia la regla de cuota tres"
+  caption="Las partes seleccionadas son sumas de financiación. Solo la cuenta completa financia el único coste de ocho créditos."
+  analogyValue={8}
+  analogyLabel="Coste del recurso"
+  analogyNote="Un proyecto, pagado una sola vez"
+  parts={[{"label":"Pago de A","value":3},{"label":"Pago de B","value":3},{"label":"Aportación del organizador","value":2}]}
+  rebuiltLabel="Financiación seleccionada"
+  instructions="Añade cada fuente para cuadrar la construcción. Quitar una da una suma parcial, no otro mecanismo."
+  valuePrefix=""
+  valueSuffix=" cr"
+  revealAllLabel="Añadir todas las fuentes"
+  resetLabel="Vaciar selección"
+  verdictTemplate="Las fuentes suman {total} y cubren el único coste del recurso."
+/>
+
+<div role="region" tabIndex={0} aria-label="Todos los perfiles permitidos: resultado y pagos A/B/organizador en cr" className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="changed-outcomes" className="w-full min-w-[40rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Todos los perfiles permitidos: resultado y pagos A/B/organizador en cr"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Informes A/B"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Crítico limitado"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Cuota tres"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir / 0"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir / 3"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Salir / 7"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"Construir; 1/5/2"}</td><td className="px-3 py-2 text-left align-middle">{"Construir; 3/3/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"Construir; 5/1/2"}</td><td className="px-3 py-2 text-left align-middle">{"Construir; 3/3/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"Cancelar; 0/0/0"}</td><td className="px-3 py-2 text-left align-middle">{"Construir; 3/3/2"}</td></tr></tbody>
+</table>
+</div>
+
+<div role="region" tabIndex={0} aria-label="Auditoría unilateral completa de A: verdad / mejor alternativa permitida, en cr" className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="changed-audit" className="w-full min-w-[40rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Auditoría unilateral completa de A: verdad / mejor alternativa permitida, en cr"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Valor real / otro informe"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Crítico limitado"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Cuota tres"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"2 / 2"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / Salir"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td><td className="px-3 py-2 text-left align-middle">{"0 / 0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"2 / 2"}</td><td className="px-3 py-2 text-left align-middle">{"4 / 4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"0 / 6"}</td><td className="px-3 py-2 text-left align-middle">{"4 / 4"}</td></tr></tbody>
+</table>
+</div>
+
+Cuota tres no tiene desviaciones rentables en las mismas 96 comparaciones y la utilidad sincera es no negativa frente a cada informe ajeno permitido. Contra 3, solo declarar 7 construye y cobra 3: el tipo 7 gana 4, el tipo 3 solo empata con cancelar a 0 y el tipo 0 perdería 3. Contra 7, declarar 3 o 7 construye y cobra 3: el tipo 3 empata con cero, el tipo 7 gana 4 y el tipo 0 prefiere cancelar. Los demás informes no activan la construcción. Los pagos de ambos equipos más 2 siempre cubren el coste.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Comparación"
+  countsLabel="Desviaciones rentables / comparaciones auditadas"
+  differenceLabel="Primera fracción auditada menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Un arreglo fallido y una reparación finita"
+  scenarios={[{"label":"Mismo dominio finito; sin probabilidad de conducta","groups":[{"label":"Crítico limitado","events":2,"total":96},{"label":"Cuota tres","events":0,"total":96}]}]}
+/>
+
+<div role="region" tabIndex={0} aria-label="Todos los pares de tipos: pago crítico y cuota tres bajo verdad" className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="truthful-welfare" className="w-full min-w-[40rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Todos los pares de tipos: pago crítico y cuota tres bajo verdad"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Valores A/B"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Suma real"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Construyen ambas"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Bienestar, cr"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Financiación crítica, cr"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Financiación cuota tres, cr"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"No"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"3"}</td><td className="px-3 py-2 text-left align-middle">{"No"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"7"}</td><td className="px-3 py-2 text-left align-middle">{"No"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"3"}</td><td className="px-3 py-2 text-left align-middle">{"No"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"6"}</td><td className="px-3 py-2 text-left align-middle">{"No"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"3 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"10"}</td><td className="px-3 py-2 text-left align-middle">{"Sí"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 0"}</th><td className="px-3 py-2 text-left align-middle">{"7"}</td><td className="px-3 py-2 text-left align-middle">{"No"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 3"}</th><td className="px-3 py-2 text-left align-middle">{"10"}</td><td className="px-3 py-2 text-left align-middle">{"Sí"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7 / 7"}</th><td className="px-3 py-2 text-left align-middle">{"14"}</td><td className="px-3 py-2 text-left align-middle">{"Sí"}</td><td className="px-3 py-2 text-left align-middle">{"6"}</td><td className="px-3 py-2 text-left align-middle">{"6"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td></tr></tbody>
+</table>
+</div>
+
+Ambas reglas producen la misma asignación binaria que maximiza el bienestar bajo informes sinceros en este dominio. Cuota tres también conserva otros equilibrios: con tipos verdaderos(3,3), los informes(7,7) construyen y cada equipo recibe **3−3=0**. Cualquier informe unilateral da como máximo 0, así que el equilibrio falso permanece, con bienestar−2. Superar DSIC débil, IR de los equipos y el límite de financiación no demuestra que todos los equilibrios sean buenos.
+
+Hay un límite concreto para trasladar la reparación. Amplía expresamente los valores verdaderos y los mensajes numéricos a **0, 2, 3, 7**, manteniendo cuota tres, coste, límite y opción externa cero. Un tipo 2 frente al informe 7 ahora dice la verdad, construye y recibe **2−3=−1**; declarar 0 o salir da 0. La prueba finita anterior no cubría ese tipo y mensaje añadidos. No demuestra sinceridad ni participación en el dominio ampliado.
+
+</details>
+
+<Categorize client:visible
+  className="not-prose"
+  instructions="Asigna cada afirmación a su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="bien"
+  question="Clasifica qué justifican las comprobaciones finitas."
+  buckets={["Demostrado en el dominio indicado","No demostrado por estas comprobaciones"]}
+  items={[{"text":"Pago crítico no tiene desviaciones unilaterales estrictamente rentables en el dominio original.","bucket":"Demostrado en el dominio indicado"},{"text":"El organizador cumple IR porque la cumplen los equipos que declaran.","bucket":"No demostrado por estas comprobaciones"},{"text":"Una regla con equilibrio falso fuerza que todos los informes reales sean falsos.","bucket":"No demostrado por estas comprobaciones"},{"text":"Cuota tres supera la prueba débil original con dos de financiación externa.","bucket":"Demostrado en el dominio indicado"}]}
+  explanation="Conserva el sujeto y el cuantificador de cada prueba. Incentivos de los equipos, participación del organizador, conducta real y dominio cambiado son afirmaciones distintas."
+/>
+
+### Cuándo usarlo
+
+Repite la auditoría al cambiar un límite, cuota, condición de participación o conjunto de mensajes. Un contraejemplo a un arreglo no descarta todos los mecanismos; una reparación finita válida no autoriza un teorema sin restricciones.
+
+## Reconstruye la auditoría
+
+<MindMap client:visible
+  eyebrow=""
+  outlineLabel="Esquema de texto"
+  title="Qué debe separar una auditoría de incentivos"
+  root={{"label":"Auditar una regla de asignación y pago","children":[{"label":"Definir tipos verdaderos, informes permitidos y cronología"},{"label":"Calcular asignación y pagos para cada perfil de mensajes"},{"label":"Fijar tipos e informes ajenos al comprobar desviaciones"},{"label":"Conservar empates y todas las alternativas permitidas"},{"label":"Cuadrar financiación, bienestar y de quién se comprueba la participación"},{"label":"Separar equilibrio sincero, resultados en todo equilibrio y conducta observada"},{"label":"Volver a auditar al cambiar regla o dominio"}]}}
+  className="[overflow-wrap:anywhere]"
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="bien"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Has acertado todas las preguntas."
+  goodMessage="Revisa las explicaciones de tus errores."
+  keepPracticingMessage="Vuelve a los ejemplos y prueba otra vez."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  title="Comprueba la regla, la prueba y sus límites"
+  questions={[{"question":"¿Qué comparación puede refutar la propiedad universal débil de incentivos?","options":[{"text":"Un informe permitido aumenta utilidad con el mismo tipo real e informe ajeno.","correct":true},{"text":"Un informe cambia el tipo verdadero antes de calcular su pago."},{"text":"Alguien recibe menos beneficio total del que esperaba el organizador."},{"text":"Otro informe empata con la utilidad del informe verdadero."}],"explanation":"Una ganancia estrictamente positiva en un caso cubierto es un contraejemplo. DSIC débil permite empates; un tipo cambiado o un caso no incluido pertenecen a otro modelo."},{"question":"Con valores verdaderos tres y siete e informes sinceros, ¿qué regla da al equipo de valor tres una salida rentable?","options":[{"text":"Pago crítico, porque cobrar uno supera su valor verdadero."},{"text":"Cuota igual, porque cobrar cuatro supera su valor verdadero.","correct":true},{"text":"Cuota tres, porque empatar a cero es peor que salir."},{"text":"Todas, porque un valor verdadero bajo siempre impide construir."}],"explanation":"El valor bajo es 3. Cuota igual cobra 4 cuando la verdad construye: da−1 y salir da 0. Pago crítico cobra 1 en ese caso y cuota tres cobra 3."},{"question":"¿Cómo deben tratarse los empates de utilidad en una auditoría?","options":[{"text":"Contarlos como mentiras estrictamente rentables por seguridad."},{"text":"Borrarlos para que la verdad sea la única opción óptima."},{"text":"Suponer sinceridad sin declarar una regla de selección."},{"text":"Conservarlos como pagos iguales sin predecir el informe elegido.","correct":true}],"explanation":"Una desigualdad débil incluye la igualdad. Borrar los empates cambia la pregunta matemática; interpretarlos como sinceridad observada añade un supuesto de conducta sin respaldo."},{"question":"¿Por qué aparece la aportación del organizador al cuadrar el bienestar?","options":[{"text":"Cambia los valores privados de los equipos tras declarar."},{"text":"Es un segundo coste añadido al de construcción."},{"text":"Completa el coste del recurso al relacionarlo con las utilidades de los equipos.","correct":true},{"text":"Hace que todo informe cumpla la participación del organizador."}],"explanation":"Las utilidades de los equipos restan solo sus pagos. Restar la aportación restante del organizador contabiliza el coste completo de ocho una sola vez. No hay beneficio ni garantía de IR del organizador modelizados."},{"question":"¿Qué cambio impide reutilizar una prueba finita sin volver a comprobarla?","options":[{"text":"Un nuevo tipo permitido afronta pagos no cubiertos por la auditoría anterior.","correct":true},{"text":"Los mismos datos se presentan en una explicación traducida."},{"text":"La auditoría muestra todos los mensajes originales en vez de ocultar filas."},{"text":"La prueba conserva un empate existente en lugar de elegir un informe."}],"explanation":"Añadir el tipo 2 cambia el dominio. Con cuota tres contra informe 7, la verdad da−1 y cancelar 0. La prueba original solo cubría los tipos 0,3,7."},{"question":"¿Qué conclusiones tienen respaldo? Selecciona todas las correctas.","allowMultiple":true,"options":[{"text":"Una estrategia sincera débilmente dominante puede coexistir con un equilibrio Nash falso.","correct":true},{"text":"Todos los informes observados deben ser sinceros si no hay desviación rentable."},{"text":"Cambiar la financiación puede alterar incentivos al cambiar qué informes construyen.","correct":true},{"text":"La IR de los equipos demuestra automáticamente la IR del organizador."}],"explanation":"El modelo aporta un equilibrio falso y un contraejemplo con el filtro de financiación. Ni DSIC débil ni las desigualdades de participación de los equipos establecen informes reales o preferencias del organizador."}]}
+/>
+
+La construcción de pago crítico sigue el ejemplo de proyecto público de [Koutsoupias, páginas 39–41](https://conferences.mpi-inf.mpg.de/adfocs-24/material/Elias/lecture1.pdf) y la comparación de utilidades de [Chekuri y Rebolledo, secciones 2–3.4](https://chekuri.cs.illinois.edu/teaching/spring2008/Lectures/scribed/Notes12.pdf). Los valores, las reglas alternativas y las auditorías finitas de esta lección son construidos y se comprueban por separado.
+
+Continúa con el **[examen final](/es/mechanism-design/final-exam)**, que reúne asignación, incentivos y las demás herramientas del curso.

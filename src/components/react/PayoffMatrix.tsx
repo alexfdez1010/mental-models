@@ -281,8 +281,13 @@ export function PayoffMatrix({
         </span>
       </div>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full border-collapse text-center">
+      <div
+        className="mt-4 overflow-x-auto"
+        role="region"
+        tabIndex={0}
+        aria-label={tableCaptionTemplate.replaceAll('{rowPlayer}', rowPlayer).replaceAll('{colPlayer}', colPlayer)}
+      >
+        <table className="w-full border-collapse text-center" style={{ display: 'table', overflow: 'visible', margin: 0 }}>
           <caption className="sr-only">
             {tableCaptionTemplate.replaceAll('{rowPlayer}', rowPlayer).replaceAll('{colPlayer}', colPlayer)}
           </caption>
