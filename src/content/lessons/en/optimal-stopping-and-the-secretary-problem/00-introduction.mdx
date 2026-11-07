@@ -1,148 +1,88 @@
 ---
 title: "Look, Then Leap"
-description: A two-minute orientation to optimal stopping and the secretary problem — why some decisions force you to accept or reject options one at a time with no going back, why "when do I stop looking?" has a mathematically optimal answer, the 37% rule in one picture, and how this course is laid out.
+description: "An introduction to sequential choice, the classical secretary problem, its assumptions and the difference between a finite rule and its famous limit."
 topic: "en/optimal-stopping-and-the-secretary-problem"
 order: 1
-minutes: 6
-updated: 2026-07-12
+minutes: 8
+updated: 2026-11-07
 ---
 
 import { Callout, MCQ, OptimalStoppingLab } from '@/components/react';
 
-Imagine a game. I show you a stack of cards, each with a different number written on it,
-face down. I flip them over **one at a time**. After each flip you must say **"stop"** or
-**"keep going."** Say *stop* and you win whatever is on the current card — the game ends.
-Say *keep going* and that card is gone **forever**; you can never come back to it. Your
-goal: stop on the **single highest** number in the stack. You don't know the range, you
-don't know what's coming, and every card you pass is burned. When should you stop?
+Imagine a game with a known number of designs shown one at a time. You can compare the designs already seen, but receive no absolute quality scores and cannot inspect the future. After each arrival you must accept that design and finish, or reject it permanently. You want the **single greatest** design in the whole set. Assume there are no ties and every arrival order is equally likely. When should you stop?
 
-Your gut offers two terrible strategies. One: grab an early card that "seems high" — but
-seems high *compared to what?* You've barely seen any. Two: hold out for something amazing
-— but if you're too greedy the big number sails past early and you're left choosing among
-scraps. Both fail because they ignore the real structure of the game: information arrives
-**over time**, and every choice is **irreversible**. This is the shape of an enormous
-number of real decisions, and it has a name.
+This is the **classical secretary problem**. It is a particular **optimal stopping** problem: deciding when to act from information revealed sequentially, to optimize a specified reward or cost. The broader field also includes problems with recall, numerical values, costs and other observation rules. Those details determine the solution; irreversibility alone does not determine a sampling fraction.
 
-That shape is **optimal stopping**: a class of problems where options appear in
-**sequence**, each must be **accepted or rejected on the spot**, and a rejected option
-**cannot be recalled**. Hiring when candidates take rival offers, house-hunting in a fast
-market, selling when bids trickle in, deciding when you've dated enough, or simply knowing
-when you've researched enough and should *just choose* — all of them. And the flagship
-example, the one that gives the whole field its punchline, is the **secretary problem**:
-interview applicants one by one, decide each on the spot, and try to hire the best.
-
-<Callout variant="tip" title="The one-sentence version">
-**Optimal stopping** asks *when to stop looking and commit* when options arrive one at a
-time and can't be recalled — and the **secretary problem** gives the clean answer: look
-at (reject) about the first **37%**, remember the best you see, then take the first option
-that beats it. That 37% is **1/e**, and it wins the very best choice about 37% of the time.
+<Callout variant="tip" title="The classical rule and its boundary">
+Under the classical assumptions, an optimal rule rejects an opening group, then selects the first later option better than every option seen. If none qualifies, this course's protocol selects the final one. For large pools, the optimal rejected fraction and success probability both approach $1/e$, approximately 37%. For a finite pool, calculate the integer cutoff rather than require either quantity to equal 37%.
 </Callout>
 
-<MCQ
-  client:visible
-  pretest
-  question="Before we start — take a guess. You'll see 30 job candidates one at a time. You must accept or reject each immediately, and a rejected candidate is gone for good. You want the single best of the 30. What's the smartest general strategy?"
+<MCQ client:visible pretest
+  question="In the known-size, uniform-order, relative-rank game just described, which policy shape can improve on blindly selecting the first?"
   options={[
-    { text: "Reject the first chunk no matter how good — using them only to learn the standard — then hire the first later candidate who beats everyone in that opening group", correct: true },
-    { text: 'Hire the very first candidate, since waiting only risks losing them', correct: false },
-    { text: 'Reject everyone until the last candidate, then hire whoever is left', correct: false },
-    { text: 'Hire the first candidate who seems "above average" in your imagination, before seeing anyone', correct: false },
+    { text: "Choose an opening rejection count, then select the first later best-so-far, with a specified final fallback.", correct: true },
+    { text: "Inspect the future until the overall greatest is visible, then revise earlier choices." },
+    { text: "Recall the strongest rejected option despite the no-recall rule." },
+    { text: "Choose a cutoff after learning whether the completed run won." }
   ]}
-  explanation="The winning idea is look-then-leap. You can't judge 'good' without a yardstick, and you have none until you've seen some candidates — so you spend an opening phase deliberately rejecting people just to calibrate the standard, then commit to the first person who clears that bar. Hiring the very first candidate is blind; waiting for the last is greedy and usually leaves you with a dud. The rest of this course is about exactly how big that opening phase should be — and the answer is about 37%."
+  explanation="The opening observations set a comparison standard. A later record can trigger selection without knowing its global rank. The exact finite cutoff depends on the model; hindsight and recall are unavailable in this game."
 />
 
-## See it in one picture
+## See the policy family in one picture
 
-Here is the whole idea on one chart. The horizontal axis is your **look fraction** — how
-much of the sequence you spend *just looking* before you allow yourself to commit. The
-vertical axis is how often the look-then-leap rule lands the **single best** option. Drag
-the **look-fraction** slider from left to right and watch the success rate rise, crest,
-and fall. It peaks in the middle — right around **37%** — not at zero (committing blind)
-and not near the end (waiting too long). That hump is the secretary problem, and its peak
-is the 37% rule.
+The lab compares opening-cutoff rules under uniform order. In its **best-only** mode, the curve uses the exact probability of selecting the greatest. The integer count beside the slider shows how the requested percentage rounds to a finite cutoff.
 
-Then hit **Deal a new sequence** a few times to watch the rule fire on a single run: the
-grey cards are the *look* phase you throw away to set your bar, and the rule leaps at the
-first later card that beats them. Sometimes it nails the best (green); sometimes the best
-was hiding in the opening sample and it misses (red). Run it enough and you'll *feel* why
-~37% wins about 37% of the time — remarkably often for a blind, one-shot game.
+Its sequence strip shows **completed ranks retrospectively**, including options the rule never reached. Use it to inspect a completed policy trace. It is not the chooser's live information. The later audit workshop adds a stepwise view that withholds those global labels and future observations until the decision has ended.
 
-<OptimalStoppingLab
-  client:visible
-  title="How often does look-then-leap grab the best?"
-  initialN={30}
-  initialLookPercent={37}
-  initialObjective="best"
-  caption="Drag the look fraction to find the peak near 37%, then deal fresh sequences to watch the rule leap. Switch the objective to 'Maximise expected value' to see the curve change shape — when near-misses count, the optimal look shrinks below 37%."
+<OptimalStoppingLab client:visible percentileUnitLabel="%"
+  axisBestLabel="P(best)" axisValueLabel="Rank/n" axisLookLabel="Opening cutoffs →"
+  title="Compare opening cutoffs under the stated model"
+  initialN={30} initialLookPercent={37} initialObjective="best"
+  instructions="Compare fixed opening-cutoff policies under uniformly random order. The sequence below is a completed-record demonstration, not a live view of the chooser's information."
+  bestObjectiveLabel="Probability of selecting the greatest"
+  valueObjectiveLabel="Mean rank/n within this family"
+  optimalStatLabel="Best shown cutoff" scoreStatLabel="Score at this cutoff"
+  referenceStatLabel="Best-only limit: 1/e"
+  readoutTemplate="With {n} options, the displayed {objective} score at the requested {cutoff}% opening fraction is {score}. The best cutoff shown is {optimal}%. Reference: {reference}."
+  caption="Best-only probabilities are exact under uniform order. The other mode estimates mean normalized rank for this same cutoff family by seeded simulation; it does not solve every expected-value stopping problem. The reference line is a large-pool best-only limit."
 />
 
-Now flip the **Objective** toggle to *Maximise expected value*. The curve changes: when
-you get credit for a *very good* pick, not just the single best, the optimal look fraction
-**shrinks below 37%** — because holding out for perfection isn't worth passing up great
-options. That single switch, from "the best or nothing" to "as good as possible on
-average," is one of the most important lessons in the whole course, and we build it up
-carefully in Lesson 3.
+Changing the reward changes what counts as success. The lab's second mode summarizes the selected ordinal rank divided by the pool size, using simulated orders. That is a different metric from best-choice probability. A numeric-payoff problem may require different observations and a different policy family; its solution does not follow merely from toggling this chart.
 
-<MCQ
-  client:visible
-  question="In the lab, switching the objective from 'Pick the single best' to 'Maximise expected value' moves the optimal look fraction to a SMALLER number. What real-world lesson does that encode?"
+<MCQ client:visible
+  question="What is the defensible lesson from changing the scoring objective?"
   options={[
-    { text: 'When a near-miss is almost as good as the best (you care about expected value, not just the #1), you should look less and commit sooner — holding out for perfection costs you great options', correct: true },
-    { text: 'The 37% rule is wrong and looking is never worth it', correct: false },
-    { text: 'You should always look at exactly 37% regardless of what you are optimising', correct: false },
-    { text: 'Maximising expected value means you should never commit at all', correct: false },
+    { text: "State the reward and available information, then evaluate policies for that model; a comparison within one family is not a universal optimum.", correct: true },
+    { text: "Any objective always has the same opening cutoff." },
+    { text: "The simulation proves every numerical-payoff problem should commit earlier." },
+    { text: "A single winning sequence determines the best model-wide policy." }
   ]}
-  explanation="The pure 37% rule optimises a harsh goal: the probability of the single best, with zero credit for a superb second place. Real life rarely works that way — a near-perfect choice is usually almost as good as the perfect one. Once near-misses count, the cost of holding out for #1 (passing up excellent options) outweighs the benefit, so the optimal look fraction drops. Same machinery, gentler objective, earlier commit."
+  explanation="Best-choice probability, mean rank and expected numeric value are distinct objectives. A curve comparing fixed-cutoff policies has that declared scope; it cannot certify every policy under changed assumptions."
 />
 
-## What you'll walk away with
+## What the course covers
 
-By the end you'll be able to look at a decision — a hire, a flat, an offer, a partner, a
-research rabbit-hole — recognise whether it has the **sequential, no-going-back** shape,
-and if it does, split it deliberately into a **look** phase and a **leap** phase instead
-of agonising. Here's the map:
+You will learn to state a sequential decision precisely, calculate a policy under its assumptions, and identify what must change before transferring it. The course map is:
 
-1. **The secretary problem & the 37% rule** — the exact result, *why* the number **e**
-   shows up, and small cases worked by hand so you see the mechanism.
-2. **Explore-then-commit** — the general pattern under the rule: a sampling phase that
-   sets a **bar**, and a commit phase that takes the first option to clear it.
-3. **When you want the best *expected* value** — the gentler objective, why the optimal
-   look shrinks below 37%, and why your bar should **fall as options run out**.
-4. **Variations that matter** — recall (you *can* go back), a known distribution
-   (**reservation values**), search costs, uncertain N, and rejectable offers.
-5. **Transfer — and where the model lies** — hiring, house-hunting, the "37% then commit"
-   dating meme and its honest caveats, and the traps: the pure rule optimises the wrong
-   thing, assumes strict irreversibility, and ignores what you know about the odds.
+1. **The secretary problem and the 37% rule**: the classical rank-only setup, small cases and the large-pool limit.
+2. **Explore, then commit**: an opening sample and a later commitment phase in the cutoff family.
+3. **Expected-value objectives**: how rewards and the information scale affect acceptance thresholds.
+4. **Variations that matter**: recall, costs, distributional information, unknown horizons and rejectable offers.
+5. **Transfer and model limits**: check the real objective, availability and arrival process before borrowing a rule.
+6. **[Audit a stopping rule](/optimal-stopping-and-the-secretary-problem/06-audit-a-stopping-rule)**: permitted information, a complete protocol, exact finite scoring and a changed known arrival law.
 
-<Callout variant="info" title="Where we're headed">
-Keep one image in your head the whole way through: that hump-shaped curve, peaking near
-37%. Everything ahead is an answer to two questions: *does this decision have the
-look-then-leap shape?* and if so, *how long should I look before I leap?*
+<Callout variant="info" title="Keep the question precise">
+Ask what the chooser can observe, what reward is being optimized and which order law is assumed. Then ask which policies have actually been compared. A precise answer inside one model is useful without being a rule for every search.
 </Callout>
 
 ## How to use this course
 
-Every lesson opens with a quick guess, teaches the idea through a concrete story and
-worked numbers, and checks that it stuck. Don't skip the guesses — committing to an answer
-*before* you know is one of the most reliable ways to actually remember. You'll drive the
-optimal-stopping lab from several angles and meet sorting and matching exercises along the
-way.
+Try the questions before opening the explanations, reproduce worked calculations, and distinguish chooser information from analyst records. The course includes replays, sorting and matching exercises, plus an independent audit workshop. A quiz checks your reasoning; its score is not evidence that a model's assumptions hold in a real decision.
 
-This is an **expert-tier** course, so it leans on a few models you've ideally met already.
-You'll get the most from it if you're comfortable with **thinking in probabilities**
-(reasoning about the chance that the best-so-far is the true best, and what "37% of the
-time" really means), **the value of information** (the *look* phase is literally buying
-information about the option pool before you commit), and **deciding under deep
-uncertainty** (you must act without ever seeing the whole set of options). When you've
-finished the five teaching lessons, a graded final exam pulls it all together — it's
-one-way, so once you submit an answer it's locked.
+This is an **expert-tier** course. Familiarity with probability, expected value and the value of information will help. A known horizon is the number of opportunities before the decision ends. A record is the current best among what has already been observed; it need not be the greatest globally. After the six teaching lessons, the final exam is one-way: submitting locks each answer and the score appears at the end.
 
-<Callout variant="warning" title="One habit to build as you go">
-Whenever you catch yourself agonising over "should I take this or hold out for something
-better?", ask one question first: *is this a one-shot, no-going-back, one-at-a-time
-decision?* If it is, stop trusting your gut and split it into **look** and **leap** — a
-phase to learn the standard, then a phase to commit at the first option that beats it.
+<Callout variant="warning" title="Before borrowing the number">
+A deadline or a disappearing offer does not establish uniform random order, a known horizon or a best-only objective. Specify the missing conditions before claiming a numerical optimum. The next lesson derives the classical rule; the audit workshop later checks a complete finite case.
 </Callout>
 
-Ready? The next lesson goes straight to the heart of it — the exact **secretary problem**,
-the **37% rule**, and why the mysterious number **e** decides when you should stop.
+Continue to [the classical secretary problem](/optimal-stopping-and-the-secretary-problem/01-the-secretary-problem-and-the-37-percent-rule).

@@ -315,3 +315,6 @@ export type { MarketBuyer, MarketSeller, MarketEligibilityLabels, MarketEligibil
 
 export { BidCatalogue, evaluateBidCatalogue } from '@/components/react/BidCatalogue';
 export type { BidPaymentRule, BidCatalogueState, BidFraction, BidCatalogueRow, BidCatalogueResult, BidCatalogueLabels, BidCatalogueProps } from '@/components/react/BidCatalogue';
+
+export { StoppingTrace } from '@/components/react/StoppingTrace';
+export type { StoppingTraceProps, StoppingExample } from '@/components/react/StoppingTrace';

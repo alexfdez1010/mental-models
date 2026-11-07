@@ -1,0 +1,361 @@
+---
+title: "Audit a Stopping Rule"
+description: "Trace a rule without seeing the future, score its exact finite performance and test what changes when the known arrival-order law changes."
+topic: "en/optimal-stopping-and-the-secretary-problem"
+order: 7
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, Callout, Categorize, MatchConcepts, FillBlank, MindMap, RateComparison, StoppingTrace } from '@/components/react';
+
+A stopping rule is a set of instructions for deciding when to stop from the information available **at that moment**. A completed record is much more generous: it tells you what came next. Confusing those two views lets hindsight do the difficult part and then invoice the rule for genius.
+
+The earlier lessons introduced sampling, records and alternative objectives. Here you will audit a complete protocol, distinguish a correctly executed loss from a mistake, and compare the same policy under two fully specified order laws. Every numerical case below is constructed. These are exact calculations inside declared models, not measured success rates from a hiring market.
+
+## Write down what the chooser may know
+
+<MCQ client:visible pretest
+  question="The first option is the best among everything revealed so far. In a relative-rank game, what does that establish?"
+  options={[
+    { text: "Only that it leads the observed set; its position among unseen options remains unknown.", correct: true },
+    { text: "It is the greatest option in the complete sequence." },
+    { text: "It must be poor because it arrived early." },
+    { text: "The chooser may inspect the completed sequence before deciding." }
+  ]}
+  explanation="The first option is automatically best among the one option seen. A comparison within the observed set does not reveal the unseen global ranking."
+/>
+
+Imagine a referee holding the complete result sheet while a player sees only the current move. The referee can later assess a decision; the player cannot borrow the sheet during play. The analogy has a limit: known rules of the game are legitimate information. A chooser may infer something about the future from a supplied model without observing the future itself.
+
+A stopping rule is **admissible for an information model** if it uses only information that model allows. The key restriction is about when information becomes available, not whether a completed trace looks sensible. Ferguson's definition of stopping rules makes this distinction explicit: the decision can depend on the observed history, rather than on later observations. [Author's treatment of stopping rules](https://www.math.ucla.edu/~tom/Stopping/sr1.pdf)
+
+Our game offers six display designs, one at a time. Their quality has a fixed strict ordering; comparison is perfect. The chooser sees which revealed designs beat which others, but receives no absolute score and cannot identify an unseen design's global rank.
+
+| Protocol item | Declared condition |
+| --- | --- |
+| Horizon | Exactly six designs, known before the run |
+| Objective | Select the unique greatest; reward one for success and zero otherwise |
+| Observation | Relative ordering of revealed designs only |
+| Action | Accept the current design and finish, or reject it permanently |
+| Availability | Every current design can be accepted; no recall of rejected ones |
+| Other features | No ties, inspection costs, rank errors or refusal by the selected option |
+| Reference order law | All permutations are equally likely, fixed before the rule is chosen |
+| End condition | Select the final design if the policy has not already selected one |
+
+**Worked information check.** After two observations, the second design beats the first. The chooser knows their relative ordering and arrival positions. The chooser does not know whether the second is second-best or greatest globally. A completed record labelled $(2,5,1,4,6,3)$ and another labelled $(4,6,1,3,2,5)$ produce the same comparisons during those first two observations. A rule using only that history must make the same decision in both.
+
+The completed-record labels run from one to six, with six greatest. They are **analyst notation**, not values disclosed to the chooser. A rule saying “accept when global label six appears” would solve a different, more informative game.
+
+<MatchConcepts client:visible
+  question="Match each statement to the information role it plays."
+  pairs={[
+    { term: "The current option beats every previously revealed option", definition: "A comparison available to the chooser now." },
+    { term: "A rejected option was the greatest of the whole sequence", definition: "A conclusion the analyst can establish from the completed record." },
+    { term: "The order model guarantees the greatest arrives last", definition: "Prior model information, usable if that guarantee is actually supplied." },
+    { term: "The next unseen option is weaker than the current one", definition: "An unavailable observation in the reference game." }
+  ]}
+  explanation="Separate observations, completed-record facts and prior model assumptions. A known order law can support an inference; silently revealing a future comparison changes the experiment."
+/>
+
+### When to use this check
+
+Use it before judging an algorithm from a worked trace, replay or dashboard. Hide future values and global ranks, then ask whether each decision can still be reconstructed. If it cannot, the trace has smuggled in information.
+
+## Execute a rule that actually stops
+
+<MCQ client:visible pretest
+  question="After the opening rejections, a new best-so-far appears. It might still lose to an unseen option. Under the declared first-record policy, what happens?"
+  options={[
+    { text: "Select it now; the policy does not wait for confirmation from unseen options.", correct: true },
+    { text: "Keep inspecting until the overall greatest can be recognized by its global label." },
+    { text: "Change the opening cutoff after seeing whether the current option is impressive." },
+    { text: "Recall the strongest design rejected earlier." }
+  ]}
+  explanation="A record is best among the observed options, not certified best globally. The policy accepts the first eligible record and ends; the uncertainty is part of the problem."
+/>
+
+A **record** is an arriving option better than every option previously observed. Think of a high-jump bar set by the opening observations: the rule reacts when a later design clears it. The bar compares order, not quality gaps; it does not tell you how much better one design is.
+
+Choose an integer $k$, the number of opening rejections, **before any option is revealed**. We will compare $k=0,1,2,3,4,5$.
+
+1. Reject the first $k$ designs and remember their best.
+2. Thereafter, select the first new record and end the run immediately.
+3. If no eligible record appears, select the final design anyway.
+4. With $k=0$, select the first design. There is no opening sample.
+
+The fallback is part of the rule, not a last-minute repair. Without it, “reject everything if the best was in the sample” is an incomplete description of this one-selection game.
+
+In the visual, choose a teaching run and cutoff before revealing anything. Each click executes the rule; it does not invite a hindsight override. The bars show **relative ordering among the designs revealed now**. Their changing heights encode ordinal comparisons, not absolute quality differences. Only the explicit completed-record debrief displays global labels and the unseen remainder. These are replayable teaching records, not blinded trials.
+
+<StoppingTrace client:visible initialCutoff={2}
+  title="Reveal the evidence available to the policy"
+  caption="Restart unlocks the run and cutoff. After selection, open the completed record to assess the outcome."
+  examples={[
+    { label: "Run A", order: [2,5,1,4,6,3] },
+    { label: "Run B", order: [2,4,5,1,6,3] },
+    { label: "Run C", order: [6,1,2,3,4,5] }
+  ]}
+/>
+
+**Worked chooser trace for run A with $k=2$.** The second design becomes the opening leader. The third and fourth fail to beat that leader. The fifth beats every revealed design, so the rule selects it. You can reconstruct that decision entirely from relative comparisons; the chooser need not know a global quality number.
+
+| Arrival | Information relevant at that moment | Required action |
+| --- | --- | --- |
+| First | Only design seen | Opening rejection |
+| Second | Better than the first | Opening rejection; keep it as leader |
+| Third | Below the leader | Reject |
+| Fourth | Below the leader | Reject |
+| Fifth | A new record | Select and stop |
+
+<FillBlank client:visible
+  question="Complete the policy without supplying hidden information."
+  text="The opening cutoff is chosen {{before observing the run|after seeing the greatest|after inspecting the complete order}}. A record is best among {{the options already observed|all unseen options|only future options}}. If no eligible record appears, this protocol selects {{the final option|the best rejected option|nothing and starts again}}."
+  explanation="Cutoff choice, record detection and the final fallback are separate instructions. They make a reproducible policy using the declared information."
+/>
+
+### When the rule is complete enough to test
+
+Another person should be able to run it on every permitted order without asking what to do at a boundary. Specify the zero-sample case, the final option and whether equality is possible. Here ties are excluded; a real ranking system with ties would need a further rule.
+
+## Separate correct execution from a winning outcome
+
+<MCQ client:visible pretest
+  question="A policy follows every declared comparison correctly but selects a design that is not the greatest. What follows?"
+  options={[
+    { text: "This run lost under the objective; a single loss does not establish a policy error or its model-wide success rate.", correct: true },
+    { text: "The implementation must have ignored its own rule." },
+    { text: "The model-wide success probability is now zero." },
+    { text: "The rejected designs become available again." }
+  ]}
+  explanation="Execution and outcome answer different questions. A best-choice policy under an uncertain arrival order can run correctly and lose; a faulty implementation can also get lucky."
+/>
+
+The distinction resembles a correctly executed move in a game with an uncertain opponent: following the plan is not a certificate of winning. Our game has no opponent making decisions; uncertainty comes from the order drawn under its declared law.
+
+Now switch explicitly to the **analyst's completed-record view**. The labels below reveal the whole ordering after the decision. They must not be read back into the chooser's earlier information.
+
+| Run | Complete analyst record | Selection with $k=2$ | Result |
+| --- | --- | --- | --- |
+| A | 2, 5, 1, 4, 6, 3 | Position 5, global rank 6 | Success |
+| B | 2, 4, 5, 1, 6, 3 | Position 3, global rank 5 | Loss |
+| C | 6, 1, 2, 3, 4, 5 | Position 6, global rank 5 | Loss by final fallback |
+
+**Worked loss.** In B, the opening leader has analyst label four. The third option, label five, beats it and is therefore selected. The greatest, label six, appears later at position five. Rejecting the third option *because of that later arrival* would violate the information restriction. Waiting might happen to win this completed record; it is not the declared first-record policy.
+
+In C, the greatest was rejected during sampling. Nothing later can beat it. The rule still makes a selection at the end: position six. This is a correctly executed fallback with a losing outcome. Changing $k$ only after inspecting such records would create a retrospective recommendation, not an advance policy test.
+
+<Categorize client:visible
+  question="Distinguish a policy execution problem from an outcome the policy permits."
+  buckets={["Execution problem", "Permitted policy outcome"]}
+  items={[
+    { text: "Selecting an opening-sample design despite a positive predeclared cutoff", bucket: "Execution problem" },
+    { text: "Skipping the first eligible record because a later completed-record value is greater", bucket: "Execution problem" },
+    { text: "Selecting a record that a future design happens to beat", bucket: "Permitted policy outcome" },
+    { text: "Selecting the final nonrecord when the greatest was rejected in the sample", bucket: "Permitted policy outcome" }
+  ]}
+  explanation="An execution audit checks the declared instructions using the information available then. An outcome audit checks the selection against the eventual greatest. Neither audit can replace the other."
+/>
+
+### When a replay helps
+
+Use individual replays to find implementation errors and understand mechanisms. To compare success probabilities, you need the full probability model or a justified sampling procedure. Runs A, B and C were chosen for teaching; their success fraction is not an estimate of the uniform-order policy's performance.
+
+## Score the rule over the declared order law
+
+<MCQ client:visible pretest
+  question="The objective rewards only selecting the unique greatest. Which quantity should rank the cutoff policies?"
+  options={[
+    { text: "Their probability of selecting that greatest under the same declared order law.", correct: true },
+    { text: "Their average selected global rank, even though that is a different reward." },
+    { text: "Whether the most memorable teaching run happened to win." },
+    { text: "The cutoff closest to the famous limiting percentage, without computing finite performance." }
+  ]}
+  explanation="The objective determines the scoring rule. Mean rank, one selected replay and proximity to an asymptotic slogan do not measure this best-only probability."
+/>
+
+With six distinct designs there are $6!=720$ possible arrival orders. In the reference model **each has probability $1/720$**. Execute the same cutoff on every order, count selections of the greatest, and divide by $720$. This is exhaustive model calculation, not a survey of visitors or repeated empirical trials.
+
+| Opening rejections $k$ | Winning orders | All permitted orders | Success probability |
+| --- | --- | --- | --- |
+| 0 | 120 | 720 | 16.67% |
+| 1 | 274 | 720 | 38.06% |
+| 2 | 308 | 720 | 42.78% |
+| 3 | 282 | 720 | 39.17% |
+| 4 | 216 | 720 | 30.00% |
+| 5 | 120 | 720 | 16.67% |
+
+The best **among these six cutoff policies** rejects two. Its exact success probability is $308/720=77/180$. The percentage is rounded in the table. Its sampling fraction is $2/6\approx33.33\%$, while its success rate is approximately $42.78\%$: they have different denominators and are not the same quantity.
+
+<RateComparison client:visible locale="en"
+  title="Exact uniform-order calculation: compare the selected cutoff with alternatives"
+  scenarioLabel="Cutoffs to compare" countsLabel="Winning orders / all permitted orders"
+  differenceLabel="Success-probability difference" pointLabel="percentage point" pointsLabel="percentage points"
+  scenarios={[
+    { label: "Reject two versus one", groups: [{ label: "Reject two", events: 308, total: 720 }, { label: "Reject one", events: 274, total: 720 }] },
+    { label: "Reject two versus three", groups: [{ label: "Reject two", events: 308, total: 720 }, { label: "Reject three", events: 282, total: 720 }] },
+    { label: "Reject two versus five", groups: [{ label: "Reject two", events: 308, total: 720 }, { label: "Reject five", events: 120, total: 720 }] }
+  ]}
+/>
+
+### Check the count by a different route
+
+Let the greatest arrive at position $m$, after the opening sample. Its position has probability $1/6$. For the rule to reach it without an earlier selection, the best among the preceding $m-1$ designs must lie in the first $k$. Under uniform ordering that conditional probability is $k/(m-1)$. Sum over the possible positions:
+
+$$
+P_k=\sum_{m=k+1}^{6}\frac{1}{6}\frac{k}{m-1}
+=\frac{k}{6}\sum_{j=k}^{5}\frac{1}{j},\qquad 1\le k\le5.
+$$
+
+For $k=2$:
+
+$$
+P_2=\frac{2}{6}\left(\frac12+\frac13+\frac14+\frac15\right)
+=\frac{77}{180}=\frac{308}{720}.
+$$
+
+The factor $k/6$ in the rearranged expression is **not** the chance the greatest comes after the sample; that chance is $(6-k)/6$. Keep the conditional argument intact instead of assigning a separate probability story to each algebraic factor. For $k=0$, the rule selects the first, giving probability $1/6$.
+
+Ferguson's classical treatment derives the threshold family and its finite success formula under the stated rank-only, uniform-order assumptions. Its first eligible stage is one larger than our opening rejection count. The large-pool result concerns a limit toward $1/e$; it is not an instruction to force the finite sampling fraction and success probability to equal that number. [Classical derivation and finite table](https://www.math.ucla.edu/~tom/Stopping/sr2.pdf)
+
+<MCQ client:visible
+  question="The finite calculation favors rejecting two. Which claim would require a different argument?"
+  options={[
+    { text: "The same cutoff is best under every other arrival law or reward model.", correct: true },
+    { text: "It beats rejecting one under the supplied uniform-order law." },
+    { text: "Its rejected fraction differs from its probability of winning." },
+    { text: "A correctly executed run can still miss the greatest." }
+  ]}
+  explanation="The enumeration holds a particular law, information model, reward and policy family fixed. It does not establish optimality across changed problems."
+/>
+
+## Test a changed law without changing the objective
+
+<MCQ client:visible pretest
+  question="A new model, announced before policy choice, guarantees that the greatest design arrives last. May a relative-rank chooser use that guarantee?"
+  options={[
+    { text: "Yes; it is supplied model information, rather than an illicit observation of a future design.", correct: true },
+    { text: "No; a chooser may never reason about a known arrival law." },
+    { text: "Only after changing the objective to mean quality." },
+    { text: "The guarantee follows automatically from any small catalogue of past examples." }
+  ]}
+  explanation="A prior guarantee and a future observation are different information sources. The guarantee must actually be part of the model; an empirical pattern alone would not supply it."
+/>
+
+Here is your independent transfer problem. Keep the horizon, reward, relative observations, availability and no-recall rule. Change **only the known law of complete orders**. Before choosing the cutoff, the chooser is told that exactly these four orders are possible, each with probability $1/4$, and therefore that the greatest always arrives last. The chooser is not told which row will occur or shown the unseen global labels during play.
+
+| Permitted order | Complete analyst labels | Model probability |
+| --- | --- | --- |
+| A | 5, 1, 2, 3, 4, 6 | 1/4 |
+| B | 1, 2, 3, 4, 5, 6 | 1/4 |
+| C | 2, 1, 4, 3, 5, 6 | 1/4 |
+| D | 1, 3, 2, 5, 4, 6 | 1/4 |
+
+This is the entire stipulated probability space, **not four observations sampled from the old set of 720**. Think of changing the deck-building rule before shuffling, rather than drawing four cards and declaring the rest impossible. The analogy stops at that distinction: our outcomes are complete arrival orders, not individual cards.
+
+Without opening the solution, trace the reject-two policy on every row. Then compare all six cutoffs and choose one under this changed law. State exactly which advance information justifies your choice.
+
+<details>
+<summary>Open the complete transfer calculation</summary>
+
+With $k=2$, A waits until position six and succeeds. B selects position three, C selects position three and D selects position four; all three selections precede the greatest. Thus $k=2$ wins $1/4=25\%$, not $308/720$.
+
+The complete analyst calculation is below. Each cell gives the global rank selected under that cutoff; six marks a success.
+
+| Order | $k=0$ | $k=1$ | $k=2$ | $k=3$ | $k=4$ | $k=5$ |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | 5 | 6 | 6 | 6 | 6 | 6 |
+| B | 1 | 2 | 3 | 4 | 5 | 6 |
+| C | 2 | 4 | 4 | 5 | 5 | 6 |
+| D | 1 | 3 | 5 | 5 | 6 | 6 |
+| Winning orders | 0 | 1 | 1 | 1 | 2 | 4 |
+
+Rejecting five selects the final option and wins $4/4=100\%$. It uses the known last-greatest guarantee, without requiring unseen comparisons. Since no success probability can exceed one, this also reaches an upper bound under this changed model. It is not a reason to wait until the last option in the original uniform-order game, where that policy wins only $120/720=1/6$.
+
+</details>
+
+<RateComparison client:visible locale="en"
+  title="Same policies, different known order laws"
+  scenarioLabel="Order law" countsLabel="Winning orders / all permitted orders"
+  differenceLabel="Success-probability difference" pointLabel="percentage point" pointsLabel="percentage points"
+  scenarios={[
+    { label: "Uniform over every order", groups: [{ label: "Reject two", events: 308, total: 720 }, { label: "Reject five", events: 120, total: 720 }] },
+    { label: "Known four-order catalogue", groups: [{ label: "Reject two", events: 1, total: 4 }, { label: "Reject five", events: 4, total: 4 }] }
+  ]}
+/>
+
+<MCQ client:visible allowMultiple
+  question="Which conclusions survive the changed-law calculation? Select all that apply."
+  options={[
+    { text: "The same policy can have a different success probability under a different known order law.", correct: true },
+    { text: "Waiting until the last is justified here by the model's advance guarantee.", correct: true },
+    { text: "The catalogue proves that waiting until the last is best in every real search." },
+    { text: "A short observed streak would establish the same guarantee without an order model." }
+  ]}
+  explanation="Only the first two follow. The altered model supplies both the four exhaustive possibilities and their probabilities. A small real sample would leave other orders and uncertainty about their probabilities open."
+/>
+
+### When to challenge the law rather than tweak the cutoff
+
+If options are scheduled, filtered or sorted, inspect the arrival process before importing a uniform-order probability. Re-estimating a cutoff cannot repair a false claim that every permutation is equally likely. Conversely, an unverified belief that the best arrives late is not permission to treat it as a guarantee.
+
+## Finish the audit before exporting the rule
+
+<MCQ client:visible pretest
+  question="A real search has an uncertain horizon and its strongest options may be scheduled early. Does that alone justify using the famous fraction of elapsed time?"
+  options={[
+    { text: "No; a time-based rule needs a justified arrival, information and reward model of its own.", correct: true },
+    { text: "Yes; any unknown count automatically becomes the same fraction of the calendar." },
+    { text: "Yes; irreversibility is the only condition that matters." },
+    { text: "No stopping problem can ever have an uncertain horizon." }
+  ]}
+  explanation="Unknown horizons are legitimate stopping problems, but they do not all share one time cutoff. State how options arrive and what is known before claiming a numerical optimum."
+/>
+
+An audit resembles checking a route before using travel directions: the instructions may be internally consistent while a closed bridge makes the route unsuitable. The limit is that uncertain arrival laws may never be verified exactly. The practical task is to state what supports the model and what would make you revise it.
+
+| Audit question | Concrete check | If it fails |
+| --- | --- | --- |
+| What is rewarded? | Unique-greatest indicator, mean rank, numeric value or another specified payoff? | Recompute for the actual objective; the metrics are not interchangeable |
+| What can be known now? | Reproduce the decision using revealed comparisons and declared prior information | Remove hindsight or solve the more informative problem explicitly |
+| Does the rule cover every path? | Check opening cutoff, first eligible record and final fallback | Complete the protocol before scoring it |
+| Which orders and probabilities apply? | List the finite model or justify an arrival process | Qualify the success claim; do not invent a uniform law |
+| What would invalidate the deployment? | Changed scheduling, availability, ties, costs or measurement errors | Revisit the model and re-evaluate, rather than promise the old percentage |
+
+**Worked transfer to planning.** A display coordinator can retain all six proposals and compare them after the deadline at no cost, with every proposal still available. The original no-recall game no longer describes the process. Comparing all six and choosing the greatest guarantees success *under those new stated conditions*. If proposals can expire or comparison takes time, that argument needs revision too. The word “sequential” alone does not determine the optimal stopping policy.
+
+<MatchConcepts client:visible
+  question="Match each audit failure to the repair it actually needs."
+  pairs={[
+    { term: "Using a future global rank to explain a live selection", definition: "Reconstruct the decision with the permitted information only." },
+    { term: "Reporting an average quality as a best-choice success probability", definition: "Score the declared reward rather than a different metric." },
+    { term: "Testing only a few handpicked teaching runs", definition: "Use the full declared probability model or a justified estimation procedure." },
+    { term: "Claiming the last-greatest guarantee from a short real streak", definition: "Justify the arrival law and retain uncertainty about unobserved possibilities." }
+  ]}
+  explanation="Different failures need different repairs. A more precise percentage cannot fix a wrong objective, illicit information or an unsupported order law."
+/>
+
+## Recall the protocol and its limits
+
+Before opening the map, explain why the first design is necessarily a record but not necessarily greatest. Then name the information that makes waiting until the last a winning policy in the transfer model.
+
+<MindMap client:visible root={{label:"Audit a stopping rule",children:[
+  {label:"Information",children:[{label:"Relative comparisons of revealed options"},{label:"Prior law may support legitimate inference"},{label:"Completed record is a separate analyst view"}]},
+  {label:"Complete policy",children:[{label:"Choose opening rejection count in advance"},{label:"Select first eligible record"},{label:"Final fallback and zero-cutoff case"}]},
+  {label:"Evaluation",children:[{label:"Correct execution can lose"},{label:"Score the declared reward over the declared law"},{label:"Finite calculation differs from the large-pool limit"}]},
+  {label:"Transfer",children:[{label:"Changed known law changes success probabilities"},{label:"Last-greatest guarantee justifies waiting in that model"},{label:"Check assumptions before claiming a real-world optimum"}]}
+]}} />
+
+<Quiz client:visible title="Check the stopping-rule audit"
+  questions={[
+    {question:"Two revealed histories have the same relative ordering but different hidden global labels. What must a rule restricted to those comparisons do?",options:[{text:"Make the same decision at the same stage, given the same declared model and cutoff.",correct:true},{text:"Accept whichever hidden global label is greatest."},{text:"Change its cutoff using the unseen suffix."}],explanation:"Only the permitted information may distinguish decisions. Analyst labels and future observations are unavailable in the reference game."},
+    {question:"After the opening sample, a record appears and the declared policy selects it. A later design is better. What was established?",options:[{text:"A losing outcome, consistent with correct execution of the rule.",correct:true},{text:"A proof that the selection code must be faulty."},{text:"Permission to rewrite the earlier decision using hindsight."}],explanation:"A policy audit separates execution, outcome and model-wide performance. One completed run does not settle all three."},
+    {question:"What does the final-option fallback contribute?",options:[{text:"A specified selection when no eligible record ever appears.",correct:true},{text:"Recall of the best rejected design."},{text:"A guarantee of success under uniform ordering."}],explanation:"If the greatest was rejected in the sample, no later record can beat it. The fallback still completes this one-selection protocol."},
+    {"question":"For the uniform reference card, what is the success probability after rejecting two designs?","options":[{"text":"Seventy-seven out of one hundred eighty.","correct":true},{"text":"One out of three."},{"text":"One out of six."}],"explanation":"The declared card has 308 winning orders out of 720: 308/720 = 77/180. The rejected fraction 2/6 = 1/3 is a different quantity. The 1/6 success rate belongs to selecting only the first or final design in this uniform game."},
+    {question:"Which statements distinguish the finite result from the familiar limiting rule? Select all that apply.",allowMultiple:true,options:[{text:"The rejected fraction and the success probability are separate quantities.",correct:true},{text:"The exact best finite cutoff can differ from the limiting fraction.",correct:true},{text:"Both finite quantities must equal the famous percentage exactly."},{text:"A limiting result removes the need to specify the order law."}],explanation:"The reference calculation selects a finite cutoff and evaluates its reward. The asymptotic equality of limiting values does not make these two finite quantities identical."},
+    {"question":"In the complete changed catalogue, what are the success probabilities for rejecting two and then rejecting five?","options":[{"text":"One quarter and one, respectively.","correct":true},{"text":"One and one quarter, respectively."},{"text":"Three quarters and one half, respectively."}],"explanation":"Reject two wins only order A: 1/4. Reject five wins all four permitted orders: 4/4 = 1. The greatest-last property is known before choice; these are exact probabilities in the changed catalogue, not estimates from four sampled runs."},
+    {question:"A deployment unexpectedly allows rejected proposals to remain available at no cost. What is the appropriate response?",options:[{text:"Revisit the availability model and re-evaluate the policy.",correct:true},{text:"Keep the old policy because the previous calculation was exact."},{text:"Treat exactness inside a model as proof its assumptions cannot change."}],explanation:"A correct calculation can become irrelevant when the decision process changes. Exact arithmetic does not validate assumptions."}
+  ]}
+/>
+
+Continue to the [final exam](/optimal-stopping-and-the-secretary-problem/final-exam). It now includes information audits, exact finite evaluation and changed-law transfer alongside the earlier course material.

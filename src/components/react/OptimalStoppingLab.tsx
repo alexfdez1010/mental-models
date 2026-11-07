@@ -63,6 +63,16 @@ export interface OptimalStoppingLabProps {
    * `{objective}`, `{reference}` are replaced with live values.
    */
   readoutTemplate?: string;
+  /** Number punctuation only; the English output remains the default. */
+  locale?: 'en' | 'es';
+  /** Tooltip for the actual maximum in the completed demonstration. */
+  trueBestTitle?: string;
+  /** Tooltip for a sampled option in the completed demonstration. */
+  sampleTitle?: string;
+  /** Tooltip for another option in the completed demonstration. */
+  candidateTitle?: string;
+  /** Unit after the existing rounded rank/n statistic. */
+  percentileUnitLabel?: string;
   /** Extra classes merged onto the root element. */
   className?: string;
 }
@@ -187,9 +197,18 @@ export function OptimalStoppingLab({
   missLabel = '✗ missed the best',
   bestWasLabel = 'the true best was #{pos}',
   readoutTemplate = 'With {n} candidates and the "{objective}" goal, looking at the first {cutoff}% then leaping scores {score}. The optimal look is about {optimal}% — close to the theoretical {reference}.',
+  locale = 'en',
+  trueBestTitle = 'true best',
+  sampleTitle = 'sample',
+  candidateTitle = 'candidate',
+  percentileUnitLabel = 'pctl',
   className,
 }: OptimalStoppingLabProps) {
   const reactId = useId();
+  const numberText = (value: number) => {
+    const raw = String(value);
+    return locale === 'es' ? raw.replace('.', ',') : raw;
+  };
 
   const [n, setN] = useState(() => clampN(Math.round(initialN), 5, 60));
   const [objective, setObjective] = useState<StoppingObjective>(initialObjective);
@@ -226,8 +245,8 @@ export function OptimalStoppingLab({
   const scoreHere = curve[Math.min(cutoff, n - 1)];
   const scoreText =
     objective === 'best'
-      ? `${Math.round(scoreHere * 100)}%`
-      : `${Math.round(scoreHere * 100)}${' '}pctl`;
+      ? `${numberText(Math.round(scoreHere * 100))}%`
+      : `${numberText(Math.round(scoreHere * 100))}${' '}${percentileUnitLabel}`;
 
   // Geometry helpers.
   const px = (r: number) => PAD_L + (n <= 1 ? 0 : (r / (n - 1)) * PLOT_W);
@@ -251,11 +270,11 @@ export function OptimalStoppingLab({
   }, [deal, cutoff]);
 
   const readout = readoutTemplate
-    .replace('{n}', String(n))
+    .replace('{n}', numberText(n))
     .replace('{objective}', objective === 'best' ? bestObjectiveLabel : valueObjectiveLabel)
-    .replace('{cutoff}', String(lookPercent))
+    .replace('{cutoff}', numberText(lookPercent))
     .replace('{score}', scoreText)
-    .replace('{optimal}', String(optimalPercent))
+    .replace('{optimal}', numberText(optimalPercent))
     .replace('{reference}', referenceStatLabel);
 
   const axisY = objective === 'best' ? axisBestLabel : axisValueLabel;
@@ -382,7 +401,7 @@ export function OptimalStoppingLab({
             <div className="rounded-card border border-accent-300 bg-accent-300/15 p-2">
               <dt className="text-[0.6rem] uppercase tracking-wide text-ink-500">{optimalStatLabel}</dt>
               <dd className="mt-0.5 font-display text-lg font-semibold tabular-nums text-accent-600">
-                {optimalPercent}%
+                {numberText(optimalPercent)}%
               </dd>
             </div>
             <div className="rounded-card border border-brand-200 bg-brand-50/60 p-2">
@@ -394,7 +413,7 @@ export function OptimalStoppingLab({
             <div className="rounded-card border border-ink-200 bg-surface p-2">
               <dt className="text-[0.6rem] uppercase tracking-wide text-ink-500">{referenceStatLabel}</dt>
               <dd className="mt-0.5 font-display text-[0.9rem] font-semibold leading-tight text-ink-700">
-                0.368
+                {numberText(0.368)}
               </dd>
             </div>
           </dl>
@@ -416,7 +435,7 @@ export function OptimalStoppingLab({
         >
           <span>{lookLabel}</span>
           <span className="text-sm font-semibold tabular-nums text-accent-600">
-            {lookPercent}% ({cutoff}/{n})
+            {numberText(lookPercent)}% ({numberText(cutoff)}/{numberText(n)})
           </span>
         </label>
         <input
@@ -438,7 +457,7 @@ export function OptimalStoppingLab({
           className="flex items-baseline justify-between gap-2 text-[0.65rem] font-bold uppercase tracking-wide text-ink-600"
         >
           <span>{countLabel}</span>
-          <span className="text-sm font-semibold tabular-nums text-accent-600">{n}</span>
+          <span className="text-sm font-semibold tabular-nums text-accent-600">{numberText(n)}</span>
         </label>
         <input
           id={`${reactId}-count`}
@@ -488,9 +507,9 @@ export function OptimalStoppingLab({
                       : 'bg-surface text-ink-600 ring-ink-200',
                   isBest && !isChosen ? 'ring-2 ring-accent-600' : '',
                 )}
-                title={isBest ? 'true best' : inSample ? 'sample' : 'candidate'}
+                title={isBest ? trueBestTitle : inSample ? sampleTitle : candidateTitle}
               >
-                {rank}
+                {numberText(rank)}
               </span>
             );
           })}
@@ -507,7 +526,7 @@ export function OptimalStoppingLab({
           </span>
           <span className="inline-flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-sm ring-2 ring-accent-600" />
-            {bestWasLabel.replace('{pos}', String(demo.bestIdx + 1))}
+            {bestWasLabel.replace('{pos}', numberText(demo.bestIdx + 1))}
           </span>
         </div>
 
@@ -520,7 +539,7 @@ export function OptimalStoppingLab({
         >
           {demo.hit ? hitLabel : missLabel}
           {' — '}
-          {bestWasLabel.replace('{pos}', String(demo.bestIdx + 1))}
+          {bestWasLabel.replace('{pos}', numberText(demo.bestIdx + 1))}
         </p>
       </div>
 

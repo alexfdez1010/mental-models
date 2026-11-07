@@ -1,0 +1,493 @@
+---
+title: "Revisa una regla de parada"
+description: "Sigue una regla sin ver el futuro, calcula su rendimiento finito exacto y comprueba qué cambia al modificar la ley conocida del orden de llegada."
+topic: "es/optimal-stopping-and-the-secretary-problem"
+order: 7
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, Callout, Categorize, MatchConcepts, FillBlank, MindMap, RateComparison, StoppingTrace } from '@/components/react';
+
+Una regla de parada contiene instrucciones para decidir cuándo parar con la información disponible **en ese momento**. Un registro completo es mucho más generoso: te dice qué vino después. Confundir ambas perspectivas permite que la retrospectiva haga la parte difícil y que luego la regla cobre por su supuesta genialidad.
+
+Las lecciones anteriores introdujeron el muestreo, los récords y los objetivos alternativos. Aquí revisarás un protocolo completo, distinguirás una derrota bien ejecutada de un error y compararás la misma política bajo dos leyes del orden totalmente especificadas. Todos los casos numéricos son inventados. Son cálculos exactos dentro de modelos declarados, no tasas de éxito medidas en un mercado laboral.
+
+## Anota qué puede saber quien elige
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible pretest
+  question="La primera opción es la mejor de todas las reveladas hasta ahora. En un juego de rangos relativos, ¿qué establece eso?"
+  options={[
+    { text: "Solo que encabeza el conjunto observado; su puesto respecto a las opciones no vistas sigue siendo desconocido.", correct: true },
+    { text: "Es la mejor opción de la secuencia completa." },
+    { text: "Tiene que ser mala porque llegó pronto." },
+    { text: "Se permite revisar la secuencia completa antes de decidir." }
+  ]}
+  explanation="La primera opción es automáticamente la mejor entre la única opción vista. Una comparación dentro del conjunto observado no revela la clasificación global que aún no se conoce."
+/>
+
+Imagina que un árbitro tiene la hoja completa de resultados y el jugador solo ve la jugada actual. El árbitro puede evaluar después una decisión; el jugador no puede tomar prestada la hoja durante la partida. La analogía tiene un límite: las reglas conocidas del juego sí son información legítima. Se puede inferir algo sobre el futuro a partir de un modelo proporcionado sin observar ese futuro.
+
+Una regla de parada es **admisible para un modelo de información** si solo utiliza información que ese modelo permite. La restricción importante es cuándo está disponible la información, no si una traza completa parece sensata. La definición de regla de parada de Ferguson hace explícita esta distinción: la decisión puede depender del historial observado, en lugar de observaciones posteriores. [Tratamiento del autor sobre reglas de parada](https://www.math.ucla.edu/~tom/Stopping/sr1.pdf)
+
+Nuestro juego ofrece seis diseños para una exposición, uno a uno. Su calidad tiene un orden estricto y fijo; la comparación es perfecta. Quien elige ve qué diseños revelados superan a cuáles, pero no recibe una puntuación absoluta ni puede identificar el rango global de un diseño aún no visto.
+
+| Elemento del protocolo | Condición declarada |
+| --- | --- |
+| Horizonte | Exactamente seis diseños, conocidos en número antes de empezar |
+| Objetivo | Elegir el mejor del conjunto; recompensa de uno si se consigue y cero en otro caso |
+| Observación | Solo el orden relativo de los diseños revelados |
+| Acción | Aceptar el diseño actual y terminar, o rechazarlo de forma permanente |
+| Disponibilidad | Todo diseño actual se puede aceptar; los rechazados no se recuperan |
+| Otros rasgos | Sin empates, costes de inspección, errores de ordenación ni rechazo por parte de la opción elegida |
+| Ley del orden de referencia | Todas las permutaciones son equiprobables, fijadas antes de elegir la regla |
+| Condición final | Elegir el último diseño si la política aún no ha elegido uno |
+
+**Comprobación de información resuelta.** Tras dos observaciones, el segundo diseño supera al primero. Se conoce su orden relativo y sus posiciones de llegada. No se sabe si el segundo es el segundo mejor o el mejor global. Un registro completo etiquetado $(2,5,1,4,6,3)$ y otro etiquetado $(4,6,1,3,2,5)$ producen las mismas comparaciones durante esas dos primeras observaciones. Una regla que solo use ese historial debe decidir lo mismo en ambos.
+
+Las etiquetas del registro completo van de uno a seis, con seis como mejor. Son **notación para el análisis**, no valores que se muestran durante la elección. Una regla que dijese «acepta cuando aparezca la etiqueta global seis» resolvería otro juego con más información.
+
+<MatchConcepts
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un concepto y después su definición."
+  allCorrectLabel="Todo enlazado"
+  partialResultWord="correctos"
+  pickDefinitionHint="elige una definición"
+  notLinkedHint="todavía sin enlazar"
+  termsLabel="Conceptos"
+  definitionsLabel="Definiciones" client:visible
+  question="Relaciona cada afirmación con el papel que desempeña esa información."
+  pairs={[
+    { term: "La opción actual supera a todas las reveladas anteriormente", definition: "Una comparación disponible ahora para quien elige." },
+    { term: "Una opción rechazada era la mejor de toda la secuencia", definition: "Una conclusión que se puede establecer al analizar el registro completo." },
+    { term: "El modelo del orden garantiza que la mejor llega la última", definition: "Información previa del modelo, utilizable si esa garantía se proporciona de verdad." },
+    { term: "La siguiente opción aún no vista es peor que la actual", definition: "Una observación no disponible en el juego de referencia." }
+  ]}
+  explanation="Separa las observaciones, los hechos del registro completo y los supuestos previos. Una ley conocida del orden puede respaldar una inferencia; revelar sin avisar una comparación futura cambia el experimento."
+/>
+
+### Cuándo usar esta comprobación
+
+Úsala antes de juzgar un algoritmo a partir de una traza resuelta, una repetición o un panel. Oculta los valores futuros y los rangos globales y pregunta si se puede reconstruir cada decisión. Si no, la traza ha introducido información a escondidas.
+
+## Ejecuta una regla que llegue a parar
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible pretest
+  question="Tras los rechazos iniciales aparece una nueva mejor opción hasta ahora. Aún podría perder frente a una opción no vista. Según la política del primer récord, ¿qué ocurre?"
+  options={[
+    { text: "Se elige ahora; la política no espera confirmación de las opciones aún no vistas.", correct: true },
+    { text: "Se sigue inspeccionando hasta reconocer la mejor global por su etiqueta." },
+    { text: "Se cambia el corte inicial después de ver si la opción actual impresiona." },
+    { text: "Se recupera el diseño más fuerte rechazado antes." }
+  ]}
+  explanation="Un récord es lo mejor entre lo observado, no una certificación de superioridad global. La política acepta el primer récord elegible y termina; la incertidumbre forma parte del problema."
+/>
+
+Un **récord** es una opción que llega y supera a todas las observadas anteriormente. Piensa en un listón de salto de altura fijado por las observaciones iniciales: la regla reacciona cuando un diseño posterior lo supera. El listón compara el orden, no las distancias de calidad; no dice cuánto mejor es un diseño.
+
+Elige un entero $k$, el número de rechazos iniciales, **antes de revelar ninguna opción**. Compararemos $k=0,1,2,3,4,5$.
+
+1. Rechaza los primeros $k$ diseños y recuerda el mejor.
+2. Después elige el primer récord nuevo y termina inmediatamente.
+3. Si no aparece ningún récord elegible, elige de todos modos el último diseño.
+4. Con $k=0$, elige el primer diseño. No hay muestra inicial.
+
+La elección final por defecto forma parte de la regla; no es un arreglo de última hora. Sin ella, «rechaza todo si la mejor estaba en la muestra» describe de forma incompleta este juego de una elección.
+
+En la visualización, elige una secuencia didáctica y un corte antes de revelar nada. Cada pulsación ejecuta la regla; no invita a corregirla con retrospectiva. Las barras muestran **el orden relativo de los diseños revelados ahora**. Sus alturas cambiantes codifican comparaciones ordinales, no diferencias absolutas de calidad. Solo la revisión explícita del registro completo muestra las etiquetas globales y el resto no visto. Son registros didácticos que se pueden repetir, no ensayos a ciegas.
+
+<StoppingTrace
+  instructions="Elige la secuencia y los rechazos iniciales antes de revelar una opción. Cada paso ejecuta la regla declarada."
+  exampleLabel="Secuencia didáctica"
+  cutoffLabel="Opciones iniciales que rechazar"
+  revealLabel="Revelar siguiente opción"
+  restartLabel="Reiniciar la traza"
+  debriefLabel="Abrir el registro completo"
+  chooserLabel="Vista de quien elige"
+  noObservationsLabel="Aún no se ha revelado ninguna opción."
+  orderNote="Solo orden entre las opciones reveladas; el primer rango es el mejor. Las alturas indican orden, no distancias de calidad."
+  historyLabel="Comparaciones observadas y acciones de la política"
+  positionLabel="Posición de llegada"
+  relativeRankLabel="Rango entre las opciones reveladas ahora"
+  ofLabel="de"
+  actionLabel="Acción al llegar"
+  sampleLabel="Rechazar durante la muestra inicial"
+  rejectLabel="Rechazar: no es un nuevo récord"
+  recordChoiceLabel="Elegir: primer récord elegible"
+  finalChoiceLabel="Elegir: última opción por defecto"
+  selectedLabel="Posición de llegada elegida"
+  hiddenOutcomeLabel="El resultado global sigue oculto hasta revisar el registro completo."
+  debriefHeading="Registro completo después de decidir"
+  globalRankLabel="Rango global; el mayor es mejor"
+  winLabel="Se eligió la mejor global"
+  lossLabel="No se eligió la mejor global" client:visible initialCutoff={2}
+  title="Revela la evidencia disponible para la política"
+  caption="Reiniciar permite cambiar la secuencia y el corte. Tras la elección, abre el registro completo para evaluar el resultado."
+  examples={[
+    { label: "Secuencia A", order: [2,5,1,4,6,3] },
+    { label: "Secuencia B", order: [2,4,5,1,6,3] },
+    { label: "Secuencia C", order: [6,1,2,3,4,5] }
+  ]}
+/>
+
+**Traza resuelta de la elección en A con $k=2$.** El segundo diseño pasa a encabezar la muestra inicial. El tercero y el cuarto no superan a ese líder. El quinto supera a todos los revelados, así que la regla lo elige. Se puede reconstruir esa decisión solo con comparaciones relativas; no hace falta conocer una cifra global de calidad.
+
+| Llegada | Información pertinente en ese momento | Acción exigida |
+| --- | --- | --- |
+| Primera | Único diseño visto | Rechazo inicial |
+| Segunda | Mejor que el primero | Rechazo inicial; conservarlo como líder |
+| Tercera | Por debajo del líder | Rechazar |
+| Cuarta | Por debajo del líder | Rechazar |
+| Quinta | Nuevo récord | Elegir y parar |
+
+<FillBlank
+  instructions="Elige una opción para cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Correcto"
+  partialResultWord="correctos" client:visible
+  question="Completa la política sin aportar información oculta."
+  text="El corte inicial se elige {{antes de observar la secuencia|después de ver la mejor global|después de inspeccionar el orden completo}}. Un récord es lo mejor entre {{las opciones ya observadas|todas las opciones no vistas|solo las opciones futuras}}. Si no aparece un récord elegible, este protocolo elige {{la última opción|la mejor opción rechazada|nada y vuelve a empezar}}."
+  explanation="Elegir el corte, detectar un récord y resolver el caso final son instrucciones distintas. Permiten reproducir una política con la información declarada."
+/>
+
+### Cuándo está la regla lo bastante completa para probarla
+
+Otra persona debería poder ejecutarla en cualquier orden permitido sin preguntar qué hacer en un caso límite. Especifica la ausencia de muestra, la última opción y si puede haber igualdad. Aquí se excluyen los empates; un sistema real de clasificación que los admita necesitaría otra regla.
+
+## Separa una buena ejecución de un resultado ganador
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible pretest
+  question="Una política sigue correctamente todas las comparaciones declaradas, pero elige un diseño que no es el mejor. ¿Qué se sigue?"
+  options={[
+    { text: "Esta secuencia perdió según el objetivo; una derrota aislada no establece un error de política ni su tasa de éxito en el modelo.", correct: true },
+    { text: "La implementación tuvo que ignorar su propia regla." },
+    { text: "La probabilidad de éxito del modelo es ahora cero." },
+    { text: "Los diseños rechazados vuelven a estar disponibles." }
+  ]}
+  explanation="La ejecución y el resultado responden a preguntas distintas. Una regla de elección bajo un orden de llegada incierto puede ejecutarse bien y perder; una implementación defectuosa también puede tener suerte."
+/>
+
+La distinción se parece a una jugada bien ejecutada en un juego con un rival incierto: seguir el plan no certifica la victoria. Nuestro juego no tiene un rival que decida; la incertidumbre procede del orden obtenido bajo la ley declarada.
+
+Pasamos ahora de forma explícita a la **perspectiva de análisis del registro completo**. Las etiquetas siguientes revelan todo el orden después de la decisión. No deben introducirse retrospectivamente en la información previa de quien elige.
+
+| Secuencia | Registro completo para el análisis | Elección con $k=2$ | Resultado |
+| --- | --- | --- | --- |
+| A | 2, 5, 1, 4, 6, 3 | Posición 5, rango global 6 | Éxito |
+| B | 2, 4, 5, 1, 6, 3 | Posición 3, rango global 5 | Derrota |
+| C | 6, 1, 2, 3, 4, 5 | Posición 6, rango global 5 | Derrota con elección final por defecto |
+
+**Derrota resuelta.** En B, el líder inicial tiene la etiqueta de análisis cuatro. La tercera opción, de etiqueta cinco, lo supera y por eso se elige. La mejor, de etiqueta seis, aparece después en la quinta posición. Rechazar la tercera *por esa llegada posterior* vulneraría la restricción de información. Esperar podría ganar en este registro completo; no es la política declarada del primer récord.
+
+En C se rechazó la mejor durante el muestreo. Nada posterior puede superarla. La regla sigue realizando una elección al final: la sexta posición. Es una resolución final bien ejecutada que pierde. Cambiar $k$ solo después de inspeccionar registros así produciría una recomendación retrospectiva, no una prueba de una política fijada de antemano.
+
+<Categorize
+  instructions="Coloca cada elemento en el grupo adecuado."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="correctos" client:visible
+  question="Distingue un problema de ejecución de un resultado permitido por la política."
+  buckets={["Problema de ejecución", "Resultado permitido"]}
+  items={[
+    { text: "Elegir un diseño de la muestra inicial pese a un corte positivo fijado de antemano", bucket: "Problema de ejecución" },
+    { text: "Saltarse el primer récord elegible porque un valor posterior del registro completo es mayor", bucket: "Problema de ejecución" },
+    { text: "Elegir un récord que un diseño futuro acaba superando", bucket: "Resultado permitido" },
+    { text: "Elegir la última opción sin récord cuando la mejor se rechazó en la muestra", bucket: "Resultado permitido" }
+  ]}
+  explanation="Revisar la ejecución exige comprobar las instrucciones con la información disponible entonces. Revisar el resultado exige comparar la elección con la mejor global. Ninguna revisión sustituye a la otra."
+/>
+
+### Cuándo ayuda una repetición
+
+Usa repeticiones concretas para encontrar errores de implementación y entender mecanismos. Para comparar probabilidades de éxito necesitas el modelo probabilístico completo o un procedimiento de muestreo justificado. A, B y C se eligieron para enseñar; su fracción de éxitos no estima el rendimiento de la política bajo orden uniforme.
+
+## Puntúa la regla bajo la ley del orden declarada
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible pretest
+  question="El objetivo solo recompensa elegir la única mejor opción. ¿Qué cantidad debería ordenar las políticas de corte?"
+  options={[
+    { text: "Su probabilidad de elegir esa mejor opción bajo la misma ley del orden declarada.", correct: true },
+    { text: "Su rango global medio elegido, aunque sea otra recompensa distinta." },
+    { text: "Que la secuencia didáctica más memorable haya ganado." },
+    { text: "La cercanía del corte al famoso porcentaje límite, sin calcular el rendimiento finito." }
+  ]}
+  explanation="El objetivo determina la puntuación. El rango medio, una repetición elegida y la proximidad a un eslogan asintótico no miden esta probabilidad de elegir la mejor."
+/>
+
+Con seis diseños distintos hay $6!=720$ órdenes posibles de llegada. En el modelo de referencia **cada uno tiene probabilidad $1/720$**. Ejecuta el mismo corte en todos los órdenes, cuenta las elecciones de la mejor y divide entre $720$. Es un cálculo exhaustivo del modelo, no una encuesta a visitantes ni ensayos empíricos repetidos.
+
+| Rechazos iniciales $k$ | Órdenes ganadores | Todos los órdenes permitidos | Probabilidad de éxito |
+| --- | --- | --- | --- |
+| 0 | 120 | 720 | 16,67% |
+| 1 | 274 | 720 | 38,06% |
+| 2 | 308 | 720 | 42,78% |
+| 3 | 282 | 720 | 39,17% |
+| 4 | 216 | 720 | 30,00% |
+| 5 | 120 | 720 | 16,67% |
+
+La mejor **entre estas seis políticas de corte** rechaza dos. Su probabilidad exacta de éxito es $308/720=77/180$. El porcentaje de la tabla está redondeado. Su fracción de muestreo es $2/6\approx33{,}33\%$, mientras que su tasa de éxito es aproximadamente $42{,}78\%$: tienen denominadores distintos y no son la misma cantidad.
+
+<RateComparison client:visible locale="es"
+  title="Cálculo exacto con orden uniforme: compara el corte elegido con alternativas"
+  scenarioLabel="Cortes que se comparan" countsLabel="Órdenes ganadores / todos los permitidos"
+  differenceLabel="Diferencia de probabilidades de éxito" pointLabel="punto porcentual" pointsLabel="puntos porcentuales"
+  scenarios={[
+    { label: "Rechazar dos frente a uno", groups: [{ label: "Rechazar dos", events: 308, total: 720 }, { label: "Rechazar uno", events: 274, total: 720 }] },
+    { label: "Rechazar dos frente a tres", groups: [{ label: "Rechazar dos", events: 308, total: 720 }, { label: "Rechazar tres", events: 282, total: 720 }] },
+    { label: "Rechazar dos frente a cinco", groups: [{ label: "Rechazar dos", events: 308, total: 720 }, { label: "Rechazar cinco", events: 120, total: 720 }] }
+  ]}
+/>
+
+### Comprueba el recuento por otra vía
+
+Supón que la mejor llega en la posición $m$, después de la muestra inicial. Su posición tiene probabilidad $1/6$. Para que la regla llegue hasta ella sin haber elegido antes, la mejor entre los $m-1$ diseños anteriores debe estar en los primeros $k$. Bajo orden uniforme, esa probabilidad condicionada es $k/(m-1)$. Suma las posiciones posibles:
+
+$$
+P_k=\sum_{m=k+1}^{6}\frac{1}{6}\frac{k}{m-1}
+=\frac{k}{6}\sum_{j=k}^{5}\frac{1}{j},\qquad 1\le k\le5.
+$$
+
+Para $k=2$:
+
+$$
+P_2=\frac{2}{6}\left(\frac12+\frac13+\frac14+\frac15\right)
+=\frac{77}{180}=\frac{308}{720}.
+$$
+
+El factor $k/6$ de la expresión reorganizada **no** es la probabilidad de que la mejor llegue después de la muestra; esa probabilidad es $(6-k)/6$. Conserva el argumento condicionado en lugar de inventar una historia probabilística independiente para cada factor algebraico. Con $k=0$, la regla elige la primera y da probabilidad $1/6$.
+
+El tratamiento clásico de Ferguson deriva la familia de umbrales y su fórmula finita de éxito bajo los supuestos declarados de rangos relativos y orden uniforme. Su primera etapa elegible es una unidad mayor que nuestro número de rechazos iniciales. El resultado para grupos grandes trata de un límite hacia $1/e$; no exige que la fracción de muestreo finita y la probabilidad de éxito coincidan con ese número. [Derivación clásica y tabla finita](https://www.math.ucla.edu/~tom/Stopping/sr2.pdf)
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible
+  question="El cálculo finito favorece rechazar dos. ¿Qué afirmación necesitaría otro argumento?"
+  options={[
+    { text: "El mismo corte es el mejor bajo cualquier otra ley de llegada o modelo de recompensa.", correct: true },
+    { text: "Supera a rechazar uno bajo la ley de orden uniforme proporcionada." },
+    { text: "Su fracción rechazada difiere de su probabilidad de ganar." },
+    { text: "Una ejecución correcta puede seguir perdiendo la mejor opción." }
+  ]}
+  explanation="La enumeración mantiene fijos una ley concreta, un modelo de información, una recompensa y una familia de políticas. No establece optimalidad en problemas modificados."
+/>
+
+## Prueba otra ley sin cambiar el objetivo
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible pretest
+  question="Un modelo nuevo, anunciado antes de elegir la política, garantiza que el mejor diseño llega el último. ¿Se puede usar esa garantía en una elección de rangos relativos?"
+  options={[
+    { text: "Sí; es información del modelo proporcionada de antemano, no una observación ilícita de un diseño futuro.", correct: true },
+    { text: "No; nunca se permite razonar sobre una ley conocida de llegada." },
+    { text: "Solo después de cambiar el objetivo a la calidad media." },
+    { text: "La garantía se sigue automáticamente de cualquier catálogo pequeño de ejemplos pasados." }
+  ]}
+  explanation="Una garantía previa y una observación futura son fuentes distintas de información. La garantía debe formar parte del modelo de verdad; un patrón empírico aislado no la proporciona."
+/>
+
+Este es tu problema independiente de transferencia. Conserva el horizonte, la recompensa, las observaciones relativas, la disponibilidad y la ausencia de recuperación. Cambia **solo la ley conocida de los órdenes completos**. Antes de elegir el corte, se informa de que solo estos cuatro órdenes son posibles, cada uno con probabilidad $1/4$, y de que por tanto la mejor siempre llega la última. No se revela qué fila ocurrirá ni se muestran las etiquetas globales no vistas durante la elección.
+
+| Orden permitido | Etiquetas completas para el análisis | Probabilidad del modelo |
+| --- | --- | --- |
+| A | 5, 1, 2, 3, 4, 6 | 1/4 |
+| B | 1, 2, 3, 4, 5, 6 | 1/4 |
+| C | 2, 1, 4, 3, 5, 6 | 1/4 |
+| D | 1, 3, 2, 5, 4, 6 | 1/4 |
+
+Es todo el espacio probabilístico estipulado, **no cuatro observaciones muestreadas del antiguo conjunto de 720**. Piensa en cambiar las reglas de construcción de la baraja antes de mezclarla, en lugar de sacar cuatro cartas y declarar imposible el resto. La analogía termina en esa distinción: nuestros resultados posibles son órdenes completos de llegada, no cartas individuales.
+
+Sin abrir la solución, sigue la política de rechazar dos en cada fila. Después compara los seis cortes y elige uno bajo esta nueva ley. Explica qué información previa justifica exactamente tu elección.
+
+<details>
+<summary>Abre el cálculo completo de transferencia</summary>
+
+Con $k=2$, A espera hasta la sexta posición y gana. B elige la tercera posición, C la tercera y D la cuarta; las tres elecciones preceden a la mejor. Por tanto, $k=2$ gana $1/4=25\%$, no $308/720$.
+
+Debajo está el cálculo completo para el análisis. Cada celda da el rango global elegido bajo ese corte; seis marca un éxito.
+
+| Orden | $k=0$ | $k=1$ | $k=2$ | $k=3$ | $k=4$ | $k=5$ |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | 5 | 6 | 6 | 6 | 6 | 6 |
+| B | 1 | 2 | 3 | 4 | 5 | 6 |
+| C | 2 | 4 | 4 | 5 | 5 | 6 |
+| D | 1 | 3 | 5 | 5 | 6 | 6 |
+| Órdenes ganadores | 0 | 1 | 1 | 1 | 2 | 4 |
+
+Rechazar cinco elige la última opción y gana $4/4=100\%$. Usa la garantía conocida de que la mejor llega la última, sin necesitar comparaciones no vistas. Como ninguna probabilidad de éxito supera uno, también alcanza una cota superior bajo este modelo modificado. No es una razón para esperar a la última opción en el juego original de orden uniforme, donde esa política solo gana $120/720=1/6$.
+
+</details>
+
+<RateComparison client:visible locale="es"
+  title="Mismas políticas, distintas leyes conocidas del orden"
+  scenarioLabel="Ley del orden" countsLabel="Órdenes ganadores / todos los permitidos"
+  differenceLabel="Diferencia de probabilidades de éxito" pointLabel="punto porcentual" pointsLabel="puntos porcentuales"
+  scenarios={[
+    { label: "Uniforme entre todos los órdenes", groups: [{ label: "Rechazar dos", events: 308, total: 720 }, { label: "Rechazar cinco", events: 120, total: 720 }] },
+    { label: "Catálogo conocido de cuatro órdenes", groups: [{ label: "Rechazar dos", events: 1, total: 4 }, { label: "Rechazar cinco", events: 4, total: 4 }] }
+  ]}
+/>
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible allowMultiple
+  question="¿Qué conclusiones se mantienen tras el cálculo con la nueva ley? Elige todas las correctas."
+  options={[
+    { text: "La misma política puede tener otra probabilidad de éxito bajo otra ley conocida del orden.", correct: true },
+    { text: "Esperar hasta la última se justifica aquí por la garantía previa del modelo.", correct: true },
+    { text: "El catálogo demuestra que esperar hasta la última es lo mejor en cualquier búsqueda real." },
+    { text: "Una racha observada corta establecería la misma garantía sin un modelo del orden." }
+  ]}
+  explanation="Solo se siguen las dos primeras. El modelo modificado proporciona tanto las cuatro posibilidades exhaustivas como sus probabilidades. Una muestra real pequeña dejaría abiertos otros órdenes y la incertidumbre sobre sus probabilidades."
+/>
+
+### Cuándo cuestionar la ley en vez de retocar el corte
+
+Si las opciones se programan, filtran u ordenan, revisa el proceso de llegada antes de importar una probabilidad de orden uniforme. Volver a estimar un corte no repara una afirmación falsa de que todas las permutaciones sean equiprobables. A la inversa, creer sin verificar que la mejor llega tarde no permite tratarlo como garantía.
+
+## Termina la revisión antes de exportar la regla
+
+<MCQ
+  pretestLabel="Antes de leer, intenta responder"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible pretest
+  question="Una búsqueda real tiene un horizonte incierto y sus mejores opciones podrían programarse pronto. ¿Eso basta para justificar la famosa fracción del tiempo transcurrido?"
+  options={[
+    { text: "No; una regla temporal necesita su propio modelo justificado de llegada, información y recompensa.", correct: true },
+    { text: "Sí; cualquier recuento desconocido se convierte automáticamente en la misma fracción del calendario." },
+    { text: "Sí; la irreversibilidad es la única condición que importa." },
+    { text: "Ningún problema de parada puede tener un horizonte incierto." }
+  ]}
+  explanation="Los horizontes desconocidos son problemas legítimos de parada, pero no comparten todos un corte temporal. Especifica cómo llegan las opciones y qué se sabe antes de afirmar un óptimo numérico."
+/>
+
+Revisar se parece a comprobar una ruta antes de seguir las indicaciones: las instrucciones pueden ser coherentes y, aun así, un puente cerrado hace inadecuado el camino. El límite es que quizá nunca se pueda verificar exactamente una ley incierta de llegada. La tarea práctica consiste en declarar qué respalda el modelo y qué obligaría a revisarlo.
+
+| Pregunta de revisión | Comprobación concreta | Si falla |
+| --- | --- | --- |
+| ¿Qué se recompensa? | ¿El indicador de elegir la única mejor, el rango medio, el valor numérico u otro pago especificado? | Recalcula para el objetivo real; las métricas no son intercambiables |
+| ¿Qué se puede saber ahora? | Reproduce la decisión con comparaciones reveladas e información previa declarada | Retira la retrospectiva o resuelve explícitamente el problema con más información |
+| ¿La regla cubre todos los recorridos? | Comprueba el corte inicial, el primer récord elegible y la elección final por defecto | Completa el protocolo antes de puntuarlo |
+| ¿Qué órdenes y probabilidades se aplican? | Enumera el modelo finito o justifica un proceso de llegada | Acota la afirmación de éxito; no inventes una ley uniforme |
+| ¿Qué invalidaría el uso? | Cambios de programación, disponibilidad, empates, costes o errores de medición | Revisa el modelo y vuelve a evaluar, en vez de prometer el porcentaje anterior |
+
+**Transferencia resuelta a planificación.** Una coordinadora de exposición puede conservar las seis propuestas y compararlas después del plazo sin coste, con todas aún disponibles. El juego original sin recuperación ya no describe el proceso. Comparar las seis y elegir la mejor garantiza éxito *bajo esas nuevas condiciones declaradas*. Si las propuestas pueden caducar o comparar lleva tiempo, ese argumento también necesita revisión. La palabra «secuencial» por sí sola no determina la política óptima de parada.
+
+<MatchConcepts
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un concepto y después su definición."
+  allCorrectLabel="Todo enlazado"
+  partialResultWord="correctos"
+  pickDefinitionHint="elige una definición"
+  notLinkedHint="todavía sin enlazar"
+  termsLabel="Conceptos"
+  definitionsLabel="Definiciones" client:visible
+  question="Relaciona cada fallo de revisión con la reparación que necesita de verdad."
+  pairs={[
+    { term: "Usar un rango global futuro para explicar una elección en curso", definition: "Reconstruir la decisión solo con la información permitida." },
+    { term: "Presentar una calidad media como probabilidad de elegir la mejor", definition: "Puntuar la recompensa declarada en lugar de otra métrica." },
+    { term: "Probar solo unas pocas secuencias didácticas elegidas a mano", definition: "Usar el modelo probabilístico completo declarado o un procedimiento de estimación justificado." },
+    { term: "Afirmar que la mejor llegará la última a partir de una racha real corta", definition: "Justificar la ley de llegada y conservar la incertidumbre sobre posibilidades no observadas." }
+  ]}
+  explanation="Fallos distintos necesitan reparaciones distintas. Un porcentaje más preciso no arregla un objetivo equivocado, información ilícita o una ley del orden sin respaldo."
+/>
+
+## Recupera el protocolo y sus límites
+
+Antes de abrir el mapa, explica por qué el primer diseño es necesariamente un récord, pero no necesariamente el mejor global. Después identifica la información que hace ganadora la política de esperar al último en el modelo de transferencia.
+
+<MindMap
+  eyebrow="Conecta las ideas"
+  outlineLabel="Esquema en texto" client:visible root={{label:"Revisar una regla de parada",children:[
+  {label:"Información",children:[{label:"Comparaciones relativas de opciones reveladas"},{label:"La ley previa puede respaldar una inferencia legítima"},{label:"El registro completo es otra perspectiva de análisis"}]},
+  {label:"Política completa",children:[{label:"Elegir de antemano el número de rechazos iniciales"},{label:"Elegir el primer récord elegible"},{label:"Elección final por defecto y caso sin muestra"}]},
+  {label:"Evaluación",children:[{label:"Una buena ejecución puede perder"},{label:"Puntuar la recompensa bajo la ley declarada"},{label:"El cálculo finito difiere del límite para grupos grandes"}]},
+  {label:"Transferencia",children:[{label:"Otra ley conocida cambia las probabilidades de éxito"},{label:"La garantía de mejor al final justifica esperar en ese modelo"},{label:"Comprobar supuestos antes de afirmar un óptimo real"}]}
+]}} />
+
+<Quiz
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Repaso completado"
+  perfectMessage="Todo correcto. Comprueba que puedes explicar cada respuesta."
+  goodMessage="Revisa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Repasa los ejemplos y comprueba la explicación de cada respuesta."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible title="Comprueba la revisión de la regla de parada"
+  questions={[
+    {question:"Dos historiales revelados tienen el mismo orden relativo, pero distintas etiquetas globales ocultas. ¿Qué debe hacer una regla restringida a esas comparaciones?",options:[{text:"Decidir lo mismo en la misma etapa, dado el mismo modelo y corte declarados.",correct:true},{text:"Aceptar la etiqueta global oculta que sea mayor."},{text:"Cambiar el corte usando la parte final no vista."}],explanation:"Solo la información permitida puede distinguir decisiones. Las etiquetas de análisis y las observaciones futuras no están disponibles en el juego de referencia."},
+    {question:"Tras la muestra inicial aparece un récord y la política declarada lo elige. Un diseño posterior es mejor. ¿Qué se ha establecido?",options:[{text:"Un resultado perdedor compatible con una ejecución correcta de la regla.",correct:true},{text:"Una prueba de que el código de selección tiene que fallar."},{text:"Permiso para reescribir la decisión anterior con retrospectiva."}],explanation:"La revisión separa ejecución, resultado y rendimiento en el modelo. Una secuencia completa no resuelve las tres cuestiones."},
+    {question:"¿Qué aporta la elección de la última opción por defecto?",options:[{text:"Una elección especificada cuando nunca aparece un récord elegible.",correct:true},{text:"La recuperación del mejor diseño rechazado."},{text:"Una garantía de éxito bajo orden uniforme."}],explanation:"Si la mejor se rechazó en la muestra, ningún récord posterior puede superarla. La elección final completa de todos modos este protocolo de una selección."},
+    {"question":"En la tarjeta de referencia uniforme, ¿cuál es la probabilidad de éxito tras rechazar dos diseños?","options":[{"text":"Setenta y siete de cada ciento ochenta.","correct":true},{"text":"Uno de cada tres."},{"text":"Uno de cada seis."}],"explanation":"La tarjeta declarada contiene 308 órdenes ganadores de 720: 308/720 = 77/180. La fracción rechazada 2/6 = 1/3 es otra cantidad. El éxito de 1/6 corresponde a elegir solo el primer diseño o el último en este juego uniforme."},
+    {question:"¿Qué afirmaciones distinguen el resultado finito de la regla límite conocida? Elige todas las correctas.",allowMultiple:true,options:[{text:"La fracción rechazada y la probabilidad de éxito son cantidades distintas.",correct:true},{text:"El mejor corte finito exacto puede diferir de la fracción límite.",correct:true},{text:"Ambas cantidades finitas deben igualar exactamente el famoso porcentaje."},{text:"Un resultado límite elimina la necesidad de especificar la ley del orden."}],explanation:"El cálculo de referencia elige un corte finito y evalúa su recompensa. La igualdad asintótica de valores límite no hace idénticas esas dos cantidades finitas."},
+    {"question":"En el nuevo catálogo completo, ¿cuáles son las probabilidades de éxito al rechazar dos y al rechazar cinco, por ese orden?","options":[{"text":"Un cuarto y uno, respectivamente.","correct":true},{"text":"Uno y un cuarto, respectivamente."},{"text":"Tres cuartos y un medio, respectivamente."}],"explanation":"Rechazar dos gana solo en el orden A: 1/4. Rechazar cinco gana en los cuatro órdenes permitidos: 4/4 = 1. La propiedad de mejor al final se conoce antes de elegir; son probabilidades exactas del nuevo catálogo, no estimaciones de cuatro secuencias muestreadas."},
+    {question:"Durante un uso real, las propuestas rechazadas pasan a seguir disponibles sin coste. ¿Qué respuesta es adecuada?",options:[{text:"Revisar el modelo de disponibilidad y volver a evaluar la política.",correct:true},{text:"Mantener la política anterior porque el cálculo previo era exacto."},{text:"Tratar la exactitud dentro de un modelo como prueba de que sus supuestos no pueden cambiar."}],explanation:"Un cálculo correcto puede dejar de ser pertinente si cambia el proceso de decisión. La aritmética exacta no valida los supuestos."}
+  ]}
+/>
+
+Continúa con el [examen final](/es/optimal-stopping-and-the-secretary-problem/final-exam). Ahora incluye revisión de información, evaluación finita exacta y transferencia con otra ley, además del material anterior del curso.
