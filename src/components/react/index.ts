@@ -332,3 +332,6 @@ export { SwitchingPlanLedger } from "@/components/react/SwitchingPlanLedger";
 
 export { BranchingDistribution, getBranchingDistribution } from '@/components/react/BranchingDistribution';
 export type { BranchingDistributionProps, BranchingDistributionLabels, BranchingLaw, BranchingQuarter } from '@/components/react/BranchingDistribution';
+
+export { SecretaryLimitCurve, secretaryLimitValue } from '@/components/react/SecretaryLimitCurve';
+export type { SecretaryLimitCurveProps, SecretaryLimitLabels } from '@/components/react/SecretaryLimitCurve';
