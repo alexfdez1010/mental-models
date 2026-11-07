@@ -1,0 +1,362 @@
+---
+title: "Follow a Reinforced Draw"
+description: "Enumerate a finite reinforcement model, compare its count law and mean with a baseline, and test the inference after changing the starting urn."
+topic: "en/cumulative-advantage-and-power-laws"
+order: 8
+minutes: 30
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, MatchConcepts, ConsequenceTree, RateComparison, ExpectedValueCalculator, MindMap, Quiz } from '@/components/react';
+
+A red ball is drawn first. It is returned with another red ball, so red now leads. Someone watching declares: “The winner is settled.” Another person says: “Then the average must rise too.” Neither statement follows from the update alone.
+
+We will calculate an entire small model, not select an impressive run. The questions are specific: **what is the probability of each recorded path, what count does it produce, and which comparison actually changes?**
+
+## Fix the rule and the thing you count
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"A process favours the colour currently ahead. What is still needed before calculating a three-draw event?"}
+  options={[{"text":"The starting composition, exact sampling/update rule and event being counted","correct":true},{"text":"Only the identity of the colour that came first"},{"text":"Only a decision to call the final plot a power law"}]}
+  explanation={"A verbal feedback loop leaves many models possible. Fix the state, randomness, update, horizon and event before calculating."}
+/>
+
+The constructed urn begins with **one red ball and one blue ball**. We make exactly **three draws**. Each draw selects uniformly among all balls currently present. Record the colour and return the selected ball. Compare two rules:
+
+- **Return only:** add nothing; the urn stays one red and one blue.
+- **Return and reinforce:** add one new ball of the selected colour after returning it.
+
+There are no new colours, differences in quality or strategic choices. Write **R** for a red observation and **B** for a blue one. A **path** is the full three-letter record, such as RBB. Define **K** as the number of red observations in those three draws. K can be 0, 1, 2 or 3.
+
+K counts recorded draws. It does not count the red balls physically left in the urn, measure an article’s quality or name a winner in a real market.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Choose the random object"}
+  text={"The sampling rule chooses uniformly among {{physical balls currently present|the two colour names regardless of their counts|all written colour strings}}. K counts {{red observations in three draws|the final share of red balls|the number of new colours entering}}."}
+  explanation={"Uniformity belongs to the elementary selection rule. The distribution of a derived count must be calculated from that rule."}
+/>
+
+### When a finite audit helps
+
+Use one when a verbal mechanism is being asked to carry a precise conclusion. Write a small complete case first. It can expose an invalid inference without pretending to reproduce the scale or complexity of the world.
+
+## Multiply the changing branch probabilities
+
+For the reinforced path RRR, the first red chance is 1/2. Returning red and adding another leaves two red among three balls. Repeating red leaves three red among four before the last draw:
+
+$$P(RRR)=\frac12\times\frac23\times\frac34=\frac14.$$
+
+For RBB, the first R still has chance 1/2. There is then one blue among three balls. After B is returned and reinforced, there are two red and two blue:
+
+$$P(RBB)=\frac12\times\frac13\times\frac24=\frac1{12}.$$
+
+The first red lead becomes a tie after the second draw and a blue lead after the third. Conditional on first R, the chance of the two following blue observations is (1/3)(2/4)=1/6. The first gain changes chances; it does not lock every subsequent outcome.
+
+<ConsequenceTree
+  client:visible
+  title={"Every three-draw branch under reinforcement"}
+  eyebrow={""}
+  instructions={"Open a recorded prefix to reveal its continuations. Each card’s probability describes the draw that reaches that card, given the preceding prefix."}
+  caption={"This is an authored finite path tree. Opening branches reveals calculations; it does not draw balls or estimate probabilities."}
+  decisionLabel={"Starting composition"}
+  orderLabels={["Draw 1","Draw 2","Draw 3"]}
+  promptLabel={"Show next branches"}
+  expandAllLabel={"Show every path"}
+  collapseLabel={"Collapse the tree"}
+  valenceLabels={{"good":"Positive assessment","bad":"Negative assessment","mixed":"Mixed assessment","neutral":"No value judgement"}}
+  decision={{"label":"Initial urn: 1R, 1B","note":"A recorded R is red; B is blue. Return the drawn ball, then add one of its colour.","valence":"neutral","children":[{"label":"R","note":"Conditional chance of this recorded R: 1/2; urn after this draw: 2R, 1B.","valence":"neutral","children":[{"label":"RR","note":"Conditional chance of this recorded R: 2/3; urn after this draw: 3R, 1B.","valence":"neutral","children":[{"label":"RRR","note":"Conditional chance of this recorded R: 3/4; urn after this draw: 4R, 1B. Path probability 1/4; K=3.","valence":"neutral"},{"label":"RRB","note":"Conditional chance of this recorded B: 1/4; urn after this draw: 3R, 2B. Path probability 1/12; K=2.","valence":"neutral"}]},{"label":"RB","note":"Conditional chance of this recorded B: 1/3; urn after this draw: 2R, 2B.","valence":"neutral","children":[{"label":"RBR","note":"Conditional chance of this recorded R: 2/4; urn after this draw: 3R, 2B. Path probability 1/12; K=2.","valence":"neutral"},{"label":"RBB","note":"Conditional chance of this recorded B: 2/4; urn after this draw: 2R, 3B. Path probability 1/12; K=1.","valence":"neutral"}]}]},{"label":"B","note":"Conditional chance of this recorded B: 1/2; urn after this draw: 1R, 2B.","valence":"neutral","children":[{"label":"BR","note":"Conditional chance of this recorded R: 1/3; urn after this draw: 2R, 2B.","valence":"neutral","children":[{"label":"BRR","note":"Conditional chance of this recorded R: 2/4; urn after this draw: 3R, 2B. Path probability 1/12; K=2.","valence":"neutral"},{"label":"BRB","note":"Conditional chance of this recorded B: 2/4; urn after this draw: 2R, 3B. Path probability 1/12; K=1.","valence":"neutral"}]},{"label":"BB","note":"Conditional chance of this recorded B: 2/3; urn after this draw: 1R, 3B.","valence":"neutral","children":[{"label":"BBR","note":"Conditional chance of this recorded R: 1/4; urn after this draw: 2R, 3B. Path probability 1/12; K=1.","valence":"neutral"},{"label":"BBB","note":"Conditional chance of this recorded B: 3/4; urn after this draw: 1R, 4B. Path probability 1/4; K=0.","valence":"neutral"}]}]}]}}
+/>
+
+Opening this tree reveals authored calculations. It does not sample a run. Every branch is neutral: red and blue are colour labels, not good and bad outcomes.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"After the reinforced prefix RR, what is the probability that the third observation is blue?"}
+  options={[{"text":"One quarter","correct":true},{"text":"One half"},{"text":"Three quarters"}]}
+  explanation={"Before the third draw the urn contains three red and one blue. Only one of its four balls is blue."}
+/>
+
+### When to condition on a history
+
+Condition when the question tells you what has already happened. If the history is not supplied, combine its possible values with their probabilities. Reusing the most vivid branch answers a different question.
+
+## Give paths their actual weights
+
+There are eight colour strings. They are equally likely in the symmetric return-only baseline: each draw has red and blue probability 1/2, so every string has probability 1/8. Reinforcement changes that law.
+
+<div role="region" aria-label={"Three-draw colour paths under the two main rules"} tabIndex={0} className="my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">
+<table data-audit-table="07-main-paths" className="w-full" style={{display:'table',overflow:'visible',margin:0}}>
+<thead><tr><th scope="col">{"Path"}</th><th scope="col">{"K"}</th><th scope="col">{"Return only"}</th><th scope="col">{"Return and add one"}</th></tr></thead>
+<tbody>
+<tr><td>{"RRR"}</td><td>{"3"}</td><td>{"1/8"}</td><td>{"1/4"}</td></tr>
+<tr><td>{"RRB"}</td><td>{"2"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"RBR"}</td><td>{"2"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"RBB"}</td><td>{"1"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"BRR"}</td><td>{"2"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"BRB"}</td><td>{"1"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"BBR"}</td><td>{"1"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"BBB"}</td><td>{"0"}</td><td>{"1/8"}</td><td>{"1/4"}</td></tr>
+</tbody>
+</table>
+</div>
+
+Why can an eight-row catalogue have unequal probabilities? Its rows combine different elementary histories. Temporarily label individual balls, retaining their order and appending each new ball. Under reinforcement the three index choices have sizes 2, 3 and 4. Each complete labelled index history has probability **1/(2×3×4)=1/24**. Six histories give RRR, six give BBB and two give each mixed string. Thus 6/24=1/4 while 2/24=1/12.
+
+Under return only there are 2×2×2=8 equally likely labelled histories. The denominators differ because the two rules define different sample spaces. We have not paired “the same luck” across the two models.
+
+Now group paths by their red count. For K=1, the reinforced paths RBB, BRB and BBR each contribute 1/12, so their sum is **3/12=1/4**. In the baseline they contribute **3/8**.
+
+<div role="region" aria-label={"Main probability law of the red-draw count"} tabIndex={0} className="my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">
+<table data-audit-table="07-main-counts" className="w-full" style={{display:'table',overflow:'visible',margin:0}}>
+<thead><tr><th scope="col">{"K"}</th><th scope="col">{"Baseline histories: favourable/possible"}</th><th scope="col">{"Reinforced histories: favourable/possible"}</th><th scope="col">{"Baseline probability"}</th><th scope="col">{"Reinforced probability"}</th></tr></thead>
+<tbody>
+<tr><td>{"0"}</td><td>{"1/8"}</td><td>{"6/24"}</td><td>{"1/8"}</td><td>{"1/4"}</td></tr>
+<tr><td>{"1"}</td><td>{"3/8"}</td><td>{"6/24"}</td><td>{"3/8"}</td><td>{"1/4"}</td></tr>
+<tr><td>{"2"}</td><td>{"3/8"}</td><td>{"6/24"}</td><td>{"3/8"}</td><td>{"1/4"}</td></tr>
+<tr><td>{"3"}</td><td>{"1/8"}</td><td>{"6/24"}</td><td>{"1/8"}</td><td>{"1/4"}</td></tr>
+</tbody>
+</table>
+</div>
+
+Every column of probabilities sums to one. The following bars use exact favourable/possible labelled-history counts on a common 0–100% scale. They are model probabilities derived from the rule, not observed frequencies from an experiment.
+
+<RateComparison
+  client:visible
+  locale={"en"}
+  title={"Compare a named event under the two rules"}
+  scenarioLabel={"Event to compare"}
+  countsLabel={"Favourable labelled histories out of possible histories"}
+  differenceLabel={"Reinforced probability minus baseline probability"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+  scenarios={[{"label":"K = 0","groups":[{"label":"Add one of the drawn colour","events":6,"total":24},{"label":"Return only","events":1,"total":8}]},{"label":"K = 1","groups":[{"label":"Add one of the drawn colour","events":6,"total":24},{"label":"Return only","events":3,"total":8}]},{"label":"K = 2","groups":[{"label":"Add one of the drawn colour","events":6,"total":24},{"label":"Return only","events":3,"total":8}]},{"label":"K = 3","groups":[{"label":"Add one of the drawn colour","events":6,"total":24},{"label":"Return only","events":1,"total":8}]},{"label":"All three recorded colours agree","groups":[{"label":"Add one of the drawn colour","events":12,"total":24},{"label":"Return only","events":2,"total":8}]}]}
+/>
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Which calculation gives the reinforced probability of exactly one red observation?"}
+  options={[{"text":"One eighth, because there are eight colour strings"},{"text":"Three times one twelfth, because three disjoint mixed paths have that count","correct":true},{"text":"One half, because the first draw is red with probability one half"}]}
+  explanation={"A count event can contain several paths. Add their path probabilities; do not assign equal weights simply because the table has eight rows."}
+/>
+
+### When counting rows is legitimate
+
+Counting favourable rows and dividing by all rows works only after equal probability for those elementary rows has been justified. Here it works for labelled index histories. It generally does not work for the displayed colour strings.
+
+## Equal means can hide different laws
+
+The **expected count** is the probability-weighted average of K across possible complete runs. It does not have to be an integer:
+
+$$E[K]=\sum_{k=0}^{3} kP(K=k).$$
+
+For the baseline:
+
+$$E[K]=\frac{0\times1+1\times3+2\times3+3\times1}{8}=\frac{12}{8}=\frac32.$$
+
+For reinforcement:
+
+$$E[K]=\frac{0+1+2+3}{4}=\frac32.$$
+
+Both means are **1.5 red observations per run in expectation**. Every actual run still contains an integer number of red observations. Reinforcement has changed the complete law while preserving this mean. A useful average and an incomplete description can be the same number.
+
+<ExpectedValueCalculator
+  client:visible
+  locale={"en"}
+  className={"not-prose"}
+  eyebrow={""}
+  title={"Reconstruct the reinforced expected count"}
+  instructions={"The starting weights are the derived reinforced count law. Editing them defines a different hypothetical law; it does not change or run an urn. Reset restores this catalogue."}
+  scenario={{"prompt":"K is the number of red observations in three draws. R is the count unit, not a currency or a final urn share.","outcomes":[{"label":"K = 0","payoff":0,"prob":25},{"label":"K = 1","payoff":1,"prob":25},{"label":"K = 2","payoff":2,"prob":25},{"label":"K = 3","payoff":3,"prob":25}],"unit":" R","unitPosition":"suffix"}}
+  probabilityLabel={"Probability"}
+  payoffLabel={"Red-draw count"}
+  contributionLabel={"Contribution to the mean"}
+  totalProbLabel={"Weights total"}
+  normalizeHint={"Weights total {sum}; this is not a probability distribution. The displayed sum is not a valid probability mean."}
+  evLabel={"Expected red-draw count"}
+  evHint={"Sum of probability × count"}
+  resetLabel={"Reset to the derived law"}
+  caption={"The bars show contributions to a mean, not event probabilities. Their scale can change with the weights; compare the displayed values. Each realised run still has an integer count."}
+/>
+
+Reset gives the proved reinforced law. The baseline is kept in the exact table: its 12.5% and 37.5% weights cannot be set exactly with these integer-percentage controls. R is a count unit here, not a currency.
+
+<details>
+<summary>Optional: quantify the different spread</summary>
+
+Define **variance** here as the probability-weighted squared distance from the mean. Squaring makes positive and negative deviations contribute positively; its unit is the square of the count unit. The finite identity is Var(K)=E[K²]−E[K]².
+
+<div role="region" aria-label={"Exact spread calculation"} tabIndex={0} className="my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">
+<table data-audit-table="07-variance" className="w-full" style={{display:'table',overflow:'visible',margin:0}}>
+<thead><tr><th scope="col">{"Rule"}</th><th scope="col">{"E[K]"}</th><th scope="col">{"E[K²]"}</th><th scope="col">{"Variance"}</th></tr></thead>
+<tbody>
+<tr><td>{"Return only"}</td><td>{"3/2"}</td><td>{"(0 + 3 + 12 + 9)/8 = 3"}</td><td>{"3 − 9/4 = 3/4"}</td></tr>
+<tr><td>{"Return and add one"}</td><td>{"3/2"}</td><td>{"(0 + 1 + 4 + 9)/4 = 7/2"}</td><td>{"7/2 − 9/4 = 5/4"}</td></tr>
+</tbody>
+</table>
+</div>
+
+The larger variance is a claim about this specified count under these two laws. It does not say that each reinforced run is more unequal than each baseline run, or that every possible concentration statistic increases.
+
+</details>
+
+<Categorize
+  client:visible
+  className={"not-prose"}
+  question={"Separate the supported result from an extra claim"}
+  buckets={["Supported by the finite model","Not established by this calculation"]}
+  items={[{"text":"Both main rules have the same expected red count","bucket":"Supported by the finite model"},{"text":"The main rules assign different probabilities to some K values","bucket":"Supported by the finite model"},{"text":"A typical run contains one and a half red observations","bucket":"Not established by this calculation"},{"text":"Every reinforcing process has no finite mean","bucket":"Not established by this calculation"},{"text":"This model diagnoses why a particular successful musician won","bucket":"Not established by this calculation"}]}
+  explanation={"The expected count summarizes a specified finite law. It neither describes every realised path nor identifies another system’s mechanism."}
+/>
+
+### When a mean is not the full question
+
+Use the mean for a question about a weighted count. Use the relevant event or spread measure for a different question. Equal means alone do not establish equal exposure to a selected event, and a changed exposure does not make the mean arithmetically wrong.
+
+## Define the event before calling it concentration
+
+Choose the event **all three recorded colours agree**. It consists of RRR or BBB, so:
+
+- Baseline: 1/8+1/8=1/4.
+- Reinforced: 1/4+1/4=1/2.
+
+This event becomes twice as likely. It is a precise finite statement. It is not a general theorem that every inequality measure rises, that a power law has formed, or that a monopoly is inevitable.
+
+The physical urn still contains both initial colours. After three reinforced draws, its red share is **(1+K)/5**. If K=3, it contains four red and one blue ball: red share **4/5**, while all three recorded observations were red. In the baseline the physical red share stays **1/2** for every K.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"A reinforced run records RRR. Which pair correctly describes the record and the final physical urn?"}
+  options={[{"text":"Three red observations; four red and one blue ball remain","correct":true},{"text":"Three red observations; only red balls remain"},{"text":"Four red observations; the recorded count equals the final number of red balls"}]}
+  explanation={"Each drawn ball is returned and one new same-colour ball is added. The initial blue ball is never removed."}
+/>
+
+### When to name a metric first
+
+Do it before comparing rules or interventions. “More concentrated” can mean several things. An event probability, a variance, a largest share and a distributional tail are different quantities and need their own calculations.
+
+## Transfer to a different starting urn
+
+Now start with **one red ball and two blue balls**. Keep the same three-draw horizon and each of the two update rules. The change is the initial composition, not an unannounced change to the selection law.
+
+Before opening the solution, calculate reinforced RRR and BBB, the law of K, its mean, and the all-same event. Check whether the eight colour strings are equally likely even in the return-only baseline.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"With one red and two blue balls initially, what first-red probability must enter every R-starting path calculation?"}
+  options={[{"text":"One half, because there are still two colour names"},{"text":"One third, because one of the three balls is red","correct":true},{"text":"Two thirds, because reinforcement makes red catch up before the first draw"}]}
+  explanation={"Nothing has been drawn or reinforced yet. Uniform selection begins with the initial physical counts."}
+/>
+
+<details>
+<summary>Check the transfer paths and count law</summary>
+
+For reinforced RRR, multiply (1/3)(2/4)(3/5)=**1/10**. For BBB, multiply (2/3)(3/4)(4/5)=**2/5**. Mixed strings with two red observations each have probability 1/15; those with one red each have probability 1/10.
+
+There are 3×4×5=**60** equally likely labelled histories under reinforcement. The baseline has 3³=**27**, with each first/second/third red chance 1/3. Its colour strings are not equally likely: BBB has eight labelled histories, while RRR has only one.
+
+<div role="region" aria-label={"Transfer count law from one red and two blue balls"} tabIndex={0} className="my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">
+<table data-audit-table="07-transfer-counts" className="w-full" style={{display:'table',overflow:'visible',margin:0}}>
+<thead><tr><th scope="col">{"K"}</th><th scope="col">{"Return only"}</th><th scope="col">{"Return and add one"}</th></tr></thead>
+<tbody>
+<tr><td>{"0"}</td><td>{"8/27"}</td><td>{"24/60 = 2/5"}</td></tr>
+<tr><td>{"1"}</td><td>{"12/27"}</td><td>{"18/60 = 3/10"}</td></tr>
+<tr><td>{"2"}</td><td>{"6/27"}</td><td>{"12/60 = 1/5"}</td></tr>
+<tr><td>{"3"}</td><td>{"1/27"}</td><td>{"6/60 = 1/10"}</td></tr>
+</tbody>
+</table>
+</div>
+
+The expected count is still the same across the two rules, now **1**:
+
+$$E[K]_{\text{baseline}}=\frac{12+12+3}{27}=1,$$
+
+$$E[K]_{\text{reinforced}}=\frac3{10}+\frac4{10}+\frac3{10}=1.$$
+
+The all-same event has baseline probability (8+1)/27=**1/3**, and reinforced probability 2/5+1/10=**1/2**. The event all blue is only the K=0 row; do not substitute it for all-same.
+
+<RateComparison
+  client:visible
+  locale={"en"}
+  title={"Recompute the events after changing the initial composition"}
+  scenarioLabel={"Event to compare"}
+  countsLabel={"Favourable labelled histories out of possible histories"}
+  differenceLabel={"Reinforced probability minus baseline probability"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+  scenarios={[{"label":"K = 0","groups":[{"label":"Add one of the drawn colour","events":24,"total":60},{"label":"Return only","events":8,"total":27}]},{"label":"K = 1","groups":[{"label":"Add one of the drawn colour","events":18,"total":60},{"label":"Return only","events":12,"total":27}]},{"label":"K = 2","groups":[{"label":"Add one of the drawn colour","events":12,"total":60},{"label":"Return only","events":6,"total":27}]},{"label":"K = 3","groups":[{"label":"Add one of the drawn colour","events":6,"total":60},{"label":"Return only","events":1,"total":27}]},{"label":"All three recorded colours agree","groups":[{"label":"Add one of the drawn colour","events":30,"total":60},{"label":"Return only","events":9,"total":27}]}]}
+/>
+
+Percentages and percentage-point differences involving twenty-sevenths are rounded to two decimal places. Their displayed fractions retain the exact denominators.
+
+<ExpectedValueCalculator
+  client:visible
+  locale={"en"}
+  className={"not-prose"}
+  eyebrow={""}
+  title={"Reconstruct the transfer reinforced mean"}
+  instructions={"The starting weights are the derived reinforced count law. Editing them defines a different hypothetical law; it does not change or run an urn. Reset restores this catalogue."}
+  scenario={{"prompt":"K is the number of red observations in three draws. R is the count unit, not a currency or a final urn share.","outcomes":[{"label":"K = 0","payoff":0,"prob":40},{"label":"K = 1","payoff":1,"prob":30},{"label":"K = 2","payoff":2,"prob":20},{"label":"K = 3","payoff":3,"prob":10}],"unit":" R","unitPosition":"suffix"}}
+  probabilityLabel={"Probability"}
+  payoffLabel={"Red-draw count"}
+  contributionLabel={"Contribution to the mean"}
+  totalProbLabel={"Weights total"}
+  normalizeHint={"Weights total {sum}; this is not a probability distribution. The displayed sum is not a valid probability mean."}
+  evLabel={"Expected red-draw count"}
+  evHint={"Sum of probability × count"}
+  resetLabel={"Reset to the derived law"}
+  caption={"The bars show contributions to a mean, not event probabilities. Their scale can change with the weights; compare the displayed values. Each realised run still has an integer count."}
+/>
+
+The final reinforced physical red share is **(1+K)/6**. K=3 therefore leaves four red and two blue balls, not a monochromatic urn. The initial blue balls remain. Nothing here ranks real people, determines a market winner or establishes an infinite-horizon law.
+
+</details>
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Apply the changed denominator"}
+  text={"In the transfer baseline, the eight colour strings are {{not equally likely|equally likely by definition|the same as the twenty-seven labelled histories}}. In the reinforced transfer, the expected red count is {{one|one half|three halves}}, while each actual count is {{an integer|necessarily equal to the mean|a physical share of the urn}}."}
+  explanation={"A different starting composition changes the path weights. The expectation is computed from those weights, and a realised count remains a different object."}
+/>
+
+### When the transfer is the test
+
+Changing the starting counts checks whether you learned the update rule or memorised the symmetric table. In another application, make the corresponding inputs explicit before carrying over a number or a claimed effect.
+
+## Reconstruct a finite reinforcement audit
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Match each claim with its required object"}
+  pairs={[{"term":"Conditional next-red chance","definition":"The red count divided by the total before that draw, given the stated history"},{"term":"Path probability","definition":"A product of successive conditional branch probabilities"},{"term":"Count law","definition":"Probabilities obtained by adding all paths with the same K"},{"term":"Expected red count","definition":"The sum of each K multiplied by its probability"},{"term":"Physical red share","definition":"Red balls still in the urn divided by all balls still in the urn"}]}
+  explanation={"The numerator, denominator and conditioning statement determine which calculation answers the question."}
+/>
+
+<MindMap
+  client:visible
+  title={"Specify, enumerate, compare, limit"}
+  eyebrow={""}
+  outlineLabel={"Outline"}
+  root={{"label":"Finite reinforcement audit","children":[{"label":"State the protocol","children":[{"label":"Initial counts, uniform ball choice, return, addition and horizon"}]},{"label":"Calculate the law","children":[{"label":"Branch products, path sums and a probability total of one"}]},{"label":"Choose the quantity","children":[{"label":"K, its mean, a named event and physical composition differ"}]},{"label":"Transfer and limit","children":[{"label":"Recompute after changing inputs; do not infer a real cause or a power law from the finite table"}]}]}}
+/>
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Calculate before interpreting"}
+  questions={[{"question":"In the main reinforced model, what is P(RBB)?","options":[{"text":"One twelfth","correct":true},{"text":"One eighth"},{"text":"One quarter"}],"explanation":"Multiply one half, one third and two fourths along that path."},{"question":"How does the probability of three matching observations compare in the main two rules?","options":[{"text":"It is one half under reinforcement and one quarter in the baseline","correct":true},{"text":"It is one quarter in both because the means agree"},{"text":"It is one because the first colour must keep winning"}],"explanation":"Add RRR and BBB in each law. Those sums differ even though the mean red count is the same."},{"question":"Which denominator justifies the main reinforced count-event fractions?","options":[{"text":"Eight equally likely colour strings"},{"text":"Twenty-four equally likely labelled index histories","correct":true},{"text":"Five final balls treated as complete paths"}],"explanation":"The sequential urn sizes are two, three and four. Colour strings combine different numbers of these labelled histories."},{"question":"A run has K=3. Which additional fact is required to calculate its final physical red share?","options":[{"text":"The starting composition and which update rule was used","correct":true},{"text":"The reputation of the red colour"},{"text":"A declaration that the share must equal one"}],"explanation":"The observation count alone does not specify how many balls were initially present or added."},{"question":"From transfer reinforced probabilities 2/5,3/10,1/5,1/10 for K=0,1,2,3, what is E[K]?","options":[{"text":"One","correct":true},{"text":"Three halves"},{"text":"Two fifths"}],"explanation":"The weighted sum is zero plus three tenths plus four tenths plus three tenths, which equals one."},{"question":"Select every conclusion established by this workshop.","allowMultiple":true,"options":[{"text":"A specified reinforcing rule can change an event probability while leaving a mean unchanged","correct":true},{"text":"Changing the starting composition requires recomputing the law","correct":true},{"text":"The finite count table proves the distribution of real social rewards is a power law"},{"text":"A large winner identifies how much of its success was caused by luck"}],"explanation":"The finite calculations establish their model implications. The last two claims would require different models and real-world evidence."}]}
+/>
+
+Continue to the [final exam](/cumulative-advantage-and-power-laws/final-exam). It supplies its own model card for the urn questions, and keeps each submitted answer locked.
+
+The examples are constructed. The [Duke Probability Workbook](https://sites.duke.edu/probabilityworkbook/polyas-urn/) describes return-and-reinforce sampling. [Pólya’s urn process in Random Services](https://www.randomservices.org/random/urn/Polya.html) derives the finite path and count laws. Our small catalogues are calculated from the stated rule.

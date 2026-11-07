@@ -1,0 +1,444 @@
+---
+title: "Sigue una extracción con refuerzo"
+description: "Enumera un modelo finito de refuerzo, compara su ley de recuentos y su media con una referencia, y revisa la inferencia al cambiar la urna inicial."
+topic: "es/cumulative-advantage-and-power-laws"
+order: 8
+minutes: 30
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, MatchConcepts, ConsequenceTree, RateComparison, ExpectedValueCalculator, MindMap, Quiz } from '@/components/react';
+
+Primero sale una bola roja. Se devuelve junto con otra roja, así que el rojo toma ventaja. Alguien que mira declara: «El ganador ya está decidido». Otra persona añade: «Entonces la media también tiene que subir». Ninguna afirmación se deduce solo de la actualización.
+
+Calcularemos un modelo pequeño completo, sin seleccionar una ejecución llamativa. Las preguntas son concretas: **¿qué probabilidad tiene cada secuencia registrada, qué recuento produce y qué comparación cambia realmente?**
+
+## Fija la regla y lo que cuentas
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Un proceso favorece al color que lleva ventaja. ¿Qué falta para calcular un suceso de tres extracciones?"}
+  options={[{"text":"La composición inicial, la regla exacta de muestreo y actualización, y el suceso que se cuenta","correct":true},{"text":"Solo la identidad del color que salió primero"},{"text":"Solo decidir que el gráfico final es una ley de potencia"}]}
+  explanation={"Un bucle verbal admite muchos modelos. Fija el estado, la aleatoriedad, la actualización, el horizonte y el suceso antes de calcular."}
+  pretestLabel={"Antes de leer, intenta responder"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisa la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+La urna construida empieza con **una bola roja y una azul**. Hacemos exactamente **tres extracciones**. Cada una elige uniformemente entre todas las bolas presentes. Registra el color y devuelve la bola elegida. Compara dos reglas:
+
+- **Solo devolver:** no añadas nada; la urna sigue con una roja y una azul.
+- **Devolver y reforzar:** añade una bola nueva del color elegido después de devolverla. Este es el **refuerzo (reinforcement)** de la regla.
+
+No hay colores nuevos, diferencias de calidad ni decisiones estratégicas. Escribe **R** para una observación roja y **B** para una azul, por el inglés blue. Una **secuencia (path)** es el registro completo de tres letras, como RBB. Define **K** como el número de observaciones rojas en esas tres extracciones. K puede ser 0, 1, 2 o 3.
+
+K cuenta extracciones registradas. No cuenta las bolas rojas que quedan físicamente dentro, no mide la calidad de un artículo ni identifica un ganador en un mercado real.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Elige el objeto aleatorio"}
+  text={"La regla de muestreo elige uniformemente entre {{las bolas físicas presentes|los dos nombres de colores sin atender a sus cantidades|todas las cadenas de colores escritas}}. K cuenta {{observaciones rojas en tres extracciones|la proporción final de bolas rojas|el número de colores nuevos que entran}}."}
+  explanation={"La uniformidad pertenece a la regla elemental de selección. La distribución de un recuento derivado debe calcularse a partir de ella."}
+  instructions={"Elige una opción para cada hueco y comprueba la respuesta."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+/>
+
+### Cuándo ayuda una auditoría finita
+
+Úsala cuando se exige una conclusión precisa a un mecanismo verbal. Escribe primero un caso pequeño completo. Puede revelar una inferencia inválida sin pretender reproducir la escala o complejidad del mundo.
+
+## Multiplica las probabilidades cambiantes de las ramas
+
+Para la secuencia reforzada RRR, la primera probabilidad de rojo es 1/2. Devolver la roja y añadir otra deja dos rojas entre tres bolas. Repetir rojo deja tres rojas entre cuatro antes de la última extracción:
+
+$$P(RRR)=\frac12\times\frac23\times\frac34=\frac14.$$
+
+Para RBB, la primera R sigue teniendo probabilidad 1/2. Después hay una azul entre tres bolas. Tras devolver y reforzar B quedan dos rojas y dos azules:
+
+$$P(RBB)=\frac12\times\frac13\times\frac24=\frac1{12}.$$
+
+La ventaja roja inicial pasa a empate tras la segunda extracción y a ventaja azul tras la tercera. Condicionada a una primera R, la probabilidad de las dos azules siguientes es (1/3)(2/4)=1/6. La primera ganancia cambia probabilidades; no fija todos los resultados posteriores.
+
+<ConsequenceTree
+  client:visible
+  title={"Todas las ramas de tres extracciones con refuerzo"}
+  eyebrow={""}
+  instructions={"Abre un prefijo registrado para ver sus continuaciones. La probabilidad de cada tarjeta describe la extracción que llega a ella, dado el prefijo anterior."}
+  caption={"Es un árbol finito de secuencias ya calculadas. Abrir ramas revela cálculos; no extrae bolas ni estima probabilidades."}
+  decisionLabel={"Composición inicial"}
+  orderLabels={["Extracción 1","Extracción 2","Extracción 3"]}
+  promptLabel={"Mostrar ramas siguientes"}
+  expandAllLabel={"Mostrar todas las secuencias"}
+  collapseLabel={"Contraer el árbol"}
+  valenceLabels={{"good":"Valoración positiva","bad":"Valoración negativa","mixed":"Valoración mixta","neutral":"Sin juicio de valor"}}
+  decision={{"label":"Urna inicial: 1R, 1B","note":"R registra una bola roja; B, una azul. Devuelve la bola extraída y añade otra de su color.","valence":"neutral","children":[{"label":"R","note":"Probabilidad condicional de esta observación registrada R: 1/2; urna después de esta extracción: 2R, 1B.","valence":"neutral","children":[{"label":"RR","note":"Probabilidad condicional de esta observación registrada R: 2/3; urna después de esta extracción: 3R, 1B.","valence":"neutral","children":[{"label":"RRR","note":"Probabilidad condicional de esta observación registrada R: 3/4; urna después de esta extracción: 4R, 1B. Probabilidad de la secuencia 1/4; K=3.","valence":"neutral"},{"label":"RRB","note":"Probabilidad condicional de esta observación registrada B: 1/4; urna después de esta extracción: 3R, 2B. Probabilidad de la secuencia 1/12; K=2.","valence":"neutral"}]},{"label":"RB","note":"Probabilidad condicional de esta observación registrada B: 1/3; urna después de esta extracción: 2R, 2B.","valence":"neutral","children":[{"label":"RBR","note":"Probabilidad condicional de esta observación registrada R: 2/4; urna después de esta extracción: 3R, 2B. Probabilidad de la secuencia 1/12; K=2.","valence":"neutral"},{"label":"RBB","note":"Probabilidad condicional de esta observación registrada B: 2/4; urna después de esta extracción: 2R, 3B. Probabilidad de la secuencia 1/12; K=1.","valence":"neutral"}]}]},{"label":"B","note":"Probabilidad condicional de esta observación registrada B: 1/2; urna después de esta extracción: 1R, 2B.","valence":"neutral","children":[{"label":"BR","note":"Probabilidad condicional de esta observación registrada R: 1/3; urna después de esta extracción: 2R, 2B.","valence":"neutral","children":[{"label":"BRR","note":"Probabilidad condicional de esta observación registrada R: 2/4; urna después de esta extracción: 3R, 2B. Probabilidad de la secuencia 1/12; K=2.","valence":"neutral"},{"label":"BRB","note":"Probabilidad condicional de esta observación registrada B: 2/4; urna después de esta extracción: 2R, 3B. Probabilidad de la secuencia 1/12; K=1.","valence":"neutral"}]},{"label":"BB","note":"Probabilidad condicional de esta observación registrada B: 2/3; urna después de esta extracción: 1R, 3B.","valence":"neutral","children":[{"label":"BBR","note":"Probabilidad condicional de esta observación registrada R: 1/4; urna después de esta extracción: 2R, 3B. Probabilidad de la secuencia 1/12; K=1.","valence":"neutral"},{"label":"BBB","note":"Probabilidad condicional de esta observación registrada B: 3/4; urna después de esta extracción: 1R, 4B. Probabilidad de la secuencia 1/4; K=0.","valence":"neutral"}]}]}]}}
+/>
+
+Abrir este árbol revela cálculos ya escritos. No muestrea una ejecución. Todas las ramas son neutrales: rojo y azul son etiquetas de color, no resultados buenos y malos.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Tras el prefijo reforzado RR, ¿qué probabilidad hay de que la tercera observación sea azul?"}
+  options={[{"text":"Un cuarto","correct":true},{"text":"Un medio"},{"text":"Tres cuartos"}]}
+  explanation={"Antes de la tercera extracción hay tres rojas y una azul. Solo una de sus cuatro bolas es azul."}
+  pretestLabel={"Antes de leer, intenta responder"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisa la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+### Cuándo condicionar a una historia
+
+Condiciona cuando la pregunta te diga qué ha ocurrido ya. Si no se aporta la historia, combina sus valores posibles con sus probabilidades. Reutilizar la rama más llamativa responde a otra pregunta.
+
+## Asigna a las secuencias sus pesos reales
+
+Hay ocho cadenas de colores. Son equiprobables en la referencia simétrica que solo devuelve: cada extracción tiene probabilidad 1/2 para rojo y azul, así que cada cadena tiene probabilidad 1/8. El refuerzo cambia esa ley.
+
+<div role="region" aria-label={"Secuencias de tres colores según las dos reglas principales"} tabIndex={0} className="my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">
+<table data-audit-table="07-main-paths" className="w-full" style={{display:'table',overflow:'visible',margin:0}}>
+<thead><tr><th scope="col">{"Secuencia"}</th><th scope="col">{"K"}</th><th scope="col">{"Solo devolver"}</th><th scope="col">{"Devolver y añadir una"}</th></tr></thead>
+<tbody>
+<tr><td>{"RRR"}</td><td>{"3"}</td><td>{"1/8"}</td><td>{"1/4"}</td></tr>
+<tr><td>{"RRB"}</td><td>{"2"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"RBR"}</td><td>{"2"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"RBB"}</td><td>{"1"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"BRR"}</td><td>{"2"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"BRB"}</td><td>{"1"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"BBR"}</td><td>{"1"}</td><td>{"1/8"}</td><td>{"1/12"}</td></tr>
+<tr><td>{"BBB"}</td><td>{"0"}</td><td>{"1/8"}</td><td>{"1/4"}</td></tr>
+</tbody>
+</table>
+</div>
+
+¿Por qué un catálogo de ocho filas puede tener probabilidades desiguales? Sus filas combinan historias elementales distintas. Etiqueta provisionalmente las bolas individuales, conservando su orden y añadiendo cada bola nueva al final. Con refuerzo, los tres índices se eligen entre 2, 3 y 4 posibilidades. Cada historia completa de índices etiquetados tiene probabilidad **1/(2×3×4)=1/24**. Seis historias producen RRR, seis producen BBB y dos producen cada cadena mixta. Así, 6/24=1/4, mientras 2/24=1/12.
+
+Si solo devolvemos hay 2×2×2=8 historias etiquetadas equiprobables. Los denominadores difieren porque las reglas definen espacios de resultados distintos. No hemos emparejado «la misma suerte» entre los dos modelos.
+
+Agrupa ahora las secuencias según su recuento de rojo. Para K=1, las secuencias reforzadas RBB, BRB y BBR aportan 1/12 cada una, así que suman **3/12=1/4**. En la referencia aportan **3/8**.
+
+<div role="region" aria-label={"Ley principal del recuento de rojas"} tabIndex={0} className="my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">
+<table data-audit-table="07-main-counts" className="w-full" style={{display:'table',overflow:'visible',margin:0}}>
+<thead><tr><th scope="col">{"K"}</th><th scope="col">{"Historias de referencia: favorables/posibles"}</th><th scope="col">{"Historias con refuerzo: favorables/posibles"}</th><th scope="col">{"Probabilidad de referencia"}</th><th scope="col">{"Probabilidad con refuerzo"}</th></tr></thead>
+<tbody>
+<tr><td>{"0"}</td><td>{"1/8"}</td><td>{"6/24"}</td><td>{"1/8"}</td><td>{"1/4"}</td></tr>
+<tr><td>{"1"}</td><td>{"3/8"}</td><td>{"6/24"}</td><td>{"3/8"}</td><td>{"1/4"}</td></tr>
+<tr><td>{"2"}</td><td>{"3/8"}</td><td>{"6/24"}</td><td>{"3/8"}</td><td>{"1/4"}</td></tr>
+<tr><td>{"3"}</td><td>{"1/8"}</td><td>{"6/24"}</td><td>{"1/8"}</td><td>{"1/4"}</td></tr>
+</tbody>
+</table>
+</div>
+
+Cada columna de probabilidades suma uno. Las barras siguientes usan recuentos exactos de historias etiquetadas favorables y posibles, en una escala común del 0 al 100%. Son probabilidades del modelo deducidas de la regla, no frecuencias observadas en un experimento.
+
+<RateComparison
+  client:visible
+  locale={"es"}
+  title={"Compara un suceso definido bajo las dos reglas"}
+  scenarioLabel={"Suceso que comparar"}
+  countsLabel={"Historias etiquetadas favorables respecto a posibles"}
+  differenceLabel={"Probabilidad con refuerzo menos probabilidad de referencia"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+  scenarios={[{"label":"K = 0","groups":[{"label":"Devolver y añadir una del mismo color","events":6,"total":24},{"label":"Solo devolver","events":1,"total":8}]},{"label":"K = 1","groups":[{"label":"Devolver y añadir una del mismo color","events":6,"total":24},{"label":"Solo devolver","events":3,"total":8}]},{"label":"K = 2","groups":[{"label":"Devolver y añadir una del mismo color","events":6,"total":24},{"label":"Solo devolver","events":3,"total":8}]},{"label":"K = 3","groups":[{"label":"Devolver y añadir una del mismo color","events":6,"total":24},{"label":"Solo devolver","events":1,"total":8}]},{"label":"Las tres observaciones son del mismo color","groups":[{"label":"Devolver y añadir una del mismo color","events":12,"total":24},{"label":"Solo devolver","events":2,"total":8}]}]}
+/>
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"¿Qué cálculo da la probabilidad reforzada de observar exactamente una roja?"}
+  options={[{"text":"Un octavo, porque hay ocho cadenas de colores"},{"text":"Tres veces un doceavo, porque tres secuencias mixtas disjuntas tienen ese recuento","correct":true},{"text":"Un medio, porque la primera extracción es roja con probabilidad un medio"}]}
+  explanation={"Un suceso definido por un recuento puede contener varias secuencias. Suma sus probabilidades; no asignes pesos iguales solo porque la tabla tenga ocho filas."}
+  pretestLabel={"Antes de leer, intenta responder"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisa la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+### Cuándo es válido contar filas
+
+Contar filas favorables y dividir entre todas funciona solo después de justificar que esas filas elementales son equiprobables. Aquí vale para las historias de índices etiquetados. En general no vale para las cadenas de colores mostradas.
+
+## Medias iguales pueden ocultar leyes distintas
+
+El **recuento esperado (expected count)** es la media de K ponderada por sus probabilidades entre las ejecuciones completas posibles. No tiene por qué ser entero:
+
+$$E[K]=\sum_{k=0}^{3} kP(K=k).$$
+
+Para la referencia:
+
+$$E[K]=\frac{0\times1+1\times3+2\times3+3\times1}{8}=\frac{12}{8}=\frac32.$$
+
+Para el refuerzo:
+
+$$E[K]=\frac{0+1+2+3}{4}=\frac32.$$
+
+Ambas medias son **1,5 observaciones rojas por ejecución en esperanza**. Cada ejecución real sigue teniendo un número entero de observaciones rojas. El refuerzo ha cambiado la ley completa y ha conservado esta media. Un promedio útil y una descripción incompleta pueden ser el mismo número.
+
+<ExpectedValueCalculator
+  client:visible
+  locale={"es"}
+  className={"not-prose"}
+  eyebrow={""}
+  title={"Reconstruye el recuento esperado con refuerzo"}
+  instructions={"Los pesos iniciales son la ley de recuentos con refuerzo ya deducida. Editarlos define otra ley hipotética; no cambia ni ejecuta una urna. Reiniciar recupera este catálogo."}
+  scenario={{"prompt":"K es el número de observaciones rojas en tres extracciones. R es la unidad de recuento; no es una moneda ni la proporción final de la urna.","outcomes":[{"label":"K = 0","payoff":0,"prob":25},{"label":"K = 1","payoff":1,"prob":25},{"label":"K = 2","payoff":2,"prob":25},{"label":"K = 3","payoff":3,"prob":25}],"unit":" R","unitPosition":"suffix"}}
+  probabilityLabel={"Probabilidad"}
+  payoffLabel={"Recuento de rojas"}
+  contributionLabel={"Aportación a la media"}
+  totalProbLabel={"Suma de pesos"}
+  normalizeHint={"Los pesos suman {sum}; no forman una distribución de probabilidad. La suma mostrada no es una media probabilística válida."}
+  evLabel={"Recuento esperado de rojas"}
+  evHint={"Suma de probabilidad × recuento"}
+  resetLabel={"Recuperar la ley deducida"}
+  caption={"Las barras muestran aportaciones a una media, no probabilidades de sucesos. Su escala puede cambiar con los pesos; compara los valores mostrados. Cada ejecución realizada sigue teniendo un recuento entero."}
+/>
+
+Reiniciar recupera la ley reforzada demostrada. La referencia se conserva en la tabla exacta: sus pesos del 12,5% y 37,5% no se pueden fijar exactamente con estos controles de porcentajes enteros. R es una unidad de recuento, no una moneda.
+
+<details>
+<summary>Opcional: cuantifica la diferencia de dispersión</summary>
+
+Define aquí la **varianza (variance)** como la distancia al cuadrado respecto a la media, ponderada por la probabilidad. Elevar al cuadrado hace positivas las aportaciones de desviaciones de ambos signos; su unidad es la unidad de recuento al cuadrado. La identidad finita es Var(K)=E[K²]−E[K]².
+
+<div role="region" aria-label={"Cálculo exacto de la dispersión"} tabIndex={0} className="my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">
+<table data-audit-table="07-variance" className="w-full" style={{display:'table',overflow:'visible',margin:0}}>
+<thead><tr><th scope="col">{"Regla"}</th><th scope="col">{"E[K]"}</th><th scope="col">{"E[K²]"}</th><th scope="col">{"Varianza"}</th></tr></thead>
+<tbody>
+<tr><td>{"Solo devolver"}</td><td>{"3/2"}</td><td>{"(0 + 3 + 12 + 9)/8 = 3"}</td><td>{"3 − 9/4 = 3/4"}</td></tr>
+<tr><td>{"Devolver y añadir una"}</td><td>{"3/2"}</td><td>{"(0 + 1 + 4 + 9)/4 = 7/2"}</td><td>{"7/2 − 9/4 = 5/4"}</td></tr>
+</tbody>
+</table>
+</div>
+
+La varianza mayor es una afirmación sobre este recuento especificado bajo estas dos leyes. No dice que cada ejecución reforzada sea más desigual que cada ejecución de referencia ni que aumente toda posible estadística de concentración.
+
+</details>
+
+<Categorize
+  client:visible
+  className={"not-prose"}
+  question={"Separa el resultado respaldado de una afirmación adicional"}
+  buckets={["Respaldado por el modelo finito","No establecido por este cálculo"]}
+  items={[{"text":"Ambas reglas principales tienen el mismo recuento esperado de rojo","bucket":"Respaldado por el modelo finito"},{"text":"Las reglas principales asignan probabilidades distintas a algunos valores de K","bucket":"Respaldado por el modelo finito"},{"text":"Una ejecución típica contiene una observación roja y media","bucket":"No establecido por este cálculo"},{"text":"Todo proceso de refuerzo carece de media finita","bucket":"No establecido por este cálculo"},{"text":"Este modelo diagnostica por qué ganó un músico concreto con éxito","bucket":"No establecido por este cálculo"}]}
+  explanation={"El recuento esperado resume una ley finita especificada. No describe cada secuencia realizada ni identifica el mecanismo de otro sistema."}
+  instructions={"Coloca cada elemento en su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todo ordenado"}
+  partialResultWord={"bien"}
+/>
+
+### Cuándo una media no es toda la pregunta
+
+Usa la media para una pregunta sobre un recuento ponderado. Usa el suceso o la medida de dispersión pertinente para otra pregunta. Que las medias coincidan no establece una exposición igual a un suceso elegido; que esa exposición cambie tampoco vuelve incorrecta la aritmética de la media.
+
+## Define el suceso antes de llamarlo concentración
+
+Elige el suceso **las tres observaciones registradas son del mismo color**. Lo forman RRR o BBB, así que:
+
+- Referencia: 1/8+1/8=1/4.
+- Refuerzo: 1/4+1/4=1/2.
+
+Este suceso se vuelve el doble de probable. Es una afirmación finita precisa. No es un teorema general de que aumente toda medida de desigualdad, de que se haya formado una ley de potencia ni de que el monopolio sea inevitable.
+
+La urna física conserva ambos colores iniciales. Tras tres extracciones reforzadas, su proporción roja es **(1+K)/5**. Si K=3, contiene cuatro bolas rojas y una azul: proporción roja **4/5**, aunque las tres observaciones registradas fueron rojas. En la referencia, la proporción física roja sigue en **1/2** para todo K.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Una ejecución con refuerzo registra RRR. ¿Qué pareja describe correctamente el registro y la urna física final?"}
+  options={[{"text":"Tres observaciones rojas; quedan cuatro bolas rojas y una azul","correct":true},{"text":"Tres observaciones rojas; solo quedan bolas rojas"},{"text":"Cuatro observaciones rojas; el recuento registrado iguala el número final de bolas rojas"}]}
+  explanation={"Cada bola extraída se devuelve y se añade otra de su color. La bola azul inicial nunca se retira."}
+  pretestLabel={"Antes de leer, intenta responder"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisa la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+### Cuándo nombrar primero la métrica
+
+Hazlo antes de comparar reglas o intervenciones. «Más concentrado» puede significar varias cosas. Una probabilidad de suceso, una varianza, una cuota máxima y una cola distributiva son magnitudes distintas y necesitan cálculos propios.
+
+## Transfiere a otra urna inicial
+
+Empieza ahora con **una bola roja y dos azules**. Mantén las mismas tres extracciones y cada una de las dos reglas de actualización. Cambia la composición inicial, no la ley de selección sin avisar.
+
+Antes de abrir la solución, calcula RRR y BBB con refuerzo, la ley de K, su media y el suceso de un mismo color. Comprueba si las ocho cadenas de colores son equiprobables incluso en la referencia que solo devuelve.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Con una roja y dos azules inicialmente, ¿qué probabilidad de primera roja debe entrar en todo cálculo de una secuencia que empieza por R?"}
+  options={[{"text":"Un medio, porque siguen existiendo dos nombres de colores"},{"text":"Un tercio, porque una de las tres bolas es roja","correct":true},{"text":"Dos tercios, porque el refuerzo hace que el rojo alcance al azul antes de empezar"}]}
+  explanation={"Aún no se ha extraído ni reforzado nada. La selección uniforme comienza con los recuentos físicos iniciales."}
+  pretestLabel={"Antes de leer, intenta responder"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisa la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+<details>
+<summary>Comprueba las secuencias y la ley de recuentos de transferencia</summary>
+
+Para RRR con refuerzo, multiplica (1/3)(2/4)(3/5)=**1/10**. Para BBB, multiplica (2/3)(3/4)(4/5)=**2/5**. Cada cadena mixta con dos observaciones rojas tiene probabilidad 1/15; cada una con una roja tiene probabilidad 1/10.
+
+Hay 3×4×5=**60** historias etiquetadas equiprobables con refuerzo. La referencia tiene 3³=**27**, con probabilidad de rojo 1/3 en cada extracción. Sus cadenas de colores no son equiprobables: BBB tiene ocho historias etiquetadas, mientras RRR solo tiene una.
+
+<div role="region" aria-label={"Ley de recuentos desde una roja y dos azules"} tabIndex={0} className="my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">
+<table data-audit-table="07-transfer-counts" className="w-full" style={{display:'table',overflow:'visible',margin:0}}>
+<thead><tr><th scope="col">{"K"}</th><th scope="col">{"Solo devolver"}</th><th scope="col">{"Devolver y añadir una"}</th></tr></thead>
+<tbody>
+<tr><td>{"0"}</td><td>{"8/27"}</td><td>{"24/60 = 2/5"}</td></tr>
+<tr><td>{"1"}</td><td>{"12/27"}</td><td>{"18/60 = 3/10"}</td></tr>
+<tr><td>{"2"}</td><td>{"6/27"}</td><td>{"12/60 = 1/5"}</td></tr>
+<tr><td>{"3"}</td><td>{"1/27"}</td><td>{"6/60 = 1/10"}</td></tr>
+</tbody>
+</table>
+</div>
+
+El recuento esperado sigue siendo igual entre las dos reglas, ahora **1**:
+
+$$E[K]_{\text{referencia}}=\frac{12+12+3}{27}=1,$$
+
+$$E[K]_{\text{refuerzo}}=\frac3{10}+\frac4{10}+\frac3{10}=1.$$
+
+El suceso de un mismo color tiene probabilidad de referencia (8+1)/27=**1/3**, y reforzada 2/5+1/10=**1/2**. El suceso de todo azul es solo la fila K=0; no lo sustituyas por el de un mismo color.
+
+<RateComparison
+  client:visible
+  locale={"es"}
+  title={"Recalcula los sucesos tras cambiar la composición inicial"}
+  scenarioLabel={"Suceso que comparar"}
+  countsLabel={"Historias etiquetadas favorables respecto a posibles"}
+  differenceLabel={"Probabilidad con refuerzo menos probabilidad de referencia"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+  scenarios={[{"label":"K = 0","groups":[{"label":"Devolver y añadir una del mismo color","events":24,"total":60},{"label":"Solo devolver","events":8,"total":27}]},{"label":"K = 1","groups":[{"label":"Devolver y añadir una del mismo color","events":18,"total":60},{"label":"Solo devolver","events":12,"total":27}]},{"label":"K = 2","groups":[{"label":"Devolver y añadir una del mismo color","events":12,"total":60},{"label":"Solo devolver","events":6,"total":27}]},{"label":"K = 3","groups":[{"label":"Devolver y añadir una del mismo color","events":6,"total":60},{"label":"Solo devolver","events":1,"total":27}]},{"label":"Las tres observaciones son del mismo color","groups":[{"label":"Devolver y añadir una del mismo color","events":30,"total":60},{"label":"Solo devolver","events":9,"total":27}]}]}
+/>
+
+Los porcentajes y las diferencias en puntos porcentuales que usan veintisieteavos se redondean a dos decimales. Las fracciones mostradas conservan sus denominadores exactos.
+
+<ExpectedValueCalculator
+  client:visible
+  locale={"es"}
+  className={"not-prose"}
+  eyebrow={""}
+  title={"Reconstruye la media reforzada de la transferencia"}
+  instructions={"Los pesos iniciales son la ley de recuentos con refuerzo ya deducida. Editarlos define otra ley hipotética; no cambia ni ejecuta una urna. Reiniciar recupera este catálogo."}
+  scenario={{"prompt":"K es el número de observaciones rojas en tres extracciones. R es la unidad de recuento; no es una moneda ni la proporción final de la urna.","outcomes":[{"label":"K = 0","payoff":0,"prob":40},{"label":"K = 1","payoff":1,"prob":30},{"label":"K = 2","payoff":2,"prob":20},{"label":"K = 3","payoff":3,"prob":10}],"unit":" R","unitPosition":"suffix"}}
+  probabilityLabel={"Probabilidad"}
+  payoffLabel={"Recuento de rojas"}
+  contributionLabel={"Aportación a la media"}
+  totalProbLabel={"Suma de pesos"}
+  normalizeHint={"Los pesos suman {sum}; no forman una distribución de probabilidad. La suma mostrada no es una media probabilística válida."}
+  evLabel={"Recuento esperado de rojas"}
+  evHint={"Suma de probabilidad × recuento"}
+  resetLabel={"Recuperar la ley deducida"}
+  caption={"Las barras muestran aportaciones a una media, no probabilidades de sucesos. Su escala puede cambiar con los pesos; compara los valores mostrados. Cada ejecución realizada sigue teniendo un recuento entero."}
+/>
+
+La proporción física roja final con refuerzo es **(1+K)/6**. Por tanto, K=3 deja cuatro rojas y dos azules, no una urna monocromática. Las bolas azules iniciales permanecen. Nada de aquí ordena personas reales, determina un ganador de mercado ni establece una ley de horizonte infinito.
+
+</details>
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Aplica el denominador cambiado"}
+  text={"En la referencia de transferencia, las ocho cadenas de colores {{no son equiprobables|son equiprobables por definición|son lo mismo que las veintisiete historias etiquetadas}}. Con refuerzo, el recuento esperado de rojo es {{uno|un medio|tres medios}}, mientras cada recuento realizado es {{un entero|necesariamente igual a la media|una proporción física de la urna}}."}
+  explanation={"Una composición inicial distinta cambia los pesos de las secuencias. La esperanza se calcula con esos pesos; el recuento realizado sigue siendo otro objeto."}
+  instructions={"Elige una opción para cada hueco y comprueba la respuesta."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+/>
+
+### Cuándo la transferencia es la prueba
+
+Cambiar los recuentos iniciales comprueba si has aprendido la actualización o memorizado la tabla simétrica. En otra aplicación, explicita los datos correspondientes antes de trasladar una cifra o un efecto supuesto.
+
+## Reconstruye una auditoría finita del refuerzo
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Empareja cada afirmación con el objeto que necesita"}
+  pairs={[{"term":"Probabilidad condicional de la siguiente roja","definition":"El recuento de rojo dividido entre el total anterior a esa extracción, dada la historia indicada"},{"term":"Probabilidad de una secuencia","definition":"Un producto de probabilidades condicionales de ramas sucesivas"},{"term":"Ley del recuento","definition":"Probabilidades obtenidas al sumar todas las secuencias con el mismo K"},{"term":"Recuento esperado de rojo","definition":"La suma de cada K multiplicado por su probabilidad"},{"term":"Proporción física roja","definition":"Bolas rojas que quedan en la urna divididas entre todas las bolas que quedan"}]}
+  explanation={"El numerador, el denominador y la condición determinan qué cálculo responde a la pregunta."}
+  instructions={"Elige un término y después su definición."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  allCorrectLabel={"✓ Todo emparejado"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"→ ahora elige una definición"}
+  notLinkedHint={"sin enlazar todavía"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+<MindMap
+  client:visible
+  title={"Especifica, enumera, compara y limita"}
+  root={{"label":"Auditoría finita del refuerzo","children":[{"label":"Define el protocolo","children":[{"label":"Recuentos iniciales, elección uniforme de bolas, devolución, adición y horizonte"}]},{"label":"Calcula la ley","children":[{"label":"Productos de ramas, sumas de secuencias y probabilidades que suman uno"}]},{"label":"Elige la magnitud","children":[{"label":"K, su media, un suceso definido y la composición física son distintos"}]},{"label":"Transfiere y limita","children":[{"label":"Recalcula al cambiar datos; no infieras una causa real o una ley de potencia de la tabla finita"}]}]}}
+  eyebrow={""}
+  outlineLabel={"Esquema"}
+/>
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Calcula antes de interpretar"}
+  questions={[{"question":"En el modelo principal con refuerzo, ¿cuánto vale P(RBB)?","options":[{"text":"Un doceavo","correct":true},{"text":"Un octavo"},{"text":"Un cuarto"}],"explanation":"Multiplica un medio, un tercio y dos cuartos a lo largo de esa secuencia."},{"question":"¿Cómo se compara la probabilidad de tres observaciones iguales entre las dos reglas principales?","options":[{"text":"Es un medio con refuerzo y un cuarto en la referencia","correct":true},{"text":"Es un cuarto en ambas porque las medias coinciden"},{"text":"Es uno porque el primer color tiene que seguir ganando"}],"explanation":"Suma RRR y BBB en cada ley. Esas sumas difieren aunque la media del recuento rojo sea la misma."},{"question":"¿Qué denominador justifica las fracciones de sucesos del recuento principal con refuerzo?","options":[{"text":"Ocho cadenas de colores equiprobables"},{"text":"Veinticuatro historias de índices etiquetados equiprobables","correct":true},{"text":"Cinco bolas finales tratadas como secuencias completas"}],"explanation":"Los tamaños sucesivos de la urna son dos, tres y cuatro. Las cadenas de colores combinan cantidades distintas de esas historias etiquetadas."},{"question":"Una ejecución tiene K=3. ¿Qué dato adicional hace falta para calcular la proporción física roja final?","options":[{"text":"La composición inicial y la regla de actualización usada","correct":true},{"text":"La reputación del color rojo"},{"text":"La declaración de que la proporción tiene que ser uno"}],"explanation":"El recuento observado por sí solo no especifica cuántas bolas había al principio o cuántas se añadieron."},{"question":"Las probabilidades de transferencia con refuerzo son 2/5,3/10,1/5,1/10 para K=0,1,2,3. ¿Cuánto vale E[K]?","options":[{"text":"Uno","correct":true},{"text":"Tres medios"},{"text":"Dos quintos"}],"explanation":"La suma ponderada es cero más tres décimos, cuatro décimos y tres décimos: uno."},{"question":"Selecciona las conclusiones establecidas por este taller.","allowMultiple":true,"options":[{"text":"Una regla de refuerzo especificada puede cambiar una probabilidad de suceso y conservar la media","correct":true},{"text":"Cambiar la composición inicial exige recalcular la ley","correct":true},{"text":"La tabla finita demuestra que las recompensas sociales reales siguen una ley de potencia"},{"text":"Un ganador grande identifica cuánto de su éxito causó la suerte"}],"explanation":"Los cálculos finitos establecen implicaciones de su modelo. Las dos últimas afirmaciones exigirían otros modelos y pruebas del mundo real."}]}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Cuestionario completado"}
+  perfectMessage={"Todas las respuestas son correctas."}
+  goodMessage={"Repasa las respuestas que has fallado."}
+  keepPracticingMessage={"Vuelve a los ejemplos y comprueba las respuestas."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Atrás"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Revisa la respuesta"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+Continúa con el [examen final](/es/cumulative-advantage-and-power-laws/final-exam). Aporta su propia tarjeta de modelo para las preguntas de la urna y mantiene bloqueada cada respuesta enviada.
+
+Los ejemplos son construidos. El [Probability Workbook de Duke](https://sites.duke.edu/probabilityworkbook/polyas-urn/) describe el muestreo con devolución y refuerzo. [El proceso de urna de Pólya en Random Services](https://www.randomservices.org/random/urn/Polya.html) deduce las leyes finitas de secuencias y recuentos. Nuestros pequeños catálogos se calculan a partir de la regla indicada.
