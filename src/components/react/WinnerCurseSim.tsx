@@ -3,6 +3,8 @@ import { cx } from '@/components/react/cx';
 
 /** Props for the {@link WinnerCurseSim} island. */
 export interface WinnerCurseSimProps {
+  /** Decimal separator for displayed averages; rounding, coordinates and simulation stay unchanged. */
+  locale?: 'en' | 'es';
   /** Heading above the card. */
   title?: string;
   /** Eyebrow label. Defaults to `"Winner's-curse lab"`. */
@@ -138,6 +140,7 @@ const EMPTY_TOTALS: Totals = { rounds: 0, sumOvershoot: 0, sumOverpay: 0, sumPro
  * cosmetic tween of the markers, disabled under `prefers-reduced-motion`.
  */
 export function WinnerCurseSim({
+  locale = 'en',
   title,
   eyebrow = "Winner's-curse lab",
   instructions = 'Every bidder guesses the same hidden true value, then bids. The highest guess wins and pays its own bid. Run auctions and watch the average overpayment — winning means you were the most optimistic.',
@@ -191,7 +194,7 @@ export function WinnerCurseSim({
   /** Format a one-decimal signed number for the averages. */
   const fmtSigned1 = (n: number) => {
     const sign = n > 0.05 ? '+' : n < -0.05 ? '−' : '';
-    return `${sign}${unit}${Math.abs(n).toFixed(1)}`;
+    return `${sign}${unit}${Math.abs(n).toFixed(1).replace('.', locale === 'es' ? ',' : '.')}`;
   };
 
   /**

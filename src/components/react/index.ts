@@ -312,3 +312,6 @@ export type { BenchmarkObservation, BenchmarkTraceProps } from '@/components/rea
 
 export { MarketEligibility, marketEligibilityAtPrice } from '@/components/react/MarketEligibility';
 export type { MarketBuyer, MarketSeller, MarketEligibilityLabels, MarketEligibilityProps } from '@/components/react/MarketEligibility';
+
+export { BidCatalogue, evaluateBidCatalogue } from '@/components/react/BidCatalogue';
+export type { BidPaymentRule, BidCatalogueState, BidFraction, BidCatalogueRow, BidCatalogueResult, BidCatalogueLabels, BidCatalogueProps } from '@/components/react/BidCatalogue';

@@ -1,0 +1,335 @@
+---
+title: "Audit a Winning Bid"
+description: "Rebuild the cases each bid wins, separate value from payment, and compare expected profit with abstention under explicit auction rules."
+topic: "en/winners-curse"
+order: 7
+minutes: 35
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, Callout, FillBlank, Categorize, MatchConcepts, MindMap, BidCatalogue } from '@/components/react';
+
+A bid can buy you a disappointing lot. It can also buy you a profitable one. “We won” tells you which offers beat the competition; it has not yet done the accounting.
+
+This workshop turns the **winner's curse** into a decision you can check row by row. You will rebuild what winning means for each candidate bid, calculate the payment separately, and compare the result with taking no lot. **The auction, catalogue, weights, credit values and costs are invented teaching assumptions.** They are not observations from a market or a recommended bidding rule.
+
+<MCQ
+  client:visible
+  question={"A bid wins only in states where gross value is below its earlier average. What follows?"}
+  options={[{"text": "Winning revises the relevant value; profit still depends on payment and costs", "correct": true}, {"text": "Winning revises the relevant value; every awarded lot must therefore lose money"}, {"text": "Winning changes only payment; the relevant value must retain its earlier average"}]}
+  explanation={"Selection changes the cases being averaged. Compare their value with the actual payment and costs before concluding that the bid loses money."}
+  pretest={true}
+  className={"not-prose"}
+/>
+
+## Specify the information before choosing the bid
+
+Imagine a sealed, indivisible lot of surplus parts. Its **common gross value**, V, is the same credit value to either bidder before payment or handling. “Common” describes that shared underlying value; it does not mean the bidders know it. The value is learned after allocation. Credits are a linear comparison scale: we prefer the larger expected net credit total. They are not currency or measured business returns.
+
+There is one rival. R denotes that rival's sealed bid. **Our information I** is the following complete conditional catalogue: given everything we know before bidding, exactly these three states are equally likely. Each has probability one third. We cannot see the actual state or rival bid before submitting. The table displays hypothetical possibilities for analysis, not a live peek inside the envelope.
+
+| State given I | Common gross value V | Rival bid R | Probability weight |
+|---|---:|---:|---:|
+| Low | 80 | 70 | 1 |
+| Middle | 120 | 110 | 1 |
+| High | 160 | 150 | 1 |
+
+Before filtering, our conditional mean given I is:
+
+$$E[V\mid I]=\frac{80+120+160}{3}=120.$$
+
+A **conditional mean** is an average restricted to a specified condition. That first mean already uses our information I. Later we will add the condition that a particular bid wins; keep I attached rather than comparing a knowledgeable bidder with a different, uninformed one.
+
+Our allowed menu is **0, 75, 95, 120 and 155 credits**. Zero means **abstention**: no allocation to us, no payment and zero profit. It does not mean nobody else gets the lot. For a positive bid b, the highest bid wins and **we lose ties**: we receive the lot only if b is strictly greater than R. Losers pay nothing. There is no reserve, entry fee, budget constraint, private value, resale friction or other unlisted outcome.
+
+### When this catalogue is useful
+
+Use a finite catalogue to expose assumptions you might otherwise hide inside “our best estimate.” The joint rows say how value and rival bid vary *together*. Knowing their separate averages would not recover that relationship. The weights here are stipulated probabilities, not counts collected from three auctions. A real application would need a defensible model and evidence for it.
+
+<MatchConcepts
+  client:visible
+  question={"Match the quantities before combining them."}
+  pairs={[{"term": "Gross common value", "definition": "The lot’s shared value before our payment and handling"}, {"term": "Payment", "definition": "The amount determined by the auction rule when we receive the lot"}, {"term": "Net profit", "definition": "Gross value minus payment and applicable costs, or zero when not awarded"}, {"term": "Information I", "definition": "What we know before choosing, including the hypothetical joint catalogue"}]}
+  explanation={"Value, payment and profit are different columns. A conditional catalogue describes uncertainty after the specified information is available."}
+  className={"not-prose"}
+/>
+
+## Rebuild the winning set for each candidate
+
+Think of a bid as a transparent filter laid over the rows. A row passes if our positive bid beats its R. Changing the filter does not change V in a row, but it can change which rows survive.
+
+For **b = 120**, the low state passes because 120 > 70; the middle passes because 120 > 110; the high state fails because 120 < 150. Each passing state retains equal weight. Write $W_b$ for the event that bid b receives the lot. Then:
+
+$$P(W_{120}\mid I)=\frac{2}{3},\qquad E[V\mid I,W_{120}]=\frac{80+120}{2}=100.$$
+
+The extra winning condition revises the mean from 120 to 100. It does not change the value of either selected lot or prove that payment exceeds value in every selected state.
+
+Compare two changes carefully:
+
+| Bid | Winning states | Gross value mean if we win |
+|---:|---|---:|
+| 75 | Low | 80 |
+| 95 | Low | 80 |
+| 120 | Low and middle | 100 |
+| 155 | All three | 120 |
+
+Moving from 75 to 95 keeps the selected information the same. Moving from 95 to 120 adds the middle state, so the conditional mean changes too. At 155 all states pass, and winning adds no information beyond I in this catalogue. There is no single fixed “winner correction” to subtract regardless of the bid.
+
+### Watch the strict inequality
+
+The displayed positive menu bids do not tie R. If a new candidate of 110 were allowed, it would lose the middle-state tie and still win only the low state. A bid of 70 would win nothing. These are checks of the rule, not additional candidates used to declare the menu winner.
+
+<FillBlank
+  client:visible
+  question={"Keep the selected event attached to the calculation."}
+  text={"A higher bid can change the {{win set|gross value|rival policy}}. Equal winning cases with the same weights preserve the conditional {{mean|payment rule|net profit}}. A lost tie receives {{nothing|the whole lot|a partial share}}."}
+  explanation={"Re-filter for each candidate. The same selected cases preserve gross conditional value, while a changed own-bid payment can still change profit."}
+  className={"not-prose"}
+/>
+
+## Separate the winning average from the whole opportunity
+
+Start with **first price**: when we win, we pay our own bid b. With no additional cost, profit is V − b on a winning row and zero otherwise. At b = 120, the complete account is:
+
+| State | Awarded to us? | Gross value | Payment | Our profit |
+|---|---|---:|---:|---:|
+| Low | Yes | 80 | 120 | −40 |
+| Middle | Yes | 120 | 120 | 0 |
+| High | No | 160 | 0 | 0 |
+
+The **conditional profit given a win** averages only winning rows: (−40 + 0)/2 = **−20**. The **expected profit per opportunity** includes every row: (−40 + 0 + 0)/3 = **−40/3**, about −13.33 credits. The two denominators answer different questions. A losing row contributes zero profit; it does not vanish from the opportunity.
+
+Because losing rows have zero profit, for a positive chance of winning:
+
+$$E[\Pi_b\mid I]=P(W_b\mid I)\,E[\Pi_b\mid I,W_b].$$
+
+Here $\Pi_b$ denotes our net profit from bid b. Multiplying −20 by 2/3 recovers −40/3. If no state wins, the conditional means are **undefined**, because there are no winning weights to average. Display a dash for them, not zero. The overall expected profit is still zero, obtained directly from all the zero-profit rows.
+
+<BidCatalogue
+  client:visible
+  states={[{"label": "Low", "value": 80, "rivalBid": 70, "weight": 1}, {"label": "Middle", "value": 120, "rivalBid": 110, "weight": 1}, {"label": "High", "value": 160, "rivalBid": 150, "weight": 1}]}
+  bids={[0, 75, 95, 120, 155]}
+  paymentRule={"first-price"}
+  winningCost={0}
+  initialBid={120}
+  profitLimit={60}
+  locale={"en"}
+  unit={"credits"}
+  title={"Follow selection and payment separately"}
+  instructions={"Select a bid and inspect which states award us the lot. Check payment and the two profit averages separately."}
+  caption={"Hypothetical catalogue conditional on our information; the actual row is not observed before bidding. Format and rival rule are fixed in this figure. Every figure shares the same profit scale."}
+  className={"not-prose"}
+/>
+
+Now audit the **entire allowed menu**, not just whether one win would look acceptable:
+
+| Bid | Probability of an award | Gross value mean if awarded | Profit mean if awarded | Expected profit per opportunity |
+|---:|---|---:|---:|---:|
+| 0, abstain | 0 | — | — | 0 |
+| 75 | 1/3 | 80 | 5 | 5/3 |
+| 95 | 1/3 | 80 | −15 | −5 |
+| 120 | 2/3 | 100 | −20 | −40/3 |
+| 155 | 1 | 120 | −35 | −35 |
+
+At 75, the only award is worth 80 and costs 75: a profit of **5**, even though winning revised the value below its prior mean. At 95 the *same* award costs 20 more, turning that profit into −15; its selection information did not change. At 155 the profits are −75, −35 and 5, with average −35. Winning every state does not make this the best candidate.
+
+**The highest expected profit in this menu is 5/3, at 75.** It wins less often than 120 or 155 and beats abstention's zero under the stipulated expected-credit criterion. This is “best among these candidates,” not a continuous optimum, an equilibrium strategy or a promised profit in a richer model.
+
+### When to use both averages
+
+Use conditional profit to understand what receiving the lot would mean. Use expected profit per opportunity, including the outside option, to compare candidate policies before knowing the state. Choosing a bid changes the event you condition on; do not select a conditional mean once and keep it fixed while changing the bid.
+
+<MCQ
+  client:visible
+  question={"Why does the lowest positive candidate beat the higher bids in the first-price menu?"}
+  options={[{"text": "Its selected lot leaves a positive margin, which remains positive after weighting the losses", "correct": true}, {"text": "Its selected lot has the highest gross value, which makes its probability of winning irrelevant"}, {"text": "Its conditional margin is below every rival candidate, which is offset by winning more often"}]}
+  explanation={"At the lowest positive bid, the only award leaves five credits, with probability one third. Losses contribute zero, so the expected profit is five thirds; every higher listed bid has negative expected profit."}
+  className={"not-prose"}
+/>
+
+## Change the payment rule while holding the rival fixed
+
+A filter and a cashier do different jobs. In this **second-price counterfactual**, we hold the same joint catalogue, rival bids, information, menu and tie rule fixed. A positive bid still wins exactly when b > R. But if we win we pay **R**, the sole rival's bid, rather than b.
+
+This is a controlled accounting comparison. In a real format change, the rival might change strategy. We are not claiming both bidders best respond under both formats or proving revenue equivalence.
+
+The value-payment difference is now 80 − 70 = 10 in the low state, 120 − 110 = 10 in the middle and 160 − 150 = 10 in the high. Therefore:
+
+| Bid | Winning states | Payment mean if awarded | Profit mean if awarded | Expected profit per opportunity |
+|---:|---|---:|---:|---:|
+| 0, abstain | None | — | — | 0 |
+| 75 | Low | 70 | 10 | 10/3 |
+| 95 | Low | 70 | 10 | 10/3 |
+| 120 | Low and middle | 90 | 10 | 20/3 |
+| 155 | All three | 110 | 10 | 10 |
+
+For the same candidate, the winning set and gross conditional mean did not change. Payment did. Bids 75 and 95 now have identical outcomes because both select the same low row and pay its R. Candidate 155 has the highest expected profit **within this menu and fixed-rival model**.
+
+<BidCatalogue
+  client:visible
+  states={[{"label": "Low", "value": 80, "rivalBid": 70, "weight": 1}, {"label": "Middle", "value": 120, "rivalBid": 110, "weight": 1}, {"label": "High", "value": 160, "rivalBid": 150, "weight": 1}]}
+  bids={[0, 75, 95, 120, 155]}
+  paymentRule={"second-price"}
+  winningCost={0}
+  initialBid={155}
+  profitLimit={60}
+  locale={"en"}
+  unit={"credits"}
+  title={"The same catalogue with a different payment rule"}
+  instructions={"Select a bid and inspect which states award us the lot. Check payment and the two profit averages separately."}
+  caption={"Hypothetical catalogue conditional on our information; the actual row is not observed before bidding. Format and rival rule are fixed in this figure. Every figure shares the same profit scale."}
+  className={"not-prose"}
+/>
+
+### Keep the private-value result in its own setting
+
+In the standard single-lot **known private-value** second-price setting, bidding your value is a weakly dominant action: it does at least as well as any other bid against every fixed rival bid. [MIT's auction lecture](https://ocw.mit.edu/courses/14-271-industrial-organization-i-fall-2022/mit14_271_f22_lec22slides.pdf) separates that argument from common-value reasoning. Here our value is uncertain and linked to R. The private-value argument does not make bidding the earlier mean dominant or insure us against losses. The next change provides an explicit counterexample to that insurance claim.
+
+<MCQ
+  client:visible
+  question={"What does the fixed-rival second-price comparison establish?"}
+  options={[{"text": "The payment change raises profit for the listed positive bids, with the rival rule fixed", "correct": true}, {"text": "The payment change guarantees profit in every common-value auction, despite any costs"}, {"text": "The payment change proves both bidders are best responding, under either auction format"}]}
+  explanation={"The comparison changes one accounting rule while holding rival behavior fixed. Its favorable outcome depends on the supplied values and costs, not on a general immunity theorem."}
+  className={"not-prose"}
+/>
+
+## Charge handling only on awarded rows
+
+Now add a known **common handling burden of 20 credits**, paid once per lot only if we receive it. Both bidders would face that same burden if awarded; the gross common value remains V. The catalogue, information and rival bids are unchanged. Abstention and losses still cost zero.
+
+For a winning first-price row, profit becomes V − b − 20; for a winning second-price row, V − R − 20. A losing row remains zero. If a candidate wins with probability p, its expected profit falls by **20p**, not automatically by 20.
+
+Try the lowest positive first-price candidate: its sole award yields 80 − 75 − 20 = **−15**. Across the whole catalogue, that is −15/3 = **−5**. For second price, the same award yields 80 − 70 − 20 = **−10**, with expected profit −10/3. The higher conditional gross value and the format label cannot pay the handling bill for us.
+
+Before opening the full solution, recompute the other candidates from the earlier tables and compare them with abstention.
+
+<MCQ
+  client:visible
+  question={"After adding the winning-only burden, which policy has the highest expected profit in both menus?"}
+  options={[{"text": "Abstention, because every positive candidate now has negative expected profit", "correct": true}, {"text": "The highest bid, because receiving every possible lot spreads the handling burden"}, {"text": "The earlier first-price choice, because its selected gross value stayed unchanged"}]}
+  explanation={"The handling burden exceeds the second-price margin in every winning state, so all positive second-price bids lose in expectation. The complete first-price table is also negative. Abstention remains zero."}
+  className={"not-prose"}
+/>
+
+<details>
+<summary>Check every candidate with the winning-only cost</summary>
+
+| Bid | First-price expected profit | Second-price expected profit |
+|---:|---:|---:|
+| 0, abstain | 0 | 0 |
+| 75 | −5 | −10/3 |
+| 95 | −35/3 | −10/3 |
+| 120 | −80/3 | −20/3 |
+| 155 | −55 | −10 |
+
+At first-price 120, the winning profits are −60 and −20, so the opportunity average is (−60 − 20 + 0)/3 = −80/3. At 155 every first-price state now loses: −95, −55 and −15 average to −55. Under second price every award loses ten, then its probability determines the overall loss. No conditional gross value or winning set changed.
+
+</details>
+
+<BidCatalogue
+  client:visible
+  states={[{"label": "Low", "value": 80, "rivalBid": 70, "weight": 1}, {"label": "Middle", "value": 120, "rivalBid": 110, "weight": 1}, {"label": "High", "value": 160, "rivalBid": 150, "weight": 1}]}
+  bids={[0, 75, 95, 120, 155]}
+  paymentRule={"first-price"}
+  winningCost={20}
+  initialBid={75}
+  profitLimit={60}
+  locale={"en"}
+  unit={"credits"}
+  title={"Handling changes profit, not the winning filter"}
+  instructions={"Select a bid and inspect which states award us the lot. Check payment and the two profit averages separately."}
+  caption={"Hypothetical catalogue conditional on our information; the actual row is not observed before bidding. Format and rival rule are fixed in this figure. Every figure shares the same profit scale."}
+  className={"not-prose"}
+/>
+
+<BidCatalogue
+  client:visible
+  states={[{"label": "Low", "value": 80, "rivalBid": 70, "weight": 1}, {"label": "Middle", "value": 120, "rivalBid": 110, "weight": 1}, {"label": "High", "value": 160, "rivalBid": 150, "weight": 1}]}
+  bids={[0, 75, 95, 120, 155]}
+  paymentRule={"second-price"}
+  winningCost={20}
+  initialBid={75}
+  profitLimit={60}
+  locale={"en"}
+  unit={"credits"}
+  title={"Second price is not insurance against this loss"}
+  instructions={"Select a bid and inspect which states award us the lot. Check payment and the two profit averages separately."}
+  caption={"Hypothetical catalogue conditional on our information; the actual row is not observed before bidding. Format and rival rule are fixed in this figure. Every figure shares the same profit scale."}
+  className={"not-prose"}
+/>
+
+### When zero wins can be the right choice
+
+Never winning is not enough evidence of excessive shading. You may be refusing negative-value opportunities. It can also mean missing profitable ones; investigate the foregone alternatives rather than prescribing a target win rate.
+
+For example, at second-price 75 with the handling burden, the prior net value after handling is 120 − 20 = 100. But conditional on its only winning state the net value before payment is 80 − 20 = 60, below the payment of 70. Ignoring selection would hide this loss. This is an explicit common-value second-price loss under the given rules, not a claim that every second-price winner loses.
+
+## Transfer the method to unequal weights
+
+A different invented catalogue tests whether you learned a denominator or merely memorized “divide by three.” There are now two possible states, with weights three and one. These are assumed probabilities of three quarters and one quarter, not four observed sales. Gross value and rival bid are still common and fixed jointly given the new information.
+
+| State | Gross value | Rival bid | Weight |
+|---|---:|---:|---:|
+| Lower | 50 | 40 | 3 |
+| Higher | 110 | 100 | 1 |
+
+Use **first price**, no extra cost, lost ties and menu **0, 45, 105**. The prior mean is (3 × 50 + 1 × 110)/4 = **65**. Bid 45 wins only the lower state: conditional gross value is (3 × 50)/3 = 50 and conditional profit is 5. Overall expected profit is (3 × 5 + 1 × 0)/4 = **15/4**, or 3.75 credits.
+
+Now compare 105 with abstention and 45. Keep the larger weight attached to the lower state even when both states win.
+
+<MCQ
+  client:visible
+  question={"How must the higher candidate be averaged in the unequal-weight transfer?"}
+  options={[{"text": "Keep each state’s probability weight and include both resulting profits", "correct": true}, {"text": "Average the two state profits equally because both states receive an award"}, {"text": "Use only the higher-value state because the candidate bid is higher"}]}
+  explanation={"The candidate wins both states, but their weights are still three to one. The lower state has profit minus fifty-five and the higher five, giving a weighted average of minus forty."}
+  className={"not-prose"}
+/>
+
+<details>
+<summary>Check the independent comparison</summary>
+
+At 105, the state profits are 50 − 105 = −55 and 110 − 105 = 5. Their expected value is (3 × (−55) + 1 × 5)/4 = **−40**. Candidate 45 has 15/4; abstention has 0. Therefore 45 has the highest expected profit within this new menu. The same rules worked with different states, weights and candidates because we rebuilt selection, payment and the denominator.
+
+</details>
+
+## State what the calculation can and cannot decide
+
+**An auditable decision memo** for the initial model reads: “Given I, the three joint states have equal probability. We lose ties and pay our own bid only if awarded. Of the allowed candidates, 75 has the largest expected net profit, 5/3 credits, while abstention gives zero. The selected gross value is 80 rather than the earlier mean 120, yet payment is only 75. This is not an equilibrium or a guarantee. We would recompute if weights, costs, rival behavior, information or available bids changed.”
+
+That memo also names the limits:
+
+- **Menu limit.** A best candidate need not be best among all real-valued bids. If the menu were expanded to include 71, it would win the low state and yield (80 − 71)/3 = 3, above 5/3. We did not include it in the original choice set.
+- **Strategic limit.** The rival bid is a state-dependent input held fixed, not a strategy we derived. An **equilibrium** requires mutually consistent responses by the players; accounting for our alternatives alone does not establish one.
+- **Information limit.** The catalogue needs the relationship between value and rival behavior. Learning about a different signal, selection process or dependence can change the winning conditional value. It need not always move downward.
+- **Objective limit.** Expected credits are the stated criterion. A binding budget, loss constraint, risk aversion, entry fee or alternative use of resources would require another account.
+
+The [Royal Swedish Academy's explanation](https://www.kva.se/en/news/ekonomipriset-2020-2/) places common-value bidding in its information setting: bidders consider both what they know and what they believe others know. It does not supply a universal discount percentage. The calculations here follow our invented catalogue, not an empirical law that every winner overpays.
+
+<MCQ
+  client:visible
+  question={"Which changes require a new audit? Select all that apply."}
+  options={[{"text": "The rival changes bids when the payment format changes", "correct": true}, {"text": "A fee is charged even when we receive no lot", "correct": true}, {"text": "We merely display an exact fraction with a rounded decimal beside it"}, {"text": "New information changes the joint catalogue weights", "correct": true}]}
+  explanation={"Rival behavior, fees and the conditional distribution are model inputs. An explicitly approximate display beside an exact value does not change the underlying calculation."}
+  allowMultiple={true}
+  className={"not-prose"}
+/>
+
+## Reconstruct the audit from memory
+
+First specify what is known. Then, for each candidate, filter the winning states, apply the payment and cost rules, and average over the right cases. Compare complete opportunity values with the outside option before choosing. If the winning probability is zero, keep its conditional means undefined and compute its overall value directly.
+
+<MindMap
+  client:visible
+  title={"From information to a finite bid choice"}
+  root={{"label": "Audit a winning bid", "children": [{"label": "Information", "children": [{"label": "Joint value and rival catalogue, weights, actual state unknown"}]}, {"label": "Selection", "children": [{"label": "Positive bid beats rival, lost ties, zero abstains"}]}, {"label": "Accounting", "children": [{"label": "Separate gross value, payment and winning-only cost"}]}, {"label": "Averages", "children": [{"label": "Winning weights for conditional means, all weights for opportunity profit"}]}, {"label": "Decision", "children": [{"label": "Compare every candidate and outside option, within the model’s limits"}]}]}}
+  className={"not-prose"}
+/>
+
+<Quiz
+  client:visible
+  title={"Check the complete bid audit"}
+  questions={[{"question": "Why can the same winning cases have different first-price profits?", "options": [{"text": "The own-bid payment changes although selected gross value stays fixed", "correct": true}, {"text": "The gross value changes whenever the selected candidate is higher"}, {"text": "The rival bid changes automatically when our candidate is lower"}], "explanation": "The two lower positive candidates select the same low state. Paying our own bid changes its margin even with no information change."}, {"question": "What belongs in the no-award row?", "options": [{"text": "Overall profit is zero and winning conditional means are not applicable", "correct": true}, {"text": "Overall profit and winning conditional means must all be zero"}, {"text": "Overall profit is undefined because the winning probability is zero"}], "explanation": "There are no winning states to average, so conditional means are undefined. Overall profit averages the defined zero-profit rows."}, {"question": "Which statements survive the handling transfer? Select all that apply.", "options": [{"text": "The winning set for the same bid stays fixed", "correct": true}, {"text": "The common gross value conditional on winning stays fixed", "correct": true}, {"text": "The second-price format guarantees a positive net margin"}, {"text": "Abstention can have the highest expected profit", "correct": true}], "explanation": "The new cost changes net profit only on winning rows. It leaves the information and allocation rule unchanged.", "allowMultiple": true}, {"question": "How should a bid that wins every state be judged?", "options": [{"text": "Compare its net opportunity value with the other candidates and abstention", "correct": true}, {"text": "Prefer it because a complete set of wins proves the value estimate was right"}, {"text": "Reject it because a complete set of wins proves the payment exceeded value"}], "explanation": "Win rate does not decide the objective. Our first- and second-price versions give different menu choices under otherwise fixed inputs."}, {"question": "A first-price bid is ninety-five credits. It wins with probability one third; mean gross value when awarded is eighty. Otherwise profit is zero, with no extra costs. What is expected profit per opportunity?", "options": [{"text": "A loss of five credits", "correct": true}, {"text": "A loss of fifteen credits"}, {"text": "A gain of five thirds of a credit"}], "explanation": "Conditional profit is 80 − 95 = −15. Weight the award and the zero-profit loss: (1/3)(−15) + (2/3)0 = −5."}, {"question": "A hypothetical catalogue assigns weight three to a profit of minus fifty-five credits and weight one to a profit of plus five. What is its expected profit per opportunity?", "options": [{"text": "An expected loss of forty credits", "correct": true}, {"text": "An expected loss of twenty-five credits"}, {"text": "An expected loss of one hundred sixty credits"}], "explanation": "Keep the unequal weights: [3(−55) + 1(5)]/(3 + 1) = (−165 + 5)/4 = −40. An equal average gives −25; the unnormalized sum gives −160."}]}
+  className={"not-prose"}
+/>
+
+The [Final Exam](/winners-curse/final-exam) follows this workshop. It includes the distinction between selected value, payment and expected opportunity profit.

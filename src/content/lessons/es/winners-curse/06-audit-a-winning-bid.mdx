@@ -1,0 +1,414 @@
+---
+title: "Auditar una puja ganadora"
+description: "Recalcula qué casos gana cada puja, separa valor y pago, y compara el beneficio esperado con abstenerte bajo reglas explícitas."
+topic: "es/winners-curse"
+order: 7
+minutes: 35
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, Callout, FillBlank, Categorize, MatchConcepts, MindMap, BidCatalogue } from '@/components/react';
+
+Una puja puede llevarte a comprar un lote decepcionante. También puede darte uno rentable. «Hemos ganado» dice qué ofertas superaron a la competencia; todavía no ha hecho las cuentas.
+
+Este taller convierte la **maldición del ganador (winner's curse)** en una decisión que puedes comprobar fila a fila. Recalcularás qué significa ganar con cada puja candidata, separarás el pago y compararás el resultado con no recibir el lote. **La subasta, el catálogo, los pesos, los créditos y los costes son supuestos didácticos inventados.** No son observaciones de un mercado ni una regla de puja recomendada.
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Una puja gana solo en casos cuyo valor bruto está por debajo de la media anterior. ¿Qué se deduce?"}
+  options={[{"text": "Ganar revisa el valor pertinente; el beneficio aún depende del pago y los costes", "correct": true}, {"text": "Ganar revisa el valor pertinente; todo lote adjudicado debe por ello perder dinero"}, {"text": "Ganar cambia solo el pago; el valor pertinente debe conservar su media anterior"}]}
+  explanation={"La selección cambia los casos que promediamos. Compara su valor con el pago y los costes reales antes de concluir que la puja pierde dinero."}
+  pretest={true}
+  className={"not-prose"}
+/>
+
+## Fija la información antes de elegir la puja
+
+Imagina un lote cerrado e indivisible de piezas sobrantes. Su **valor común bruto (common value)**, V, es el mismo valor en créditos para cualquiera de los dos postores antes del pago o la manipulación. «Común» describe ese valor subyacente compartido; no significa que los postores lo conozcan. Se descubre después de la adjudicación. Los créditos son una escala lineal de comparación: preferimos el mayor total neto esperado. No son dinero ni rendimientos empresariales medidos.
+
+Hay un rival. R representa su puja sellada. **Nuestra información I** consiste en este catálogo condicional completo: con todo lo que sabemos antes de pujar, exactamente estos tres casos son igual de probables. Cada uno tiene probabilidad de un tercio. No podemos ver el caso real ni la puja rival antes de enviar la nuestra. La tabla muestra posibilidades hipotéticas para analizarlas, no una mirada dentro del sobre.
+
+| Caso según I | Valor común bruto V | Puja rival R | Peso de probabilidad |
+|---|---:|---:|---:|
+| Bajo | 80 | 70 | 1 |
+| Medio | 120 | 110 | 1 |
+| Alto | 160 | 150 | 1 |
+
+Antes de filtrar, nuestra media condicionada a I es:
+
+$$E[V\mid I]=\frac{80+120+160}{3}=120.$$
+
+Una **media condicional** es un promedio restringido a una condición definida. Esa primera media ya usa nuestra información I. Después añadiremos que gana una puja concreta; conserva I en la cuenta para no comparar a un postor informado con otro distinto que no lo está.
+
+El menú permitido es **0, 75, 95, 120 y 155 créditos**. Cero significa **abstenerse**: no recibimos el lote, no pagamos y el beneficio es cero. No significa que nadie más reciba el lote. Con una puja positiva b, gana la mayor oferta y **perdemos los empates**: solo recibimos el lote si b es estrictamente mayor que R. Quien pierde no paga. No hay precio de reserva, cuota de entrada, límite presupuestario, valor privado, fricción de reventa ni otro resultado omitido.
+
+### Cuándo resulta útil este catálogo
+
+Un catálogo finito permite ver supuestos que podrías esconder dentro de «nuestra mejor estimación». Las filas conjuntas dicen cómo varían *juntos* el valor y la puja rival. Conocer sus medias por separado no recupera esa relación. Aquí los pesos son probabilidades estipuladas, no recuentos de tres subastas observadas. Una aplicación real necesitaría un modelo defendible y pruebas que lo respalden.
+
+<MatchConcepts
+  client:visible
+  instructions={"Elige un término y después su definición."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  allCorrectLabel={"✓ Todas las parejas correctas"}
+  partialResultWord={"correctas"}
+  pickDefinitionHint={"→ elige una definición"}
+  notLinkedHint={"sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+  question={"Relaciona las cantidades antes de combinarlas."}
+  pairs={[{"term": "Valor común bruto", "definition": "El valor compartido del lote antes de nuestro pago y manipulación"}, {"term": "Pago", "definition": "La cantidad determinada por la regla de subasta cuando recibimos el lote"}, {"term": "Beneficio neto", "definition": "Valor bruto menos pago y costes aplicables, o cero sin adjudicación"}, {"term": "Información I", "definition": "Lo que sabemos antes de elegir, incluido el catálogo conjunto hipotético"}]}
+  explanation={"Valor, pago y beneficio son columnas distintas. Un catálogo condicional describe la incertidumbre después de disponer de la información indicada."}
+  className={"not-prose"}
+/>
+
+## Recalcula qué casos gana cada candidato
+
+Piensa en la puja como un filtro transparente sobre las filas. Una fila pasa si nuestra puja positiva supera su R. Cambiar el filtro no cambia V dentro de la fila, pero puede cambiar qué filas permanecen.
+
+Con **b = 120**, pasa el caso bajo porque 120 > 70; pasa el medio porque 120 > 110; no pasa el alto porque 120 < 150. Los dos casos seleccionados conservan el mismo peso. Escribimos $W_b$ para el evento de recibir el lote con la puja b:
+
+$$P(W_{120}\mid I)=\frac{2}{3},\qquad E[V\mid I,W_{120}]=\frac{80+120}{2}=100.$$
+
+La condición adicional de ganar revisa la media de 120 a 100. No cambia el valor de ninguno de los lotes seleccionados ni demuestra que el pago supere al valor en todos ellos.
+
+Compara con cuidado dos cambios:
+
+| Puja | Casos ganados | Valor bruto medio si ganamos |
+|---:|---|---:|
+| 75 | Bajo | 80 |
+| 95 | Bajo | 80 |
+| 120 | Bajo y medio | 100 |
+| 155 | Los tres | 120 |
+
+Pasar de 75 a 95 conserva la información seleccionada. Pasar de 95 a 120 añade el caso medio, así que también cambia la media condicional. Con 155 pasan todos los casos y ganar no añade información a I en este catálogo. No hay una única «corrección por ganar» fija que restar con independencia de la puja.
+
+### Respeta la desigualdad estricta
+
+Las pujas positivas del menú no empatan con R. Si se permitiera una candidata nueva de 110, perdería el empate del caso medio y seguiría ganando solo el bajo. Una puja de 70 no ganaría nada. Son comprobaciones de la regla, no candidatos añadidos para declarar el ganador del menú.
+
+<FillBlank
+  client:visible
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"correctas"}
+  question={"Conserva el evento seleccionado junto a la cuenta."}
+  text={"Una puja mayor puede cambiar los {{casos ganados|valores brutos|planes del rival}}. Los mismos casos con iguales pesos conservan la {{media|regla de pago|ganancia neta}} condicional. Un empate perdido no recibe {{nada|el lote entero|una parte del lote}}."}
+  explanation={"Vuelve a filtrar con cada candidato. Los mismos casos conservan el valor bruto condicional, pero un pago basado en nuestra puja puede cambiar el beneficio."}
+  className={"not-prose"}
+/>
+
+## Separa la media al ganar de la oportunidad completa
+
+Empezamos con **primer precio**: cuando ganamos, pagamos nuestra puja b. Sin coste adicional, el beneficio es V − b en una fila ganada y cero en las demás. Con b = 120, la cuenta completa es:
+
+| Caso | ¿Se nos adjudica? | Valor bruto | Pago | Nuestro beneficio |
+|---|---|---:|---:|---:|
+| Bajo | Sí | 80 | 120 | −40 |
+| Medio | Sí | 120 | 120 | 0 |
+| Alto | No | 160 | 0 | 0 |
+
+El **beneficio condicional a ganar** promedia solo las filas ganadas: (−40 + 0)/2 = **−20**. El **beneficio esperado por oportunidad** incluye todas las filas: (−40 + 0 + 0)/3 = **−40/3**, unos −13,33 créditos. Los denominadores responden preguntas distintas. Una fila perdida aporta beneficio cero; no desaparece de la oportunidad.
+
+Como las filas perdidas tienen beneficio cero, con una probabilidad positiva de ganar:
+
+$$E[\Pi_b\mid I]=P(W_b\mid I)\,E[\Pi_b\mid I,W_b].$$
+
+Aquí $\Pi_b$ representa nuestro beneficio neto con la puja b. Multiplicar −20 por 2/3 recupera −40/3. Si ningún caso gana, las medias condicionales quedan **sin definir**, porque no hay pesos ganadores que promediar. Muéstralas con un guion, no con cero. El beneficio esperado global sigue siendo cero y se obtiene directamente de todas las filas con beneficio cero.
+
+<BidCatalogue
+  client:visible
+  states={[{"label": "Bajo", "value": 80, "rivalBid": 70, "weight": 1}, {"label": "Medio", "value": 120, "rivalBid": 110, "weight": 1}, {"label": "Alto", "value": 160, "rivalBid": 150, "weight": 1}]}
+  bids={[0, 75, 95, 120, 155]}
+  paymentRule={"first-price"}
+  winningCost={0}
+  initialBid={120}
+  profitLimit={60}
+  locale={"es"}
+  unit={"créditos"}
+  title={"Sigue por separado la selección y el pago"}
+  instructions={"Elige una puja y observa qué casos nos adjudican el lote. Revisa por separado el pago y las dos medias de beneficio."}
+  caption={"Catálogo hipotético condicionado a nuestra información; no observamos la fila real antes de pujar. El formato y la regla rival están fijos en esta figura. Todas las figuras comparten escala de beneficio."}
+  className={"not-prose"}
+/>
+
+Ahora audita **todo el menú permitido**, no solo si una victoria aislada parecería aceptable:
+
+| Puja | Probabilidad de adjudicación | Valor bruto medio con adjudicación | Beneficio medio con adjudicación | Beneficio esperado por oportunidad |
+|---:|---|---:|---:|---:|
+| 0, abstenerse | 0 | — | — | 0 |
+| 75 | 1/3 | 80 | 5 | 5/3 |
+| 95 | 1/3 | 80 | −15 | −5 |
+| 120 | 2/3 | 100 | −20 | −40/3 |
+| 155 | 1 | 120 | −35 | −35 |
+
+Con 75, el único lote adjudicado vale 80 y cuesta 75: deja un beneficio de **5**, aunque ganar haya revisado el valor a la baja frente a su media previa. Con 95, *el mismo* lote cuesta 20 más y el beneficio pasa a −15; la información seleccionada no cambia. Con 155, los beneficios son −75, −35 y 5, con media −35. Ganar en todos los casos no convierte esta puja en la mejor candidata.
+
+**El mayor beneficio esperado del menú es 5/3, con 75.** Gana menos veces que 120 o 155 y supera el cero de abstenerse bajo el criterio declarado de créditos esperados. Es «la mejor entre estas candidatas», no un óptimo continuo, una estrategia de equilibrio ni un beneficio prometido en un modelo más amplio.
+
+### Cuándo usar ambas medias
+
+Usa el beneficio condicional para entender qué supondría recibir el lote. Usa el beneficio esperado por oportunidad, incluida la alternativa de abstenerte, para comparar políticas antes de conocer el caso. Elegir la puja cambia el evento al que condicionas; no calcules una media condicional una sola vez para mantenerla fija cuando cambies la oferta.
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Por qué la menor candidata positiva supera a las pujas mayores del menú de primer precio?"}
+  options={[{"text": "Su lote seleccionado deja margen positivo, que sigue siendo positivo al ponderar las derrotas", "correct": true}, {"text": "Su lote seleccionado tiene el mayor valor bruto, lo que vuelve irrelevante la probabilidad de ganar"}, {"text": "Su margen condicional es inferior al de las demás, pero se compensa ganando más veces"}]}
+  explanation={"Con la menor puja positiva, la única adjudicación deja cinco créditos y tiene probabilidad de un tercio. Las derrotas aportan cero: el beneficio esperado es cinco tercios. Las pujas mayores indicadas tienen beneficio esperado negativo."}
+  className={"not-prose"}
+/>
+
+## Cambia la regla de pago y conserva la regla rival
+
+El filtro y la caja hacen trabajos distintos. En este **supuesto alternativo de segundo precio**, conservamos el mismo catálogo conjunto, las pujas rivales, la información, el menú y la regla de empate. Una puja positiva sigue ganando exactamente cuando b > R. Pero, si ganamos, pagamos **R**, la oferta del único rival, en vez de b.
+
+Es una comparación controlada de cuentas. Si cambiara un formato real, el rival podría cambiar de estrategia. No afirmamos que ambos postores elijan su mejor respuesta bajo los dos formatos ni demostramos equivalencia de ingresos.
+
+La diferencia entre valor y pago es ahora 80 − 70 = 10 en el caso bajo, 120 − 110 = 10 en el medio y 160 − 150 = 10 en el alto. Por tanto:
+
+| Puja | Casos ganados | Pago medio con adjudicación | Beneficio medio con adjudicación | Beneficio esperado por oportunidad |
+|---:|---|---:|---:|---:|
+| 0, abstenerse | Ninguno | — | — | 0 |
+| 75 | Bajo | 70 | 10 | 10/3 |
+| 95 | Bajo | 70 | 10 | 10/3 |
+| 120 | Bajo y medio | 90 | 10 | 20/3 |
+| 155 | Los tres | 110 | 10 | 10 |
+
+Para una misma candidata, no cambian los casos ganados ni la media bruta condicional. Cambia el pago. Las pujas 75 y 95 dan ahora resultados idénticos porque seleccionan la misma fila baja y pagan su R. La candidata 155 tiene el mayor beneficio esperado **dentro de este menú y modelo de rival fijo**.
+
+<BidCatalogue
+  client:visible
+  states={[{"label": "Bajo", "value": 80, "rivalBid": 70, "weight": 1}, {"label": "Medio", "value": 120, "rivalBid": 110, "weight": 1}, {"label": "Alto", "value": 160, "rivalBid": 150, "weight": 1}]}
+  bids={[0, 75, 95, 120, 155]}
+  paymentRule={"second-price"}
+  winningCost={0}
+  initialBid={155}
+  profitLimit={60}
+  locale={"es"}
+  unit={"créditos"}
+  title={"El mismo catálogo con otra regla de pago"}
+  instructions={"Elige una puja y observa qué casos nos adjudican el lote. Revisa por separado el pago y las dos medias de beneficio."}
+  caption={"Catálogo hipotético condicionado a nuestra información; no observamos la fila real antes de pujar. El formato y la regla rival están fijos en esta figura. Todas las figuras comparten escala de beneficio."}
+  className={"not-prose"}
+/>
+
+### Conserva el resultado de valor privado en su contexto
+
+En el caso estándar de un solo lote, **valor privado conocido** y segundo precio, pujar tu valor es una acción débilmente dominante: frente a cualquier puja rival fija, otra oferta nunca da un resultado mejor que pujar tu valor. La [lección de subastas del MIT](https://ocw.mit.edu/courses/14-271-industrial-organization-i-fall-2022/mit14_271_f22_lec22slides.pdf) separa ese argumento del razonamiento con valor común. Aquí nuestro valor es incierto y está relacionado con R. El argumento de valor privado no vuelve dominante pujar la media anterior ni nos asegura contra pérdidas. El siguiente cambio ofrece un contraejemplo explícito a esa supuesta protección.
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Qué establece la comparación de segundo precio con rival fijo?"}
+  options={[{"text": "El cambio de pago mejora el beneficio de las pujas positivas indicadas, con regla rival fija", "correct": true}, {"text": "El cambio de pago garantiza beneficio en toda subasta de valor común, haya los costes que haya"}, {"text": "El cambio de pago demuestra que ambos postores dan su mejor respuesta, bajo cualquier formato"}]}
+  explanation={"La comparación cambia una regla contable y conserva la conducta rival. El resultado favorable depende de los valores y costes dados, no de un teorema general de inmunidad."}
+  className={"not-prose"}
+/>
+
+## Cobra la manipulación solo en las filas adjudicadas
+
+Añade ahora un **coste común conocido de manipulación de 20 créditos**, pagado una vez por lote solo si lo recibimos. Cualquiera de los dos postores afrontaría el mismo coste al recibirlo; el valor común bruto sigue siendo V. No cambian el catálogo, la información ni las pujas rivales. Abstenerse y perder siguen costando cero.
+
+En una fila ganada a primer precio, el beneficio pasa a V − b − 20; a segundo precio, a V − R − 20. Una fila perdida sigue dando cero. Si una candidata gana con probabilidad p, su beneficio esperado cae en **20p**, no automáticamente en 20.
+
+Prueba la menor candidata positiva de primer precio: su única adjudicación deja 80 − 75 − 20 = **−15**. En todo el catálogo, eso es −15/3 = **−5**. A segundo precio, la misma adjudicación deja 80 − 70 − 20 = **−10**, con beneficio esperado −10/3. Ni un mayor valor bruto condicional ni la etiqueta del formato pagan por nosotros la manipulación.
+
+Antes de abrir la solución completa, recalcula las demás candidatas con las tablas anteriores y compáralas con abstenerte.
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Tras añadir el coste solo al ganar, ¿qué política tiene mayor beneficio esperado en ambos menús?"}
+  options={[{"text": "Abstenerse, porque toda candidata positiva tiene ahora beneficio esperado negativo", "correct": true}, {"text": "La puja mayor, porque recibir cualquier lote reparte el coste de manipulación"}, {"text": "La elección anterior de primer precio, porque su valor bruto seleccionado no cambió"}]}
+  explanation={"El coste de manipulación supera el margen de segundo precio en toda fila ganada, así que todas las pujas positivas pierden en esperanza. La tabla completa de primer precio también es negativa. Abstenerse sigue dando cero."}
+  className={"not-prose"}
+/>
+
+<details>
+<summary>Comprueba todas las candidatas con el coste al ganar</summary>
+
+| Puja | Beneficio esperado a primer precio | Beneficio esperado a segundo precio |
+|---:|---:|---:|
+| 0, abstenerse | 0 | 0 |
+| 75 | −5 | −10/3 |
+| 95 | −35/3 | −10/3 |
+| 120 | −80/3 | −20/3 |
+| 155 | −55 | −10 |
+
+Con 120 a primer precio, los beneficios ganadores son −60 y −20, así que la media por oportunidad es (−60 − 20 + 0)/3 = −80/3. Con 155, todos los casos de primer precio pierden ahora: −95, −55 y −15 tienen media −55. A segundo precio, cada adjudicación pierde diez; su probabilidad determina la pérdida global. No ha cambiado ninguna media bruta condicional ni conjunto de casos ganados.
+
+</details>
+
+<BidCatalogue
+  client:visible
+  states={[{"label": "Bajo", "value": 80, "rivalBid": 70, "weight": 1}, {"label": "Medio", "value": 120, "rivalBid": 110, "weight": 1}, {"label": "Alto", "value": 160, "rivalBid": 150, "weight": 1}]}
+  bids={[0, 75, 95, 120, 155]}
+  paymentRule={"first-price"}
+  winningCost={20}
+  initialBid={75}
+  profitLimit={60}
+  locale={"es"}
+  unit={"créditos"}
+  title={"La manipulación cambia el beneficio, no el filtro ganador"}
+  instructions={"Elige una puja y observa qué casos nos adjudican el lote. Revisa por separado el pago y las dos medias de beneficio."}
+  caption={"Catálogo hipotético condicionado a nuestra información; no observamos la fila real antes de pujar. El formato y la regla rival están fijos en esta figura. Todas las figuras comparten escala de beneficio."}
+  className={"not-prose"}
+/>
+
+<BidCatalogue
+  client:visible
+  states={[{"label": "Bajo", "value": 80, "rivalBid": 70, "weight": 1}, {"label": "Medio", "value": 120, "rivalBid": 110, "weight": 1}, {"label": "Alto", "value": 160, "rivalBid": 150, "weight": 1}]}
+  bids={[0, 75, 95, 120, 155]}
+  paymentRule={"second-price"}
+  winningCost={20}
+  initialBid={75}
+  profitLimit={60}
+  locale={"es"}
+  unit={"créditos"}
+  title={"El segundo precio no asegura contra esta pérdida"}
+  instructions={"Elige una puja y observa qué casos nos adjudican el lote. Revisa por separado el pago y las dos medias de beneficio."}
+  caption={"Catálogo hipotético condicionado a nuestra información; no observamos la fila real antes de pujar. El formato y la regla rival están fijos en esta figura. Todas las figuras comparten escala de beneficio."}
+  className={"not-prose"}
+/>
+
+### Cuándo puede convenir no ganar
+
+No ganar nunca no demuestra por sí solo que hayas rebajado demasiado. Puede que estés rechazando oportunidades de valor negativo. También puedes estar dejando pasar otras rentables; investiga las alternativas descartadas en vez de recetar una tasa de victorias.
+
+Por ejemplo, con segundo precio y puja 75, el valor previo neto de manipulación es 120 − 20 = 100. Pero, condicionado al único caso que gana, el valor neto antes del pago es 80 − 20 = 60, inferior al pago de 70. Ignorar la selección ocultaría esa pérdida. Es una pérdida explícita de valor común y segundo precio bajo estas reglas, no una afirmación de que todo ganador de segundo precio pierda.
+
+## Traslada el método a pesos desiguales
+
+Otro catálogo inventado comprueba si has aprendido a elegir el denominador o solo has memorizado «dividir entre tres». Ahora hay dos casos posibles, con pesos tres y uno. Son probabilidades supuestas de tres cuartos y un cuarto, no cuatro ventas observadas. El valor bruto sigue siendo común y está fijado conjuntamente con la puja rival dada la nueva información.
+
+| Caso | Valor bruto | Puja rival | Peso |
+|---|---:|---:|---:|
+| Menor | 50 | 40 | 3 |
+| Mayor | 110 | 100 | 1 |
+
+Usa **primer precio**, ningún coste adicional, empates perdidos y menú **0, 45, 105**. La media previa es (3 × 50 + 1 × 110)/4 = **65**. La puja 45 gana solo el caso menor: el valor bruto condicional es (3 × 50)/3 = 50 y el beneficio condicional es 5. El beneficio esperado global es (3 × 5 + 1 × 0)/4 = **15/4**, es decir, 3,75 créditos.
+
+Compara ahora 105 con abstenerse y con 45. Conserva el mayor peso del caso menor aunque ganen ambos casos.
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Cómo hay que promediar la candidata mayor de la transferencia con pesos desiguales?"}
+  options={[{"text": "Conservar el peso de probabilidad de cada caso e incluir ambos beneficios", "correct": true}, {"text": "Promediar por igual ambos beneficios porque los dos casos reciben adjudicación"}, {"text": "Usar solo el caso de valor mayor porque la puja candidata también es mayor"}]}
+  explanation={"La candidata gana ambos casos, pero los pesos siguen siendo tres a uno. El caso menor deja menos cincuenta y cinco y el mayor cinco: su media ponderada es menos cuarenta."}
+  className={"not-prose"}
+/>
+
+<details>
+<summary>Comprueba la comparación independiente</summary>
+
+Con 105, los beneficios son 50 − 105 = −55 y 110 − 105 = 5. Su esperanza es (3 × (−55) + 1 × 5)/4 = **−40**. La candidata 45 da 15/4; abstenerse da 0. Por tanto, 45 tiene el mayor beneficio esperado dentro de este nuevo menú. Las mismas reglas funcionan con casos, pesos y candidatos distintos porque hemos reconstruido selección, pago y denominador.
+
+</details>
+
+## Declara qué puede decidir la cuenta y qué queda fuera
+
+Una **nota de decisión comprobable** del modelo inicial diría: «Dada I, los tres casos conjuntos tienen igual probabilidad. Perdemos los empates y pagamos nuestra oferta solo si recibimos el lote. Entre las candidatas permitidas, 75 tiene el mayor beneficio neto esperado, 5/3 créditos, frente al cero de abstenerse. El valor bruto seleccionado es 80 en vez de la media anterior de 120, pero el pago es solo 75. No es un equilibrio ni una garantía. Reharíamos la cuenta si cambiaran los pesos, los costes, la conducta rival, la información o las pujas disponibles».
+
+La nota también identifica sus límites:
+
+- **Límite del menú.** La mejor candidata no tiene por qué ser la mejor entre todas las pujas reales posibles. Si ampliásemos el menú para incluir 71, ganaría el caso bajo y daría (80 − 71)/3 = 3, más que 5/3. No la incluimos en el conjunto de elección original.
+- **Límite estratégico.** La puja rival es una entrada que depende del caso y se mantiene fija, no una estrategia que hayamos deducido. Un **equilibrio** exige respuestas mutuamente coherentes de los jugadores; contar solo nuestras alternativas no lo establece.
+- **Límite de información.** El catálogo necesita la relación entre valor y conducta rival. Conocer otra señal, proceso de selección o dependencia puede cambiar el valor condicional al ganar. No tiene por qué moverse siempre a la baja.
+- **Límite del objetivo.** Los créditos esperados son el criterio declarado. Un presupuesto vinculante, límite de pérdida, aversión al riesgo, cuota de entrada u otro uso alternativo de los recursos exigirían otra cuenta.
+
+La [explicación de la Real Academia Sueca](https://www.kva.se/en/news/ekonomipriset-2020-2/) sitúa la puja de valor común en su contexto informativo: los postores consideran lo que saben y lo que creen que saben los demás. No aporta un porcentaje universal de rebaja. Las cuentas de aquí se deducen de nuestro catálogo inventado, no de una ley empírica según la cual todo ganador paga de más.
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Qué cambios exigen una auditoría nueva? Marca todos los correctos."}
+  options={[{"text": "El rival cambia sus pujas cuando cambia el formato de pago", "correct": true}, {"text": "Se cobra una cuota incluso cuando no recibimos ningún lote", "correct": true}, {"text": "Solo mostramos una fracción exacta con un decimal redondeado al lado"}, {"text": "Una información nueva cambia los pesos del catálogo conjunto", "correct": true}]}
+  explanation={"La conducta rival, las cuotas y la distribución condicional son entradas del modelo. Mostrar una aproximación explícita junto al valor exacto no cambia la cuenta subyacente."}
+  allowMultiple={true}
+  className={"not-prose"}
+/>
+
+## Reconstruye la auditoría de memoria
+
+Primero especifica lo que se sabe. Después, con cada candidata, filtra los casos ganados, aplica las reglas de pago y coste, y promedia los casos adecuados. Compara el valor de la oportunidad completa con la alternativa antes de elegir. Si la probabilidad de ganar es cero, conserva las medias condicionales sin definir y calcula directamente el valor global.
+
+<MindMap
+  client:visible
+  eyebrow={"Relaciones del taller"}
+  outlineLabel={"Esquema en texto"}
+  title={"De la información a una elección finita de puja"}
+  root={{"label": "Auditar una puja ganadora", "children": [{"label": "Información", "children": [{"label": "Catálogo conjunto de valor y rival, pesos, caso real desconocido"}]}, {"label": "Selección", "children": [{"label": "Puja positiva supera al rival, empates perdidos, cero se abstiene"}]}, {"label": "Cuenta", "children": [{"label": "Separar valor bruto, pago y coste solo al ganar"}]}, {"label": "Medias", "children": [{"label": "Pesos ganadores para medias condicionales, todos para beneficio por oportunidad"}]}, {"label": "Decisión", "children": [{"label": "Comparar cada candidata y la alternativa, dentro de los límites del modelo"}]}]}}
+  className={"not-prose"}
+/>
+
+<Quiz
+  client:visible
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"correctas"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso terminado"}
+  perfectMessage={"Todo correcto. Comprueba que puedes explicar tus decisiones."}
+  goodMessage={"Revisa las preguntas que has fallado."}
+  keepPracticingMessage={"Vuelve al ejemplo y prueba de nuevo."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultado"}
+  backLabel={"Anterior"}
+  scoreLabel={"Resultado"}
+  restartLabel={"Repetir"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  title={"Comprueba la auditoría completa de puja"}
+  questions={[{"question": "¿Por qué los mismos casos ganados pueden dar beneficios distintos a primer precio?", "options": [{"text": "Cambia el pago de nuestra puja aunque el valor bruto seleccionado siga fijo", "correct": true}, {"text": "El valor bruto cambia cada vez que la candidata seleccionada es mayor"}, {"text": "La puja rival cambia automáticamente cuando nuestra candidata es menor"}], "explanation": "Las dos candidatas positivas menores seleccionan el mismo caso bajo. Pagar nuestra propia puja cambia su margen sin que cambie la información."}, {"question": "¿Qué corresponde a la fila sin adjudicación?", "options": [{"text": "El beneficio global es cero y las medias condicionales al ganar no son aplicables", "correct": true}, {"text": "El beneficio global y las medias condicionales al ganar deben ser todos cero"}, {"text": "El beneficio global queda sin definir porque la probabilidad de ganar es cero"}], "explanation": "No hay casos ganados que promediar, así que las medias condicionales quedan sin definir. El beneficio global promedia filas con beneficio cero bien definido."}, {"question": "¿Qué afirmaciones se conservan al añadir la manipulación? Marca todas las correctas.", "options": [{"text": "Los casos ganados por una misma puja siguen fijos", "correct": true}, {"text": "El valor común bruto condicionado a ganar sigue fijo", "correct": true}, {"text": "El formato de segundo precio garantiza margen neto positivo"}, {"text": "Abstenerse puede tener el mayor beneficio esperado", "correct": true}], "explanation": "El coste nuevo cambia el beneficio neto solo en las filas ganadas. No cambia la información ni la regla de adjudicación.", "allowMultiple": true}, {"question": "¿Cómo hay que juzgar una puja que gana en todos los casos?", "options": [{"text": "Comparando su valor neto por oportunidad con las demás candidatas y abstenerse", "correct": true}, {"text": "Prefiriéndola porque ganar todos los casos demuestra que la estimación era correcta"}, {"text": "Rechazándola porque ganar todos los casos demuestra que el pago superaba al valor"}], "explanation": "La tasa de victorias no decide el objetivo. Las versiones de primer y segundo precio dan elecciones distintas con las demás entradas fijas."}, {"question": "Una puja de primer precio es noventa y cinco créditos. Gana con probabilidad de un tercio y valor bruto medio al ganar de ochenta. Si pierde, da cero y no hay otros costes. ¿Qué beneficio espera por oportunidad?", "options": [{"text": "Una pérdida de cinco créditos", "correct": true}, {"text": "Una pérdida de quince créditos"}, {"text": "Una ganancia de cinco tercios de crédito"}], "explanation": "El beneficio condicional es 80 − 95 = −15. Pondera adjudicación y derrota de beneficio cero: (1/3)(−15) + (2/3)0 = −5."}, {"question": "Un catálogo hipotético asigna peso tres a un beneficio de menos cincuenta y cinco créditos y peso uno a más cinco. ¿Cuál es su beneficio esperado por oportunidad?", "options": [{"text": "Una pérdida esperada de cuarenta créditos", "correct": true}, {"text": "Una pérdida esperada de veinticinco créditos"}, {"text": "Una pérdida esperada de ciento sesenta créditos"}], "explanation": "Conserva los pesos desiguales: [3(−55) + 1(5)]/(3 + 1) = (−165 + 5)/4 = −40. La media sin ponderar da −25; la suma sin normalizar da −160."}]}
+  className={"not-prose"}
+/>
+
+Después viene el [examen final](/es/winners-curse/final-exam), que incluye la distinción entre valor seleccionado, pago y beneficio esperado por oportunidad.
