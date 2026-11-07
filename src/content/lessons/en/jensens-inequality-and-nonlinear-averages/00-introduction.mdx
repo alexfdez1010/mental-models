@@ -1,0 +1,162 @@
+---
+title: "The Order of Averaging"
+description: "Distinguish expected response from the response at a weighted input mean."
+topic: "en/jensens-inequality-and-nonlinear-averages"
+order: 1
+minutes: 16
+updated: 2026-11-08
+---
+
+import { MCQ, NonlinearMeanTrace, FillBlank, MatchConcepts, MindMap, Quiz } from '@/components/react';
+
+An “average batch” sounds like a tidy way to estimate work. It can also be a batch that never occurs, passed through a rule in the wrong order.
+
+Suppose a constructed process receives two jobs with probability three quarters and six jobs with probability one quarter. Its declared processing-work model squares the batch size. Averaging the inputs and then squaring will not give the same answer as squaring each possible input and averaging the work.
+
+**Jensen’s inequality** explains when the shape of a response function orders those two calculations. Its home is mathematics, particularly convex analysis and probability. Our goal is to use it without quietly changing a distribution, a domain or the objective.
+
+## Follow the two operations
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"To estimate mean work under a nonlinear rule, which operation answers the question directly?"}
+  options={[{"text":"Transform each possible input, then apply its probability weight.","correct":true},{"text":"Replace all inputs by their mean, then transform that one input."},{"text":"Average the two unweighted endpoints, then transform the midpoint."}]}
+  explanation={"Mean work averages the modeled work outputs under the supplied probabilities. The other operations need not agree."}
+  pretest={true}
+/>
+
+
+Let $X$ be the number of jobs in one batch. Its complete probability law is:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Complete constructed batch law"}>
+<table data-audit-table="main-law" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Complete constructed batch law"}</caption><thead><tr><th scope="col" className="p-3 align-bottom">{"Jobs in batch"}</th><th scope="col" className="p-3 align-bottom">{"Probability"}</th><th scope="col" className="p-3 align-bottom">{"Modeled work (staff·min)"}</th><th scope="col" className="p-3 align-bottom">{"Weighted work (staff·min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"2"}</th><td className="p-3">{"3/4"}</td><td className="p-3">{"4"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"6"}</th><td className="p-3">{"1/4"}</td><td className="p-3">{"36"}</td><td className="p-3">{"9"}</td></tr>
+<tr><th scope="row" className="p-3">{"Total"}</th><td className="p-3">{"1"}</td><td className="p-3">{""}</td><td className="p-3">{"12"}</td></tr>
+</tbody></table>
+</div>
+
+
+Write $E[X]$ for its weighted input mean. It is:
+
+$$
+E[X]=\frac34\times 2+\frac14\times 6=3\ \text{jobs}.
+$$
+
+A **response function** assigns an output to each allowed input. Here the stipulated work rule is $c(x)=\alpha x^2$, where $\alpha=1$ staff-minute per job squared. Thus a two-job batch requires four staff-minutes and a six-job batch thirty-six. This is a teaching model, not an empirical law of workers or machines.
+
+**Transform each input, then average**:
+
+$$
+E[c(X)]=\frac34\times 4+\frac14\times 36=12\ \text{staff-min}.
+$$
+
+**Average the inputs, then transform**:
+
+$$
+c(E[X])=1\times 3^2=9\ \text{staff-min}.
+$$
+
+The **Jensen gap** in this order is $E[c(X)]-c(E[X])=3$ staff-minutes. The common mean input is three jobs; the outputs differ because the square response is nonlinear. A nonlinear function need not preserve weighted averages.
+
+<NonlinearMeanTrace
+  client:visible
+  title={"Locate both results at the same mean input"}
+  instructions={"Use the view control to trace either order. Case data and weights remain fixed."}
+  cases={[{"id":"main","label":"Two or six jobs","response":"square","points":[{"value":2,"weight":3},{"value":6,"weight":1}],"inputUnit":"jobs","responseUnit":"staff·min"}]}
+  labels={{"case":"Supplied case","view":"Show operations","both":"Both orders","transformFirst":"Transform each, then average","averageFirst":"Average, then transform","reset":"Reset diagram","chart":"Response curve and the two averaging orders","chartDescription":"The circle shows the response at the weighted mean input. The diamond shows the weighted mean response at that same input coordinate. A chord appears only for exactly two distinct positive-weight inputs.","inputAxis":"Input","responseAxis":"Response","rule":"Response rule","domain":"Input domain","table":"Supplied inputs, normalized weights and responses","input":"Input","weight":"Weight","share":"Normalized weight","response":"Response","weightedResponse":"Weighted response","totalWeight":"Total weight","meanInput":"Mean input","responseAtMean":"Response at the mean","meanResponse":"Mean response","gap":"Mean response minus response at the mean","equal":"The two response markers coincide: the exact gap is zero.","positiveSupport":"Only positive-weight inputs are plotted; all supplied rows remain in the table.","curveLegend":"Line: response rule","responseAtMeanLegend":"Response at the mean","meanResponseLegend":"Mean of the responses"}}
+  locale={"en"}
+/>
+
+
+The plot’s two response markers share the same horizontal mean. The table keeps the unequal weights visible; taking an unweighted average of two and six would produce four jobs instead.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Keep input and response units separate."}
+  text={"The mean input is {{three jobs|twelve jobs|nine jobs}}; the mean modeled work is {{twelve staff-minutes|nine staff-minutes|three staff-minutes}}."}
+  explanation={"Input mean=(3×2+6)/4=3 jobs. Work mean=(3×4+36)/4=12 staff-minutes."}
+/>
+
+
+### When the shortcut needs checking
+
+Reach for this comparison when someone replaces varying loads, concentrations or other inputs by one average before applying a response model. First identify which operation the question actually asks for. Neither calculation validates the response model or its probabilities.
+
+## Decide what a larger response means
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"The expected response is larger under varying inputs. What must you know before calling that an improvement?"}
+  options={[{"text":"Whether the response is convex at just the observed points."},{"text":"Whether larger response serves the stated objective and the comparison is feasible.","correct":true},{"text":"Whether every outcome equals the computed expectation."}]}
+  explanation={"A response might be a cost; a mathematically smaller alternative might not be feasible."}
+  pretest={true}
+/>
+
+
+Here the response is processing work. Twelve staff-minutes is more work than nine, not an automatic advantage. A convex cost can make variation expensive. A convex benefit would require its own model, units and objective.
+
+The expected work of twelve is also not a third possible batch result. A single batch in this law has four or thirty-six staff-minutes of modeled work. An expectation combines possibilities; it need not be realized by one observation.
+
+Nor does the gap itself identify a feasible intervention that saves three staff-minutes. Keeping every batch at three jobs might require coordination, violate an arrival restriction or be unavailable. The final workshop supplies feasible plans and counts their additional work before choosing between them.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Match each statement to its role."}
+  pairs={[{"term":"Input mean","definition":"A weighted average in input units"},{"term":"Mean response","definition":"A weighted average after applying the response"},{"term":"Preference","definition":"A judgment requiring an objective and complete alternatives"}]}
+  explanation={"The operations define quantities; an objective determines how to compare outcomes."}
+/>
+
+
+### When to attach a preference
+
+Name the output and objective: lower work, higher benefit, a deadline, or another criterion. The inequality compares mathematical quantities. A preference needs that extra interpretation and a comparison of complete feasible alternatives.
+
+## Build the course ladder
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"A response is defined at the listed inputs. Can you always evaluate it at their mean?"}
+  options={[{"text":"Yes; an average automatically extends every function."},{"text":"Yes; positive weights remove all domain restrictions."},{"text":"No; the mean and relevant connecting interval still need a valid response.","correct":true}]}
+  explanation={"A function can be undefined between supported points."}
+  pretest={true}
+/>
+
+
+We will start with finite lists of values and nonnegative weights. That avoids hidden assumptions about convergence of an infinite expectation. The course defines its additional vocabulary before using it: support, function domain, convexity, strictness, conditional means and convex order.
+
+1. [Weights, Support and Two Means](/jensens-inequality-and-nonlinear-averages/01-weights-support-and-two-means) normalizes the data and distinguishes two operations.
+2. [Curves, Chords and Domains](/jensens-inequality-and-nonlinear-averages/02-curves-chords-and-domains) defines the shape over an interval.
+3. [The Finite Inequality and Equality](/jensens-inequality-and-nonlinear-averages/03-the-finite-inequality-and-equality) proves the weighted result and checks when equality survives variation.
+4. [Which Changes in Variability Can Be Ranked](/jensens-inequality-and-nonlinear-averages/04-fixed-mean-spreads-and-convex-order) uses a conditional construction and two opposing hinge responses.
+5. [Check the Model Before the Conclusion](/jensens-inequality-and-nonlinear-averages/05-check-the-model-before-the-conclusion) changes curvature, probabilities and response accuracy.
+6. [Audit a Batch Plan](/jensens-inequality-and-nonlinear-averages/06-audit-a-batch-plan) counts complete work and tests an independent transfer.
+7. The [28-question final exam](/jensens-inequality-and-nonlinear-averages/final-exam) locks each submitted answer and shows the score at the end.
+
+The prerequisite is [Thinking in Probabilities](/thinking-in-probabilities), which supplies finite weighted expectation. We do not assume calculus or a background in finance. A derivative test will not be required for the calculations or exam.
+
+<MindMap
+  client:visible
+  title={"The order-of-averaging audit"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Nonlinear averages","children":[{"label":"Data","children":[{"label":"Specify values and nonnegative weights"},{"label":"Keep support and domain explicit"}]},{"label":"Two operations","children":[{"label":"Average responses"},{"label":"Compare with response at the input mean"}]},{"label":"Interpretation","children":[{"label":"Check curvature and strictness"},{"label":"Name units, objective and feasible alternatives"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Test the first distinction"}
+  questions={[{"question":"Two and four are equally likely inputs. For the square response, the mean response and response at the mean are…","options":[{"text":"Nine and ten."},{"text":"Ten and nine.","correct":true},{"text":"Six and three."}],"explanation":"Mean square=(4+16)/2=10. Mean input=3, whose square is 9."},{"question":"The main work law has expected work twelve. What can one batch realize in this law?","options":[{"text":"Only twelve staff-minutes."},{"text":"Any work value between four and thirty-six."},{"text":"Four or thirty-six staff-minutes.","correct":true}],"explanation":"The complete support contains only the two supplied batch outcomes."},{"question":"A positive expected-work gap establishes which claim by itself?","options":[{"text":"The two averaging orders differ under the stipulated model.","correct":true},{"text":"A feasible intervention has already saved that gap."},{"text":"The processing rule has been empirically validated."}],"explanation":"The calculation does not validate a model or supply an implementation."}]}
+/>
+
+
+The modern interval definition and Jensen statement are in [Boyd and Vandenberghe’s primary teaching slides](https://live.ocw.mit.edu/courses/6-079-introduction-to-convex-optimization-fall-2009/2ae23d35685ff402473b36011138149a_MIT6_079F09_lec03.pdf). [Jensen’s original paper](https://doi.org/10.1007/BF02418571) develops the historical theory; our finite proof uses the modern chord definition. All batch data in this course are constructed.

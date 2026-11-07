@@ -1,0 +1,244 @@
+---
+title: "Which Changes in Variability Can Be Ranked"
+description: "Use conditional mean preservation and reject variance-only rankings of nonlinear responses."
+topic: "en/jensens-inequality-and-nonlinear-averages"
+order: 5
+minutes: 32
+updated: 2026-11-08
+---
+
+import { MCQ, NonlinearMeanTrace, FillBlank, ConsequenceTree, Categorize, MindMap, Quiz } from '@/components/react';
+
+“More variable” can hide several different claims. A square response notices variance exactly. A different convex response may rank the same pair in the opposite direction.
+
+To make a comparison that works for every convex response, we need a stronger construction than a larger variance number.
+
+## Learn what the square gap measures
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"For the square response with coefficient one, which quantity equals the Jensen gap?"}
+  options={[{"text":"The weighted mean input."},{"text":"The variance of the supplied input law.","correct":true},{"text":"The probability of the largest input."}]}
+  explanation={"Variance is E[X²]−(E[X])² for the finite law."}
+  pretest={true}
+/>
+
+
+For a supplied finite law with mean $\mu$, its **variance** is the weighted mean squared distance from that mean:
+
+$$
+\operatorname{Var}(X)=\sum_i p_i(x_i-\mu)^2=E[X^2]-\mu^2.
+$$
+
+Expanding the square proves the second equality because $E[X]=\mu$ and the weights sum to one. Thus the square-response Jensen gap equals variance when the response coefficient is one. With input measured in jobs, variance has units of jobs squared. A work coefficient converts that into staff-minutes; the two units are not interchangeable.
+
+A constant input three has square response nine and variance zero. Equal-probability inputs two/four keep the mean three but give mean square response ten, so variance is one.
+
+<NonlinearMeanTrace
+  client:visible
+  title={"Keep mean input three while introducing a spread"}
+  instructions={"The response is square in both cases; compare each law with its own mean."}
+  cases={[{"id":"constant","label":"Constant input three","response":"square","points":[{"value":3,"weight":1}],"inputUnit":"input points","responseUnit":"response points"},{"id":"two-four","label":"Equal inputs two and four","response":"square","points":[{"value":2,"weight":1},{"value":4,"weight":1}],"inputUnit":"input points","responseUnit":"response points"}]}
+  labels={{"case":"Supplied case","view":"Show operations","both":"Both orders","transformFirst":"Transform each, then average","averageFirst":"Average, then transform","reset":"Reset diagram","chart":"Response curve and the two averaging orders","chartDescription":"The circle shows the response at the weighted mean input. The diamond shows the weighted mean response at that same input coordinate. A chord appears only for exactly two distinct positive-weight inputs.","inputAxis":"Input","responseAxis":"Response","rule":"Response rule","domain":"Input domain","table":"Supplied inputs, normalized weights and responses","input":"Input","weight":"Weight","share":"Normalized weight","response":"Response","weightedResponse":"Weighted response","totalWeight":"Total weight","meanInput":"Mean input","responseAtMean":"Response at the mean","meanResponse":"Mean response","gap":"Mean response minus response at the mean","equal":"The two response markers coincide: the exact gap is zero.","positiveSupport":"Only positive-weight inputs are plotted; all supplied rows remain in the table.","curveLegend":"Line: response rule","responseAtMeanLegend":"Response at the mean","meanResponseLegend":"Mean of the responses"}}
+  locale={"en"}
+/>
+
+
+This is the variance of the complete stipulated law. It is not an estimate from a random sample and does not require replacing a denominator by a sample-size correction.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Use the complete law, not a sample correction."}
+  text={"Equal-probability inputs two/four have mean {{three|two|four}} and square-response gap {{one|ten|nine}}."}
+  explanation={"Mean=3, E[X²]=10, and 10−9=1. These are quantities of the stipulated law."}
+/>
+
+
+### When variance answers the response question
+
+For an exact quadratic response, the identity tells you the gap. It does not make variance sufficient for every nonlinear response. The meaning of the response and any conversion coefficient still matter.
+
+## Preserve each parent mean before averaging
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"A replacement preserves each parent mean. Which check identifies that condition?"}
+  options={[{"text":"The overall child and parent means match, without examining branches."},{"text":"The child variance equals the parent variance, without examining means."},{"text":"Each child branch’s normalized mean equals its own parent value.","correct":true}]}
+  explanation={"The sufficient construction is conditional, not merely an overall equality."}
+  pretest={true}
+/>
+
+
+A **conditional mean** $E[Y\mid X=x]$ averages the possible child values of $Y$ under the probabilities specified for a particular parent $X=x$.
+
+Let $X$ be two/four with equal probability. If $X=2$, replace it by $Y=1$ or $3$, equally likely. If $X=4$, replace it by $Y=3$ or $5$, equally likely. Each child pair has its own parent’s mean:
+
+$$
+E[Y\mid X=2]=2,\qquad E[Y\mid X=4]=4.
+$$
+
+The four complete paths each have probability one quarter. The two paths reaching three are distinct paths to the same value, whose probabilities add. The final law of $Y$ has weights one/two/one on values one/three/five.
+
+<ConsequenceTree
+  client:visible
+  title={"Preserve the mean inside each parent branch"}
+  eyebrow={""}
+  decision={{"label":"X is two or four equally","note":"Each parent has probability 1/2","valence":"neutral","children":[{"label":"Parent X=2","note":"Parent probability 1/2","valence":"neutral","children":[{"label":"Y=1 under X=2","note":"Conditional chance 1/2; complete path 1/4","valence":"neutral"},{"label":"Y=3 under X=2","note":"Conditional chance 1/2; complete path 1/4","valence":"neutral"}]},{"label":"Parent X=4","note":"Parent probability 1/2","valence":"neutral","children":[{"label":"Y=3 under X=4","note":"Conditional chance 1/2; complete path 1/4","valence":"neutral"},{"label":"Y=5 under X=4","note":"Conditional chance 1/2; complete path 1/4","valence":"neutral"}]}]}}
+  orderLabels={["Parent value","Conditional replacement"]}
+  instructions={"Open each supplied parent and its two replacements. Repeated child value three receives mass from two different paths."}
+  caption={"The tree displays a stipulated joint law; it does not simulate or infer a real mechanism."}
+  decisionLabel={"Supplied condition"}
+  promptLabel={"Open next step"}
+  expandAllLabel={"Show all steps"}
+  collapseLabel={"Collapse"}
+  valenceLabels={{"good":"Favourable","bad":"Unfavourable","mixed":"Mixed","neutral":"Mathematical step"}}
+/>
+
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Check both conditional means before averaging"}>
+<table data-audit-table="conditional-split" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"46rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Check both conditional means before averaging"}</caption><thead><tr><th scope="col" className="p-3 align-bottom">{"Parent X"}</th><th scope="col" className="p-3 align-bottom">{"Parent probability"}</th><th scope="col" className="p-3 align-bottom">{"Child values Y"}</th><th scope="col" className="p-3 align-bottom">{"Conditional weights"}</th><th scope="col" className="p-3 align-bottom">{"E[Y | X]"}</th><th scope="col" className="p-3 align-bottom">{"E[Y² | X]"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"2"}</th><td className="p-3">{"1/2"}</td><td className="p-3">{"1, 3"}</td><td className="p-3">{"1/2, 1/2"}</td><td className="p-3">{"2"}</td><td className="p-3">{"5"}</td></tr>
+<tr><th scope="row" className="p-3">{"4"}</th><td className="p-3">{"1/2"}</td><td className="p-3">{"3, 5"}</td><td className="p-3">{"1/2, 1/2"}</td><td className="p-3">{"4"}</td><td className="p-3">{"17"}</td></tr>
+</tbody></table>
+</div>
+
+
+Both unconditional means are three. The square-response means are ten for $X$ and eleven for $Y$. More importantly, apply finite Jensen separately within each parent branch:
+
+$$
+f(x)=f(E[Y\mid X=x])\le E[f(Y)\mid X=x].
+$$
+
+Multiply each branch inequality by its parent probability and add. This gives $E[f(X)]\le E[f(Y)]$ for every finite convex response on the common interval. The construction preserves the conditional parent means, rather than just the overall mean.
+
+<NonlinearMeanTrace
+  client:visible
+  title={"Compare the parent and child square responses"}
+  instructions={"The conditional tree supplies the justification; these two marginal cases display its computed consequence."}
+  cases={[{"id":"parent","label":"Parent law: two or four","response":"square","points":[{"value":2,"weight":1},{"value":4,"weight":1}],"inputUnit":"input points","responseUnit":"response points"},{"id":"child","label":"Child law: one, three or five","response":"square","points":[{"value":1,"weight":1},{"value":3,"weight":2},{"value":5,"weight":1}],"inputUnit":"input points","responseUnit":"response points"}]}
+  labels={{"case":"Supplied case","view":"Show operations","both":"Both orders","transformFirst":"Transform each, then average","averageFirst":"Average, then transform","reset":"Reset diagram","chart":"Response curve and the two averaging orders","chartDescription":"The circle shows the response at the weighted mean input. The diamond shows the weighted mean response at that same input coordinate. A chord appears only for exactly two distinct positive-weight inputs.","inputAxis":"Input","responseAxis":"Response","rule":"Response rule","domain":"Input domain","table":"Supplied inputs, normalized weights and responses","input":"Input","weight":"Weight","share":"Normalized weight","response":"Response","weightedResponse":"Weighted response","totalWeight":"Total weight","meanInput":"Mean input","responseAtMean":"Response at the mean","meanResponse":"Mean response","gap":"Mean response minus response at the mean","equal":"The two response markers coincide: the exact gap is zero.","positiveSupport":"Only positive-weight inputs are plotted; all supplied rows remain in the table.","curveLegend":"Line: response rule","responseAtMeanLegend":"Response at the mean","meanResponseLegend":"Mean of the responses"}}
+  locale={"en"}
+/>
+
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"In the displayed replacement, mean input stays three. Parent and child square-response means are…"}
+  options={[{"text":"Ten and eleven.","correct":true},{"text":"Nine and ten."},{"text":"Eleven and ten."}]}
+  explanation={"Parents give (4+16)/2=10. Children give (1+2×9+25)/4=11."}
+/>
+
+
+### When zero-mean noise is not enough
+
+Writing $Y=X+Z$ is sufficient here if $E[Z\mid X]=0$. Independence is not required for the branch proof. An unconditional $E[Z]=0$ alone is weaker and can remove variation instead.
+
+For example, keep $X=2$ or $4$ equally, but set $Y=3$ always. Then $Z=3-X$ is plus one or minus one with overall mean zero. Its conditional mean is plus one at the first parent and minus one at the second. Mean square response falls from ten to nine. The condition used in the proof has failed.
+
+<Categorize
+  client:visible
+  className={"not-prose"}
+  question={"Does this statement supply the sufficient branch condition?"}
+  buckets={["Supplies the conditional condition","Does not supply it alone"]}
+  items={[{"text":"Each replacement’s mean equals its parent.","bucket":"Supplies the conditional condition"},{"text":"The overall added noise has mean zero.","bucket":"Does not supply it alone"},{"text":"E[Z | X] equals zero at every supported parent.","bucket":"Supplies the conditional condition"},{"text":"The original and final laws have the same unconditional mean.","bucket":"Does not supply it alone"}]}
+  explanation={"Unconditional mean equality need not preserve a mean inside each parent branch."}
+/>
+
+
+## Compare all convex responses rather than one summary
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Two laws have the same mean and variance. Does that determine every convex response’s mean?"}
+  options={[{"text":"Yes; the two moments determine all finite laws."},{"text":"No; different convex responses can give opposite rankings.","correct":true},{"text":"Yes; every convex response is a rescaled square."}]}
+  explanation={"The two hinge responses below supply exact opposing comparisons."}
+  pretest={true}
+/>
+
+
+For finite laws on a common interval, say $X$ is below $Y$ in **convex order** when $E[f(X)]\le E[f(Y)]$ for every finite convex function on that interval. We compare laws with the same input mean. The conditional construction above is one sufficient way to establish that order; we are not claiming an unproved converse representation theorem.
+
+Convex order is partial: some pairs cannot be ranked. Here is an exact pair on $[0,4]$:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Three complete comparison laws on the common interval"}>
+<table data-audit-table="variance-laws" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Three complete comparison laws on the common interval"}</caption><thead><tr><th scope="col" className="p-3 align-bottom">{"Law"}</th><th scope="col" className="p-3 align-bottom">{"Input values"}</th><th scope="col" className="p-3 align-bottom">{"Weights"}</th><th scope="col" className="p-3 align-bottom">{"Mean"}</th><th scope="col" className="p-3 align-bottom">{"Variance"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"A"}</th><td className="p-3">{"1, 3"}</td><td className="p-3">{"1, 1"}</td><td className="p-3">{"2"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"B"}</th><td className="p-3">{"0, 2, 4"}</td><td className="p-3">{"1, 6, 1"}</td><td className="p-3">{"2"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"C"}</th><td className="p-3">{"0, 2, 4"}</td><td className="p-3">{"1, 4, 1"}</td><td className="p-3">{"2"}</td><td className="p-3">{"4/3"}</td></tr>
+</tbody></table>
+</div>
+
+
+A has values one/three equally. B has values zero/two/four with weights one/six/one out of eight. Both have mean two and variance one. Consider two convex hinges, each a maximum of zero and an affine function:
+
+$$
+h_2(x)=\max(0,x-2),\qquad h_3(x)=\max(0,x-3).
+$$
+
+For $h_2$, A’s response mean is one half and B’s one quarter. For $h_3$, A’s is zero and B’s one eighth. The ranking reverses. Thus neither law is above the other for every convex response.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Two convex responses rank A and B oppositely"}>
+<table data-audit-table="hinge-rankings" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Two convex responses rank A and B oppositely"}</caption><thead><tr><th scope="col" className="p-3 align-bottom">{"Law"}</th><th scope="col" className="p-3 align-bottom">{"E[max(0,X−2)]"}</th><th scope="col" className="p-3 align-bottom">{"E[max(0,X−3)]"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"A"}</th><td className="p-3">{"1/2"}</td><td className="p-3">{"0"}</td></tr>
+<tr><th scope="row" className="p-3">{"B"}</th><td className="p-3">{"1/4"}</td><td className="p-3">{"1/8"}</td></tr>
+<tr><th scope="row" className="p-3">{"C"}</th><td className="p-3">{"1/3"}</td><td className="p-3">{"1/6"}</td></tr>
+</tbody></table>
+</div>
+
+
+<NonlinearMeanTrace
+  client:visible
+  title={"Choose a law and a declared convex response"}
+  instructions={"The four A/B cases expose opposite rankings. Checking these cases is not an all-convex-function proof."}
+  cases={[{"id":"a-h2","label":"Law A, hinge at two","response":"hinge-2","points":[{"value":1,"weight":1},{"value":3,"weight":1}],"inputUnit":"input points","responseUnit":"response points"},{"id":"b-h2","label":"Law B, hinge at two","response":"hinge-2","points":[{"value":0,"weight":1},{"value":2,"weight":6},{"value":4,"weight":1}],"inputUnit":"input points","responseUnit":"response points"},{"id":"a-h3","label":"Law A, hinge at three","response":"hinge-3","points":[{"value":1,"weight":1},{"value":3,"weight":1}],"inputUnit":"input points","responseUnit":"response points"},{"id":"b-h3","label":"Law B, hinge at three","response":"hinge-3","points":[{"value":0,"weight":1},{"value":2,"weight":6},{"value":4,"weight":1}],"inputUnit":"input points","responseUnit":"response points"},{"id":"c-h2","label":"Law C, hinge at two","response":"hinge-2","points":[{"value":0,"weight":1},{"value":2,"weight":4},{"value":4,"weight":1}],"inputUnit":"input points","responseUnit":"response points"}]}
+  labels={{"case":"Supplied case","view":"Show operations","both":"Both orders","transformFirst":"Transform each, then average","averageFirst":"Average, then transform","reset":"Reset diagram","chart":"Response curve and the two averaging orders","chartDescription":"The circle shows the response at the weighted mean input. The diamond shows the weighted mean response at that same input coordinate. A chord appears only for exactly two distinct positive-weight inputs.","inputAxis":"Input","responseAxis":"Response","rule":"Response rule","domain":"Input domain","table":"Supplied inputs, normalized weights and responses","input":"Input","weight":"Weight","share":"Normalized weight","response":"Response","weightedResponse":"Weighted response","totalWeight":"Total weight","meanInput":"Mean input","responseAtMean":"Response at the mean","meanResponse":"Mean response","gap":"Mean response minus response at the mean","equal":"The two response markers coincide: the exact gap is zero.","positiveSupport":"Only positive-weight inputs are plotted; all supplied rows remain in the table.","curveLegend":"Line: response rule","responseAtMeanLegend":"Response at the mean","meanResponseLegend":"Mean of the responses"}}
+  locale={"en"}
+/>
+
+
+Even **greater** variance is insufficient. Keep A, and use C at values zero/two/four with weights one/four/one out of six. C has mean two and variance $4/3$, but its $h_2$ response mean is $1/3$, below A’s $1/2$.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"A exceeds B for the hinge at two, while B exceeds A for the hinge at three. What follows?"}
+  options={[{"text":"A is above B in convex order because the first comparison is larger."},{"text":"B is above A in convex order because it has a wider support."},{"text":"Neither law is above the other for every convex response.","correct":true}]}
+  explanation={"Both hinges are convex on the common interval, and their opposite rankings rule out either all-convex ordering."}
+/>
+
+
+### When a comparison deserves the stronger name
+
+Use convex order only for an all-convex-function statement justified by a proof or a sufficient construction. Checking one response or matching means and variances does not establish it. The term is mathematical; it does not call every response “risk” or decide which direction an objective prefers.
+
+[Rothschild and Stiglitz’s primary paper](https://doi.org/10.1016/0022-0531(70)90038-4) discusses conditional mean-preserving dispersion, partial ordering and the limits of variance. Its economic interpretation is not needed for these finite constructions. The branch proof and hinge numbers above are worked locally.
+
+<MindMap
+  client:visible
+  title={"Name the ordering you have proved"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Comparing variability","children":[{"label":"Square response","children":[{"label":"Gap equals variance in the stated units"},{"label":"Other responses need more information"}]},{"label":"Conditional spread","children":[{"label":"Each child mean preserves its parent"},{"label":"Apply Jensen inside branches, then average"}]},{"label":"Convex order","children":[{"label":"Compares every convex response"},{"label":"Some equal-mean laws cannot be ranked"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Distinguish summaries from constructions"}
+  questions={[{"question":"Set Y always equal to three while X is two/four equally. Noise Y−X has overall mean zero. The square mean…","options":[{"text":"Falls from ten to nine.","correct":true},{"text":"Rises from nine to ten."},{"text":"Must stay ten by zero-mean noise."}],"explanation":"The conditional noise means are +1 and −1, so the sufficient mean-preserving branch condition fails."},{"question":"For the hinge at three, law A gives zero and B gives one eighth. Combined with the opposite hinge-at-two ranking, this shows…","options":[{"text":"B is better under any possible objective."},{"text":"Equal variance is insufficient for an all-convex ranking.","correct":true},{"text":"The hinge at three cannot be convex."}],"explanation":"Both hinges are maxima of affine functions on the whole interval."},{"question":"C has variance four thirds versus A’s one, yet hinge-at-two response one third versus one half. This refutes…","options":[{"text":"The square-response variance identity."},{"text":"The finite Jensen inequality within each law."},{"text":"A universal rule that greater variance raises every convex response.","correct":true}],"explanation":"Jensen compares a law with its own mean. It does not order arbitrary equal-mean laws by variance alone."}]}
+/>
+
+
+Next, [Check the Model Before the Conclusion](/jensens-inequality-and-nonlinear-averages/05-check-the-model-before-the-conclusion) asks what happens when the response, domain or weights change.

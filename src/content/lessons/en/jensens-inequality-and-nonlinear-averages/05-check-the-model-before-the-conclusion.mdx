@@ -1,0 +1,210 @@
+---
+title: "Check the Model Before the Conclusion"
+description: "Audit response domains, probability sensitivity and a justified response-error bound."
+topic: "en/jensens-inequality-and-nonlinear-averages"
+order: 6
+minutes: 25
+updated: 2026-11-08
+---
+
+import { MCQ, NonlinearMeanTrace, FillBlank, FirstPrinciplesBuilder, Categorize, MindMap, Quiz } from '@/components/react';
+
+A correct theorem can be applied to the wrong response. A model that squares inputs up to a cap is not the uncapped square function on the full interval, even if their outputs coincide on some observed rows.
+
+We will audit the response domain, the supplied law and the accuracy claim separately.
+
+## Check the response over the full interval
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"A capped square agrees with a square at some inputs. Can the uncapped square’s convexity be assumed across the cap?"}
+  options={[{"text":"No; the actual response needs its own interval-wide check.","correct":true},{"text":"Yes; agreeing below a cap fixes the whole shape."},{"text":"Yes; any nonnegative response is convex."}]}
+  explanation={"The capped response has a different shape across the relevant interval."}
+  pretest={true}
+/>
+
+
+Define $g(x)=\min(x^2,9)$ on $[0,6]$. It agrees with the square up to three and then stays flat. At the original inputs two/six, its outputs are four and nine.
+
+With probabilities three quarters/one quarter:
+
+$$
+E[g(X)]=\frac34\times 4+\frac14\times 9=\frac{21}{4}.
+$$
+
+The mean input is still three, and $g(3)=9$. Therefore $E[g(X)]-g(E[X])=21/4-9=-15/4$. This negative gap is not a counterexample to Jensen: the capped response fails convexity over the support interval $[2,6]$.
+
+<NonlinearMeanTrace
+  client:visible
+  title={"Inspect the actual capped response"}
+  instructions={"The module reports the exact two-order difference without a global curvature verdict."}
+  cases={[{"id":"cap","label":"Square response capped at nine","response":"capped-square","points":[{"value":2,"weight":3},{"value":6,"weight":1}],"inputUnit":"input points","responseUnit":"response points"}]}
+  labels={{"case":"Supplied case","view":"Show operations","both":"Both orders","transformFirst":"Transform each, then average","averageFirst":"Average, then transform","reset":"Reset diagram","chart":"Response curve and the two averaging orders","chartDescription":"The circle shows the response at the weighted mean input. The diamond shows the weighted mean response at that same input coordinate. A chord appears only for exactly two distinct positive-weight inputs.","inputAxis":"Input","responseAxis":"Response","rule":"Response rule","domain":"Input domain","table":"Supplied inputs, normalized weights and responses","input":"Input","weight":"Weight","share":"Normalized weight","response":"Response","weightedResponse":"Weighted response","totalWeight":"Total weight","meanInput":"Mean input","responseAtMean":"Response at the mean","meanResponse":"Mean response","gap":"Mean response minus response at the mean","equal":"The two response markers coincide: the exact gap is zero.","positiveSupport":"Only positive-weight inputs are plotted; all supplied rows remain in the table.","curveLegend":"Line: response rule","responseAtMeanLegend":"Response at the mean","meanResponseLegend":"Mean of the responses"}}
+  locale={"en"}
+/>
+
+
+The failed chord is a direct witness. Do not classify the whole response from the fact that it agrees with a convex formula below its cap.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Under the main law, the capped response mean is twenty-one quarters and its value at the mean is nine. The gap is…"}
+  options={[{"text":"Positive fifteen quarters."},{"text":"Negative fifteen quarters.","correct":true},{"text":"Zero because the input mean is unchanged."}]}
+  explanation={"21/4−9=−15/4. The response fails the convex chord condition on this interval."}
+/>
+
+
+A domain can fail before an inequality is even available. The reciprocal $1/x$ is undefined at zero. A law equally supported at minus one/one has mean zero, so its response at the mean is undefined. Moreover, the connecting interval crosses the domain’s hole. Do not report that response as zero, infinity or a finite mean by convention.
+
+### When an input is outside the model
+
+Report the missing definition or condition. A response defined at every observed row can still be undefined at the mean or between rows. Restricting to an interval where the model is defined is a substantive assumption, not cosmetic notation.
+
+## Change probabilities without calling it a fixed-mean spread
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Change only the probability of the larger input while keeping its two possible values. Which claim needs checking?"}
+  options={[{"text":"The response rule has necessarily changed."},{"text":"The input mean is automatically fixed."},{"text":"The input mean may change along with the gap.","correct":true}]}
+  explanation={"For values 2/6, the mean is 2+4p, so it changes with the high-input probability."}
+  pretest={true}
+/>
+
+
+Keep square response and input values two/six. Let the probability of six be $p$, so that of two is $1-p$. Then:
+
+$$
+E[X]=2+4p,\qquad E[X^2]=4+32p.
+$$
+
+Subtracting the square of the new mean gives:
+
+$$
+E[X^2]-(E[X])^2=16p(1-p).
+$$
+
+For $p$ equal to one fifth, one quarter and three tenths, the results are:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Compare each law with its own input mean"}>
+<table data-audit-table="probability-sensitivity" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"44rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Compare each law with its own input mean"}</caption><thead><tr><th scope="col" className="p-3 align-bottom">{"Probability of six"}</th><th scope="col" className="p-3 align-bottom">{"Mean input"}</th><th scope="col" className="p-3 align-bottom">{"Mean square response"}</th><th scope="col" className="p-3 align-bottom">{"Square of mean"}</th><th scope="col" className="p-3 align-bottom">{"Gap"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"1/5"}</th><td className="p-3">{"14/5"}</td><td className="p-3">{"52/5"}</td><td className="p-3">{"196/25"}</td><td className="p-3">{"64/25"}</td></tr>
+<tr><th scope="row" className="p-3">{"1/4"}</th><td className="p-3">{"3"}</td><td className="p-3">{"12"}</td><td className="p-3">{"9"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"3/10"}</th><td className="p-3">{"16/5"}</td><td className="p-3">{"68/5"}</td><td className="p-3">{"256/25"}</td><td className="p-3">{"84/25"}</td></tr>
+</tbody></table>
+</div>
+
+
+<NonlinearMeanTrace
+  client:visible
+  title={"Change a supplied probability case"}
+  instructions={"The value set and square response stay fixed. Both the mean and the response means can change."}
+  cases={[{"id":"p20","label":"High input probability one fifth","response":"square","points":[{"value":2,"weight":4},{"value":6,"weight":1}],"inputUnit":"input points","responseUnit":"response points"},{"id":"p25","label":"High input probability one quarter","response":"square","points":[{"value":2,"weight":3},{"value":6,"weight":1}],"inputUnit":"input points","responseUnit":"response points"},{"id":"p30","label":"High input probability three tenths","response":"square","points":[{"value":2,"weight":7},{"value":6,"weight":3}],"inputUnit":"input points","responseUnit":"response points"}]}
+  labels={{"case":"Supplied case","view":"Show operations","both":"Both orders","transformFirst":"Transform each, then average","averageFirst":"Average, then transform","reset":"Reset diagram","chart":"Response curve and the two averaging orders","chartDescription":"The circle shows the response at the weighted mean input. The diamond shows the weighted mean response at that same input coordinate. A chord appears only for exactly two distinct positive-weight inputs.","inputAxis":"Input","responseAxis":"Response","rule":"Response rule","domain":"Input domain","table":"Supplied inputs, normalized weights and responses","input":"Input","weight":"Weight","share":"Normalized weight","response":"Response","weightedResponse":"Weighted response","totalWeight":"Total weight","meanInput":"Mean input","responseAtMean":"Response at the mean","meanResponse":"Mean response","gap":"Mean response minus response at the mean","equal":"The two response markers coincide: the exact gap is zero.","positiveSupport":"Only positive-weight inputs are plotted; all supplied rows remain in the table.","curveLegend":"Line: response rule","responseAtMeanLegend":"Response at the mean","meanResponseLegend":"Mean of the responses"}}
+  locale={"en"}
+/>
+
+
+At three tenths, the input mean is $16/5$, the mean square response $68/5$, and the gap $84/25$. The mean changed as well as the dispersion. Each law is compared with its **own** mean, not with the original three-job baseline.
+
+The three supplied probability cases do not validate any real arrival law or tell us how likely the model itself is correct. No distribution over the three cases has been assigned either.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Keep the new mean in the comparison."}
+  text={"At high-input probability three tenths, the input mean is {{sixteen fifths|three|seventeen fifths}} and the square gap is {{eighty-four twenty-fifths|three|sixteen fifths}}."}
+  explanation={"Mean=2+4(3/10)=16/5; gap=16(3/10)(7/10)=84/25."}
+/>
+
+
+### When to show sensitivity
+
+Use it to expose what follows from plausible specified inputs. Name what stays fixed and what changes. Do not label an arbitrary probability edit a mean-preserving intervention.
+
+## Bound response error without inventing evidence
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"A justified uniform response-error bound applies on the entire relevant interval. How many parts of the Jensen gap can change?"}
+  options={[{"text":"Both the mean response and the response at the mean.","correct":true},{"text":"Only the mean response over supported inputs."},{"text":"Only the probability weights of the input law."}]}
+  explanation={"The response error can shift both quantities that are subtracted."}
+  pretest={true}
+/>
+
+
+Suppose a model response is $f$ and the true response is $g$, on the same relevant interval. You have separately justified the uniform bound $|g(x)-f(x)|\le\varepsilon$ throughout that interval. A bound just at observed input rows would omit the response at the mean.
+
+For a fixed finite law, the mean response can shift by at most $\varepsilon$, because its nonnegative weights sum to one. The response at the mean can also shift by at most $\varepsilon$. Subtracting the two quantities therefore gives:
+
+$$
+\left|[E[g(X)]-g(E[X])]-[E[f(X)]-f(E[X])]\right|\le 2\varepsilon.
+$$
+
+For the model gap three and $\varepsilon=1/2$ response point, the true gap lies between two and four. Those bounds concern the same supplied law; they do not establish that either response is convex or that the assumed error bound has empirical support.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title={"Account for both response-error terms"}
+  eyebrow={""}
+  locale={"en"}
+  analogyValue={1}
+  analogyLabel={"Combined absolute-error bound (response points)"}
+  analogyNote={"Each term is at most one half response point."}
+  parts={[{"label":"Error in mean response","value":0.5,"note":"Nonnegative normalized weights preserve the uniform bound."},{"label":"Error in response at mean","value":0.5,"note":"The mean is also inside the bounded-error interval."}]}
+  rebuiltLabel={"Selected subtotal (response points)"}
+  instructions={"Add the two maximum absolute contributions. These are error bounds, not observed response errors."}
+  valuePrefix={""}
+  valueSuffix={""}
+  revealAllLabel={"Add all terms"}
+  resetLabel={"Clear selection"}
+  verdictTemplate={"The selected terms total {total}."}
+/>
+
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"The model gap is three and the justified uniform response error is at most one half. Which interval contains the true gap under the same law?"}
+  options={[{"text":"From two and a half to three and a half."},{"text":"From two to four.","correct":true},{"text":"From negative one to positive one."}]}
+  explanation={"Both subtracted quantities may change by 1/2, so the gap differs by at most 1. The true gap is in [2,4]."}
+/>
+
+
+### When a bound is useful
+
+Use it after identifying where the error guarantee comes from and the interval it covers. The calculation propagates a justified assumption. It cannot manufacture one from a neat table or replace evidence with a tolerance chosen after seeing the result.
+
+<Categorize
+  client:visible
+  className={"not-prose"}
+  question={"Separate a consequence from evidence for its assumptions."}
+  buckets={["Conditional calculation","Evidence still needed"]}
+  items={[{"text":"The stipulated high-input probability gives its corresponding weighted mean.","bucket":"Conditional calculation"},{"text":"The proposed probabilities accurately describe a real population.","bucket":"Evidence still needed"},{"text":"A justified uniform error bound implies a two-error-term gap bound.","bucket":"Conditional calculation"},{"text":"A real response satisfies the proposed uniform error bound.","bucket":"Evidence still needed"}]}
+  explanation={"A theorem propagates the given assumptions; it does not validate them."}
+/>
+
+
+<MindMap
+  client:visible
+  title={"Check what changed"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Model audit","children":[{"label":"Response","children":[{"label":"Use the actual cap and domain"},{"label":"Check the interval containing support and mean"}]},{"label":"Weights","children":[{"label":"A probability edit can move the input mean"},{"label":"Cases do not imply probabilities over cases"}]},{"label":"Accuracy","children":[{"label":"Bound both subtracted responses"},{"label":"A propagated bound still needs evidence"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Find the missing condition"}
+  questions={[{"question":"The reciprocal is defined at minus one and one, but their equal-weight mean is zero. What blocks the displayed Jensen comparison?","options":[{"text":"The response at the mean is undefined and the connecting domain has a hole.","correct":true},{"text":"A finite law cannot contain negative input values under any theorem."},{"text":"A weighted input mean must always be one of the supported outcomes."}],"explanation":"This reciprocal lacks a domain interval containing both inputs and their mean."},{"question":"A uniform model-error bound was checked only at supported inputs. Which further location matters for the gap?","options":[{"text":"Only the largest supplied weight."},{"text":"Only the original input mean from another distribution."},{"text":"The mean input of the same law, and the claimed whole interval.","correct":true}],"explanation":"The second operation evaluates the response at that mean; the stated uniform assumption covers the relevant interval."},{"question":"The capped-square example has a negative gap. This demonstrates…","options":[{"text":"That finite Jensen is false for convex responses."},{"text":"That applying an uncapped response’s curvature to another function can fail.","correct":true},{"text":"That every capped response is concave on every interval."}],"explanation":"The local failed chord rejects the convexity needed for this comparison without classifying every cap globally."}]}
+/>
+
+
+The final workshop, [Audit a Batch Plan](/jensens-inequality-and-nonlinear-averages/06-audit-a-batch-plan), adds feasibility and extra work before turning a base-work comparison into a decision.

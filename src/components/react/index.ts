@@ -386,3 +386,6 @@ export type { DimensionBalanceAuditProps } from '@/components/react/DimensionBal
 
 export { GeometricScalingExplorer } from '@/components/react/GeometricScalingExplorer';
 export type { GeometricScalingExplorerProps } from '@/components/react/GeometricScalingExplorer';
+
+export { NonlinearMeanTrace } from '@/components/react/NonlinearMeanTrace';
+export type { NonlinearMeanTraceProps } from '@/components/react/NonlinearMeanTrace';
