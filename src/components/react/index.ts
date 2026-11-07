@@ -341,3 +341,6 @@ export type { ReferenceChoiceCase, ReferenceChoiceLabels, ReferenceChoiceAuditPr
 
 export { MixedStrategyAudit, auditMixedStrategy, mixedAuditFraction, MIXED_AUDIT_PERCENTAGES } from '@/components/react/MixedStrategyAudit';
 export type { MixedStrategyAuditProps, MixedStrategyAuditLabels, MixedStrategyAuditResult, MixedAuditPercent, MixedAuditMatrix } from '@/components/react/MixedStrategyAudit';
+
+export { FactorChainTrace, calculateFactorChain, formatFactorChainValue } from '@/components/react/FactorChainTrace';
+export type { FactorChain, FactorChainScenario, FactorChainLabels, FactorChainTraceProps, FactorChainValue, FactorChainCalculation } from '@/components/react/FactorChainTrace';
