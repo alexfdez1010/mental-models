@@ -1,0 +1,512 @@
+---
+title: "Audita una trayectoria detenida"
+description: "Enumera secuencias de factores, calcula su media ponderada y comprueba cómo un umbral observado cambia las trayectorias y sus cantidades finales."
+topic: "es/compounding"
+order: 6
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, MatchConcepts, Categorize, MindMap, Quiz, ExpectedValueCalculator, FactorChainTrace, RateComparison } from '@/components/react';
+
+Una máquina de prueba cambia una cantidad mediante multiplicaciones. Puedes dejar que complete todas las actualizaciones o indicarle que deje de actualizar cuando la cantidad cruce un umbral. Antes de elegir, necesitas saber qué hace al detenerse, cuándo ocurre y qué caminos posibles estás promediando.
+
+Este es un **modelo construido**, medido en **unidades del modelo**. Las cantidades y las reglas de actualización se fijan para el ejercicio. No se añade ni se retira nada. Una cantidad detenida se conserva, sin pérdidas de almacenamiento ni costes. Estos supuestos permiten examinar las cuentas antes de trasladarlas a un caso real.
+
+<MCQ client:visible
+  className={"not-prose"}
+  pretestLabel={"Antes de empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"La media final supera el inicio. ¿Qué nos dice eso, por sí solo, de cuántos caminos terminan por debajo?"}
+  options={[{"text":"Ninguno puede terminar por debajo."},{"text":"Menos de la mitad tienen que terminar por debajo."},{"text":"La media por sí sola no determina ese recuento.","correct":true},{"text":"Exactamente la mitad tienen que terminar por debajo."}]}
+  explanation={"Una media ponderada combina tamaños y probabilidades. Unos pocos finales grandes pueden elevarla por encima del inicio aunque muchos caminos terminen por debajo. Contaremos ambas medidas."}
+  pretest={true}
+/>
+
+## Cuenta los caminos antes de promediar los finales
+
+Un **factor** multiplica la cantidad actual. La máquina empieza con **100 unidades**. En cada paso completo, U multiplica por **3/2 = 1,50** y D por **3/5 = 0,60**. U aumenta la cantidad un 50 %; D la reduce un 40 %. Son cambios proporcionales distintos, no porcentajes opuestos.
+
+Cada letra siguiente tiene probabilidad **1/2**, con independencia de las anteriores: conocer el pasado no cambia esas probabilidades estipuladas. Un **camino potencial** es una secuencia completa de letras que podría ocurrir. Con dos pasos hay cuatro caminos. Cada uno tiene probabilidad $(1/2)(1/2)=1/4$. Llamamos **peso** a esa probabilidad dentro del cálculo.
+
+Imagina cuatro papeletas con el mismo peso, una por secuencia completa. Dos pueden indicar la misma cantidad final; eso no las convierte en una sola papeleta. Sirven para contar, no para informar al operador de qué camino futuro verá.
+
+<div role="region" tabIndex={0} aria-label={"Dos pasos completos sin detener"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="warmup-plain" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Dos pasos completos sin detener"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Secuencia potencial"}</th><th scope="col" className="px-3 py-2 text-left">{"Tras el primer paso, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Tras el segundo paso, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Peso del camino"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"UU"}</th><td className="px-3 py-2 text-left align-top">{"150"}</td><td className="px-3 py-2 text-left align-top">{"225"}</td><td className="px-3 py-2 text-left align-top">{"1/4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UD"}</th><td className="px-3 py-2 text-left align-top">{"150"}</td><td className="px-3 py-2 text-left align-top">{"90"}</td><td className="px-3 py-2 text-left align-top">{"1/4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DU"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"90"}</td><td className="px-3 py-2 text-left align-top">{"1/4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DD"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"36"}</td><td className="px-3 py-2 text-left align-top">{"1/4"}</td></tr></tbody>
+</table>
+</div>
+
+En UD, el primer paso produce $100\times1{,}50=150$ y el segundo, $150\times0{,}60=90$. DU también termina en 90: $100\times0{,}60\times1{,}50=90$. Todavía no hay regla de parada, así que se aplican todos los factores declarados.
+
+La **media ponderada**, también llamada **valor esperado (expected value)**, multiplica cada cantidad final posible por su peso y suma las contribuciones. Con pesos iguales, podemos sumar los cuatro finales y dividir entre cuatro:
+
+$$
+\frac{225+90+90+36}{4}=110{,}25\text{ unidades}.
+$$
+
+Agrupar los dos finales de 90 conserva la cuenta: $225/4+90/2+36/4=56{,}25+45+9=110{,}25$. Promediar solo los tres valores distintos daría $(225+90+36)/3=117$. Eso sustituye los pesos de los caminos por los de otro modelo sin avisar.
+
+<ExpectedValueCalculator client:visible
+  className={"not-prose"}
+  title={"Media de los cuatro caminos iniciales"}
+  eyebrow={""}
+  locale={"es"}
+  scenario={{"prompt":"Pondera cada cantidad final por su peso.","outcomes":[{"label":"Final de UU","payoff":225,"prob":25},{"label":"Final compartido por UD y DU","payoff":90,"prob":50},{"label":"Final de DD","payoff":36,"prob":25}],"unit":" unidades","unitPosition":"suffix"}}
+  instructions={"Los pesos iniciales proceden de cuatro secuencias equiprobables. Mantén el total en cien o restablécelos."}
+  probabilityLabel={"Peso de los caminos"}
+  payoffLabel={"Cantidad final"}
+  contributionLabel={"Contribución"}
+  totalProbLabel={"Suma de pesos"}
+  normalizeHint={"Los pesos deben sumar cien por ciento. Ahora suman {sum}."}
+  evLabel={"Cantidad final media"}
+  evHint={"Media ponderada de los caminos del catálogo"}
+  resetLabel={"Restablecer pesos"}
+  caption={"Cambiar los pesos define otra ponderación. Los controles no generan nuevas secuencias ni cambian los factores."}
+/>
+
+La calculadora redondea las contribuciones y la media visibles a dos decimales. La tabla y las fórmulas conservan los decimales exactos. Mover un control cambia la ponderación mostrada; no vuelve a ejecutar la máquina. Si los pesos no suman el 100 %, la suma visible no es el valor esperado de este catálogo completo. Restablécelos para recuperar sus probabilidades declaradas.
+
+<FillBlank client:visible
+  className={"not-prose"}
+  instructions={"Elige una opción en cada hueco."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Todo correcto"}
+  partialResultWord={"bien"}
+  text={"El final compartido por UD y DU tiene {{la mitad del peso|un tercio del peso|un cuarto del peso}}. Las cantidades finales iguales se agrupan {{sumando los pesos de sus caminos|eliminando caminos repetidos|promediando sus pesos}}."}
+  explanation={"Dos de las cuatro secuencias equiprobables terminan en esa cantidad. Sus dos pesos de un cuarto se suman; repetir la cantidad impresa no elimina una secuencia posible."}
+/>
+
+### Cuándo usarlo
+
+Usa una media ponderada cuando un mismo resultado pueda alcanzarse por varios caminos. Define primero los casos completos y sus pesos. Contar cada resultado distinto una sola vez solo está justificado si esos resultados distintos son equiprobables.
+
+## La media puede subir aunque la mayoría termine por debajo
+
+<MCQ client:visible
+  className={"not-prose"}
+  pretestLabel={"Antes de empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Ampliamos el mismo modelo a cuatro pasos. ¿Qué hay que contar antes de promediar?"}
+  options={[{"text":"Solo los finales mayor y menor."},{"text":"Todas las secuencias potenciales completas y sus pesos.","correct":true},{"text":"Solo los valores finales distintos."},{"text":"Las letras del camino que parezca más típico."}]}
+  explanation={"Un catálogo completo incluye cada secuencia con su probabilidad. Agrupar es válido después de tener en cuenta esos pesos."}
+  pretest={true}
+/>
+
+Permitimos ahora **cuatro pasos**, con las mismas probabilidades independientes de U/D y los mismos factores. El **horizonte (horizon)** es el número de pasos que evaluamos: aquí son cuatro, aunque la máquina deje de actualizar antes. Hay $2\times2\times2\times2=16$ secuencias potenciales, cada una con peso $1/16$. Cada letra adicional duplica el recuento. Las agrupamos por su número de U porque, sin paradas ni flujos externos, la multiplicación da el mismo final con independencia del orden.
+
+<div role="region" tabIndex={0} aria-label={"Parámetros declarados de la máquina"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="model-main" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Parámetros declarados de la máquina"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Parámetro"}</th><th scope="col" className="px-3 py-2 text-left">{"Valor"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"Cantidad inicial, unidades del modelo"}</th><td className="px-3 py-2 text-left align-top">{"100"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Pasos completos"}</th><td className="px-3 py-2 text-left align-top">{"4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Factor U"}</th><td className="px-3 py-2 text-left align-top">{"3/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Factor D"}</th><td className="px-3 py-2 text-left align-top">{"3/5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Probabilidad de cada letra siguiente independiente"}</th><td className="px-3 py-2 text-left align-top">{"1/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Umbral inclusivo de parada, unidades del modelo"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Factor posterior a la parada"}</th><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Flujos externos y costes"}</th><td className="px-3 py-2 text-left align-top">{"Ninguno"}</td></tr></tbody>
+</table>
+</div>
+
+<div role="region" tabIndex={0} aria-label={"Cuatro pasos agrupados por el número de letras U"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="grouped-plain" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Cuatro pasos agrupados por el número de letras U"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Número de U"}</th><th scope="col" className="px-3 py-2 text-left">{"Número de secuencias"}</th><th scope="col" className="px-3 py-2 text-left">{"Cantidad final, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Peso conjunto"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"4"}</th><td className="px-3 py-2 text-left align-top">{"1"}</td><td className="px-3 py-2 text-left align-top">{"506,25"}</td><td className="px-3 py-2 text-left align-top">{"1/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"3"}</th><td className="px-3 py-2 text-left align-top">{"4"}</td><td className="px-3 py-2 text-left align-top">{"202,5"}</td><td className="px-3 py-2 text-left align-top">{"4/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"2"}</th><td className="px-3 py-2 text-left align-top">{"6"}</td><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"6/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"1"}</th><td className="px-3 py-2 text-left align-top">{"4"}</td><td className="px-3 py-2 text-left align-top">{"32,4"}</td><td className="px-3 py-2 text-left align-top">{"4/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"0"}</th><td className="px-3 py-2 text-left align-top">{"1"}</td><td className="px-3 py-2 text-left align-top">{"12,96"}</td><td className="px-3 py-2 text-left align-top">{"1/16"}</td></tr></tbody>
+</table>
+</div>
+
+Con dos letras U, elige sus dos posiciones entre las cuatro. Las seis secuencias son UUDD, UDUD, UDDU, DUUD, DUDU y DDUU; cada una termina en **81**. Entre los cinco grupos, los recuentos **1+4+6+4+1=16** recuperan todo el catálogo.
+
+La suma ponderada es
+
+$$
+\frac{506{,}25+4(202{,}5)+6(81)+4(32{,}4)+12{,}96}{16}=121{,}550625\text{ unidades}.
+$$
+
+El **factor medio de un paso** es $(1{,}50+0{,}60)/2=1{,}05$. La independencia también permite comprobar la media de cuatro pasos como $100(1{,}05)^4=121{,}550625$. Es un atajo para la media ponderada de este modelo, no la secuencia de factores que experimenta cada trayectoria individual. Un camino concreto sigue usando sus factores U y D.
+
+Los grupos con cero, una o dos letras U terminan por debajo de las 100 unidades iniciales. Sus recuentos suman **1+4+6=11**. Por tanto, la media supera el inicio aunque **11/16** de los finales sean inferiores. Los finales grandes elevan la media ponderada. De hecho, ningún camino termina en la propia media.
+
+<MCQ client:visible
+  className={"not-prose"}
+  pretestLabel={"Antes de empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Cuántos caminos terminan estrictamente por debajo del inicio en el modelo de cuatro pasos sin detener?"}
+  options={[{"text":"Cinco de los dieciséis caminos."},{"text":"Ocho de los dieciséis caminos."},{"text":"Doce de los dieciséis caminos."},{"text":"Once de los dieciséis caminos.","correct":true}]}
+  explanation={"Cuenta los grupos con finales inferiores al inicio: los de cero, una o dos letras U. Sus recuentos suman once; los finales mayores explican que la media pueda superar aun así el inicio."}
+/>
+
+### Cuándo usarlo
+
+Usa la distribución completa —las cantidades y sus pesos— cuando la media parezca responder a otra pregunta distinta de «¿con qué frecuencia termina por debajo del inicio?». La media, la probabilidad de un final inferior y el mínimo describen propiedades distintas. Ninguna proporciona las otras dos.
+
+## Especifica qué ocurre en el umbral de parada
+
+<MCQ client:visible
+  className={"not-prose"}
+  pretestLabel={"Antes de empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Una regla observa la cantidad actualizada y después detiene al llegar a su umbral o por debajo. ¿Puede quedar detenida por debajo?"}
+  options={[{"text":"Sí: la actualización completa puede cruzarlo por debajo.","correct":true},{"text":"No: un umbral repone automáticamente la cantidad."},{"text":"No: observar un valor impide la caída anterior."},{"text":"Solo si mira las letras posteriores por adelantado."}]}
+  explanation={"La observación sigue a la actualización. El cruce puede dejar un valor inferior, que esta regla conserva sin reponer nada."}
+  pretest={true}
+/>
+
+Una **política (policy)** es una regla sobre qué hace la máquina en cada paso. Compara la política original, **aplicar todos los factores**, con una segunda política:
+
+1. Empieza con 100 unidades, por encima del umbral de 60.
+2. Aplica el siguiente factor U o D a la cantidad actual.
+3. Observa la cantidad actualizada. Si es **60 o menos**, deja de actualizar para siempre.
+4. Conserva esa cantidad alcanzada durante los pasos restantes. En otro caso, continúa hasta completar como máximo cuatro pasos.
+
+Es una **regla de parada observada (stopping rule)**: la decisión usa la cantidad alcanzada hasta ese momento, sin ver las letras futuras. El umbral es inclusivo: llegar exactamente a 60 detiene el proceso. La parada ocurre **después** de actualizar, así que se puede cruzar por debajo de 60. No promete conservar al menos 60 ni reponer hasta 60 una cantidad inferior.
+
+Con dos pasos, UU da $100\to150\to225$ y UD da $100\to150\to90$. Cualquier camino que empiece por D alcanza **60 tras el primer paso** y queda detenido ahí. Por eso DU y DD terminan en 60 bajo la regla, aunque sus segundas letras sin aplicar sean distintas.
+
+<div role="region" tabIndex={0} aria-label={"Dos pasos completos con el umbral inclusivo"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="warmup-stopped" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Dos pasos completos con el umbral inclusivo"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Secuencia potencial"}</th><th scope="col" className="px-3 py-2 text-left">{"Tras el primer paso, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Tras el segundo paso, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Primer paso detenido"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"UU"}</th><td className="px-3 py-2 text-left align-top">{"150"}</td><td className="px-3 py-2 text-left align-top">{"225"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UD"}</th><td className="px-3 py-2 text-left align-top">{"150"}</td><td className="px-3 py-2 text-left align-top">{"90"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DU"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DD"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr></tbody>
+</table>
+</div>
+
+La media pasa a ser $(225+90+60+60)/4=108{,}75$ unidades. Tras agrupar, los pesos de las tres cantidades visibles son **25 %, 25 %, 50 %**. La tercera cantidad hereda los dos caminos potenciales completos que empiezan por D.
+
+<ExpectedValueCalculator client:visible
+  className={"not-prose"}
+  title={"Media después de aplicar la regla"}
+  eyebrow={""}
+  locale={"es"}
+  scenario={{"prompt":"Pondera cada cantidad final por su peso.","outcomes":[{"label":"Final de UU","payoff":225,"prob":25},{"label":"Final de UD","payoff":90,"prob":25},{"label":"Final compartido por DU y DD","payoff":60,"prob":50}],"unit":" unidades","unitPosition":"suffix"}}
+  instructions={"Los pesos iniciales proceden de cuatro secuencias equiprobables. Mantén el total en cien o restablécelos."}
+  probabilityLabel={"Peso de los caminos"}
+  payoffLabel={"Cantidad final"}
+  contributionLabel={"Contribución"}
+  totalProbLabel={"Suma de pesos"}
+  normalizeHint={"Los pesos deben sumar cien por ciento. Ahora suman {sum}."}
+  evLabel={"Cantidad final media"}
+  evHint={"Media ponderada de los caminos del catálogo"}
+  resetLabel={"Restablecer pesos"}
+  caption={"Cambiar los pesos define otra ponderación. Los controles no generan nuevas secuencias ni cambian los factores."}
+/>
+
+Con cuatro pasos, **UDDU** sigue $100\to150\to90\to54\to54$: la tercera actualización cruza por debajo de 60; la cuarta no se aplica. Sin detener, esa última U multiplicaría 54 por 1,50 y produciría 81. El **factor efectivo** de la política detenida después del cruce es **1**, porque multiplicar por uno conserva la cantidad alcanzada. Su letra potencial sin usar sigue siendo U.
+
+<FactorChainTrace client:visible
+  className={"not-prose"}
+  title={"Sigue la cantidad en cada paso"}
+  instructions={"Recorre los cuatro pasos. Después de una parada, la cantidad se conserva."}
+  scenarios={[{"label":"Mismos recuentos sin detener","start":100,"unit":"unidades del modelo","chains":[{"label":"UUDD sin detener","factorHundredths":[150,150,60,60]},{"label":"DUUD sin detener","factorHundredths":[60,150,150,60]}]},{"label":"Mismos caminos potenciales con el umbral","start":100,"unit":"unidades del modelo","chains":[{"label":"UUDD con la regla de parada","factorHundredths":[150,150,60,60]},{"label":"DUUD con la regla de parada","factorHundredths":[60,100,100,100]}]},{"label":"Cruzar por debajo del umbral","start":100,"unit":"unidades del modelo","chains":[{"label":"UDDU con la regla de parada","factorHundredths":[150,60,60,100]},{"label":"UDDU sin detener","factorHundredths":[150,60,60,150]}]}]}
+  labels={{"scenarioLabel":"Caso","stepTemplate":"Paso {step} de {total}","startLabel":"Cantidad inicial","backLabel":"Paso anterior","nextLabel":"Paso siguiente","resetLabel":"Volver al inicio","chainLabel":"Trayectoria","previousLabel":"Cantidad anterior","factorLabel":"Factor efectivo","resultLabel":"Cantidad al terminar el paso","initialCellLabel":"Inicio","tableCaption":"Factores efectivos declarados y cantidades","chartDescription":"Los puntos muestran cantidades en cada paso, incluida su conservación después de parar. Los segmentos orientan la comparación; no añaden actualizaciones intermedias.","valueAxisLabel":"Cantidad en unidades del modelo","stepAxisLabel":"Pasos","initialAnnouncementTemplate":"Inicio: {first}; {second}.","stepAnnouncementTemplate":"Paso {step}: {first}; {second}.","precisionNote":"Los productos usan los factores decimales declarados sin redondear cantidades intermedias. Un factor uno después de detener conserva la cantidad alcanzada."}}
+  locale={"es"}
+/>
+
+La figura permite examinar secuencias de factores declaradas. Elige la comparación y avanza de un paso al siguiente. Un factor uno después de una parada representa la conservación de la cantidad. La figura no decide cuándo detener ni genera letras posibles; la política y las trazas resueltas proporcionan esas secuencias.
+
+<Categorize client:visible
+  className={"not-prose"}
+  instructions={"Asigna cada afirmación a su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"Todo clasificado"}
+  partialResultWord={"bien"}
+  question={"Separa una letra potencial de un factor efectivo que representa la política."}
+  buckets={["Futuro potencial","Factor efectivo"]}
+  items={[{"text":"La U sin usar que aparece después de que un camino se haya detenido.","bucket":"Futuro potencial"},{"text":"El multiplicador uno que conserva la cantidad detenida.","bucket":"Factor efectivo"},{"text":"Una D que habría ocurrido después, pero no se ejecuta.","bucket":"Futuro potencial"},{"text":"El factor D aplicado en el paso que alcanza o cruza el umbral por primera vez.","bucket":"Factor efectivo"}]}
+  explanation={"Los caminos potenciales permiten comparar bajo la misma incertidumbre. Los factores efectivos representan la política en cada camino: U o D mientras sigue activo y uno para conservar la cantidad detenida."}
+/>
+
+### Cuándo usarlo
+
+Antes de evaluar una regla de umbral, especifica cuándo se observa, si la comparación es inclusiva o estricta, qué cantidad se conserva y qué actualizaciones o costes siguen. Una regla que recorte en un suelo, venda con una comisión o permita reiniciar es otro modelo y necesita otra cuenta.
+
+## Conserva los pesos al juntar ramas detenidas
+
+<MCQ client:visible
+  className={"not-prose"}
+  pretestLabel={"Antes de empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Varias secuencias potenciales completas quedan detenidas tras la misma primera letra. ¿Cómo se calcula su peso conjunto?"}
+  options={[{"text":"Asignando a esa historia detenida el peso de una sola secuencia original."},{"text":"Dando el mismo peso a cada historia detenida observada distinta."},{"text":"Sumando los pesos de todas las secuencias completas que conducen a ella.","correct":true},{"text":"Eliminándola porque ya no hay multiplicaciones posteriores."}]}
+  explanation={"La historia detenida hereda todas las secuencias potenciales completas que la producen. La política cambia las actualizaciones, no la ley inicial de probabilidad."}
+  pretest={true}
+/>
+
+Usa las mismas dieciséis secuencias potenciales para comparar las políticas. Así mantienes fija la incertidumbre subyacente: la regla cambia qué factores se aplican, sin cambiar a escondidas la probabilidad de una secuencia. El operador nunca recibe todo este catálogo futuro por adelantado; nosotros lo usamos para llevar las cuentas de todos los casos posibles.
+
+<div role="region" tabIndex={0} aria-label={"Caminos potenciales completos y cantidades finales"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="main-ledger" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Caminos potenciales completos y cantidades finales"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Secuencia potencial"}</th><th scope="col" className="px-3 py-2 text-left">{"Todos los factores, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Regla de parada, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Primer paso detenido"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUUU"}</th><td className="px-3 py-2 text-left align-top">{"506,25"}</td><td className="px-3 py-2 text-left align-top">{"506,25"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUUD"}</th><td className="px-3 py-2 text-left align-top">{"202,5"}</td><td className="px-3 py-2 text-left align-top">{"202,5"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUDU"}</th><td className="px-3 py-2 text-left align-top">{"202,5"}</td><td className="px-3 py-2 text-left align-top">{"202,5"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUDD"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDUU"}</th><td className="px-3 py-2 text-left align-top">{"202,5"}</td><td className="px-3 py-2 text-left align-top">{"202,5"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDUD"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDDU"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"54"}</td><td className="px-3 py-2 text-left align-top">{"3"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDDD"}</th><td className="px-3 py-2 text-left align-top">{"32,4"}</td><td className="px-3 py-2 text-left align-top">{"54"}</td><td className="px-3 py-2 text-left align-top">{"3"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUUU"}</th><td className="px-3 py-2 text-left align-top">{"202,5"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUUD"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUDU"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUDD"}</th><td className="px-3 py-2 text-left align-top">{"32,4"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDUU"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDUD"}</th><td className="px-3 py-2 text-left align-top">{"32,4"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDDU"}</th><td className="px-3 py-2 text-left align-top">{"32,4"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDDD"}</th><td className="px-3 py-2 text-left align-top">{"12,96"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr></tbody>
+</table>
+</div>
+
+Un guion indica que no se alcanza el umbral durante los cuatro pasos. Las ocho secuencias que empiezan por D se juntan en el camino observado detenido en 60, con peso conjunto **8/16 = 1/2**. UDDU y UDDD se juntan en 54, con peso conjunto **2/16 = 1/8**. Cada una de las otras seis secuencias conserva peso **1/16**. Juntar ramas observadas no vuelve equiprobables los ocho caminos resultantes.
+
+La suma ponderada detenida se puede comprobar con esas ramas agrupadas:
+
+$$
+\frac{506{,}25+3(202{,}5)+2(81)+2(54)+8(60)}{16}=116{,}484375\text{ unidades}.
+$$
+
+<div role="region" tabIndex={0} aria-label={"Tres medidas distintas de la cantidad final"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="main-comparison" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Tres medidas distintas de la cantidad final"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Medida"}</th><th scope="col" className="px-3 py-2 text-left">{"Todos los factores"}</th><th scope="col" className="px-3 py-2 text-left">{"Regla de parada"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"Media, unidades del modelo"}</th><td className="px-3 py-2 text-left align-top">{"121,550625"}</td><td className="px-3 py-2 text-left align-top">{"116,484375"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Cantidad final inferior a la inicial"}</th><td className="px-3 py-2 text-left align-top">{"11/16"}</td><td className="px-3 py-2 text-left align-top">{"12/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Mínimo final, unidades del modelo"}</th><td className="px-3 py-2 text-left align-top">{"12,96"}</td><td className="px-3 py-2 text-left align-top">{"54"}</td></tr></tbody>
+</table>
+</div>
+
+<RateComparison client:visible
+  className={"not-prose"}
+  title={"Cantidades finales estrictamente inferiores al inicio"}
+  locale={"es"}
+  countsLabel={"Caminos potenciales inferiores al inicio del total de caminos potenciales"}
+  differenceLabel={"Primera política menos segunda política"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+  scenarioLabel={"Caso"}
+  scenarios={[{"label":"La misma ley de probabilidad de cuatro pasos","groups":[{"label":"Aplicar todos los factores","events":11,"total":16},{"label":"Aplicar la regla de parada","events":12,"total":16}]}]}
+/>
+
+Aquí **pérdida** significa una cantidad final estrictamente inferior a las 100 unidades iniciales; no una caída desde un máximo previo. En este catálogo declarado, detener eleva el mínimo final de **12,96 a 54**, reduce la media de **121,550625 a 116,484375** y eleva la probabilidad de acabar por debajo del inicio de **11/16 a 12/16**. Algunos caminos evitan caídas posteriores; otros se pierden una recuperación. Hay que contar esos efectos para compararlos, en vez de suponer que detener siempre ayuda o perjudica.
+
+Si el único objetivo fuera maximizar la media final **entre estas dos políticas**, aquí gana aplicar todos los factores. Si fuera maximizar su mínimo final, ganaría la política detenida. Esta comparación no busca entre todos los umbrales posibles ni todas las políticas. No identifica una regla universalmente mejor.
+
+<MCQ client:visible
+  className={"not-prose"}
+  pretestLabel={"Antes de empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Entre las dos políticas declaradas, ¿qué afirmación encaja con el objetivo elegido?"}
+  options={[{"text":"La política detenida maximiza la media porque su mínimo es mayor."},{"text":"Aplicar todos los factores tiene mayor media; detener tiene mayor mínimo.","correct":true},{"text":"Las políticas son equivalentes porque comparten caminos potenciales."},{"text":"El mínimo mayor demuestra que no puede existir una política mejor."}]}
+  explanation={"La cuenta completa da clasificaciones distintas para la media y el mínimo. Compartir caminos potenciales permite comparar de forma coherente; no vuelve equivalentes las políticas ni busca entre todas las demás reglas."}
+/>
+
+### Cuándo usarlo
+
+Usa caminos potenciales comunes para comparar reglas bajo la misma incertidumbre. Declara el objetivo y el horizonte antes de llamar mejor a una política. Conserva los pesos cuando varios futuros potenciales producen una misma historia detenida observada.
+
+## Traslada la auditoría a otros factores
+
+<MCQ client:visible
+  className={"not-prose"}
+  pretestLabel={"Antes de empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Cambian los factores y el umbral. ¿Qué parte de la auditoría hay que recalcular?"}
+  options={[{"text":"Solo el rótulo de la unidad."},{"text":"Solo la cantidad final mayor."},{"text":"Nada, porque las letras conservan sus nombres."},{"text":"Las trazas, los finales detenidos y las comparaciones ponderadas.","correct":true}]}
+  explanation={"Los mismos nombres de las letras pueden representar ahora multiplicadores distintos. Vuelve a ejecutar la regla con los parámetros nuevos antes de trasladar una conclusión."}
+  pretest={true}
+/>
+
+Prueba un caso nuevo antes de abrir la solución. Empieza con **100 unidades**, completa **cuatro pasos** y asigna probabilidad **1/2** a cada letra independiente. U multiplica ahora por **6/5 = 1,20** y D por **4/5 = 0,80**. En la segunda política, observa tras cada actualización y conserva para siempre la cantidad alcanzada en el primer valor de **80 o menos**. No hay flujos externos ni costes. Son supuestos cambiados, no mediciones nuevas de la máquina anterior.
+
+<div role="region" tabIndex={0} aria-label={"Parámetros declarados de la máquina"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="model-transfer" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Parámetros declarados de la máquina"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Parámetro"}</th><th scope="col" className="px-3 py-2 text-left">{"Valor"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"Cantidad inicial, unidades del modelo"}</th><td className="px-3 py-2 text-left align-top">{"100"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Pasos completos"}</th><td className="px-3 py-2 text-left align-top">{"4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Factor U"}</th><td className="px-3 py-2 text-left align-top">{"6/5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Factor D"}</th><td className="px-3 py-2 text-left align-top">{"4/5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Probabilidad de cada letra siguiente independiente"}</th><td className="px-3 py-2 text-left align-top">{"1/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Umbral inclusivo de parada, unidades del modelo"}</th><td className="px-3 py-2 text-left align-top">{"80"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Factor posterior a la parada"}</th><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Flujos externos y costes"}</th><td className="px-3 py-2 text-left align-top">{"Ninguno"}</td></tr></tbody>
+</table>
+</div>
+
+Calcula **UDDU** con ambas políticas. Después enumera las dieciséis secuencias y compara sus medias finales. Como comprobación inicial, UUUD sin detener sigue $100\to120\to144\to172{,}8\to138{,}24$; ninguno de esos valores alcanza el umbral nuevo. Recuerda que otra secuencia puede cruzarlo por debajo en lugar de llegar exactamente a él.
+
+<MCQ client:visible
+  className={"not-prose"}
+  pretestLabel={"Antes de empezar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"En UDDU del caso nuevo, ¿qué cantidad conserva la política de parada?"}
+  options={[{"text":"Ochenta unidades, porque todo umbral es un suelo."},{"text":"Noventa y dos coma dieciséis unidades, porque hay que aplicar todas las letras."},{"text":"Setenta y seis coma ocho unidades, alcanzadas antes de la última letra potencial.","correct":true},{"text":"Cien unidades, porque la media se mantiene en el inicio."}]}
+  explanation={"Las dos primeras actualizaciones dan ciento veinte y después noventa y seis unidades. La tercera multiplica por el factor D y cruza por debajo del umbral. Se conserva esa cantidad alcanzada; una media no es el resultado de este camino."}
+/>
+
+<details>
+<summary>Comprueba la auditoría completa de la transferencia</summary>
+
+UDDU da $100\to120\to96\to76{,}8\to92{,}16$ sin detener. Con la regla, queda en **76,8 tras el tercer paso**. El umbral de 80 no es un suelo de conservación garantizado. DUUU queda en **80 tras el primer paso**; sus aumentos potenciales posteriores no se aplican.
+
+<FactorChainTrace client:visible
+  className={"not-prose"}
+  title={"Sigue la cantidad en cada paso"}
+  instructions={"Recorre los cuatro pasos. Después de una parada, la cantidad se conserva."}
+  scenarios={[{"label":"Datos nuevos y umbral nuevo","start":100,"unit":"unidades del modelo","chains":[{"label":"UDDU con la regla de parada","factorHundredths":[120,80,80,100]},{"label":"UDDU sin detener","factorHundredths":[120,80,80,120]}]}]}
+  labels={{"scenarioLabel":"Caso","stepTemplate":"Paso {step} de {total}","startLabel":"Cantidad inicial","backLabel":"Paso anterior","nextLabel":"Paso siguiente","resetLabel":"Volver al inicio","chainLabel":"Trayectoria","previousLabel":"Cantidad anterior","factorLabel":"Factor efectivo","resultLabel":"Cantidad al terminar el paso","initialCellLabel":"Inicio","tableCaption":"Factores efectivos declarados y cantidades","chartDescription":"Los puntos muestran cantidades en cada paso, incluida su conservación después de parar. Los segmentos orientan la comparación; no añaden actualizaciones intermedias.","valueAxisLabel":"Cantidad en unidades del modelo","stepAxisLabel":"Pasos","initialAnnouncementTemplate":"Inicio: {first}; {second}.","stepAnnouncementTemplate":"Paso {step}: {first}; {second}.","precisionNote":"Los productos usan los factores decimales declarados sin redondear cantidades intermedias. Un factor uno después de detener conserva la cantidad alcanzada."}}
+  locale={"es"}
+/>
+
+<div role="region" tabIndex={0} aria-label={"Caminos potenciales completos y cantidades finales"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="transfer-ledger" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Caminos potenciales completos y cantidades finales"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Secuencia potencial"}</th><th scope="col" className="px-3 py-2 text-left">{"Todos los factores, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Regla de parada, unidades"}</th><th scope="col" className="px-3 py-2 text-left">{"Primer paso detenido"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUUU"}</th><td className="px-3 py-2 text-left align-top">{"207,36"}</td><td className="px-3 py-2 text-left align-top">{"207,36"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUUD"}</th><td className="px-3 py-2 text-left align-top">{"138,24"}</td><td className="px-3 py-2 text-left align-top">{"138,24"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUDU"}</th><td className="px-3 py-2 text-left align-top">{"138,24"}</td><td className="px-3 py-2 text-left align-top">{"138,24"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUDD"}</th><td className="px-3 py-2 text-left align-top">{"92,16"}</td><td className="px-3 py-2 text-left align-top">{"92,16"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDUU"}</th><td className="px-3 py-2 text-left align-top">{"138,24"}</td><td className="px-3 py-2 text-left align-top">{"138,24"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDUD"}</th><td className="px-3 py-2 text-left align-top">{"92,16"}</td><td className="px-3 py-2 text-left align-top">{"92,16"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDDU"}</th><td className="px-3 py-2 text-left align-top">{"92,16"}</td><td className="px-3 py-2 text-left align-top">{"76,8"}</td><td className="px-3 py-2 text-left align-top">{"3"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDDD"}</th><td className="px-3 py-2 text-left align-top">{"61,44"}</td><td className="px-3 py-2 text-left align-top">{"76,8"}</td><td className="px-3 py-2 text-left align-top">{"3"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUUU"}</th><td className="px-3 py-2 text-left align-top">{"138,24"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUUD"}</th><td className="px-3 py-2 text-left align-top">{"92,16"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUDU"}</th><td className="px-3 py-2 text-left align-top">{"92,16"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUDD"}</th><td className="px-3 py-2 text-left align-top">{"61,44"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDUU"}</th><td className="px-3 py-2 text-left align-top">{"92,16"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDUD"}</th><td className="px-3 py-2 text-left align-top">{"61,44"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDDU"}</th><td className="px-3 py-2 text-left align-top">{"61,44"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDDD"}</th><td className="px-3 py-2 text-left align-top">{"40,96"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr></tbody>
+</table>
+</div>
+
+La suma sin detener, por grupos, es $207{,}36+4(138{,}24)+6(92{,}16)+4(61{,}44)+40{,}96=1600$. La suma detenida es $207{,}36+3(138{,}24)+2(92{,}16)+2(76{,}8)+8(80)=1600$. Dividir cualquiera entre dieciséis da **100 unidades**. La igualdad de sus medias no iguala sus finales: los mínimos son **40,96 y 76,8**, y los recuentos inferiores al inicio vuelven a ser **11 y 12**.
+
+También hay una comprobación local de por qué la media se conserva aquí. Desde una cantidad actual $x$, la media del siguiente paso sin detener es $(1{,}20x+0{,}80x)/2=x$. Una cantidad ya detenida se mantiene en $x$; una cantidad activa tiene esa misma media del siguiente paso antes de observar la letra. Aplicar ese razonamiento durante este horizonte finito conserva la media inicial. Depende de las probabilidades iguales e independientes, los factores y la regla de conservación declarados. No dice que toda regla de parada conserve cualquier media.
+
+</details>
+
+### Cuándo usarlo
+
+Repite la auditoría cuando cambien los factores, las probabilidades, el horizonte, el umbral o el tratamiento posterior a la parada. Medias iguales pueden coexistir con distribuciones distintas. El cálculo de la primera máquina no resuelve el de la segunda por analogía.
+
+## Reconstruye la regla antes de juzgarla
+
+<MatchConcepts client:visible
+  className={"not-prose"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  instructions={"Elige un concepto y después su definición."}
+  allCorrectLabel={"Todo relacionado"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"elige ahora una definición"}
+  notLinkedHint={"sin relacionar"}
+  termsLabel={"Conceptos"}
+  definitionsLabel={"Definiciones"}
+  question={"Recupera las distinciones necesarias para una auditoría."}
+  pairs={[{"term":"Final de un camino","definition":"La cantidad final de una secuencia potencial completa bajo una política especificada."},{"term":"Media ponderada","definition":"La suma de cada cantidad final multiplicada por el peso de las secuencias que la producen."},{"term":"Instrucción de parada","definition":"Una regla que usa información observada para decidir qué actualizaciones posteriores dejan de aplicarse."},{"term":"Objetivo","definition":"La medida usada para comparar políticas, como la media final o el mínimo."}]}
+/>
+
+Una auditoría necesita una cantidad inicial y su unidad, un periodo de actualización, los factores posibles y sus probabilidades, un horizonte finito, la información disponible al decidir y las instrucciones completas de parada y conservación. Enumera los caminos potenciales completos, ejecuta la regla en cada uno y solo entonces agrupa los finales con sus pesos conjuntos. Compara las medidas que respondan al objetivo declarado.
+
+El límite de cuatro pasos forma parte del modelo. Un horizonte mayor, letras dependientes, costes o una distribución de factores distinta requieren otra cuenta. Ningún resultado finito de estos promete un desenlace concreto ni valida una ley de crecimiento en un negocio, una destreza o una cuenta. Una cantidad detenida en este modelo sigue siendo positiva; ni se reinicia en cero ni se repone hasta el umbral.
+
+<MindMap client:visible
+  className={"[overflow-wrap:anywhere]"}
+  eyebrow={""}
+  outlineLabel={"Esquema de texto"}
+  title={"Audita cantidades, pesos e instrucciones"}
+  root={{"label":"Auditoría de caminos finitos","children":[{"label":"Declara el modelo","children":[{"label":"Unidades iniciales, factores, probabilidades independientes y horizonte finito"}]},{"label":"Ejecuta cada política","children":[{"label":"Observa después de actualizar; conserva el valor alcanzado tras un cruce inclusivo"}]},{"label":"Conserva los pesos","children":[{"label":"Las historias agrupadas heredan los pesos de todas las secuencias potenciales completas"}]},{"label":"Compara según el objetivo","children":[{"label":"Media, probabilidad de acabar por debajo y mínimo responden a preguntas distintas"}]},{"label":"Comprueba la transferencia","children":[{"label":"Cambiar los supuestos requiere trazas y sumas ponderadas nuevas"}]}]}}
+/>
+
+<Quiz client:visible
+  className={"not-prose"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Cuestionario completado"}
+  perfectMessage={"Has acertado todas las preguntas."}
+  goodMessage={"Revisa las explicaciones de tus errores."}
+  keepPracticingMessage={"Vuelve a los ejemplos y prueba otra vez."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Has acertado"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  title={"Comprueba la auditoría completa"}
+  questions={[{"question":"En el modelo de dos pasos sin detener, ¿cuál es la media ponderada final?","options":[{"text":"Ciento diecisiete unidades, promediando solo cantidades distintas."},{"text":"Ciento diez coma veinticinco unidades, conservando todos los pesos.","correct":true},{"text":"Noventa unidades, el final repetido."},{"text":"Doscientas veinticinco unidades, el final mayor."}],"explanation":"Suma los finales de las cuatro secuencias equiprobables y divide entre cuatro. Cada una de las dos secuencias que terminan en noventa conserva su peso de un cuarto."},{"question":"¿Por qué pueden diferir UUDD y DUUD bajo la política de parada pese a tener el mismo producto sin detener?","options":[{"text":"Detener siempre cambia la probabilidad de U."},{"text":"La multiplicación cambia su regla de orden solo en los caminos desfavorables."},{"text":"La política reacciona a cantidades intermedias, que dependen del orden.","correct":true},{"text":"Una cantidad final repetida pierde su peso de probabilidad."}],"explanation":"DUUD alcanza el umbral inclusivo en su primera actualización y queda detenido. UUDD no lo alcanza. Sin la instrucción que depende de la trayectoria, sus productos coinciden."},{"question":"Selecciona todas las afirmaciones respaldadas por el catálogo principal de cuatro pasos.","allowMultiple":true,"options":[{"text":"La política detenida tiene el mínimo final mayor.","correct":true},{"text":"La política detenida garantiza conservar su umbral o más."},{"text":"La media sin detener supera el inicio aunque la mayoría de los finales sean inferiores.","correct":true},{"text":"La política detenida tiene la media final mayor."}],"explanation":"El mínimo detenido supera al mínimo sin detener, pero queda por debajo del umbral. La media sin detener supera el inicio mientras once de los dieciséis finales son inferiores."},{"question":"En la transferencia con los factores nuevos, ¿qué relación hay entre las medias finales?","options":[{"text":"Ambas igualan la cantidad inicial bajo el modelo finito declarado.","correct":true},{"text":"La media detenida tiene que ser mayor bajo cualquier regla posible."},{"text":"La media sin detener tiene que superar el inicio siempre que U lo aumente."},{"text":"Medias iguales obligan a tener finales iguales en cada secuencia potencial."}],"explanation":"Cada paso activo tiene factor medio uno en esta transferencia; conservar también mantiene la cantidad actual. Las sumas ponderadas completas coinciden, aunque difieran finales concretos y mínimos."},{"question":"Tras ver una caída, decides consultar la siguiente letra potencial antes de elegir si paras. ¿Qué ha cambiado?","options":[{"text":"Solo la forma de escribir la regla original."},{"text":"Nada, porque el auditor dispone de caminos completos."},{"text":"Solo el tamaño de la unidad."},{"text":"La información y el momento de la decisión, que requieren otro modelo.","correct":true}],"explanation":"La instrucción de parada original usa la información disponible después de la actualización actual. Un catálogo usado para evaluar no autoriza al operador a mirar el futuro."},{"question":"Un umbral propuesto tiene un mínimo mayor y una media menor. ¿Qué falta para elegir entre esas medidas?","options":[{"text":"Afirmar que todo mínimo es también una media."},{"text":"Un objetivo declarado y los intercambios que se aceptan.","correct":true},{"text":"Solo la cantidad final más grande."},{"text":"Una regla que asigne pesos iguales a todas las historias observadas."}],"explanation":"Las medidas resumen consecuencias distintas. Especifica el objetivo de la decisión antes de ordenar las políticas; esta lección no proporciona una receta universal."}]}
+/>
+
+### Fuentes y límites
+
+La definición de media ponderada y la comprobación del producto independiente siguen la explicación de la esperanza en la [lección siete de MIT 6.041](https://ocw.mit.edu/courses/6-041-probabilistic-systems-analysis-and-applied-probability-fall-2010/37bdf3cd4ab8880dd43de78e3b0db45e_EObHWIEKGjA.pdf), una transcripción de clase. La [lección dieciséis de Hao Wu en MIT](https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/ddeda684b0dd6a1422418c7eca3ce843_MIT18_445S15_lecture16.pdf) define la parada a partir de la información disponible en ese momento y establece condiciones para conservar una media bajo una parada acotada. Esos resultados técnicos tienen condiciones; esta lección comprueba sus propios casos finitos directamente. La máquina, los factores, los umbrales y los finales enumerados son ejemplos construidos, no observaciones experimentales.
+
+Lo siguiente es el [examen final](/es/compounding/final-exam). Aplica el mismo criterio: identifica el modelo antes de hacer sus cuentas.

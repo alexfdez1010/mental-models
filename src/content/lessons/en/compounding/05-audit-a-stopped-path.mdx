@@ -1,0 +1,411 @@
+---
+title: "Audit a Stopped Path"
+description: "Enumerate factor sequences, calculate their weighted mean and check how an observed stopping boundary changes paths and final quantities."
+topic: "en/compounding"
+order: 6
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, MatchConcepts, Categorize, MindMap, Quiz, ExpectedValueCalculator, FactorChainTrace, RateComparison } from '@/components/react';
+
+A test machine changes a quantity by multiplication. You can let it complete every update, or tell it to stop updating after the quantity crosses a boundary. Before choosing, you need to know what “stop” does, when it happens and which possible paths you are averaging.
+
+This is a **constructed model**, measured in **model units**. Its quantities and update rules are stipulated. Nothing is added or withdrawn. A stopped quantity stays where it stopped, with no storage loss or cost. Those assumptions let us inspect the arithmetic before importing a real-world story.
+
+<MCQ client:visible
+  className={"not-prose"}
+  question={"The mean endpoint is above the start. What does that alone tell us about how many paths finish below the start?"}
+  options={[{"text":"None can finish lower."},{"text":"Fewer than half must finish lower."},{"text":"The mean alone does not determine that count.","correct":true},{"text":"Exactly half must finish lower."}]}
+  explanation={"A weighted mean combines sizes and probabilities. A few large endpoints can lift it above the start even when many paths finish below. We will count both quantities."}
+  pretest={true}
+/>
+
+## Count paths before averaging endpoints
+
+A **factor** multiplies the current quantity. Our machine starts at **100 units**. At each completed step, U multiplies by **3/2 = 1.50** and D multiplies by **3/5 = 0.60**. U increases the quantity by 50%; D reduces it by 40%. These are different proportional changes, not opposite percentages.
+
+Each next letter has probability **1/2**, independently of the previous letters: learning the past does not change those declared chances. A **potential path** is a complete sequence of letters that could occur. With two steps there are four paths. Each has probability $(1/2)(1/2)=1/4$. We call this probability its **weight** in the calculation.
+
+Think of four equally weighted tickets, one for each complete sequence. Two tickets may name the same final quantity; that does not turn them into one ticket. The tickets are a counting aid, not information about which future path the operator will see.
+
+<div role="region" tabIndex={0} aria-label={"Two completed steps without stopping"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="warmup-plain" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Two completed steps without stopping"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Potential sequence"}</th><th scope="col" className="px-3 py-2 text-left">{"After step one, units"}</th><th scope="col" className="px-3 py-2 text-left">{"After step two, units"}</th><th scope="col" className="px-3 py-2 text-left">{"Path weight"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"UU"}</th><td className="px-3 py-2 text-left align-top">{"150"}</td><td className="px-3 py-2 text-left align-top">{"225"}</td><td className="px-3 py-2 text-left align-top">{"1/4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UD"}</th><td className="px-3 py-2 text-left align-top">{"150"}</td><td className="px-3 py-2 text-left align-top">{"90"}</td><td className="px-3 py-2 text-left align-top">{"1/4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DU"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"90"}</td><td className="px-3 py-2 text-left align-top">{"1/4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DD"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"36"}</td><td className="px-3 py-2 text-left align-top">{"1/4"}</td></tr></tbody>
+</table>
+</div>
+
+For UD, the first step produces $100\times1.50=150$, and the second produces $150\times0.60=90$. DU also ends at 90: $100\times0.60\times1.50=90$. There is no stopping rule yet, so all declared factors apply.
+
+The **weighted mean**, also called the **expected value**, multiplies each possible final quantity by its weight and adds the contributions. Equal weights let us add the four endpoints and divide by four:
+
+$$
+\frac{225+90+90+36}{4}=110.25\text{ units}.
+$$
+
+Grouping the two 90s gives the same calculation: $225/4+90/2+36/4=56.25+45+9=110.25$. Averaging only the three distinct values would instead give $(225+90+36)/3=117$. That silently replaces the path weights with a different model.
+
+<ExpectedValueCalculator client:visible
+  className={"not-prose"}
+  title={"Mean of the first four paths"}
+  eyebrow={""}
+  locale={"en"}
+  scenario={{"prompt":"Weight each final quantity by its share.","outcomes":[{"label":"UU endpoint","payoff":225,"prob":25},{"label":"Endpoint shared by UD and DU","payoff":90,"prob":50},{"label":"DD endpoint","payoff":36,"prob":25}],"unit":" units","unitPosition":"suffix"}}
+  instructions={"The initial shares come from four equally likely sequences. Keep the total at one hundred or reset them."}
+  probabilityLabel={"Path share"}
+  payoffLabel={"Final quantity"}
+  contributionLabel={"Contribution"}
+  totalProbLabel={"Shares total"}
+  normalizeHint={"Shares must total one hundred percent. They now total {sum}."}
+  evLabel={"Mean final quantity"}
+  evHint={"Weighted mean over the path catalogue"}
+  resetLabel={"Reset shares"}
+  caption={"Changing the shares defines a different weighting. The controls do not generate new sequences or change the factors."}
+/>
+
+The calculator rounds displayed contributions and the mean to two decimal places. The table and formulas retain exact terminating decimals. Moving a slider changes the weighting shown; it does not rerun the machine. If the weights do not total 100%, the displayed sum is not the expected value of this complete catalogue. Reset to recover its stated probabilities.
+
+<FillBlank client:visible
+  className={"not-prose"}
+  text={"The endpoint shared by UD and DU carries {{half the weight|one third of the weight|one quarter of the weight}}. Equal final quantities combine by {{adding their path weights|discarding repeated paths|averaging their weights}}."}
+  explanation={"Two of the four equally likely sequences end at that shared quantity. Their two quarter-weights add; the fact that the printed quantity repeats does not remove a possible sequence."}
+/>
+
+### When to use it
+
+Use a weighted mean when one result can arise through several paths. First define the complete outcomes and their weights. Counting each distinct result once is justified only if those distinct results really are equally likely.
+
+## A mean can rise while most paths finish lower
+
+<MCQ client:visible
+  className={"not-prose"}
+  question={"We extend the same model to four steps. What must be counted before averaging?"}
+  options={[{"text":"Only the largest and smallest endpoints."},{"text":"All complete potential sequences and their weights.","correct":true},{"text":"Only the distinct endpoint values."},{"text":"The letters on whichever path looks most typical."}]}
+  explanation={"A complete catalogue includes every sequence with its probability. Grouping is safe after those weights have been accounted for."}
+  pretest={true}
+/>
+
+Now allow **four steps**, with the same independent U/D probabilities and factors. The **horizon** is the number of steps we evaluate: four here, even if the machine stops updating sooner. There are $2\times2\times2\times2=16$ potential sequences, each with weight $1/16$. The count doubles at each additional letter. We group them by their number of U letters only because, without stopping or outside flows, multiplication gives the same endpoint regardless of order.
+
+<div role="region" tabIndex={0} aria-label={"Declared machine parameters"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="model-main" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Declared machine parameters"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Parameter"}</th><th scope="col" className="px-3 py-2 text-left">{"Value"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"Initial quantity, model units"}</th><td className="px-3 py-2 text-left align-top">{"100"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Completed steps"}</th><td className="px-3 py-2 text-left align-top">{"4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"U factor"}</th><td className="px-3 py-2 text-left align-top">{"3/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"D factor"}</th><td className="px-3 py-2 text-left align-top">{"3/5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Probability of each next independent letter"}</th><td className="px-3 py-2 text-left align-top">{"1/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Inclusive stopping boundary, model units"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Post-stop factor"}</th><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Outside flows and costs"}</th><td className="px-3 py-2 text-left align-top">{"None"}</td></tr></tbody>
+</table>
+</div>
+
+<div role="region" tabIndex={0} aria-label={"Four steps grouped by the number of U letters"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="grouped-plain" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Four steps grouped by the number of U letters"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"U count"}</th><th scope="col" className="px-3 py-2 text-left">{"Sequence count"}</th><th scope="col" className="px-3 py-2 text-left">{"Endpoint, units"}</th><th scope="col" className="px-3 py-2 text-left">{"Combined weight"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"4"}</th><td className="px-3 py-2 text-left align-top">{"1"}</td><td className="px-3 py-2 text-left align-top">{"506.25"}</td><td className="px-3 py-2 text-left align-top">{"1/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"3"}</th><td className="px-3 py-2 text-left align-top">{"4"}</td><td className="px-3 py-2 text-left align-top">{"202.5"}</td><td className="px-3 py-2 text-left align-top">{"4/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"2"}</th><td className="px-3 py-2 text-left align-top">{"6"}</td><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"6/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"1"}</th><td className="px-3 py-2 text-left align-top">{"4"}</td><td className="px-3 py-2 text-left align-top">{"32.4"}</td><td className="px-3 py-2 text-left align-top">{"4/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"0"}</th><td className="px-3 py-2 text-left align-top">{"1"}</td><td className="px-3 py-2 text-left align-top">{"12.96"}</td><td className="px-3 py-2 text-left align-top">{"1/16"}</td></tr></tbody>
+</table>
+</div>
+
+For two U letters, choose their two positions among the four. The six sequences are UUDD, UDUD, UDDU, DUUD, DUDU and DDUU; each ends at **81**. Across the five groups, the counts **1+4+6+4+1=16** recover the full catalogue.
+
+The weighted sum is
+
+$$
+\frac{506.25+4(202.5)+6(81)+4(32.4)+12.96}{16}=121.550625\text{ units}.
+$$
+
+The **mean factor for one step** is $(1.50+0.60)/2=1.05$. Independence also lets us check the four-step mean as $100(1.05)^4=121.550625$. This is a shortcut for this model’s weighted mean, not the factor sequence that every individual path experiences. A specific path still uses its actual U and D factors.
+
+The groups with zero, one or two U letters end below the starting 100. Their counts add to **1+4+6=11**. Thus the mean exceeds the start even though **11/16** of the endpoints are lower. The large endpoints pull the weighted mean upward. Indeed, no path ends at the mean itself.
+
+<MCQ client:visible
+  className={"not-prose"}
+  question={"Which count finishes strictly below the start in the four-step model without stopping?"}
+  options={[{"text":"Five of the sixteen paths."},{"text":"Eight of the sixteen paths."},{"text":"Twelve of the sixteen paths."},{"text":"Eleven of the sixteen paths.","correct":true}]}
+  explanation={"Count the groups whose endpoints are below the start: the groups with zero, one or two U letters. Their sequence counts add to eleven; the larger endpoints determine why the mean can still exceed the start."}
+/>
+
+### When to use it
+
+Use the full distribution—the quantities and their weights—when a mean seems to answer a different question from “how often does it finish below the start?” A mean, a probability of a lower endpoint and a minimum describe different properties. None supplies the other two.
+
+## Specify what happens at the stopping boundary
+
+<MCQ client:visible
+  className={"not-prose"}
+  question={"A rule observes the updated quantity, then stops at or below its boundary. Can it freeze below that boundary?"}
+  options={[{"text":"Yes: the completed update may cross below it.","correct":true},{"text":"No: a boundary automatically replenishes the amount."},{"text":"No: observing a value prevents the preceding decline."},{"text":"Only if it looks ahead to later letters."}]}
+  explanation={"Observation follows the update. A crossing can leave a lower attained value, which this rule retains without replenishment."}
+  pretest={true}
+/>
+
+A **policy** is a rule for what the machine does at each step. Compare the original policy, **apply every factor**, with a second policy:
+
+1. Start at 100 units, above the boundary of 60.
+2. Apply the next U or D factor to the current quantity.
+3. Observe the updated quantity. If it is **60 or less**, stop updating permanently.
+4. Retain that attained quantity for all remaining steps. Otherwise continue, up to four completed steps.
+
+This is an **observed stopping rule**: the decision uses the quantity reached so far, without seeing future letters. The boundary is inclusive: reaching exactly 60 stops the process. Stopping happens **after** the update, so crossing below 60 is possible. It is not a promise to preserve at least 60, nor an instruction to restore any lower quantity to 60.
+
+For two steps, UU gives $100\to150\to225$ and UD gives $100\to150\to90$. Any path beginning D reaches **60 after the first step** and freezes there. Thus DU and DD both end at 60 under the rule, although their unused second letters differ.
+
+<div role="region" tabIndex={0} aria-label={"Two completed steps with the inclusive boundary"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="warmup-stopped" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Two completed steps with the inclusive boundary"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Potential sequence"}</th><th scope="col" className="px-3 py-2 text-left">{"After step one, units"}</th><th scope="col" className="px-3 py-2 text-left">{"After step two, units"}</th><th scope="col" className="px-3 py-2 text-left">{"First stopped step"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"UU"}</th><td className="px-3 py-2 text-left align-top">{"150"}</td><td className="px-3 py-2 text-left align-top">{"225"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UD"}</th><td className="px-3 py-2 text-left align-top">{"150"}</td><td className="px-3 py-2 text-left align-top">{"90"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DU"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DD"}</th><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr></tbody>
+</table>
+</div>
+
+The mean becomes $(225+90+60+60)/4=108.75$ units. After grouping, its weights are **25%, 25%, 50%** for the three displayed quantities. The third quantity inherits both complete potential paths beginning D.
+
+<ExpectedValueCalculator client:visible
+  className={"not-prose"}
+  title={"Mean after applying the rule"}
+  eyebrow={""}
+  locale={"en"}
+  scenario={{"prompt":"Weight each final quantity by its share.","outcomes":[{"label":"UU endpoint","payoff":225,"prob":25},{"label":"UD endpoint","payoff":90,"prob":25},{"label":"Endpoint shared by DU and DD","payoff":60,"prob":50}],"unit":" units","unitPosition":"suffix"}}
+  instructions={"The initial shares come from four equally likely sequences. Keep the total at one hundred or reset them."}
+  probabilityLabel={"Path share"}
+  payoffLabel={"Final quantity"}
+  contributionLabel={"Contribution"}
+  totalProbLabel={"Shares total"}
+  normalizeHint={"Shares must total one hundred percent. They now total {sum}."}
+  evLabel={"Mean final quantity"}
+  evHint={"Weighted mean over the path catalogue"}
+  resetLabel={"Reset shares"}
+  caption={"Changing the shares defines a different weighting. The controls do not generate new sequences or change the factors."}
+/>
+
+With four steps, **UDDU** follows $100\to150\to90\to54\to54$: the third update crosses below 60; the fourth is not applied. Without stopping, that last U would multiply 54 by 1.50 and produce 81. The stopped policy’s **effective factor** after the hit is **1**, since multiplying by one preserves the attained quantity. Its unused potential letter is still U.
+
+<FactorChainTrace client:visible
+  className={"not-prose"}
+  title={"Trace the quantity at each step"}
+  instructions={"Move through the four steps. After a stop, the quantity is retained."}
+  scenarios={[{"label":"Same counts without stopping","start":100,"unit":"model units","chains":[{"label":"UUDD without stopping","factorHundredths":[150,150,60,60]},{"label":"DUUD without stopping","factorHundredths":[60,150,150,60]}]},{"label":"Same potential paths with the boundary","start":100,"unit":"model units","chains":[{"label":"UUDD with the stopping rule","factorHundredths":[150,150,60,60]},{"label":"DUUD with the stopping rule","factorHundredths":[60,100,100,100]}]},{"label":"Crossing below the boundary","start":100,"unit":"model units","chains":[{"label":"UDDU with the stopping rule","factorHundredths":[150,60,60,100]},{"label":"UDDU without stopping","factorHundredths":[150,60,60,150]}]}]}
+  labels={{"scenarioLabel":"Case","stepTemplate":"Step {step} of {total}","startLabel":"Starting quantity","backLabel":"Previous step","nextLabel":"Next step","resetLabel":"Return to the start","chainLabel":"Path","previousLabel":"Previous quantity","factorLabel":"Effective factor","resultLabel":"Quantity after the step","initialCellLabel":"Start","tableCaption":"Declared effective factors and quantities","chartDescription":"Points show quantities at each step, including retention after a stop. Connecting segments guide comparison; they do not add intermediate updates.","valueAxisLabel":"Quantity in model units","stepAxisLabel":"Steps","initialAnnouncementTemplate":"Start: {first}; {second}.","stepAnnouncementTemplate":"Step {step}: {first}; {second}.","precisionNote":"Products use the declared decimal factors without rounding intermediate quantities. A factor of one after stopping preserves the attained quantity."}}
+  locale={"en"}
+/>
+
+The figure inspects declared factor schedules. Select the comparison, then move from step to step. A displayed factor of one after a stop represents retention. The figure does not decide when to stop or generate possible letters; the policy and the worked traces supply those schedules.
+
+<Categorize client:visible
+  className={"not-prose"}
+  question={"Separate a potential letter from an effective factor used to represent the policy."}
+  buckets={["Potential future","Effective factor"]}
+  items={[{"text":"The unused U printed after a path has already stopped.","bucket":"Potential future"},{"text":"The multiplier one that retains the stopped quantity.","bucket":"Effective factor"},{"text":"A D that would have occurred later but is not executed.","bucket":"Potential future"},{"text":"The D factor applied on the first step that reaches or crosses the boundary.","bucket":"Effective factor"}]}
+  explanation={"Potential paths keep the uncertainty comparable. Effective factors represent the policy on each path: U or D while active, then one to retain the stopped quantity."}
+/>
+
+### When to use it
+
+Before evaluating a boundary rule, specify the observation timing, inclusive or strict comparison, retained quantity and all later updates or costs. A rule that clips the amount at a floor, sells for a fee or permits restarting is a different model and needs another calculation.
+
+## Preserve path weights when branches stop together
+
+<MCQ client:visible
+  className={"not-prose"}
+  question={"Several complete potential sequences freeze after the same first letter. How should their combined weight be calculated?"}
+  options={[{"text":"Give that frozen history the weight of a single original sequence."},{"text":"Give every distinct observed stopped history the same weight."},{"text":"Add the weights of all complete sequences that lead to it.","correct":true},{"text":"Remove it because no later multiplication occurs."}]}
+  explanation={"The stopped history inherits every complete potential sequence that produces it. The policy changes updates, not the initial probability law."}
+  pretest={true}
+/>
+
+Use the same sixteen potential sequences to compare policies. This keeps the underlying uncertainty fixed: the rule changes which factors are applied, rather than quietly changing how likely a sequence is. The operator never receives this whole future catalogue as advance information; it is our bookkeeping for comparing all possible cases.
+
+<div role="region" tabIndex={0} aria-label={"Complete potential paths and their endpoints"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="main-ledger" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Complete potential paths and their endpoints"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Potential sequence"}</th><th scope="col" className="px-3 py-2 text-left">{"Every factor, units"}</th><th scope="col" className="px-3 py-2 text-left">{"Stopping rule, units"}</th><th scope="col" className="px-3 py-2 text-left">{"First stopped step"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUUU"}</th><td className="px-3 py-2 text-left align-top">{"506.25"}</td><td className="px-3 py-2 text-left align-top">{"506.25"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUUD"}</th><td className="px-3 py-2 text-left align-top">{"202.5"}</td><td className="px-3 py-2 text-left align-top">{"202.5"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUDU"}</th><td className="px-3 py-2 text-left align-top">{"202.5"}</td><td className="px-3 py-2 text-left align-top">{"202.5"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUDD"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDUU"}</th><td className="px-3 py-2 text-left align-top">{"202.5"}</td><td className="px-3 py-2 text-left align-top">{"202.5"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDUD"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDDU"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"54"}</td><td className="px-3 py-2 text-left align-top">{"3"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDDD"}</th><td className="px-3 py-2 text-left align-top">{"32.4"}</td><td className="px-3 py-2 text-left align-top">{"54"}</td><td className="px-3 py-2 text-left align-top">{"3"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUUU"}</th><td className="px-3 py-2 text-left align-top">{"202.5"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUUD"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUDU"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUDD"}</th><td className="px-3 py-2 text-left align-top">{"32.4"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDUU"}</th><td className="px-3 py-2 text-left align-top">{"81"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDUD"}</th><td className="px-3 py-2 text-left align-top">{"32.4"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDDU"}</th><td className="px-3 py-2 text-left align-top">{"32.4"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDDD"}</th><td className="px-3 py-2 text-left align-top">{"12.96"}</td><td className="px-3 py-2 text-left align-top">{"60"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr></tbody>
+</table>
+</div>
+
+A dash means no boundary hit during the four steps. The eight sequences beginning D merge into the observed stopped path at 60, with combined weight **8/16 = 1/2**. UDDU and UDDD merge at 54, with combined weight **2/16 = 1/8**. Each of the six other sequences retains weight **1/16**. Merging observed branches does not make those eight resulting paths equally likely.
+
+The stopped weighted sum can be checked from those grouped branches:
+
+$$
+\frac{506.25+3(202.5)+2(81)+2(54)+8(60)}{16}=116.484375\text{ units}.
+$$
+
+<div role="region" tabIndex={0} aria-label={"Three different measures of the final quantity"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="main-comparison" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Three different measures of the final quantity"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Measure"}</th><th scope="col" className="px-3 py-2 text-left">{"Every factor"}</th><th scope="col" className="px-3 py-2 text-left">{"Stopping rule"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"Mean, model units"}</th><td className="px-3 py-2 text-left align-top">{"121.550625"}</td><td className="px-3 py-2 text-left align-top">{"116.484375"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Final quantity below the starting amount"}</th><td className="px-3 py-2 text-left align-top">{"11/16"}</td><td className="px-3 py-2 text-left align-top">{"12/16"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Minimum endpoint, model units"}</th><td className="px-3 py-2 text-left align-top">{"12.96"}</td><td className="px-3 py-2 text-left align-top">{"54"}</td></tr></tbody>
+</table>
+</div>
+
+<RateComparison client:visible
+  className={"not-prose"}
+  title={"Final quantities strictly below the start"}
+  locale={"en"}
+  countsLabel={"Potential paths below the start out of all potential paths"}
+  differenceLabel={"First policy minus second policy"}
+  scenarios={[{"label":"Same four-step probability law","groups":[{"label":"Apply every factor","events":11,"total":16},{"label":"Apply the stopping rule","events":12,"total":16}]}]}
+/>
+
+Here **loss** means a final quantity strictly below the starting 100 units; it does not mean a drop from a previous peak. In this declared catalogue, stopping raises the minimum endpoint from **12.96 to 54**, lowers the mean from **121.550625 to 116.484375**, and raises the below-start probability from **11/16 to 12/16**. Some paths avoid later declines; others miss a later recovery. Those effects need counting, rather than a general slogan that stopping must help or hurt.
+
+If the only objective were to maximize the final mean **between these two policies**, applying every factor wins here. If the objective were to maximize their minimum endpoint, the stopped policy wins. This comparison searches neither all possible boundaries nor all possible policies. It does not identify a universal best rule.
+
+<MCQ client:visible
+  className={"not-prose"}
+  question={"Between the two declared policies, which statement matches the chosen objective?"}
+  options={[{"text":"The stopped policy maximizes the mean because its minimum is higher."},{"text":"Applying every factor has the higher mean; stopping has the higher minimum.","correct":true},{"text":"The policies are equivalent because they share potential paths."},{"text":"The higher minimum proves that no better policy could exist."}]}
+  explanation={"The full calculation gives different rankings for the mean and minimum. Shared potential paths make the comparison consistent; they do not make the policies equivalent or search all other rules."}
+/>
+
+### When to use it
+
+Use common potential paths to compare rules under the same uncertainty. State the objective and horizon before calling one policy better. Keep weights attached when several potential futures produce one observed stopped history.
+
+## Transfer the audit to different factors
+
+<MCQ client:visible
+  className={"not-prose"}
+  question={"The factors and boundary change. Which part of the audit must be recomputed?"}
+  options={[{"text":"Only the unit label."},{"text":"Only the largest endpoint."},{"text":"Nothing, because the letters keep their names."},{"text":"The traces, stopped endpoints and weighted comparisons.","correct":true}]}
+  explanation={"The same letter labels can now describe different multipliers. Re-execute the rule under the new parameters before transferring a conclusion."}
+  pretest={true}
+/>
+
+Try a new case before opening the solution. Start at **100 units**, take **four steps**, and let each independent letter have probability **1/2**. U now multiplies by **6/5 = 1.20**, D by **4/5 = 0.80**. Under the second policy, observe after each update and freeze permanently at the attained quantity on the first value **80 or less**. There are no outside flows or costs. These are changed assumptions, not fresh measurements of the earlier machine.
+
+<div role="region" tabIndex={0} aria-label={"Declared machine parameters"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="model-transfer" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Declared machine parameters"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Parameter"}</th><th scope="col" className="px-3 py-2 text-left">{"Value"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"Initial quantity, model units"}</th><td className="px-3 py-2 text-left align-top">{"100"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Completed steps"}</th><td className="px-3 py-2 text-left align-top">{"4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"U factor"}</th><td className="px-3 py-2 text-left align-top">{"6/5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"D factor"}</th><td className="px-3 py-2 text-left align-top">{"4/5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Probability of each next independent letter"}</th><td className="px-3 py-2 text-left align-top">{"1/2"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Inclusive stopping boundary, model units"}</th><td className="px-3 py-2 text-left align-top">{"80"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Post-stop factor"}</th><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"Outside flows and costs"}</th><td className="px-3 py-2 text-left align-top">{"None"}</td></tr></tbody>
+</table>
+</div>
+
+Work out **UDDU** under both policies. Then enumerate the sixteen sequences and compare their final means. For a starting check, UUUD without stopping follows $100\to120\to144\to172.8\to138.24$; none of these values hits the new boundary. Remember that a different sequence can cross below it rather than land exactly on it.
+
+<MCQ client:visible
+  className={"not-prose"}
+  question={"For UDDU in the new case, which quantity does the stopping policy retain?"}
+  options={[{"text":"Eighty units, because every boundary is a floor."},{"text":"Ninety-two point one six units, because all letters must apply."},{"text":"Seventy-six point eight units, reached before the last potential letter.","correct":true},{"text":"One hundred units, because the mean stays at the start."}]}
+  explanation={"The first two updates give one hundred and twenty, then ninety-six units. The third multiplies by the D factor and crosses below the boundary. That attained quantity is retained; a mean is not this path’s outcome."}
+/>
+
+<details>
+<summary>Check the full transfer audit</summary>
+
+UDDU gives $100\to120\to96\to76.8\to92.16$ without stopping. With the rule, it freezes at **76.8 after step three**. The boundary of 80 is not a guaranteed retained floor. DUUU freezes at **80 after the first step**; its later potential increases are unused.
+
+<FactorChainTrace client:visible
+  className={"not-prose"}
+  title={"Trace the quantity at each step"}
+  instructions={"Move through the four steps. After a stop, the quantity is retained."}
+  scenarios={[{"label":"New factors and boundary","start":100,"unit":"model units","chains":[{"label":"UDDU with the stopping rule","factorHundredths":[120,80,80,100]},{"label":"UDDU without stopping","factorHundredths":[120,80,80,120]}]}]}
+  labels={{"scenarioLabel":"Case","stepTemplate":"Step {step} of {total}","startLabel":"Starting quantity","backLabel":"Previous step","nextLabel":"Next step","resetLabel":"Return to the start","chainLabel":"Path","previousLabel":"Previous quantity","factorLabel":"Effective factor","resultLabel":"Quantity after the step","initialCellLabel":"Start","tableCaption":"Declared effective factors and quantities","chartDescription":"Points show quantities at each step, including retention after a stop. Connecting segments guide comparison; they do not add intermediate updates.","valueAxisLabel":"Quantity in model units","stepAxisLabel":"Steps","initialAnnouncementTemplate":"Start: {first}; {second}.","stepAnnouncementTemplate":"Step {step}: {first}; {second}.","precisionNote":"Products use the declared decimal factors without rounding intermediate quantities. A factor of one after stopping preserves the attained quantity."}}
+  locale={"en"}
+/>
+
+<div role="region" tabIndex={0} aria-label={"Complete potential paths and their endpoints"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="transfer-ledger" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left">{"Complete potential paths and their endpoints"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left">{"Potential sequence"}</th><th scope="col" className="px-3 py-2 text-left">{"Every factor, units"}</th><th scope="col" className="px-3 py-2 text-left">{"Stopping rule, units"}</th><th scope="col" className="px-3 py-2 text-left">{"First stopped step"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUUU"}</th><td className="px-3 py-2 text-left align-top">{"207.36"}</td><td className="px-3 py-2 text-left align-top">{"207.36"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUUD"}</th><td className="px-3 py-2 text-left align-top">{"138.24"}</td><td className="px-3 py-2 text-left align-top">{"138.24"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUDU"}</th><td className="px-3 py-2 text-left align-top">{"138.24"}</td><td className="px-3 py-2 text-left align-top">{"138.24"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UUDD"}</th><td className="px-3 py-2 text-left align-top">{"92.16"}</td><td className="px-3 py-2 text-left align-top">{"92.16"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDUU"}</th><td className="px-3 py-2 text-left align-top">{"138.24"}</td><td className="px-3 py-2 text-left align-top">{"138.24"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDUD"}</th><td className="px-3 py-2 text-left align-top">{"92.16"}</td><td className="px-3 py-2 text-left align-top">{"92.16"}</td><td className="px-3 py-2 text-left align-top">{"—"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDDU"}</th><td className="px-3 py-2 text-left align-top">{"92.16"}</td><td className="px-3 py-2 text-left align-top">{"76.8"}</td><td className="px-3 py-2 text-left align-top">{"3"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"UDDD"}</th><td className="px-3 py-2 text-left align-top">{"61.44"}</td><td className="px-3 py-2 text-left align-top">{"76.8"}</td><td className="px-3 py-2 text-left align-top">{"3"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUUU"}</th><td className="px-3 py-2 text-left align-top">{"138.24"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUUD"}</th><td className="px-3 py-2 text-left align-top">{"92.16"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUDU"}</th><td className="px-3 py-2 text-left align-top">{"92.16"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DUDD"}</th><td className="px-3 py-2 text-left align-top">{"61.44"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDUU"}</th><td className="px-3 py-2 text-left align-top">{"92.16"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDUD"}</th><td className="px-3 py-2 text-left align-top">{"61.44"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDDU"}</th><td className="px-3 py-2 text-left align-top">{"61.44"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-top">{"DDDD"}</th><td className="px-3 py-2 text-left align-top">{"40.96"}</td><td className="px-3 py-2 text-left align-top">{"80"}</td><td className="px-3 py-2 text-left align-top">{"1"}</td></tr></tbody>
+</table>
+</div>
+
+The unstopped group sum is $207.36+4(138.24)+6(92.16)+4(61.44)+40.96=1600$. The stopped sum is $207.36+3(138.24)+2(92.16)+2(76.8)+8(80)=1600$. Dividing either by sixteen gives **100 units**. Their equal means do not make their endpoints equal: the minimums are **40.96 and 76.8**, and their below-start counts are again **11 and 12**.
+
+There is also a local check of why the mean stays fixed here. From any current amount $x$, the next unstopped mean is $(1.20x+0.80x)/2=x$. An already stopped amount stays $x$; an active amount has the same one-step mean before we observe the next letter. Applying that reasoning through this finite horizon preserves the initial mean. It relies on the stated independent equal chances, factors and retention rule. It does not say every stopping rule preserves every mean.
+
+</details>
+
+### When to use it
+
+Repeat the audit when factors, probabilities, horizon, boundary or post-stop treatment change. Equal means can coexist with different distributions. A calculation for the first machine cannot settle the second by analogy alone.
+
+## Reconstruct the rule before judging it
+
+<MatchConcepts client:visible
+  className={"not-prose"}
+  question={"Recover the distinctions needed for an audit."}
+  pairs={[{"term":"Path endpoint","definition":"The final quantity from one complete potential sequence under a specified policy."},{"term":"Weighted mean","definition":"The sum of each final quantity multiplied by the weight of the sequences that produce it."},{"term":"Stopping instruction","definition":"A rule using observed information to decide which later updates are no longer applied."},{"term":"Objective","definition":"The measure used to compare policies, such as final mean or minimum."}]}
+/>
+
+An audit needs a starting quantity and unit, an update period, possible factors and their probabilities, a finite horizon, the information available at each decision, and the complete stopping and retention instructions. Enumerate full potential paths, execute the rule on each, and only then group endpoints with their combined weights. Compare the measures that answer the stated objective.
+
+The four-step limit is part of our model. A longer horizon, dependent letters, costs or a revised factor distribution requires a new calculation. None of these finite results promises a realized outcome or validates a growth law in a business, skill or account. A stopped amount in this model remains positive; it is neither reset to zero nor replenished to the boundary.
+
+<MindMap client:visible
+  className={"not-prose"}
+  title={"Audit quantities, weights and instructions"}
+  eyebrow={""}
+  root={{"label":"A finite path audit","children":[{"label":"Declare the model","children":[{"label":"Starting units, factors, independent chances and finite horizon"}]},{"label":"Execute each policy","children":[{"label":"Observe after the update; retain the attained value after an inclusive hit"}]},{"label":"Keep the weights","children":[{"label":"Merged histories inherit the weights of all full potential sequences"}]},{"label":"Compare the objective","children":[{"label":"Mean, below-start probability and minimum answer different questions"}]},{"label":"Test transfer","children":[{"label":"Changed assumptions require new traces and weighted sums"}]}]}}
+/>
+
+<Quiz client:visible
+  className={"not-prose"}
+  title={"Check the complete audit"}
+  questions={[{"question":"In the two-step model without stopping, what is the weighted mean endpoint?","options":[{"text":"One hundred and seventeen units, averaging only distinct quantities."},{"text":"One hundred and ten point two five units, preserving all path weights.","correct":true},{"text":"Ninety units, the repeated endpoint."},{"text":"Two hundred and twenty-five units, the largest endpoint."}],"explanation":"Add the endpoints of all four equally likely sequences and divide by four. The two sequences ending at ninety each retain a quarter-weight."},{"question":"Why can UUDD and DUUD differ under the stopping policy despite equal unstopped products?","options":[{"text":"Stopping always changes the probability of U."},{"text":"Multiplication changes its order rule only on unlucky paths."},{"text":"The policy reacts to intermediate quantities, which depend on order.","correct":true},{"text":"A repeated final quantity loses its probability weight."}],"explanation":"DUUD reaches the inclusive boundary on its first update and freezes. UUDD does not. Without the path-dependent instruction, their products agree."},{"question":"Select every statement supported by the main four-step catalogue.","allowMultiple":true,"options":[{"text":"The stopped policy has the higher minimum endpoint.","correct":true},{"text":"The stopped policy guarantees retention at or above its boundary."},{"text":"The unstopped mean exceeds the start although most endpoints are lower.","correct":true},{"text":"The stopped policy has the higher final mean."}],"explanation":"The stopped minimum exceeds the unstopped minimum but lies below the boundary. The unstopped mean exceeds the start while eleven of the sixteen endpoints are below it."},{"question":"In the new-factor transfer, which relation holds between the final means?","options":[{"text":"Both equal the starting quantity under the stated finite model.","correct":true},{"text":"The stopped mean must be larger under every possible rule."},{"text":"The unstopped mean must exceed the start whenever U increases it."},{"text":"Equal means force equal endpoints for every potential sequence."}],"explanation":"Each active step has mean factor one in this transfer; retention also preserves the current amount. The full weighted sums agree, while particular endpoints and minimums differ."},{"question":"You decide after seeing a decline to use the next potential letter before choosing whether to stop. What changed?","options":[{"text":"Only the spelling of the original rule."},{"text":"Nothing, because full paths are listed for the auditor."},{"text":"Only the size of the unit."},{"text":"The information and timing of the decision, requiring another model.","correct":true}],"explanation":"The original stopping instruction uses information available after the current update. A catalogue used for evaluation does not authorize the operator to inspect the future."},{"question":"A proposed boundary comes with a higher minimum and a lower mean. What is still needed to choose between those measures?","options":[{"text":"A claim that every minimum is also a mean."},{"text":"A stated objective and acceptable trade-offs.","correct":true},{"text":"The largest endpoint alone."},{"text":"A rule that all observed histories receive equal weights."}],"explanation":"The measures summarize different consequences. Specify the decision’s objective before ranking the policies; this lesson does not supply a universal preference."}]}
+/>
+
+### Sources and limits
+
+The weighted-mean definition and the independent-product check follow the expectation discussion in [MIT 6.041 lecture seven](https://ocw.mit.edu/courses/6-041-probabilistic-systems-analysis-and-applied-probability-fall-2010/37bdf3cd4ab8880dd43de78e3b0db45e_EObHWIEKGjA.pdf), a lecture transcript. [Hao Wu’s MIT lecture sixteen](https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/ddeda684b0dd6a1422418c7eca3ce843_MIT18_445S15_lecture16.pdf) defines stopping from information available at the time and gives conditions for preserving a mean under bounded stopping. Those technical results have conditions; this lesson verifies its own finite cases directly. The machine, factors, boundaries and enumerated endpoints are constructed examples, not experimental observations.
+
+Next is the [final exam](/compounding/final-exam). Use the same discipline there: identify the model before doing its arithmetic.
