@@ -1,0 +1,301 @@
+---
+title: "Audit a signalling proposal"
+description: "Audit a complete signalling game through conditional beliefs, receiver choices, sender deviations and unseen observations."
+topic: "en/signaling-and-costly-signals"
+order: 8
+minutes: 30
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, ConsequenceTree, RateComparison, ExpectedValueCalculator, MindMap, Quiz, Callout } from '@/components/react';
+
+A certificate looks convincing. That does not tell you whether anyone wants to earn it, whether the organiser should accept it, or whether the belief behind that decision fits the proposed behaviour. Those are three different questions. This workshop makes you check all three on one small, completely specified game.
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question="A proposal says that ready applicants certify and the organiser accepts certificates. What is still missing before calling it an equilibrium?"
+  options={[{"text":"Whether the certificate has a sufficiently impressive name."},{"text":"Whether beliefs, receiver actions and sender incentives all fit.","correct":true},{"text":"Whether every applicant receives a positive reward."}]}
+  explanation="A signal label describes a proposed pattern. It does not establish consistent beliefs or best responses on either side."
+/>
+
+## Write the whole game before judging the signal
+
+Think of the proposal as a timetable: every stop needs an entry, including stops nobody expects to use. Unlike a train timetable, the passengers here choose routes in response to the rules. A missing response can change their choice.
+
+An applicant is the **sender**: they know a private **type**, H (ready for this demonstration) or L (not ready). These labels concern one demonstration, not a person’s worth. The exhibition organiser is the **receiver**: it sees a certificate or its absence, then accepts or declines. A **strategy** specifies an action at every situation that player could face. A **belief** is the receiver’s probability of H after each observation. An **assessment** combines both strategies and those beliefs.
+
+| Base-game rule | Stipulated value |
+|---|---|
+| Prior probability of H / L | 1/4 / 3/4 |
+| Private value of acceptance, either type | 10 cr |
+| Certificate cost, H / L | 2 cr / 12 cr |
+| No-certificate cost | 0 cr |
+| Organiser payoff from accepting H / L | +6 cr / −6 cr |
+| Declining: payoff before any certificate cost | 0 cr for both players |
+
+A credit (cr) is a fictional payoff unit, not a measured price. Certificate costs are paid even when declined; they are not a transfer to the organiser. The certificate is perfectly observed and does not improve readiness. Both choices are feasible; cost is not a budget constraint. Everyone knows the rules and maximises their own payoff in this single encounter. There is no reputation, other signal, refund, later encounter or enforcement benefit. We omit broader exhibition and social effects: this is an incentive audit, not a welfare ranking.
+
+<ConsequenceTree client:visible
+  eyebrow=""
+  title="Who knows what, and when"
+  instructions="Open the sequence to track information. All markers are neutral."
+  decisionLabel="Private information"
+  orderLabels={["Sender choice","Receiver information","Receiver action"]}
+  promptLabel="Next stage"
+  expandAllLabel="Show the sequence"
+  collapseLabel="Collapse the sequence"
+  valenceLabels={{"good":"Favourable","bad":"Unfavourable","mixed":"Mixed","neutral":"Neutral"}}
+  caption="This is the analyst’s explanation sequence, not a game tree with information sets. Opening a node does not reveal the applicant’s type to the organiser."
+  decision={{"label":"The applicant privately learns H or L","valence":"neutral","children":[{"label":"Choose certificate or none; pay the corresponding cost","valence":"neutral","children":[{"label":"The organiser sees only that choice and forms a belief","valence":"neutral","children":[{"label":"Accept or decline; terminal payoffs follow","valence":"neutral"}]}]}]}}
+/>
+
+Here are **all eight terminal outcomes**. Each pair is (applicant payoff, organiser payoff), in cr. For instance, H certifies and is declined: the private acceptance benefit is zero, but the cost remains, so the pair is (−2, 0).
+
+| Type | Signal | Accept | Decline |
+|---|---|---|---|
+| H | Certificate | (8, 6) | (−2, 0) |
+| H | None | (10, 6) | (0, 0) |
+| L | Certificate | (−2, −6) | (−12, 0) |
+| L | None | (10, −6) | (0, 0) |
+
+<FillBlank client:visible
+  className="not-prose"
+  question="A cost survives an unsuccessful application"
+  text="In the base table, an L applicant who certifies and is declined receives {{minus twelve|zero|minus two}} credits."
+  explanation="Declining removes the acceptance benefit, not the certificate bill. The organiser receives zero, so the two entries must not be confused."
+/>
+
+### When to use this first step
+
+Before comparing signal costs, specify who observes what, every feasible action, and the payoff at every endpoint. Otherwise a hidden refund, a different acceptance benefit or an unspecified response can do the work you attributed to “credibility”.
+
+## Condition on the observation the proposal produces
+
+Sorting letters into trays changes the contents of each tray. A certificate is informative only insofar as the proposed choices put different mixes of types in its tray. The stamp’s price alone does not calculate that mix.
+
+Represent the prior by a catalogue with four equally likely entries: H, L₁, L₂, L₃. The subscripts merely name three L entries. This is a stipulated probability law, not a claim that every real batch of four people contains exactly one H. In the formula, P(H,s) is the probability of both H and observation s.
+
+$$q(s)=P(H\mid s)=\frac{P(H,s)}{P(s)},\qquad P(s)>0.$$
+
+| Who certifies in the proposal | H among certificate entries | H among no-certificate entries |
+|---|---|---|
+| Neither type | No entries; undefined by Bayes | 1/4 |
+| Only H | 1/1 | 0/3 |
+| Only L | 0/3 | 1/1 |
+| Both types | 1/4 | No entries; undefined by Bayes |
+
+<RateComparison client:visible
+  locale="en"
+  title="The denominator follows the proposed behaviour"
+  countsLabel="H entries out of eligible catalogue entries"
+  scenarioLabel="Proposed sender strategy"
+  differenceLabel="First fraction minus prior"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{"label":"Only H certifies: certificate","groups":[{"label":"H given certificate","events":1,"total":1},{"label":"H before observing anything","events":1,"total":4}]},{"label":"Both certify: certificate","groups":[{"label":"H given certificate","events":1,"total":4},{"label":"H before observing anything","events":1,"total":4}]},{"label":"Only H certifies: no certificate","groups":[{"label":"H given no certificate","events":0,"total":3},{"label":"H before observing anything","events":1,"total":4}]}]}
+/>
+
+<MCQ client:visible
+  className="not-prose"
+  question="Under the only-H-certifies proposal, which denominator belongs to the belief after NO certificate?"
+  options={[{"text":"All four prior entries."},{"text":"The three entries that send no certificate.","correct":true},{"text":"The single entry that sends a certificate."}]}
+  explanation="Conditioning retains only the three L entries producing that observation. Its H fraction is zero over three; it is not the prior fraction and not an empty observation."
+/>
+
+### When the calculation stops
+
+An observation with positive probability is **on path**. An observation assigned zero probability is **off path**. An empty tray does not contain a zero proportion of H: the fraction has no denominator. We will need an additional belief to audit the response there.
+
+## A belief still needs a decision rule
+
+A weather forecast and a decision to hold an outdoor event are different objects. The decision also depends on what getting it wrong costs. Here the receiver’s **best response** is an action with the highest expected payoff at its stated belief.
+
+Write q for the probability of H after the observation. Accepting gives
+
+$$E_R(q)=6q-6(1-q)=12q-6\text{ cr}.$$
+
+Declining gives zero. Accept if q is above 1/2; decline if below. At exactly 1/2 both actions, or any mixture, are best responses. We have not imposed a tie-break. Under separation, certificate means q = 1 and acceptance gives 6 cr; no certificate means q = 0 and acceptance would lose 6 cr. Under either pooling pattern, the observed signal leaves q = 1/4: accepting yields 1.5 − 4.5 = −3 cr, so declining is better.
+
+<ExpectedValueCalculator client:visible
+  locale="en"
+  eyebrow=""
+  title="What accepting is worth to the organiser"
+  instructions="Move both proportions. For an expected payoff, keep their sum at one hundred percent."
+  caption="These are stipulated probabilities, not observed frequencies. Bar lengths rescale with the current contributions; compare the printed amounts across settings. Reset restores the prior, not the posterior after a certificate."
+  probabilityLabel="Probability of type"
+  payoffLabel="Organiser payoff if accepted"
+  contributionLabel="Weighted contribution"
+  totalProbLabel="Total probability"
+  normalizeHint="The weights sum to {sum}. Until they cover the whole distribution, the result is a weighted sum, not its expected payoff."
+  evLabel="Weighted acceptance payoff"
+  evHint="expected payoff only for a complete distribution"
+  costLabel="Comparison amount"
+  netLabel="Difference"
+  worthVerdict="Positive difference."
+  notWorthVerdict="Negative difference."
+  breakEvenVerdict="Approximately equal."
+  resetLabel="Restore the prior"
+  scenario={{"prompt":"Accept one applicant; decline pays zero.","unit":" cr","unitPosition":"suffix","outcomes":[{"label":"H ready","payoff":6,"prob":25},{"label":"L not ready","payoff":-6,"prob":75}]}}
+/>
+
+<FillBlank client:visible
+  className="not-prose"
+  text="At an exactly even belief in the base game, accepting and declining are {{tied|both losses|strictly ordered}}."
+  explanation="Half of plus six and half of minus six sum to zero, the same payoff as declining. A weak best response permits equality."
+/>
+
+### When to use the receiver check
+
+Do it even when the sender story looks persuasive. “They are willing to certify” does not mean “the organiser should accept”. The loss from L and the reward from H belong in that second calculation.
+
+## Hold the response fixed and test both deviations
+
+A unilateral **deviation** changes one player’s choice while the other strategy stays fixed. You cannot rescue an unprofitable move by quietly awarding it a different response. The comparison is like changing one cell in a spreadsheet while locking the rule that calculates its consequences.
+
+Audit proposal S: H certifies, L does not; accept certificates and decline no certificate; beliefs q(certificate) = 1 and q(none) = 0. Both observations occur, so Bayes supplies both beliefs. The previous section checked both receiver responses. Now compare the sender’s prescribed and alternative action, holding that receiver policy fixed.
+
+| Type | Prescribed payoff | Payoff from switching signal | Profitable deviation? |
+|---|---|---|---|
+| H | 10 − 2 = 8 cr | 0 cr | No |
+| L | 0 cr | 10 − 12 = −2 cr | No |
+
+All three checks pass. We have verified this separating assessment in this game. We have not proved it unique or shown that a population will learn it. Spence’s lecture stresses that choices and receiver beliefs/rewards must fit together; the fixed prize alone is only part of that loop.
+
+<MCQ client:visible
+  className="not-prose"
+  question="For H, why is “skip the certificate but still receive acceptance” the wrong deviation in proposal S?"
+  options={[{"text":"It changes both the signal and the receiver policy.","correct":true},{"text":"It changes the private type from H into L."},{"text":"It fails because certificate costs cannot be sunk."}]}
+  explanation="The stated receiver declines no certificate. H may change the signal, but cannot choose a different response for the organiser in the same unilateral comparison."
+/>
+
+### Cheaper imitation breaks this proposal, not every possible one
+
+Change only L’s certificate cost from 12 to 6 cr. Keep proposal S fixed. Its beliefs still follow Bayes and its receiver actions remain best responses, but L now gains 10 − 6 = 4 cr by certifying instead of zero. The sender check fails.
+
+Two tempting replacements also require their own audits. If both types certify, a belief of certainty in H contradicts the on-path catalogue: q is 1/4 and accepting loses 3 cr. If both certify and the organiser declines both observations, each sender can avoid the certificate cost by dropping it. These are separate failed proposals, not a predicted adjustment sequence.
+
+<MCQ client:visible
+  className="not-prose"
+  question="With the cheaper-L variant and the old acceptance policy, how much does L gain by switching from no certificate to certification?"
+  options={[{"text":"Six credits."},{"text":"Four credits.","correct":true},{"text":"Minus four credits."}]}
+  explanation="Acceptance is worth ten; subtract the new cost of six. The alternative pays zero. Four is a profitable deviation, not a forecast of the replacement equilibrium."
+/>
+
+## An unseen signal needs an explicit belief
+
+Return to the base costs. Suppose neither type certifies. No certificate is observed with certainty and leaves q = 1/4, so decline is optimal. What should the organiser do after a certificate that this proposal says never arrives? Bayes cannot divide by zero to answer.
+
+| Same sender proposal: neither certifies | Belief after unseen certificate | Best receiver response there | Sender audit |
+|---|---|---|---|
+| Assessment P | q = 0 | Decline | H: 0 vs −2; L: 0 vs −12. Neither gains. |
+| Assessment P′ | q = 1 | Accept | H could gain 8 instead of 0. Fails. |
+
+P passes the **weak perfect Bayesian equilibrium** check used here: on-path Bayes consistency, receiver best responses at every observation, and no profitable sender deviation. The off-path belief is an additional stipulated part of the assessment. P′ fails despite having the same proposed sender behaviour.
+
+<Callout variant="warning" title="Passing this check has a boundary">
+This does not recommend pessimistic beliefs about real applicants. Stronger equilibrium refinements or specified learning models can restrict off-path beliefs and exclude assessments that pass a weak check. Fudenberg and He study such restrictions under explicit learning assumptions. We have not applied their selection theorem to this constructed game.
+</Callout>
+
+<Categorize client:visible
+  className="not-prose"
+  instructions="Locate the failure in each proposed assessment."
+  buckets={["Belief consistency","Receiver response","Sender deviation","No failed check stated"]}
+  items={[{"text":"Both certify, but the certificate is believed to identify H with certainty.","bucket":"Belief consistency"},{"text":"Both certify; the organiser correctly keeps the prior but accepts.","bucket":"Receiver response"},{"text":"Only H certifies; the old policy stays, but L’s cost falls to six credits.","bucket":"Sender deviation"},{"text":"Neither certifies; both observations are declined, with the off-path belief specified as no chance of H.","bucket":"No failed check stated"}]}
+  explanation="The catalogue determines an on-path mix, payoffs determine the best action at that mix, and each type compares its own alternatives. The last case is the explicitly specified weak pooling assessment, not a claim of uniqueness."
+/>
+
+### Equal costs can separate in a different game
+
+Keep the base prior and receiver payoffs, but make the certificate cost 2 cr for **both** types. Now change private acceptance values to 10 cr for H and 1 cr for L. Under accept-certificate/decline-none, H gets 8 rather than 0, whereas L would get −1 rather than 0. On-path beliefs are still 1 and 0 and the receiver’s responses still fit. Separation is possible because benefits differ. This is a separate model: do not carry the cheaper-L cost of 6 into it.
+
+<FillBlank client:visible
+  className="not-prose"
+  text="The equal-cost example separates because the types have different {{benefits from acceptance|observations of the certificate|prior catalogue sizes}}."
+  explanation="Both pay the same bill, but the private prize is ten for H and one for L. Cost differences are useful in the fixed-common-prize model, not necessary across every signalling game."
+/>
+
+## Transfer: a majority is not an acceptance threshold
+
+New card, separate encounter. The prior is H with probability 3/5 and L with 2/5. Acceptance still gives the applicant 10 cr; certificate costs remain H = 2 and L = 12 cr, paid even when declined. The organiser now receives +6 cr for accepting H and **−18 cr** for accepting L; decline gives zero to both before certificate costs. All other base-game information and feasibility assumptions remain.
+
+| Type | Signal | Accept: applicant, organiser | Decline: applicant, organiser |
+|---|---|---|---|
+| H | Certificate | (8, 6) | (−2, 0) |
+| H | None | (10, 6) | (0, 0) |
+| L | Certificate | (−2, −18) | (−12, 0) |
+| L | None | (10, −18) | (0, 0) |
+
+Audit two complete proposals before opening the solution. T: only H certifies; beliefs after certificate/none are 1/0; accept certificate and decline none. U: both types certify; beliefs after certificate/none are 3/5 and an explicitly stipulated off-path zero; accept certificate and decline none. In each case check beliefs, receiver choices and both sender deviations.
+
+<MCQ client:visible
+  className="not-prose"
+  question="In proposal U, what is the organiser’s expected payoff from accepting the observed certificate?"
+  options={[{"text":"Plus three point six credits."},{"text":"Minus six credits."},{"text":"Minus three point six credits.","correct":true},{"text":"Zero credits."}]}
+  explanation="Three fifths of plus six is three point six; two fifths of minus eighteen is minus seven point two. Their sum is minus three point six, below declining at zero."
+/>
+
+<ExpectedValueCalculator client:visible
+  locale="en"
+  eyebrow=""
+  title="A different loss changes the acceptance rule"
+  instructions="Move both proportions. For an expected payoff, keep their sum at one hundred percent."
+  caption="These are stipulated probabilities, not observed frequencies. Bar lengths rescale with the current contributions; compare the printed amounts across settings. Reset restores the prior, not the posterior after a certificate."
+  probabilityLabel="Probability of type"
+  payoffLabel="Organiser payoff if accepted"
+  contributionLabel="Weighted contribution"
+  totalProbLabel="Total probability"
+  normalizeHint="The weights sum to {sum}. Until they cover the whole distribution, the result is a weighted sum, not its expected payoff."
+  evLabel="Weighted acceptance payoff"
+  evHint="expected payoff only for a complete distribution"
+  costLabel="Comparison amount"
+  netLabel="Difference"
+  worthVerdict="Positive difference."
+  notWorthVerdict="Negative difference."
+  breakEvenVerdict="Approximately equal."
+  resetLabel="Restore the prior"
+  scenario={{"prompt":"Accept one applicant; decline pays zero.","unit":" cr","unitPosition":"suffix","outcomes":[{"label":"H ready","payoff":6,"prob":60},{"label":"L not ready","payoff":-18,"prob":40}]}}
+/>
+
+<MCQ client:visible
+  className="not-prose"
+  allowMultiple={true}
+  question="Which conclusions survive a full audit of T and U? Select all that apply."
+  options={[{"text":"T passes the three checks in the stipulated game.","correct":true},{"text":"U’s on-path belief contradicts both types certifying."},{"text":"U fails the receiver check and L also prefers no certificate.","correct":true},{"text":"U passes because ready applicants are a majority."}]}
+  explanation="T has posteriors one/zero, receiver payoffs plus six/minus eighteen and the same sender comparisons as the base separation. U has a correct on-path belief, but accepting loses in expectation and L gets minus two rather than zero."
+/>
+
+<details>
+<summary>Open the transfer audit and exact threshold</summary>
+
+The receiver calculation is
+
+$$6q-18(1-q)=24q-18\text{ cr}.$$
+
+It equals zero at q = 3/4. Accept strictly above that threshold; decline strictly below; both are best responses at equality. In U, q = 3/5, so the organiser should decline: 3.6 − 7.2 = −3.6 cr. U also tells L to pay 12 for a reward of 10, giving −2 cr instead of declining without a certificate for zero. In T, acceptance after a certificate pays the organiser 6; decline after none avoids losing 18. H compares 8 with 0 and L compares 0 with −2. T passes. We checked two assessments, not every possible equilibrium.
+
+</details>
+
+### When to transfer the method
+
+Use the checklist when a proposed signal changes a decision: an exhibition slot, a warranty offer, a qualification rule. Replace the fictional payoffs with justified values before using it in practice. Unknown costs, mixed behaviour, productive certificates and repeated encounters can change the answer. A posterior shift is not itself a decision benefit.
+
+## Rebuild the audit from memory
+
+<MindMap client:visible
+  title="One proposal, three checks"
+  root={{"label":"Audit a signalling proposal","children":[{"label":"Specify the game","children":[{"label":"Private type and visible actions"},{"label":"Every terminal payoff and feasible deviation"}]},{"label":"Beliefs","children":[{"label":"Condition on the produced observation"},{"label":"Empty observations need an additional belief"}]},{"label":"Receiver","children":[{"label":"Expected payoff against the outside action"},{"label":"Respect exact ties"}]},{"label":"Sender","children":[{"label":"Hold the receiver policy fixed"},{"label":"Compare both types with their alternatives"}]},{"label":"Limits","children":[{"label":"Weak check is not unique selection or learning"},{"label":"Changing costs breaks a proposal without predicting its replacement"}]}]}}
+  eyebrow=""
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title="Check the full audit"
+  questions={[{"question":"Which object contains sender strategies, receiver actions and conditional beliefs?","options":[{"text":"An assessment.","correct":true},{"text":"A certificate price."},{"text":"A private type."}],"explanation":"An assessment is the complete proposed strategy-and-belief package to audit. A price is only one payoff input."},{"question":"In the base catalogue, both types certify. What is the posterior probability of H after a certificate?","options":[{"text":"One."},{"text":"One quarter.","correct":true},{"text":"Three quarters."}],"explanation":"All four entries produce it and one is H, so observing it leaves the prior unchanged."},{"question":"If no type certifies, what does Bayes say about H after a certificate?","options":[{"text":"Its probability must be zero."},{"text":"Its probability must equal the prior."},{"text":"The zero-probability observation leaves it undetermined.","correct":true}],"explanation":"Zero probability of the observation is a zero denominator, not a posterior equal to zero. Specify an off-path belief separately."},{"question":"Which comparisons audit the base separating proposal? Select all that apply.","allowMultiple":true,"options":[{"text":"H compares eight from certification with zero without it.","correct":true},{"text":"L compares zero without certification with minus two from it.","correct":true},{"text":"H compares eight from certification with ten without it."},{"text":"The receiver accepts whenever the certificate is expensive."}],"explanation":"The response after no certificate is decline, so neither sender may assign itself acceptance when deviating to none."},{"question":"In the transfer game, the receiver is exactly indifferent at which belief?","options":[{"text":"One half."},{"text":"Three fifths."},{"text":"Three quarters.","correct":true}],"explanation":"Six times three quarters balances eighteen times one quarter. Both actions yield zero at that belief."},{"question":"Which limits are justified? Select all that apply.","allowMultiple":true,"options":[{"text":"A passed weak assessment need not be uniquely selected.","correct":true},{"text":"Equal certificate costs forbid separation in every game."},{"text":"A profitable deviation need not identify the replacement outcome.","correct":true},{"text":"An expensive certificate establishes real applicant readiness."}],"explanation":"The audit checks a specified game and assessment. It neither predicts learning nor turns a constructed payoff table into empirical evidence."}]}
+/>
+
+### Sources and boundaries
+
+The constructed numerical game and all variants belong to this lesson. Spence’s [Nobel lecture](https://www.nobelprize.org/uploads/2018/06/spence-lecture.pdf), introduction and “The simplest job market signaling model”, motivates checking choices, beliefs and rewards together and warns against treating a stripped-down education model as an empirical claim about education. Fudenberg and He’s [Learning and Type Compatibility in Signaling Games](https://arxiv.org/abs/1702.01819v3), introduction, toy example and signalling-game notation, explains the importance of off-path beliefs and how additional learning assumptions can restrict equilibrium predictions. Neither source supplies our fictional parameters or validates a real selection policy.
+
+**Next: the [Final Exam](/signaling-and-costly-signals/final-exam)** — an irreversible run across the course, including the three checks practised here.

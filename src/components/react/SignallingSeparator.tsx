@@ -65,6 +65,20 @@ export interface SignallingSeparatorProps {
   initialCostLow?: number;
   /** Starting receiver prior, % that are high type (0–100). Defaults to `40`. */
   initialPrior?: number;
+  /** Localised label or template; placeholders are replaced with current chart values. */
+  noneTickLabel?: string;
+  /** Localised label or template; placeholders are replaced with current chart values. */
+  maxTickLabel?: string;
+  /** Localised label or template; placeholders are replaced with current chart values. */
+  moreTickLabel?: string;
+  /** Localised label or template; placeholders are replaced with current chart values. */
+  chartAriaTemplate?: string;
+  /** Localised label or template; placeholders are replaced with current chart values. */
+  highCostAriaTemplate?: string;
+  /** Localised label or template; placeholders are replaced with current chart values. */
+  lowCostAriaTemplate?: string;
+  /** Localised label or template; placeholders are replaced with current chart values. */
+  priorAriaTemplate?: string;
   /** Extra classes merged onto the root element. */
   className?: string;
 }
@@ -164,8 +178,17 @@ export function SignallingSeparator({
   initialCostHigh = 12,
   initialCostLow = 26,
   initialPrior = 40,
+  noneTickLabel = 'none',
+  maxTickLabel = 'max',
+  moreTickLabel = 'more →',
+  chartAriaTemplate = '{axisLabel} against {xAxisLabel}. The signal costs {costHigh} per unit for a high type and {costLow} for a low type. The equilibrium is {status}.',
+  highCostAriaTemplate = '{value} cost per unit to a high type',
+  lowCostAriaTemplate = '{value} cost per unit to a low type',
+  priorAriaTemplate = '{value}% high type',
   className,
 }: SignallingSeparatorProps) {
+  const formatLabel = (template: string, values: Record<string, string | number>) =>
+    template.replace(/\{(\w+)\}/g, (token, key: string) => String(values[key] ?? token));
   const reactId = useId();
 
   const [costHigh, setCostHigh] = useState(clamp(initialCostHigh, 6, 40));
@@ -222,7 +245,7 @@ export function SignallingSeparator({
           viewBox={`0 0 ${W} ${H}`}
           className="h-auto w-full"
           role="img"
-          aria-label={`${axisLabel} against ${xAxisLabel}. The signal costs ${costHigh} per unit for a high type and ${costLow} for a low type. The equilibrium is ${model.separates ? separatingWord : poolingWord}.`}
+          aria-label={formatLabel(chartAriaTemplate, { axisLabel, xAxisLabel, costHigh, costLow, status: model.separates ? separatingWord : poolingWord })}
         >
           <rect x="0" y="0" width={W} height={H} fill="var(--color-surface-sunken)" />
 
@@ -275,7 +298,7 @@ export function SignallingSeparator({
           {/* X ticks */}
           {[0, 0.5, 1].map((t) => (
             <text key={`xt-${t}`} x={px(t * S_MAX)} y={PAD_T + PLOT_H + 15} textAnchor="middle" fontSize="9" fill="var(--color-ink-500)">
-              {t === 0 ? 'none' : t === 1 ? 'max' : 'more →'}
+              {t === 0 ? noneTickLabel : t === 1 ? maxTickLabel : moreTickLabel}
             </text>
           ))}
           <text x={PAD_L + PLOT_W / 2} y={H - 6} textAnchor="middle" fontSize="10" fontWeight="600" fill="var(--color-ink-600)">
@@ -334,7 +357,7 @@ export function SignallingSeparator({
             step={1}
             value={costHigh}
             onChange={(e) => setCostHigh(clamp(Number(e.target.value), 6, 40))}
-            aria-valuetext={`${costHigh} cost per unit to a high type`}
+            aria-valuetext={formatLabel(highCostAriaTemplate, { value: costHigh })}
             className="mt-1 h-1.5 w-full cursor-pointer accent-brand-500"
           />
         </div>
@@ -355,7 +378,7 @@ export function SignallingSeparator({
             step={1}
             value={costLow}
             onChange={(e) => setCostLow(clamp(Number(e.target.value), 6, 40))}
-            aria-valuetext={`${costLow} cost per unit to a low type`}
+            aria-valuetext={formatLabel(lowCostAriaTemplate, { value: costLow })}
             className="mt-1 h-1.5 w-full cursor-pointer accent-accent-500"
           />
         </div>
@@ -376,7 +399,7 @@ export function SignallingSeparator({
             step={1}
             value={prior}
             onChange={(e) => setPrior(clamp(Number(e.target.value), 0, 100))}
-            aria-valuetext={`${prior}% high type`}
+            aria-valuetext={formatLabel(priorAriaTemplate, { value: prior })}
             className="mt-1 h-1.5 w-full cursor-pointer accent-ink-400"
           />
           <p className="mt-1 text-xs text-ink-500">{priorHint}</p>
