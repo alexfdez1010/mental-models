@@ -365,3 +365,6 @@ export type { GeometricThresholdScenario, GeometricThresholdPoint, GeometricThre
 
 export { LocalUpdateTrace } from '@/components/react/LocalUpdateTrace';
 export type { LocalUpdateTraceProps, LocalUpdateLabels, LocalUpdateCase, LocalUpdateProtocol } from '@/components/react/LocalUpdateTrace';
+
+export { AggregationTrace } from '@/components/react/AggregationTrace';
+export type { AggregationTraceProps } from '@/components/react/AggregationTrace';
