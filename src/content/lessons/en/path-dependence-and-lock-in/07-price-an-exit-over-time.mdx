@@ -1,0 +1,572 @@
+---
+title: "Price an exit over time"
+description: "Compare complete switching plans, count repeated migration costs and separate an inherited platform from an irrecoverable past invoice."
+topic: "en/path-dependence-and-lock-in"
+order: 8
+minutes: 23
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, MindMap, Quiz, Callout, FirstPrinciplesBuilder, SwitchingPlanLedger } from '@/components/react';
+
+A new platform gives you more each period. The migration fee fits on one line. Before saying “we're trapped” or “obviously switch”, put a date on the comparison. A moving van is paid once per move; cheaper rent arrives month by month. Comparing the two without saying how long you'll stay leaves the decision unfinished.
+
+This workshop prices one organisation's continuation from an inherited platform. It does not model a whole market or a group that must coordinate. Every number below is constructed, and every future benefit is known before the plan is chosen.
+
+<MCQ
+  client:visible
+  question="An organisation already uses A. B gives more benefit per period but moving costs something. Which missing fact can reverse the preferred continuation?"
+  options={[
+  {
+    "text": "How many future periods the comparison includes",
+    "correct": true
+  },
+  {
+    "text": "How large the irrecoverable old invoice happened to be"
+  },
+  {
+    "text": "Which platform name appears first in the report"
+  }
+]}
+  explanation="A per-period advantage accumulates over the horizon; a migration fee is charged per change. An old invoice that is identical across future choices cannot change their ranking. We will calculate the horizon reversal, rather than infer it from the word “better”."
+  pretest
+/>
+
+## Set the future ledger
+
+A **continuation plan** specifies the platform used in every remaining period. A **horizon** is the number of periods included in that comparison. For two periods, the complete list is AA, AB, BA and BB. The letters name period choices; the platform already installed is recorded separately.
+
+Imagine a small print workshop choosing a scheduling platform. Its planning scale is **credits**, abbreviated **cr**: a common measure of benefit and cost for this fictional decision, not a currency or an estimate from a real business. A “period” is one equal planning interval. We do not mix daily benefits with annual fees.
+
+| Input | Stipulated value or rule |
+|---|---|
+| Platform installed before period one | A in the main case |
+| Benefit from A | 6 cr per period |
+| Benefit from B | 9 cr per period |
+| Horizon initially compared | 2 periods |
+| Migration cost K | 7 cr **per change**, in either direction |
+| Routine operating costs | Already included in each benefit figure |
+| Timing | Change at a period boundary, then receive that period's benefit |
+| Information | All period benefits and fees known before choosing |
+| Feasible choices | Either platform in each period; no refusal, budget or availability restriction |
+| Outside the model | Discounting, uncertainty, learning gains, external network effects and terminal resale value |
+
+“Gross” below means **before migration**, not before every operating expense. Our objective is total future benefit minus every new migration cost. All plans end at the stated horizon; no plan receives an unlisted benefit afterwards.
+
+The repeated fee models transactional work or disruption that must be paid again on returning. Some learning costs behave differently: once you know both tools, returning may require no new learning. [Farrell and Klemperer's survey, sections one and two](https://www.nuff.ox.ac.uk/economics/papers/2006/w7/Farrell_KlempererWP.pdf), distinguishes these mechanisms. Do not reuse our fee rule for a case with a different cost structure.
+
+### When to use this setup
+
+Use a finite ledger when the remaining options, periods and costs can be stated. If benefits are forecasts, begin with explicit scenarios or an uncertainty model; this known-benefit calculation does not make a forecast certain.
+
+<FillBlank
+  client:visible
+  question="Keep the units straight"
+  text="The benefit is measured {{per period|per migration|per past invoice}}. The fee is charged {{per change|per period|per platform name}}."
+  explanation="Add the benefits of the chosen periods. Separately count the platform changes and multiply by the fee. A plan that stays put receives benefits without paying a migration fee."
+/>
+
+## Count every transition
+
+Treat the installed platform as the starting square on a board. You pay when you cross from one platform to the other, including the first step. Merely seeing a B somewhere in a plan does not tell you how many times you moved.
+
+For installed A, **BA** follows A → B → A. It changes before the first period and again before the second: two fees. **AB** follows A → A → B: one fee. Both plans earn 6 + 9 = 15 cr before migration, but their costs differ.
+
+**Future net = sum of chosen period benefits − K × number of platform changes**
+
+| Plan, installed A | Gross benefit, cr | Changes | Migration cost, cr | Future net, cr |
+|---|---|---|---|---|
+| AA | 12 | 0 | 0 | 12 |
+| AB | 15 | 1 | 7 | 8 |
+| BA | 15 | 2 | 14 | 1 |
+| BB | 18 | 1 | 7 | 11 |
+
+AA is best among **all four feasible plans** in this model. B's higher per-period benefit is real; across only two periods, its extra 6 cr does not repay the initial 7 cr migration. Staying is a forward-looking result, with no appeal to an old purchase invoice.
+
+Now change **only the installed platform to B**. Future benefit figures, fees and the two-period horizon remain identical.
+
+| Plan, installed B | Gross benefit, cr | Changes | Migration cost, cr | Future net, cr |
+|---|---|---|---|---|
+| AA | 12 | 1 | 7 | 5 |
+| AB | 15 | 2 | 14 | 1 |
+| BA | 15 | 1 | 7 | 8 |
+| BB | 18 | 0 | 0 | 18 |
+
+BB now wins with 18 cr. The inherited state changes which future moves are costly. These are different starting states, so we have not held every present fact identical. Nor have we proved anything about which original purchase was best: that requires its original options and benefits.
+
+<SwitchingPlanLedger
+  client:visible
+  title="Check every continuation"
+  instructions="Change one input at a time. The first symbol is the installed platform, followed by the choices in each period. Count a fee whenever neighbouring symbols differ."
+  caption="Constructed known-benefit model: A yields six credits each period; B yields nine. Every change costs the selected amount, including the initial change and any return. No external network value or terminal value."
+  benefitsA={[
+  6,
+  6,
+  6
+]}
+  benefitsB={[
+  9,
+  9,
+  9
+]}
+  fees={[
+  0,
+  6,
+  7,
+  9
+]}
+  initialFee={7}
+  initialInstalled="A"
+  initialHorizon={2}
+  platformA="A"
+  platformB="B"
+  unit="cr"
+  locale="en"
+  labels={{
+  "installed": "Installed before the first period",
+  "horizon": "Decision horizon",
+  "fee": "Cost per platform change",
+  "periodsTemplate": "{count} periods",
+  "tableCaption": "Complete continuation plans and their future costs",
+  "trace": "Installed → period choices",
+  "gross": "Gross benefit",
+  "changes": "Changes",
+  "totalCost": "Migration cost",
+  "net": "Future net",
+  "best": "Best in this model",
+  "axis": "All bars share one net-benefit scale across the controls. The vertical marker is zero.",
+  "zero": "Zero",
+  "bestTemplate": "Best continuation plans: {plans}; future net {net}"
+}}
+/>
+
+<MCQ
+  client:visible
+  question="Recall the starting square. With B installed, what does plan AB cost in migration fees when each change costs seven credits?"
+  options={[
+  {
+    "text": "Fourteen credits, because it goes from B to A and back to B",
+    "correct": true
+  },
+  {
+    "text": "Seven credits, because there is just one change inside AB"
+  },
+  {
+    "text": "Zero credits, because it ends on the platform already installed"
+  }
+]}
+  explanation="B → A → B crosses twice. Two times seven is fourteen. Counting only the change between written period letters misses the first migration; looking only at the final platform misses both moves."
+/>
+
+### When this distinction matters
+
+Use the transition trace when a pilot, rollback or later reversal is possible. A reversible move can still be expensive: being allowed to return does not erase the second migration fee. If actual return costs differ, replace the rule before calculating.
+
+## Give benefits enough time
+
+Guess before expanding the horizon: can one extra period make a switch worthwhile without improving B at all? Keep A installed and K = 7 cr. Both platforms now have **three known periods** at the same respective benefits.
+
+| Three-period plan | Gross benefit, cr | Changes | Migration cost, cr | Future net, cr |
+|---|---|---|---|---|
+| AAA | 18 | 0 | 0 | 18 |
+| AAB | 21 | 1 | 7 | 14 |
+| ABA | 21 | 2 | 14 | 7 |
+| ABB | 24 | 1 | 7 | 17 |
+| BAA | 21 | 2 | 14 | 7 |
+| BAB | 24 | 3 | 21 | 3 |
+| BBA | 24 | 2 | 14 | 10 |
+| BBB | 27 | 1 | 7 | 20 |
+
+BBB now wins: 27 − 7 = 20 cr, compared with AAA's 18 cr. Every mixed plan is listed, so an unexamined “switch later” plan cannot be hiding above the winner.
+
+For the particular comparison **switch immediately and remain on B** versus **remain on A**, constant period benefits give:
+
+**Incremental net = T × (B benefit per period − A benefit per period) − K**
+
+The extra benefit is 3 cr per period. Across two periods: 2 × 3 − 7 = **−1 cr**. Across three: 3 × 3 − 7 = **2 cr**. This expression compares those two constant-platform plans; the full table establishes which plan wins among every allowed continuation.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale="en"
+  title="Build the cumulative advantage"
+  eyebrow=""
+  analogyValue={7}
+  analogyLabel="Fee for one immediate migration"
+  analogyNote="A is installed; the plan moves to B once and never returns."
+  parts={[
+  {
+    "label": "First period",
+    "value": 3,
+    "note": "B gives nine instead of six."
+  },
+  {
+    "label": "Second period",
+    "value": 3,
+    "note": "The same three-credit advantage."
+  },
+  {
+    "label": "Third period",
+    "value": 3,
+    "note": "Included only in the longer horizon."
+  }
+]}
+  rebuiltLabel="Extra benefits in the selected periods"
+  instructions="Add the first two periods, compare with the fee, then add the third. This reconstruction concerns one immediate switch, not every plan."
+  valuePrefix=""
+  valueSuffix=" cr"
+  revealAllLabel="Include every period"
+  resetLabel="Clear the periods"
+  verdictTemplate="The full horizon adds {total} before the one migration fee. Subtract that fee to find the incremental net."
+  caption="Each part is an extra benefit relative to staying on A, not the total benefit of B. All figures use the same credit scale."
+/>
+
+<MCQ
+  client:visible
+  question="Use the full three-period table. How much does its best continuation improve on staying on A throughout?"
+  options={[
+  {
+    "text": "Two credits after paying for one migration",
+    "correct": true
+  },
+  {
+    "text": "Nine credits before paying for any migration"
+  },
+  {
+    "text": "Six credits after charging a fee each period"
+  }
+]}
+  explanation="BBB gives twenty and AAA eighteen, so the gain is two. Nine is the gross three-period advantage; the seven-credit migration must still be deducted. Fees are per change, not per period."
+/>
+
+### Equality is a result too
+
+With installed A, two periods and **K = 6 cr**, the four net values are AA **12**, AB **9**, BA **3**, BB **12**. AA and BB tie. The ledger should mark both; the calculation supplies no strict preference between them. An omitted inconvenience cannot be invoked to break the tie while claiming the model is unchanged.
+
+Justify the horizon from the actual remaining use before comparing plans. Choosing a duration only after seeing which platform wins can bias the decision. Use this check whenever a one-time cost is compared with a recurring benefit.
+
+A percentage improvement is not an exit rule. Its value depends on the base benefit, duration, transition costs and feasible alternatives. Even a modest improvement can accumulate enough benefit; a large one can fail to repay a sufficiently expensive transition.
+
+## Keep the state, remove the invoice
+
+The installed platform is useful information. “We once paid a large amount for it” is a different claim. A **sunk invoice** is already paid and unrecoverable under every continuation. Changing its amount while holding today's state and every future consequence fixed changes none of the four future nets.
+
+| Past irrecoverable invoice, cr | Installed platform | Future AA net, cr | Future BB net, cr | Preferred two-period plan |
+|---|---|---|---|---|
+| 200 | A | 12 | 11 | AA |
+| 2000 | A | 12 | 11 | AA |
+
+If you subtract the past invoice from every plan for a wider accounting total, you subtract the **same constant** from each. For two plans X and Y, (future X − P) − (future Y − P) = future X − future Y. Neither the size of P nor the unpleasantness of remembering it changes that difference.
+
+This is not an instruction to erase history. Past decisions may leave trained staff, usable equipment, contracts, refunds or deadlines that alter future benefits and costs. Those consequences belong in the current state. A refundable amount is not sunk; a fee not yet paid is not a past invoice. The test is whether a consequence differs between the choices still open.
+
+### When to use the separation
+
+Use it when “we've invested too much to leave” mixes an old payment with real future consequences. Keep the consequences and compare them. Do not charge the old invoice again as a new migration fee.
+
+<Categorize
+  client:visible
+  instructions="Sort by whether the consequence differs between future plans."
+  buckets={[
+  "Belongs in the future comparison",
+  "Same sunk amount for every plan"
+]}
+  items={[
+  {
+    "text": "An irrecoverable licence invoice already paid under every continuation",
+    "bucket": "Same sunk amount for every plan"
+  },
+  {
+    "text": "New conversion work charged only if the platform changes",
+    "bucket": "Belongs in the future comparison"
+  },
+  {
+    "text": "Existing staff skills that raise next period's benefit on A but not B",
+    "bucket": "Belongs in the future comparison"
+  },
+  {
+    "text": "A contract refund received only on a qualifying exit",
+    "bucket": "Belongs in the future comparison"
+  }
+]}
+  explanation="The old irrecoverable invoice is common to every continuation. Conversion work, productive skills and an exit-dependent refund change future comparisons. Calling them all “past investment” would hide the distinction."
+/>
+
+## Transfer to a changing payoff path
+
+Keep installed A, **K = 7 cr** and **three periods**. Change only B's third-period benefit from 9 to **3 cr**. Everyone knows this schedule before choosing; there is no new information arriving halfway through the plan.
+
+| Platform | First-period benefit, cr | Second-period benefit, cr | Third-period benefit, cr |
+|---|---|---|---|
+| A | 6 | 6 | 6 |
+| B | 9 | 9 | 3 |
+
+Before opening the solution, choose the best continuation among all eight. In particular, test whether two good B periods repay moving there **and back**.
+
+<MCQ
+  client:visible
+  question="For this changed schedule, which continuation gives the greatest future net?"
+  options={[
+  {
+    "text": "AAA, with eighteen credits and no migrations",
+    "correct": true
+  },
+  {
+    "text": "BBB, with fourteen credits after one migration"
+  },
+  {
+    "text": "BBA, with ten credits after two migrations"
+  },
+  {
+    "text": "ABB, with eleven credits after one migration"
+  }
+]}
+  explanation="AAA gives six plus six plus six, or eighteen. BBB gives nine plus nine plus three minus seven, or fourteen. BBA earns twenty-four but pays fourteen to move out and back, leaving ten. The complete solution checks the other paths too."
+/>
+
+<details>
+<summary>Check every plan and explore the changed schedule</summary>
+
+| Plan, installed A | Gross benefit, cr | Changes | Migration cost, cr | Future net, cr |
+|---|---|---|---|---|
+| AAA | 18 | 0 | 0 | 18 |
+| AAB | 15 | 1 | 7 | 8 |
+| ABA | 21 | 2 | 14 | 7 |
+| ABB | 18 | 1 | 7 | 11 |
+| BAA | 21 | 2 | 14 | 7 |
+| BAB | 18 | 3 | 21 | −3 |
+| BBA | 24 | 2 | 14 | 10 |
+| BBB | 21 | 1 | 7 | 14 |
+
+AAA beats every feasible alternative. Multiplying today's B advantage by three would invent a benefit that the third period does not provide. The negative BAB value is a real loss on this scale, not zero. Try changing the migration fee below: the best plan need not remain the same.
+<SwitchingPlanLedger
+  client:visible
+  title="A different third period"
+  instructions="Change one input at a time. The first symbol is the installed platform, followed by the choices in each period. Count a fee whenever neighbouring symbols differ."
+  caption="Only the third B benefit changes, to three credits; it is known before choosing. This is a new payoff path, not a surprise discovered after migration."
+  benefitsA={[
+  6,
+  6,
+  6
+]}
+  benefitsB={[
+  9,
+  9,
+  3
+]}
+  fees={[
+  0,
+  6,
+  7,
+  9
+]}
+  initialFee={7}
+  initialInstalled="A"
+  initialHorizon={3}
+  platformA="A"
+  platformB="B"
+  unit="cr"
+  locale="en"
+  labels={{
+  "installed": "Installed before the first period",
+  "horizon": "Decision horizon",
+  "fee": "Cost per platform change",
+  "periodsTemplate": "{count} periods",
+  "tableCaption": "Complete continuation plans and their future costs",
+  "trace": "Installed → period choices",
+  "gross": "Gross benefit",
+  "changes": "Changes",
+  "totalCost": "Migration cost",
+  "net": "Future net",
+  "best": "Best in this model",
+  "axis": "All bars share one net-benefit scale across the controls. The vertical marker is zero.",
+  "zero": "Zero",
+  "bestTemplate": "Best continuation plans: {plans}; future net {net}"
+}}
+/>
+
+</details>
+
+### When to repeat the calculation
+
+Reopen the ledger when credible information changes a benefit, cost, feasible choice, installed state or horizon. If the real decision is uncertain, compare plausible schedules and the consequences of being wrong. Neither a sunk invoice nor a slogan about lock-in replaces that work.
+
+## Audit the claim before scaling it up
+
+The workshop's preferred plan depends on an inherited state and future frictions. That is one mechanism by which past commitments matter. It does **not** establish an increasing-returns adoption process, multiple market equilibria or the inferiority of a historical standard.
+
+In a network case, your benefits may depend on who else switches. You would need to model their choices, compatibility and incentives as well. A private ledger does not establish a collective welfare gain: an exit payment to a vendor may be a private cost and a transfer to someone else. Keep the decision maker and objective explicit.
+
+A usable audit records the installed state, the payoff schedule and horizon, every permitted transition and its cost, and the objective used to rank complete plans. Then state what observation would change an input. “B is nicer” leaves several of those boxes empty.
+
+<MCQ
+  client:visible
+  question="Select every change that can require a new future comparison, holding the rest of the model fixed."
+  options={[
+  {
+    "text": "A contract makes future return migration cheaper",
+    "correct": true
+  },
+  {
+    "text": "A revised horizon includes another usable period",
+    "correct": true
+  },
+  {
+    "text": "An old irrecoverable invoice is found to be larger"
+  },
+  {
+    "text": "A verified schedule lowers one future B benefit",
+    "correct": true
+  }
+]}
+  explanation="Return fees change transition costs; the horizon changes which benefits count; and the schedule changes a plan's gross benefit. A larger irrecoverable past invoice changes no future payoff when the state and all future consequences remain fixed."
+  allowMultiple
+/>
+
+## Rebuild the comparison
+
+<MindMap
+  client:visible
+  title="A continuation audit"
+  root={{
+  "label": "Choose from here",
+  "children": [
+    {
+      "label": "Start from the inherited state",
+      "children": [
+        {
+          "label": "Installed A or B changes the first migration"
+        }
+      ]
+    },
+    {
+      "label": "Specify a common horizon",
+      "children": [
+        {
+          "label": "Add known benefits for each included period"
+        }
+      ]
+    },
+    {
+      "label": "Trace every transition",
+      "children": [
+        {
+          "label": "Returning can incur another transactional cost"
+        }
+      ]
+    },
+    {
+      "label": "Rank complete plans",
+      "children": [
+        {
+          "label": "Subtract every new fee and retain all exact ties"
+        }
+      ]
+    },
+    {
+      "label": "Separate past invoices",
+      "children": [
+        {
+          "label": "Keep future consequences and remove common sunk amounts"
+        }
+      ]
+    },
+    {
+      "label": "Review the boundary",
+      "children": [
+        {
+          "label": "A private choice is not a market prediction"
+        }
+      ]
+    }
+  ]
+}}
+/>
+
+<Quiz
+  client:visible
+  title="Test the ledger"
+  questions={[
+  {
+    "question": "With A installed, two constant-benefit periods and a six-credit migration fee, what does the complete comparison establish?",
+    "options": [
+      {
+        "text": "AA and BB tie at twelve credits each",
+        "correct": true
+      },
+      {
+        "text": "BB alone wins with eighteen credits net"
+      },
+      {
+        "text": "AB and BA tie because their gross benefits match"
+      }
+    ],
+    "explanation": "AA costs nothing and yields twelve; BB yields eighteen minus six, also twelve. AB is fifteen minus six, or nine; BA is fifteen minus twelve, or three. Equal gross benefit does not imply equal net benefit."
+  },
+  {
+    "question": "A past payment is irrecoverable, but it paid for staff training that raises next period's output. What should enter the comparison?",
+    "options": [
+      {
+        "text": "The training's future output effect, without recharging the invoice",
+        "correct": true
+      },
+      {
+        "text": "The entire past invoice, without counting the output effect"
+      },
+      {
+        "text": "Neither amount, because both originated in a past decision"
+      }
+    ],
+    "explanation": "The invoice is common and sunk. The staff skill affects what the organisation can do now and therefore belongs in future benefits. Ignoring sunk spending does not erase the productive state it helped create."
+  },
+  {
+    "question": "From installed A, the plan BAB uses three periods. How many fees does the repeated-transaction rule charge?",
+    "options": [
+      {
+        "text": "Three fees, one at each change of platform",
+        "correct": true
+      },
+      {
+        "text": "Two fees, one for each distinct platform used"
+      },
+      {
+        "text": "One fee, only when B is used for the first time"
+      }
+    ],
+    "explanation": "The trace is A → B → A → B. Every boundary changes platform, so there are three fees. Charging once per newly learned platform would be another model."
+  },
+  {
+    "question": "When does the shortcut “horizon times the current benefit gap minus one fee” compare the two stay-throughout plans correctly?",
+    "options": [
+      {
+        "text": "When that gap persists in every included period and the move happens once",
+        "correct": true
+      },
+      {
+        "text": "Whenever B is better today, even if future period benefits change"
+      },
+      {
+        "text": "Whenever a return is allowed, even if the plan actually returns"
+      }
+    ],
+    "explanation": "The shortcut sums a constant gap and deducts one transition. A changing schedule needs period-specific differences; a return needs its additional fee. Neither adjustment is optional."
+  },
+  {
+    "question": "A manager shows that BBB wins in the three-period constant-benefit model. What further conclusion follows?",
+    "options": [
+      {
+        "text": "It is best among the enumerated feasible plans under those stated inputs",
+        "correct": true
+      },
+      {
+        "text": "It proves that every firm should join B before its rivals do"
+      },
+      {
+        "text": "It proves that buying A in the past was originally irrational"
+      }
+    ],
+    "explanation": "All eight future plans were compared, so the finite optimum is established. The model includes neither other firms' choices nor the original purchase decision's information and options."
+  }
+]}
+/>
+
+Next: the [final exam](/path-dependence-and-lock-in/final-exam), which includes the continuation audit alongside the course's historical mechanisms and their limits.

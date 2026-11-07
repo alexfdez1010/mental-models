@@ -5,6 +5,10 @@ import { cx } from '@/components/react/cx';
 export interface LockInExplorerProps {
   /** Heading above the card. */
   title?: string;
+  /** Number formatting for the visible and accessible strength value only. */
+  locale?: 'en' | 'es';
+  /** Accessible strength value; the template must contain {strength}. */
+  strengthValueTemplate?: string;
   /** Eyebrow label. Defaults to `'Increasing returns & lock-in'`. */
   eyebrow?: string;
   /** Instruction line above the simulation. */
@@ -132,6 +136,8 @@ const round = (n: number) => Math.round(n);
  */
 export function LockInExplorer({
   title,
+  locale = 'en',
+  strengthValueTemplate = 'increasing-returns strength {strength}',
   eyebrow = 'Increasing returns & lock-in',
   instructions = 'Two standards, A and B, compete for a market that fills one adopter at a time. Each newcomer prefers a standard for its quality AND for how many others already use it. Standard B is genuinely better — yet with strong increasing returns, an accidental early lead can lock the market onto the worse one. Run it, then hit “New run” to watch a different winner emerge from the same knob.',
   caption,
@@ -281,7 +287,10 @@ export function LockInExplorer({
     verdict = verdictLockedWorse.replace('{winner}', winnerLabel);
   }
 
-  const strengthDisplay = (strength / 100).toFixed(1);
+  const strengthDisplay = (strength / 100).toFixed(1).replace('.', locale === 'es' ? ',' : '.');
+  if (typeof strengthValueTemplate !== 'string' || !strengthValueTemplate.includes('{strength}')) {
+    throw new Error('LockInExplorer: strengthValueTemplate must include {strength}.');
+  }
   const readoutText = readout
     .replace('{strength}', strengthDisplay)
     .replace('{adopters}', String(total))
@@ -407,7 +416,7 @@ export function LockInExplorer({
           step={10}
           value={strength}
           onChange={(e) => onStrengthChange(Number(e.target.value))}
-          aria-valuetext={`increasing-returns strength ${strengthDisplay}`}
+          aria-valuetext={strengthValueTemplate.replace('{strength}', strengthDisplay)}
           className="mt-1 h-1.5 w-full cursor-pointer accent-accent-500"
         />
         <div className="flex justify-between text-[0.6rem] font-medium uppercase tracking-wide text-ink-400">
