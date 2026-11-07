@@ -362,3 +362,6 @@ export type { FixedRule, FixedRuleRecord, FixedRuleComparisonLabels, FixedRuleCo
 
 export { GeometricThresholdTrace, calculateGeometricThresholdScenario, formatGeometricRational, auditGeometricThresholdTrace } from '@/components/react/GeometricThresholdTrace';
 export type { GeometricThresholdScenario, GeometricThresholdPoint, GeometricThresholdCalculation, GeometricThresholdTraceLabels, GeometricThresholdTraceProps } from '@/components/react/GeometricThresholdTrace';
+
+export { LocalUpdateTrace } from '@/components/react/LocalUpdateTrace';
+export type { LocalUpdateTraceProps, LocalUpdateLabels, LocalUpdateCase, LocalUpdateProtocol } from '@/components/react/LocalUpdateTrace';

@@ -1,0 +1,411 @@
+---
+title: "Audita una regla de actualización"
+description: "Sigue un modelo de cuatro nodos, compara actualizaciones simultáneas y secuenciales y comprueba qué objetivo logra fijar un nodo."
+topic: "es/emergence"
+order: 6
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, Callout, MatchConcepts, Categorize, MindMap, LocalUpdateTrace, RateComparison } from '@/components/react';
+
+Dos implementaciones reciben los mismos cuatro valores y la misma instrucción: copiar la mayoría local. Una sigue alternando indefinidamente. Otra alcanza el acuerdo en un solo barrido. Antes de culpar al código, comprueba qué significaba «actualizar».
+
+Este es un modelo construido que puedes auditar por completo. Amplía la relación entre el nivel micro y el macro que enseña el curso de **emergencia (emergence)**: conocer el cálculo local ayuda, pero las conexiones, la configuración inicial y los tiempos también pertenecen al modelo. Aquí no se estima cómo se comportan personas, aves o máquinas reales.
+
+## Especifica el experimento
+
+<MCQ
+  client:visible
+  question={"Dos modelos tienen los mismos valores iniciales, conexiones y reglas de mayoría local. ¿Deben coincidir sus configuraciones posteriores?"}
+  options={[{"text":"Sí, porque la fórmula local especifica por completo cualquier implementación posible."},{"text":"Sí, porque un modelo determinista no puede depender del momento de sus lecturas."},{"text":"Solo si coinciden también cuándo leen, cuándo escriben y su protocolo de actualización.","correct":true},{"text":"Solo si los valores iniciales tienen una mayoría única en el anillo completo."}]}
+  explanation={"Una regla local indica cómo calcula un nodo su siguiente valor. Todavía no indica qué versión de los valores de sus vecinos lee. Leer una instantánea o las escrituras inmediatas puede producir transiciones completas distintas."}
+  className={"not-prose"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretest={true}
+  pretestLabel={"Antes de leer — haz una predicción"}
+/>
+
+Una **configuración (configuration)** es la lista ordenada de todos los valores actuales de los nodos. Nuestros cuatro nodos identificados forman el anillo A–B–C–D–A. Cada uno guarda 0 o 1. La cadena `0101` significa A=0, B=1, C=0, D=1; conserva el cero inicial. Ninguno de los valores significa bueno, malo, verdadero o falso. Son dos estados posibles.
+
+El **vecindario (neighbourhood)** de un nodo comprende a su vecino izquierdo, a sí mismo y a su vecino derecho. Para A es D,A,B; para B es A,B,C. C lee B,C,D y D lee C,D,A. Incluir al propio nodo importa: hay tres entradas en la votación, por lo que no puede haber empate.
+
+La **regla local (local rule)** devuelve 1 cuando al menos dos de esas tres entradas son 1; en caso contrario devuelve 0. Esta es su tabla de verdad completa:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Regla completa de mayoría de tres entradas">
+<table style={{minWidth: "28rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Regla completa de mayoría de tres entradas</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Izquierda</th><th scope="col" className="p-3 align-bottom font-semibold">Propio</th><th scope="col" className="p-3 align-bottom font-semibold">Derecha</th><th scope="col" className="p-3 align-bottom font-semibold">Siguiente valor</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">0</th><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">0</th><td className="p-3 align-top">0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">0</th><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">0</th><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">1</th><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">1</th><td className="p-3 align-top">0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">1</th><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">1</th><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td></tr>
+</tbody>
+</table>
+</div>
+
+Las especificaciones restantes completan la ficha del modelo:
+
+- Las cuatro posiciones y sus conexiones en anillo son fijas.
+- En la comparación principal no hay ruido, entradas externas, elección aleatoria ni cambios de regla local.
+- Un **protocolo (protocol)** especifica cuándo se leen y escriben los valores y en qué orden se actualizan los nodos.
+- Una **ronda** simultánea actualiza todos los nodos desde una única instantánea anterior. Un **barrido** secuencial actualiza cada nodo una vez en un orden declarado, leyendo los valores más recientes.
+- Son unidades para contar sucesos dentro de un modelo. No se supone una duración en segundos, y una actualización de nodo no equivale a una ronda simultánea completa.
+
+<MatchConcepts
+  client:visible
+  question={"Relaciona cada especificación con la pregunta que responde."}
+  pairs={[{"term":"Configuración","definition":"¿Qué valor guarda ahora cada posición identificada?"},{"term":"Vecindario","definition":"¿Qué posiciones aportan las entradas locales de un nodo?"},{"term":"Regla local","definition":"¿Cómo determinan esas entradas el siguiente valor propuesto?"},{"term":"Protocolo de actualización","definition":"¿Qué versiones de las entradas se leen y cuándo se escriben las propuestas?"}]}
+  explanation={"La fórmula local, las posiciones y los tiempos responden a preguntas distintas. Un modelo finito completo necesita las tres cosas; la palabra mayoría no aporta un calendario de actualización."}
+  className={"not-prose"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"Todo emparejado"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"Ahora elige una definición"}
+  notLinkedHint={"Sin emparejar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+### Cuándo ayuda esta especificación
+
+Usa una ficha del modelo cuando dos simulaciones discrepen, cuando reproduzcas un resultado o cuando una intervención propuesta cambie parte de una regla. Así un detalle de implementación no se convierte sin avisar en un supuesto sobre el proceso modelado.
+
+## Lee a la vez y después escribe
+
+Una **actualización simultánea (simultaneous update)** lee una copia inmutable de la configuración anterior. Calcula primero todas las propuestas y después escríbelas a la vez. Empezamos en `0101`.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Una ronda simultánea completa desde 0101">
+<table style={{minWidth: "38rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Una ronda simultánea completa desde 0101</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Destino</th><th scope="col" className="p-3 align-bottom font-semibold">Valores de izquierda, propio y derecha</th><th scope="col" className="p-3 align-bottom font-semibold">Número de unos</th><th scope="col" className="p-3 align-bottom font-semibold">Propuesta</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">D=1, A=0, B=1</td><td className="p-3 align-top">2</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">A=0, B=1, C=0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">B=1, C=0, D=1</td><td className="p-3 align-top">2</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">C=0, D=1, A=0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td></tr>
+</tbody>
+</table>
+</div>
+
+Ninguna propuesta utiliza otra propuesta anterior de esa misma ronda. Leer la última columna en orden ABCD da `1010`. En la siguiente ronda, cada nodo vuelve a ver a dos vecinos con el valor contrario al suyo, por lo que todos los valores vuelven a cambiar: `0101 → 1010 → 0101`.
+
+Una **configuración fija (fixed configuration)** es aquella que todas las actualizaciones locales aplicables dejan igual. Un **ciclo (cycle)** repite configuraciones después de rondas completas. Esta pareja alterna tiene un ciclo de longitud 2. Como la regla es determinista y reaparece la misma configuración completa en la misma fase, continuar repite esas dos configuraciones. Matemáticamente, un estado fijo tiene periodo uno; lo etiquetamos como fijo sin añadir un aviso redundante de ciclo.
+
+Cuenta los unos: hay 2 antes y 2 después de cada ronda, aunque los cuatro nodos cambian de valor. Un total que no cambia puede ocultar una disposición que sí cambia.
+
+<MCQ
+  client:visible
+  question={"En el anillo alterno, una ronda simultánea conserva el número de unos. ¿Qué ha ocurrido con los valores individuales?"}
+  options={[{"text":"No ha cambiado ningún nodo, porque el recuento agregado sigue igual."},{"text":"Han cambiado los cuatro nodos, aunque el recuento total sigue igual.","correct":true},{"text":"Solo se han actualizado los dos nodos que ya guardaban uno."},{"text":"La regla ha elegido una pareja sin especificar para actualizarla."}]}
+  explanation={"Cada nodo ve el valor contrario en sus dos vecinos, así que todos cambian. Los dos ceros pasan a uno y los dos unos pasan a cero; el recuento sigue siendo dos. Un recuento estable no implica una configuración fija."}
+  className={"not-prose"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+### Cuándo usar lecturas de una instantánea
+
+Usa este protocolo cuando el modelo suponga explícitamente una instantánea anterior común. Un bucle puede calcular las propuestas una a una, siempre que lea la copia y escriba en otro espacio de almacenamiento. El orden de cálculo de las propuestas no cambia entonces la ronda confirmada. Actualizar inmediatamente el mismo almacenamiento constituye otro protocolo.
+
+## Escribe antes de que lea el siguiente nodo
+
+Una **actualización secuencial (sequential update)** lee la configuración después de las escrituras anteriores del mismo barrido. Vuelve a partir de `0101` y declara el orden ABCD.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Todas las actualizaciones con escritura inmediata del barrido ABCD">
+<table style={{minWidth: "38rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Todas las actualizaciones con escritura inmediata del barrido ABCD</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Actualización</th><th scope="col" className="p-3 align-bottom font-semibold">Antes</th><th scope="col" className="p-3 align-bottom font-semibold">Entradas leídas</th><th scope="col" className="p-3 align-bottom font-semibold">Propuesta</th><th scope="col" className="p-3 align-bottom font-semibold">Después</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">0101</td><td className="p-3 align-top">D=1, A=0, B=1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1101</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">1101</td><td className="p-3 align-top">A=1, B=1, C=0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1101</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">1101</td><td className="p-3 align-top">B=1, C=0, D=1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1111</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">C=1, D=1, A=1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1111</td></tr>
+</tbody>
+</table>
+</div>
+
+A cambia primero. B puede leer ese nuevo valor, así que conserva 1 en lugar de adoptar la propuesta simultánea 0. Que B no cambie no termina el barrido: C aún cambia después. La configuración final es `1111`, y todas las actualizaciones posteriores la dejan fija.
+
+Declara ahora BCDA sin cambiar la configuración inicial ni la fórmula local:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Todas las actualizaciones con escritura inmediata del barrido BCDA">
+<table style={{minWidth: "38rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Todas las actualizaciones con escritura inmediata del barrido BCDA</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Actualización</th><th scope="col" className="p-3 align-bottom font-semibold">Antes</th><th scope="col" className="p-3 align-bottom font-semibold">Entradas leídas</th><th scope="col" className="p-3 align-bottom font-semibold">Propuesta</th><th scope="col" className="p-3 align-bottom font-semibold">Después</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">0101</td><td className="p-3 align-top">A=0, B=1, C=0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0001</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">0001</td><td className="p-3 align-top">B=0, C=0, D=1</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0001</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">0001</td><td className="p-3 align-top">C=0, D=1, A=0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0000</td></tr>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">D=0, A=0, B=0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0000</td></tr>
+</tbody>
+</table>
+</div>
+
+La misma regla local termina ahora en `0000`. Ambos resultados unánimes son fijos. No hemos definido una preferencia entre ellos: «alcanzar el acuerdo» no significa «alcanzar la respuesta correcta».
+
+<LocalUpdateTrace
+  client:visible
+  title={"Examina el mismo anillo con tres protocolos"}
+  instructions={"Empieza con la pareja alterna. Avanza por las lecturas y escrituras y después cambia el protocolo. Cambiar cualquiera de los selectores devuelve al inicio. Prueba la pareja contigua, que tiene el mismo número de unos."}
+  cases={[{"id":"alternating","label":"Pareja alterna","initial":[0,1,0,1]},{"id":"adjacent","label":"Pareja contigua","initial":[0,0,1,1]},{"id":"isolated","label":"Un uno aislado","initial":[0,0,0,1]}]}
+  protocols={[{"id":"parallel","label":"Rondas simultáneas","description":"Cada nodo lee la configuración completa anterior. Todos los valores propuestos se escriben a la vez.","mode":"parallel","rounds":2},{"id":"abcd","label":"Secuencial ABCD","description":"Se actualiza A, después B, después C y después D. Cada nodo lee los últimos valores y escribe inmediatamente.","mode":"sequential","rounds":1,"order":["A","B","C","D"]},{"id":"bcda","label":"Secuencial BCDA","description":"Se actualiza B, después C, después D y después A. Cada nodo lee los últimos valores y escribe inmediatamente.","mode":"sequential","rounds":1,"order":["B","C","D","A"]}]}
+  nodeLabels={["Nodo A","Nodo B","Nodo C","Nodo D"]}
+  labels={{"caseLabel":"Configuración inicial","protocolLabel":"Protocolo de actualización","previousLabel":"Suceso anterior","nextLabel":"Siguiente suceso","resetLabel":"Volver a la configuración inicial","initialLabel":"Configuración inicial","stepTemplate":"Suceso {step} de {total}","graphLabel":"Anillo de cuatro nodos y configuración binaria actual","graphDescription":"A está conectado con B y D; B con A y C; C con B y D; D con C y A. Cada círculo contiene el identificador del nodo y su valor actual, cero o uno. La tabla registra todas las lecturas y escrituras.","tableLabel":"Lecturas, propuestas y configuraciones confirmadas hasta este paso","eventLabel":"Suceso","beforeLabel":"Antes","updatedLabel":"Nodos actualizados","inputsLabel":"Entradas leídas: izquierda, propio, derecha","proposalLabel":"Valor propuesto","afterLabel":"Después","noneLabel":"Ninguno","allLabel":"Los cuatro nodos","pinnedLabel":"Se mantiene en cero durante todo el proceso","roundLabel":"una ronda simultánea por suceso","sweepLabel":"una actualización de nodo por suceso","fixedLabel":"La configuración actual es fija.","notFixedLabel":"La configuración actual no es fija.","consensusLabel":"Los cuatro valores coinciden.","mixedLabel":"Los valores son distintos.","cycleLabel":"Se ha repetido un ciclo de rondas completas de longitud {length}.","readRuleLabel":"Regla de lectura y escritura","announcementTemplate":"{step}. {protocol}. Configuración {configuration}. {status}"}}
+  locale={"es"}
+/>
+
+El diagrama muestra la configuración ya escrita. La tabla registra las entradas exactas de cada propuesta. El modo simultáneo avanza por rondas completas; el secuencial, por actualizaciones de nodos individuales. El barrido declarado se puede examinar entero aunque se alcance una configuración fija antes de su última actualización.
+
+<MCQ
+  client:visible
+  question={"En el barrido ABCD, la configuración posterior a B es idéntica a la anterior a B. ¿Por qué sería un error parar ahí?"}
+  options={[{"text":"Una cadena repetida prueba un ciclo, independientemente del nodo pendiente."},{"text":"Una actualización sin cambio prueba que la fórmula de mayoría ha dejado de aplicarse."},{"text":"C y D siguen pendientes, y C cambia la configuración actual.","correct":true},{"text":"Hay que restaurar el inicio después de cada actualización que no cambie un valor."}]}
+  explanation={"Antes y después de B la cadena es 1101, pero la fase pendiente es distinta. C lee uno,cero,uno y pasa a uno. La repetición establece un ciclo determinista solo cuando el estado relevante incluye la misma fase de actualización, no simplemente la misma cadena visible."}
+  className={"not-prose"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+### Cuándo importa el orden
+
+Si los cálculos posteriores pueden leer las escrituras anteriores, el orden puede importar. Los dos barridos establecen esa posibilidad para esta regla y este inicio. No prueban que todo orden, estado inicial o protocolo asíncrono se comporte de forma distinta. Comprueba las alternativas declaradas en vez de tratar un calendario cómodo como un supuesto neutral.
+
+## Comprueba el catálogo finito completo
+
+Probar dos órdenes encuentra un contraejemplo a la independencia respecto al orden. No establece qué hacen todos los inicios u órdenes posibles. Este sistema es lo bastante pequeño como para enumerarlo: cada una de las cuatro posiciones tiene dos valores, así que hay $2^4=16$ configuraciones. Actualizar cada nodo una vez da $4!=24$ órdenes completos, o $16\times24=384$ parejas de inicio y orden.
+
+El catálogo siguiente enumera todos los inicios. La última columna cuenta los órdenes secuenciales completos según su configuración final. Todos los destinos secuenciales enumerados son configuraciones fijas bajo la regla simultánea de este modelo.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Los dieciséis inicios y todos los órdenes secuenciales completos">
+<table style={{minWidth: "54rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Los dieciséis inicios y todos los órdenes secuenciales completos</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Inicio</th><th scope="col" className="p-3 align-bottom font-semibold">Siguiente configuración simultánea</th><th scope="col" className="p-3 align-bottom font-semibold">Comportamiento simultáneo posterior</th><th scope="col" className="p-3 align-bottom font-semibold">Destinos secuenciales y recuentos de órdenes</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">0000</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fija en 0000</td><td className="p-3 align-top">0000: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0001</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fija en 0000</td><td className="p-3 align-top">0000: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0010</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fija en 0000</td><td className="p-3 align-top">0000: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0011</th><td className="p-3 align-top">0011</td><td className="p-3 align-top">Fija en 0011</td><td className="p-3 align-top">0011: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0100</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fija en 0000</td><td className="p-3 align-top">0000: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0101</th><td className="p-3 align-top">1010</td><td className="p-3 align-top">Ciclo 0101 ↔ 1010</td><td className="p-3 align-top">0000: 12 órdenes; 1111: 12 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0110</th><td className="p-3 align-top">0110</td><td className="p-3 align-top">Fija en 0110</td><td className="p-3 align-top">0110: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0111</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fija en 1111</td><td className="p-3 align-top">1111: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">1000</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fija en 0000</td><td className="p-3 align-top">0000: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">1001</th><td className="p-3 align-top">1001</td><td className="p-3 align-top">Fija en 1001</td><td className="p-3 align-top">1001: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">1010</th><td className="p-3 align-top">0101</td><td className="p-3 align-top">Ciclo 0101 ↔ 1010</td><td className="p-3 align-top">0000: 12 órdenes; 1111: 12 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">1011</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fija en 1111</td><td className="p-3 align-top">1111: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">1100</th><td className="p-3 align-top">1100</td><td className="p-3 align-top">Fija en 1100</td><td className="p-3 align-top">1100: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">1101</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fija en 1111</td><td className="p-3 align-top">1111: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">1110</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fija en 1111</td><td className="p-3 align-top">1111: 24 órdenes</td></tr>
+<tr><th scope="row" className="p-3 align-top">1111</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fija en 1111</td><td className="p-3 align-top">1111: 24 órdenes</td></tr>
+</tbody>
+</table>
+</div>
+
+Puedes comprobar la clasificación sin adivinar:
+
+- Sin unos o con cuatro unos, toda mayoría local conserva el valor: `0000` y `1111` son fijos.
+- Con un solo uno, ese nodo tiene dos vecinos cero y desaparece; cada cero ve como máximo un uno. Tres unos producen el resultado complementario. Estos ocho inicios alcanzan el acuerdo en una ronda simultánea.
+- Con dos unos contiguos, cada nodo tiene al menos un vecino con su mismo valor. Las cuatro disposiciones `0011,0110,1001,1100` son configuraciones fijas mixtas.
+- Con dos unos alternos, ambos vecinos se oponen a cada nodo. Esas dos configuraciones se transforman una en otra.
+
+Así quedan cubiertos los dieciséis inicios: 2+8+4+2. Hay seis configuraciones fijas, no seis configuraciones unánimes. En particular, `0011` y `0101` tienen el mismo número de unos y dinámicas distintas. La disposición contiene información que el recuento descartó.
+
+Desde un inicio alterno, el primer nodo actualizado cambia para coincidir con sus vecinos. Sus vecinos inmediatos tienen entonces un vecino que coincide con ellos y conservan sus valores; el nodo opuesto cambia cuando llega su turno. El valor unánime final es, por tanto, el nuevo valor del primer nodo, independientemente del orden restante. Estos son los veinticuatro órdenes desde `0101`, agrupados sin asignarles probabilidades:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Catálogo completo de órdenes desde 0101">
+<table style={{minWidth: "44rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Catálogo completo de órdenes desde 0101</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Primer nodo</th><th scope="col" className="p-3 align-bottom font-semibold">Las seis permutaciones restantes</th><th scope="col" className="p-3 align-bottom font-semibold">Destino</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">ABCD, ABDC, ACBD, ACDB, ADBC, ADCB</td><td className="p-3 align-top">1111</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">BACD, BADC, BCAD, BCDA, BDAC, BDCA</td><td className="p-3 align-top">0000</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">CABD, CADB, CBAD, CBDA, CDAB, CDBA</td><td className="p-3 align-top">1111</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">DABC, DACB, DBAC, DBCA, DCAB, DCBA</td><td className="p-3 align-top">0000</td></tr>
+</tbody>
+</table>
+</div>
+
+Doce órdenes enumerados terminan en cada valor unánime. Si una implementación usa siempre ABCD, termina siempre en `1111` desde este inicio bajo las reglas estipuladas. El catálogo por sí solo no le da una probabilidad del cincuenta por ciento de alcanzar cada destino.
+
+<Callout variant="info" title="Qué establece la enumeración" label="Información">
+Este anillo finito se puede clasificar exactamente. El ejercicio ilustra cómo las interacciones locales y los tiempos determinan un patrón colectivo. No establece que todo sistema emergente sea impredecible, que todo modelo secuencial converja ni que un proceso real siga esta regla de mayoría. El dominio de la demostración forma parte de su resultado.
+</Callout>
+
+<Categorize
+  client:visible
+  question={"Separa los resultados establecidos aquí de las conclusiones que la auditoría finita no establece."}
+  buckets={["Establecido en este modelo","No establecido por este modelo"]}
+  items={[{"text":"El inicio alterno tiene destinos distintos en los dos órdenes declarados con escritura inmediata.","bucket":"Establecido en este modelo"},{"text":"Un recuento agregado sin cambio puede acompañar cambios en todos los nodos.","bucket":"Establecido en este modelo"},{"text":"Todo modelo secuencial de reglas locales converge al acuerdo.","bucket":"No establecido por este modelo"},{"text":"El recuento de órdenes aporta probabilidades de una implementación sin especificar.","bucket":"No establecido por este modelo"},{"text":"Todo orden completo de este anillo termina en una configuración fija.","bucket":"Establecido en este modelo"},{"text":"Un resultado sorprendente de simulación prueba la emergencia fuerte.","bucket":"No establecido por este modelo"}]}
+  explanation={"El catálogo exhaustivo sostiene afirmaciones sobre estos estados, esta regla y estos órdenes completos. No justifica nuevos dominios, una ley probabilística de selección de implementaciones ni una afirmación filosófica de irreducibilidad."}
+  instructions={"Elige el grupo que corresponde a cada afirmación."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"Todo clasificado"}
+  partialResultWord={"bien"}
+  className={"not-prose"}
+/>
+
+### Cuándo basta con enumerar
+
+En un espacio de estados pequeño, una comprobación exhaustiva puede sostener una garantía acotada. En uno mayor, unas cuantas ejecuciones satisfactorias son una muestra de ejecuciones, no una demostración exhaustiva. Registra qué estados iniciales, calendarios y condiciones de contorno se han comprobado realmente.
+
+## Fija un nodo y comprueba el objetivo
+
+Supón que tu objetivo es eliminar el ciclo alterno. Una intervención propuesta mantiene A en 0 permanentemente, mientras B,C,D siguen actualizándose por mayoría simultáneamente. Restringe los inicios legales a las ocho cadenas que empiezan por 0. A ya es cero al comienzo; la intervención cambia su regla durante todo el proceso, en vez de cambiarlo una vez y volver al modelo anterior.
+
+Otra persona pide un resultado más exigente: todos los valores deben terminar en cero. Antes de abrir la solución, decide si la intervención cumple ambos objetivos. Trabaja desde `0101` y `0111` y después considera si uno de esos ejemplos por sí solo resuelve los ocho inicios.
+
+<MCQ
+  client:visible
+  question={"Con A fijo en cero, parte de cero-uno-uno-uno y actualiza B, C y D simultáneamente por la regla de mayoría indicada. ¿Qué ocurre?"}
+  options={[{"text":"La configuración permanece mixta y fija, así que no cumple el objetivo de todos cero.","correct":true},{"text":"Todos los unos desaparecen en la siguiente ronda porque un cero fijo debe dominar el anillo."},{"text":"Vuelve el ciclo alterno original porque cualquier anillo binario tiene que oscilar."},{"text":"No se conoce la siguiente configuración hasta sortear un orden de actualización."}]}
+  explanation={"B lee cero,uno,uno; C lee uno,uno,uno; D lee uno,uno,cero. Los tres conservan uno y A permanece en cero. La configuración es fija y mixta. Un contraejemplo rechaza una garantía de todos cero desde cualquier inicio; demostrar el objetivo más débil para todos los inicios aún requiere la comprobación completa."}
+  className={"not-prose"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+<details>
+<summary>Abre la solución completa de transferencia</summary>
+
+En `0101`, B lee 0,1,0 y pasa a 0; C lee 1,0,1 y pasa a 1; D lee 0,1,0 y pasa a 0. Con A fijo en 0, la siguiente configuración es `0010`. En ella C es un uno aislado; la siguiente ronda da `0000`.
+
+En `0111`, cada nodo que no está fijado tiene una mayoría de unos entre sus tres entradas, así que la configuración mixta sigue fija. Este es todo el dominio de inicios legales:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Los ocho inicios legales bajo la intervención persistente A-cero">
+<table style={{minWidth: "38rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Los ocho inicios legales bajo la intervención persistente A-cero</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Inicio</th><th scope="col" className="p-3 align-bottom font-semibold">Traza hasta una configuración fija</th><th scope="col" className="p-3 align-bottom font-semibold">Rondas hasta ser fija</th><th scope="col" className="p-3 align-bottom font-semibold">¿Todos los valores cero?</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">0000</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">0</td><td className="p-3 align-top">Sí</td></tr>
+<tr><th scope="row" className="p-3 align-top">0001</th><td className="p-3 align-top">0001 → 0000</td><td className="p-3 align-top">1</td><td className="p-3 align-top">Sí</td></tr>
+<tr><th scope="row" className="p-3 align-top">0010</th><td className="p-3 align-top">0010 → 0000</td><td className="p-3 align-top">1</td><td className="p-3 align-top">Sí</td></tr>
+<tr><th scope="row" className="p-3 align-top">0011</th><td className="p-3 align-top">0011</td><td className="p-3 align-top">0</td><td className="p-3 align-top">No</td></tr>
+<tr><th scope="row" className="p-3 align-top">0100</th><td className="p-3 align-top">0100 → 0000</td><td className="p-3 align-top">1</td><td className="p-3 align-top">Sí</td></tr>
+<tr><th scope="row" className="p-3 align-top">0101</th><td className="p-3 align-top">0101 → 0010 → 0000</td><td className="p-3 align-top">2</td><td className="p-3 align-top">Sí</td></tr>
+<tr><th scope="row" className="p-3 align-top">0110</th><td className="p-3 align-top">0110</td><td className="p-3 align-top">0</td><td className="p-3 align-top">No</td></tr>
+<tr><th scope="row" className="p-3 align-top">0111</th><td className="p-3 align-top">0111</td><td className="p-3 align-top">0</td><td className="p-3 align-top">No</td></tr>
+</tbody>
+</table>
+</div>
+
+Una configuración inicialmente fija tarda cero rondas en alcanzar esa condición. Todos los inicios legales alcanzan una configuración fija en dos rondas como máximo, por lo que no queda ningún ciclo no trivial dentro de este dominio. Pero las cuatro configuraciones fijas posibles son `0000,0011,0110,0111`. Solo cinco inicios alcanzan todos los valores cero.
+
+<LocalUpdateTrace
+  client:visible
+  title={"Comprueba todos los inicios legales con A fijo en cero"}
+  instructions={"En todos los casos A ya empieza en cero. A permanece fijo; B, C y D leen la ronda anterior. Examina ambas rondas, incluidas las que dejan igual una configuración que ya era fija."}
+  cases={[{"id":"pinned-0000","label":"0000","initial":[0,0,0,0]},{"id":"pinned-0001","label":"0001","initial":[0,0,0,1]},{"id":"pinned-0010","label":"0010","initial":[0,0,1,0]},{"id":"pinned-0011","label":"0011","initial":[0,0,1,1]},{"id":"pinned-0100","label":"0100","initial":[0,1,0,0]},{"id":"pinned-0101","label":"0101","initial":[0,1,0,1]},{"id":"pinned-0110","label":"0110","initial":[0,1,1,0]},{"id":"pinned-0111","label":"0111","initial":[0,1,1,1]}]}
+  protocols={[{"id":"parallel","label":"Rondas simultáneas","description":"Solo B, C y D leen la configuración completa anterior. Sus propuestas se escriben a la vez; A permanece en cero.","mode":"parallel","rounds":2}]}
+  nodeLabels={["Nodo A","Nodo B","Nodo C","Nodo D"]}
+  labels={{"caseLabel":"Configuración inicial","protocolLabel":"Protocolo de actualización","previousLabel":"Suceso anterior","nextLabel":"Siguiente suceso","resetLabel":"Volver a la configuración inicial","initialLabel":"Configuración inicial","stepTemplate":"Suceso {step} de {total}","graphLabel":"Anillo de cuatro nodos y configuración binaria actual","graphDescription":"A está conectado con B y D; B con A y C; C con B y D; D con C y A. Cada círculo contiene el identificador del nodo y su valor actual, cero o uno. La tabla registra todas las lecturas y escrituras.","tableLabel":"Lecturas, propuestas y configuraciones confirmadas hasta este paso","eventLabel":"Suceso","beforeLabel":"Antes","updatedLabel":"Nodos actualizados","inputsLabel":"Entradas leídas: izquierda, propio, derecha","proposalLabel":"Valor propuesto","afterLabel":"Después","noneLabel":"Ninguno","allLabel":"Los cuatro nodos","pinnedLabel":"Se mantiene en cero durante todo el proceso","roundLabel":"una ronda simultánea por suceso","sweepLabel":"una actualización de nodo por suceso","fixedLabel":"La configuración actual es fija.","notFixedLabel":"La configuración actual no es fija.","consensusLabel":"Los cuatro valores coinciden.","mixedLabel":"Los valores son distintos.","cycleLabel":"Se ha repetido un ciclo de rondas completas de longitud {length}.","readRuleLabel":"Regla de lectura y escritura","announcementTemplate":"{step}. {protocol}. Configuración {configuration}. {status}"}}
+  pinnedA={0}
+  locale={"es"}
+/>
+
+<RateComparison
+  client:visible
+  title={"Dos objetivos sobre el mismo catálogo completo de ocho inicios"}
+  locale={"es"}
+  scenarioLabel={"Catálogo declarado"}
+  countsLabel={"Inicios que cumplen el objetivo de todos los inicios legales"}
+  differenceLabel={"Diferencia entre proporciones del catálogo"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+  scenarios={[{"label":"Regla persistente A-cero","groups":[{"label":"Alcanza una configuración fija en dos rondas como máximo","events":8,"total":8},{"label":"Alcanza todos los valores cero en dos rondas como máximo","events":5,"total":8}]}]}
+/>
+
+Las barras muestran $8/8=100\%$ y $5/8=62{,}5\%$, una diferencia de 37,5 puntos porcentuales. Son proporciones de un catálogo exhaustivo, no probabilidades de un sistema real. Sin una ley que indique cómo se eligen las configuraciones iniciales, no dicen con qué frecuencia ocurre cada resultado fuera del catálogo.
+
+</details>
+
+### Cuándo comprobar un objetivo más exigente
+
+Después de intervenir, pregunta qué propiedad cambia realmente. Eliminar la oscilación, alcanzar un estado fijo, alcanzar el acuerdo y alcanzar un valor concreto son objetivos distintos. Una intervención puede satisfacer uno y fallar en otro. Las reglas persistentes, las condiciones iniciales legales y la ventana de observación deben seguir explícitas cuando cambie el caso.
+
+## Usa la auditoría fuera del anillo
+
+Un informe dice: «Los valores dejaron de cambiar, así que el modelo funciona». Pregunta qué se registró. Si solo compara los valores anteriores y posteriores a B en un barrido ABCD, `1101 → 1101` no basta: C aún no se ha actualizado. Un registro que muestre que las cuatro propuestas aplicables coinciden con los valores actuales establecería que esa configuración es fija. Repetir una configuración de ronda completa en la misma fase puede establecer la continuación periódica bajo una regla determinista que no cambia. Ninguna de esas observaciones valida por sí sola la regla para un proceso real.
+
+Para una implementación propuesta, conserva los datos iniciales y registra los valores que lee cada nodo. Desde `0101`, B lee A=0 en una ronda simultánea, pero A=1 después de la escritura inmediata de A en el barrido ABCD. Esa lectura concreta distingue los dos protocolos; una imagen final por sí sola puede no hacerlo. Coincidir con una traza es una comprobación útil, mientras que coincidir en el catálogo finito completo demuestra equivalencia solo en ese dominio declarado.
+
+El estudio de Blok y Bergersen sobre otro modelo de autómata celular distingue esquemas de actualización y recomienda comprobar alternativas pertinentes. El manual de NetLogo también especifica la ejecución serial frente a la intercalada y el uso de listas con orden fijo. Esas fuentes sostienen la necesidad de explicitar los tiempos. No convierten este anillo en un modelo medido de una multitud o una máquina. [Manuscrito de Blok y Bergersen](https://www.cs.ubc.ca/~rikblok/research/published/blok99.pdf), [guía de programación de NetLogo](https://docs.netlogo.org/programming.html).
+
+<MCQ
+  client:visible
+  question={"Puedes examinar un registro adicional para distinguir las dos implementaciones principales desde el inicio alterno. ¿Cuál aporta más información?"}
+  options={[{"text":"Cuántos nodos guardan uno al principio, antes de que cualquiera de las implementaciones actualice valores."},{"text":"Si B lee el valor almacenado en A antes o después de que se escriba el primer cambio de A.","correct":true},{"text":"Si el voto local incluye al nodo que se actualiza además de sus dos vecinos."},{"text":"Si ambos cálculos usan el mismo umbral de mayoría para las tres entradas binarias."}]}
+  explanation={"Ambas implementaciones empiezan con el mismo recuento y el mismo diagrama. La diferencia decisiva está en la entrada de B: A es cero en la instantánea anterior y uno después de la primera escritura inmediata. Registrar esa lectura comprueba directamente los tiempos declarados."}
+  className={"not-prose"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+Cuando recurras a la emergencia como herramienta de pensamiento, conserva las interacciones en la descripción. Nombra las partes, el estado, el vecindario y la regla; especifica las lecturas y escrituras; sigue un protocolo completo y después comprueba el objetivo en el dominio declarado. Si el proceso real admite ruido, conexiones cambiantes, entradas omitidas u otro calendario, revisa el modelo antes de transferir su garantía.
+
+<MindMap
+  client:visible
+  title={"La auditoría de la regla de actualización"}
+  eyebrow={""}
+  outlineLabel={"Esquema de texto"}
+  root={{"label":"Auditar un modelo de reglas locales","children":[{"label":"Especificar","children":[{"label":"Configuración y vecindario"},{"label":"Cálculo local y tiempos"}]},{"label":"Seguir la traza","children":[{"label":"Lecturas de una instantánea y escritura conjunta"},{"label":"Escrituras inmediatas y orden declarado"}]},{"label":"Comprobar","children":[{"label":"Estado fijo frente a ciclo frente a acuerdo"},{"label":"Catálogo completo y objetivo explícito"}]},{"label":"Transferir","children":[{"label":"Regla cambiada y dominio legal de inicios"},{"label":"Evidencia antes de una afirmación sobre el mundo real"}]}]}}
+/>
+
+<Quiz
+  client:visible
+  title={"Comprueba la regla, los tiempos y la afirmación"}
+  questions={[{"question":"Una pareja contigua y una pareja alterna contienen el mismo número de unos. ¿Por qué pueden diferir sus siguientes configuraciones simultáneas?","options":[{"text":"La disposición de los vecinos cambia, así que cambian las ternas de entrada.","correct":true},{"text":"El mismo número de unos obliga a que todas las ternas sean idénticas."},{"text":"El protocolo toma en secreto una muestra de otra población en cada nodo."},{"text":"Una regla determinista debe elegir por azar una mayoría nueva en cada ronda."}],"explanation":"El recuento descarta las posiciones. En la pareja contigua, cada nodo tiene un vecino con su mismo valor; en la alterna, ambos vecinos tienen el valor contrario. Por eso las entradas locales producen transiciones distintas aunque ambos recuentos sean dos."},{"question":"Durante un barrido con escritura inmediata, un nodo conserva su valor. ¿Qué debes comprobar antes de declarar fija la configuración?","options":[{"text":"Si ese nodo ya había aparecido antes en el diagrama."},{"text":"Si todas las actualizaciones locales aplicables dejarían igual la configuración actual.","correct":true},{"text":"Si el número actual de unos coincide con el recuento inicial."},{"text":"Si la letra del nodo siguiente difiere de la del anterior."}],"explanation":"Ser fija significa que todas las reglas locales aplicables conservan la configuración actual. En el ejemplo ABCD, B no cambia, pero C cambia después. Una actualización sin cambio no establece el cierre de todo el sistema."},{"question":"Todos los órdenes completos del catálogo llevan un inicio alterno al acuerdo. ¿Qué demuestra el reparto de órdenes por valor final?","options":[{"text":"Un orden instalado concreto tiene la misma probabilidad de terminar en cada valor."},{"text":"Los nodos comparten una preferencia oculta por el primero de los valores."},{"text":"Distintos órdenes declarados pueden seleccionar distintas configuraciones fijas unánimes.","correct":true},{"text":"Cambiar el orden conserva la configuración exacta en cada actualización de nodo."}],"explanation":"El catálogo enumera implementaciones deterministas distintas. Doce órdenes terminan en cada valor unánime, pero un orden elegido y fijo no es un sorteo. La enumeración por sí sola no aporta una probabilidad de selección de la implementación."},{"question":"Una desarrolladora quiere reproducir el modelo simultáneo mediante un bucle. ¿Qué implementación conserva sus lecturas?","options":[{"text":"Escribir cada nodo inmediatamente y usar su nuevo valor para el siguiente."},{"text":"Actualizar solo el primer nodo y copiar su valor a las posiciones restantes."},{"text":"Parar en cuanto una actualización proponga el valor ya guardado en ese nodo."},{"text":"Leer una copia inmutable para todas las propuestas y después escribir el conjunto.","correct":true}],"explanation":"El modelo simultáneo lee una única instantánea completa anterior. Calcular en otro espacio de almacenamiento antes de escribir el conjunto conserva esa regla. Un bucle que escribe inmediatamente implementa un protocolo secuencial."},{"question":"Con A fijo en cero, ¿qué afirmaciones se deducen del catálogo completo de transferencia?","options":[{"text":"Todo inicio legal alcanza una configuración fija dentro de la ventana indicada.","correct":true},{"text":"Todo inicio legal alcanza una configuración con los cuatro valores cero."},{"text":"Puede mantenerse una configuración fija mixta tras eliminarse el ciclo alterno.","correct":true},{"text":"Las frecuencias del catálogo son probabilidades empíricas de un sistema real sin especificar."}],"explanation":"Los ocho inicios legales alcanzan configuraciones fijas en dos rondas como máximo, incluidos los que ya eran fijos. Solo cinco alcanzan todos los valores cero. Una configuración fija puede ser mixta, y los ocho inicios enumerados no son una distribución empírica.","allowMultiple":true},{"question":"Un proceso real se parece a este anillo, pero no se ha medido cuándo se actualiza. ¿Cuál es un siguiente paso justificado?","options":[{"text":"Adoptar el barrido alfabético porque debe describir cualquier interacción local."},{"text":"Comprobar qué escrituras previas puede leer cada nodo y contrastar el modelo con trazas.","correct":true},{"text":"Deducir un reloj simultáneo porque la imagen final parece ordenada."},{"text":"Usar el catálogo del anillo como pronóstico sin identificar una configuración inicial."}],"explanation":"Identifica las lecturas y su momento antes de transferir el resultado. El anillo es un modelo construido con reglas completamente declaradas; parecerse a una imagen no establece sus supuestos en un proceso real."}]}
+  className={"not-prose"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Cuestionario completado"}
+  perfectMessage={"Has acertado todas las preguntas."}
+  goodMessage={"Repasa las explicaciones de las respuestas que has fallado."}
+  keepPracticingMessage={"Vuelve a las trazas y compara los pasos de cada protocolo."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Atrás"}
+  scoreLabel={"Has acertado"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+Ya has seguido un modelo finito completo y has comprobado una intervención desde todos sus inicios legales. El [examen final](/es/emergence/final-exam) combina esta auditoría con los conceptos anteriores del curso. Las respuestas se bloquean al enviarlas y la puntuación aparece al final.

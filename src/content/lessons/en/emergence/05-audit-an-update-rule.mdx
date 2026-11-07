@@ -1,0 +1,341 @@
+---
+title: "Audit an Update Rule"
+description: "Trace a four-node model, compare simultaneous and sequential updates, and test whether fixing one node achieves the stated objective."
+topic: "en/emergence"
+order: 6
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, Callout, MatchConcepts, Categorize, MindMap, LocalUpdateTrace, RateComparison } from '@/components/react';
+
+Two implementations receive the same four values and the same instruction: copy the local majority. One keeps alternating forever. Another reaches agreement in a single sweep. Before blaming the code, check what “update” meant.
+
+This is a constructed model you can audit completely. It extends the course’s micro-to-macro idea: knowing the local calculation is useful, but the connections, starting configuration and timing also belong in the model. Nothing here estimates how real people, birds or machines behave.
+
+## Specify the experiment
+
+<MCQ
+  client:visible
+  question={"Two models have identical starting values, connections and local majority rules. Must their later configurations match?"}
+  options={[{"text":"Yes, because the local formula completely specifies every possible implementation."},{"text":"Yes, because a deterministic model cannot depend on the timing of its reads."},{"text":"Only if their read timing, write timing and update protocol also match.","correct":true},{"text":"Only if the initial values have a unique majority across the entire ring."}]}
+  explanation={"A local rule says how a node calculates its next value. It does not yet say which version of its neighbours’ values it reads. Snapshot reads and immediate writes can produce different complete transitions."}
+  className={"not-prose"}
+  pretest={true}
+/>
+
+A **configuration** is the ordered list of all current node values. Our four labelled nodes form the ring A–B–C–D–A. Each holds either 0 or 1. The string `0101` means A=0, B=1, C=0, D=1; keep its leading zero. Neither value is good, bad, true or false. They are just two possible states.
+
+A node’s **neighbourhood** consists of its left neighbour, itself and its right neighbour. For A that is D,A,B; for B it is A,B,C. C reads B,C,D, and D reads C,D,A. Including the node itself matters: the vote has three inputs, so no tie is possible.
+
+The **local rule** returns 1 when at least two of those three inputs are 1, and otherwise returns 0. Here is its complete truth table:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="The complete three-input majority rule">
+<table style={{minWidth: "28rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">The complete three-input majority rule</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Left</th><th scope="col" className="p-3 align-bottom font-semibold">Self</th><th scope="col" className="p-3 align-bottom font-semibold">Right</th><th scope="col" className="p-3 align-bottom font-semibold">Next value</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">0</th><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">0</th><td className="p-3 align-top">0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">0</th><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">0</th><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">1</th><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">1</th><td className="p-3 align-top">0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">1</th><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">1</th><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1</td></tr>
+</tbody>
+</table>
+</div>
+
+The remaining specifications form the model card:
+
+- The four positions and their ring connections are fixed.
+- There is no noise, outside input, random choice or change of local rule in the main comparison.
+- A **protocol** specifies when values are read and written, and in which order nodes update.
+- A simultaneous **round** updates every node from one preceding snapshot. A sequential **sweep** updates each node once in a declared order, reading the latest values.
+- These events are counting units within a model. No duration in seconds is assumed, and one node update is not one whole simultaneous round.
+
+<MatchConcepts
+  client:visible
+  question={"Match each specification to the question it answers."}
+  pairs={[{"term":"Configuration","definition":"Which value is stored at each labelled position now?"},{"term":"Neighbourhood","definition":"Which positions supply a node’s local inputs?"},{"term":"Local rule","definition":"How do those input values determine the proposed next value?"},{"term":"Update protocol","definition":"Which versions of the inputs are read, and when are proposed values written?"}]}
+  explanation={"The local formula, positions and timing answer different questions. A complete finite model needs all of them; the word majority does not supply an update schedule."}
+  className={"not-prose"}
+/>
+
+### When this specification helps
+
+Use a model card when two simulations disagree, when you reproduce a result, or when a proposed intervention changes one part of a rule. It prevents an implementation detail from silently becoming an assumption about the process being modelled.
+
+## Read together, then write
+
+A **simultaneous update** reads an immutable copy of the preceding configuration. Calculate all proposals first; commit them together. We begin at `0101`.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="One complete simultaneous round from 0101">
+<table style={{minWidth: "38rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">One complete simultaneous round from 0101</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Target</th><th scope="col" className="p-3 align-bottom font-semibold">Left, self, right values</th><th scope="col" className="p-3 align-bottom font-semibold">Number of ones</th><th scope="col" className="p-3 align-bottom font-semibold">Proposal</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">D=1, A=0, B=1</td><td className="p-3 align-top">2</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">A=0, B=1, C=0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">B=1, C=0, D=1</td><td className="p-3 align-top">2</td><td className="p-3 align-top">1</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">C=0, D=1, A=0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">0</td></tr>
+</tbody>
+</table>
+</div>
+
+No proposal uses an earlier proposal from the same round. Reading the last column in ABCD order gives `1010`. At the next round, every node again sees two neighbours opposite to itself, so every value flips back: `0101 → 1010 → 0101`.
+
+A **fixed configuration** is one that all applicable local updates leave unchanged. A **cycle** repeats configurations after complete rounds. This alternating pair has a cycle of length 2. Because the rule is deterministic and the same complete configuration recurs at the same phase, continuing repeats the same two configurations. A fixed state has period one mathematically; we label it fixed rather than adding a redundant cycle warning.
+
+Count the ones: there are 2 before and 2 after every round, even though all four nodes change value. An unchanged total can conceal a changing arrangement.
+
+<MCQ
+  client:visible
+  question={"In the alternating ring, a simultaneous round leaves the count of ones unchanged. What happened to the individual values?"}
+  options={[{"text":"No node changed, because the aggregate count stayed the same."},{"text":"All four nodes changed, while the total count stayed the same.","correct":true},{"text":"Only the two nodes already holding one were updated."},{"text":"The rule selected an unspecified pair of nodes to update."}]}
+  explanation={"Each node sees the opposite value in both neighbours, so every node flips. The two zeros become ones and the two ones become zeros; the count stays two. A stable count is not a fixed configuration."}
+  className={"not-prose"}
+/>
+
+### When to use snapshot reads
+
+Use this protocol when the model explicitly assumes a common preceding snapshot. A loop can still calculate those proposals one by one, provided it reads the copy and writes to separate storage. The order of calculating proposals then does not change the committed round. Updating the same storage immediately is a different protocol.
+
+## Write before the next node reads
+
+A **sequential update** reads the configuration after earlier writes in the same sweep. Start again at `0101`, and declare the order ABCD.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Every immediate-write update in the ABCD sweep">
+<table style={{minWidth: "38rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Every immediate-write update in the ABCD sweep</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Update</th><th scope="col" className="p-3 align-bottom font-semibold">Before</th><th scope="col" className="p-3 align-bottom font-semibold">Inputs read</th><th scope="col" className="p-3 align-bottom font-semibold">Proposal</th><th scope="col" className="p-3 align-bottom font-semibold">After</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">0101</td><td className="p-3 align-top">D=1, A=0, B=1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1101</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">1101</td><td className="p-3 align-top">A=1, B=1, C=0</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1101</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">1101</td><td className="p-3 align-top">B=1, C=0, D=1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1111</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">C=1, D=1, A=1</td><td className="p-3 align-top">1</td><td className="p-3 align-top">1111</td></tr>
+</tbody>
+</table>
+</div>
+
+A changes first. B can read that new value, so B remains 1 instead of adopting the simultaneous proposal 0. B’s unchanged update does not end the sweep: C still changes next. The finished configuration is `1111`, and all later updates leave it fixed.
+
+Now declare BCDA, keeping the starting configuration and local formula identical:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Every immediate-write update in the BCDA sweep">
+<table style={{minWidth: "38rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Every immediate-write update in the BCDA sweep</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Update</th><th scope="col" className="p-3 align-bottom font-semibold">Before</th><th scope="col" className="p-3 align-bottom font-semibold">Inputs read</th><th scope="col" className="p-3 align-bottom font-semibold">Proposal</th><th scope="col" className="p-3 align-bottom font-semibold">After</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">0101</td><td className="p-3 align-top">A=0, B=1, C=0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0001</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">0001</td><td className="p-3 align-top">B=0, C=0, D=1</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0001</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">0001</td><td className="p-3 align-top">C=0, D=1, A=0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0000</td></tr>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">D=0, A=0, B=0</td><td className="p-3 align-top">0</td><td className="p-3 align-top">0000</td></tr>
+</tbody>
+</table>
+</div>
+
+The same local rule now ends at `0000`. Both unanimous outcomes are fixed. We have not defined a preference between them, so “reaches agreement” does not mean “reaches the right answer.”
+
+<LocalUpdateTrace
+  client:visible
+  title={"Inspect the same ring under three protocols"}
+  instructions={"Start with the alternating pair. Advance through the reads and writes, then change the protocol. Changing either selector returns to the initial configuration. Try the adjacent pair with the same count of ones."}
+  cases={[{"id":"alternating","label":"Alternating pair","initial":[0,1,0,1]},{"id":"adjacent","label":"Adjacent pair","initial":[0,0,1,1]},{"id":"isolated","label":"Isolated one","initial":[0,0,0,1]}]}
+  protocols={[{"id":"parallel","label":"Simultaneous rounds","description":"Every node reads the preceding complete configuration. Commit all proposed values together.","mode":"parallel","rounds":2},{"id":"abcd","label":"Sequential ABCD","description":"Update A, then B, then C, then D. Each reads the latest configuration and writes immediately.","mode":"sequential","rounds":1,"order":["A","B","C","D"]},{"id":"bcda","label":"Sequential BCDA","description":"Update B, then C, then D, then A. Each reads the latest configuration and writes immediately.","mode":"sequential","rounds":1,"order":["B","C","D","A"]}]}
+  nodeLabels={["Node A","Node B","Node C","Node D"]}
+  labels={{"caseLabel":"Initial configuration","protocolLabel":"Update protocol","previousLabel":"Previous event","nextLabel":"Next event","resetLabel":"Return to the initial configuration","initialLabel":"Initial configuration","stepTemplate":"Event {step} of {total}","graphLabel":"Four-node ring and current binary configuration","graphDescription":"A is connected to B and D; B to A and C; C to B and D; D to C and A. Each circle contains its node identifier and current zero or one. The table records every read and write.","tableLabel":"Revealed reads, proposals and committed configurations","eventLabel":"Event","beforeLabel":"Before","updatedLabel":"Updated nodes","inputsLabel":"Inputs read: left, self, right","proposalLabel":"Proposed value","afterLabel":"After","noneLabel":"None","allLabel":"All four nodes","pinnedLabel":"Held at zero throughout","roundLabel":"one simultaneous round per event","sweepLabel":"one node update per event","fixedLabel":"The current configuration is fixed.","notFixedLabel":"The current configuration is not fixed.","consensusLabel":"All four values agree.","mixedLabel":"The values are mixed.","cycleLabel":"A completed-round cycle of length {length} has repeated.","readRuleLabel":"Read and write rule","announcementTemplate":"{step}. {protocol}. Configuration {configuration}. {status}"}}
+/>
+
+The diagram shows the committed configuration. Its table records the exact inputs used for each proposal. Simultaneous mode advances by whole rounds; sequential mode advances by individual node updates. The entire declared sweep remains inspectable even when a fixed configuration is reached before its last update.
+
+<MCQ
+  client:visible
+  question={"In the ABCD sweep, the configuration after B is identical to the configuration before B. Why is stopping there an error?"}
+  options={[{"text":"A repeated string proves a cycle regardless of which node is due next."},{"text":"One unchanged update proves the majority formula has stopped applying."},{"text":"C and D are still pending, and C changes the current configuration.","correct":true},{"text":"The initial configuration must be restored after every unchanged update."}]}
+  explanation={"Before and after B the string is 1101, but the pending phase differs. C reads 1,0,1 and changes to one. Repetition establishes a deterministic cycle only when the relevant state includes the same update phase, not merely the same visible string."}
+  className={"not-prose"}
+/>
+
+### When order matters
+
+If later calculations can read earlier writes, order can matter. The two sweeps establish that possibility for this rule and start. They do not prove that every order, initial state or asynchronous protocol behaves differently. Check the declared alternatives rather than treating one convenient schedule as a neutral default.
+
+## Check the whole finite catalogue
+
+Trying two orders finds a counterexample to order-independence. It does not establish what every possible start or order does. This system is small enough to enumerate: each of four positions has two values, so there are $2^4=16$ configurations. Updating each node once gives $4!=24$ complete orders, or $16\times24=384$ start/order pairs.
+
+The catalogue below lists every start. The final column counts complete sequential orders by their ending configuration. Every listed sequential endpoint is a simultaneous fixed configuration in this model.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="All sixteen starts and all complete sequential orders">
+<table style={{minWidth: "54rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">All sixteen starts and all complete sequential orders</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Start</th><th scope="col" className="p-3 align-bottom font-semibold">Next simultaneous configuration</th><th scope="col" className="p-3 align-bottom font-semibold">Later simultaneous behaviour</th><th scope="col" className="p-3 align-bottom font-semibold">Sequential endpoints and order counts</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">0000</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fixed at 0000</td><td className="p-3 align-top">0000: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">0001</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fixed at 0000</td><td className="p-3 align-top">0000: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">0010</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fixed at 0000</td><td className="p-3 align-top">0000: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">0011</th><td className="p-3 align-top">0011</td><td className="p-3 align-top">Fixed at 0011</td><td className="p-3 align-top">0011: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">0100</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fixed at 0000</td><td className="p-3 align-top">0000: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">0101</th><td className="p-3 align-top">1010</td><td className="p-3 align-top">Cycle 0101 ↔ 1010</td><td className="p-3 align-top">0000: 12 orders; 1111: 12 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">0110</th><td className="p-3 align-top">0110</td><td className="p-3 align-top">Fixed at 0110</td><td className="p-3 align-top">0110: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">0111</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fixed at 1111</td><td className="p-3 align-top">1111: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">1000</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">Fixed at 0000</td><td className="p-3 align-top">0000: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">1001</th><td className="p-3 align-top">1001</td><td className="p-3 align-top">Fixed at 1001</td><td className="p-3 align-top">1001: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">1010</th><td className="p-3 align-top">0101</td><td className="p-3 align-top">Cycle 0101 ↔ 1010</td><td className="p-3 align-top">0000: 12 orders; 1111: 12 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">1011</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fixed at 1111</td><td className="p-3 align-top">1111: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">1100</th><td className="p-3 align-top">1100</td><td className="p-3 align-top">Fixed at 1100</td><td className="p-3 align-top">1100: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">1101</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fixed at 1111</td><td className="p-3 align-top">1111: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">1110</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fixed at 1111</td><td className="p-3 align-top">1111: 24 orders</td></tr>
+<tr><th scope="row" className="p-3 align-top">1111</th><td className="p-3 align-top">1111</td><td className="p-3 align-top">Fixed at 1111</td><td className="p-3 align-top">1111: 24 orders</td></tr>
+</tbody>
+</table>
+</div>
+
+You can check the classification without guessing:
+
+- With no ones or four ones, every local majority preserves its value: `0000` and `1111` are fixed.
+- With one one, that node has two zero neighbours and disappears; every zero sees at most one one. Three ones give the complementary result. These eight starts reach unanimity in one simultaneous round.
+- With two adjacent ones, each node has at least one neighbour matching itself. The four arrangements `0011,0110,1001,1100` are mixed fixed configurations.
+- With two alternating ones, both neighbours oppose every node. Those two configurations flip into each other.
+
+That accounts for all sixteen starts: 2+8+4+2. There are six fixed configurations, not six unanimous configurations. In particular `0011` and `0101` have the same count of ones and different dynamics. The arrangement carries information that the count discarded.
+
+For an alternating start, the first updated node flips to match its neighbours. Its immediate neighbours then have a matching neighbour and keep their values; the opposite node flips when its turn arrives. Thus the final unanimous value is the first node’s new value, regardless of the remaining order. Here are all twenty-four orders from `0101`, grouped without assigning them probabilities:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Complete order catalogue from 0101">
+<table style={{minWidth: "44rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Complete order catalogue from 0101</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">First node</th><th scope="col" className="p-3 align-bottom font-semibold">All six remaining permutations</th><th scope="col" className="p-3 align-bottom font-semibold">Endpoint</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">ABCD, ABDC, ACBD, ACDB, ADBC, ADCB</td><td className="p-3 align-top">1111</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">BACD, BADC, BCAD, BCDA, BDAC, BDCA</td><td className="p-3 align-top">0000</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">CABD, CADB, CBAD, CBDA, CDAB, CDBA</td><td className="p-3 align-top">1111</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">DABC, DACB, DBAC, DBCA, DCAB, DCBA</td><td className="p-3 align-top">0000</td></tr>
+</tbody>
+</table>
+</div>
+
+Twelve listed orders end at each unanimous value. If an implementation always uses ABCD, it always ends at `1111` from this start under the stipulated rules. The catalogue alone does not give it a fifty-fifty chance of either endpoint.
+
+<Callout variant="info" title="What the enumeration establishes">
+This finite ring can be classified exactly. The exercise illustrates how local interactions and timing determine a collective pattern. It does not establish that every emergent system is unpredictable, that every sequential model converges, or that a real process follows this majority rule. The proof’s domain is part of its result.
+</Callout>
+
+<Categorize
+  client:visible
+  question={"Separate results established here from conclusions that the finite audit does not establish."}
+  buckets={["Established in this model","Not established by this model"]}
+  items={[{"text":"The alternating start has different endpoints under the two declared immediate-write orders.","bucket":"Established in this model"},{"text":"An unchanged aggregate count can accompany changes at every node.","bucket":"Established in this model"},{"text":"Every sequential local-rule model converges to unanimity.","bucket":"Not established by this model"},{"text":"The count of orders supplies probabilities for an unspecified implementation.","bucket":"Not established by this model"},{"text":"Every complete order on this ring ends at a fixed configuration.","bucket":"Established in this model"},{"text":"A surprising simulation outcome proves strong emergence.","bucket":"Not established by this model"}]}
+  explanation={"The exhaustive catalogue supports statements about these states, rule and complete orders. It does not justify new domains, a probability law for selecting implementations, or a philosophical claim of irreducibility."}
+  className={"not-prose"}
+/>
+
+### When enumeration is enough
+
+For a small state space, an exhaustive check can support a bounded guarantee. For a larger space, a few successful runs are samples of runs, not exhaustive proof. Record which initial states, schedules and boundary conditions were actually checked.
+
+## Pin a node and test the objective
+
+Suppose your objective is to remove the alternating cycle. A proposed intervention holds A at 0 permanently, while B,C,D continue simultaneous majority updates. Restrict the legal starts to the eight strings beginning with 0. A is already zero at the start; this intervention changes its rule throughout, rather than flipping it once and returning to the old model.
+
+A second stakeholder wants a stronger result: all four values must eventually be zero. Before opening the solution, decide whether the intervention meets both objectives. Work from `0101` and `0111`, then consider whether either example alone settles all eight starts.
+
+<MCQ
+  client:visible
+  question={"With A held at zero, begin at zero-one-one-one and update B, C and D simultaneously by the stated majority rule. What follows?"}
+  options={[{"text":"The configuration stays mixed and fixed, so the all-zero objective is not met.","correct":true},{"text":"Every one vanishes in the next round because a fixed zero must dominate the ring."},{"text":"The original alternating cycle returns because every binary ring must oscillate."},{"text":"The next configuration is unknown until a random update order is sampled."}]}
+  explanation={"B reads zero,one,one; C reads one,one,one; D reads one,one,zero. Each keeps one, while A stays zero. The configuration is fixed and mixed. One counterexample rejects an all-starts all-zero guarantee; proving the weaker objective for all starts still needs the complete check."}
+  className={"not-prose"}
+/>
+
+<details>
+<summary>Open the complete transfer solution</summary>
+
+At `0101`, B reads 0,1,0 and becomes 0; C reads 1,0,1 and becomes 1; D reads 0,1,0 and becomes 0. With A held at 0, the next configuration is `0010`. In that configuration C is an isolated one; the next round gives `0000`.
+
+At `0111`, each unpinned node has a majority of ones in its three inputs, so the mixed configuration remains fixed. Here is the entire legal starting domain:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="All eight legal starts under the persistent A-zero intervention">
+<table style={{minWidth: "38rem", display: "table", overflow: "visible", margin: 0}} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">All eight legal starts under the persistent A-zero intervention</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Start</th><th scope="col" className="p-3 align-bottom font-semibold">Trace to a fixed configuration</th><th scope="col" className="p-3 align-bottom font-semibold">Rounds until fixed</th><th scope="col" className="p-3 align-bottom font-semibold">All values zero?</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">0000</th><td className="p-3 align-top">0000</td><td className="p-3 align-top">0</td><td className="p-3 align-top">Yes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0001</th><td className="p-3 align-top">0001 → 0000</td><td className="p-3 align-top">1</td><td className="p-3 align-top">Yes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0010</th><td className="p-3 align-top">0010 → 0000</td><td className="p-3 align-top">1</td><td className="p-3 align-top">Yes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0011</th><td className="p-3 align-top">0011</td><td className="p-3 align-top">0</td><td className="p-3 align-top">No</td></tr>
+<tr><th scope="row" className="p-3 align-top">0100</th><td className="p-3 align-top">0100 → 0000</td><td className="p-3 align-top">1</td><td className="p-3 align-top">Yes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0101</th><td className="p-3 align-top">0101 → 0010 → 0000</td><td className="p-3 align-top">2</td><td className="p-3 align-top">Yes</td></tr>
+<tr><th scope="row" className="p-3 align-top">0110</th><td className="p-3 align-top">0110</td><td className="p-3 align-top">0</td><td className="p-3 align-top">No</td></tr>
+<tr><th scope="row" className="p-3 align-top">0111</th><td className="p-3 align-top">0111</td><td className="p-3 align-top">0</td><td className="p-3 align-top">No</td></tr>
+</tbody>
+</table>
+</div>
+
+An initially fixed configuration takes zero rounds to reach fixedness. Every legal start reaches a fixed configuration within two rounds, so no nontrivial cycle remains within this domain. But the four possible fixed configurations are `0000,0011,0110,0111`. Only five starting configurations reach unanimous zero.
+
+<LocalUpdateTrace
+  client:visible
+  title={"Test every legal start with A held at zero"}
+  instructions={"Each case begins with A already zero. A remains fixed; B, C and D read the preceding round. Inspect both rounds, including rounds that leave an already fixed configuration unchanged."}
+  cases={[{"id":"pinned-0000","label":"0000","initial":[0,0,0,0]},{"id":"pinned-0001","label":"0001","initial":[0,0,0,1]},{"id":"pinned-0010","label":"0010","initial":[0,0,1,0]},{"id":"pinned-0011","label":"0011","initial":[0,0,1,1]},{"id":"pinned-0100","label":"0100","initial":[0,1,0,0]},{"id":"pinned-0101","label":"0101","initial":[0,1,0,1]},{"id":"pinned-0110","label":"0110","initial":[0,1,1,0]},{"id":"pinned-0111","label":"0111","initial":[0,1,1,1]}]}
+  protocols={[{"id":"parallel","label":"Simultaneous rounds","description":"Only B, C and D read the preceding complete configuration. Commit their proposals together; A remains zero.","mode":"parallel","rounds":2}]}
+  nodeLabels={["Node A","Node B","Node C","Node D"]}
+  labels={{"caseLabel":"Initial configuration","protocolLabel":"Update protocol","previousLabel":"Previous event","nextLabel":"Next event","resetLabel":"Return to the initial configuration","initialLabel":"Initial configuration","stepTemplate":"Event {step} of {total}","graphLabel":"Four-node ring and current binary configuration","graphDescription":"A is connected to B and D; B to A and C; C to B and D; D to C and A. Each circle contains its node identifier and current zero or one. The table records every read and write.","tableLabel":"Revealed reads, proposals and committed configurations","eventLabel":"Event","beforeLabel":"Before","updatedLabel":"Updated nodes","inputsLabel":"Inputs read: left, self, right","proposalLabel":"Proposed value","afterLabel":"After","noneLabel":"None","allLabel":"All four nodes","pinnedLabel":"Held at zero throughout","roundLabel":"one simultaneous round per event","sweepLabel":"one node update per event","fixedLabel":"The current configuration is fixed.","notFixedLabel":"The current configuration is not fixed.","consensusLabel":"All four values agree.","mixedLabel":"The values are mixed.","cycleLabel":"A completed-round cycle of length {length} has repeated.","readRuleLabel":"Read and write rule","announcementTemplate":"{step}. {protocol}. Configuration {configuration}. {status}"}}
+  pinnedA={0}
+/>
+
+<RateComparison
+  client:visible
+  title={"Two objectives over the same complete eight-start catalogue"}
+  locale={"en"}
+  scenarioLabel={"Declared catalogue"}
+  countsLabel={"Successful starts out of all legal starts"}
+  differenceLabel={"Difference between catalogue proportions"}
+  scenarios={[{"label":"Persistent A-zero rule","groups":[{"label":"Reaches a fixed configuration within two rounds","events":8,"total":8},{"label":"Reaches unanimous zero within two rounds","events":5,"total":8}]}]}
+/>
+
+The bars show $8/8=100\%$ and $5/8=62.5\%$, a gap of 37.5 percentage points. These are proportions of an exhaustive catalogue, not probabilities for a real system. Without a law for how initial configurations are chosen, they do not say how often either result occurs outside the catalogue.
+
+</details>
+
+### When to test a stronger objective
+
+After an intervention, ask which property it actually changes. Eliminating oscillation, reaching a fixed state, reaching agreement and reaching a particular value are different objectives. An intervention can satisfy one and fail another. Persistent rules, legal starting conditions and the observation window must stay explicit when the case changes.
+
+## Use the audit beyond this ring
+
+A report says: “The values stopped changing, so the model works.” Ask what was recorded. If the report compares only the values before and after B in an ABCD sweep, `1101 → 1101` is insufficient: C has not yet updated. A record showing all four applicable proposals equal to the current values would establish fixedness at that configuration. A repeated complete-round configuration at the same phase can establish periodic continuation under an unchanged deterministic rule. Neither observation by itself validates the rule for a real process.
+
+For a proposed implementation, keep the initial data fixed and log the values each node reads. From `0101`, B reads A=0 in a simultaneous round but A=1 after A’s immediate write in the ABCD sweep. That specific read discriminates the two protocols; a final picture alone may not. Agreement with one trace is a useful check, while agreement over the complete finite catalogue proves equivalence only over that declared domain.
+
+Blok and Bergersen’s study of a different cellular-automaton model distinguishes update schemes and recommends checking relevant alternatives. The NetLogo manual likewise specifies serial versus interleaved execution and fixed ordered lists. Those sources support making timing explicit. They do not turn this ring into a measured model of a crowd or machine. [Blok and Bergersen’s author manuscript](https://www.cs.ubc.ca/~rikblok/research/published/blok99.pdf), [NetLogo Programming Guide](https://docs.netlogo.org/programming.html).
+
+<MCQ
+  client:visible
+  question={"You can inspect one additional record to distinguish the two main implementations from the alternating start. Which is most informative?"}
+  options={[{"text":"The number of nodes holding one at the start, before either implementation performs an update."},{"text":"Whether B reads A’s stored value before or after A’s first write is committed.","correct":true},{"text":"Whether the local vote includes the updating node as well as its two neighbours."},{"text":"Whether both calculations use the same majority threshold for the three binary input values."}]}
+  explanation={"Both implementations begin with the same count and diagram. The decisive difference is B’s input: A is zero in the previous snapshot and one after the first immediate write. A log of that read tests the claimed timing directly."}
+  className={"not-prose"}
+/>
+
+When you reach for emergence as a thinking tool, retain the interactions in the description. Name the parts, state, neighbourhood and rule; specify reads and writes; trace a full protocol; then test the objective on the declared domain. If the real process permits noise, changing connections, omitted inputs or a different schedule, revise the model before transferring its guarantee.
+
+<MindMap
+  client:visible
+  title={"The update-rule audit"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Audit a local-rule model","children":[{"label":"Specify","children":[{"label":"Configuration and neighbourhood"},{"label":"Local calculation and timing"}]},{"label":"Trace","children":[{"label":"Snapshot reads and joint commitment"},{"label":"Immediate writes and declared order"}]},{"label":"Test","children":[{"label":"Fixed state versus cycle versus consensus"},{"label":"Full catalogue and explicit objective"}]},{"label":"Transfer","children":[{"label":"Changed rule and legal starting domain"},{"label":"Evidence before a real-world claim"}]}]}}
+/>
+
+<Quiz
+  client:visible
+  title={"Check the rule, the timing and the claim"}
+  questions={[{"question":"An adjacent pair and an alternating pair contain the same number of ones. Why can their next simultaneous configurations differ?","options":[{"text":"The neighbour arrangements differ, so the local input triples differ.","correct":true},{"text":"The same count of ones forces every input triple to be identical."},{"text":"The protocol secretly samples a different population at each node."},{"text":"A deterministic rule must choose a new majority by chance each round."}],"explanation":"The count discards positions. In the adjacent pair, each node has a neighbour matching itself; in the alternating pair, both neighbours oppose it. The local inputs therefore produce different transitions even though both counts are two."},{"question":"During an immediate-write sweep, one node keeps its value. What must you check before declaring the configuration fixed?","options":[{"text":"Whether that node has appeared earlier in the diagram."},{"text":"Whether every applicable local update would leave the current configuration unchanged.","correct":true},{"text":"Whether the current number of ones matches its starting count."},{"text":"Whether the next node has a different letter from the previous one."}],"explanation":"Fixedness means all applicable local rules preserve the current configuration. In the ABCD example B makes no change, but C then changes. An unchanged single update does not establish global closure."},{"question":"Every complete order in the catalogue takes an alternating start to unanimity. What does the split of orders by final value establish?","options":[{"text":"A particular installed order has an equal chance of either final value."},{"text":"The nodes possess a hidden shared preference for the first value."},{"text":"Different declared orders can select different unanimous fixed configurations.","correct":true},{"text":"Changing the order preserves the exact configuration at every micropass."}],"explanation":"The catalogue lists different deterministic implementations. Twelve orders end at each unanimous value, but a fixed chosen order is not a random draw. The enumeration alone supplies no probability for how an implementation is selected."},{"question":"A developer wants to reproduce the simultaneous model using a loop. Which implementation preserves its reads?","options":[{"text":"Write each node immediately, then use the newest value for the next node."},{"text":"Update the first node only and copy its value to the remaining positions."},{"text":"Stop as soon as any update produces the value already stored at that node."},{"text":"Read an immutable copy for every proposal, then commit the completed set.","correct":true}],"explanation":"The parallel model reads one complete previous snapshot. Calculating into separate storage before committing preserves that rule. An immediate-write loop instead implements a sequential protocol."},{"question":"With A held at zero, which statements follow from the complete transfer catalogue?","options":[{"text":"Every legal start reaches a fixed configuration within the stated window.","correct":true},{"text":"Every legal start reaches a configuration with all four values zero."},{"text":"A mixed fixed configuration can remain even after the alternating cycle is removed.","correct":true},{"text":"The catalogue frequencies are empirical chances for an unspecified real system."}],"explanation":"All eight legal starts reach fixed configurations within two rounds, including initial fixed states. Only five reach unanimous zero. A fixed configuration can be mixed, and the eight enumerated starts are not an empirical distribution.","allowMultiple":true},{"question":"A real process resembles this ring, but its update timing has not been measured. What is a justified next step?","options":[{"text":"Adopt the alphabetical sweep because it must describe every local interaction."},{"text":"Check which earlier writes later nodes can read, then test the specified model against traces.","correct":true},{"text":"Infer a simultaneous clock from the fact that the final picture looks orderly."},{"text":"Treat the finite ring catalogue as a forecast without identifying a starting configuration."}],"explanation":"Identify the timing and reads before transferring a result. The ring is a constructed model with fully declared rules; resemblance to a picture does not establish its assumptions in a real process."}]}
+  className={"not-prose"}
+/>
+
+You have now traced a complete finite model and tested an intervention against its legal starts. The [final exam](/emergence/final-exam) combines this audit with the earlier course concepts. Answers lock when submitted and the score appears at the end.
