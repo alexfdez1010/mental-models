@@ -1,0 +1,349 @@
+---
+title: "Audita una encuesta de preferencias"
+description: "Separa respuestas de preferencias privadas, acota el apoyo ausente y comprueba cuándo el seguimiento resuelve una regla de decisión."
+topic: "es/preference-falsification"
+order: 7
+minutes: 24
+updated: 2026-11-07
+---
+
+import { Callout, MCQ, FillBlank, MatchConcepts, Categorize, RateComparison, FirstPrinciplesBuilder, ConsequenceTree, MindMap, Quiz } from '@/components/react';
+
+Llegan doce respuestas de un grupo de veinte personas. Ocho dicen sí. Alguien pone «dos tercios apoyan la propuesta» en una diapositiva. La cuenta describe las respuestas; la diapositiva describe al grupo. Son afirmaciones distintas, incluso antes de que nadie tenga motivos para ocultar su opinión.
+
+<Callout variant="info" label="Información" title="Condiciones del caso">
+Todas las personas y cifras siguientes son inventadas. El grupo está completamente identificado y se ha invitado a cada persona una sola vez. Cada cual tiene una preferencia privada fija: apoyar u oponerse a la misma propuesta, que no cambia. Primero registramos respuestas; después hacemos supuestos separados sobre su sinceridad. No hay ponderaciones, participantes repetidos, afirmaciones de muestreo aleatorio ni probabilidades inferidas de las preferencias ocultas.
+</Callout>
+
+<div role="region" tabIndex={0} aria-label={"Registro inicial del grupo completo"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="initial-counts" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Registro inicial del grupo completo"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Situación registrada"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Personas"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Ha respondido sí"}</th><td className="px-3 py-2 text-left align-middle">{"8"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Ha respondido no"}</th><td className="px-3 py-2 text-left align-middle">{"4"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"No ha respondido"}</th><td className="px-3 py-2 text-left align-middle">{"8"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Grupo completo"}</th><td className="px-3 py-2 text-left align-middle">{"20"}</td></tr></tbody>
+</table>
+</div>
+
+## Nombra el denominador
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Qué descripción queda establecida solo con el recuento inicial?"
+  options={[{"text":"Dos tercios de quienes responden han declarado su apoyo.","correct":true},{"text":"Dos tercios del grupo completo apoyan en privado."},{"text":"Todas las personas que no responden se oponen en privado."},{"text":"La mayoría de quienes no responden apoyan en privado."}]}
+  explanation="Ocho de doce respuestas son sí. Que reflejen preferencias privadas y qué piensen las personas que faltan son cuestiones distintas."
+  pretest={true}
+/>
+
+La **población** es el grupo completo cuyas preferencias quieres describir. Una **persona que responde** es alguien que ha contestado a la encuesta. Aquí la población tiene 20 personas y han respondido 12. La proporción de respuestas es $12/20=3/5=60\%$. Entre las respuestas, el apoyo declarado es $8/12=2/3$. Entre todas las personas invitadas, la proporción que *ha declarado* sí es $8/20=2/5=40\%$.
+
+Cambiar el denominador cambia la pregunta. Una invitación sin respuesta se parece a un sobre sin abrir: escribir «no» en él no revela lo que llevaba dentro. La tasa de respuesta mide participación, no el tamaño ni la dirección del sesgo de respuesta. AAPOR distingue ambas cosas en sus [definiciones normalizadas](https://aapor.org/standards-and-ethics/standard-definitions/).
+
+<FillBlank client:visible
+  className="not-prose"
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="bien"
+  text="La proporción entre quienes {{responden|no responden|apoyan}} describe las respuestas recibidas. Una respuesta ausente deja la preferencia {{desconocida|en contra con certeza|a favor con certeza}}."
+  explanation="El denominador de respuestas recibidas no incluye a quienes faltan."
+/>
+
+### Cuándo usarlo
+
+Usa la proporción entre quienes responden para describir sus respuestas. Para describir el apoyo privado del grupo entero necesitas tratar las respuestas ausentes y explicar qué supones que miden las recibidas.
+
+## Encuentra todos los totales compatibles
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Supón que todas las respuestas recibidas son sinceras. ¿Una mayoría entre quienes responden resuelve la mayoría del grupo entero?"
+  options={[{"text":"Sí, porque se ha invitado a un único grupo."},{"text":"No, porque las personas sin respuesta pueden cambiarla.","correct":true},{"text":"Sí, porque la sinceridad elimina las respuestas ausentes."},{"text":"No, porque las respuestas recibidas tienen que ser falsas."}]}
+  explanation="La sinceridad permite usar las respuestas para clasificar a esas personas. No clasifica a quienes faltan."
+  pretest={true}
+/>
+
+En esta sección, **suponemos sinceras las respuestas recibidas** y no restringimos las ocho preferencias que faltan. Sea $S$ el número de apoyos privados y $z$ los apoyos entre quienes no han respondido. Entonces
+
+$$S=8+z,\qquad z\in\{0,1,\ldots,8\},\qquad 8\leq S\leq 16.$$
+
+El menor total compatible sitúa a todas las personas que faltan en la oposición. El mayor las sitúa en el apoyo. Para realizar un total de $8+z$ apoyos, asigna al apoyo exactamente $z$ de las ocho personas que faltan, con $z$ entre cero y ocho. Son **cotas de identificación (identification bounds)**: el conjunto de totales compatibles con las observaciones y los supuestos. Aquí son ajustadas porque pueden darse ambos extremos y todos los enteros intermedios. No son un intervalo de confianza, ni se ha asignado la misma probabilidad a todos los totales compatibles.
+
+El apoyo privado podría ir del 40% al 80%, en pasos de una persona. Una mayoría estricta exige al menos 11 de 20; hay totales compatibles a ambos lados. Las cotas dejan la mayoría sin resolver. Su punto medio no es una estimación que proporcione este modelo.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Registro y supuesto"
+  countsLabel="Apoyos compatibles del grupo completo"
+  differenceLabel="Cota inferior menos superior"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Extremos de apoyo compatibles"
+  scenarios={[{"label":"Registro inicial","groups":[{"label":"Extremo inferior compatible","events":8,"total":20},{"label":"Extremo superior compatible","events":16,"total":20}]},{"label":"Tras cinco respuestas","groups":[{"label":"Extremo inferior compatible","events":11,"total":20},{"label":"Extremo superior compatible","events":14,"total":20}]},{"label":"Tras la sexta respuesta","groups":[{"label":"Extremo inferior compatible","events":12,"total":20},{"label":"Extremo superior compatible","events":14,"total":20}]}]}
+/>
+
+<MatchConcepts client:visible
+  className="not-prose"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un concepto y después su definición."
+  allCorrectLabel="Todo relacionado"
+  partialResultWord="bien"
+  pickDefinitionHint="elige ahora una definición"
+  notLinkedHint="sin relacionar"
+  termsLabel="Conceptos"
+  definitionsLabel="Definiciones"
+  question="Relaciona cada afirmación con su papel en la cuenta."
+  pairs={[{"term":"Ocho personas han respondido sí","definition":"Un recuento observado, anterior al supuesto de sinceridad."},{"term":"Todas las respuestas recibidas son sinceras","definition":"Una condición que permite clasificar preferencias privadas mediante las respuestas."},{"term":"Entre ocho y dieciséis apoyos","definition":"Los totales factibles bajo esa condición y sin restringir las preferencias ausentes."}]}
+/>
+
+### Cuándo usarlo
+
+Usa cotas cuando puedas precisar qué se sabe sin defender una distribución de lo que falta. Si otra evidencia restringe el grupo ausente, calcula nuevas cotas y explica qué evidencia has añadido.
+
+## Vuelve a examinar la sinceridad
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="El cuestionario deja de pedir nombres. ¿Qué establece por sí solo ese cambio sobre las preferencias privadas?"
+  options={[{"text":"Que todas las respuestas son sinceras."},{"text":"Que quienes faltan se parecen a quienes responden."},{"text":"Ni la sinceridad ni la representatividad.","correct":true},{"text":"Que todas las respuestas son deliberadamente falsas."}]}
+  explanation="Quitar los nombres cambia una parte de las condiciones de respuesta. El recuento por sí solo no valida ninguno de esos dos supuestos."
+  pretest={true}
+/>
+
+La privacidad puede abordar un motivo para ocultar una opinión. Por sí sola no certifica respuestas sinceras, cobertura completa, una pregunta estable ni participación. Pew Research Center explica las [respuestas socialmente deseables y el modo de encuesta](https://www.pewresearch.org/writing-survey-questions/); AAPOR recomienda [preguntas claras y permitir saltarse preguntas](https://aapor.org/standards-and-ethics/best-practices/). Ninguna de esas prácticas proporciona los supuestos numéricos de sinceridad de nuestro ejemplo.
+
+Prueba un **análisis de sensibilidad (sensitivity analysis)**: cambia deliberadamente un supuesto y comprueba qué conclusiones se mantienen. Permitimos hipotéticamente que hasta 2 de los 8 sí procedan de personas que en privado se oponen, y que hasta 3 de los 4 no procedan de personas que en privado apoyan. Son límites estipulados, no estimaciones de la encuesta. Si $f$ cuenta el primer tipo y $g$ el segundo,
+
+$$S=8-f+g+z,\qquad 0\leq f\leq 2,\quad 0\leq g\leq 3,\quad 0\leq z\leq 8.$$
+
+Todos los recuentos son enteros. El mínimo es $8-2+0+0=6$; el máximo, $8-0+3+8=19$. El rango se amplía al 30%–95%. Sin ninguna restricción sobre la sinceridad de las respuestas, son compatibles todos los totales de 0 a 20. Añadir decimales al porcentaje de quienes responden no estrecha esos conjuntos.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Registro y supuesto"
+  countsLabel="Apoyos compatibles del grupo completo"
+  differenceLabel="Cota inferior menos superior"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Extremos de apoyo compatibles"
+  scenarios={[{"label":"Respuestas sinceras","groups":[{"label":"Extremo inferior compatible","events":8,"total":20},{"label":"Extremo superior compatible","events":16,"total":20}]},{"label":"Límites hipotéticos de falsedad","groups":[{"label":"Extremo inferior compatible","events":6,"total":20},{"label":"Extremo superior compatible","events":19,"total":20}]},{"label":"Sin restricciones de sinceridad","groups":[{"label":"Extremo inferior compatible","events":0,"total":20},{"label":"Extremo superior compatible","events":20,"total":20}]}]}
+/>
+
+<Categorize client:visible
+  className="not-prose"
+  instructions="Asigna cada afirmación a su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="bien"
+  question="Clasifica qué necesita cada afirmación."
+  buckets={["Lo establece el registro","Necesita un supuesto adicional"]}
+  items={[{"text":"Doce personas han enviado una respuesta.","bucket":"Lo establece el registro"},{"text":"Todos los sí recibidos describen apoyo privado.","bucket":"Necesita un supuesto adicional"},{"text":"Como máximo dos sí clasifican mal a personas que en privado se oponen.","bucket":"Necesita un supuesto adicional"},{"text":"Ocho invitaciones siguen sin respuesta.","bucket":"Lo establece el registro"}]}
+  explanation="El registro identifica respuestas y ausencias. La sinceridad y los límites de clasificación errónea afectan a su significado; requieren apoyo más allá del recuento de participación."
+/>
+
+### Cuándo usarlo
+
+Usa el análisis de sensibilidad para mostrar qué conclusión depende de un supuesto discutible. Un rango más estrecho solo ayuda si puedes defender el supuesto más fuerte; no es un premio por escoger límites cómodos.
+
+## Resuelve una regla sin conocer el total exacto
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una regla exige alcanzar o superar su umbral anunciado de apoyo. ¿Cuándo puede parar el recuento?"
+  options={[{"text":"Solo cuando hayan respondido todas las personas."},{"text":"Cuando todos los totales aún compatibles den la misma decisión.","correct":true},{"text":"En cuanto coincidan la mayoría de las respuestas."},{"text":"Cuando deje de cambiar el porcentaje de respuestas afirmativas."}]}
+  explanation="La decisión puede resolverse antes de conocer el total exacto. Todos los totales aún compatibles deben quedar al mismo lado de la regla indicada."
+  pretest={true}
+/>
+
+Volvemos al modelo de respuestas sinceras. El grupo ya ha anunciado una regla: aprobar si el apoyo privado es **al menos 12**. Esta lección audita esa regla; no justifica el umbral. Las preferencias y la pregunta permanecen fijas. Cada seguimiento completado llega a una persona distinta de las que faltaban, obtiene una respuesta sincera y cuesta 3 créditos del ejercicio (cr). Una negativa a responder sigue siendo una respuesta ausente.
+
+Tras $k$ respuestas adicionales completadas, de las que $x$ son sí,
+
+$$8+x\leq S\leq 16-k+x.$$
+
+Un nuevo sí sube la cota inferior en uno; un nuevo no baja la superior en uno. Ambos estrechan el rango en uno, condicionando a la sinceridad. Aprueba cuando la cota inferior llegue a 12. Rechaza cuando la superior sea menor que 12. En otro caso, el registro no resuelve esta regla. Continúa solo si la participación es voluntaria y el presupuesto restante lo permite.
+
+<div role="region" tabIndex={0} aria-label={"Secuencia construida: costes y apoyos compatibles"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="followup-trace" className="w-full min-w-[32rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Secuencia construida: costes y apoyos compatibles"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Respuestas completadas"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Nuevos sí"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Nuevos no"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Apoyos factibles"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Créditos gastados"}</th></tr></thead>
+<tbody><tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Ninguna"}</th><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"8–16"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Sí, no, sí, no, sí"}</th><td className="px-3 py-2 text-left align-middle">{"3"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td><td className="px-3 py-2 text-left align-middle">{"11–14"}</td><td className="px-3 py-2 text-left align-middle">{"15"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Después, otro sí"}</th><td className="px-3 py-2 text-left align-middle">{"4"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td><td className="px-3 py-2 text-left align-middle">{"12–14"}</td><td className="px-3 py-2 text-left align-middle">{"18"}</td></tr></tbody>
+</table>
+</div>
+
+Tras cinco respuestas siguen siendo posibles tanto 11 como 12 apoyos: la regla no está resuelta. Tras la sexta respuesta, que es sí, hasta el menor total posible la cumple. Podría haber 12, 13 o 14 apoyos; todos dan aprobación. No hace falta estimar probabilidades.
+
+Ocho seguimientos completados clasificarían a todas las personas ausentes y costarían 24 créditos. Algunas secuencias necesitan los ocho; la secuencia de seis cuesta 18. Es una cuenta condicional, no un pronóstico de participación ni sinceridad. Con un presupuesto de 15 créditos, esta secuencia termina sin resolver la regla. Un presupuesto mayor tampoco obliga a nadie a responder.
+
+<FirstPrinciplesBuilder client:visible
+  locale="es"
+  title="Cuenta los seguimientos completados"
+  eyebrow=""
+  analogyValue={24}
+  analogyLabel="Presupuesto para ocho respuestas completadas"
+  analogyNote="El mismo coste de tres créditos por respuesta completada."
+  parts={[{"label":"Primeras cinco respuestas completadas","value":15,"note":"Cinco respuestas a tres créditos cada una."},{"label":"Sexta respuesta completada","value":3,"note":"Una respuesta más al mismo coste unitario."}]}
+  rebuiltLabel="Facturas seleccionadas"
+  instructions="Añade las dos facturas ya incurridas. Un subconjunto suma facturas; no representa otra secuencia de respuestas."
+  valuePrefix=""
+  valueSuffix=" cr"
+  revealAllLabel="Añadir ambas facturas"
+  resetLabel="Vaciar facturas"
+  verdictTemplate="Las facturas seleccionadas suman {total}; solo se han cobrado estas seis respuestas completadas."
+/>
+
+<ConsequenceTree client:visible
+  decision={{"label":"Conserva el mismo grupo y la misma pregunta","children":[{"label":"Explicita la condición de sinceridad","children":[{"label":"Calcula los totales compatibles","children":[{"label":"Todos alcanzan el umbral: aprobar según esta regla","valence":"neutral"},{"label":"Todos quedan por debajo: rechazar según esta regla","valence":"neutral"},{"label":"Ambos siguen siendo posibles: valorar otro seguimiento voluntario y distinto","children":[{"label":"Una respuesta sincera completada actualiza una cota","valence":"neutral"},{"label":"Una negativa a responder sigue sin clasificar","valence":"neutral"}],"valence":"neutral"}],"valence":"neutral"}],"valence":"neutral"}],"valence":"neutral"}}
+  title="Audita el siguiente paso"
+  eyebrow=""
+  instructions="Abre las ramas para comprobar una condición de decisión; no predicen qué responderá cada persona."
+  decisionLabel="Condición inicial"
+  orderLabels={["Supuesto","Cálculo","Decisión","Nueva evidencia"]}
+  promptLabel="Abrir el siguiente paso"
+  expandAllLabel="Abrir todas las ramas"
+  collapseLabel="Cerrar ramas"
+  valenceLabels={{"neutral":"Paso condicional"}}
+/>
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Tras la sexta respuesta de la secuencia, ¿qué afirmación se sostiene?"
+  options={[{"text":"Se ha medido el total exacto de apoyos."},{"text":"La regla anunciada está resuelta, pero el total exacto no.","correct":true},{"text":"Todas las respuestas posteriores tienen que ser sí."},{"text":"La encuesta ha demostrado su propia sinceridad."}]}
+  explanation="Las cotas son 12–14 y todas alcanzan 12. No identifican un único total, predicen respuestas posteriores ni validan la sinceridad."
+/>
+
+### Cuándo usarlo
+
+Usa esta condición de parada cuando el umbral de decisión esté fijado y puedas defender las cotas. Si las preferencias cambian durante el seguimiento o las respuestas no son fiables, reconstruye el modelo antes de reutilizar la cuenta.
+
+## Prueba con otro grupo
+
+Otro grupo completamente identificado tiene 15 personas, 5 sí, 6 no y 4 respuestas ausentes. Su regla anunciada exige al menos 8 apoyos. Suponemos sinceras las respuestas recibidas y de seguimiento, una sola pregunta fija y preferencias privadas constantes. Tres personas distintas de las que faltaban responden después sí, no, sí. Calcula las nuevas cotas antes de abrir la solución.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Tras esos tres seguimientos, ¿qué sigue sin resolverse?"
+  options={[{"text":"Si la regla exige aprobar o rechazar la propuesta.","correct":true},{"text":"Si las respuestas iniciales tenían mayoría afirmativa."},{"text":"Cuántas personas siguen sin responder."},{"text":"Si la regla exige una supermayoría estricta."}]}
+  explanation="El nuevo registro contiene siete apoyos conocidos y una persona desconocida. Esta puede dejar el apoyo por debajo del umbral o justo en él."
+  pretest={true}
+/>
+
+<details>
+<summary>Compara tu cálculo</summary>
+
+Inicialmente, $5\leq S\leq 9$. Tras dos nuevos sí y un nuevo no: 7 apoyos conocidos, 7 oposiciones conocidas y 1 persona ausente, de modo que $7\leq S\leq 8$. El umbral está incluido: exactamente 8 da aprobación. Si la última respuesta es sí, $S=8$; si es no, $S=7$. No se asigna una probabilidad a ninguna de las dos posibilidades.
+
+Contar perfectamente las respuestas recibidas no eliminaría la incertidumbre sobre las preferencias privadas si fallara el supuesto de sinceridad. Esa limitación acompaña al cálculo en el grupo nuevo.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Registro y supuesto"
+  countsLabel="Apoyos compatibles del grupo completo"
+  differenceLabel="Cota inferior menos superior"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Extremos de apoyo compatibles"
+  scenarios={[{"label":"Transferencia inicial","groups":[{"label":"Extremo inferior compatible","events":5,"total":15},{"label":"Extremo superior compatible","events":9,"total":15}]},{"label":"Tras tres respuestas","groups":[{"label":"Extremo inferior compatible","events":7,"total":15},{"label":"Extremo superior compatible","events":8,"total":15}]},{"label":"Si la última respuesta es sí","groups":[{"label":"Extremo inferior compatible","events":8,"total":15},{"label":"Extremo superior compatible","events":8,"total":15}]}]}
+/>
+
+</details>
+
+<FillBlank client:visible
+  className="not-prose"
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="bien"
+  text="Cuando el umbral dice «al menos», la igualdad {{cumple|incumple|cambia}} la regla. Una respuesta ausente deja la preferencia {{sin clasificar|clasificada en contra|clasificada a favor}}."
+  explanation="La última persona ausente de la transferencia puede dejar siete u ocho apoyos; solo ocho alcanza el umbral."
+/>
+
+## Reconstruye el razonamiento
+
+<MindMap client:visible
+  eyebrow=""
+  outlineLabel="Esquema de texto"
+  title="De las respuestas a una decisión defendible"
+  root={{"label":"Auditar una encuesta de preferencias","children":[{"label":"Nombrar la población y el denominador de quienes responden"},{"label":"Separar respuestas declaradas de preferencias privadas"},{"label":"Calcular totales compatibles bajo supuestos explícitos"},{"label":"Comprobar sensibilidad a posibles respuestas falsas"},{"label":"Comparar todos los totales compatibles con el umbral anunciado"},{"label":"Seguir preguntando solo dentro de las condiciones de consentimiento, coste y estabilidad"}]}}
+  className="[overflow-wrap:anywhere]"
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="bien"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Has acertado todas las preguntas."
+  goodMessage="Revisa las explicaciones de tus errores."
+  keepPracticingMessage="Vuelve a los ejemplos y prueba otra vez."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  title="Comprueba la auditoría"
+  questions={[{"question":"¿Qué error cambia lo que mide la fracción inicial?","options":[{"text":"Presentar apoyo declarado entre quienes responden como apoyo privado de todo el grupo.","correct":true},{"text":"Registrar por separado los no y las invitaciones sin respuesta."},{"text":"Mantener la misma pregunta durante el seguimiento."},{"text":"Explicitar el supuesto de sinceridad antes de usarlo."}],"explanation":"Importan tanto el denominador como el concepto medido. Ocho de doce respuestas no establece que dos tercios de la población apoyen en privado."},{"question":"¿Qué totales son compatibles con el modelo inicial de respuestas sinceras?","options":[{"text":"De ocho a dieciséis.","correct":true},{"text":"De ocho a doce."},{"text":"De doce a veinte."},{"text":"De seis a diecinueve."}],"explanation":"Los sí sinceros clasifican ocho apoyos. Cualquiera de las ocho personas ausentes también puede apoyar:8…16. Seis…diecinueve corresponde al modelo separado que limita las respuestas falsas."},{"question":"¿Qué ocurre al sustituir la sinceridad perfecta por los límites hipotéticos de respuestas falsas?","options":[{"text":"El conjunto compatible se estrecha automáticamente."},{"text":"El conjunto compatible pasa a seis hasta diecinueve.","correct":true},{"text":"Las personas ausentes se convierten en una muestra aleatoria."},{"text":"El recuento de participación se convierte en una estimación de error."}],"explanation":"Permitir hasta dos sí falsos y tres no falsos da 8−f+g+z, de 6 a 19. Los datos no han estimado esos límites."},{"question":"¿Por qué basta la secuencia principal de seis respuestas para la regla anunciada?","options":[{"text":"Su cota inferior alcanza el umbral.","correct":true},{"text":"Su punto medio coincide con el número de respuestas."},{"text":"Han respondido todas las personas invitadas."},{"text":"Su tasa de respuesta demuestra sinceridad privada."}],"explanation":"La secuencia deja 12…14 apoyos y la regla exige al menos 12. Todos los totales compatibles aprueban, aunque queden personas desconocidas."},{"question":"En la transferencia, ¿qué última respuesta rechazaría la propuesta?","options":[{"text":"Sí, porque la igualdad no alcanza el umbral."},{"text":"No, porque el apoyo quedaría por debajo del umbral.","correct":true},{"text":"Cualquiera, porque una persona aporta poca evidencia."},{"text":"Ninguna, porque las respuestas iniciales ya habían aprobado."}],"explanation":"Con siete apoyos y una persona desconocida, el último no fija S=7, menor que 8. El último sí fija S=8 y cumple el umbral."},{"question":"¿Qué condiciones deben figurar en un informe de seguimiento? Selecciona todas las correctas.","allowMultiple":true,"options":[{"text":"Si la propuesta y las preferencias privadas permanecieron fijas.","correct":true},{"text":"Qué respuestas siguen ausentes y qué sinceridad se ha supuesto.","correct":true},{"text":"Que el anonimato demuestra sinceridad en todas las respuestas."},{"text":"Que todos los totales compatibles tienen la misma probabilidad."}],"explanation":"Un objeto estable, las respuestas ausentes y los supuestos de sinceridad permiten interpretar la cuenta. El anonimato por sí solo no demuestra sinceridad, y las cotas no asignan probabilidades."}]}
+/>
+
+Comunica el recuento observado, los supuestos que lo conectan con las preferencias privadas y las decisiones aún compatibles con ambos. Cuando ese conjunto abarque los dos lados del umbral, precisa qué evidencia adicional lo resolvería y cuánto costaría obtenerla.
