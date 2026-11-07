@@ -353,3 +353,6 @@ export { MarginalSurplusChart } from '@/components/react/MarginalSurplusChart';
 
 export { IntervalScoreAudit } from '@/components/react/IntervalScoreAudit';
 export type { IntervalAuditRecord, IntervalAuditRule, IntervalAuditScenario, IntervalScoreLabels, IntervalScoreAuditProps } from '@/components/react/IntervalScoreAudit';
+
+export { ResponseChordDiagram } from '@/components/react/ResponseChordDiagram';
+export type { ResponseChordProfile, ResponseChordLabels, ResponseChordDiagramProps, ResponseChordFraction } from '@/components/react/ResponseChordDiagram';

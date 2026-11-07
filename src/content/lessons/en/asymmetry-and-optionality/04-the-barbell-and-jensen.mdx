@@ -1,324 +1,746 @@
 ---
-title: "The Barbell & Jensen's Inequality"
-description: "How to put convexity to work: pair the very safe with the very risky and shun the fragile middle — the barbell. Plus the single piece of math behind it, in plain words: for a convex payoff, the average of the outcomes beats the outcome of the average."
+title: "Jensen's Inequality and the Barbell Audit"
+description: "Separate convexity, a non-strict inequality and feasible decisions. Audit a reserve and an experiment with explicit costs and probabilities."
 topic: "en/asymmetry-and-optionality"
 order: 5
-minutes: 11
-updated: 2026-07-03
+minutes: 32
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, FillBlank, Callout } from '@/components/react';
+import { MCQ, Quiz, FillBlank, MatchConcepts, Categorize, MindMap, Callout, ResponseChordDiagram, FirstPrinciplesBuilder, ExpectedValueCalculator } from '@/components/react';
 
-You have spent three lessons learning to *recognize* the smile — the convex payoff with
-its capped loss and open-ended win — and to *manufacture* it with optionality. Recognition
-is nice. But sooner or later a real question lands on your desk: you have a pile of money,
-or time, or attention, and you have to actually *place* it. Where does it go?
+A large reserve and a small experiment can limit a loss. That budget allocation, called a **barbell strategy**, does not by itself establish a convex response or a worthwhile plan.
 
-The instinct almost everyone reaches for is "somewhere in the middle" — not too safe, not
-too wild, a sensible balance. That instinct is the single most reliable way to build a
-portfolio that is quietly fragile. This lesson hands you the opposite move — the
-**barbell** — and then, for the first and only time in this course, the one piece of math
-that proves *why* it works: **Jensen's inequality**, which we will state entirely in plain
-words. By the end you'll see the punchline that ties the whole course together: for a
-convex shape, **variability is fuel, not noise.**
+We will separate three questions: what shape does the function have, which averages does Jensen compare, and which feasible alternative serves a stated objective? Every number here is constructed. Credits are exercise tokens, not money or investment advice.
 
-<MCQ
-  client:visible
-  pretest
-  question="You have $10,000 to deploy. Which allocation is a 'barbell' in the sense this lesson means?"
+<MCQ className="not-prose" client:visible
+  question={"A project has a limited loss and no maximum gain. What is missing before calling its response convex?"}
   options={[
-    { text: "Put $9,000 in near-riskless cash and $1,000 into a capped-loss, open-upside bet — and put nothing in the moderate-risk middle", correct: true },
-    { text: "Put all $10,000 into a single 'balanced', moderate-risk fund that aims for a steady 8% a year", correct: false },
-    { text: "Spread the $10,000 evenly across ten moderate-risk stocks to diversify", correct: false },
-    { text: "Put all $10,000 into the single riskiest bet you can find, to maximize the upside", correct: false },
-  ]}
-  explanation="No penalty on a pretest — this is the whole lesson in one question. A barbell puts weight on both ends of the bar (very safe + very risky) and deliberately leaves the center empty. The other three are all 'middle' plays: the balanced fund and the ten moderate stocks are the fragile middle itself, and the all-in bet has no safe core to survive the bad world. By the end you'll see why the empty center is the point."
+  {
+    "text": "The response function and the domain being compared.",
+    "correct": true
+  },
+  {
+    "text": "Only the share allocated to the initial reserve.",
+    "correct": false
+  },
+  {
+    "text": "Only the observed result in its best state.",
+    "correct": false
+  },
+  {
+    "text": "Nothing: those bounds already determine curvature.",
+    "correct": false
+  }
+]}
+  explanation={"Bounds describe possible values; convexity compares a function at points and their mixtures in its domain. We will see a concave function with a floor and no ceiling."}
+  pretest={true}
 />
 
-## The barbell strategy
 
-Picture a weightlifter's **barbell**: two heavy plates, one on each far end of the bar,
-and a bare, empty rod in the middle. Now map that onto how you allocate a scarce resource.
-The **barbell strategy** is to put the large majority of your resources — call it **85–90%** —
-into the **very safe** (cash, near-riskless holdings, things that simply cannot vanish),
-and a small slice — the remaining **10–15%** — into the **very risky** with genuinely
-convex upside (bets that can lose *only* the slice but might return many times over). And
-then the defining move: you put **nothing** in the "moderate-risk" middle.
+## Name the input and the response
 
-Why on earth skip the middle? Because the two ends give you something the middle never can.
-The safe end guarantees your worst case is small and *known* — you cannot be wiped out.
-The risky end gives you a shot at an *unbounded* gain. Together they build a payoff that is
-lopsided the right way: **bounded below, open above.** The middle offers neither — as the
-next section shows, it usually hides an unbounded downside under a capped upside, which is
-exactly the shape you spent this whole course learning to run from.
+A **response function** assigns an outcome to each input. Its **domain** is the set of allowed inputs. We write `x` for the input and `f(x)` for the response. An input might measure intensity; a response might measure points, costs or terminal balance. Meaning matters: a higher cost is usually worse.
 
-### A worked example: barbell vs. the sensible middle
+For `f(x) = x²`, the domain is the real line. With equally likely inputs −10 and 10, both responses are 100 points. The mean input is 0 and its response is 0. We abbreviate an input unit as **u** and a response point as **pt**.
 
-Put real numbers on it. You have **\$100,000**. Compare two portfolios across two worlds — a
-**good world** where risk pays off, and a **bad world** where the tail arrives.
+| Input (u) | Probability | Response (pt) | Contribution to mean response (pt) |
+|---:|---:|---:|---:|
+| −10 | 1/2 | 100 | 50 |
+| 10 | 1/2 | 100 | 50 |
+| Total | 1 | — | 100 |
 
-- **The barbell:** \$90,000 in cash (earns a boring, safe 2%) and \$10,000 in a convex bet
-  that either **10×'s** (to \$100,000) in the good world or **goes to zero** in the bad world.
-- **The middle:** all \$100,000 in a "moderate-risk" balanced strategy that earns a smooth
-  **8%** in the good world but — because moderate risk quietly rides leverage — loses **35%**
-  when the tail hits.
+We have not yet compared two available plans. We have applied one function to two states and to their mean input. If the points measured damage, celebrating the hundred points would be an unusual decision.
 
-| | Barbell (\$90k safe + \$10k convex bet) | The middle (all \$100k, "moderate risk") |
-|---|---|---|
-| Good world | \$90k → \$91,800 **plus** \$10k → \$100,000 = **\$191,800** | \$100k → **\$108,000** |
-| Bad world | \$90k → \$91,800 **plus** \$10k → \$0 = **\$91,800** | \$100k → **\$65,000** |
-| Worst case | A small, **known** loss (down ~\$8k from the safe growth you'd have) | A **big** loss of \$35k — and it could be worse |
-| Best case | **Open-ended** — the risky slice has no ceiling | Capped at a mediocre 8% |
+### When this distinction helps
 
-Read the two columns side by side and the asymmetry jumps out. The barbell's *worst* case
-is a mild, fully-known dip — the \$10k slice was all you ever risked, and the \$90k core
-never budged. Its *best* case has no ceiling. The middle portfolio does the reverse: its
-best case is a forgettable 8%, and its worst case quietly loses a *third* of everything —
-because "moderate risk" was leverage in a cardigan. The barbell was wrong about the risky
-slice in the bad world and *still* walked away almost whole. The middle was "sensible" and
-lost \$35,000.
+Before discussing risk or curvature, write down the input, domain, response, units and objective. Favorable outcomes in two states do not define a function between them or beyond the interval.
 
-<Callout variant="tip" title="The one-sentence version">
-A **barbell** loads both ends of the bar — most of your resources in the **very safe**, a
-small slice in the **very risky with convex upside** — and leaves the moderate-risk middle
-**empty**, so your downside is small and known while your upside stays wide open.
-</Callout>
+<MatchConcepts className="not-prose" client:visible
+  question={"Keep each quantity attached to its meaning"}
+  pairs={[
+  {
+    "term": "Input",
+    "definition": "The argument supplied to the function."
+  },
+  {
+    "term": "Response",
+    "definition": "The value returned by the function at an input."
+  },
+  {
+    "term": "Domain",
+    "definition": "The set of inputs allowed by the model."
+  },
+  {
+    "term": "Objective",
+    "definition": "The criterion used to compare feasible alternatives."
+  }
+]}
+/>
 
-### A pitfall: the barbell is not "average it out"
 
-The tempting mistake is to think a barbell is just a fancy way to reach a moderate *average*
-risk — 90% safe and 10% wild "averages" to something middling, so why not just hold the
-middling thing directly? Because **the average risk is not the point; the shape is.** A
-90/10 barbell and a single moderate fund might share the same expected return on a
-spreadsheet, but their *payoff shapes* are opposites. The barbell caps the loss at the 10%
-slice and leaves the upside open. The single fund caps the upside and leaves the loss open.
-Same average, mirror-image tails — and the tails are where you live or die. Never collapse a
-barbell down to its average and call them equivalent.
+## The chord and the two averages
 
-### When to use it
+A function is **convex** on an interval if, between any two points in that interval, its graph lies no higher than the **chord** joining their responses. For a weight `w` between 0 and 1:
 
-Reach for the barbell whenever you must commit a scarce resource under **deep uncertainty**
-and a **bad outcome could ruin you.** Money is the obvious case, but the shape travels: a
-career (a stable day job as the safe core, a wild side-project as the convex slice), a
-research budget (most on proven methods, a slice on long-shot ideas), your calendar (most
-hours on reliable work, a few on speculative bets that might change everything). Whenever
-the middle option promises "balance" but you can't actually see its tail, the barbell is the
-move: refuse the middle, buy real safety with the bulk, and buy real convexity with the rest.
+`f((1 − w)a + wb) ≤ (1 − w)f(a) + wf(b)`.
 
-## Why the middle is a trap
+The left side averages inputs and applies the function once. The right side applies the function first and then averages responses. This condition must hold for all points and weights in the domain, not only the pair chosen for a picture.
 
-So why is the sensible middle so dangerous? Because **"moderate risk" is usually a capped
-upside sitting on top of an uncapped, hidden downside** — a concave frown wearing a sensible
-suit. It *looks* balanced. It advertises steady, unremarkable returns. And underneath, where
-you can't see, it is exposed to a rare, open-ended loss that no glossy fact-sheet mentions.
-You get neither of the two things worth having: not the real safety of the safe end (your
-downside is not actually bounded), and not the real convexity of the risky end (your upside
-*is* capped). You get the worst geometry available, dressed as prudence.
+**Jensen's inequality** extends the comparison to a finite distribution. If states have probabilities `pᵢ ≥ 0` totaling 1, and their inputs lie in the interval of convexity, then:
 
-### A worked example: the "balanced" fund that blows up
+`f(E[X]) ≤ E[f(X)]`.
 
-Consider a fund marketed as **moderate, balanced, low-drama.** To hit its promised "steady
-7%" it quietly borrows — say it holds \$100 of assets backed by only \$25 of real capital, a
-4-to-1 leverage it never puts on the front page. Watch what a small move in the underlying
-assets does to *your* capital:
+`E` means a probability-weighted average: `E[X] = Σ pᵢxᵢ`. In this finite case every response is a finite number. We do not need independence between “states”: they are mutually exclusive alternatives, not signals whose probabilities are being multiplied. The statement and conditions follow [MIT's convexity notes, pages two to three and twelve](https://live.ocw.mit.edu/courses/6-079-introduction-to-convex-optimization-fall-2009/2ae23d35685ff402473b36011138149a_MIT6_079F09_lec03.pdf).
 
-| Move in underlying assets | Effect on the fund's \$25 of real capital | What it feels like |
-|---|---|---|
-| +2% (a good quarter) | +\$2 on \$25 = **+8%** | "See? Steady, moderate gains." |
-| +1% (a normal quarter) | +\$1 on \$25 = **+4%** | Calm, unremarkable, "balanced" |
-| −5% (a rough month) | −\$5 on \$25 = **−20%** | Ouch — but survivable |
-| −25% (a genuine tail event) | −\$25 on \$25 = **−100%** | **Wiped out.** The whole thing is gone |
+For the square, the response at the mean is `f(0) = 0`, whereas the mean response is `100`. Define the **Jensen gap** as `E[f(X)] − f(E[X])`: here, 100 pt. It is a response difference, not a return rate or a probability.
 
-The upside is capped and dull: even a good quarter is a modest single-digit gain. But the
-*downside is open* — a move of just −25% in the underlying, which markets deliver more often
-than anyone's model admits, takes your capital not to a bruising loss but to **zero.** That
-is a concave frown. The "moderate" label described the good quarters; it said nothing about
-the tail, because the tail is precisely what the middle hides. You were picking up pennies —
-a steady 4-to-8% — directly in front of the steamroller.
+<ResponseChordDiagram client:visible
+  title={"Curve, chord and order of operations"}
+  instructions={"Select a model and compare the circle with the square. The table contains exact data; the drawn curve locates them."}
+  locale={"en"}
+  profiles={[
+  {
+    "id": "square",
+    "family": "square",
+    "lower": -10,
+    "upper": 10,
+    "upperWeightQuarters": 2,
+    "scale": 1,
+    "offset": 0,
+    "label": "Square response",
+    "caption": "The input is equally likely to be minus ten or ten. Response points are a neutral measurement: more points need not mean a better decision.",
+    "inputUnit": "u",
+    "responseUnit": "pt"
+  },
+  {
+    "id": "hinge-cross",
+    "family": "hinge",
+    "lower": 0,
+    "upper": 2,
+    "upperWeightQuarters": 2,
+    "scale": 20,
+    "offset": 0,
+    "hingeThresholdQuarters": 2,
+    "label": "Threshold crossed",
+    "caption": "The gross response is twenty times the excess above one half, or zero below that threshold. Only two equally likely endpoints are used here.",
+    "inputUnit": "u",
+    "responseUnit": "pt"
+  },
+  {
+    "id": "hinge-affine",
+    "family": "hinge",
+    "lower": 1,
+    "upper": 2,
+    "upperWeightQuarters": 2,
+    "scale": 20,
+    "offset": 0,
+    "hingeThresholdQuarters": 2,
+    "label": "One affine segment",
+    "caption": "The same threshold function, now with equally likely inputs one and two. Both inputs and their mean lie on its straight segment.",
+    "inputUnit": "u",
+    "responseUnit": "pt"
+  }
+]}
+  labels={{
+  "profileLabel": "Response model",
+  "inputAxisLabel": "Horizontal axis",
+  "responseAxisLabel": "Vertical axis",
+  "curveLabel": "Response curve",
+  "chordLabel": "Chord between endpoints",
+  "meanInputLabel": "Mean input: dotted vertical",
+  "atMeanLabel": "Response at the mean input: circle",
+  "meanResponseLabel": "Mean response: square",
+  "gapLabel": "Signed response gap",
+  "tableCaption": "Endpoint inputs, probabilities and responses",
+  "endpointLabel": "Endpoint",
+  "lowerLabel": "Lower input",
+  "upperLabel": "Upper input",
+  "inputLabel": "Input",
+  "weightLabel": "Probability",
+  "responseLabel": "Response",
+  "fixedScaleNote": "Axes are fixed within each model; selecting another model changes the declared function and range.",
+  "resultTemplate": "Mean input: {meanInput}. Response at that mean: {responseAtMean}. Mean response: {meanResponse}. Mean response minus response at the mean: {gap}."
+}}
+/>
 
-<Callout variant="warning" title="Moderate is a description of the good days only">
-When something is sold to you as "moderate" or "balanced" risk, ask what its **worst
-plausible day** does to your capital. If the answer is "a small, known dip," it's genuinely
-moderate. If the answer is "well, in a real crisis…" and the sentence trails off — that's an
-uncapped downside hiding under a capped upside. The middle isn't a compromise between safe
-and risky. It's often the fragile shape with better marketing.
-</Callout>
 
-### When to use it
+The circle marks `f(E[X])`; the square marks `E[f(X)]`. The vertical locates the mean input. In an equality the shapes coincide: the figure does not move a datum to make them look different.
 
-Deploy "the middle is a trap" as an active *screen* whenever an option is pitched to you on
-its **average behavior** — its typical year, its steady yield, its Sharpe ratio, its track
-record of calm. Average behavior is exactly what a concave payoff shows you right up until
-the steamroller. The moment you notice you're being sold the smooth middle, stop and hunt
-for the tail: find the worst case, and check whether it's bounded or open. If it's open,
-the "moderate" middle is fragile, and the barbell's empty center is where you belong.
+### When to use Jensen
 
-## Jensen's inequality, in plain words
+Use it to compare a mean response with the response at the mean of **the same distribution and the same function**. On its own it does not rank all distributions, say that greater variance always improves the result, or make the mean input an available action.
 
-Now the one piece of math — and it earns its keep, because it *proves* why the convex shape
-loves the very uncertainty that destroys the fragile one. It's called **Jensen's
-inequality**, and stripped of its symbols it says something you can hold in your head:
+<FillBlank className="not-prose" client:visible
+  question={"Recall the comparison without looking at the formula"}
+  text={"For a {{convex|concave|arbitrary}} function, the mean response is {{at least|always greater than|always less than}} the response at the mean input, under the stated conditions."}
+  explanation={"The inequality is non-strict: equality is allowed. Function, distribution and domain stay fixed; two different policies are not automatically being compared."}
+/>
 
-> **For a convex payoff, the average of the outcomes is greater than the outcome of the average.**
 
-Read that twice, because the order of operations is the whole trick. On one side, you let
-the input *vary*, compute the payoff for each varying case, and average those payoffs — that's
-"the average of the outcomes." On the other side, you first average the input into a single
-middling value and compute the payoff *once* on that average — "the outcome of the average."
-Jensen says that when the payoff is convex (the smile), the first is **bigger**. Written in
-prose, for a convex payoff $f$ and a variable input $X$: $E[f(X)] \ge f(E[X])$. Spreading
-your exposure across a *variable* input beats freezing it at the single average input.
+## Equality and a counterexample with a floor
 
-### A worked example: volatility literally adds value
+Consider `h(x) = 20 max(0, x − 1/2)` for `x ≥ 0`. The response is zero up to the threshold and then grows along a straight line. It is convex: the maximum of those two affine functions is convex. An **affine** function has the form `ax + b`; it is both convex and concave.
 
-Take the cleanest convex payoff there is: $f(x) = x^2$, a textbook smile. Suppose the input
-$x$ is going to land at either **+10** or **−10**, each equally likely. Two ways to score it:
+| Function and input law | Mean input (u) | Response at mean (pt) | Mean response (pt) | Gap (pt) |
+|---|---:|---:|---:|---:|
+| `h`, inputs 0 and 2, half each | 1 | 10 | 15 | 5 |
+| `h`, inputs 1 and 2, half each | 1.5 | 20 | 20 | 0 |
+| `a(x) = 10x`, inputs 0 and 2, half each | 1 | 10 | 10 | 0 |
+| `r(x) = 10√x`, inputs 0 and 4, weights 3/4 and 1/4 | 1 | 10 | 5 | −5 |
 
-| Approach | Calculation | Result |
-|---|---|---|
-| **Outcome of the average** — average the input first, then apply f | average of +10 and −10 is 0, so f(0) = 0² | **0** |
-| **Average of the outcomes** — apply f to each, then average | f(+10) = 100, f(−10) = 100, average = (100 + 100) / 2 | **100** |
+In the first row, `h(0) = 0` and `h(2) = 30`: their mean is 15. In the second, `h(1) = 10` and `h(2) = 30`: their mean is 20, equal to `h(1.5)`. There is uncertainty and convexity, but no strict gain: the inputs stay on an affine segment. For a strictly convex function and finite, nonconstant inputs with positive probability, the comparison is strict.
 
-Stare at that gap. The two approaches used the *exact same inputs*, +10 and −10. The only
-difference is **when you averaged** — before applying the convex payoff, or after. Average
-first and the +10 and −10 cancel to nothing: outcome **0.** Apply the payoff first and both
-extremes bend *upward* (100 and 100, since squaring kills the sign), so their average is a
-fat **100.** The variability didn't wash out. On a convex shape, **the variability was
-worth 100 points of pure value.**
+The last function is **concave** on its nonnegative domain: the chord lies below the curve and Jensen reverses. It has a zero floor and no ceiling on that domain, yet it is concave. Its responses are 0 and 20, so `3/4 × 0 + 1/4 × 20 = 5`, versus `r(1) = 10`. Floors and ceilings do not classify curvature.
 
-That is the punchline of the whole course, in one number. On a convex (smile) payoff,
-**variability is fuel, not noise.** The swings you were taught to fear are, on this shape,
-the very thing that pays. Freeze the input at its boring average and you get the boring
-outcome (0). Let it swing wildly to both extremes and the convex payoff harvests both swings
-(100). This is *exactly* why an antifragile, convex, barbell position secretly **wants** an
-uncertain world: an uncertain world delivers the big swings, and a convex payoff turns big
-swings into big value. A fragile, concave position wants the opposite — it prays for calm,
-because on a frown the very same swings bend *downward* and destroy it.
+<ResponseChordDiagram client:visible
+  title={"Affine and concave: two limits to the intuition"}
+  instructions={"Select a model and compare the circle with the square. The table contains exact data; the drawn curve locates them."}
+  locale={"en"}
+  profiles={[
+  {
+    "id": "affine",
+    "family": "affine",
+    "lower": 0,
+    "upper": 2,
+    "upperWeightQuarters": 2,
+    "scale": 10,
+    "offset": 0,
+    "label": "Affine response",
+    "caption": "Ten response points per input unit, with no offset. Averaging before or after the response gives the same result.",
+    "inputUnit": "u",
+    "responseUnit": "pt"
+  },
+  {
+    "id": "sqrt",
+    "family": "sqrt",
+    "lower": 0,
+    "upper": 4,
+    "upperWeightQuarters": 1,
+    "scale": 10,
+    "offset": 0,
+    "label": "Concave response with a floor",
+    "caption": "Ten times the square root of the input. The upper endpoint has one quarter of the probability; the lower has three quarters. The response has a floor and no upper bound on the nonnegative domain.",
+    "inputUnit": "u",
+    "responseUnit": "pt"
+  }
+]}
+  labels={{
+  "profileLabel": "Response model",
+  "inputAxisLabel": "Horizontal axis",
+  "responseAxisLabel": "Vertical axis",
+  "curveLabel": "Response curve",
+  "chordLabel": "Chord between endpoints",
+  "meanInputLabel": "Mean input: dotted vertical",
+  "atMeanLabel": "Response at the mean input: circle",
+  "meanResponseLabel": "Mean response: square",
+  "gapLabel": "Signed response gap",
+  "tableCaption": "Endpoint inputs, probabilities and responses",
+  "endpointLabel": "Endpoint",
+  "lowerLabel": "Lower input",
+  "upperLabel": "Upper input",
+  "inputLabel": "Input",
+  "weightLabel": "Probability",
+  "responseLabel": "Response",
+  "fixedScaleNote": "Axes are fixed within each model; selecting another model changes the declared function and range.",
+  "resultTemplate": "Mean input: {meanInput}. Response at that mean: {responseAtMean}. Mean response: {meanResponse}. Mean response minus response at the mean: {gap}."
+}}
+/>
 
-<Callout variant="info" title="Which way the shape bends decides everything">
-Jensen's inequality flips for the frown. For a **concave** payoff, the average of the
-outcomes is *less* than the outcome of the average — variability *subtracts* value. Same
-mathematics, opposite sign. So the single question "is my payoff convex or concave?" decides
-whether uncertainty is your friend or your executioner. Convex: swings help. Concave: swings
-kill. There is no neutral ground — which is, once more, why the middle is no refuge.
-</Callout>
 
-<MCQ
-  client:visible
-  question="Using the convex payoff f(x) = x², suppose the input will be either +6 or −6, equally likely. Compare the 'outcome of the average' with the 'average of the outcomes.' Which is true?"
+### When equality matters
+
+Before promising a benefit from spread, check which segment the input law reaches. Before maximizing a response, check whether it represents benefit or cost. Curvature does not choose your objective for you.
+
+<MCQ className="not-prose" client:visible
+  question={"A function is convex, but all inputs stay on one affine segment. What comparison does Jensen allow?"}
   options={[
-    { text: "Outcome of the average = f(0) = 0; average of the outcomes = (36 + 36) / 2 = 36 — so the variable case beats the averaged case by 36", correct: true },
-    { text: "Both equal 36, because the inputs are the same either way", correct: false },
-    { text: "Outcome of the average = 36 and average of the outcomes = 0 — averaging first gives more", correct: false },
-    { text: "Both equal 0, because +6 and −6 cancel out", correct: false },
-  ]}
-  explanation="Average the input first: (+6 and −6) average to 0, so f(0) = 0. Apply the payoff first: f(+6) = 36 and f(−6) = 36 (squaring kills the sign), so their average is 36. The variable case wins by 36 — Jensen's inequality in action. The inputs are identical; the only difference is that averaging before a convex payoff throws away the value the swings create, while averaging after keeps it."
+  {
+    "text": "The mean response must be strictly greater.",
+    "correct": false
+  },
+  {
+    "text": "The response at the mean must be strictly greater.",
+    "correct": false
+  },
+  {
+    "text": "The two quantities can be exactly equal.",
+    "correct": true
+  },
+  {
+    "text": "The presence of uncertainty prevents comparison.",
+    "correct": false
+  }
+]}
+  explanation={"The second row gives twenty on both sides. A non-strict inequality permits equality; “convex” does not mean “strictly convex.” The slope change is not crossed here."}
 />
 
-<FillBlank
-  client:visible
-  question="Fill in Jensen's inequality in plain words:"
-  text="For a {{convex|concave|linear}} payoff, the {{average of the outcomes|outcome of the average|smallest outcome}} is greater than the {{outcome of the average|average of the outcomes|largest outcome}} — which means that on this shape, variability {{adds|subtracts|has no effect on}} value, so a convex position actually {{wants|fears|ignores}} an uncertain world."
-  explanation="On a convex (smile) payoff, applying the payoff before averaging captures the upward bend at both extremes, so the average of the outcomes beats the outcome of the average — E[f(X)] ≥ f(E[X]). That means variability adds value, which is exactly why a convex/antifragile position wants uncertainty rather than fearing it. For a concave payoff the inequality flips and variability subtracts value."
+
+## Audit a reserve and an experiment
+
+Now there is a decision. A team has **100 credits (cr)** for one period. It can hold them and finish with 100 cr, or choose this reserve-and-experiment plan:
+
+- Reserve 85 cr, held unchanged until the end under the model assumptions.
+- Pay 10 cr for the experiment at the start. This is not automatically repaid.
+- Pay a further 5 cr fixed fee at the start, in every state.
+
+There is no interest, inflation, debt, later payment, reserve loss or other obligation. The team does not choose the external input `X`. Its three mutually exclusive and exhaustive states are 0, 1 and 2 u, with probabilities 1/4, 1/2 and 1/4. These are stipulated probabilities, not measured frequencies.
+
+<FirstPrinciplesBuilder client:visible
+  locale={"en"}
+  title={"Rebuild the initial budget"}
+  eyebrow={""}
+  analogyValue={100}
+  analogyLabel={"Initial credits"}
+  analogyNote={"These are uses of the budget at the start, not future receipts."}
+  parts={[
+  {
+    "label": "Reserve",
+    "value": 85,
+    "note": "Held until the end under the stated model assumptions."
+  },
+  {
+    "label": "Experiment outlay",
+    "value": 10,
+    "note": "Paid at the start; not automatically repaid."
+  },
+  {
+    "label": "Fixed fee",
+    "value": 5,
+    "note": "Paid in every state, including zero response."
+  }
+]}
+  rebuiltLabel={"Selected uses"}
+  instructions={"Add all three uses to check that the budget balances."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Add all three uses"}
+  resetLabel={"Clear the account"}
+  verdictTemplate={"The uses total {total}. The reserve and both payments are counted once."}
+  caption={"Credits are abbreviated cr. A partial sum is only an accounting check."}
 />
 
-## Barbell = manufactured convexity
 
-Now watch the two halves of this lesson click together. Everything the barbell does is in
-service of building **one convex shape at the level of your whole portfolio.** The safe core
-(the 85–90%) bounds your downside: no matter how badly the risky slice behaves, you cannot
-lose more than the slice, so the loss is capped and known — that's the *floor* of the smile.
-The risky slice (the 10–15%) supplies the open-ended, uncapped upside — that's the *ramp* of
-the smile. Bounded below, open above: the barbell is a machine for **manufacturing
-convexity** out of two ingredients that, on their own, are just "very safe" and "very risky."
+The experiment's gross response uses the same rule `h(x) = 20 max(0, x − 1/2)`, now measured in credits. It is a credit receipt additional to the reserve; it does not include a separate repayment of the outlay. Terminal balance is therefore `g(x) = 85 + h(x)`. Both initial payments have already been deducted in leaving the 85 reserve.
 
-And Jensen tells you the reward for building that shape. Because the assembled payoff is
-convex, it is **helped by the very volatility that would sink a fragile position.** The
-uncertain world that hammers the leveraged middle-of-the-road fund into the ground is the
-same world that delivers the big swings your convex slice converts into big gains. You didn't
-just survive the uncertainty — on a convex shape, per Jensen, you *profited from it.* That's
-the deep reason the barbell isn't merely "safe with a lottery ticket stapled on." It is a
-deliberately engineered antifragile position: the more the world lurches, the more the convex
-end has to work with, while the safe end guarantees the lurches can never reach your core.
+| Input (u) | Probability | Gross response (cr) | Terminal balance (cr) | Contribution to mean balance (cr) |
+|---:|---:|---:|---:|---:|
+| 0 | 1/4 | 0 | 85 | 21.25 |
+| 1 | 1/2 | 10 | 95 | 47.5 |
+| 2 | 1/4 | 30 | 115 | 28.75 |
+| Total | 1 | — | — | 97.5 |
 
-<Callout variant="success" title="Three lessons, one shape">
-This is where the course converges. **Optionality** (lesson 3) is how you *acquire* convex
-payoffs — pay a small known cost for an open-ended upside. The **barbell** is how you *build
-a whole portfolio* out of them, so the convex shape governs everything you hold. And the safe
-core of the barbell *is* a **margin of safety** — the bounded floor that guarantees you're
-still standing to collect the upside. Cut the downside, keep the upside open: the barbell is
-that heuristic made concrete, and Jensen is the proof that the resulting shape turns an
-uncertain world from a threat into fuel.
-</Callout>
+The mean input is `1/4 × 0 + 1/2 × 1 + 1/4 × 2 = 1`. The mean gross response is `12.5 cr`, so the mean balance is `85 + 12.5 = 97.5 cr`. Summing the last column gives the same answer.
 
-<MCQ
-  client:visible
-  question="A friend describes her plan: '85% of my savings sit in insured cash I can't lose. The other 15% I split across a handful of tiny startup stakes — each can only cost me what I put in, but any one could 50× if it hits.' Which best describes what she's built?"
+Do not confuse this law with the first chart's two-endpoint profile. There `h` had a mean response of 15. Here the endpoints carry only half the probability: `1/2 × 15 + 1/2 × h(1) = 7.5 + 5 = 12.5`.
+
+<ExpectedValueCalculator client:visible
+  locale={"en"}
+  title={"Weight the three terminal balances"}
+  eyebrow={""}
+  instructions={"Try other probabilities while keeping the total at one hundred percent; then restore the stated law. Costs and balances stay fixed."}
+  caption={"When probabilities total one hundred percent, this calculator shows a mean balance, with no choice verdict. Holding the budget leaves one hundred credits."}
+  scenario={{
+  "prompt": "One period, three mutually exclusive and exhaustive states",
+  "unit": " cr",
+  "unitPosition": "suffix",
+  "outcomes": [
+    {
+      "label": "Zero input",
+      "payoff": 85,
+      "prob": 25
+    },
+    {
+      "label": "Input one",
+      "payoff": 95,
+      "prob": 50
+    },
+    {
+      "label": "Input two",
+      "payoff": 115,
+      "prob": 25
+    }
+  ]
+}}
+  probabilityLabel={"Probability"}
+  payoffLabel={"Terminal balance"}
+  contributionLabel={"Weighted contribution"}
+  totalProbLabel={"Probability total"}
+  normalizeHint={"Probabilities must total one hundred percent; they currently total {sum}."}
+  evLabel={"Mean terminal balance"}
+  evHint={"sum of each balance times its probability"}
+  costLabel={"Unused additional cost"}
+  netLabel={"Unused net mean"}
+  worthVerdict={"Comparison unused in this example"}
+  notWorthVerdict={"Comparison unused in this example"}
+  breakEvenVerdict={"Comparison unused in this example"}
+  resetLabel={"Reset probabilities"}
+  className={"not-prose"}
+/>
+
+
+Jensen still holds: `E[g(X)] = 97.5 ≥ g(E[X]) = g(1) = 95`. The gap is 2.5 cr. But `g(1)` is a mathematical benchmark; we have not assumed that `X = 1` can be chosen.
+
+The available alternative is holding 100 cr. If the stated objective is to maximize **expected terminal balance** between these two plans, holding wins: `100 > 97.5`. This is not dominance in every state: the experiment leaves 115 cr in the upper state. A known floor and a positive gap do not settle the choice.
+
+### When the complete account helps
+
+Use it to evaluate a reserve, an outlay and an uncertain response. Compare balances with balances, at the same date and against a feasible alternative. Subtracting the initial fifteen credits again from terminal balance would charge the cost twice.
+
+<MCQ className="not-prose" client:visible
+  question={"Using the budget and probabilities in the table, what is the experiment plan’s expected terminal balance?"}
   options={[
-    { text: "A barbell — a bounded, known downside from the safe core plus an open-ended upside from the risky slice, i.e. a manufactured convex payoff that benefits from an uncertain world", correct: true },
-    { text: "A fragile, concave position, because startups are risky and risk is always concave", correct: false },
-    { text: "A moderate-risk middle portfolio, because 85/15 averages out to something balanced", correct: false },
-    { text: "An undiversified gamble, because too much is sitting idle in cash", correct: false },
-  ]}
-  explanation="This is a textbook barbell: a large very-safe core (insured cash, capped loss) plus a small very-risky, convex slice (each stake's loss is capped at what she put in, the upside is open at 50×), with nothing in the fragile middle. That combination manufactures a portfolio-level convex payoff — bounded below, open above — which, by Jensen, is helped rather than hurt by an uncertain world. It's not concave (the downside is bounded, not open), and collapsing it to its 'average' misses the whole point: the shape, not the average, is what matters."
+  {
+    "text": "Eighty-two and a half credits.",
+    "correct": false
+  },
+  {
+    "text": "Ninety-five credits.",
+    "correct": false
+  },
+  {
+    "text": "One hundred credits.",
+    "correct": false
+  },
+  {
+    "text": "Ninety-seven and a half credits.",
+    "correct": true
+  }
+]}
+  explanation={"The eighty-five reserve plus the mean gross response of twelve and a half gives ninety-seven and a half. Ninety-five is the response at the mean input; eighty-two and a half subtracts payments already deducted."}
 />
 
-## Recap
 
-<Quiz
-  client:visible
-  title="Check yourself: the barbell and Jensen"
+## Change a cost without changing curvature
+
+Keep the input law and the 10 cr outlay fixed. Change only the fixed fee to `F`, paid at the start. The reserve becomes `90 − F`, and terminal balance is `g_F(x) = 90 − F + h(x)`. All four fees in the table leave a nonnegative reserve.
+
+| Fixed fee F (cr) | Reserve (cr) | Balance at mean input (cr) | Expected balance (cr) | Jensen gap (cr) | Better expected balance: experiment or hold |
+|---:|---:|---:|---:|---:|---|
+| 0 | 90 | 100 | 102.5 | 2.5 | Experiment |
+| 2.5 | 87.5 | 97.5 | 100 | 2.5 | Exact tie |
+| 5 | 85 | 95 | 97.5 | 2.5 | Hold |
+| 15 | 75 | 85 | 87.5 | 2.5 | Hold |
+
+Both balance columns fall by exactly one credit for each extra credit of fee. Expected balance is `102.5 − F`; the benchmark at the mean input is `100 − F`. Subtracting cancels the common fee and leaves the same 2.5 gap. The function remains convex even though the choice changes at `F = 2.5`.
+
+### What to review before changing the plan
+
+A cost might be paid always, only when an option is exercised, or after an outcome. Here it is always paid and reduces the reserve at the start. Changing that timing or condition requires a new account. A true inequality does not pay an invoice.
+
+<MCQ className="not-prose" client:visible
+  question={"Which fixed fee in the table gives an exact expected-balance tie with holding the budget?"}
+  options={[
+  {
+    "text": "Zero credits.",
+    "correct": false
+  },
+  {
+    "text": "Two and a half credits.",
+    "correct": true
+  },
+  {
+    "text": "Five credits.",
+    "correct": false
+  },
+  {
+    "text": "Fifteen credits.",
+    "correct": false
+  }
+]}
+  explanation={"Mean balance before that fee is one hundred two and a half. Subtracting two and a half leaves one hundred. The Jensen gap remains two and a half: it is not the advantage over holding."}
+/>
+
+
+## Check what the floor depends on
+
+In the original model the minimum balance is 85 cr because the gross response is never negative and the reserve is held intact. That floor follows from the assumptions; the name “barbell” does not guarantee it.
+
+Consider two **separate** modifications. If the 85 reserve loses twenty percent and there is no other obligation, minimum balance becomes `85 × 0.8 = 68 cr`. If the reserve stays intact but an additional 7 cr obligation appears, the minimum is `85 − 7 = 78 cr`. We have not combined the modifications. Nor have we defined their effects on holding: these calculations revise the floor, not the ranking of modified plans.
+
+### When to review a loss limit
+
+Reopen the account if the reserve guarantee, liability beyond the outlay, or cost of closing the experiment changes. A small budget share only limits loss to that share when the contracts and obligations allow it.
+
+<Categorize className="not-prose" client:visible
+  question={"Does the original floor survive?"}
+  buckets={[
+  "Keeps the original floor",
+  "Requires a new floor calculation"
+]}
+  items={[
+  {
+    "text": "The reserve is intact and no obligations appear.",
+    "bucket": "Keeps the original floor"
+  },
+  {
+    "text": "The reserve loses value before the period ends.",
+    "bucket": "Requires a new floor calculation"
+  },
+  {
+    "text": "Only the upper-state gross response increases; the original zero-response state remains.",
+    "bucket": "Keeps the original floor"
+  },
+  {
+    "text": "A new obligation is paid beyond the outlay.",
+    "bucket": "Requires a new floor calculation"
+  }
+]}
+  explanation={"The floor depends on the reserve and obligations, together with a nonnegative gross response. A higher-response state does not reduce that minimum; reserve loss or an extra obligation changes the account."}
+/>
+
+
+## Transfer to another budget
+
+Close the previous accounts before starting. A team has **60 cr** for one period. It reserves 48, pays an outlay of 8 and a fixed fee of 4 at the start. The reserve stays intact, there are no other obligations, and the alternative is holding all 60 cr.
+
+The input takes values 0 and 2 u with probability 1/2 each. Gross response is `k(x) = 6 max(0, x − 1)` cr. Terminal balance is `48 + k(x)`. The objective is again to maximize expected terminal balance between these two plans.
+
+Without reusing the earlier example's answers, calculate the mean input, both terminal balances, expected balance and Jensen gap. Then decide whether that gap is enough to select the experiment.
+
+<MCQ className="not-prose" client:visible
+  question={"What expected terminal balance do you obtain in the transfer?"}
+  options={[
+  {
+    "text": "Fifty-one credits.",
+    "correct": true
+  },
+  {
+    "text": "Forty-eight credits.",
+    "correct": false
+  },
+  {
+    "text": "Fifty-four credits.",
+    "correct": false
+  },
+  {
+    "text": "Sixty credits.",
+    "correct": false
+  }
+]}
+  explanation={"The gross response is zero or six, so its mean is three. Adding the forty-eight reserve gives fifty-one. The initial payments are already reflected in that reserve."}
+/>
+
+<details>
+<summary>Show the solution and figure</summary>
+
+
+
+| Input (u) | Probability | Gross response (cr) | Terminal balance (cr) | Contribution (cr) |
+|---:|---:|---:|---:|---:|
+| 0 | 1/2 | 0 | 48 | 24 |
+| 2 | 1/2 | 6 | 54 | 27 |
+| Total | 1 | — | — | 51 |
+
+Mean input is 1. At that input, `k(1) = 0` and balance is 48 cr. Expected balance is 51 cr and the gap is `51 − 48 = 3 cr`. Holding leaves 60 cr and wins under the stated objective, despite the positive gap. Do not subtract the twelve-credit cost again.
+
+<ResponseChordDiagram client:visible
+  title={"The transfer, using its own data"}
+  instructions={"Select a model and compare the circle with the square. The table contains exact data; the drawn curve locates them."}
+  locale={"en"}
+  profiles={[
+  {
+    "id": "transfer",
+    "family": "hinge",
+    "lower": 0,
+    "upper": 2,
+    "upperWeightQuarters": 2,
+    "scale": 6,
+    "offset": 48,
+    "hingeThresholdQuarters": 4,
+    "label": "Transfer: terminal balance",
+    "caption": "The terminal balance is forty-eight credits plus six times the excess above one, with the excess floored at zero. These are the two equally likely states of the transfer, not the earlier three-state budget.",
+    "inputUnit": "u",
+    "responseUnit": "cr"
+  }
+]}
+  labels={{
+  "profileLabel": "Response model",
+  "inputAxisLabel": "Horizontal axis",
+  "responseAxisLabel": "Vertical axis",
+  "curveLabel": "Response curve",
+  "chordLabel": "Chord between endpoints",
+  "meanInputLabel": "Mean input: dotted vertical",
+  "atMeanLabel": "Response at the mean input: circle",
+  "meanResponseLabel": "Mean response: square",
+  "gapLabel": "Signed response gap",
+  "tableCaption": "Endpoint inputs, probabilities and responses",
+  "endpointLabel": "Endpoint",
+  "lowerLabel": "Lower input",
+  "upperLabel": "Upper input",
+  "inputLabel": "Input",
+  "weightLabel": "Probability",
+  "responseLabel": "Response",
+  "fixedScaleNote": "Axes are fixed within each model; selecting another model changes the declared function and range.",
+  "resultTemplate": "Mean input: {meanInput}. Response at that mean: {responseAtMean}. Mean response: {meanResponse}. Mean response minus response at the mean: {gap}."
+}}
+/>
+
+
+</details>
+
+### When to transfer the method
+
+Reuse the sequence of questions: function and domain, input law, complete account, alternative and objective. Numbers and intervention effects belong to each case; they do not travel by analogy.
+
+
+## Recall the method
+
+
+<MindMap className="not-prose" client:visible
+  eyebrow=""
+  title={"From curvature to a decision"}
+  root={{
+  "label": "Audit before choosing",
+  "children": [
+    {
+      "label": "Function and domain",
+      "children": [
+        {
+          "label": "Bounds do not determine curvature"
+        },
+        {
+          "label": "Affine permits equality"
+        }
+      ]
+    },
+    {
+      "label": "Finite Jensen",
+      "children": [
+        {
+          "label": "Same function and input law"
+        },
+        {
+          "label": "Mean response versus response at the mean"
+        }
+      ]
+    },
+    {
+      "label": "Complete account",
+      "children": [
+        {
+          "label": "Reserve plus gross response"
+        },
+        {
+          "label": "Initial costs counted once"
+        }
+      ]
+    },
+    {
+      "label": "Decision",
+      "children": [
+        {
+          "label": "Compare feasible alternatives"
+        },
+        {
+          "label": "State the objective and review assumptions"
+        }
+      ]
+    }
+  ]
+}}
+/>
+
+<Quiz className="not-prose" client:visible
+  title={"Check functions, accounts and decisions"}
   questions={[
-    {
-      question: "What is the barbell strategy?",
-      options: [
-        { text: "Put the large majority of resources in the very safe and a small slice in the very risky with convex upside, and deliberately avoid the moderate-risk middle.", correct: true },
-        { text: "Split everything 50/50 between two moderate-risk funds to balance them out.", correct: false },
-        { text: "Put everything into the single riskiest bet available to maximize upside.", correct: false },
-        { text: "Hold only cash so you can never lose anything.", correct: false },
-      ],
-      explanation: "A barbell loads both ends — most in the very safe (bounded, known downside) and a small slice in the very risky with open-ended upside — and leaves the center empty. Weight on both ends of the bar, nothing in the middle.",
-    },
-    {
-      question: "Why is the 'moderate-risk middle' so often a trap?",
-      options: [
-        { text: "It typically pairs a capped upside with an uncapped, hidden downside — a concave frown in a sensible suit — so you get neither real safety nor real convexity.", correct: true },
-        { text: "It is too safe, so it never earns anything at all.", correct: false },
-        { text: "It has an open-ended upside that is simply too tempting.", correct: false },
-        { text: "It is illegal in most markets.", correct: false },
-      ],
-      explanation: "The middle advertises steady, modest returns while quietly carrying a rare, open-ended loss (often via hidden leverage). Capped upside on top of uncapped downside is the concave shape — the very thing to avoid. You get neither the bounded safety of the safe end nor the open upside of the risky end.",
-    },
-    {
-      question: "Jensen's inequality, in plain words, says that for a convex payoff:",
-      options: [
-        { text: "The average of the outcomes is greater than the outcome of the average — so spreading exposure across a variable input beats freezing it at the average, and variability adds value.", correct: true },
-        { text: "The outcome of the average always equals the average of the outcomes.", correct: false },
-        { text: "The outcome of the average is greater, so you should always average your inputs first.", correct: false },
-        { text: "Variability always reduces value, no matter the shape of the payoff.", correct: false },
-      ],
-      explanation: "For convex f, E[f(X)] ≥ f(E[X]): apply the payoff before averaging and the upward bend at both extremes is captured, so the average of the outcomes beats the outcome of the average. Variability adds value on a convex shape. (For a concave payoff the inequality flips and variability subtracts value.)",
-    },
-    {
-      question: "For f(x) = x² with the input equally likely to be +10 or −10, why does the 'average of the outcomes' (100) beat the 'outcome of the average' (0)?",
-      options: [
-        { text: "Averaging the inputs first cancels +10 and −10 to 0, giving f(0) = 0; applying the convex payoff first bends both extremes up to 100 each, so their average is 100 — the swings are turned into value instead of cancelling.", correct: true },
-        { text: "Because 100 is simply a bigger number than 0 by coincidence.", correct: false },
-        { text: "Because the inputs were different in the two calculations.", correct: false },
-        { text: "Because f(x) = x² is a concave payoff that punishes variability.", correct: false },
-      ],
-      explanation: "Same inputs, different order. Average first: +10 and −10 cancel to 0, so f(0) = 0. Apply f first: f(+10) = 100 and f(−10) = 100 (squaring kills the sign), average = 100. On a convex shape the swings bend upward and are harvested, so variability is fuel — which is exactly why a convex/barbell position wants an uncertain world.",
-    },
-  ]}
+  {
+    "question": "Which evidence establishes convexity?",
+    "options": [
+      {
+        "text": "A limited loss and a gain with no ceiling.",
+        "correct": false
+      },
+      {
+        "text": "A chord inequality valid across the domain.",
+        "correct": true
+      },
+      {
+        "text": "A favorable mean in two observed states.",
+        "correct": false
+      },
+      {
+        "text": "A reserve larger than the initial outlay.",
+        "correct": false
+      }
+    ],
+    "explanation": "Convexity is a property of the function on its domain. Bounds and budget shares do not replace it."
+  },
+  {
+    "question": "Which statements about Jensen are correct under this lesson’s conditions?",
+    "options": [
+      {
+        "text": "An affine function permits equality with variable inputs.",
+        "correct": true
+      },
+      {
+        "text": "A positive gap guarantees the best feasible decision.",
+        "correct": false
+      },
+      {
+        "text": "The mean input must be selectable as an action.",
+        "correct": false
+      },
+      {
+        "text": "A higher response can be worse if it measures costs.",
+        "correct": true
+      }
+    ],
+    "explanation": "An affine function preserves the mean; response meaning depends on the objective. Jensen neither turns a benchmark into an action nor compares all available plans.",
+    "allowMultiple": true
+  },
+  {
+    "question": "In the main budget, what is subtracted when reserve plus gross response is already being calculated?",
+    "options": [
+      {
+        "text": "The outlay and fixed fee again.",
+        "correct": false
+      },
+      {
+        "text": "Only the fixed fee, because it is state-independent.",
+        "correct": false
+      },
+      {
+        "text": "Neither initial payment a second time.",
+        "correct": true
+      },
+      {
+        "text": "The whole reserve, to isolate convexity.",
+        "correct": false
+      }
+    ],
+    "explanation": "The reserve is what remains after both payments at the start. We add what is held and what is received at the end; subtracting again charges twice."
+  },
+  {
+    "question": "The fixed fee rises without changing the input law or gross response. What can happen?",
+    "options": [
+      {
+        "text": "The function becomes concave because balance falls.",
+        "correct": false
+      },
+      {
+        "text": "The Jensen gap becomes a probability.",
+        "correct": false
+      },
+      {
+        "text": "The reserve stops being part of the account.",
+        "correct": false
+      },
+      {
+        "text": "The plan ceases to be preferred while the gap is unchanged.",
+        "correct": true
+      }
+    ],
+    "explanation": "A fixed fee shifts all responses equally: it changes balances and comparison with holding, but not curvature or the gap between the two averages."
+  }
+]}
 />
 
-## Next up
 
-You now hold both halves of the machinery: the **barbell** that manufactures a convex payoff
-out of a safe core and a risky slice, and **Jensen's inequality** that proves such a shape is
-*helped* by the very uncertainty that ruins the fragile middle. What's left is to turn all of
-this into a decision habit you can run in your head, everywhere, without a spreadsheet. In the
-final teaching lesson, **Cut the Downside, Keep the Upside Open**, we distill the whole course
-into one heuristic — seek convex bets, run many small reversible experiments, let the winners
-run — and walk through the traps that still catch experts: paying too much for optionality,
-mistaking a capped loss for an unbounded one, and confusing plain variance with good asymmetry.
+<Callout variant="tip" label="Tip" title="An audit that can change the decision">
+The inequality answers one mathematical question. A decision still needs the alternative, objective, and every cost and obligation. If any of those changes, reopen the account even when the function remains convex.
+</Callout>
+
+Definitions of convexity, affinity and maxima of convex functions follow [MIT's notes on convex functions](https://live.ocw.mit.edu/courses/6-079-introduction-to-convex-optimization-fall-2009/2ae23d35685ff402473b36011138149a_MIT6_079F09_lec03.pdf); the Jensen comparison also appears in the [information theory notes, pages two to three](https://ocw.mit.edu/courses/6-441-information-theory-spring-2010/5c0b5a8a544cb2320778e4c9e5dea64f_MIT6_441S10_lec02.pdf). Budgets and finite input laws are teaching models constructed here.
+
+[Next: cut the downside, keep the upside →](/asymmetry-and-optionality/05-cut-the-downside-keep-the-upside)

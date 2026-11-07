@@ -277,7 +277,7 @@ export function PayoffExplorer({
           <text x={PAD_L + 2} y={PAD_T + 10} fontSize="10" fill="var(--color-brand-700)">
             {upAxisLabel}
           </text>
-          <text x={PAD_L + 2} y={PAD_T + PLOT_H - 4} fontSize="10" fill="var(--color-accent-700)">
+          <text x={PAD_L + 2} y={PAD_T + PLOT_H - 4} fontSize="10" fill="var(--color-brand-700)">
             {downAxisLabel}
           </text>
 
@@ -317,7 +317,7 @@ export function PayoffExplorer({
             rx="2"
             fill="var(--color-accent-400)"
           />
-          <text x={downX + barW / 2} y={MID_Y + downBarH + 14} textAnchor="middle" fontSize="11" fill="var(--color-accent-700)" fontWeight="600">
+          <text x={downX + barW / 2} y={MID_Y + downBarH + 14} textAnchor="middle" fontSize="11" fill="var(--color-brand-700)" fontWeight="600">
             −{down}
           </text>
           <text x={downX + barW / 2} y={MID_Y - 6} textAnchor="middle" fontSize="10" fill="var(--color-ink-500)">
