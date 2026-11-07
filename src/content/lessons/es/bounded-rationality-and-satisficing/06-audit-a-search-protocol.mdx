@@ -1,0 +1,517 @@
+---
+title: "Taller: audita un protocolo de búsqueda"
+description: "Reconstruye una búsqueda con costes, respeta la información disponible y distingue una aspiración de un umbral de reserva óptimo."
+topic: "es/bounded-rationality-and-satisficing"
+order: 7
+minutes: 30
+updated: 2026-11-07
+---
+
+import { MCQ, MatchConcepts, Categorize, FillBlank, ConsequenceTree, FirstPrinciplesBuilder, InversionFlip, MindMap, Quiz } from '@/components/react';
+
+Una productora de radio deja de buscar al encontrar un estudio aceptable. Más tarde, alguien señala otro mejor que aparecía después en la lista. ¿Fue un error parar? Antes de juzgarlo, hay que saber qué conocía la productora, cuánto costaba otra visita y qué ofertas seguían disponibles. El registro completo de una auditoría puede incluir información que quien elegía nunca llegó a tener.
+
+Vas a reconstruir una regla de satisficing fijada de antemano, comparar varias reglas sobre ese registro y resolver otro modelo pequeño en el que sí podemos calcular un umbral de parada óptimo. Seguir una regla y demostrar que esa regla es óptima son dos trabajos distintos.
+
+## Define el objetivo antes de inspeccionar una opción
+
+<MCQ client:visible pretest
+  question="Un estudio anuncia la mayor calidad, pero incumple un requisito obligatorio de acceso. ¿Cómo debe tratarlo el protocolo?"
+  options={[
+    { text: 'Descartarlo por no ser admisible, aunque su calidad supere la aspiración.', correct: true },
+    { text: 'Aceptarlo si la ganancia de calidad compensa el requisito incumplido.' },
+    { text: 'Rebajar el requisito después de pagar por inspeccionar el estudio.' }
+  ]}
+  explanation="Un requisito obligatorio delimita las opciones que pueden elegirse. La aspiración de calidad se aplica dentro de ese conjunto; no permite saltarse los requisitos."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar"
+/>
+
+Considera esta **decisión inventada para una sola sesión**. Una radio comunitaria necesita un estudio con acceso sin escalones, el equipo multipista necesario y la franja de grabación acordada. Las tres condiciones son **requisitos obligatorios de admisión**.
+
+La radio usa **créditos de planificación**, unidades cardinales de beneficio inventadas para este ejercicio. El valor de cada estudio ya incorpora la valoración de los beneficios de la sesión y todos los gastos de reserva y producción, **antes de los costes de inspección**. Cada inspección consume **4 créditos** de coste de oportunidad medido en esa misma escala. No estamos restando minutos a una puntuación por estrellas.
+
+El resultado que auditamos es:
+
+$$
+N=V-4n
+$$
+
+Aquí $V$ es el beneficio del estudio que finalmente se elige, $n$ es el número de inspecciones pagadas y $N$ es el beneficio neto final de planificación. Cuentan todas las inspecciones pagadas: las de estudios no admisibles, descartados y aceptados.
+
+| Elemento del protocolo | Fijado antes de buscar |
+|---|---|
+| Aspiración | Al menos 75 créditos, entre los estudios admisibles |
+| Orden de búsqueda | A, B, C, D, E |
+| Información | Se paga antes de conocer la admisibilidad y el valor del estudio |
+| Recuperación de ofertas | Una oferta descartada caduca; no puede recuperarse después |
+| Límite | Como máximo 16 créditos de inspección: cuatro inspecciones antes del plazo |
+| Alternativa de respaldo | Un estudio admisible reservado, con valor de 62 créditos, conocido sin inspección |
+| Disponibilidad del respaldo | Se mantiene hasta el plazo; no exige otro coste de inspección |
+| Parada | Aceptar el primer estudio admisible que alcance la aspiración; si no aparece, usar el respaldo al llegar al límite |
+
+La aspiración es un **criterio de aceptación elegido**, no un valor deducido de un modelo probabilístico de los estudios futuros. Aquí no se proporciona ese modelo. La regla también necesita un límite y una alternativa de respaldo: «seguir buscando hasta que algo sirva» es un plan incompleto cuando se acaba el tiempo o el presupuesto.
+
+Simon distinguió las alternativas que considera una persona de las que existen objetivamente y estudió la búsqueda secuencial de resultados satisfactorios. Su planteamiento no demuestra que cualquier aspiración elegida maximice el beneficio neto esperado. [Modelo original de Simon](https://cooperative-individualism.org/simon-herbert_a-behavioral-model-of-rational-choice-1955-feb.pdf)
+
+<MatchConcepts client:visible
+  question="Relaciona cada elemento del protocolo con su función"
+  pairs={[
+    { term: 'Requisito de admisión', definition: 'Condición que una opción debe cumplir para poder elegirse.' },
+    { term: 'Aspiración', definition: 'Criterio elegido de lo suficientemente bueno, aplicado a las opciones admisibles.' },
+    { term: 'Coste de inspección', definition: 'Coste de recursos necesario para conocer una opción, aunque se descarte.' },
+    { term: 'Alternativa de respaldo', definition: 'Opción viable especificada para cuando la búsqueda termina sin una oferta aceptable.' },
+    { term: 'Recuperación de ofertas', definition: 'Posibilidad de volver a una opción ya inspeccionada, cuando el modelo lo permite.' }
+  ]}
+  explanation="Los requisitos, la aspiración, los costes y el respaldo cumplen funciones distintas. Un umbral no define toda la búsqueda. Tampoco puedes dar por hecho que recuperarás una oferta anterior porque ahora parezca atractiva."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  allCorrectLabel="Todo emparejado"
+  partialResultWord="correctas"
+  pickDefinitionHint="Ahora elige una definición"
+  notLinkedHint="Sin enlazar todavía"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+
+  instructions="Elige un término y después su definición."
+/>
+
+## Reconstruye solo la información de quien elige
+
+<MCQ client:visible pretest
+  question="Antes de inspeccionar el siguiente estudio, ¿qué información puede usar quien elige en este caso?"
+  options={[
+    { text: 'Las opciones ya observadas, la regla declarada, el presupuesto restante y el respaldo conocido.', correct: true },
+    { text: 'El mayor valor de un registro completo revelado después de buscar.' },
+    { text: 'El valor exacto del siguiente estudio, porque ya conoce su letra.' }
+  ]}
+  explanation="Conocer el orden no equivale a conocer los valores. La información que se obtiene después para una auditoría no estaba disponible en la decisión anterior."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar"
+/>
+
+Las tres primeras inspecciones pagadas revelan lo siguiente:
+
+| Inspección | Valor del estudio revelado | ¿Admisible? | Decisión con la aspiración elegida | Coste de inspección acumulado |
+|---|---|---|---|---|
+| A | 82 | No: incumple el acceso | Descartar | 4 |
+| B | 70 | Sí | Descartar: inferior a 75 | 8 |
+| C | 78 | Sí | Aceptar y parar | 12 |
+
+La radio elige **C tras tres inspecciones**. El beneficio neto final es **78 − 12 = 66 créditos**. La puntuación alta de A no resolvía su problema de acceso. Descartarlo tampoco devolvía el coste de inspeccionarlo. C, el aceptado, también costó una visita.
+
+<ConsequenceTree client:visible
+  title="Reconstruye lo observado y el momento de parar"
+  eyebrow="La información llega tras la inspección"
+  instructions="Despliega cada etapa. El recorrido termina cuando el protocolo elegido acepta una oferta admisible."
+  decisionLabel="Protocolo fijado"
+  orderLabels={['Primera inspección', 'Segunda inspección', 'Tercera inspección', 'Parada']}
+  promptLabel="Mostrar la siguiente etapa observada"
+  expandAllLabel="Mostrar todo el recorrido observado"
+  collapseLabel="Plegar el recorrido"
+  valenceLabels={{ good: 'Favorable', bad: 'Desfavorable', mixed: 'Mixto', neutral: 'Sin clasificar' }}
+  decision={{ label: 'Se declaran requisitos, aspiración, límite de inspecciones y respaldo', children: [
+    { label: 'Se inspecciona A y se descarta', note: 'Vale ochenta y dos, pero falla el acceso. Se han gastado cuatro créditos.', children: [
+      { label: 'Se inspecciona B y se descarta', note: 'Su valor admisible de setenta queda bajo la aspiración. Se han gastado ocho créditos.', children: [
+        { label: 'Se inspecciona C y se acepta', note: 'Su valor admisible de setenta y ocho alcanza la aspiración. Se han gastado doce créditos.', children: [
+          { label: 'La búsqueda termina', note: 'Se elige C. Quien decide no ha inspeccionado D ni E.' }
+        ] }
+      ] }
+    ] }
+  ] }}
+  caption="El recorrido aplica una regla declarada; no demuestra que sea óptima. No hace falta conocer ningún estudio posterior para reproducir esta parada."
+/>
+
+<FirstPrinciplesBuilder client:visible
+  title="Cuenta las tres inspecciones pagadas"
+  eyebrow="Se paga antes de descartar o aceptar"
+  analogyValue={16}
+  analogyLabel="Presupuesto de inspección declarado"
+  parts={[
+    { label: 'Inspección del estudio no admisible A', value: 4 },
+    { label: 'Inspección del estudio descartado B', value: 4 },
+    { label: 'Inspección del estudio aceptado C', value: 4 }
+  ]}
+  rebuiltLabel="Costes de inspección seleccionados"
+  instructions="Añade las inspecciones que se hicieron y resta después el coste completo al valor del estudio elegido."
+  revealAllLabel="Añadir todas las inspecciones realizadas"
+  resetLabel="Empezar de nuevo"
+  valuePrefix=""
+  valueSuffix=" créditos"
+  locale="es"
+  verdictTemplate="Las inspecciones realizadas cuestan {total}. Resta esa cantidad al valor de C para obtener el beneficio neto final."
+  caption="El presupuesto sin gastar no es otro coste. D y E no se inspeccionaron y no añaden ningún cargo a este recorrido."
+/>
+
+<Categorize client:visible
+  question="Clasifica la información disponible al terminar de inspeccionar C"
+  buckets={['Conocida por quien elige', 'No observada por quien elige']}
+  items={[
+    { text: 'A incumplía un requisito obligatorio.', bucket: 'Conocida por quien elige' },
+    { text: 'C alcanza la aspiración declarada.', bucket: 'Conocida por quien elige' },
+    { text: 'La alternativa de respaldo sigue disponible.', bucket: 'Conocida por quien elige' },
+    { text: 'El valor exacto de D.', bucket: 'No observada por quien elige' },
+    { text: 'El valor exacto de E.', bucket: 'No observada por quien elige' }
+  ]}
+  explanation="Quien elige conoce las opciones inspeccionadas y el protocolo. Un registro completo posterior permite auditar la búsqueda, pero no se convierte retroactivamente en información disponible al llegar a C."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  explanationLabel="Explicación"
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="correctas"
+
+  instructions="Coloca cada elemento en el grupo correcto."
+/>
+
+## Compara recorridos sin convertir el pasado en predicción
+
+<MCQ client:visible pretest
+  question="La auditoría descubre después que una aspiración mayor habría dado más beneficio neto en este registro. ¿Qué se puede concluir?"
+  options={[
+    { text: 'Esa regla salió mejor en esta reconstrucción; no se ha demostrado su superioridad futura.', correct: true },
+    { text: 'Quien eligió conocía la oferta posterior y la ignoró de forma irracional.' },
+    { text: 'La aspiración mayor queda demostrada como óptima para cualquier secuencia futura.' }
+  ]}
+  explanation="Comparar resultados realizados informa sobre ese recorrido. No proporciona un modelo probabilístico de los recorridos futuros ni permite usar valores aún no observados en una decisión anterior."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar"
+/>
+
+<details>
+<summary>Abre el registro completo para una auditoría posterior</summary>
+
+Esta tabla es un **registro inventado para la auditoría**. Quien seguía la regla original no la veía entera.
+
+| Orden de aparición | Estudio | Valor | ¿Admisible? | ¿Se puede inspeccionar antes del límite? |
+|---|---|---|---|---|
+| 1 | A | 82 | No | Sí |
+| 2 | B | 70 | Sí | Sí |
+| 3 | C | 78 | Sí | Sí |
+| 4 | D | 93 | Sí | Sí, si la búsqueda continúa |
+| 5 | E | 99 | Sí | No: se ha agotado el plazo de cuatro inspecciones |
+
+</details>
+
+Reconstruye otra regla con **los mismos requisitos, orden, costes, plazo y respaldo, sin recuperación de ofertas**, pero con una aspiración de **90**. Descarta A, B y C, inspecciona D y lo acepta. El coste de inspección es **4 × 4 = 16**; el beneficio neto final es **93 − 16 = 77 créditos**. Supera los **66** de la regla original en este registro.
+
+Ambas reconstrucciones usan solo lo observado hasta cada decisión. La comparación no demuestra que quien eligió pudiera conocer el valor de D al llegar a C, ni que la aspiración de 90 tenga el mayor beneficio esperado antes de buscar. Para eso hace falta un modelo de las secuencias posibles o una evaluación prospectiva adecuada. Elegir el umbral después de leer todo el registro es ajustarlo a este recorrido.
+
+Tampoco podemos afirmar que la radio debió elegir E. Su valor es alto en el registro completo, pero no se puede inspeccionar dentro del plazo declarado. Una comparación debe respetar las mismas acciones viables y la misma información. Alguien que lo sabe todo y dispone de otro plazo es una referencia distinta.
+
+El orden también importa. En **otro orden estipulado, con D primero**, la aspiración original acepta D tras una inspección y obtiene **93 − 4 = 89 créditos**. No hemos supuesto llegadas aleatorias ni extracciones independientes. Son registros explícitos que ilustran cómo el resultado de una política depende del entorno en que se aplica.
+
+<FillBlank client:visible
+  question="Completa lo que permite concluir la comparación"
+  text="La aspiración mayor obtiene más {{beneficio neto realizado en este registro|beneficio esperado demostrado en cualquier entorno|beneficio conocido antes de inspeccionar}}. Elegirla después de leer todos los valores posteriores es {{un ajuste retrospectivo|una validación prospectiva independiente|información gratuita disponible en la parada anterior}}."
+  explanation="Distingue la auditoría completa de la elección con información que llega paso a paso. Puedes reproducir exactamente los costes y resultados sin demostrar cuál será la mejor política en registros futuros desconocidos."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  explanationLabel="Explicación"
+
+  instructions="Elige una opción para cada hueco y comprueba las respuestas."
+  correctResultLabel="Correcto"
+  partialResultWord="correctas"
+/>
+
+## Prevé qué hacer si nada alcanza la aspiración
+
+<MCQ client:visible pretest
+  question="Se alcanza el límite de inspecciones y ningún estudio admisible llega a la aspiración. ¿Qué debe hacer este protocolo?"
+  options={[
+    { text: 'Usar el respaldo viable y conservar todos los costes de inspección.', correct: true },
+    { text: 'Inspeccionar el siguiente estudio porque la aspiración incumplida anula el límite.' },
+    { text: 'Recuperar una oferta descartada aunque el protocolo no lo permita.' }
+  ]}
+  explanation="Usar el respaldo forma parte de la regla. Que la búsqueda decepcione no permite eliminar sin avisar un límite, una condición de recuperación o un requisito obligatorio."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar"
+/>
+
+Una tercera reconstrucción usa una aspiración de **95**. A no es admisible; B, C y D quedan por debajo del listón. Tras la cuarta inspección no ha aparecido ninguna oferta aceptable. La radio usa el estudio reservado:
+
+**Valor del respaldo 62 − coste de inspección 16 = beneficio neto final de 46 créditos.**
+
+No paga por inspeccionar E, no vuelve a C ni convierte A en un estudio accesible. El valor del respaldo se conoce sin pagar, pero la búsqueda ya ha consumido recursos. Ese mismo respaldo elegido sin ninguna inspección habría dado **62**: son historiales distintos.
+
+Por eso conviene matizar «baja el listón cuando se acabe el tiempo». Una revisión prevista de una **aspiración flexible de calidad** puede ser útil, pero el acceso, el equipo y el plazo son restricciones obligatorias en este modelo. Bajar una puntuación no convierte en viable un estudio inadmisible. También puedes parar y usar el respaldo; renunciar a un requisito no es la única salida cuando la búsqueda no funciona.
+
+Para decidir si haces **una inspección más**, los costes ya pagados son comunes a parar y continuar. Compara el beneficio adicional con el coste adicional a partir de ahora. Mantén los costes pasados en el registro completo, sin cobrarlos de nuevo como un gasto marginal. Justificar la continuación sigue exigiendo creencias o cotas sobre la oferta desconocida; «ya hemos gastado muchísimo» no las proporciona.
+
+<MCQ client:visible allowMultiple
+  question="Selecciona las comprobaciones que mantienen completa y viable la auditoría."
+  options={[
+    { text: 'Contar las inspecciones que descartaron una opción no admisible.', correct: true },
+    { text: 'Separar los requisitos obligatorios de una aspiración revisable.', correct: true },
+    { text: 'Elegir el mayor valor del registro aunque su oferta llegue después del plazo.' },
+    { text: 'Contar los costes ya pagados como un cargo adicional nuevo por la siguiente inspección.' }
+  ]}
+  explanation="La auditoría completa conserva los costes pagados y respeta los requisitos y el horizonte viable. La decisión marginal de continuar compara incrementos futuros, sin volver a cobrar los costes anteriores."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar"
+/>
+
+### Cuándo usar esta auditoría
+
+Úsala cuando una búsqueda tenga un límite real y haya que explicar por qué terminó. Registra el orden, la información revelada, los costes y el respaldo antes de ver el resultado. Sirve para un umbral elegido, una regla adaptativa o una política calculada, siempre que explicites la regla de actualización y la información disponible.
+
+## Calcula un umbral de reserva después de definir el modelo
+
+<MCQ client:visible pretest
+  question="¿Qué convertiría una aspiración en un umbral de reserva óptimo, en vez de ser solo un criterio elegido?"
+  options={[
+    { text: 'Una derivación a partir del objetivo, las acciones viables, los costes y los supuestos de distribución.', correct: true },
+    { text: 'Llamarla valor de reserva después de encontrar una opción aceptable.' },
+    { text: 'Mostrar que permitió terminar una búsqueda antes del plazo.' }
+  ]}
+  explanation="Dos reglas con forma de umbral pueden tener justificaciones distintas. La optimalidad se refiere a un objetivo y un modelo especificados; el nombre de la regla no basta."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar"
+/>
+
+Cambiamos las condiciones. Quien elige es neutral ante el riesgo y conserva una oferta admisible de **x créditos**. Puede **recuperarla sin coste**. Queda exactamente **una inspección**, que cuesta **8 créditos**. La nueva oferta admisible vale **50 o 90 créditos**, con probabilidad de **un medio** cada una, conocida de antemano. No hay demoras ni otros costes.
+
+Parar da **x** a partir de ahora. Inspeccionar permite quedarse con la mejor entre la oferta conservada y la recién descubierta:
+
+$$
+I(x)=\tfrac12\max(x,50)+\tfrac12\max(x,90)-8
+$$
+
+Con **x = 70**, inspeccionar da **½ × 70 + ½ × 90 − 8 = 35 + 45 − 8 = 72**. Parar da **70**, así que la inspección tiene una ventaja esperada de **2 créditos**. Si la nueva oferta solo vale 50, se conserva la de 70 pero se han pagado 8: el resultado desde esta decisión es **62**. La ventaja esperada no garantiza un resultado realizado mejor.
+
+<FirstPrinciplesBuilder client:visible
+  title="Pondera la oferta conservada en cada resultado posible"
+  eyebrow="Una inspección restante con recuperación"
+  analogyValue={70}
+  analogyLabel="Valor de parar con la oferta conservada"
+  parts={[
+    { label: 'Resultado bajo: la mitad de la oferta conservada', value: 35 },
+    { label: 'Resultado alto: la mitad de la oferta nueva', value: 45 }
+  ]}
+  rebuiltLabel="Contribuciones seleccionadas antes del coste de inspección"
+  instructions="Suma los valores conservados ponderados por su probabilidad y resta después el coste de inspección en el cálculo."
+  revealAllLabel="Añadir ambos resultados"
+  resetLabel="Empezar de nuevo"
+  valuePrefix=""
+  valueSuffix=" créditos"
+  locale="es"
+  verdictTemplate="El valor conservado esperado es {total} antes del coste de inspección. Resta ese coste antes de comparar inspeccionar con parar."
+  caption="La posibilidad de recuperar la oferta es lo que mantiene su valor en el resultado bajo. Sin ella, esa contribución sería distinta."
+/>
+
+Para **50 ≤ x ≤ 90**, la ventaja esperada de inspeccionar se simplifica a:
+
+$$
+I(x)-x=\tfrac12(90-x)-8
+$$
+
+Igualamos a cero: **90 − x = 16**, de donde **x = 74**. Por debajo de **74**, inspeccionar; por encima, parar; en **74**, ambas acciones dan el mismo beneficio esperado. Con **78**, inspeccionar da **76 < 78**, así que se para. Para valores conservados inferiores a 50, el neto esperado de inspeccionar es 62 y supera la oferta conservada; por encima de 90, inspeccionar solo devuelve esa oferta menos su coste. Estas cotas completan la comparación.
+
+Aquí **74 es un umbral de reserva óptimo para este problema de una inspección**. Se ha calculado a partir de las acciones disponibles y la distribución conocida. No se ha elegido porque parezca un listón bastante exigente. Tampoco sustituye la aspiración original de 75 del estudio: aquella búsqueda no permitía recuperar ofertas, tenía varias etapas y requisitos obligatorios, y no aportaba una distribución de los estudios desconocidos.
+
+El modelo de búsqueda de Weitzman deduce valores de reserva a partir de distribuciones, costes de búsqueda y una estructura de recuperación y alternativas disponibles. Esas condiciones importan; la palabra «umbral» no demuestra optimalidad por sí sola. [Documento de trabajo original del MIT](https://dspace.mit.edu/server/api/core/bitstreams/aadfb4ca-8ef9-4aaf-ab8d-1422cd035c20/content)
+
+<InversionFlip client:visible
+  title="Revisa los atajos que sostienen una afirmación sobre la parada"
+  eyebrow="Mantén los supuestos a la vista"
+  instructions="Muestra un atajo y después examina una comprobación que lo evita."
+  forwardLabel="Objetivo de la auditoría"
+  invertedLabel="Atajo"
+  safeguardLabel="Mostrar una comprobación"
+  flipHint="Mostrar el atajo"
+  flipAllLabel="Mostrar todos los atajos"
+  resetLabel="Empezar de nuevo"
+  pairs={[
+    { forward: 'Evaluar una parada decidida con información gradual.', inverted: 'Atribuir a quien elegía valores revelados solo en la auditoría completa.', safeguard: 'Reconstruir lo que se había observado en cada decisión.' },
+    { forward: 'Contabilizar los costes de búsqueda.', inverted: 'Cobrar solo la inspección finalmente aceptada.', safeguard: 'Conservar todas las inspecciones pagadas, incluidas las que detectaron incumplimientos.' },
+    { forward: 'Explicar un umbral óptimo.', inverted: 'Llamar valor de reserva a una aspiración elegida sin aportar un modelo.', safeguard: 'Definir objetivo, acciones, costes, distribución y recuperación, y deducir la comparación.' },
+    { forward: 'Resolver una búsqueda sin ofertas aceptables.', inverted: 'Relajar un requisito obligatorio o el plazo para fabricar una opción aceptable.', safeguard: 'Especificar un respaldo viable y una política separada para revisar la aspiración flexible.' }
+  ]}
+  caption="Una política reproducible puede rendir mal. Un óptimo calculado puede depender de supuestos que no se cumplen fuera de su modelo."
+/>
+
+## Transfiere el método cambiando la recuperación y la distribución
+
+<MCQ client:visible pretest
+  question="Si inspeccionar otra oferta hace caducar la oferta conservada, ¿qué posibilidad debe desaparecer del cálculo de inspección?"
+  options={[
+    { text: 'Quedarse con la oferta conservada tras un resultado nuevo desfavorable.', correct: true },
+    { text: 'El coste de inspección, porque perder la recuperación hace gratuita la información.' },
+    { text: 'El valor de parar ahora, antes de que caduque la oferta conservada.' }
+  ]}
+  explanation="No poder recuperar la oferta cambia lo que permite continuar. Parar ahora mantiene la oferta actual; inspeccionar puede obligar a aceptar una nueva peor."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar"
+/>
+
+Una **nueva búsqueda inventada** busca una sala para una breve sesión de escucha. Se conserva una oferta admisible de **55 créditos**. Queda una inspección de coste **5**; la nueva sala admisible vale **20 u 80**, con probabilidad de **un medio** cada una. De nuevo, los créditos expresan beneficios y costes de inspección en una escala común declarada. El objetivo es el beneficio neto esperado a partir de ahora y quien decide es neutral ante el riesgo.
+
+Esta vez, **inspeccionar hace perder la oferta actual** y obliga a aceptar la nueva sala revelada. Parar ahora mantiene la oferta actual. No hay otras alternativas, demoras ni costes.
+
+<MCQ client:visible
+  question="Con estas nuevas condiciones sin recuperación, ¿qué conviene hacer?"
+  options={[
+    { text: 'Parar con la oferta conservada: inspeccionar tiene menor beneficio neto esperado.', correct: true },
+    { text: 'Inspeccionar y conservar automáticamente la oferta actual si la nueva es peor.' },
+    { text: 'Inspeccionar porque el mayor valor nuevo posible supera al actual.' },
+    { text: 'Parar solo después de pagar la inspección y volver a la oferta conservada.' }
+  ]}
+  explanation="Usa las acciones que este caso permite. La solución compara parar con aceptar obligatoriamente la nueva oferta aleatoria, incluido el coste de conocerla."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de empezar"
+/>
+
+<details>
+<summary>Compara el resultado sin recuperación con el supuesto alternativo</summary>
+
+Sin recuperación, el neto esperado de inspeccionar es **½ × 20 + ½ × 80 − 5 = 10 + 40 − 5 = 45 créditos**, inferior a los **55** de parar. Conviene parar. El valor conservado de indiferencia es **45** bajo estas condiciones.
+
+Si se garantizara la recuperación gratuita, el neto esperado de inspeccionar sería **½ × 55 + ½ × 80 − 5 = 27,5 + 40 − 5 = 62,5**, superior a **55**. En ese modelo distinto, convendría inspeccionar. Para valores conservados entre 20 y 80, la ecuación de indiferencia es **½ × (80 − x) − 5 = 0**, que da **x = 70**.
+
+Mismos costes y distribución, distintas acciones al continuar: los umbrales son **45 sin recuperación** y **70 con recuperación**. Ninguno sale de copiar la aspiración del estudio ni el umbral calculado antes. Si la versión con recuperación inspecciona y obtiene 20, conserva 55 pero paga 5, con un resultado final de **50**: la optimalidad esperada tampoco garantiza una mejora realizada.
+
+</details>
+
+<FillBlank client:visible
+  question="Recuerda las condiciones antes de trasladar un umbral a otra tarea"
+  text="El criterio elegido es una {{aspiración|demostración de optimalidad|oferta futura observada}}. Un umbral de reserva calculado depende del {{modelo especificado|nombre de la regla|mejor resultado posterior por sí solo}}. Cambiar la recuperación de ofertas cambia los {{resultados viables al continuar|costes ya pagados|datos observados antes de buscar}}."
+  explanation="Transfiere el método de comparación y reconstruye sus entradas. Otra información, horizonte, coste o posibilidad de recuperación puede justificar una regla de parada distinta."
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  explanationLabel="Explicación"
+
+  instructions="Elige una opción para cada hueco y comprueba las respuestas."
+  correctResultLabel="Correcto"
+  partialResultWord="correctas"
+/>
+
+## Conecta la auditoría de búsqueda
+
+<MindMap client:visible title="De una regla elegida a una comparación de parada justificada"
+  root={{ label: 'Auditar un protocolo de búsqueda', children: [
+    { label: 'Declarar', children: [{ label: 'Objetivo y unidades comunes' }, { label: 'Requisitos y aspiración' }, { label: 'Orden, costes, límite y respaldo' }] },
+    { label: 'Reconstruir', children: [{ label: 'Usar lo observado hasta el momento' }, { label: 'Contar todas las inspecciones' }, { label: 'Parar según la regla declarada' }] },
+    { label: 'Acotar la comparación', children: [{ label: 'Respetar plazos y recuperación' }, { label: 'Ajustar al pasado no es predecirlo' }, { label: 'Resultado realizado no es superioridad esperada' }] },
+    { label: 'Calcular cuando se pueda', children: [{ label: 'Definir distribuciones y acciones viables' }, { label: 'Comparar parar con continuar' }, { label: 'Explicitar la indiferencia' }] },
+    { label: 'Transferir con cuidado', children: [{ label: 'Reconstruir las condiciones nuevas' }, { label: 'Mantener los requisitos obligatorios' }, { label: 'Evaluar la regla en su entorno' }] }
+  ] }}
+
+
+  eyebrow="Vista general"
+  outlineLabel="Esquema en texto"
+/>
+
+<Quiz client:visible title="Comprueba la auditoría de búsqueda"
+  questions={[
+    { question: '¿Por qué se incluye la inspección del estudio no admisible A en el cálculo neto original?', options: [
+      { text: 'Se pagó para conocer los requisitos y el valor antes de descartarlo.', correct: true },
+      { text: 'Los estudios no admisibles suman su valor al del estudio elegido.' },
+      { text: 'Las inspecciones descartadas solo cuentan si la regla final sale bien.' }
+    ], explanation: 'El incumplimiento no devuelve el coste en este modelo. Cuenta las tres inspecciones realizadas antes de restarlas al beneficio de C.' },
+    { question: '¿Qué ocurre si la aspiración supera todos los valores admisibles que pueden inspeccionarse antes del límite?', options: [
+      { text: 'El protocolo usa el respaldo reservado y mantiene los costes de inspección.', correct: true },
+      { text: 'Debe aceptar una oferta no admisible para evitar usar el respaldo.' },
+      { text: 'Obtiene permiso para inspeccionar ofertas después del plazo declarado.' }
+    ], explanation: 'La regla incluye un límite finito y un respaldo admisible. No alcanzar la aspiración no elimina esas condiciones.' },
+    { question: '¿Qué demuestra el mejor resultado realizado de la aspiración mayor en el caso del estudio?', options: [
+      { text: 'Rinde mejor en esta reconstrucción; la comparación prospectiva sigue pendiente.', correct: true },
+      { text: 'Quien elegía podía conocer los valores no inspeccionados en la parada anterior.' },
+      { text: 'La aspiración mayor es ahora el umbral óptimo para cualquier secuencia futura.' }
+    ], explanation: 'El registro completo permite reconstruir los resultados. No aporta una distribución de registros futuros ni informa retroactivamente la elección original.' },
+    { question: 'Selecciona las distinciones que conserva una auditoría completa.', allowMultiple: true, options: [
+      { text: 'Los requisitos obligatorios y la aspiración de calidad elegida.', correct: true },
+      { text: 'Los costes ya pagados y el coste de una inspección adicional.', correct: true },
+      { text: 'El registro completo posterior y lo observado por quien elegía.', correct: true },
+      { text: 'Una aspiración elegida y un umbral de reserva óptimo son idénticos por definición.' }
+    ], explanation: 'Estas distinciones determinan viabilidad, contabilidad e información. Un umbral de reserva óptimo necesita una justificación basada en un modelo.' },
+    { question: 'En el valor de indiferencia calculado para una inspección con recuperación, ¿qué se cumple?', options: [
+      { text: 'Parar e inspeccionar tienen el mismo beneficio neto esperado.', correct: true },
+      { text: 'Inspeccionar garantiza un resultado realizado estrictamente mejor.' },
+      { text: 'Se ha conocido el resultado oculto sin pagar por inspeccionarlo.' }
+    ], explanation: 'La indiferencia se refiere a la comparación esperada con esas acciones y distribución. No resuelve la extracción aleatoria ni garantiza una mejora realizada.' },
+    { question: '¿Por qué se para en la transferencia cuando no se pueden recuperar ofertas?', options: [
+      { text: 'Inspeccionar hace perder la oferta conservada y da menor beneficio neto esperado.', correct: true },
+      { text: 'Se puede inspeccionar gratis y volver después a la oferta conservada.' },
+      { text: 'El mayor valor nuevo posible es inferior al de la oferta actual.' }
+    ], explanation: 'El máximo favorable no determina el beneficio neto esperado. También cuentan el resultado bajo, el coste y la pérdida de la oferta anterior.' },
+    { question: '¿Qué afirmación sobre el satisficing queda justificada tras este taller?', options: [
+      { text: 'Es un procedimiento basado en una aspiración cuyo rendimiento depende de la regla y el entorno.', correct: true },
+      { text: 'Maximiza el beneficio neto siempre que falte tiempo o información.' },
+      { text: 'Permite eliminar requisitos obligatorios tras una búsqueda infructuosa.' }
+    ], explanation: 'Los recursos limitados motivan procedimientos viables, pero no demuestran que cualquier aspiración sea óptima. Define las condiciones, reproduce la decisión y acota la conclusión.' }
+  ]}
+
+  checkLabel="Comprobar"
+  retryLabel="Intentarlo de nuevo"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Repaso completado"
+  perfectMessage="Has resuelto todas las preguntas."
+  goodMessage="Revisa las preguntas que has fallado."
+  keepPracticingMessage="Vuelve a los ejemplos y revisa las respuestas."
+  gateLabel="Comprueba la respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Tu puntuación"
+  restartLabel="Empezar de nuevo"
+/>
+
+Continúa al [examen final](/es/bounded-rationality-and-satisficing/final-exam), que incluye contabilidad de búsquedas, límites de información y umbrales de reserva dependientes del modelo.

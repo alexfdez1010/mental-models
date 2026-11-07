@@ -3,6 +3,8 @@ import { cx } from '@/components/react/cx';
 
 /** Props for the {@link SatisficingLab} island. */
 export interface SatisficingLabProps {
+  /** Number locale for visible mean inspection counts. Defaults to English. */
+  locale?: 'en' | 'es';
   /** Heading above the card. */
   title?: string;
   /** Eyebrow label. Defaults to `'Satisficing lab'`. */
@@ -64,6 +66,12 @@ export interface SatisficingLabProps {
    * `{net}`, `{optimal}`, `{maxnet}` are replaced with live values.
    */
   readoutTemplate?: string;
+  /** Tooltip for the highest-quality option in the complete demonstration field. */
+  bestOptionTitle?: string;
+  /** Tooltip for an option rejected before stopping. */
+  rejectedOptionTitle?: string;
+  /** Tooltip for an option not inspected by the simulated chooser. */
+  unseenOptionTitle?: string;
   /** Extra classes merged onto the root element. */
   className?: string;
 }
@@ -141,6 +149,7 @@ const PLOT_H = CH - PAD_T - PAD_B;
  */
 export function SatisficingLab({
   title,
+  locale = 'en',
   eyebrow = 'Satisficing lab',
   instructions = 'Options arrive one at a time with a hidden quality (1–100). A satisficer sets an aspiration level and grabs the first option that clears it; a maximiser inspects everything to find the true best. Drag the aspiration, then raise the cost of each look and watch which strategy wins.',
   caption,
@@ -168,6 +177,9 @@ export function SatisficingLab({
   acceptedLabel = 'accepted',
   bestWasLabel = 'the true best was #{pos}',
   readoutTemplate = 'With {n} options and an aspiration of {aspiration}, the satisficer accepts quality {quality} after just {looks} looks for a net value of {net}. The best aspiration here is about {optimal}. The maximiser finds the true best but pays for every look — its net value is only {maxnet}.',
+  bestOptionTitle = 'true best',
+  rejectedOptionTitle = 'rejected',
+  unseenOptionTitle = 'not seen',
   className,
 }: SatisficingLabProps) {
   const reactId = useId();
@@ -238,11 +250,13 @@ export function SatisficingLab({
     return { bestIdx, chosenIdx: idx, hit: idx === bestIdx };
   }, [demoField, aspiration]);
 
+  const looksText = locale === 'es' ? here.looks.toFixed(1).replace('.', ',') : here.looks.toFixed(1);
+
   const readout = readoutTemplate
     .replace('{n}', String(n))
     .replace('{aspiration}', String(aspiration))
     .replace('{quality}', here.quality.toFixed(0))
-    .replace('{looks}', here.looks.toFixed(1))
+    .replace('{looks}', looksText)
     .replace('{net}', netHere.toFixed(0))
     .replace('{optimal}', String(optimalAsp))
     .replace('{maxnet}', maxNet.toFixed(0));
@@ -323,7 +337,7 @@ export function SatisficingLab({
             />
 
             {/* axis labels */}
-            <text x={PAD_L - 4} y={PAD_T + 6} textAnchor="end" fontSize="7.5" fill="var(--color-ink-500)">
+            <text x={PAD_L} y={PAD_T - 4} textAnchor="start" fontSize="7.5" fill="var(--color-ink-500)">
               {axisValueLabel}
             </text>
             <text x={PAD_L + PLOT_W} y={CH - 8} textAnchor="end" fontSize="8.5" fontWeight="700" fill="var(--color-ink-500)">
@@ -347,7 +361,7 @@ export function SatisficingLab({
             <div className="rounded-card border border-ink-200 bg-surface p-2">
               <dt className="text-[0.6rem] uppercase tracking-wide text-ink-500">{looksStatLabel}</dt>
               <dd className="mt-0.5 font-display text-lg font-semibold tabular-nums text-ink-700">
-                {here.looks.toFixed(1)}
+                {looksText}
               </dd>
             </div>
             <div className="rounded-card border border-ink-200 bg-surface p-2">
@@ -378,7 +392,7 @@ export function SatisficingLab({
               <tr className="border-t border-ink-200">
                 <td className="p-1 text-left font-semibold text-brand-700">{satisficerLabel}</td>
                 <td className="p-1">{here.quality.toFixed(0)}</td>
-                <td className="p-1">{here.looks.toFixed(1)}</td>
+                <td className="p-1">{looksText}</td>
                 <td className="p-1 font-semibold text-brand-700">{netHere.toFixed(0)}</td>
               </tr>
               <tr className="border-t border-ink-200">
@@ -498,7 +512,7 @@ export function SatisficingLab({
                       : 'bg-surface text-ink-400 ring-ink-200',
                   isBest && !isChosen ? 'ring-2 ring-accent-600' : '',
                 )}
-                title={isBest ? 'true best' : beforeStop ? 'rejected' : 'not seen'}
+                title={isChosen ? acceptedLabel : isBest ? bestOptionTitle : beforeStop ? rejectedOptionTitle : unseenOptionTitle}
               >
                 {q}
               </span>
