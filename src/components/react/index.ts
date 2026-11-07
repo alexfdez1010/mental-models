@@ -346,3 +346,5 @@ export { FactorChainTrace, calculateFactorChain, formatFactorChainValue } from '
 export type { FactorChain, FactorChainScenario, FactorChainLabels, FactorChainTraceProps, FactorChainValue, FactorChainCalculation } from '@/components/react/FactorChainTrace';
 
 export { PolicyCostComparison } from '@/components/react/PolicyCostComparison';
+
+export { ScenarioDecisionAudit } from '@/components/react/ScenarioDecisionAudit';

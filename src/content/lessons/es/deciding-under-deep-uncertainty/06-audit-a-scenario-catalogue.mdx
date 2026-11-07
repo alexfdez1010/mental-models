@@ -1,0 +1,723 @@
+---
+title: "Audita un catálogo de escenarios"
+description: "Compara peor coste y máximo arrepentimiento, recalcula comparadores factibles y prueba una condición conjunta sin inventar probabilidades."
+topic: "es/deciding-under-deep-uncertainty"
+order: 7
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MindMap, RateComparison, ScenarioDecisionAudit } from '@/components/react';
+
+El equipo de tu evento debe preparar una sola mesa de acceso. Una compañera minimiza la peor interrupción del servicio y elige B. Otro compañero minimiza la máxima diferencia respecto a lo que se habría podido conseguir y elige A. Comprueba las definiciones antes de dar por rota alguna hoja de cálculo.
+
+## Fija las condiciones de la comparación
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — prueba"}
+  question={"Dos cálculos usan la misma tabla de costes y eligen planes distintos. ¿Qué conviene comprobar primero?"}
+  options={[
+  {
+    "text": "Si utilizan el mismo objetivo y las mismas alternativas factibles",
+    "correct": true
+  },
+  {
+    "text": "Si la hoja de cálculo más grande incluye más decimales",
+    "correct": false
+  },
+  {
+    "text": "Si ambos planes ganan el mismo número de columnas de escenarios",
+    "correct": false
+  }
+]}
+  explanation={"La diferencia puede proceder de objetivos o menús factibles distintos, en lugar de un error aritmético. El ejemplo completo que viene a continuación hace explícitos ambos criterios."}
+  pretest={true}
+/>
+
+Es un **caso construido**, con resultados fijados por supuesto. Se elige un plan antes de una ventana de servicio de cuatro horas. Su **coste** son los minutos totales en que la mesa de acceso no presta servicio durante esos 240 minutos. Un coste menor es mejor. Ninguna celda estima la probabilidad de una condición ni explica su causa.
+
+Una sola persona prepara el plan antes de abrir. Al principio dispone de **120 minutos de trabajo**. A/B/C requieren 80/100/120. Cada plan es una alternativa completa; se excluyen las mezclas y los cambios de plan después de conocer la condición. La preparación es una restricción de recursos; no es otra interrupción que haya que sumar al coste del servicio.
+
+El catálogo inicial contiene tres condiciones. Deja fuera, deliberadamente, la afluencia alta combinada con un fallo de conexión.
+
+| Plan | Preparación en minutos de trabajo | Afluencia normal, conexión disponible | Afluencia alta, conexión disponible | Afluencia normal, sin conexión |
+|---|---:|---:|---:|---:|
+| A | 80 | 10 | 30 | 40 |
+| B | 100 | 15 | 20 | 30 |
+| C | 120 | 0 | 35 | 35 |
+
+Las tres últimas columnas son minutos sin servicio. Elige un criterio antes de ordenar los planes: minimizar el mayor coste original o minimizar la mayor diferencia retrospectiva de oportunidad. Describen prioridades distintas.
+
+## Calcula los dos objetivos completos
+
+Para el **minimax de coste**, toma primero el mayor coste de cada fila: A tiene 40; B, 30; C, 35. Después minimiza esos máximos. **B gana con un peor coste de 30 minutos** en este catálogo. La regla no predice que vaya a ocurrir la condición de treinta minutos de B.
+
+Para el **minimax del arrepentimiento**, busca por separado el mejor coste que un plan factible podría conseguir en cada condición. El mínimo de la primera columna es el 0 de C; el de la segunda, el 20 de B; el de la tercera, el 30 de B. Resta esos comparadores a los costes de cada plan:
+
+| Plan | Diferencia normal | Diferencia con afluencia alta | Diferencia sin conexión | Mayor diferencia |
+|---|---:|---:|---:|---:|
+| A | 10 − 0 = 10 | 30 − 20 = 10 | 40 − 30 = 10 | 10 |
+| B | 15 − 0 = 15 | 20 − 20 = 0 | 30 − 30 = 0 | 15 |
+| C | 0 − 0 = 0 | 35 − 20 = 15 | 35 − 30 = 5 | 15 |
+
+**A gana el minimax del arrepentimiento con una diferencia máxima de 10 minutos.** Su peor coste original sigue siendo 40. La diferencia no es un cargo adicional que se sume a esos cuarenta minutos; aquí el «arrepentimiento» tampoco mide una emoción.
+
+Si `D` es el menú de planes factibles, `S` las condiciones incluidas y `L(a,s)` el coste de un plan, el comparador del escenario es `m(s;D) = min L(a,s)` entre los planes de `D`. El arrepentimiento es `R(a,s;D) = L(a,s) − m(s;D)`. Para cada plan de `D`, el minimax de coste toma `max L(a,s)` entre las condiciones de `S` y después elige un plan con el menor de esos máximos. El minimax del arrepentimiento hace la misma comparación usando `max R(a,s;D)`. Estas definiciones requieren que `D` y `S` no estén vacíos.
+
+El comparador puede usar un plan distinto en cada columna. Es una comparación retrospectiva: el equipo sigue eligiendo **un solo plan antes** de conocer la condición. Ningún plan factible puede entregar la fila compuesta 0/20/30 cambiando mágicamente después de los hechos.
+
+<ScenarioDecisionAudit client:visible
+  title={"Examina costes, factibilidad y arrepentimiento"}
+  instructions={"Las barras muestran la medida elegida; su escala se mantiene fija dentro de este caso."}
+  cases={[
+  {
+    "id": "desk",
+    "label": "Mesa de acceso",
+    "window": 240,
+    "unit": "min",
+    "preparationUnit": "min de trabajo",
+    "scenarios": [
+      {
+        "id": "normal",
+        "label": "Normal, conexión disponible"
+      },
+      {
+        "id": "rush",
+        "label": "Afluencia alta, conexión disponible"
+      },
+      {
+        "id": "link",
+        "label": "Normal, sin conexión"
+      },
+      {
+        "id": "both",
+        "label": "Afluencia alta, sin conexión"
+      }
+    ],
+    "plans": [
+      {
+        "id": "a",
+        "label": "A",
+        "preparation": 80,
+        "costs": [
+          10,
+          30,
+          40,
+          60
+        ]
+      },
+      {
+        "id": "b",
+        "label": "B",
+        "preparation": 100,
+        "costs": [
+          15,
+          20,
+          30,
+          90
+        ]
+      },
+      {
+        "id": "c",
+        "label": "C",
+        "preparation": 120,
+        "costs": [
+          0,
+          35,
+          35,
+          70
+        ]
+      }
+    ],
+    "catalogues": [
+      {
+        "id": "initial",
+        "label": "Tres condiciones iniciales",
+        "indices": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "id": "joint",
+        "label": "Incluye la condición conjunta",
+        "indices": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "budgets": [
+      {
+        "id": "120",
+        "label": "Inicial",
+        "amount": 120
+      },
+      {
+        "id": "110",
+        "label": "Reducido",
+        "amount": 110
+      },
+      {
+        "id": "80",
+        "label": "Más ajustado",
+        "amount": 80
+      },
+      {
+        "id": "79",
+        "label": "Inferior a todos",
+        "amount": 79
+      }
+    ]
+  }
+]}
+  labels={{
+  "caseLabel": "Caso",
+  "catalogueLabel": "Catálogo",
+  "budgetLabel": "Presupuesto de preparación",
+  "criterionLabel": "Minimizar",
+  "costCriterion": "Peor coste",
+  "regretCriterion": "Máximo arrepentimiento",
+  "planLabel": "Plan",
+  "preparationLabel": "Preparación",
+  "eligibilityLabel": "Factibilidad por preparación",
+  "eligibleLabel": "Disponible",
+  "unavailableLabel": "No disponible",
+  "costLabel": "Coste",
+  "regretLabel": "Diferencia",
+  "worstCostLabel": "Peor coste",
+  "worstRegretLabel": "Máximo arrepentimiento",
+  "benchmarkLabel": "Mejor coste factible en cada condición",
+  "tableCaption": "Costes condicionales y diferencias frente a planes factibles",
+  "eligibilityNote": "Aquí solo se aplica el presupuesto de preparación. No se aplica ningún límite adicional al coste del servicio.",
+  "scaleLabel": "Escala fija de las barras",
+  "selectedLabel": "Planes que minimizan el criterio",
+  "emptyMessage": "Ningún plan cumple este presupuesto de preparación. No existe un comparador factible ni un plan que minimice el criterio.",
+  "singletonMessage": "Solo hay un plan disponible. Su arrepentimiento cero lo compara consigo mismo; su coste original se mantiene.",
+  "tieMessage": "Se muestran todos los planes empatados; este criterio no deshace el empate.",
+  "noValueLabel": "No corresponde"
+}}
+  locale={"es"}
+/>
+
+Empieza con el catálogo inicial y el presupuesto 120. Cambia **Minimizar** entre peor coste y máximo arrepentimiento. Las barras representan la cantidad elegida en una escala fija de 0 a 90 minutos; las celdas mantienen los costes originales y las diferencias. Esa escala incluye las cuatro condiciones del caso, incluida la que examinaremos más adelante.
+
+<FillBlank client:visible
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"correctos"}
+  question={"Recupera los dos resultados antes de cambiar los controles."}
+  text={"Con las tres condiciones iniciales y todos los planes factibles, B minimiza el peor {{coste|arrepentimiento|tiempo de preparación}}, mientras que A minimiza el máximo {{arrepentimiento|coste|tiempo de preparación}}. La mayor diferencia de A es de {{diez|quince|cuarenta}} minutos."}
+  explanation={"B tiene el menor máximo de coste por fila: treinta. A tiene el menor máximo de arrepentimiento por fila: diez. Cuarenta es el mayor coste original de A, no su arrepentimiento."}
+/>
+
+## Cambia el presupuesto y reconstruye el comparador
+
+Ahora solo hay **110 minutos de trabajo**. A y B siguen siendo factibles; C necesita 120 y sale de la comparación. Su cero en la condición normal no puede seguir siendo el comparador factible.
+
+Los nuevos mínimos de las columnas son **10/20/30**. Las diferencias de A pasan a ser **0/10/10**, con máximo 10. Las de B pasan a ser **5/0/0**, con máximo 5. **B minimiza ahora el máximo arrepentimiento y también el peor coste.** C no era el ganador anterior del minimax del arrepentimiento, pero retirarlo cambió el resultado porque había definido el comparador de una columna.
+
+Mantener el comparador antiguo 0/20/30 después de excluir C respondería a otra pregunta: cómo se comparan los planes con una alternativa que el equipo no puede preparar. Selecciona el presupuesto 110 en el inspector y comprueba la fila del comparador.
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — prueba"}
+  question={"Con el catálogo inicial, ¿cuál es el máximo arrepentimiento de B cuando el presupuesto excluye C, pero permite A y B?"}
+  options={[
+  {
+    "text": "Quince minutos sin servicio",
+    "correct": false
+  },
+  {
+    "text": "Cinco minutos sin servicio",
+    "correct": true
+  },
+  {
+    "text": "Diez minutos sin servicio",
+    "correct": false
+  }
+]}
+  explanation={"Los mínimos factibles son diez, veinte y treinta. Los costes de B, quince, veinte y treinta, dan diferencias de cinco, cero y cero. La mayor es cinco; quince conserva indebidamente el comparador cero del plan C no disponible."}
+/>
+
+Con presupuesto **80**, solo A es factible. Frente a sí mismo tiene arrepentimiento cero en cada condición incluida, aunque su coste original pueda ser importante. Con presupuesto **79**, ningún plan es factible. No hay comparador ni plan que minimice el criterio. «Ningún plan factible» es un resultado útil; mostrar un cero tranquilizador sería una ficción aritmética.
+
+### Cuándo hacer esta comprobación
+
+Recalcula el comparador cuando la plantilla, los permisos, el tiempo u otra restricción declarada cambien el menú. No confundas una alternativa inviable con una oportunidad factible que has dejado pasar.
+
+## Añade la condición conjunta
+
+El catálogo original probaba por separado la afluencia alta y el fallo de conexión. No los probaba juntos. Añade la cuarta condición estipulada:
+
+| Plan | Afluencia alta y sin conexión | Peor coste entre las cuatro | Máximo arrepentimiento entre las cuatro |
+|---|---:|---:|---:|
+| A | 60 | 60 | 10 |
+| B | 90 | 90 | 30 |
+| C | 70 | 70 | 15 |
+
+Aquí el cuarto comparador es 60. Las nuevas diferencias son A0/B30/C10. Con presupuesto 120, **A minimiza ahora ambos criterios**: su peor coste es 60 y su máximo arrepentimiento, 10. La recomendación de peor coste cambia de B a A. Es sensibilidad a una condición recién incluida, no evidencia de que la condición conjunta sea probable ni de que A vaya a evitar cualquier interrupción.
+
+Los costes de la cuarta columna son supuestos, como los de las tres primeras. Un equipo real necesitaría evidencia para sostenerlos y un proceso para cuestionar las condiciones omitidas. Cuatro columnas no agotan todos los futuros.
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — prueba"}
+  question={"Después de añadir la condición conjunta, ¿qué afirmaciones se deducen de la tabla estipulada?"}
+  options={[
+  {
+    "text": "A tiene el menor peor coste original entre los tres planes",
+    "correct": true
+  },
+  {
+    "text": "La diferencia cero de A en la condición conjunta significa que no sufre interrupción allí",
+    "correct": false
+  },
+  {
+    "text": "El máximo arrepentimiento de B aumenta porque su coste conjunto supera en treinta al mejor factible",
+    "correct": true
+  },
+  {
+    "text": "La condición conjunta es más probable porque cambia el plan elegido",
+    "correct": false
+  }
+]}
+  explanation={"El peor coste de A es sesenta, frente a noventa y setenta. La diferencia conjunta de B es noventa menos sesenta: treinta. El coste conjunto de A sigue siendo sesenta y la tabla de costes no aporta probabilidades."}
+  allowMultiple={true}
+/>
+
+## Contar el catálogo no da una probabilidad
+
+Usa **35 minutos sin servicio** como prueba descriptiva, todavía sin filtrar. En el catálogo inicial A la supera en 2/3 entradas; B y C, en 3/3. En el ampliado, A la supera en 2/4; B y C, en 3/4. El inspector sigue aplicando solo el presupuesto de preparación: no impone silenciosamente esta prueba adicional.
+
+Duplica ahora la condición normal en el catálogo inicial. A también supera esa entrada duplicada, de modo que su fracción descriptiva sube de 2/3 a 3/4. No ha aparecido ninguna condición física nueva ni evidencia sobre probabilidades.
+
+<RateComparison client:visible
+  title={"Entradas del catálogo en las que A cumple la prueba declarada"}
+  locale={"es"}
+  scenarioLabel={"Comparación de catálogos"}
+  countsLabel={"Entradas que cumplen / entradas incluidas"}
+  differenceLabel={"Catálogo duplicado menos catálogo original"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+  scenarios={[
+  {
+    "label": "Las mismas tres condiciones distintas; una entrada repetida",
+    "groups": [
+      {
+        "label": "Entrada normal duplicada",
+        "events": 3,
+        "total": 4
+      },
+      {
+        "label": "Catálogo original",
+        "events": 2,
+        "total": 3
+      }
+    ]
+  }
+]}
+/>
+
+La media sin ponderar de un catálogo también da un voto a cada entrada. Las medias originales de A/B/C son **80/3, 65/3 y 70/3** minutos; B tiene la menor. Duplicar la entrada normal produce **90/4, 80/4 y 70/4**; C tiene ahora la menor. Son medias válidas de las listas especificadas. Llamarlas costes futuros esperados requiere un modelo justificado de ponderaciones probabilísticas; repetir una entrada no lo proporciona. Repetir una condición idéntica tampoco cambia las clasificaciones de peor coste o máximo arrepentimiento.
+
+Si el límite de 35 minutos pasa a ser un **requisito estricto en cada condición incluida**, aplícalo a la factibilidad antes de ordenar. B/C lo cumplen en el conjunto inicial; A no. En las cuatro condiciones, **ninguno** lo cumple. Un recuento descriptivo, un requisito obligatorio y un objetivo son tres funciones distintas para un número.
+
+<Categorize client:visible
+  instructions={"Coloca cada elemento en su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todo clasificado"}
+  partialResultWord={"correctos"}
+  question={"Clasifica estas afirmaciones según lo que especifican."}
+  buckets={[
+  "Recuento descriptivo",
+  "Requisito estricto",
+  "Objetivo de comparación"
+]}
+  items={[
+  {
+    "text": "El plan A cumple en dos de las tres entradas del catálogo.",
+    "bucket": "Recuento descriptivo"
+  },
+  {
+    "text": "Descarta cualquier plan que supere el límite en una condición incluida.",
+    "bucket": "Requisito estricto"
+  },
+  {
+    "text": "Entre los planes factibles, minimiza el mayor coste de servicio.",
+    "bucket": "Objetivo de comparación"
+  },
+  {
+    "text": "Entre los planes factibles, minimiza la mayor diferencia retrospectiva.",
+    "bucket": "Objetivo de comparación"
+  }
+]}
+  explanation={"Contar registros resume la lista. Un requisito determina qué es factible. Un objetivo ordena lo que queda. Ninguno, por sí solo, asigna probabilidades a los sucesos."}
+/>
+
+## Transfiere el cálculo a un segundo servicio
+
+Antes de consultar la respuesta resuelta, compara tres planes nuevos durante una **ventana de tres horas (180 minutos)**. Rigen las mismas convenciones: se elige una vez antes de conocer la condición, un coste de servicio menor es mejor y la preparación va aparte. El presupuesto de preparación es de **70 minutos de trabajo**.
+
+| Plan | Preparación en minutos de trabajo | Coste tranquilo | Coste concurrido |
+|---|---:|---:|---:|
+| D | 45 | 8 | 30 |
+| E | 55 | 18 | 18 |
+| F | 70 | 12 | 22 |
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — prueba"}
+  question={"En la tabla del segundo servicio, ¿qué pareja identifica los planes que minimizan el peor coste y el máximo arrepentimiento con el presupuesto declarado?"}
+  options={[
+  {
+    "text": "F minimiza el peor coste; E minimiza el máximo arrepentimiento",
+    "correct": false
+  },
+  {
+    "text": "E minimiza el peor coste y también el máximo arrepentimiento",
+    "correct": false
+  },
+  {
+    "text": "E minimiza el peor coste; F minimiza el máximo arrepentimiento",
+    "correct": true
+  }
+]}
+  explanation={"Los máximos de coste son treinta, dieciocho y veintidós: se elige E. Los mínimos factibles por columna son ocho y dieciocho. Las diferencias de D son cero/doce; las de E, diez/cero; las de F, cuatro/cuatro. Se elige F por máximo arrepentimiento."}
+/>
+
+<details>
+<summary>Examina la transferencia resuelta y un presupuesto menor</summary>
+
+Los comparadores factibles son **8/18**. Las mayores diferencias son **D12/E10/F4**. E gana en peor coste con 18; F gana en máximo arrepentimiento con 4. Con presupuesto **60**, F sale del menú y E gana en arrepentimiento con 10. Con presupuesto **40**, no se puede preparar ningún plan. Estos resultados se deducen de la tabla declarada; no afirman nada sobre la fiabilidad de un servicio real.
+
+<ScenarioDecisionAudit client:visible
+  title={"Audita el segundo servicio"}
+  instructions={"Las barras muestran la medida elegida; su escala se mantiene fija dentro de este caso."}
+  cases={[
+  {
+    "id": "transfer",
+    "label": "Segundo servicio",
+    "window": 180,
+    "unit": "min",
+    "preparationUnit": "min de trabajo",
+    "scenarios": [
+      {
+        "id": "quiet",
+        "label": "Tranquilo"
+      },
+      {
+        "id": "busy",
+        "label": "Concurrido"
+      }
+    ],
+    "plans": [
+      {
+        "id": "d",
+        "label": "D",
+        "preparation": 45,
+        "costs": [
+          8,
+          30
+        ]
+      },
+      {
+        "id": "e",
+        "label": "E",
+        "preparation": 55,
+        "costs": [
+          18,
+          18
+        ]
+      },
+      {
+        "id": "f",
+        "label": "F",
+        "preparation": 70,
+        "costs": [
+          12,
+          22
+        ]
+      }
+    ],
+    "catalogues": [
+      {
+        "id": "two",
+        "label": "Dos condiciones",
+        "indices": [
+          0,
+          1
+        ]
+      }
+    ],
+    "budgets": [
+      {
+        "id": "70",
+        "label": "Inicial",
+        "amount": 70
+      },
+      {
+        "id": "60",
+        "label": "Reducido",
+        "amount": 60
+      },
+      {
+        "id": "40",
+        "label": "Más ajustado",
+        "amount": 40
+      }
+    ]
+  }
+]}
+  labels={{
+  "caseLabel": "Caso",
+  "catalogueLabel": "Catálogo",
+  "budgetLabel": "Presupuesto de preparación",
+  "criterionLabel": "Minimizar",
+  "costCriterion": "Peor coste",
+  "regretCriterion": "Máximo arrepentimiento",
+  "planLabel": "Plan",
+  "preparationLabel": "Preparación",
+  "eligibilityLabel": "Factibilidad por preparación",
+  "eligibleLabel": "Disponible",
+  "unavailableLabel": "No disponible",
+  "costLabel": "Coste",
+  "regretLabel": "Diferencia",
+  "worstCostLabel": "Peor coste",
+  "worstRegretLabel": "Máximo arrepentimiento",
+  "benchmarkLabel": "Mejor coste factible en cada condición",
+  "tableCaption": "Costes condicionales y diferencias frente a planes factibles",
+  "eligibilityNote": "Aquí solo se aplica el presupuesto de preparación. No se aplica ningún límite adicional al coste del servicio.",
+  "scaleLabel": "Escala fija de las barras",
+  "selectedLabel": "Planes que minimizan el criterio",
+  "emptyMessage": "Ningún plan cumple este presupuesto de preparación. No existe un comparador factible ni un plan que minimice el criterio.",
+  "singletonMessage": "Solo hay un plan disponible. Su arrepentimiento cero lo compara consigo mismo; su coste original se mantiene.",
+  "tieMessage": "Se muestran todos los planes empatados; este criterio no deshace el empate.",
+  "noValueLabel": "No corresponde"
+}}
+  locale={"es"}
+/>
+
+</details>
+
+## Recuerda las condiciones de la decisión
+
+<MindMap client:visible
+  eyebrow={""}
+  outlineLabel={"Esquema de texto"}
+  title={"¿Qué sostiene la recomendación?"}
+  root={{
+  "label": "Decisión con escenarios",
+  "children": [
+    {
+      "label": "Medición",
+      "children": [
+        {
+          "label": "Unidad de coste y ventana de servicio; recurso de preparación separado"
+        }
+      ]
+    },
+    {
+      "label": "Menú factible",
+      "children": [
+        {
+          "label": "Aplicar la restricción declarada y reconstruir el comparador de cada escenario"
+        }
+      ]
+    },
+    {
+      "label": "Objetivo",
+      "children": [
+        {
+          "label": "Peor coste original o mayor diferencia; conservar todos los empates"
+        }
+      ]
+    },
+    {
+      "label": "Catálogo",
+      "children": [
+        {
+          "label": "Condiciones incluidas y condiciones conjuntas omitidas; los recuentos no son probabilidades"
+        }
+      ]
+    },
+    {
+      "label": "Auditoría",
+      "children": [
+        {
+          "label": "Cambiar restricciones y condiciones; distinguir el resultado condicional de la evidencia real"
+        }
+      ]
+    }
+  ]
+}}
+/>
+<Quiz client:visible
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"correctas"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Cuestionario completado"}
+  perfectMessage={"Todas las respuestas son correctas."}
+  goodMessage={"Revisa las respuestas que has fallado."}
+  keepPracticingMessage={"Repasa el razonamiento de las respuestas."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Atrás"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  title={"Comprueba la auditoría"}
+  questions={[
+  {
+    "question": "Un presupuesto deja un solo plan. Su máximo arrepentimiento es cero. ¿Qué puedes concluir?",
+    "options": [
+      {
+        "text": "Su coste original también es cero en cada condición",
+        "correct": false
+      },
+      {
+        "text": "Coincide consigo mismo; hay que comprobar sus costes originales",
+        "correct": true
+      },
+      {
+        "text": "Cumple automáticamente todos los requisitos de aceptación",
+        "correct": false
+      }
+    ],
+    "explanation": "Un menú con un único plan factible da arrepentimiento cero por resta. Puede seguir teniendo costes originales inaceptables."
+  },
+  {
+    "question": "En la tabla principal inicial, C queda excluido con el presupuesto menor. ¿Qué comparador corresponde a la condición normal?",
+    "options": [
+      {
+        "text": "Cero minutos, por el coste original de C",
+        "correct": false
+      },
+      {
+        "text": "Cinco minutos, por el nuevo arrepentimiento de B",
+        "correct": false
+      },
+      {
+        "text": "Diez minutos, por el plan factible A",
+        "correct": true
+      }
+    ],
+    "explanation": "El comparador es el menor coste original entre los planes factibles actuales. A cuesta diez; B, quince; C no está disponible."
+  },
+  {
+    "question": "Un catálogo repite una condición. ¿Qué resumen permanece necesariamente igual?",
+    "options": [
+      {
+        "text": "La fracción de entradas que superan una prueba",
+        "correct": false
+      },
+      {
+        "text": "La media sin ponderar de todas las entradas",
+        "correct": false
+      },
+      {
+        "text": "El coste máximo de cada plan fijo",
+        "correct": true
+      }
+    ],
+    "explanation": "Repetir un valor idéntico no puede cambiar un máximo. Sí puede cambiar medias y fracciones al cambiar el peso de las entradas."
+  },
+  {
+    "question": "El presupuesto de transferencia queda por debajo de la preparación de todos los planes. ¿Qué debe mostrar el análisis?",
+    "options": [
+      {
+        "text": "Ningún plan factible y ningún comparador factible del arrepentimiento",
+        "correct": true
+      },
+      {
+        "text": "Todos los planes empatados con arrepentimiento factible cero",
+        "correct": false
+      },
+      {
+        "text": "El plan que menos preparación requiere como excepción",
+        "correct": false
+      }
+    ],
+    "explanation": "Sin un menú factible no hay un comparador factible que restar. Una regla no puede dispensar por sí sola el presupuesto."
+  },
+  {
+    "question": "El equipo añade una condición creíble pero poco probable. ¿Qué describe el minimax de coste?",
+    "options": [
+      {
+        "text": "Pondera la nueva condición por su probabilidad estimada",
+        "correct": false
+      },
+      {
+        "text": "Incluye el coste de esa condición en cada máximo por fila",
+        "correct": true
+      },
+      {
+        "text": "La ignora salvo que sea la condición más frecuente",
+        "correct": false
+      }
+    ],
+    "explanation": "El minimax de coste usa máximos del conjunto incluido, sin ponderaciones probabilísticas. Elegir o restringir ese conjunto sigue siendo una decisión sustantiva del modelo."
+  },
+  {
+    "question": "¿Qué información se necesita antes de llamar robusta a una recomendación?",
+    "options": [
+      {
+        "text": "El criterio de aceptación y las condiciones incluidas",
+        "correct": true
+      },
+      {
+        "text": "Que el plan elegido tenga un nombre tranquilizador",
+        "correct": false
+      },
+      {
+        "text": "Las restricciones que definen las alternativas disponibles",
+        "correct": true
+      }
+    ],
+    "explanation": "La robustez necesita una prueba declarada, condiciones evaluadas y un menú factible. Una etiqueta no proporciona nada de eso.",
+    "allowMultiple": true
+  }
+]}
+/>
+
+Después viene el **Examen final**. Combina conceptos del curso y auditorías numéricas con todos los datos necesarios. Enviar una respuesta la bloquea durante el examen; la puntuación final aparece al terminar.
+
+### Fuentes y límites
+
+El [preprint de Anderson y Zachary de 2022](https://arxiv.org/abs/2203.01420v1) define costes minimax y arrepentimiento respecto al menú factible, y examina su sensibilidad a alternativas y escenarios. La [guía de RAND](https://www.rand.org/pubs/tools/TL320/tool/robust-decision-making.html) explica el planteamiento, el análisis de vulnerabilidad y por qué contar futuros satisfactorios no da probabilidades. El [Green Book 2026](https://www.gov.uk/government/publications/the-green-book--2/the-green-book-2026) respalda explicitar objetivos, factibilidad y análisis de sensibilidad. Estas fuentes no proporcionan los costes construidos del servicio. Este ejercicio finito no certifica una intervención real ni cubre cualquier futuro.

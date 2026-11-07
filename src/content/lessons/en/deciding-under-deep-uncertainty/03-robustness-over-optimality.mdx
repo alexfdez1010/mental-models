@@ -1,189 +1,317 @@
 ---
-title: "Robustness Over Optimality: Choosing What Survives, Not What Wins"
-description: "When you can't compute the best action, stop hunting the optimum and start demanding robustness — a choice that does acceptably across many futures. Satisficing, robust decision-making, minimax-regret, and the ruin-avoidance principle that sits above every calculation."
+title: "Robustness, Objectives and Feasible Plans"
+description: "Distinguish acceptability, minimax cost and minimax regret, and keep their recommendations inside the stated model."
 topic: "en/deciding-under-deep-uncertainty"
 order: 4
-minutes: 13
-updated: 2026-07-04
+minutes: 14
+updated: 2026-11-07
 ---
 
-import { MCQ, Callout, Reveal, ManyWorldsExplorer, MatchConcepts, FillBlank } from '@/components/react';
+import { MCQ, MatchConcepts, FillBlank, MindMap, Quiz, ScenarioDecisionAudit } from '@/components/react';
 
-You've now seen the failure mode from the inside: optimising hard against a future
-you can't actually know is a great way to be perfectly prepared for a world that
-never arrives — and defenceless against the one that does. So this lesson builds the
-replacement. Not a tweak to expected value, but a **different goal entirely.** When
-you can't reliably compute which action is *best*, you stop asking "what's optimal?"
-and start asking "**what survives?**" That switch — from optimality to
-**robustness** — is the beating heart of deciding under deep uncertainty, and
-everything else in this course hangs off it.
+A plan can have the smallest worst outage without having the smallest worst hindsight gap. Before calling one “robust”, say which result you want and what you are willing to rule out.
 
-## Optimality vs. robustness
+## Acceptability and optimization
 
-An **optimal** choice is the single best action *for a specified world*: give me the
-probabilities and payoffs and I'll compute the peak. It's magnificent when you
-genuinely know the world — and brittle exactly when you don't, because it's tuned to
-one scenario and can fall off a cliff the moment reality differs.
+An **optimal** plan minimizes or maximizes a specified objective over feasible alternatives. That objective can involve one scenario, a probability-weighted expectation, or the worst result across several scenarios. Optimization does not, by itself, imply a forecast or a fragile choice.
 
-A **robust** choice is one that performs *acceptably across a wide range of possible
-worlds*. It rarely tops the leaderboard in any single scenario — the optimiser beats
-it in the world the optimiser was built for — but it never collapses, because it was
-never betting the farm on one future. Robustness deliberately trades a slice of
-best-case performance for a floor under the worst case. Under deep uncertainty,
-where you can't trust your ranking of the scenarios anyway, that trade is almost
-always the right one.
+A **robust** plan performs acceptably across a specified range of conditions. “Acceptably” needs a test: an outage ceiling, a minimum output, or another stated requirement. Passing the test within a catalogue does not certify every future condition. A plan can also be optimal for a declared robustness criterion.
 
-<Callout variant="tip" title="Optimal vs. robust, in one line">
-**Optimal** = best in the *one world you specified* (brilliant if you're right,
-brittle if you're not). **Robust** = *acceptable across many worlds* (never the
-champion, never the corpse). When you can't know which world you'll get, you want
-the choice that can't be killed, not the choice that wins a contest you can't be
-sure you're even in.
-</Callout>
+For example, if service must be unavailable for at most thirty-five minutes in **every listed condition**, a plan with costs ten/thirty/forty fails because forty exceeds the ceiling. A smaller average does not repair the failure. The average here is simply (10 + 30 + 40)/3 = 80/3, about 26.7 minutes; the requirement concerns each condition, not that mean.
 
-## Drive it: the robust strategy comes home alive
-
-Back to the many-worlds explorer — but this time click **Robust** and compare it,
-head to head, with **Optimise** in the table below the chart. Push turbulence all
-the way up to deep uncertainty.
-
-<ManyWorldsExplorer
-  client:visible
-  title="Robust vs. optimal across the full spread of worlds"
-  caption="Read the comparison table. Optimise wins 'Average outcome' but shows a brutal worst world and stops surviving every world once turbulence is high. Robust never tops the average — and never breaks the ruin line. Under deep uncertainty, the strategy that survives 21/21 worlds beats the one with the flashiest mean."
-/>
-
-Look at the table, not just the chart. **Optimise** owns the *Average outcome*
-column — it always will, that's what it's built for. But scan across to *Worlds
-survived*: crank the turbulence and Optimise stops surviving all of them, while
-**Robust** holds at the full count no matter how wild you make the future. That's
-the whole trade in three columns. You give up bragging rights on the average to buy
-an unbreakable floor. When you genuinely can't know which world you'll land in, the
-strategy that *can't be eliminated* is worth more than the one with the best
-scorecard in a contest you might not even be entered in.
-
-## The robustness toolkit
-
-"Prefer robustness" is the principle. Here are the four concrete tools that put it
-to work — each one a way of choosing without trusting your probabilities.
-
-### 1. Satisficing — good enough beats fragile best
-
-Coined by Herbert Simon from *satisfy* + *suffice*, **satisficing** means setting a
-bar for "good enough" and taking the first option that clears it, rather than
-straining to *maximise*. Under deep uncertainty this isn't laziness — it's wisdom.
-Maximising demands precise comparisons between options, which demands precise inputs
-you don't have; chasing the razor-thin "best" usually means over-fitting to guessed
-numbers and stripping out safety margin to eke out a tiny theoretical edge. A
-good-enough choice with room to spare is more robust than a "perfectly optimised"
-one balanced on invented decimals.
-
-### 2. Robust decision-making — stress-test across scenarios
-
-Instead of finding the best action for your *best-guess* future, flip the process:
-generate *many* plausible futures, then look for the action that holds up
-**acceptably across all of them**. You're not trying to predict which future
-arrives — you're searching for a choice that doesn't need you to. Formally this is
-called robust decision-making; informally it's "which plan doesn't embarrass me in
-*any* of these worlds?" The answer is rarely the plan that's optimal in the most
-likely one.
-
-### 3. Minimax-regret — minimise your worst future kick
-
-**Regret** is the gap between what you got and the best you *could* have gotten in
-that world, in hindsight. **Minimax-regret** says: for each action, find its
-*worst-case regret* across all the futures, then pick the action whose worst-case
-regret is smallest. It's a robustness rule aimed squarely at the "I'll kick myself"
-feeling — it steers you away from choices that are catastrophic in *some* world,
-even if they're dazzling in others. It naturally favours balanced, hedged actions
-over all-in bets on a single scenario.
-
-### 4. The ruin-avoidance / precautionary principle — survival first
-
-This is the one that sits *above* all the others, non-negotiable: **never risk what
-you cannot afford to lose.** Because the game is played through time and ruin is
-absorbing — once you hit zero, you're out for good, with no future bets to recover
-on — avoiding catastrophic, irreversible loss takes priority over *any* gain in
-average performance. This is where the **precautionary principle** earns its keep:
-when an action carries a plausible risk of ruin or irreversible harm, the burden
-shifts to *proving it's safe*, and "but the expected value is positive!" is not a
-defence. Survival is not one objective among many. It's the precondition for
-pursuing every other objective you have.
-
-<Callout variant="warning" title="The rule that sits above every calculation">
-**Ruin-avoidance beats optimisation, always.** A positive average is worthless if
-one of the paths to it passes through zero, because after zero the compounding
-stops forever. Under deep uncertainty — where you can't rule out the catastrophe you
-didn't model — this hardens into a flat rule: *first, make sure you survive every
-world; only then optimise among the survivors.*
-</Callout>
-
-<MatchConcepts
-  client:visible
-  question="Match each robustness tool to what it actually does."
-  pairs={[
-    { term: 'Satisficing', definition: 'Set a "good enough" bar and take the first option that clears it, instead of straining to maximise on inputs you cannot trust.' },
-    { term: 'Robust decision-making', definition: 'Search for the action that performs acceptably across many generated futures, rather than the best action for one guessed future.' },
-    { term: 'Minimax-regret', definition: 'Pick the action whose worst-case hindsight regret, across all futures, is the smallest.' },
-    { term: 'Ruin-avoidance / precaution', definition: 'Refuse any action that risks catastrophic, irreversible loss — survival outranks every gain in average performance.' },
-  ]}
-  explanation="Satisficing drops maximisation for a good-enough bar; robust decision-making optimises across many futures at once; minimax-regret bounds your worst-case regret; and ruin-avoidance is the master rule that puts survival above all optimisation. Together they let you choose well without trusting probabilities you do not have."
-/>
-
-## Isn't this just pessimism?
-
-No — and getting this straight matters, because it's the most common misreading.
-Robustness is **not** "assume the worst and cower." A pure pessimist optimises for
-the *worst* world, which is just as brittle as optimising for the best — it
-sacrifices everything to a scenario that probably won't happen and can leave you
-worse off across the futures that actually arrive. Robustness is subtler: it seeks
-choices that do *well enough across the whole spread*, capping the downside without
-throwing away the upside. It's not betting on disaster; it's *refusing to bet the
-farm on any single forecast.* Think of the antifragile **barbell** you met earlier —
-very safe core plus a small open-upside bet — which is robust and *still captures
-the good tail.* You'll build that machinery out in the next lesson.
-
-<MCQ
-  client:visible
-  question="A robust choice under deep uncertainty is best described as one that…"
+<MCQ client:visible
+  question={"A service plan has costs ten, thirty and forty minutes. The requirement is at most thirty-five in every included condition. Does it pass?"}
   options={[
-    { text: 'Performs acceptably across a wide range of possible futures, capping the downside without assuming disaster is certain', correct: true },
-    { text: 'Maximises the expected value using your single best-guess set of probabilities', correct: false },
-    { text: 'Assumes the worst possible outcome will happen and optimises entirely for it', correct: false },
-    { text: 'Delays the decision until the uncertainty resolves and the odds become clear', correct: false },
-  ]}
-  explanation="Robustness aims for 'acceptable everywhere', not 'best in one world' (that's optimising a guess), not 'braced only for catastrophe' (that's pessimism, itself brittle), and not 'wait forever' (not a decision). It caps the downside across the whole spread of futures while staying open to the good ones — which is exactly why it beats both the optimiser and the pessimist when you can't know which world you'll get."
+  {
+    "text": "Yes: its unweighted mean is below the required ceiling",
+    "correct": false
+  },
+  {
+    "text": "No: the forty-minute condition breaches the requirement",
+    "correct": true
+  },
+  {
+    "text": "No: every condition must have the same service cost",
+    "correct": false
+  }
+]}
+  explanation={"The requirement is applied separately to every listed condition. Forty exceeds thirty-five even though the catalogue mean, eighty divided by three, is lower."}
 />
 
-<Reveal client:visible label="Why does minimax-regret tend to pick more hedged, balanced actions than plain expected value?" buttonLabel="Show the answer">
-Because it's scored on your *worst-case regret*, not your average payoff. An all-in
-bet on one scenario can be spectacular if that scenario lands — but in the worlds
-where it doesn't, your regret (the gap versus what you could have done) is enormous,
-and minimax-regret judges the action by that worst gap. A hedged, balanced action is
-never the single best in any world, so it never *wins* big — but it's also never
-disastrously wrong, so its worst-case regret is small. By minimising the maximum
-regret, the rule systematically steers you toward choices that stay reasonable no
-matter which future shows up, which is precisely the robust posture. It's the
-mathematical shape of "don't put yourself in a position to hate yourself."
-</Reveal>
+## Two objectives on one table
 
-<FillBlank
-  client:visible
-  question="Fill in the core switch."
-  text="Under deep uncertainty you stop asking what is {{optimal|cheapest}} — best in one guessed world — and start asking what is {{robust|popular}} — acceptable across many worlds. Above every calculation sits one rule: avoid {{ruin|effort}}, because a positive average is worthless if a path to it passes through zero."
-  explanation="The switch is from optimality (brittle, tuned to one world) to robustness (acceptable across many). The master constraint is ruin-avoidance: survival first, because there's no compounding after zero."
+Consider a constructed four-hour event service. Plans A/B/C need 80/100/120 worker-minutes of preparation before opening; all are available under a 120-minute preparation budget. Their service costs are unavailable-service minutes during the 240-minute window. Preparation and service cost describe different resources and are not added.
+
+In the initial three conditions, A costs **10/30/40**, B **15/20/30**, and C **0/35/35**. Smaller cost is better. **Minimax cost** chooses the plan with the smallest largest cost: A's maximum is 40, B's 30 and C's 35, so B wins this objective.
+
+**Regret**, in this calculation, is a numerical gap: a plan's cost minus the smallest cost achievable by a feasible plan in that same condition. It is an opportunity-cost comparison, not measured distress. The feasible column minima are **0/20/30**. A's gaps are **10/10/10**; B's are **15/0/0**; C's are **0/15/5**. **Minimax regret** minimizes the largest gap, selecting A with 10 rather than B/C with 15.
+
+<ScenarioDecisionAudit client:visible
+  title={"Compare the two objectives"}
+  instructions={"Bars show the selected measure; their scale stays fixed throughout this case."}
+  cases={[
+  {
+    "id": "desk",
+    "label": "Check-in desk",
+    "window": 240,
+    "unit": "min",
+    "preparationUnit": "worker-min",
+    "scenarios": [
+      {
+        "id": "normal",
+        "label": "Normal, link working"
+      },
+      {
+        "id": "rush",
+        "label": "High load, link working"
+      },
+      {
+        "id": "link",
+        "label": "Normal, link failed"
+      },
+      {
+        "id": "both",
+        "label": "High load, link failed"
+      }
+    ],
+    "plans": [
+      {
+        "id": "a",
+        "label": "A",
+        "preparation": 80,
+        "costs": [
+          10,
+          30,
+          40,
+          60
+        ]
+      },
+      {
+        "id": "b",
+        "label": "B",
+        "preparation": 100,
+        "costs": [
+          15,
+          20,
+          30,
+          90
+        ]
+      },
+      {
+        "id": "c",
+        "label": "C",
+        "preparation": 120,
+        "costs": [
+          0,
+          35,
+          35,
+          70
+        ]
+      }
+    ],
+    "catalogues": [
+      {
+        "id": "initial",
+        "label": "Initial three conditions",
+        "indices": [
+          0,
+          1,
+          2
+        ]
+      }
+    ],
+    "budgets": [
+      {
+        "id": "120",
+        "label": "Initial",
+        "amount": 120
+      }
+    ]
+  }
+]}
+  labels={{
+  "caseLabel": "Case",
+  "catalogueLabel": "Catalogue",
+  "budgetLabel": "Preparation budget",
+  "criterionLabel": "Minimize",
+  "costCriterion": "Worst cost",
+  "regretCriterion": "Worst regret",
+  "planLabel": "Plan",
+  "preparationLabel": "Preparation",
+  "eligibilityLabel": "Preparation eligibility",
+  "eligibleLabel": "Available",
+  "unavailableLabel": "Unavailable",
+  "costLabel": "Cost",
+  "regretLabel": "Regret gap",
+  "worstCostLabel": "Worst cost",
+  "worstRegretLabel": "Worst regret",
+  "benchmarkLabel": "Best feasible cost in each condition",
+  "tableCaption": "Conditional costs and feasible regret gaps",
+  "eligibilityNote": "Eligibility here applies only the preparation budget. No separate service-cost ceiling is applied.",
+  "scaleLabel": "Fixed bar scale",
+  "selectedLabel": "Minimizers",
+  "emptyMessage": "No plan meets this preparation budget. No feasible benchmark or minimizer exists.",
+  "singletonMessage": "Only one plan is available. Its zero regret compares it with itself; its original cost remains.",
+  "tieMessage": "Every tied minimizer is listed; this criterion does not break the tie.",
+  "noValueLabel": "Not applicable"
+}}
+  locale={"en"}
 />
 
-## When to reach for it
+The hindsight benchmark can use a different plan in each column. The team still chooses **one plan before** seeing the condition; it cannot actually switch among those column winners with foreknowledge. The worked comparison is confined to this menu and catalogue. The final workshop will change both.
 
-Reach for robustness the instant you notice your probabilities are guesses rather
-than knowledge — which is most consequential decisions. Ask three questions in
-order: *Can any option ruin me? (If so, cut it, whatever its average.) Which option
-is good enough across the widest range of futures? Which one will I least regret if
-the world surprises me?* Notice that none of the three needs a probability. That's
-the gift of the robustness frame — it lets you decide *well* precisely when you
-can't decide *precisely*.
+<FillBlank client:visible
+  question={"Complete the calculation for this table."}
+  text={"The smallest worst original cost belongs to {{B|A|C}}. The smallest worst regret belongs to {{A|B|C}}. Regret compares with the best {{feasible|most popular|most costly}} plan in the same condition."}
+  explanation={"B’s worst cost is thirty. A’s worst gap is ten. The relevant comparator must have been available; otherwise the numerical opportunity gap answers a different question."}
+/>
 
-Next up: **Buying Back Uncertainty** — the hands-on toolkit for acting robustly in
-the real world: reversibility and option value, margin of safety, small experiments,
-redundancy and slack, scenario thinking, and the pre-mortem.
+## Requirements are choices too
+
+A decision maker may declare a consequence unacceptable and exclude plans that produce it under the evaluated conditions. That is a **hard constraint**. It should specify the consequence, the conditions and the evidence used to assess it. If no plan meets the constraint, report infeasibility and reconsider the plan menu or requirement; a ranking rule cannot manufacture a passing option.
+
+Irreversible consequences can justify strict requirements in a particular decision. They do not make a finite test a proof against all unmodeled harm, or establish everyone's preferences automatically. A low regret score can coexist with a bad outcome: when only one plan is available, it has zero regret against itself regardless of its original cost.
+
+**Satisficing** means taking an option that meets a declared aspiration or acceptability level rather than continuing to seek the highest score. A first passing option is satisfactory **for that test**. Its broader robustness depends on what the test and catalogue cover, while the cost of further search is another consideration.
+
+<MatchConcepts client:visible
+  question={"Match each rule to the quantity or condition it uses."}
+  pairs={[
+  {
+    "term": "Minimax cost",
+    "definition": "Minimize the largest original cost in the included conditions."
+  },
+  {
+    "term": "Minimax regret",
+    "definition": "Minimize the largest gap from the feasible best in the same condition."
+  },
+  {
+    "term": "Hard requirement",
+    "definition": "Exclude a plan if it breaches the declared condition."
+  },
+  {
+    "term": "Satisficing",
+    "definition": "Accept an option that meets the chosen aspiration or test."
+  }
+]}
+  explanation={"These rules can be combined, but they do different jobs. Apply the constraints to determine feasibility before computing regret or choosing a minimizer."}
+/>
+
+## Where the analysis can break
+
+Changing the scenario set can change either recommendation. Removing a feasible alternative can change a regret benchmark even if that alternative was not selected. Neither rule needs scenario probabilities; both still depend on assumptions about costs, constraints and coverage.
+
+Minimizing the worst cost is not a prediction that the worst condition will occur. It is a declared objective. Minimizing regret is not a guarantee of a balanced portfolio or an acceptable original cost. Comparing their trade-offs requires the actual table and the decision maker's priorities.
+
+<MCQ client:visible
+  question={"Only one plan is feasible, and it has a severe cost in a listed condition. What is its minimax-regret score?"}
+  options={[
+  {
+    "text": "It must equal the severe original cost in that condition",
+    "correct": false
+  },
+  {
+    "text": "It cannot be calculated without the scenario probability",
+    "correct": false
+  },
+  {
+    "text": "Zero, because the feasible benchmark is the plan itself",
+    "correct": true
+  }
+]}
+  explanation={"With a singleton feasible menu, each scenario-wise gap is cost minus itself. Zero regret says nothing by itself about whether the original cost is acceptable."}
+/>
+
+<details>
+<summary>Why can removing an unchosen alternative change regret?</summary>
+
+The removed plan might have set the lowest cost in a column without minimizing the worst gap overall. Removing it raises that column's feasible benchmark, which can change other plans' gaps unequally. The final workshop computes the change rather than treating the original benchmark as permanent.
+
+</details>
+
+<MindMap client:visible
+  title={"Audit the calculation"}
+  root={{
+  "label": "Robustness claim",
+  "children": [
+    {
+      "label": "Specify acceptability and evaluated conditions"
+    },
+    {
+      "label": "Apply constraints to the feasible menu"
+    },
+    {
+      "label": "Distinguish original cost from feasible regret"
+    },
+    {
+      "label": "Audit changes in the menu and catalogue"
+    }
+  ]
+}}
+  eyebrow={""}
+/>
+<Quiz client:visible
+  title={"Check the distinctions"}
+  questions={[
+  {
+    "question": "A has worst cost forty and worst regret ten; B has worst cost thirty and worst regret fifteen. Both are feasible. A team minimizes worst cost. Which result follows?",
+    "options": [
+      {
+        "text": "A, because ten is the smallest number in the comparison",
+        "correct": false
+      },
+      {
+        "text": "B, because thirty is the smaller worst original cost",
+        "correct": true
+      },
+      {
+        "text": "A and B tie, because they optimize different quantities",
+        "correct": false
+      }
+    ],
+    "explanation": "For the declared cost objective compare forty with thirty. The regret values answer a different question."
+  },
+  {
+    "question": "A plan meets a test in three listed conditions but fails in a fourth condition that was omitted. What does its original passing result establish?",
+    "options": [
+      {
+        "text": "That the fourth condition cannot occur",
+        "correct": false
+      },
+      {
+        "text": "That the original calculations must be arithmetically wrong",
+        "correct": false
+      },
+      {
+        "text": "That it passed the three-condition test, with limited coverage",
+        "correct": true
+      }
+    ],
+    "explanation": "The original conditional calculation may be correct. Its catalogue did not cover the newly considered failure."
+  },
+  {
+    "question": "Two feasible plans cost M: four/sixteen and N: ten/twelve minutes. What is N’s worst feasible regret?",
+    "options": [
+      {
+        "text": "Six minutes",
+        "correct": true
+      },
+      {
+        "text": "Ten minutes",
+        "correct": false
+      },
+      {
+        "text": "Twelve minutes",
+        "correct": false
+      }
+    ],
+    "explanation": "The feasible column minima are four and twelve. N’s gaps are six and zero, so its worst regret is six."
+  }
+]}
+/>
+
+Next: **Buying Back Uncertainty**, with tools for reversibility, slack and experiments. The applied workshop later asks you to audit the menu and the conditions behind a numerical recommendation.
+
+### Sources and scope
+
+The definitions and menu/catalogue sensitivity follow the selected framework sections of [Anderson and Zachary’s 2022 preprint](https://arxiv.org/abs/2203.01420v1). [RAND’s guide](https://www.rand.org/pubs/tools/TL320/tool/robust-decision-making.html) describes iterative framing, vulnerability analysis and trade-offs. All event costs here are stipulated teaching data, not empirical evidence or a complete RDM study.

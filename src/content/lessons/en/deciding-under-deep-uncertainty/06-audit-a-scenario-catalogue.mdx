@@ -1,0 +1,662 @@
+---
+title: "Audit a Scenario Catalogue"
+description: "Compare worst cost and worst regret, rebuild feasible benchmarks, and test an omitted joint condition without inventing probabilities."
+topic: "en/deciding-under-deep-uncertainty"
+order: 7
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MindMap, RateComparison, ScenarioDecisionAudit } from '@/components/react';
+
+Your event team must prepare one check-in plan. A colleague minimizes the worst outage and picks B. Another minimizes the worst gap from what could have been achieved and picks A. Check the definitions before declaring either spreadsheet broken.
+
+## Set the contract for the comparison
+
+<MCQ client:visible
+  question={"Two calculations use the same cost table and select different plans. What should you check first?"}
+  options={[
+  {
+    "text": "Whether they use the same objective and feasible alternatives",
+    "correct": true
+  },
+  {
+    "text": "Whether the larger spreadsheet includes more decimal places",
+    "correct": false
+  },
+  {
+    "text": "Whether both plans win the same number of scenario columns",
+    "correct": false
+  }
+]}
+  explanation={"A disagreement can come from different objectives or feasible menus rather than an arithmetic error. The complete example below makes both criteria explicit."}
+  pretest={true}
+/>
+
+This is a **constructed case**, with fixed outcomes by assumption. One plan is selected before a four-hour service window. Its **cost** is total minutes when the check-in service is unavailable during those 240 minutes. Smaller is better. None of the cells estimates the probability of a condition or explains its cause.
+
+A single worker prepares the plan before opening. Only **120 worker-minutes** are available initially. A/B/C require 80/100/120. Each is a complete alternative; mixing plans and changing plans after the condition becomes known are excluded. Preparation is a resource constraint; it is not another service outage to add to the cost column.
+
+The initial catalogue contains three conditions. It deliberately leaves out high load combined with a failed link.
+
+| Plan | Preparation in worker-minutes | Normal load, link working | High load, link working | Normal load, link failed |
+|---|---:|---:|---:|---:|
+| A | 80 | 10 | 30 | 40 |
+| B | 100 | 15 | 20 | 30 |
+| C | 120 | 0 | 35 | 35 |
+
+The last three columns are unavailable-service minutes. Choose a criterion before ranking: minimize the largest original cost, or minimize the largest hindsight opportunity gap. They describe different priorities.
+
+## Calculate both objectives completely
+
+For **minimax cost**, first take the largest cost in each row: A has 40, B 30 and C 35. Then minimize those maxima. **B wins with a worst cost of 30 minutes** in this catalogue. This rule does not predict that B's thirty-minute condition will occur.
+
+For **minimax regret**, find the best cost a feasible plan could achieve separately in each condition. The first column's minimum is C's 0; the second is B's 20; the third is B's 30. Subtract those benchmarks from every plan's costs:
+
+| Plan | Normal gap | High-load gap | Failed-link gap | Largest gap |
+|---|---:|---:|---:|---:|
+| A | 10 − 0 = 10 | 30 − 20 = 10 | 40 − 30 = 10 | 10 |
+| B | 15 − 0 = 15 | 20 − 20 = 0 | 30 − 30 = 0 | 15 |
+| C | 0 − 0 = 0 | 35 − 20 = 15 | 35 − 30 = 5 | 15 |
+
+**A wins minimax regret with a largest gap of 10 minutes.** Its original worst cost is still 40. The gap is not an extra charge added to those forty minutes, and “regret” here is not a measurement of emotion.
+
+If `D` is the feasible plan menu, `S` the included conditions and `L(a,s)` a plan's cost, the scenario benchmark is `m(s;D) = min L(a,s)` over plans in `D`. Regret is `R(a,s;D) = L(a,s) − m(s;D)`. For each plan in `D`, minimax cost takes `max L(a,s)` over the conditions in `S`, then selects a plan with the smallest such maximum. Minimax regret makes the same comparison using `max R(a,s;D)`. These definitions require nonempty `D` and `S`.
+
+The benchmark may use a different plan in each column. It is a hindsight comparison: the team must still choose **one plan before** it knows the condition. No feasible plan can deliver the composite 0/20/30 row by magically switching after the fact.
+
+<ScenarioDecisionAudit client:visible
+  title={"Inspect costs, feasibility and regret"}
+  instructions={"Bars show the selected measure; their scale stays fixed throughout this case."}
+  cases={[
+  {
+    "id": "desk",
+    "label": "Check-in desk",
+    "window": 240,
+    "unit": "min",
+    "preparationUnit": "worker-min",
+    "scenarios": [
+      {
+        "id": "normal",
+        "label": "Normal, link working"
+      },
+      {
+        "id": "rush",
+        "label": "High load, link working"
+      },
+      {
+        "id": "link",
+        "label": "Normal, link failed"
+      },
+      {
+        "id": "both",
+        "label": "High load, link failed"
+      }
+    ],
+    "plans": [
+      {
+        "id": "a",
+        "label": "A",
+        "preparation": 80,
+        "costs": [
+          10,
+          30,
+          40,
+          60
+        ]
+      },
+      {
+        "id": "b",
+        "label": "B",
+        "preparation": 100,
+        "costs": [
+          15,
+          20,
+          30,
+          90
+        ]
+      },
+      {
+        "id": "c",
+        "label": "C",
+        "preparation": 120,
+        "costs": [
+          0,
+          35,
+          35,
+          70
+        ]
+      }
+    ],
+    "catalogues": [
+      {
+        "id": "initial",
+        "label": "Initial three conditions",
+        "indices": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "id": "joint",
+        "label": "Includes the joint condition",
+        "indices": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "budgets": [
+      {
+        "id": "120",
+        "label": "Initial",
+        "amount": 120
+      },
+      {
+        "id": "110",
+        "label": "Reduced",
+        "amount": 110
+      },
+      {
+        "id": "80",
+        "label": "Tighter",
+        "amount": 80
+      },
+      {
+        "id": "79",
+        "label": "Below all",
+        "amount": 79
+      }
+    ]
+  }
+]}
+  labels={{
+  "caseLabel": "Case",
+  "catalogueLabel": "Catalogue",
+  "budgetLabel": "Preparation budget",
+  "criterionLabel": "Minimize",
+  "costCriterion": "Worst cost",
+  "regretCriterion": "Worst regret",
+  "planLabel": "Plan",
+  "preparationLabel": "Preparation",
+  "eligibilityLabel": "Preparation eligibility",
+  "eligibleLabel": "Available",
+  "unavailableLabel": "Unavailable",
+  "costLabel": "Cost",
+  "regretLabel": "Regret gap",
+  "worstCostLabel": "Worst cost",
+  "worstRegretLabel": "Worst regret",
+  "benchmarkLabel": "Best feasible cost in each condition",
+  "tableCaption": "Conditional costs and feasible regret gaps",
+  "eligibilityNote": "Eligibility here applies only the preparation budget. No separate service-cost ceiling is applied.",
+  "scaleLabel": "Fixed bar scale",
+  "selectedLabel": "Minimizers",
+  "emptyMessage": "No plan meets this preparation budget. No feasible benchmark or minimizer exists.",
+  "singletonMessage": "Only one plan is available. Its zero regret compares it with itself; its original cost remains.",
+  "tieMessage": "Every tied minimizer is listed; this criterion does not break the tie.",
+  "noValueLabel": "Not applicable"
+}}
+  locale={"en"}
+/>
+
+Start with the initial catalogue and budget 120. Change **Minimize** between worst cost and worst regret. The bars depict the selected quantity on a fixed 0–90-minute scale; the cells retain both original costs and gaps. That scale includes all four authored conditions, including the condition examined later.
+
+<FillBlank client:visible
+  question={"Retrieve the two results before changing the controls."}
+  text={"With the initial three conditions and all plans feasible, B minimizes worst {{cost|regret|preparation}}, while A minimizes worst {{regret|cost|preparation}}. A’s largest gap is {{ten|fifteen|forty}} minutes."}
+  explanation={"B has the smallest row maximum cost, thirty. A has the smallest row maximum regret, ten. Forty is A’s largest original cost, not its regret."}
+/>
+
+## Change the budget and rebuild the benchmark
+
+Now only **110 worker-minutes** are available. A and B remain feasible; C needs 120 and must leave the comparison. Its zero in the normal condition cannot remain the feasible benchmark.
+
+The new column minima are **10/20/30**. A's gaps become **0/10/10**, with maximum 10. B's become **5/0/0**, with maximum 5. **B now minimizes worst regret as well as worst cost.** C was not the previous minimax-regret winner, yet removing it changed the result because it had defined a column benchmark.
+
+Keeping the old 0/20/30 comparator after excluding C would answer a different question: how plans compare with an alternative the team cannot prepare. Use budget 110 in the inspector and check the benchmark row.
+
+<MCQ client:visible
+  question={"Using the initial catalogue, how large is B’s worst regret after the budget excludes C but still allows A and B?"}
+  options={[
+  {
+    "text": "Fifteen unavailable-service minutes",
+    "correct": false
+  },
+  {
+    "text": "Five unavailable-service minutes",
+    "correct": true
+  },
+  {
+    "text": "Ten unavailable-service minutes",
+    "correct": false
+  }
+]}
+  explanation={"The feasible minima are ten, twenty and thirty. B’s costs fifteen, twenty and thirty give gaps five, zero and zero. The largest is five; fifteen incorrectly keeps C’s unavailable zero-cost benchmark."}
+/>
+
+At budget **80**, only A is feasible. Against itself it has zero regret in every included condition, even though its original cost can be substantial. At budget **79**, no plan is feasible. There is no comparator or minimizer to report. “No feasible plan” is a useful result; a reassuring zero would be an arithmetic fiction.
+
+### When to use this check
+
+Recompute the benchmark whenever staffing, permissions, time or another declared constraint changes the menu. Do not confuse an infeasible alternative with a forgone feasible opportunity.
+
+## Add the joint condition
+
+The original catalogue tested high load and link failure separately. It did not test them together. Add the stipulated fourth condition:
+
+| Plan | High load and failed link | Worst cost across all four | Worst regret across all four |
+|---|---:|---:|---:|
+| A | 60 | 60 | 10 |
+| B | 90 | 90 | 30 |
+| C | 70 | 70 | 15 |
+
+Here the fourth benchmark is 60. The new gaps are A0/B30/C10. With budget 120, **A now minimizes both criteria**: its worst cost is 60 and worst regret 10. The worst-cost recommendation changed from B to A. This is sensitivity to a newly included condition, not evidence that the joint condition is likely or that A will prevent all outages.
+
+The fourth column's costs are assumptions, just like the first three. A real team would need evidence for them and a process for questioning omitted conditions. Four columns do not exhaust all futures.
+
+<MCQ client:visible
+  question={"After adding the joint condition, which statements follow from the stipulated table?"}
+  options={[
+  {
+    "text": "A has the smallest worst original cost among the three plans",
+    "correct": true
+  },
+  {
+    "text": "A’s zero gap in the joint condition means it has no outage there",
+    "correct": false
+  },
+  {
+    "text": "B’s worst regret rises because its joint cost is thirty above the feasible best",
+    "correct": true
+  },
+  {
+    "text": "The joint condition is more probable because it changes the chosen plan",
+    "correct": false
+  }
+]}
+  explanation={"A’s worst cost is sixty versus ninety and seventy. B’s joint gap is ninety minus sixty, or thirty. A’s own joint cost remains sixty, and the cost table supplies no probabilities."}
+  allowMultiple={true}
+/>
+
+## A catalogue count is not a chance
+
+Use **35 unavailable minutes** as a descriptive test, not yet a filter. In the initial catalogue A passes in 2/3 entries; B and C pass in 3/3. In the expanded catalogue A passes in 2/4; B and C pass in 3/4. The inspector still applies only the preparation budget: it does not silently enforce this separate test.
+
+Now duplicate the normal condition in the initial catalogue. A passes that duplicate too, so its descriptive fraction rises from 2/3 to 3/4. No new physical condition or probability evidence has appeared.
+
+<RateComparison client:visible
+  title={"Plan A meeting the declared test in catalogue entries"}
+  locale={"en"}
+  scenarioLabel={"Catalogue comparison"}
+  countsLabel={"Passing entries / listed entries"}
+  differenceLabel={"Duplicated catalogue minus original catalogue"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+  scenarios={[
+  {
+    "label": "Same three distinct conditions; one entry repeated",
+    "groups": [
+      {
+        "label": "Normal entry duplicated",
+        "events": 3,
+        "total": 4
+      },
+      {
+        "label": "Original catalogue",
+        "events": 2,
+        "total": 3
+      }
+    ]
+  }
+]}
+/>
+
+A catalogue's unweighted mean also gives each entry a vote. Original means for A/B/C are **80/3, 65/3, 70/3** minutes; B has the lowest. Duplicating the normal entry gives **90/4, 80/4, 70/4**, so C has the lowest. These are valid averages of the specified lists. Calling them expected future costs requires a justified probability-weight model; repeating an entry does not supply one. Neither maximum-cost nor maximum-regret rankings change merely because an identical condition is repeated.
+
+If the 35-minute ceiling is instead a **hard requirement in every included condition**, apply it to feasibility before ranking. B/C meet it in the initial set; A does not. In all four conditions, **none** meets it. A descriptive count, a mandatory requirement and an objective are three different roles for a number.
+
+<Categorize client:visible
+  question={"Sort these claims by what they specify."}
+  buckets={[
+  "Descriptive count",
+  "Hard requirement",
+  "Ranking objective"
+]}
+  items={[
+  {
+    "text": "Plan A passes in two of the three catalogue entries.",
+    "bucket": "Descriptive count"
+  },
+  {
+    "text": "Reject any plan exceeding the ceiling in an included condition.",
+    "bucket": "Hard requirement"
+  },
+  {
+    "text": "Among feasible plans, minimize the largest service cost.",
+    "bucket": "Ranking objective"
+  },
+  {
+    "text": "Among feasible plans, minimize the largest hindsight gap.",
+    "bucket": "Ranking objective"
+  }
+]}
+  explanation={"Counting records summarizes the list. A requirement determines eligibility. An objective ranks what remains. None of them, alone, assigns event probabilities."}
+/>
+
+## Transfer to a second service
+
+Before looking at the worked answer, compare three new plans over a **three-hour window (180 minutes)**. The same conventions apply: choose once before the condition, smaller unavailable-service cost is better, and preparation is separate. The preparation budget is **70 worker-minutes**.
+
+| Plan | Preparation in worker-minutes | Quiet cost | Busy cost |
+|---|---:|---:|---:|
+| D | 45 | 8 | 30 |
+| E | 55 | 18 | 18 |
+| F | 70 | 12 | 22 |
+
+<MCQ client:visible
+  question={"In the second service table, which pairing correctly identifies the worst-cost and worst-regret minimizers at the stated budget?"}
+  options={[
+  {
+    "text": "F minimizes worst cost; E minimizes worst regret",
+    "correct": false
+  },
+  {
+    "text": "E minimizes both worst cost and worst regret",
+    "correct": false
+  },
+  {
+    "text": "E minimizes worst cost; F minimizes worst regret",
+    "correct": true
+  }
+]}
+  explanation={"The cost maxima are thirty, eighteen and twenty-two, selecting E. Feasible column minima are eight and eighteen. D’s gaps are zero/twelve, E’s ten/zero and F’s four/four, selecting F on worst regret."}
+/>
+
+<details>
+<summary>Inspect the worked transfer and a tighter budget</summary>
+
+The feasible benchmarks are **8/18**. Largest gaps are **D12/E10/F4**. E wins worst cost at 18; F wins worst regret at 4. At budget **60**, F leaves the menu and E wins regret with 10. At budget **40**, no plan can be prepared. These outcomes follow from the stated table; there is no claim about a real service's reliability.
+
+<ScenarioDecisionAudit client:visible
+  title={"Audit the second service"}
+  instructions={"Bars show the selected measure; their scale stays fixed throughout this case."}
+  cases={[
+  {
+    "id": "transfer",
+    "label": "Second service",
+    "window": 180,
+    "unit": "min",
+    "preparationUnit": "worker-min",
+    "scenarios": [
+      {
+        "id": "quiet",
+        "label": "Quiet"
+      },
+      {
+        "id": "busy",
+        "label": "Busy"
+      }
+    ],
+    "plans": [
+      {
+        "id": "d",
+        "label": "D",
+        "preparation": 45,
+        "costs": [
+          8,
+          30
+        ]
+      },
+      {
+        "id": "e",
+        "label": "E",
+        "preparation": 55,
+        "costs": [
+          18,
+          18
+        ]
+      },
+      {
+        "id": "f",
+        "label": "F",
+        "preparation": 70,
+        "costs": [
+          12,
+          22
+        ]
+      }
+    ],
+    "catalogues": [
+      {
+        "id": "two",
+        "label": "Two conditions",
+        "indices": [
+          0,
+          1
+        ]
+      }
+    ],
+    "budgets": [
+      {
+        "id": "70",
+        "label": "Initial",
+        "amount": 70
+      },
+      {
+        "id": "60",
+        "label": "Reduced",
+        "amount": 60
+      },
+      {
+        "id": "40",
+        "label": "Tighter",
+        "amount": 40
+      }
+    ]
+  }
+]}
+  labels={{
+  "caseLabel": "Case",
+  "catalogueLabel": "Catalogue",
+  "budgetLabel": "Preparation budget",
+  "criterionLabel": "Minimize",
+  "costCriterion": "Worst cost",
+  "regretCriterion": "Worst regret",
+  "planLabel": "Plan",
+  "preparationLabel": "Preparation",
+  "eligibilityLabel": "Preparation eligibility",
+  "eligibleLabel": "Available",
+  "unavailableLabel": "Unavailable",
+  "costLabel": "Cost",
+  "regretLabel": "Regret gap",
+  "worstCostLabel": "Worst cost",
+  "worstRegretLabel": "Worst regret",
+  "benchmarkLabel": "Best feasible cost in each condition",
+  "tableCaption": "Conditional costs and feasible regret gaps",
+  "eligibilityNote": "Eligibility here applies only the preparation budget. No separate service-cost ceiling is applied.",
+  "scaleLabel": "Fixed bar scale",
+  "selectedLabel": "Minimizers",
+  "emptyMessage": "No plan meets this preparation budget. No feasible benchmark or minimizer exists.",
+  "singletonMessage": "Only one plan is available. Its zero regret compares it with itself; its original cost remains.",
+  "tieMessage": "Every tied minimizer is listed; this criterion does not break the tie.",
+  "noValueLabel": "Not applicable"
+}}
+  locale={"en"}
+/>
+
+</details>
+
+## Recall the decision contract
+
+<MindMap client:visible
+  title={"What supports the recommendation?"}
+  root={{
+  "label": "Scenario decision",
+  "children": [
+    {
+      "label": "Measurement",
+      "children": [
+        {
+          "label": "Cost unit and service window; separate preparation resource"
+        }
+      ]
+    },
+    {
+      "label": "Feasible menu",
+      "children": [
+        {
+          "label": "Apply the stated constraint, then rebuild the scenario-wise comparator"
+        }
+      ]
+    },
+    {
+      "label": "Objective",
+      "children": [
+        {
+          "label": "Worst original cost or worst gap; retain all ties"
+        }
+      ]
+    },
+    {
+      "label": "Catalogue",
+      "children": [
+        {
+          "label": "Included conditions and missing joint conditions; counts are not probabilities"
+        }
+      ]
+    },
+    {
+      "label": "Audit",
+      "children": [
+        {
+          "label": "Change constraints and conditions; distinguish conditional result from real-world evidence"
+        }
+      ]
+    }
+  ]
+}}
+  eyebrow={""}
+/>
+<Quiz client:visible
+  title={"Audit checkpoint"}
+  questions={[
+  {
+    "question": "A budget leaves only one plan. Its worst regret is zero. What can you conclude?",
+    "options": [
+      {
+        "text": "Its original cost is also zero in every condition",
+        "correct": false
+      },
+      {
+        "text": "It matches itself; its original costs still need checking",
+        "correct": true
+      },
+      {
+        "text": "It meets every acceptability requirement automatically",
+        "correct": false
+      }
+    ],
+    "explanation": "A singleton feasible menu has zero regret by subtraction. It can still have unacceptable original costs."
+  },
+  {
+    "question": "In the initial main table, C is excluded at the tighter budget. Which benchmark belongs in the normal condition?",
+    "options": [
+      {
+        "text": "Zero minutes, from C’s original cost",
+        "correct": false
+      },
+      {
+        "text": "Five minutes, from B’s new regret",
+        "correct": false
+      },
+      {
+        "text": "Ten minutes, from feasible plan A",
+        "correct": true
+      }
+    ],
+    "explanation": "The benchmark is the smallest original cost among currently feasible plans. A costs ten; B costs fifteen; C is unavailable."
+  },
+  {
+    "question": "A catalogue repeats one condition. Which summary is necessarily unchanged?",
+    "options": [
+      {
+        "text": "The fraction of entries passing a test",
+        "correct": false
+      },
+      {
+        "text": "The unweighted mean across the entries",
+        "correct": false
+      },
+      {
+        "text": "The maximum cost of each fixed plan",
+        "correct": true
+      }
+    ],
+    "explanation": "Repeating an identical value cannot change a maximum. It can change means and pass fractions by changing entry weights."
+  },
+  {
+    "question": "The transfer budget falls below every plan’s preparation need. What should the analysis show?",
+    "options": [
+      {
+        "text": "No feasible plan and no feasible regret comparator",
+        "correct": true
+      },
+      {
+        "text": "Every plan tied with zero feasible regret",
+        "correct": false
+      },
+      {
+        "text": "The smallest-preparation plan as an exception",
+        "correct": false
+      }
+    ],
+    "explanation": "Without a feasible menu there is no feasible benchmark to subtract. A rule cannot waive the budget on its own."
+  },
+  {
+    "question": "The team adds a credible but low-likelihood condition. Which statement describes minimax cost?",
+    "options": [
+      {
+        "text": "It weights the new condition by its estimated chance",
+        "correct": false
+      },
+      {
+        "text": "It includes that condition’s cost in each row maximum",
+        "correct": true
+      },
+      {
+        "text": "It ignores that condition unless it occurs most often",
+        "correct": false
+      }
+    ],
+    "explanation": "Minimax cost uses maxima across the included set, without probability weights. Choosing or restricting that set remains a substantive modeling choice."
+  },
+  {
+    "question": "Which information is needed before calling a recommendation robust?",
+    "options": [
+      {
+        "text": "The acceptability criterion and included conditions",
+        "correct": true
+      },
+      {
+        "text": "The fact that the selected plan has a reassuring name",
+        "correct": false
+      },
+      {
+        "text": "The constraints defining the available alternatives",
+        "correct": true
+      }
+    ],
+    "explanation": "Robustness needs a stated test, evaluated conditions and a feasible menu. A label does not provide them.",
+    "allowMultiple": true
+  }
+]}
+/>
+
+Next is the **Final Exam**. It combines course concepts with self-contained numerical audits. Submitting an answer locks it during the exam; the final score appears only at the end.
+
+### Sources and limits
+
+[Anderson and Zachary’s 2022 preprint](https://arxiv.org/abs/2203.01420v1) defines minimax costs and feasible-menu regret, and examines sensitivity to alternatives and scenarios. [RAND’s guide](https://www.rand.org/pubs/tools/TL320/tool/robust-decision-making.html) explains framing, vulnerability analysis and why counts of successful futures are not probabilities. The [Green Book 2026](https://www.gov.uk/government/publications/the-green-book--2/the-green-book-2026) supports explicit objectives, feasibility and sensitivity analysis. These sources do not provide the constructed service costs. This finite exercise does not certify a real intervention or cover every future.
