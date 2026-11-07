@@ -1,211 +1,256 @@
 ---
-title: "Shading Your Bid"
-description: The cure for the winner's curse — bid as if you have already won and been told your estimate was the highest, shade your bid down to correct for the selection, and shade deeper the more rivals you face. Plus how the auction format (first-price vs second-price) changes the whole calculation.
+title: "Choose a Bid on a Defined Grid"
+description: "Compare conditional profits across a complete integer bid grid, test precision and ties, and distinguish a maximum from an unattained bound."
 topic: "en/winners-curse"
 order: 4
-minutes: 16
-updated: 2026-07-11
+minutes: 32
+updated: 2026-11-07
 ---
 
-import { Callout, MCQ, MatchConcepts, Reveal, WinnerCurseSim, AuctionSandbox } from '@/components/react';
+import { MCQ, FillBlank, BidCatalogue, Categorize, Callout, MatchConcepts, MindMap, Quiz } from '@/components/react';
 
-The diagnosis from lesson 3 was grim but precise: if you bid your honest estimate,
-winning means you overpaid by a predictable amount. But *predictable* is the magic
-word. A bias you can predict is a bias you can subtract. This lesson is the cure —
-**bid shading** — and the single mental trick that makes it automatic: bidding as if
-you've already won.
+A discount is easy to announce. Choosing the bid that best serves a stated objective takes more work. **Bid shading** means bidding below a value reference; it is not a universal percentage or proof that the remaining offer is profitable.
 
-<MCQ
-  client:visible
-  pretest
-  question="Before we start — take a guess. To defend against the winner's curse, how should you set your bid relative to your honest estimate of the common value?"
-  options={[
-    { text: 'Below your estimate — shade it down — and shade more the more rivals you face', correct: true },
-    { text: 'Exactly at your estimate; it is unbiased, so it is the fair price', correct: false },
-    { text: 'Above your estimate, to make sure you win against tough competition', correct: false },
-    { text: 'At your estimate, but only when there are many bidders', correct: false },
-  ]}
-  explanation="It's the first, and both halves matter. Shade DOWN, because winning means your estimate was probably too high, so your raw estimate is a systematic overpayment. And shade MORE with more rivals, because a bigger field means the winning estimate is a more extreme overshoot. Bidding at your estimate walks straight into the curse; bidding above it sprints into it."
+Here you will compare every allowed whole-credit bid in a small constructed auction. The task is to choose before the uncertain state is known, not to inspect the outcome and then pick a price. Later you will change the permitted increment and the catalogue itself.
+
+## Fix the information and the allowed actions
+
+A sealed lot has an uncertain common gross value $V$: the same value to either bidder before payment. Our information $I$ is the complete hypothetical joint catalogue below. The actual row is unknown before bidding. Its relative weights define probabilities after normalization; they are not counts from three observed auctions.
+
+All value, bids and profit use fictional **credits**, abbreviated **cr**. We prefer the largest expected net credit amount, with linear utility and no extra risk or budget constraint.
+
+| State given our information | Gross value V in cr | Highest fixed rival bid R in cr | Probability weight |
+| --- | ---: | ---: | ---: |
+| Low | 80 | 70 | 1 |
+| Middle | 120 | 110 | 1 |
+| High | 160 | 150 | 1 |
+
+Each row has probability $1/3$, so $E[V\mid I]=(80+120+160)/3=120$ cr. This is a value assessment conditional on our information, not an assumption that an observed signal is unbiased.
+
+We may submit any **integer** bid from $0$ through $200$ cr. A zero bid means abstention: no lot, no payment and zero profit for us. A positive bid $b$ wins only if $b>R$; **ties lose**. This is first price: if awarded the lot, we pay our own bid. Otherwise our profit is zero. There are no entry fees, reserves, handling costs or additional outcomes. The rival rule stays fixed across our candidate choices. A **best response** here is the permitted action with the highest expected net profit against that stipulated rival rule.
+
+Try a bid of $95$ cr, below the earlier mean of $120$ cr.
+
+<MCQ client:visible
+  pretest={true}
+  question="Which states does the discounted test bid win under the stated rule?"
+  options={[{"text":"Only the low state.","correct":true},{"text":"The low and middle states."},{"text":"All states because it is below the earlier mean."},{"text":"No state because it is a discounted bid."}]}
+  explanation="The offer beats the low rival bid but not the middle or high rival bids. Winning depends on the rival column, not on whether the offer is below the earlier mean."
 />
 
-## Bid as if you've already won
+The sole award has gross value $80$ cr and costs $95$ cr: net profit $80-95=-15$ cr. That award occurs with probability $1/3$, so expected profit per opportunity is $(-15)/3=-5$ cr. “Below our earlier mean” has not prevented an expected loss.
 
-Here's the trick that turns the whole model into a reflex. Don't ask "what's my best
-estimate right now?" Ask the stranger, more powerful question:
+Use a complete catalogue when you want to expose what a proposed bid wins. Its joint rows matter: separate averages of value and rival bids would not recover their relationship. A real application would need evidence for that relationship and for the stated costs and constraints.
 
-> **"Suppose I've already won. Suppose I've been told my estimate was the highest of
-> everyone's. Given *that*, what is this thing really worth?"**
+<FillBlank client:visible
+  text="The candidate is chosen {{before|after}} observing the actual row. A winning row pays {{our own bid|the earlier mean value}}. The expected opportunity average retains {{all probability weights|only winning probability weights}}."
+  explanation="The bid is a policy chosen under uncertainty. First price determines payment on awards; losing rows still belong in the opportunity average with zero profit."
+/>
 
-That mental time-travel is the entire cure. In lesson 3 you learned that winning
-implies your estimate was near the top of the pile, which implies it overshot the
-truth. So imagine you're standing in the winner's shoes *before you bid*, absorb the
-bad news that your estimate was the optimistic one, revise your value **downward** to
-what it's probably worth given you won — and bid *that* lower number. You've priced in
-the curse before it can happen.
+## Rebuild the event when the bid changes
 
-The beauty of this framing is that it makes the correction feel natural instead of
-paranoid. You're not timidly lowballing. You're refusing to be fooled by the one
-scenario that matters — the scenario where you win — because that's the only scenario
-in which your bid ever gets you anything. A bid that would be a disaster *if you win*
-is simply a bad bid, no matter how reasonable it looks in the average case.
+A bid acts like a filter over the catalogue. Raising the filter can admit additional rows, while also increasing the amount paid on every row it wins. The analogy is limited: the rows here are stipulated possibilities, not objects whose values change when the filter moves.
 
-<Callout variant="tip" title="The one-sentence version">
-Bid shading is bidding below your honest estimate to correct for the fact that
-winning means you overestimated — and the trick that makes it automatic is to value
-the prize *as if you'd already won and learned your estimate was the highest*, then
-bid that lower number.
+Let $W_b=\{R<b\}$ be the award event for a positive bid. The net profit $\Pi_b$ is $V-b$ on that event and zero otherwise. With a positive award probability,
+
+$$E[\Pi_b\mid I]=P(W_b\mid I)\left(E[V\mid I,W_b]-b\right).$$
+
+The winning conditional mean averages only awarded rows. Expected profit per opportunity averages all rows, including unawarded rows with zero profit. If no row wins, the winning conditional mean is undefined; the opportunity profit is still zero. Compute it directly rather than inventing a conditional value of zero.
+
+Compare these candidates:
+
+| Bid in cr | Winning states | Award probability | Gross value if awarded in cr | Profit if awarded in cr | Expected profit per opportunity in cr |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 0, abstain | None | 0 | — | — | 0 |
+| 70 | None, low tie lost | 0 | — | — | 0 |
+| 71 | Low | 1/3 | 80 | 9 | 3 |
+| 80 | Low | 1/3 | 80 | 0 | 0 |
+| 95 | Low | 1/3 | 80 | −15 | −5 |
+| 111 | Low and middle | 2/3 | 100 | −11 | −22/3 |
+| 151 | All | 1 | 120 | −31 | −31 |
+
+At $71$, the winning margin is $80-71=9$, and $(1/3)\times9=3$ cr per opportunity. At $80$, the bid equals its own selected conditional gross value, leaving zero. That is break-even, **not** the best feasible result. A conditional-value adjustment alone has not solved the optimization.
+
+At $111$, the selected gross mean is $(80+120)/2=100$, so the conditional margin is $100-111=-11$. Weighting by $2/3$ gives $-22/3$. The conditional mean now divides by two selected weights; the opportunity average still divides by three.
+
+<BidCatalogue client:visible
+  states={[{"label":"Low","value":80,"rivalBid":70,"weight":1},{"label":"Middle","value":120,"rivalBid":110,"weight":1},{"label":"High","value":160,"rivalBid":150,"weight":1}]}
+  bids={[0,70,71,80,95,110,111,150,151]}
+  paymentRule="first-price"
+  winningCost={0}
+  initialBid={95}
+  profitLimit={60}
+  locale="en"
+  unit="cr"
+  title="Reference catalogue"
+  caption="Nine representative bids; the interval proof covers all allowed integers."
+/>
+
+Use the conditional account to understand an award. Use the whole-opportunity account to choose before the state is known. Recompute both when changing a bid; there is no single selected value that remains correct for every candidate.
+
+<MCQ client:visible
+  question="For the candidate just above the lowest rival threshold, which pair gives its winning margin and then its expected opportunity profit?"
+  options={[{"text":"Nine credits, then three credits.","correct":true},{"text":"Three credits, then nine credits."},{"text":"Nine credits, then nine credits."},{"text":"Eighty credits, then one third of a credit."}]}
+  explanation="Only the low state wins. Its value minus the own bid is nine; weighting the award by one third gives three. The other two rows contribute zero."
+/>
+
+## Cover the whole integer grid
+
+You do not need to inspect two hundred similar rows by eye. Between rival thresholds, the winning set stays fixed. Inside such a band, increasing the first-price bid raises payment without admitting a new state. Expected profit therefore decreases strictly on every band with a positive chance of an award.
+
+The lower endpoint that actually **wins** is the candidate to check in each band. Lost ties make it the next permitted integer, not the rival amount itself.
+
+| Admissible bids in cr | Winning set | Expected profit in cr | Best candidate in that band | Its expected profit in cr |
+| --- | --- | --- | ---: | ---: |
+| 0 | Abstain | 0 | 0 | 0 |
+| 1 through 70 | None | 0 | Every bid in this band | 0 |
+| 71 through 110 | Low | (80 − b)/3 | 71 | 3 |
+| 111 through 150 | Low and middle | (200 − 2b)/3 | 111 | −22/3 |
+| 151 through 200 | All | 120 − b | 151 | −31 |
+
+For the middle band, add both winning profits and retain all three opportunity weights:
+
+$$\frac{(80-b)+(120-b)+0}{3}=\frac{200-2b}{3}.$$
+
+For the last band every state wins, giving $(80+120+160-3b)/3=120-b$. The bands and abstention cover all $201$ integer actions. Comparing their best values gives $3>0>-22/3>-31$, so **the unique best integer bid is $71$ cr**, with expected profit $3$ cr per opportunity under this model.
+
+Do not read “decreases within a band” as “decreases everywhere.” A move from $110$ to $111$ admits the middle state: expected profit jumps from $-10$ to $-22/3$, an increase. The jump remains below the global maximum. You must compare the starts of all winning bands, not assume the first threshold always wins.
+
+A later workshop uses the same reference catalogue but the narrower menu $\{0,75,95,120,155\}$. Its best first-price candidate is $75$, with $(80-75)/3=5/3$ cr. It does not allow $71$. Both conclusions are correct for their different comparison sets; the later exam's finite-menu question keeps that narrower menu.
+
+Use interval reasoning when the payment rule and winning set make profit simple between thresholds. Entry costs, alternative tie rules or rival responses can change that structure.
+
+Test an unplotted bid of $100$ cr.
+
+<FillBlank client:visible
+  question="Complete the unplotted candidate’s account"
+  text="Its winning margin is {{minus twenty credits|minus twenty thirds of a credit|zero credits}}. Its expected profit per opportunity is {{minus twenty thirds of a credit|minus twenty credits|zero credits}}."
+  explanation="Only the low state wins. Its margin is eighty minus one hundred, a loss of twenty. Divide by the total weight of three to obtain minus twenty thirds; the unplotted candidate is still an admissible action."
+/>
+
+## Specify precision before claiming a maximum
+
+A staircase has a first step above a mark. A continuous ramp has no first point strictly above that mark. This analogy concerns the set of permitted actions, not a physical claim about auction systems.
+
+A **maximum** is a payoff achieved by an admissible action that does at least as well as every alternative. A **supremum** is the smallest value that no possible payoff exceeds; an action need not achieve it. A nonempty finite menu has a maximum. Changing the permitted precision changes that menu.
+
+For the same reference catalogue and strict first-price rule:
+
+| Permitted increments | Lowest winning bid above the low rival in cr | Best expected profit in cr |
+| --- | ---: | ---: |
+| Whole credit | 71 | 3 |
+| Half credit | 70.5 | 19/6 |
+| Quarter credit | 70.25 | 13/4 |
+
+The half-credit result is $(80-70.5)/3=19/6$. The quarter-credit result is $(80-70.25)/3=13/4$. In each finite grid, the other winning bands still give negative values and no-award actions give zero, so these are its global maxima.
+
+Now allow arbitrary real bids in $[0,200]$. On the low-only winning interval $70<b\le110$, write $b=70+\varepsilon$, where $0<\varepsilon\le40$:
+
+$$E[\Pi_b\mid I]=\frac{10-\varepsilon}{3}<\frac{10}{3}.$$
+
+As positive $\varepsilon$ approaches zero, profit approaches $10/3$. But a bid of exactly $70$ loses the tie and gives zero. It does not attain that limiting payoff.
+
+Every low-only winning bid has a smaller winning alternative: $(70+b)/2$ remains strictly above $70$ and lowers payment. The other winning intervals give negative payoffs; no-award actions give zero. Therefore $10/3$ is the global supremum, **with no maximizing real bid** in this constructed model. The missing maximum comes from the strict allocation jump, not from failing to search hard enough.
+
+Use this boundary to ask what precision, tie-breaking and submission rules actually permit. It is a mathematical reason to specify the protocol before naming an optimum, not a recipe for submitting infinitesimal real-world offers.
+
+<Categorize client:visible
+  question="Distinguish an achieved result from a bound"
+  buckets={["Attained maximum","Unattained supremum","Neither"]}
+  items={[{"text":"The expected profit achieved by the best whole-credit action in the stated reference problem.","bucket":"Attained maximum"},{"text":"The limiting profit with arbitrary real bids and lost ties in this reference problem.","bucket":"Unattained supremum"},{"text":"The zero profit from the bid that exactly ties the lowest rival.","bucket":"Neither"},{"text":"The earlier mean gross value before selecting an award event.","bucket":"Neither"}]}
+  explanation="The integer grid attains its highest expected profit. The real model approaches its least upper bound without attaining it. Another upper bound need not be the supremum; the earlier gross mean is not that least bound."
+/>
+
+## Transfer to different values and weights
+
+Return to the original integer grid, first-price payment, lost ties and zero outside option. In a separate constructed problem, our information $J$ specifies a different catalogue:
+
+| State given the new information | Gross value in cr | Highest fixed rival bid in cr | Probability weight |
+| --- | ---: | ---: | ---: |
+| Lower | 70 | 60 | 1 |
+| Higher | 130 | 90 | 3 |
+
+The lower row has probability $1/4$ and the higher $3/4$. The earlier mean is $(70+3\times130)/4=115$ cr. These weights remain attached to their rows whether one state wins or both do.
+
+Before opening the solution, compute the winning set and expected profit for bids $61$, $90$ and $91$. Then cover all integer bands and compare their maxima with abstention. Do not transplant the reference problem's choice of the lowest winning threshold.
+
+<MCQ client:visible
+  question="For the higher candidate that beats both rivals in this transfer, what is expected profit per opportunity?"
+  options={[{"text":"Twenty-four credits.","correct":true},{"text":"Nine credits."},{"text":"Nine quarters of a credit."},{"text":"Ninety-six credits."}]}
+  explanation="The low-state profit is minus twenty-one with weight one, and the high-state profit is thirty-nine with weight three. Their weighted sum is ninety-six; divide by four to get twenty-four. Equal weighting would give nine."
+/>
+
+<details>
+<summary>Check the complete weighted comparison</summary>
+
+| Bid in cr | Winning states | Award probability | Gross value if awarded in cr | Winning profit mean in cr | Expected profit per opportunity in cr |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 0, abstain | None | 0 | — | — | 0 |
+| 60 | None, lower tie lost | 0 | — | — | 0 |
+| 61 | Lower | 1/4 | 70 | 9 | 9/4 |
+| 90 | Lower, higher tie lost | 1/4 | 70 | −20 | −5 |
+| 91 | Both | 1 | 115 | 24 | 24 |
+
+For $61$, only the lower row wins: $(70-61)/4=9/4$. At $90$, that same row contributes $(70-90)/4=-5$; the higher tie loses. At $91$ both rows win:
+
+$$\frac{(70-91)+3(130-91)}{4}=\frac{-21+117}{4}=24.$$
+
+The complete bands are:
+
+| Admissible bids in cr | Expected profit in cr | Best candidate in band | Its expected profit in cr |
+| --- | --- | ---: | ---: |
+| 0 through 60 | 0 | Every bid in this band | 0 |
+| 61 through 90 | (70 − b)/4 | 61 | 9/4 |
+| 91 through 200 | 115 − b | 91 | 24 |
+
+Within each positive-award band profit decreases. Their best values are $9/4$ and $24$, with zero outside. The unique best integer bid is therefore $91$, not the first winning threshold. Crossing that second threshold adds a heavily weighted valuable state, so the increase in expected value outweighs the higher own payment. It still loses $21$ cr if the lower state occurs: maximizing expected profit does not promise a profit on every award.
+
+</details>
+
+<BidCatalogue client:visible
+  states={[{"label":"Lower","value":70,"rivalBid":60,"weight":1},{"label":"Higher","value":130,"rivalBid":90,"weight":3}]}
+  bids={[0,60,61,90,91]}
+  paymentRule="first-price"
+  winningCost={0}
+  initialBid={61}
+  profitLimit={60}
+  locale="en"
+  unit="cr"
+  title="Unequal-weight catalogue"
+  caption="Representative bids; the solution compares every permitted interval."
+/>
+
+Use this transfer to test whether your method survives a changed conditional distribution. “Choose the lowest winning threshold” happened to work in the reference case. It was a conclusion to prove, not the method itself.
+
+## Keep the strategy claim within its model
+
+A common subtraction from every bidder is a different exercise from choosing our bid while rival bids stay fixed. For example, subtracting ten from offers of eighty and ninety gives seventy and eighty: the ranking is unchanged. In general, $p_i-c>p_j-c$ exactly when $p_i>p_j$. Such a shared offset does not establish that one bidder wins less often or that its bid is a best response.
+
+Nor does more competition determine a universal discount direction. A changed rival field requires a new joint account of information, rival behavior and payment. An **equilibrium** requires mutually consistent choices by the bidders; optimizing only our action against an imposed rival rule does not establish one.
+
+The private-value second-price truth-telling result has its own conditions: a known personal value and a payment fixed by rival bids on an awarded state. It does not establish that bidding an earlier common-value mean is optimal. [MIT's auction lecture](https://ocw.mit.edu/courses/14-271-industrial-organization-i-fall-2022/mit14_271_f22_lec22slides.pdf) separates these information and format settings. The [Royal Swedish Academy's account](https://www.kva.se/en/news/ekonomipriset-2020-2/) likewise places bidding in the context of what each bidder knows and believes others know. Neither source supplies this invented catalogue or its grid optimum.
+
+Finally, zero awards are not intrinsically a failure. In our reference model abstention forgoes a better feasible action. If every feasible positive-award action instead had lower expected net value than the outside option, declining those awards could be best. A win count alone does not tell you which comparison applies.
+
+<Callout variant="warning" title="A precise answer needs precise conditions">
+The integer result uses the declared catalogue, weights, fixed rival bids, lost ties, first-price payments, feasible grid and zero outside option. A new fee, constraint, information source or rival response can change the choice. Recompute the comparison rather than reuse the numerical discount.
 </Callout>
 
-## More rivals mean shading *more*
+Without looking back, explain why the discounted test bid loses in expectation, why conditional break-even is not the optimum, and why a finer grid can improve the value while an arbitrary real set has no maximizing bid here.
 
-Now the counter-intuitive part, and the one that separates people who *understand*
-the model from people who've merely heard of it. How deep should you shade? It depends
-on the number of rivals — and in the opposite direction from your instinct.
-
-Your gut says: *tougher competition, bid harder.* In a private-value auction (lesson
-2), that's roughly right — you have to bid closer to your true value to win. But in a
-**common-value** auction it's exactly backwards. The more bidders you face, the
-**deeper you shade**, because:
-
-- Winning against **20** rivals means your estimate beat twenty others — a far more
-  extreme overshoot than beating **2** rivals. So the "given I won" correction is
-  bigger, and you subtract more.
-- Recall the numbers from lesson 3: the winner's expected overshoot grew from \$10M
-  (2 bidders) toward \$29M (20 bidders). The shade has to grow to match it.
-
-So the model's signature paradox is this: **in a common-value auction, more
-competition should make you bid *less* aggressively per signal, not more.** The
-crowded room isn't a reason to reach higher — it's a reason to pull back, because a
-win in a crowded room is a louder alarm that you're the optimist. Most people do the
-reverse: they see a bidding war heating up, feel the pressure, and bid *up*, which is
-pouring fuel on the exact fire the model warns about.
-
-<MCQ
-  client:visible
-  question="You're bidding on a common-value asset. Late in the process you learn the number of serious rival bidders has jumped from 3 to 15. How should this change your bid per unit of your estimate?"
-  options={[
-    { text: 'Shade DOWN more aggressively — with 15 rivals, winning is stronger evidence you overestimated, so the correction should be bigger', correct: true },
-    { text: 'Bid UP — more competition means you must reach higher to win', correct: false },
-    { text: 'No change — the number of rivals is irrelevant once you have your estimate', correct: false },
-    { text: 'Withdraw entirely; any auction with 15 bidders is unwinnable', correct: false },
-  ]}
-  explanation="Shade down harder. This is the paradox at the core of the model: in COMMON value, more rivals make winning a bigger red flag (the winning estimate is the max of more draws), so you subtract more, not less. Bidding up because 'it's competitive now' is the classic curse-inducing mistake. And withdrawing entirely over-corrects — the goal is the right bid, not zero bids."
+<MatchConcepts client:visible
+  question="Recover the decision procedure"
+  pairs={[{"term":"Winning event","definition":"The states awarded to a specified candidate under its allocation and tie rules."},{"term":"Conditional margin","definition":"Mean net profit among the awarded states only."},{"term":"Opportunity profit","definition":"The probability-weighted net result across all states, including no-award outcomes."},{"term":"Feasible set","definition":"All actions permitted by the bid range and precision rules."},{"term":"Maximum","definition":"A highest payoff attained by an allowed action."},{"term":"Supremum","definition":"The least upper bound, which an allowed action need not attain."}]}
 />
 
-## The format changes everything
-
-*How* the auction is run — its **mechanism** — changes how the curse works and how
-you should respond. This is where mechanism design meets the winner's curse. The two
-canonical formats behave very differently.
-
-In a **first-price** auction you pay **your own bid**. Bidding your true estimate
-locks in zero surplus even before the curse, so you *must* shade below it — both for
-ordinary profit and to correct for the selection. The shading you learned above is a
-first-price idea.
-
-In a **second-price (Vickrey)** auction you pay the **runner-up's bid**, not your
-own. This famously makes bidding your true *private* value a dominant strategy,
-because the price you pay never depends on your own bid. But — and this is the subtle
-part — in a **common-value** second-price auction the winner's curse **still bites**,
-because the price you pay (the second-highest bid) is still correlated with everyone
-overestimating. A naive bidder who bids their raw estimate in a common-value
-second-price auction can still overpay. The format blunts the curse relative to
-first-price and simplifies the strategy, but it does **not** make it disappear when
-the value is common and uncertain.
-
-Play with the mechanism directly. This sandbox is a clean, single-shot auction: set
-your true value, your bid, and the top rival bid, and watch who wins, what price is
-paid, and whether your bid was a best response.
-
-<AuctionSandbox
-  client:visible
-  title="First-price vs second-price: how the format shapes your bid"
-  caption="Start in second-price: notice that bidding your value never lets you overpay, because you pay the runner-up's bid — the strategy is simple. Switch to first-price: now bidding your value locks in zero surplus, so you must shade below it. In a COMMON-value world (this course), you shade below your ESTIMATE on top of that, because winning itself is evidence your estimate was too high. The format sets the baseline; the curse adds the extra shade."
+<MindMap client:visible
+  title="From a discount to a complete choice"
+  root={{"label":"Choose a conditional bid","children":[{"label":"Specify the problem","children":[{"label":"Known information and joint weights"},{"label":"Fixed rivals, payment and lost ties"},{"label":"Bid range, increments and outside option"}]},{"label":"Calculate each event","children":[{"label":"Refilter when the candidate changes"},{"label":"Winning margin versus opportunity value"},{"label":"No award has no conditional mean"}]},{"label":"Cover the action set","children":[{"label":"Decreasing profit within fixed-event bands"},{"label":"Lowest bid per band and outside"},{"label":"A narrower menu can have another optimum"}]},{"label":"Test the boundary","children":[{"label":"Precision changes allowed actions"},{"label":"A real supremum need not be attained"},{"label":"New weights can favor a later threshold"}]}]}}
 />
 
-Two lessons from the sandbox. First, the **format sets your baseline strategy**:
-second-price says "bid your value," first-price says "shade below it." Second, the
-**winner's curse adds an extra shade on top** whenever the value is common and
-uncertain, because your *estimate* itself is suspect the moment you win. Good
-mechanism design (second-price, Vickrey, well-structured formats) reduces the burden
-on the bidder, but in common-value settings it never fully relieves you of the duty
-to correct for winning.
-
-## Watch the shade defuse the curse
-
-Back to the winner's-curse lab — but now with the shading toggle. Run ×50 with naive
-bidding and note the negative average profit (the curse). Then flip to **shaded** and
-run ×50 again. The shading rule subtracts exactly the selection correction, and the
-winner's average profit climbs back toward zero.
-
-<WinnerCurseSim
-  client:visible
-  title="Flip the shade on and watch the curse melt"
-  caption="First, naive bidding: run ×50 and note the negative average profit — the curse in action. Now switch the bidding rule to 'Shaded' and run ×50 again. The average profit rises to about zero: the shade (which grows with both the noise and the number of rivals) cancels the selection bias almost exactly. Crank the bidders up and notice the shade the readout reports gets DEEPER — more rivals, more correction."
-  initialBidders={8}
-  initialNoise={30}
+<Quiz client:visible
+  title="Check the conditional bid choice"
+  questions={[{"question":"At the bid that matches the selected low-state gross value, what is expected net profit per opportunity?","options":[{"text":"Zero credits.","correct":true},{"text":"The earlier mean gross value."},{"text":"Three credits."},{"text":"Nine credits."}],"explanation":"The winning gross value equals the payment, so the winning margin is zero. Losing rows also give zero. This is break-even, while the lower feasible winning bid has positive expectation."},{"question":"A candidate has a winning margin of nine credits and an award probability of one third, with zero profit otherwise. What is expected opportunity profit?","options":[{"text":"Nine credits."},{"text":"Three credits.","correct":true},{"text":"One third of a credit."},{"text":"Twenty-seven credits."}],"explanation":"Multiply the winning margin by its probability: nine times one third gives three. Nine is the conditional margin, not the average over all opportunities."},{"question":"At the upper endpoint of the first band with any awards, which allocation and expected profit follow?","options":[{"text":"Low and middle; minus ten credits."},{"text":"Low only; minus ten credits.","correct":true},{"text":"Low only; minus thirty credits."},{"text":"No award; zero credits."}],"explanation":"A bid of one hundred ten loses the middle-state tie. Only the low state wins, with profit eighty minus one hundred ten, weighted by one third: minus ten."},{"question":"Why can the later workshop correctly choose seventy-five while this integer-grid problem chooses seventy-one?","options":[{"text":"It uses a narrower allowed menu that does not include seventy-one.","correct":true},{"text":"It assigns an extra value to the same low state."},{"text":"It secretly pays the rival rather than the own bid."},{"text":"A larger candidate set cannot change the best achievable value."}],"explanation":"The information and first-price rule can stay fixed while the feasible set changes. Seventy-five is best among the old five candidates; seventy-one is available only in the expanded integer set."},{"question":"What distinguishes a maximum from the real-bid supremum in this example?","options":[{"text":"A maximum is attained; here the least upper bound is approached but unattained.","correct":true},{"text":"A maximum and a supremum are both attained; the boundary bid attains both here."},{"text":"A maximum is a bid and a supremum its profit, so they have different units."},{"text":"A maximum depends on precision; a supremum is the payoff at the boundary bid."}],"explanation":"A maximum requires an attaining bid. Each real low-only winning bid can be lowered while staying strictly above the rival; the boundary itself loses the award."},{"question":"In the unequal-weight transfer, why can the higher threshold give the better integer action?","options":[{"text":"It admits a heavily weighted valuable state whose gain exceeds the extra payment.","correct":true},{"text":"It increases payment on awarded states while leaving the winning set unchanged."},{"text":"It replaces the declared weights by equal weights once both states are awarded."},{"text":"It excludes the lower-value row once our bid crosses the higher rival threshold."}],"explanation":"Within each unchanged winning set a lower own payment helps. Crossing into a new set changes values and probabilities too; the transfer gives twenty-four versus nine quarters."},{"question":"Which changes require rebuilding the decision? Select all that apply.","allowMultiple":true,"options":[{"text":"Rivals change their bidding rule.","correct":true},{"text":"The permitted bid increment changes.","correct":true},{"text":"A fee is charged even without an award.","correct":true},{"text":"An exact fraction is displayed beside an explicitly approximate decimal."}],"explanation":"Rival behavior, feasible bids and payment on losing rows are model inputs. A declared display approximation does not alter the exact underlying comparison."}]}
 />
 
-Notice what the shade does and doesn't do. It doesn't guarantee you win *and* profit —
-you'll win less often now, because you're bidding lower. What it does is make the wins
-you *do* get roughly break-even instead of systematically loss-making. That's the
-trade at the heart of the cure: **you swap a lot of overpriced wins for fewer,
-fairly-priced ones.** In a common-value auction, that's not timidity — it's the
-difference between a business that survives and one that "wins" itself into the
-ground.
-
-<MatchConcepts
-  client:visible
-  question="Match each piece of the cure to what it actually does."
-  pairs={[
-    { term: "Bid as if you've already won", definition: "Value the prize conditional on your estimate being the highest, absorbing the bad news that winning implies you overestimated — then bid that lower number." },
-    { term: "Shade down", definition: "Bid below your honest estimate of the common value, to subtract the predictable overpayment that winning selects for." },
-    { term: "Shade more with more rivals", definition: "Deepen the correction as the field grows, because the winning estimate is the maximum of more draws and overshoots the truth further." },
-    { term: "First-price format", definition: "You pay your own bid, so you must shade below value for surplus — and shade further still to correct for the curse." },
-    { term: "Second-price (Vickrey) format", definition: "You pay the runner-up's bid, which simplifies strategy and blunts the curse — but does NOT eliminate it when value is common and uncertain." },
-    { term: "Don't over-shade", definition: "Correcting so hard you never win anything is its own failure; the goal is the right bid, not zero bids." },
-  ]}
-  explanation="The cure is one idea in several outfits: condition on winning, subtract the resulting overpayment (shade down), and scale that subtraction with the number of rivals. The auction format sets your baseline (pay-own-bid vs pay-runner-up), and even the curse-blunting second-price format leaves a residual correction to make in common value. Throughout, the target is the CORRECT bid — over-shading into permanent losing is just the curse's mirror image."
-/>
-
-## When to use it
-
-Reach for shading whenever you're bidding on uncertain common value and want to
-actually profit from your wins:
-
-- **Estimate, then subtract.** Form your honest estimate of the common value, then
-  subtract a selection correction *before* you bid. Never bid the raw estimate.
-- **Scale the correction to the crowd.** Two rivals, a small shade; twenty rivals, a
-  deep one. Let the size of the field set the depth.
-- **Scale it to the uncertainty too.** The noisier your estimate, the bigger the tail
-  the winner is drawn from, and the harder you shade. Confident, precise value →
-  light shade; murky, speculative value → heavy shade.
-- **Read the format.** In first-price, shade for surplus *and* for the curse. In
-  second-price, strategy is simpler but you still correct for common-value
-  selection.
-
-<Callout variant="warning" title="The trap this sets for you">
-Over-correction is the mirror-image failure. Terrified of the curse, some bidders
-shade so hard they never win a single auction — which isn't discipline, it's just
-losing slowly. The cure is calibration, not retreat: shade *exactly* enough to make
-your wins break-even-or-better, and no more. A bidder who never wins has defeated the
-winner's curse the way you defeat a chess opponent by refusing to play. Lesson 6 is
-partly about finding that middle path.
-</Callout>
-
-## Recap
-
-The cure for the winner's curse is **bid shading**, and the trick that makes it
-automatic is to **bid as if you've already won** — value the prize conditional on
-your estimate being the highest, absorb the implied overestimate, and bid the lower
-number. Shade **more the more rivals you face**, the model's signature paradox that
-in common value, competition should make you bid *less* aggressively per signal, not
-more. The auction **format** sets your baseline: first-price makes you shade below
-value for surplus and then further for the curse; second-price (Vickrey) simplifies
-strategy and blunts the curse but doesn't remove it under common, uncertain value.
-And the whole thing is a calibration, not a retreat — over-shade into never winning
-and you've just found a slower way to lose.
-
-Now that you can diagnose and defuse the curse, let's see it operating at full scale
-in the real world — takeovers, IPOs, spectrum auctions, free agents, hiring, and
-bidding wars. That's lesson 5: **where it bites in the wild.**
+Next: [where it bites in the wild](/winners-curse/04-real-arenas). Carry the model's conditions with you: an observed winner or disappointment still needs an account of information, allocation, payment and alternatives.

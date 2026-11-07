@@ -1,277 +1,326 @@
 ---
-title: "Rebaja tu puja"
-description: El remedio para la maldición del ganador — puja como si ya hubieras ganado y te hubieran dicho que tu estimación era la más alta, rebaja tu puja para corregir la selección y rebájala más cuantos más rivales tengas. Además, cómo el formato de la subasta (primer precio frente a segundo precio) cambia todo el cálculo.
+title: "Elige la puja con incrementos definidos"
+description: "Compara beneficios condicionados en todas las pujas enteras, comprueba precisión y empates, y distingue máximo y cota no alcanzada."
 topic: "es/winners-curse"
 order: 4
-minutes: 16
-updated: 2026-07-11
+minutes: 32
+updated: 2026-11-07
 ---
 
-import { Callout, MCQ, MatchConcepts, Reveal, WinnerCurseSim, AuctionSandbox } from '@/components/react';
+import { MCQ, FillBlank, BidCatalogue, Categorize, Callout, MatchConcepts, MindMap, Quiz } from '@/components/react';
 
-El diagnóstico de la lección 3 fue sombrío pero preciso: si pujas tu estimación
-honesta, ganar significa que pagaste de más en una cantidad predecible. Pero
-*predecible* es la palabra mágica. Un sesgo que puedes predecir es un sesgo que puedes
-restar. Esta lección es el remedio — **la rebaja de la puja (bid shading)** — y el único
-truco mental que lo hace automático: pujar como si ya hubieras ganado.
+Anunciar un descuento es fácil. Elegir la puja que mejor cumple un objetivo declarado exige más trabajo. **La rebaja de la puja (bid shading)** consiste en ofrecer menos que una valoración de referencia; no es un porcentaje universal ni demuestra que la oferta restante sea rentable.
 
-<MCQ
-  client:visible
-  pretest
-  pretestLabel="Antes de leer — arriésgate a adivinar"
-  question="Antes de empezar — arriésgate a adivinar. Para defenderte de la maldición del ganador (winner's curse), ¿cómo deberías fijar tu puja respecto a tu estimación honesta del valor común?"
-  options={[
-    { text: 'Por debajo de tu estimación — rebájala — y rebájala más cuantos más rivales tengas', correct: true },
-    { text: 'Exactamente en tu estimación; es insesgada, así que es el precio justo', correct: false },
-    { text: 'Por encima de tu estimación, para asegurarte de ganar frente a una competencia dura', correct: false },
-    { text: 'En tu estimación, pero solo cuando hay muchos pujadores', correct: false },
-  ]}
+Aquí compararás todas las pujas enteras permitidas en una subasta construida. La decisión se toma antes de conocer el caso que ocurrirá, no después de inspeccionar el resultado. Más adelante cambiarás el incremento permitido y el propio catálogo.
+
+## Fija la información y las acciones permitidas
+
+Un lote cerrado tiene un valor bruto común incierto $V$: el mismo valor para cualquiera de los dos pujadores antes del pago. Nuestra información $I$ es el catálogo conjunto hipotético completo de abajo. No conocemos el caso real antes de pujar. Sus pesos relativos definen probabilidades al normalizarlos; no son recuentos de tres subastas observadas.
+
+Todos los valores, pujas y beneficios usan **créditos** ficticios, abreviados **cr**. Preferimos el mayor importe neto esperado, con utilidad lineal y sin restricciones adicionales de riesgo o presupuesto.
+
+| Caso dada nuestra información | Valor bruto V en cr | Mayor puja rival fija R en cr | Peso de probabilidad |
+| --- | ---: | ---: | ---: |
+| Bajo | 80 | 70 | 1 |
+| Medio | 120 | 110 | 1 |
+| Alto | 160 | 150 | 1 |
+
+Cada caso tiene probabilidad $1/3$, así que $E[V\mid I]=(80+120+160)/3=120$ cr. Es una valoración condicionada a nuestra información, no un supuesto de que una señal observada sea insesgada.
+
+Podemos presentar cualquier puja **entera** de $0$ a $200$ cr. Cero significa abstenerse: no recibimos lote, no pagamos y nuestro beneficio es cero. Una puja positiva $b$ gana solo si $b>R$; **los empates se pierden**. Es primer precio: si nos adjudican el lote, pagamos nuestra propia puja. Si no, el beneficio es cero. No hay comisiones de entrada, precios de reserva, costes de manipulación ni otros resultados. La regla rival se mantiene fija al comparar nuestras candidatas. Buscamos una **mejor respuesta**: la acción permitida que da el mayor beneficio neto esperado frente a esa regla rival estipulada.
+
+Prueba una puja de $95$ cr, inferior a la media anterior de $120$ cr.
+
+<MCQ client:visible
+  pretestLabel="Antes de empezar"
   checkLabel="Comprobar"
-  retryLabel="Inténtalo de nuevo"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
-  explanation="Es la primera, y ambas mitades importan. Rebaja HACIA ABAJO, porque ganar significa que tu estimación probablemente era demasiado alta, así que tu estimación en bruto es un sobrepago sistemático. Y rebaja MÁS con más rivales, porque un campo más grande significa que la estimación ganadora es un exceso más extremo. Pujar en tu estimación entra directo en la maldición; pujar por encima de ella es correr hacia ella."
+  pretest={true}
+  question="¿Qué casos gana la candidata rebajada con la regla indicada?"
+  options={[{"text":"Solo el caso bajo.","correct":true},{"text":"Los casos bajo y medio."},{"text":"Todos, porque es inferior a la media anterior."},{"text":"Ninguno, porque es una puja rebajada."}]}
+  explanation="La oferta supera la puja rival baja, pero no las de los casos medio y alto. Ganar depende de la columna rival, no de que la oferta sea inferior a la media anterior."
 />
 
-## Puja como si ya hubieras ganado
+La única adjudicación tiene valor bruto $80$ cr y cuesta $95$ cr: beneficio neto $80-95=-15$ cr. Se da con probabilidad $1/3$, así que el beneficio esperado por oportunidad es $(-15)/3=-5$ cr. «Por debajo de nuestra media anterior» no ha evitado una pérdida esperada.
 
-Aquí está el truco que convierte todo el modelo en un reflejo. No preguntes «¿cuál es
-mi mejor estimación ahora mismo?». Hazte la pregunta más extraña y más poderosa:
+Usa un catálogo completo para mostrar qué gana una puja propuesta. Importan las filas conjuntas: las medias separadas de valor y puja rival no recuperarían su relación. Una aplicación real necesitaría pruebas de esa relación y de los costes y restricciones declarados.
 
-> **«Supón que ya he ganado. Supón que me han dicho que mi estimación era la más alta de
-> todas. Dado *eso*, ¿cuánto vale realmente esta cosa?»**
+<FillBlank client:visible
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="correctas"
+  text="La candidata se elige {{antes|después}} de observar el caso real. Un caso ganado paga {{nuestra propia puja|el valor medio anterior}}. La media por oportunidad conserva {{todos los pesos de probabilidad|solo los pesos de los casos ganados}}."
+  explanation="La puja es una política elegida bajo incertidumbre. El primer precio determina el pago al ganar; los casos perdidos siguen perteneciendo a la media por oportunidad con beneficio cero."
+/>
 
-Ese viaje mental en el tiempo es todo el remedio. En la lección 3 aprendiste que ganar
-implica que tu estimación estaba cerca de lo más alto del montón, lo que implica que
-superaba la verdad. Así que imagina que estás en los zapatos del ganador *antes de
-pujar*, absorbe la mala noticia de que tu estimación era la optimista, revisa tu valor
-**a la baja** hacia lo que probablemente vale dado que ganaste — y puja *ese* número más
-bajo. Has descontado la maldición antes de que pueda ocurrir.
+## Reconstruye el evento cuando cambia la puja
 
-La belleza de este enfoque es que hace que la corrección se sienta natural en vez de
-paranoica. No estás rebajando tímidamente. Te niegas a dejarte engañar por el único
-escenario que importa — el escenario en el que ganas — porque ese es el único escenario
-en el que tu puja te consigue algo. Una puja que sería un desastre *si ganas* es
-simplemente una mala puja, por muy razonable que parezca en el caso promedio.
+Una puja funciona como un filtro sobre el catálogo. Subirlo puede admitir más filas, pero también aumenta lo pagado en cada fila que gana. La analogía tiene un límite: aquí las filas son posibilidades estipuladas, no objetos cuyo valor cambie al mover el filtro.
 
-<Callout variant="tip" title="La versión de una frase">
-La rebaja de la puja es pujar por debajo de tu estimación honesta para corregir el
-hecho de que ganar significa que sobrestimaste — y el truco que lo hace automático es
-valorar el premio *como si ya hubieras ganado y hubieras sabido que tu estimación era la
-más alta*, y luego pujar ese número más bajo.
+Llamamos $W_b=\{R<b\}$ al evento de adjudicación de una puja positiva. El beneficio neto $\Pi_b$ es $V-b$ en ese evento y cero en los demás casos. Con probabilidad positiva de ganar,
+
+$$E[\Pi_b\mid I]=P(W_b\mid I)\left(E[V\mid I,W_b]-b\right).$$
+
+La media condicionada a ganar promedia solo las filas adjudicadas. El beneficio esperado por oportunidad promedia todas las filas, incluidos los casos sin adjudicación, cuyo beneficio es cero. Si no gana ninguna, la media condicionada no está definida; el beneficio por oportunidad sigue siendo cero. Calcúlalo directamente en vez de inventar un valor condicionado igual a cero.
+
+Compara estas candidatas:
+
+| Puja en cr | Casos ganados | Probabilidad de adjudicación | Valor bruto si se adjudica en cr | Beneficio si se adjudica en cr | Beneficio esperado por oportunidad en cr |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 0, abstenerse | Ninguno | 0 | — | — | 0 |
+| 70 | Ninguno, empate bajo perdido | 0 | — | — | 0 |
+| 71 | Bajo | 1/3 | 80 | 9 | 3 |
+| 80 | Bajo | 1/3 | 80 | 0 | 0 |
+| 95 | Bajo | 1/3 | 80 | −15 | −5 |
+| 111 | Bajo y medio | 2/3 | 100 | −11 | −22/3 |
+| 151 | Todos | 1 | 120 | −31 | −31 |
+
+En $71$, el margen ganador es $80-71=9$ y $(1/3)\times9=3$ cr por oportunidad. En $80$, la puja iguala su propio valor bruto condicionado a ganar y deja cero. Es el punto de equilibrio, **no** el mejor resultado viable. Ajustar el valor condicionado no ha resuelto por sí solo la optimización.
+
+En $111$, la media bruta seleccionada es $(80+120)/2=100$, así que el margen condicionado es $100-111=-11$. Al ponderarlo por $2/3$ da $-22/3$. Ahora la media condicionada divide entre dos pesos seleccionados; la media por oportunidad sigue dividiendo entre tres.
+
+<BidCatalogue client:visible
+  states={[{"label":"Bajo","value":80,"rivalBid":70,"weight":1},{"label":"Medio","value":120,"rivalBid":110,"weight":1},{"label":"Alto","value":160,"rivalBid":150,"weight":1}]}
+  bids={[0,70,71,80,95,110,111,150,151]}
+  paymentRule="first-price"
+  winningCost={0}
+  initialBid={95}
+  profitLimit={60}
+  locale="es"
+  unit="cr"
+  title="Catálogo de referencia"
+  caption="Nueve pujas representativas; la demostración por intervalos cubre todos los enteros permitidos."
+/>
+
+Usa el cálculo condicionado para entender una adjudicación. Usa el cálculo por oportunidad para elegir antes de conocer el caso. Reconstruye ambos al cambiar la puja: no hay un valor seleccionado único que siga siendo correcto para todas las candidatas.
+
+<MCQ client:visible
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Para la candidata inmediatamente superior al menor umbral rival, ¿qué pareja da el margen al ganar y después el beneficio esperado por oportunidad?"
+  options={[{"text":"Nueve créditos y después tres.","correct":true},{"text":"Tres créditos y después nueve."},{"text":"Nueve créditos y después nueve."},{"text":"Ochenta créditos y después un tercio de crédito."}]}
+  explanation="Solo gana el caso bajo. Su valor menos la puja propia da nueve; ponderar la adjudicación por un tercio da tres. Los otros dos casos aportan cero."
+/>
+
+## Cubre toda la rejilla de enteros
+
+No necesitas inspeccionar doscientas filas parecidas a ojo. Entre los umbrales rivales, el conjunto ganador se mantiene fijo. Dentro de uno de esos intervalos, subir la puja a primer precio aumenta el pago sin admitir un caso nuevo. Por tanto, el beneficio esperado disminuye estrictamente en cada intervalo con probabilidad positiva de adjudicación.
+
+La candidata que hay que comprobar es el extremo inferior que realmente **gana** en cada intervalo. Al perder los empates, es el entero permitido siguiente, no la propia cantidad rival.
+
+| Pujas permitidas en cr | Conjunto ganador | Beneficio esperado en cr | Mejor candidata del intervalo | Su beneficio esperado en cr |
+| --- | --- | --- | ---: | ---: |
+| 0 | Abstenerse | 0 | 0 | 0 |
+| De 1 a 70 | Ninguno | 0 | Cualquiera del intervalo | 0 |
+| De 71 a 110 | Bajo | (80 − b)/3 | 71 | 3 |
+| De 111 a 150 | Bajo y medio | (200 − 2b)/3 | 111 | −22/3 |
+| De 151 a 200 | Todos | 120 − b | 151 | −31 |
+
+En el intervalo intermedio, suma ambos beneficios ganadores y conserva los tres pesos por oportunidad:
+
+$$\frac{(80-b)+(120-b)+0}{3}=\frac{200-2b}{3}.$$
+
+En el último ganan todos: $(80+120+160-3b)/3=120-b$. Los intervalos y la abstención cubren las $201$ acciones enteras. Comparar sus mejores valores da $3>0>-22/3>-31$, así que **la única puja entera óptima es $71$ cr**, con beneficio esperado de $3$ cr por oportunidad bajo este modelo.
+
+No leas «disminuye dentro de un intervalo» como «disminuye en todas partes». Pasar de $110$ a $111$ admite el caso medio: el beneficio esperado salta de $-10$ a $-22/3$, un aumento. El salto sigue por debajo del máximo global. Hay que comparar el comienzo de todos los intervalos ganadores, no dar por hecho que siempre vence el primer umbral.
+
+Un taller posterior usa el mismo catálogo de referencia, pero el menú más estrecho $\{0,75,95,120,155\}$. Su mejor candidata a primer precio es $75$, con $(80-75)/3=5/3$ cr. No permite $71$. Ambas conclusiones son correctas para sus distintos conjuntos de comparación; la pregunta del examen posterior sobre el menú finito conserva ese menú más estrecho.
+
+Usa el razonamiento por intervalos cuando la regla de pago y el conjunto ganador hagan sencillo el beneficio entre umbrales. Los costes de entrada, otros desempates o las respuestas rivales pueden cambiar esa estructura.
+
+Prueba una puja de $100$ cr que no aparece en el gráfico.
+
+<FillBlank client:visible
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="correctas"
+  question="Completa el cálculo de la candidata que falta en el gráfico"
+  text="Su margen al ganar es {{menos veinte créditos|menos veinte tercios de crédito|cero créditos}}. Su beneficio esperado por oportunidad es {{menos veinte tercios de crédito|menos veinte créditos|cero créditos}}."
+  explanation="Solo gana el caso bajo. Su margen es ochenta menos cien, una pérdida de veinte. Divide entre el peso total de tres para obtener menos veinte tercios; la candidata que falta en el gráfico sigue siendo una acción permitida."
+/>
+
+## Especifica la precisión antes de afirmar un máximo
+
+Una escalera tiene un primer escalón por encima de una marca. Una rampa continua no tiene un primer punto estrictamente superior. La analogía trata del conjunto de acciones permitidas, no de una propiedad física de los sistemas de subastas.
+
+Un **máximo** es el mayor beneficio posible cuando alguna acción permitida lo alcanza. Un **supremo** es el menor valor que ningún beneficio posible supera; no tiene por qué alcanzarlo ninguna acción. Un menú finito no vacío tiene un máximo. Cambiar la precisión permitida cambia ese menú.
+
+Con el mismo catálogo de referencia y primer precio estricto:
+
+| Incrementos permitidos | Menor puja ganadora por encima del rival bajo en cr | Mejor beneficio esperado en cr |
+| --- | ---: | ---: |
+| Un crédito | 71 | 3 |
+| Medio crédito | 70,5 | 19/6 |
+| Un cuarto de crédito | 70,25 | 13/4 |
+
+El resultado con medios créditos es $(80-70{,}5)/3=19/6$. Con cuartos es $(80-70{,}25)/3=13/4$. En cada rejilla finita, los otros intervalos ganadores siguen dando valores negativos y las acciones sin adjudicación dan cero; por tanto, esos son sus máximos globales.
+
+Permite ahora cualquier puja real en $[0,200]$. En el intervalo que gana solo el caso bajo, $70<b\le110$, escribe $b=70+\varepsilon$, con $0<\varepsilon\le40$:
+
+$$E[\Pi_b\mid I]=\frac{10-\varepsilon}{3}<\frac{10}{3}.$$
+
+Cuando $\varepsilon$ positivo se aproxima a cero, el beneficio se aproxima a $10/3$. Pero una puja exactamente igual a $70$ pierde el empate y da cero. No alcanza ese beneficio límite.
+
+Toda puja que gane solo el caso bajo tiene otra ganadora menor: $(70+b)/2$ sigue siendo estrictamente superior a $70$ y reduce el pago. Los otros intervalos ganadores dan beneficios negativos; las acciones sin adjudicación dan cero. Por tanto, $10/3$ es el supremo global, **sin que exista una puja real que lo maximice** en este modelo construido. La falta de máximo viene del salto estricto de adjudicación, no de haber buscado poco.
+
+Usa este límite para preguntar qué permiten realmente la precisión, el desempate y las reglas de presentación. Es una razón matemática para especificar el protocolo antes de nombrar un óptimo, no una receta para presentar ofertas infinitesimales reales.
+
+<Categorize client:visible
+  instructions="Asigna cada afirmación a su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="correctas"
+  question="Distingue un resultado alcanzado de una cota"
+  buckets={["Máximo alcanzado","Supremo no alcanzado","Ninguno de los dos"]}
+  items={[{"text":"El beneficio esperado que alcanza la mejor acción en créditos enteros del problema de referencia.","bucket":"Máximo alcanzado"},{"text":"El beneficio límite con pujas reales arbitrarias y empates perdidos en este problema de referencia.","bucket":"Supremo no alcanzado"},{"text":"El beneficio cero de la puja que empata exactamente con el menor rival.","bucket":"Ninguno de los dos"},{"text":"El valor bruto medio anterior a seleccionar un evento de adjudicación.","bucket":"Ninguno de los dos"}]}
+  explanation="La rejilla entera alcanza su mayor beneficio esperado. El modelo real se aproxima a su menor cota superior sin alcanzarla. Otra cota superior no tiene por qué ser el supremo; la media bruta anterior no es esa menor cota."
+/>
+
+## Transfiere el cálculo a otros valores y pesos
+
+Vuelve a la rejilla inicial de enteros, el pago a primer precio, los empates perdidos y la alternativa exterior cero. En un problema construido distinto, la información $J$ especifica otro catálogo:
+
+| Caso dada la nueva información | Valor bruto en cr | Mayor puja rival fija en cr | Peso de probabilidad |
+| --- | ---: | ---: | ---: |
+| Menor | 70 | 60 | 1 |
+| Mayor | 130 | 90 | 3 |
+
+El caso menor tiene probabilidad $1/4$ y el mayor $3/4$. La media anterior es $(70+3\times130)/4=115$ cr. Los pesos siguen asociados a sus filas tanto si gana un caso como si ganan ambos.
+
+Antes de abrir la solución, calcula el conjunto ganador y el beneficio esperado de las pujas $61$, $90$ y $91$. Después cubre todos los intervalos enteros y compara sus máximos con abstenerte. No trasplantes la elección del menor umbral ganador del problema de referencia.
+
+<MCQ client:visible
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Para la candidata mayor que supera a ambos rivales en esta transferencia, ¿cuál es el beneficio esperado por oportunidad?"
+  options={[{"text":"Veinticuatro créditos.","correct":true},{"text":"Nueve créditos."},{"text":"Nueve cuartos de crédito."},{"text":"Noventa y seis créditos."}]}
+  explanation="El beneficio del caso menor es menos veintiuno con peso uno, y el del mayor treinta y nueve con peso tres. Su suma ponderada es noventa y seis; divide entre cuatro para obtener veinticuatro. Con pesos iguales daría nueve."
+/>
+
+<details>
+<summary>Comprueba la comparación ponderada completa</summary>
+
+| Puja en cr | Casos ganados | Probabilidad de adjudicación | Valor bruto si se adjudica en cr | Beneficio medio al ganar en cr | Beneficio esperado por oportunidad en cr |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 0, abstenerse | Ninguno | 0 | — | — | 0 |
+| 60 | Ninguno, empate menor perdido | 0 | — | — | 0 |
+| 61 | Menor | 1/4 | 70 | 9 | 9/4 |
+| 90 | Menor, empate mayor perdido | 1/4 | 70 | −20 | −5 |
+| 91 | Ambos | 1 | 115 | 24 | 24 |
+
+En $61$ solo gana el caso menor: $(70-61)/4=9/4$. En $90$ ese mismo caso aporta $(70-90)/4=-5$; el empate mayor se pierde. En $91$ ganan ambos:
+
+$$\frac{(70-91)+3(130-91)}{4}=\frac{-21+117}{4}=24.$$
+
+Los intervalos completos son:
+
+| Pujas permitidas en cr | Beneficio esperado en cr | Mejor candidata del intervalo | Su beneficio esperado en cr |
+| --- | --- | ---: | ---: |
+| De 0 a 60 | 0 | Cualquiera del intervalo | 0 |
+| De 61 a 90 | (70 − b)/4 | 61 | 9/4 |
+| De 91 a 200 | 115 − b | 91 | 24 |
+
+Dentro de cada intervalo con adjudicación, el beneficio disminuye. Sus mejores valores son $9/4$ y $24$, con cero fuera. Por tanto, la única puja entera óptima es $91$, no el primer umbral ganador. Cruzar ese segundo umbral añade un caso de mucho peso y valor, así que la mejora del valor esperado supera el mayor pago propio. Aun así, pierde $21$ cr si ocurre el caso menor: maximizar el beneficio esperado no garantiza obtener beneficio en cada adjudicación.
+
+</details>
+
+<BidCatalogue client:visible
+  states={[{"label":"Menor","value":70,"rivalBid":60,"weight":1},{"label":"Mayor","value":130,"rivalBid":90,"weight":3}]}
+  bids={[0,60,61,90,91]}
+  paymentRule="first-price"
+  winningCost={0}
+  initialBid={61}
+  profitLimit={60}
+  locale="es"
+  unit="cr"
+  title="Catálogo con pesos desiguales"
+  caption="Pujas representativas; la solución compara todos los intervalos permitidos."
+/>
+
+Usa esta transferencia para comprobar si tu método sobrevive a otra distribución condicionada. «Elige el menor umbral ganador» funcionó en el caso de referencia. Era una conclusión que demostrar, no el método en sí.
+
+## Mantén la afirmación estratégica dentro de su modelo
+
+Restar lo mismo a todos los pujadores es un ejercicio distinto de elegir nuestra puja con las rivales fijas. Por ejemplo, restar diez a ofertas de ochenta y noventa da setenta y ochenta: el orden no cambia. En general, $p_i-c>p_j-c$ exactamente cuando $p_i>p_j$. Esa rebaja compartida no demuestra que un pujador gane con menor frecuencia ni que su puja sea una mejor respuesta.
+
+Tampoco más competencia determina una dirección universal de descuento. Un campo rival distinto necesita otro cálculo conjunto de información, comportamiento rival y pago. Un **equilibrio** exige elecciones mutuamente coherentes de los pujadores; optimizar solo nuestra acción frente a una regla rival impuesta no lo establece.
+
+El resultado de pujar el valor verdadero a segundo precio con valor privado tiene sus propias condiciones: un valor personal conocido y un pago fijado por las pujas rivales en un caso adjudicado. No establece que pujar una media anterior de valor común sea óptimo. [La clase de subastas del MIT](https://ocw.mit.edu/courses/14-271-industrial-organization-i-fall-2022/mit14_271_f22_lec22slides.pdf) separa estos entornos de información y formato. La [explicación de la Real Academia Sueca](https://www.kva.se/en/news/ekonomipriset-2020-2/) también sitúa las pujas en lo que cada participante sabe y cree que saben los demás. Ninguna fuente aporta este catálogo inventado ni su óptimo en la rejilla.
+
+Por último, no recibir adjudicaciones no es por sí mismo un fracaso. En nuestro modelo de referencia, abstenerse renuncia a una acción viable mejor. Si todas las acciones viables con adjudicaciones tuvieran en cambio menor valor neto esperado que la alternativa exterior, rechazarlas podría ser lo mejor. El número de victorias no te dice por sí solo qué comparación corresponde.
+
+<Callout variant="warning" label="Advertencia" title="Una respuesta precisa necesita condiciones precisas">
+El resultado entero usa el catálogo declarado, sus pesos, pujas rivales fijas, empates perdidos, pagos a primer precio, rejilla viable y alternativa exterior cero. Una comisión, restricción, fuente de información o respuesta rival nueva puede cambiar la elección. Reconstruye la comparación en lugar de reutilizar el descuento numérico.
 </Callout>
 
-## Más rivales significa rebajar *más*
+Sin volver atrás, explica por qué la candidata rebajada pierde en esperanza, por qué el punto de equilibrio condicionado no es el óptimo y por qué una rejilla más fina puede mejorar el valor mientras el conjunto real arbitrario no tiene aquí una puja que lo maximice.
 
-Ahora la parte contraintuitiva, la que separa a quienes *entienden* el modelo de
-quienes simplemente han oído hablar de él. ¿Cuánto de profundo debes rebajar? Depende
-del número de rivales — y en la dirección opuesta a tu instinto.
-
-Tus tripas dicen: *competencia más dura, puja más fuerte.* En una subasta de valor
-privado (lección 2), eso es más o menos correcto — tienes que pujar más cerca de tu
-valor real para ganar. Pero en una subasta de **valor común (common value)** es
-exactamente al revés. Cuantos más pujadores tengas enfrente, **más profundo rebajas**,
-porque:
-
-- Ganar frente a **20** rivales significa que tu estimación superó a otras veinte — un
-  exceso mucho más extremo que superar a **2** rivales. Así que la corrección de «dado
-  que gané» es mayor, y restas más.
-- Recuerda los números de la lección 3: el exceso esperado del ganador crecía de \$10M
-  (2 pujadores) hacia \$29M (20 pujadores). La rebaja tiene que crecer para igualarlo.
-
-Así que la paradoja característica del modelo es esta: **en una subasta de valor común,
-más competencia debería hacerte pujar *menos* agresivamente por señal, no más.** La sala
-abarrotada no es una razón para apuntar más alto — es una razón para retroceder, porque
-una victoria en una sala abarrotada es una alarma más fuerte de que tú eres el optimista.
-La mayoría de la gente hace lo contrario: ve una guerra de pujas calentándose, siente la
-presión y puja *al alza*, lo cual es echar gasolina al mismísimo fuego contra el que
-avisa el modelo.
-
-<MCQ
-  client:visible
-  question="Estás pujando por un activo de valor común. Ya avanzado el proceso, te enteras de que el número de rivales serios ha saltado de 3 a 15. ¿Cómo debería cambiar esto tu puja por unidad de tu estimación?"
-  options={[
-    { text: 'Rebaja HACIA ABAJO más agresivamente — con 15 rivales, ganar es evidencia más fuerte de que sobrestimaste, así que la corrección debería ser mayor', correct: true },
-    { text: 'Puja AL ALZA — más competencia significa que debes apuntar más alto para ganar', correct: false },
-    { text: 'Sin cambios — el número de rivales es irrelevante una vez que tienes tu estimación', correct: false },
-    { text: 'Retírate por completo; cualquier subasta con 15 pujadores es imposible de ganar', correct: false },
-  ]}
+<MatchConcepts client:visible
   checkLabel="Comprobar"
-  retryLabel="Inténtalo de nuevo"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  explanation="Rebaja hacia abajo con más fuerza. Esta es la paradoja en el núcleo del modelo: en valor COMÚN, más rivales hacen que ganar sea una señal de alarma mayor (la estimación ganadora es el máximo de más extracciones), así que restas más, no menos. Pujar al alza porque «ahora hay competencia» es el clásico error que induce la maldición. Y retirarte por completo sobrecorrige — el objetivo es la puja correcta, no cero pujas."
-/>
-
-## El formato lo cambia todo
-
-*Cómo* se organiza la subasta — su **mecanismo** — cambia cómo funciona la maldición y
-cómo deberías responder. Aquí es donde el diseño de mecanismos (mechanism design) se
-encuentra con la maldición del ganador. Los dos formatos canónicos se comportan de forma
-muy distinta.
-
-En una subasta a **primer precio (first-price)** pagas **tu propia puja**. Pujar tu
-estimación real bloquea un excedente cero incluso antes de la maldición, así que
-*debes* rebajar por debajo de ella — tanto por el beneficio ordinario como para corregir
-la selección. La rebaja que aprendiste arriba es una idea de primer precio.
-
-En una subasta a **segundo precio (second-price / Vickrey)** pagas la **puja del
-segundo**, no la tuya. Esto hace, célebremente, que pujar tu valor *privado* real sea una
-estrategia dominante, porque el precio que pagas nunca depende de tu propia puja. Pero —y
-esta es la parte sutil— en una subasta a segundo precio de **valor común** la maldición
-del ganador **sigue mordiendo**, porque el precio que pagas (la segunda puja más alta)
-sigue estando correlacionado con que todos sobrestimen. Un pujador ingenuo que puja su
-estimación en bruto en una subasta a segundo precio de valor común aún puede pagar de
-más. El formato amortigua la maldición respecto al primer precio y simplifica la
-estrategia, pero **no** la hace desaparecer cuando el valor es común e incierto.
-
-Juega directamente con el mecanismo. Este laboratorio es una subasta limpia, de un solo
-disparo: fija tu valor real, tu puja y la mejor puja rival, y observa quién gana, qué
-precio se paga y si tu puja fue una mejor respuesta.
-
-<AuctionSandbox
-  client:visible
-  title="Primer precio frente a segundo precio: cómo el formato moldea tu puja"
-  caption="Empieza en segundo precio: fíjate en que pujar tu valor nunca te deja pagar de más, porque pagas la puja del segundo — la estrategia es simple. Cambia a primer precio: ahora pujar tu valor bloquea un excedente cero, así que debes rebajar por debajo de él. En un mundo de valor COMÚN (este curso), rebajas por debajo de tu ESTIMACIÓN además de eso, porque ganar en sí mismo es evidencia de que tu estimación era demasiado alta. El formato fija la base; la maldición añade la rebaja extra."
-  instructions="Elige la regla de la subasta y luego fija tu valor real, tu puja y la mejor puja rival. Observa quién gana, qué precio se paga y si tu puja es de verdad la mejor respuesta."
-  eyebrow="Laboratorio de subastas"
-  ruleLabel="Regla de la subasta"
-  firstPriceLabel="Primer precio (pagas tu propia puja)"
-  secondPriceLabel="Segundo precio (pagas la puja del segundo)"
-  valueLabel="Tu valor real"
-  bidLabel="Tu puja"
-  rivalLabel="Mejor puja rival"
-  winWord="ganas"
-  loseWord="pierdes"
-  resultLabel="Resultado"
-  outcomeWinTemplate="{win} el objeto y pagas {price} por algo que vale {value}: un excedente de {surplus}."
-  outcomeLoseTemplate="{lose}: la mejor puja rival {rival} supera tu {bid}, así que te vas con un excedente de {surplus}."
-  analysisLabel="¿Es tu puja la mejor respuesta?"
-  secondPriceTruthfulNote="Pujar exactamente tu valor es una estrategia dominante. Ganas justo cuando es rentable, y el precio que pagas (la puja del segundo) nunca depende de tu propia puja, así que no puedes pagar de más ni renunciar a una victoria rentable."
-  secondPriceOverbidNote="Pujar por encima de tu valor solo puede perjudicarte. Arriesga ganar a un precio del segundo por encima de lo que vale el objeto (excedente negativo) y nunca te consigue nada que de verdad quisieras."
-  secondPriceUnderbidNote="Pujar por debajo de tu valor solo puede perjudicarte. Arriesga perder un objeto del que habrías sacado beneficio y nunca rebaja el precio que pagas cuando ganas: ese precio lo fija el segundo, no tú."
-  firstPriceNote="En una subasta a primer precio pagas tu propia puja, así que pujar tu valor real garantiza cero excedente. Debes rebajar por debajo de tu valor, cambiando una menor probabilidad de ganar por un margen cuando ganas."
-/>
-
-Dos lecciones del laboratorio. Primero, el **formato fija tu estrategia base**: el
-segundo precio dice «puja tu valor», el primer precio dice «rebaja por debajo de él».
-Segundo, la **maldición del ganador añade una rebaja extra encima** siempre que el valor
-es común e incierto, porque tu *estimación* en sí es sospechosa en el momento en que
-ganas. Un buen diseño de mecanismos (segundo precio, Vickrey, formatos bien
-estructurados) reduce la carga sobre el pujador, pero en entornos de valor común nunca te
-libera del todo del deber de corregir por ganar.
-
-## Observa la rebaja desactivar la maldición
-
-De vuelta al laboratorio de la maldición del ganador — pero ahora con el interruptor de
-la rebaja. Ejecuta ×50 con puja ingenua y fíjate en el beneficio medio negativo (la
-maldición). Luego cambia a **rebajada** y ejecuta ×50 de nuevo. La regla de rebaja resta
-exactamente la corrección por selección, y el beneficio medio del ganador vuelve a subir
-hacia cero.
-
-<WinnerCurseSim
-  client:visible
-  title="Activa la rebaja y observa cómo se derrite la maldición"
-  caption="Primero, puja ingenua: ejecuta ×50 y fíjate en el beneficio medio negativo — la maldición en acción. Ahora cambia la regla de puja a «Rebajada» y ejecuta ×50 de nuevo. El beneficio medio sube hasta cerca de cero: la rebaja (que crece tanto con el ruido como con el número de rivales) cancela el sesgo de selección casi exactamente. Sube el número de pujadores y fíjate en que la rebaja que reporta el marcador se vuelve MÁS PROFUNDA — más rivales, más corrección."
-  instructions="Cada pujador estima el mismo valor real oculto y luego puja. La puja más alta gana y paga su propia puja. Celebra subastas y observa el sobrepago medio: ganar significa que fuiste el más optimista."
-  eyebrow="Laboratorio de la maldición del ganador"
-  biddersLabel="Número de pujadores"
-  noiseLabel="Ruido de la estimación (cuánto puede errar cada conjetura)"
-  shadeLabel="Regla de puja"
-  shadeOffLabel="Ingenua (puja tu estimación)"
-  shadeOnLabel="Rebajada (corrige por ganar)"
-  runOneLabel="Celebrar una subasta"
-  runManyLabel="Repetir ×50"
-  resetLabel="Reiniciar"
-  trueValueLabel="Valor real"
-  bidderLabel="Una puja"
-  winnerLabel="Estimación ganadora"
-  shadedBidLabel="Puja ganadora rebajada"
-  lastLabel="Última subasta"
-  averagesLabel="Promedios hasta ahora"
-  roundsLabel="Subastas celebradas"
-  overshootLabel="Media: estimación ganadora sobre el valor real"
-  overpayLabel="Sobrepago medio (puja − valor)"
-  profitLabel="Beneficio medio del ganador"
-  emptyLabel="Pulsa «Celebrar una subasta» para celebrar una. Luego repite ×50 para ver cómo se asientan los promedios."
-  shadeNoteTemplate="Rebajando en {shade} = ruido × (N−1)/(N+1). Más profundo con más rivales."
-  lastTemplate="El ganador estimó {winner} por algo que vale {true}, pujó {bid} y se fue con un beneficio de {profit}."
-  initialBidders={8}
-  initialNoise={30}
-/>
-
-Fíjate en lo que hace y no hace la rebaja. No garantiza que ganes *y* obtengas
-beneficio — ahora ganarás con menos frecuencia, porque estás pujando más bajo. Lo que sí
-hace es que las victorias que *sí* consigues salgan aproximadamente en tablas en vez de
-ser sistemáticamente perdedoras. Ese es el intercambio en el corazón del remedio:
-**cambias muchas victorias con sobreprecio por unas pocas a precio justo.** En una
-subasta de valor común, eso no es timidez — es la diferencia entre un negocio que
-sobrevive y uno que se «gana» a sí mismo hasta la ruina.
-
-<MatchConcepts
-  client:visible
-  question="Empareja cada pieza del remedio con lo que hace realmente."
-  pairs={[
-    { term: "Puja como si ya hubieras ganado", definition: "Valora el premio condicionado a que tu estimación sea la más alta, absorbiendo la mala noticia de que ganar implica que sobrestimaste — y luego puja ese número más bajo." },
-    { term: "Rebaja hacia abajo", definition: "Puja por debajo de tu estimación honesta del valor común, para restar el sobrepago predecible que la victoria selecciona." },
-    { term: "Rebaja más con más rivales", definition: "Profundiza la corrección a medida que crece el campo, porque la estimación ganadora es el máximo de más extracciones y supera la verdad aún más." },
-    { term: "Formato a primer precio", definition: "Pagas tu propia puja, así que debes rebajar por debajo del valor para tener excedente — y rebajar todavía más para corregir la maldición." },
-    { term: "Formato a segundo precio (Vickrey)", definition: "Pagas la puja del segundo, lo que simplifica la estrategia y amortigua la maldición — pero NO la elimina cuando el valor es común e incierto." },
-    { term: "No rebajes de más", definition: "Corregir tan fuerte que nunca ganas nada es su propio fracaso; el objetivo es la puja correcta, no cero pujas." },
-  ]}
-  checkLabel="Comprobar"
-  retryLabel="Inténtalo de nuevo"
-  allCorrectLabel="✓ Todo emparejado"
-  termsLabel="Términos"
+  retryLabel="Reintentar"
+  instructions="Elige un concepto y después su definición."
+  allCorrectLabel="Todo relacionado"
+  partialResultWord="correctas"
+  pickDefinitionHint="elige ahora una definición"
+  notLinkedHint="sin relacionar"
+  termsLabel="Conceptos"
   definitionsLabel="Definiciones"
-  explanation="El remedio es una sola idea con varios disfraces: condiciona en ganar, resta el sobrepago resultante (rebaja hacia abajo) y escala esa resta con el número de rivales. El formato de la subasta fija tu base (pagar tu propia puja frente a pagar la del segundo), e incluso el formato a segundo precio que amortigua la maldición deja una corrección residual que hacer en valor común. En todo momento, el objetivo es la puja CORRECTA — rebajar de más hasta perder permanentemente es solo la imagen especular de la maldición."
+  question="Recupera el procedimiento de decisión"
+  pairs={[{"term":"Evento ganador","definition":"Los casos adjudicados a una candidata especificada bajo sus reglas de asignación y desempate."},{"term":"Margen condicionado","definition":"El beneficio neto medio solo entre los casos adjudicados."},{"term":"Beneficio por oportunidad","definition":"El resultado neto ponderado por probabilidad de todos los casos, incluidos los no adjudicados."},{"term":"Conjunto viable","definition":"Todas las acciones permitidas por el intervalo y la precisión de las pujas."},{"term":"Máximo","definition":"El mayor beneficio posible, alcanzado por una acción permitida."},{"term":"Supremo","definition":"La menor cota superior, que una acción permitida no tiene por qué alcanzar."}]}
 />
 
-## Cuándo usarlo
+<MindMap client:visible
+  eyebrow="Vista general"
+  outlineLabel="Esquema de texto"
+  title="De una rebaja a una elección completa"
+  root={{"label":"Elegir una puja condicionada","children":[{"label":"Especificar el problema","children":[{"label":"Información conocida y pesos conjuntos"},{"label":"Rivales fijos, pago y empates perdidos"},{"label":"Intervalo, incrementos y alternativa exterior"}]},{"label":"Calcular cada evento","children":[{"label":"Filtrar de nuevo al cambiar la candidata"},{"label":"Margen ganador frente a valor por oportunidad"},{"label":"Sin adjudicación no hay media condicionada"}]},{"label":"Cubrir el conjunto de acciones","children":[{"label":"Beneficio decreciente con evento fijo"},{"label":"Menor puja por intervalo y alternativa exterior"},{"label":"Otro menú puede tener otro óptimo"}]},{"label":"Comprobar el límite","children":[{"label":"La precisión cambia las acciones permitidas"},{"label":"Un supremo real puede no alcanzarse"},{"label":"Otros pesos pueden favorecer un umbral posterior"}]}]}}
+/>
 
-Recurre a la rebaja siempre que estés pujando por un valor común incierto y quieras
-sacar beneficio real de tus victorias:
+<Quiz client:visible
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Has acertado todas las preguntas."
+  goodMessage="Revisa las explicaciones de tus errores."
+  keepPracticingMessage="Vuelve a los ejemplos y prueba otra vez."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  title="Comprueba la elección de puja condicionada"
+  questions={[{"question":"En la puja que iguala el valor bruto del caso bajo seleccionado, ¿cuál es el beneficio neto esperado por oportunidad?","options":[{"text":"Cero créditos.","correct":true},{"text":"El valor bruto medio anterior."},{"text":"Tres créditos."},{"text":"Nueve créditos."}],"explanation":"El valor bruto adjudicado iguala el pago, así que el margen ganador es cero. Los casos sin adjudicación también dan cero. Es el punto de equilibrio, mientras que una puja ganadora menor y permitida tiene esperanza positiva."},{"question":"Una candidata tiene un margen de nueve créditos al ganar y probabilidad de adjudicación de un tercio, con beneficio cero en los demás casos. ¿Cuál es el beneficio esperado por oportunidad?","options":[{"text":"Nueve créditos."},{"text":"Tres créditos.","correct":true},{"text":"Un tercio de crédito."},{"text":"Veintisiete créditos."}],"explanation":"Multiplica el margen ganador por su probabilidad: nueve por un tercio da tres. Nueve es el margen condicionado, no la media de todas las oportunidades."},{"question":"En el extremo superior del primer intervalo con adjudicaciones, ¿qué asignación y beneficio esperado se obtienen?","options":[{"text":"Bajo y medio; menos diez créditos."},{"text":"Solo bajo; menos diez créditos.","correct":true},{"text":"Solo bajo; menos treinta créditos."},{"text":"Sin adjudicación; cero créditos."}],"explanation":"Una puja de ciento diez pierde el empate del caso medio. Solo gana el bajo, con beneficio ochenta menos ciento diez, ponderado por un tercio: menos diez."},{"question":"¿Por qué el taller posterior puede elegir correctamente setenta y cinco mientras este problema con enteros elige setenta y uno?","options":[{"text":"Usa un menú permitido más estrecho que no incluye setenta y uno.","correct":true},{"text":"Asigna un valor adicional al mismo caso bajo."},{"text":"Paga en secreto la puja rival en lugar de la propia."},{"text":"Un conjunto mayor de candidatas no puede cambiar el mejor valor alcanzable."}],"explanation":"La información y la regla de primer precio pueden mantenerse mientras cambia el conjunto viable. Setenta y cinco es la mejor de las cinco candidatas antiguas; setenta y uno solo está disponible en el conjunto ampliado de enteros."},{"question":"¿Qué distingue un máximo del supremo con pujas reales en este ejemplo?","options":[{"text":"El máximo se alcanza; aquí la menor cota superior se aproxima, pero no se alcanza.","correct":true},{"text":"Máximo y supremo se alcanzan; la puja de la frontera alcanza ambos en este caso."},{"text":"El máximo es una puja y el supremo su beneficio, así que usan unidades distintas."},{"text":"El máximo depende de la precisión; el supremo es el beneficio en la puja frontera."}],"explanation":"Un máximo exige una puja que lo alcance. Cualquier puja real que gane solo el caso bajo puede reducirse manteniéndose estrictamente por encima del rival; en la frontera se pierde la adjudicación."},{"question":"En la transferencia de pesos desiguales, ¿por qué el umbral mayor puede dar la mejor acción entera?","options":[{"text":"Añade un caso valioso de mucho peso cuya ganancia supera el pago adicional.","correct":true},{"text":"Aumenta el pago de los casos ganados sin cambiar el conjunto adjudicado."},{"text":"Sustituye los pesos declarados por pesos iguales al adjudicarse ambos casos."},{"text":"Excluye el caso de menor valor cuando la puja supera el mayor umbral rival."}],"explanation":"Dentro de un conjunto ganador fijo ayuda pagar menos. Al pasar a otro conjunto cambian también los valores y las probabilidades; la transferencia da veinticuatro frente a nueve cuartos."},{"question":"¿Qué cambios exigen reconstruir la decisión? Marca todas las respuestas correctas.","allowMultiple":true,"options":[{"text":"Los rivales cambian su regla de puja.","correct":true},{"text":"Cambia el incremento de puja permitido.","correct":true},{"text":"Se cobra una comisión incluso sin adjudicación.","correct":true},{"text":"Una fracción exacta se muestra junto a un decimal indicado como aproximado."}],"explanation":"El comportamiento rival, las pujas viables y el pago en casos perdedores son entradas del modelo. Una aproximación de presentación declarada no cambia la comparación exacta subyacente."}]}
+/>
 
-- **Estima, luego resta.** Forma tu estimación honesta del valor común, luego resta una
-  corrección por selección *antes* de pujar. Nunca pujes la estimación en bruto.
-- **Escala la corrección al gentío.** Dos rivales, una rebaja pequeña; veinte rivales,
-  una profunda. Deja que el tamaño del campo fije la profundidad.
-- **Escálala también a la incertidumbre.** Cuanto más ruidosa sea tu estimación, mayor
-  es la cola de la que se extrae el ganador, y más fuerte rebajas. Valor confiado y
-  preciso → rebaja ligera; valor turbio y especulativo → rebaja fuerte.
-- **Lee el formato.** En primer precio, rebaja por el excedente *y* por la maldición. En
-  segundo precio, la estrategia es más simple, pero sigues corrigiendo por la selección
-  de valor común.
-
-<Callout variant="warning" title="La trampa que esto te tiende">
-La sobrecorrección es el fracaso especular. Aterrados por la maldición, algunos
-pujadores rebajan tan fuerte que nunca ganan una sola subasta — lo cual no es disciplina,
-es simplemente perder despacio. El remedio es la calibración, no la retirada: rebaja
-*exactamente* lo suficiente para que tus victorias salgan en tablas o mejor, y no más. Un
-pujador que nunca gana ha derrotado la maldición del ganador del mismo modo que derrotas
-a un oponente de ajedrez negándote a jugar. La lección 6 trata en parte de encontrar ese
-camino intermedio.
-</Callout>
-
-## Recapitulación
-
-El remedio para la maldición del ganador es **la rebaja de la puja**, y el truco que lo
-hace automático es **pujar como si ya hubieras ganado** — valorar el premio condicionado
-a que tu estimación sea la más alta, absorber el sobrestimado implícito y pujar el número
-más bajo. Rebaja **más cuantos más rivales tengas**, la paradoja característica del
-modelo de que en valor común la competencia debería hacerte pujar *menos* agresivamente
-por señal, no más. El **formato** de la subasta fija tu base: el primer precio te hace
-rebajar por debajo del valor para tener excedente y luego más para la maldición; el
-segundo precio (Vickrey) simplifica la estrategia y amortigua la maldición, pero no la
-elimina bajo un valor común e incierto. Y todo el asunto es una calibración, no una
-retirada — rebaja de más hasta no ganar nunca y solo habrás encontrado una forma más
-lenta de perder.
-
-Ahora que puedes diagnosticar y desactivar la maldición, veámosla operando a gran escala
-en el mundo real — adquisiciones, salidas a bolsa (IPOs), subastas de espectro, agentes
-libres, contrataciones y guerras de pujas. Esa es la lección 5: **dónde muerde en la
-naturaleza.**
+A continuación: [dónde actúa en el mundo real](/es/winners-curse/04-real-arenas). Conserva las condiciones del modelo: un ganador o un resultado decepcionante observado sigue necesitando un análisis de información, asignación, pago y alternativas.
