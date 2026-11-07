@@ -324,3 +324,6 @@ export type { CommonsProfile, CommonsRuleModel, CommonsAccounts, CommonsRuleLabe
 
 export { SearchBudgetComparison } from '@/components/react/SearchBudgetComparison';
 export type { SearchBudgetMethod, SearchBudgetLabels, SearchBudgetComparisonProps } from '@/components/react/SearchBudgetComparison';
+
+export { NetworkThresholdTrace } from '@/components/react/NetworkThresholdTrace';
+export type { ThresholdTeam, NetworkThresholdTraceProps } from '@/components/react/NetworkThresholdTrace';

@@ -1,0 +1,294 @@
+---
+title: "Planifica una cascada en red"
+description: "Calcula umbrales locales, compara semillas y demuestra un presupuesto mínimo con plazo en una red de cinco equipos."
+topic: "es/critical-mass"
+order: 8
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, NetworkThresholdTrace, RateComparison, Callout, MindMap, Quiz } from '@/components/react';
+
+Cinco equipos ficticios se plantean usar una convención común para archivar documentos. Cada equipo se incorpora cuando suficientes contactos suyos ya la usan. Puedes comprometer a unos cuantos desde el inicio. Tu trabajo consiste en decidir **por dónde empezar y si el resultado llega a tiempo**.
+
+Es un problema de planificación con un comportamiento estipulado, no datos observados de adopción. Conocemos por definición las flechas y los requisitos de la tabla. Los equipos reales pueden negarse, abandonar o comunicarse de otra manera; aquí mantenemos esas posibilidades fuera del cálculo.
+
+| Equipo | Recibe un contacto de | Contactos activos necesarios |
+| --- | --- | ---: |
+| A | C | 1 |
+| B | A | 1 |
+| C | B | 1 |
+| D | A y C | 2 |
+| E | D | 1 |
+
+Una flecha va de quien aporta el contacto a quien lo recibe. A→B significa que A puede aportar a B; no significa que B aporte a A. Una **semilla** es un equipo comprometido a estar activo en la ronda inicial, al margen de su propio requisito. Un equipo activo sigue activo. Cada ronda consulta los equipos activos al comienzo y después activa juntos a todos los que cumplen su requisito. Una ronda es una actualización; no le asignamos una duración en días.
+
+<MCQ client:visible
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretest={true}
+  question="Dos planes comprometen al mismo número de equipos al inicio. ¿Tienen que activar a los mismos equipos dentro del mismo plazo?"
+  options={[{"text":"Sí: solo importa el número de equipos iniciales."},{"text":"No: su posición puede aportar contactos a distintos equipos en distintas rondas.","correct":true},{"text":"Sí: el requisito medio determina toda la secuencia."},{"text":"No: el modelo cambia las flechas al azar en cada ronda."}]}
+  explanation="La posición de las semillas cambia quién recibe contactos. La red es fija y determinista; la misma cantidad inicial no implica las mismas rutas ni los mismos tiempos."
+/>
+
+## Lee una ronda sin adelantarte a la siguiente
+
+Imagina que hacemos una fotografía al comienzo de cada ronda. Todos consultan esa fotografía y solo después tomamos la siguiente. La analogía explica la simultaneidad; no afirma que las organizaciones reales trabajen con reuniones sincronizadas.
+
+Llamamos $S_t$ al conjunto de equipos activos después de la ronda $t$, $N_i$ a los equipos con flechas hacia $i$ y $h_i$ a su número de contactos necesarios. La regla es
+
+$$S_{t+1}=S_t\cup\{i:|N_i\cap S_t|\ge h_i\}.$$
+
+La unión conserva los equipos que ya estaban activos. El recuento usa $S_t$, nunca un $S_{t+1}$ actualizado a medias. Basta con igualar el requisito: D se incorpora cuando sus dos contactos entrantes están activos.
+
+Compromete solo a A. En la primera actualización B ve al A que necesita. C todavía ve a B inactivo; D ve a A, pero no a C; E ve a D inactivo. Solo se incorpora B. Repite el mismo cálculo:
+
+| Ronda | Recién activados | Activos al terminar | Por qué puede incorporarse el siguiente |
+| ---: | --- | --- | --- |
+| 0 | A, comprometido | A | B recibe a A |
+| 1 | B | A, B | C recibe a B |
+| 2 | C | A, B, C | D recibe a A y C |
+| 3 | D | A, B, C, D | E recibe a D |
+| 4 | E | A, B, C, D, E | No queda ningún equipo inactivo |
+
+<NetworkThresholdTrace client:visible
+  seedsLabel="Equipos comprometidos al inicio"
+  thresholdLabel="Contactos entrantes necesarios para {team}"
+  stepLabel="Avanzar una ronda"
+  finishLabel="Avanzar hasta el cierre"
+  resetLabel="Volver a la ronda inicial"
+  graphLabel="Red de contactos dirigidos"
+  graphDescription="Cada flecha va del equipo que aporta un contacto al que lo recibe. La tabla muestra los mismos contactos y estados actuales."
+  tableLabel="Contactos y estados en la ronda mostrada"
+  teamLabel="Equipo"
+  contactsLabel="Recibe de"
+  requiredLabel="Contactos necesarios"
+  exposureLabel="Entrantes activos ahora"
+  statusLabel="Estado"
+  seedLabel="Semilla comprometida"
+  newLabel="Activado en esta ronda"
+  activeLabel="Activo"
+  nextLabel="Se activará en la ronda siguiente"
+  inactiveLabel="Inactivo"
+  noneLabel="Ninguno"
+  progressTemplate="Ronda {round}: {active} de {total} equipos activos. {state}"
+  closedLabel="Cierre: estas reglas no activarán más equipos."
+  openLabel="Todavía hay activaciones pendientes."
+  teams={[{"id":"A","label":"A","threshold":1},{"id":"B","label":"B","threshold":1},{"id":"C","label":"C","threshold":1},{"id":"D","label":"D","threshold":2},{"id":"E","label":"E","threshold":1}]}
+  arcs={[["A","B"],["B","C"],["C","A"],["A","D"],["C","D"],["D","E"]]}
+  adjustableTeam="D"
+  initialSeeds={["A"]}
+  title="Sigue la ruta de los contactos"
+  caption="Cambiar una semilla o el requisito vuelve a la ronda inicial. Los recuentos usan el conjunto activo mostrado; los equipos que cumplen el requisito se incorporan tras avanzar una ronda."
+/>
+
+El atajo tentador consiste en recorrer A, después B, después C y actualizar cada uno al momento. Así una activación puede atravesar varias flechas en la misma ronda. Estás resolviendo otro modelo temporal, aunque por casualidad coincida el conjunto final.
+
+Usa actualizaciones por instantáneas cuando el problema especifique rondas simultáneas. Si la comunicación llega en momentos distintos, modela esos tiempos de llegada antes de reutilizar este calendario.
+
+<FillBlank client:visible
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="correctas"
+  text="Para la primera actualización, consulta la {{instantánea al comienzo de la ronda|lista actualizada a medias}}. Los recién activados aportan contactos {{en la ronda siguiente|dentro de esa misma actualización}}."
+  explanation="Una sola instantánea fija qué contactos cuentan en una actualización. Contar a B justo después de activarlo aceleraría el proceso declarado."
+/>
+
+## Un presupuesto de semillas no fija la posición inicial
+
+Contar los billetes de autobús no te dice de dónde salen los autobuses. Del mismo modo, contar semillas omite sus conexiones. La analogía tiene un límite: aquí la activación copia un estado; no traslada a un equipo fuera de su posición anterior.
+
+Compara los inicios con un solo equipo. E no tiene contactos salientes: comprometerlo deja inactivos a todos los demás. Comprometer a D activa a E, pero ningún contacto regresa hacia A, B o C. Comprometer a C recorre el ciclo de la izquierda y también ayuda a D.
+
+| Única semilla | Nuevas activaciones por ronda, incluida la inicial | Activos al terminar la segunda ronda | Activos en el cierre |
+| --- | --- | ---: | ---: |
+| A | A → B → C → D → E | 3 | 5 |
+| B | B → C → A → D → E | 3 | 5 |
+| C | C → A → B y D → E | 4 | 5 |
+| D | D → E | 2 | 2 |
+| E | E | 1 | 1 |
+
+El **cierre** significa que una actualización no añadiría ningún equipo bajo las reglas fijas actuales. Puede ser parcial: E solo ya está en el cierre. Cierre no significa que todos se hayan incorporado, y un total plano no basta para declarar condenado un proyecto real.
+
+El ciclo A→B→C→A no arranca espontáneamente. Sin semillas, todos ven cero contactos entrantes activos y todos los requisitos son positivos. El conjunto activo vacío también está en el cierre.
+
+Usa las rutas entrantes para comparar posiciones; no las sustituyas por un requisito medio. En este problema la media de requisitos no cambia entre planes de semillas, pero sí cambian los resultados.
+
+<MCQ client:visible
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Si solo D está comprometido, ¿qué conjunto activo final se deduce de las flechas?"
+  options={[{"text":"Solo D."},{"text":"A, C y D."},{"text":"D y E.","correct":true},{"text":"Todos los equipos."}]}
+  explanation="D aporta a E. Ni D ni E aportan a A, B o C, así que el proceso se cierra con D y E. Leer una flecha al revés inventaría la ruta que falta."
+/>
+
+## Fija el plazo antes de comparar resultados
+
+Cada semilla comprometida cuesta **una unidad de planificación**. Se puede elegir como semilla a cualquier equipo. El objetivo es activar a los cinco **al terminar la segunda ronda**, minimizando el coste de las semillas. Este objetivo construido no incluye otros costes ni beneficios.
+
+Compara dos planes que cuestan dos unidades cada uno:
+
+| Ronda | Nuevos con A y D | Nuevos con A y E |
+| ---: | --- | --- |
+| 0 | A, D | A, E |
+| 1 | B, E | B |
+| 2 | C | C |
+| 3 | Ninguno, ya está cerrado | D |
+
+A+D cumple el plazo. Elegir directamente a D como semilla no exige activar antes sus dos contactos: en eso consiste el compromiso exógeno. A+E acaba alcanzando a los mismos cinco equipos, pero E no puede ayudar a D y D debe esperar a C. El mismo coste inicial y la misma cobertura final ocultan un plazo incumplido.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Comparación"
+  countsLabel="Equipos activos del total"
+  differenceLabel="Primera cobertura menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Cobertura dentro del plazo y en el cierre"
+  scenarios={[{"label":"Al terminar la segunda ronda","groups":[{"label":"Semillas A y D","events":5,"total":5},{"label":"Semillas A y E","events":4,"total":5}]},{"label":"En el cierre","groups":[{"label":"Semillas A y D","events":5,"total":5},{"label":"Semillas A y E","events":5,"total":5}]}]}
+/>
+
+El gráfico divide los equipos activos entre el mismo total fijo. La diferencia es de cobertura, **no una probabilidad de éxito**. No se ha elegido al azar ningún plan ni ninguna persona.
+
+Un informe útil identifica las semillas, el conjunto activo y la ronda. «Llega a todos» omite precisamente la condición que decide este encargo. Si cambiara el plazo, tendrías que repetir la comparación.
+
+<MCQ client:visible
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En el plazo de la tabla comparativa, ¿cuántos equipos activos más tiene el plan que termina antes?"
+  options={[{"text":"Ninguno."},{"text":"Uno.","correct":true},{"text":"Dos."},{"text":"Todos los equipos."}]}
+  explanation="El primer plan tiene cinco equipos activos y el segundo cuatro al terminar la segunda ronda. La diferencia es un equipo; la cobertura final idéntica responde a otra pregunta."
+/>
+
+## Demuestra el presupuesto frente a todos los planes más baratos
+
+Encontrar un plan válido demuestra suficiencia: ese presupuesto puede funcionar. Demostrar un **mínimo** exige además necesidad: no funciona ningún plan permitido más barato. Comprobar los casos más baratos es la mitad que falta en muchas presentaciones de lanzamiento muy seguras de sí mismas.
+
+Aquí falla el conjunto vacío, y la tabla de semillas individuales muestra que ninguna activa a todos dentro del plazo. Por tanto, una pareja válida establece un mínimo de dos unidades de planificación. Para identificar todos los planes de coste mínimo, comprueba cada pareja en vez de elegir el nodo que parece más importante.
+
+| Dos semillas | Activos al terminar la segunda ronda | Cumple el plazo para todos |
+| --- | ---: | --- |
+| A, B | 4 | No |
+| A, C | 5 | Sí |
+| A, D | 5 | Sí |
+| A, E | 4 | No |
+| B, C | 4 | No |
+| B, D | 5 | Sí |
+| B, E | 4 | No |
+| C, D | 5 | Sí |
+| C, E | 5 | Sí |
+| D, E | 2 | No |
+
+Por ejemplo, C+E incorpora a A en la primera actualización y a B+D en la segunda, completando el conjunto a tiempo. A+C incorpora a B+D en la primera y a E en la segunda. Distintas rutas pueden cumplir el mismo objetivo.
+
+Hay cinco parejas válidas, no un lanzamiento ganador único. Todas cuestan lo mismo y cumplen el plazo especificado. Llamar a A+D *el* óptimo borraría esos empates. Llamar a dos semillas una «masa crítica» universal borraría la red, los requisitos y el plazo que hacen cierto el resultado.
+
+Bajo estas reglas fijas y progresivas, añadir semillas no puede retirar un equipo activo en una ronda dada: no reduce ningún recuento entrante. Esa es una propiedad local de monotonicidad. Un conjunto mayor puede resultar peor en coste, y las salidas o los cambios de requisitos exigirían otro argumento.
+
+<Categorize client:visible
+  instructions="Asigna cada afirmación a su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="correctas"
+  question="¿Qué demuestra cada comprobación?"
+  buckets={["Suficiencia","Necesidad","Ninguna de las dos"]}
+  items={[{"text":"Mostrar una pareja que alcance a todos dentro del plazo.","bucket":"Suficiencia"},{"text":"Demostrar que el plan vacío y todos los planes individuales incumplen el plazo.","bucket":"Necesidad"},{"text":"Mostrar que un plan acaba alcanzando a todos, sin comprobar el plazo.","bucket":"Ninguna de las dos"},{"text":"Contar las parejas válidas y llamarlo probabilidad de adopción medida.","bucket":"Ninguna de las dos"}]}
+  explanation="Un plan válido demuestra que un presupuesto puede bastar. Descartar todos los más baratos demuestra que es necesario. El alcance final no demuestra que se cumpla el plazo, y contar planes no aporta una ley de probabilidad."
+/>
+
+## Transfiere el cálculo a un requisito distinto
+
+Conserva todas las flechas, el compromiso inicial y la regla de actualización. Cambia solo el número de contactos entrantes que necesita D a **uno**. Compromete solo a A. Antes de usar el control, escribe los nuevos activos de cada actualización y decide si se cumple el plazo.
+
+<MCQ client:visible
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Con el requisito cambiado, ¿qué secuencia de nuevas activaciones sigue al A inicial?"
+  options={[{"text":"B, después C, después D y después E."},{"text":"B y D, después C y E.","correct":true},{"text":"Todos los demás inmediatamente."},{"text":"E, después D, después B y C."}]}
+  explanation="Ahora A basta tanto para B como para D en la primera actualización. B aporta a C y D aporta a E en la segunda. C y E siguen esperando: los recién activados B y D no aportan dentro de la primera actualización."
+/>
+
+<details>
+<summary>Comprueba el cálculo completo de transferencia</summary>
+
+| Ronda | Activos antes de actualizar | Recién activados | Activos después de actualizar |
+| ---: | --- | --- | --- |
+| 0 | Compromiso inicial | A | A |
+| 1 | A | B y D | A, B, D |
+| 2 | A, B, D | C y E | A, B, C, D, E |
+
+Solo ha cambiado el requisito de D. El alcance final desde A sigue siendo de cinco equipos; la finalización pasa de la cuarta ronda a la segunda. Así separamos una mejora de tiempo de un aumento de cobertura final. En la visualización, elige el requisito menor de D y deja solo a A como semilla para comprobarlo.
+
+</details>
+
+Un cambio real en el requisito de un equipo necesitaría pruebas: qué cuenta como contacto entrante, cuándo se observa, si el equipo adopta realmente al alcanzar ese recuento y si sigue activo. La tabla estipula todo eso; no lo descubre.
+
+<Callout variant="warning" label="Advertencia" title="La secuencia es un resultado condicionado">
+La respuesta exacta depende de contactos dirigidos fijos, adopción al alcanzar un umbral, activación persistente y actualizaciones sincronizadas. Las negativas, las salidas, los anuncios externos compartidos o los retrasos adicionales de comunicación pueden cambiar tiempos y cobertura. Un lanzamiento que salga bien no identifica las flechas ni los umbrales que lo causaron.
+</Callout>
+
+El modelo de [Easley y Kleinberg, en el capítulo diecinueve](https://www.cs.cornell.edu/home/kleinber/networks-book/networks-book-ch19.pdf), relaciona los umbrales locales de adopción, los primeros adoptantes y la estructura de la red. Usa un juego de coordinación no dirigido con umbrales fraccionarios. Nuestros recuentos dirigidos son una variante construida expresamente; los cálculos anteriores se deducen de sus propias reglas. [El artículo original de Granovetter](https://snap.stanford.edu/class/cs224w-readings/granovetter78threshold.pdf) también desarrolla modelos de umbral y analiza la importancia de la estructura social y los límites de tratar a todos como conectados con todos.
+
+## Reconstruye la decisión
+
+Sin volver atrás, explica por qué E solo ya está cerrado, por qué A+D y A+E difieren dentro del plazo y qué descarta un plan más barato. Después usa el repaso para comprobar qué parte del argumento has omitido.
+
+<MindMap client:visible
+  eyebrow="Vista general"
+  outlineLabel="Esquema de texto"
+  title="Un plan de red que puedes comprobar"
+  root={{"label":"Plan con umbrales locales","children":[{"label":"Declarar el proceso","children":[{"label":"Contactos entrantes dirigidos"},{"label":"Semillas iniciales comprometidas"},{"label":"Una instantánea por ronda"},{"label":"Las activaciones persisten"}]},{"label":"Calcular la secuencia","children":[{"label":"Contar contactos activos actuales"},{"label":"Añadir juntos los que cumplen"},{"label":"Distinguir el cierre parcial"}]},{"label":"Comparar el objetivo","children":[{"label":"Cobertura dentro de un plazo"},{"label":"Coste por semilla"},{"label":"Descartar planes más baratos"},{"label":"Conservar soluciones empatadas"}]},{"label":"Comprobar los límites","children":[{"label":"Cambiar un supuesto de forma explícita"},{"label":"Tiempo y alcance final difieren"},{"label":"Los datos reales necesitan pruebas"}]}]}}
+/>
+
+<Quiz client:visible
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Has acertado todas las preguntas."
+  goodMessage="Revisa las explicaciones de tus errores."
+  keepPracticingMessage="Vuelve a los ejemplos y prueba otra vez."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  title="Comprueba el plan de red"
+  questions={[{"question":"Con solo C comprometido, ¿cuántos equipos están activos al terminar la ronda dos?","options":[{"text":"Dos."},{"text":"Tres."},{"text":"Cuatro.","correct":true},{"text":"Cinco."}],"explanation":"C está comprometido en la ronda cero. A se incorpora en la primera actualización; B y D, en la segunda. Son cuatro equipos activos en total. E aún espera a que D contribuya en la siguiente actualización."},{"question":"Un analista activa B y deja que B active C en esa misma ronda. ¿Qué ha cambiado?","options":[{"text":"Solo el orden del dibujo; el proceso es idéntico."},{"text":"Ha sustituido las actualizaciones simultáneas por propagación dentro de una misma ronda.","correct":true},{"text":"El requisito de D ha bajado necesariamente."},{"text":"Ha eliminado el compromiso de las semillas."}],"explanation":"La actualización declarada lee una sola instantánea al comienzo de la ronda. Un equipo recién activado no aporta contactos hasta la actualización siguiente."},{"question":"¿Qué afirmaciones se deducen de las reglas de activación persistente declaradas?","allowMultiple":true,"options":[{"text":"Añadir semillas comprometidas no puede eliminar una activación en una misma ronda.","correct":true},{"text":"Un ciclo dirigido sin semillas comprometidas arranca solo."},{"text":"Toda ejecución acaba activando a todos los equipos."},{"text":"El cierre significa que ningún equipo inactivo cumple ahora su requisito.","correct":true}],"explanation":"Con requisitos positivos y fijos, añadir fuentes activas no reduce los contactos disponibles. Un ciclo no aporta contactos mientras todos sus equipos están inactivos; puede haber un cierre parcial."},{"question":"Con A y E comprometidos, ¿cuántas actualizaciones tras el compromiso inicial hacen falta para activar los cinco equipos?","options":[{"text":"Una."},{"text":"Dos."},{"text":"Tres.","correct":true},{"text":"Cuatro."}],"explanation":"A y E empiezan activos. B se incorpora en la primera actualización; C, en la segunda; D, en la tercera. El plan llega a todos en la ronda tres, una actualización después del plazo declarado."},{"question":"¿Por qué la lista de parejas válidas solo demuestra un mínimo después de comprobar las semillas individuales?","options":[{"text":"Una pareja válida es automáticamente mínima en cualquier red."},{"text":"También hay que descartar los planes permitidos más baratos.","correct":true},{"text":"Toda pareja válida cuesta menos que una semilla."},{"text":"Un grafo dirigido debe tener exactamente un óptimo."}],"explanation":"Una pareja válida demuestra que ese presupuesto basta. Antes de demostrar que es necesario hay que descartar el plan vacío y todos los planes individuales; aquí todas las semillas cuestan lo mismo."},{"question":"Un equipo real deja de usar la convención después de incorporarse. ¿Qué parte del modelo hay que revisar?","options":[{"text":"El supuesto de que la activación persiste.","correct":true},{"text":"Solo el coste inicial de las semillas; los contactos posteriores no cambian cuando se va una fuente."},{"text":"Solo el plazo; el cierre siempre protege los contactos anteriores."},{"text":"Nada: el modelo ya simula las salidas."}],"explanation":"Este modelo conserva todas las activaciones. Una salida puede retirar contactos e invalidar tanto el cálculo del cierre como el argumento de monotonicidad."}]}
+/>
+
+A continuación: [el examen final](/es/critical-mass/final-exam). Presenta una pregunta cada vez, bloquea las respuestas enviadas y muestra la puntuación al terminar.

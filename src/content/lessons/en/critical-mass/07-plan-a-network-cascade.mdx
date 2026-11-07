@@ -1,0 +1,206 @@
+---
+title: "Plan a network cascade"
+description: "Trace local thresholds, compare seed placement and prove a minimum budget for a deadline in a five-team network."
+topic: "en/critical-mass"
+order: 8
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, NetworkThresholdTrace, RateComparison, Callout, MindMap, Quiz } from '@/components/react';
+
+Five fictional teams are considering a shared filing convention. A team joins when enough of its named contacts already use it. You can commit a few teams at the start. Your job is to decide **where to start and whether the result arrives in time**.
+
+This is a planning puzzle with stipulated behavior, not measured adoption data. The arrows and requirements below are fully known. Real teams can decline, leave or communicate differently; the puzzle deliberately holds those possibilities still.
+
+| Team | Receives a contact from | Active contacts required |
+| --- | --- | ---: |
+| A | C | 1 |
+| B | A | 1 |
+| C | B | 1 |
+| D | A and C | 2 |
+| E | D | 1 |
+
+An arrow points from contributor to receiver. A→B means A can contribute to B; it does not mean B contributes to A. A **seed** is a team committed active at round zero, independently of its own requirement. An active team stays active. Each round reads the active teams at its start, then activates all eligible teams together. A round is one update, with no assumed duration in days.
+
+<MCQ client:visible
+  pretest={true}
+  question="Two launch plans commit the same number of teams. Must they activate the same teams by the same deadline?"
+  options={[{"text":"Yes: only the number of initial teams matters."},{"text":"No: their positions can expose different teams at different rounds.","correct":true},{"text":"Yes: the average requirement fixes the whole trace."},{"text":"No: the model randomly changes the arrows every round."}]}
+  explanation="Seed placement changes who receives exposure. The network is fixed and deterministic; equal initial counts do not imply equal routes or timing."
+/>
+
+## Read one round without borrowing from the next
+
+Think of a photograph taken at the beginning of each round. Everyone checks that photograph, and only then does the next photograph get taken. The analogy explains simultaneity; it does not claim real organizations work in synchronized meetings.
+
+Let $S_t$ be the set of active teams after round $t$, $N_i$ the sources with arrows into team $i$, and $h_i$ its required contact count. The rule is
+
+$$S_{t+1}=S_t\cup\{i:|N_i\cap S_t|\ge h_i\}.$$
+
+The union retains the existing active teams. The count uses $S_t$, never a partly updated $S_{t+1}$. Equality is enough: D joins when both its incoming contacts are active.
+
+Commit only A. At the first update B sees its required A. C still sees an inactive B; D sees A but not C; E sees an inactive D. Only B joins. Continue the same calculation:
+
+| Round | Newly active | Active after the round | Why the next team can join |
+| ---: | --- | --- | --- |
+| 0 | A, committed | A | B receives A |
+| 1 | B | A, B | C receives B |
+| 2 | C | A, B, C | D receives both A and C |
+| 3 | D | A, B, C, D | E receives D |
+| 4 | E | A, B, C, D, E | No inactive team remains |
+
+<NetworkThresholdTrace client:visible
+  teams={[{"id":"A","label":"A","threshold":1},{"id":"B","label":"B","threshold":1},{"id":"C","label":"C","threshold":1},{"id":"D","label":"D","threshold":2},{"id":"E","label":"E","threshold":1}]}
+  arcs={[["A","B"],["B","C"],["C","A"],["A","D"],["C","D"],["D","E"]]}
+  adjustableTeam="D"
+  initialSeeds={["A"]}
+  title="Follow the contact path"
+  caption="Changing a seed or the requirement restarts at round zero. Counts use the displayed active set; eligible teams join only after the next step."
+/>
+
+The tempting shortcut is to scan A, then B, then C, updating each immediately. That lets an activation travel several arrows within one round. It solves a different timing model, even if the final set happens to agree.
+
+Use snapshot updates when a problem specifies simultaneous rounds. If communication instead arrives at unequal times, model those arrival times explicitly before reusing this schedule.
+
+<FillBlank client:visible
+  text="For the first update, read the {{start-of-round snapshot|partly updated set}}. Newly activated teams contribute {{next round|within that same update}}."
+  explanation="A single snapshot fixes which contacts count in an update. Counting B immediately after activating it would accelerate the declared process."
+/>
+
+## A seed budget does not specify a starting position
+
+A bus ticket count does not tell you where the buses start. Likewise, the number of seeds omits their connections. Here the bus analogy has a limit: activation copies a state rather than moving a team out of its previous location.
+
+Compare single-team starts. E has no outgoing contact: committing E leaves everyone else inactive. Committing D activates E, but no contact goes back into A, B or C. Committing C travels around the left-hand cycle and also helps D.
+
+| Only seed | Newly active in successive rounds, including the initial round | Active by end round two | Active at closure |
+| --- | --- | ---: | ---: |
+| A | A → B → C → D → E | 3 | 5 |
+| B | B → C → A → D → E | 3 | 5 |
+| C | C → A → B and D → E | 4 | 5 |
+| D | D → E | 2 | 2 |
+| E | E | 1 | 1 |
+
+**Closure** means an update would add no team under the current fixed rules. It can be partial: E alone is already closed. Closure does not mean everyone joined, and a flat total does not by itself mean a real project is permanently doomed.
+
+The cycle A→B→C→A does not start spontaneously. With no seeds, every team sees zero active incoming contacts and every requirement is positive. The empty active set is also closed.
+
+Use the incoming paths to compare placements; do not replace them with an average requirement. In this puzzle the average requirement is unchanged across all seed plans, yet their outcomes differ.
+
+<MCQ client:visible
+  question="With only D committed, which final active set follows from the arrows?"
+  options={[{"text":"D only."},{"text":"A, C and D."},{"text":"D and E.","correct":true},{"text":"All teams."}]}
+  explanation="D supplies E. Neither D nor E supplies A, B or C, so the process closes with D and E. Reading an arrow backward would invent the missing path."
+/>
+
+## Specify the deadline before comparing success
+
+Suppose every committed seed costs **one planning unit**. All teams can be seeded. The objective is to activate all five teams **by the end of round two**, while minimizing seed cost. There are no other costs or benefits in this constructed objective.
+
+Compare two plans that each cost two units:
+
+| Round | Newly active with A and D | Newly active with A and E |
+| ---: | --- | --- |
+| 0 | A, D | A, E |
+| 1 | B, E | B |
+| 2 | C | C |
+| 3 | None, already closed | D |
+
+A+D meets the deadline. Seeding D directly does not require first activating its two contacts: that is exactly what exogenous commitment means. A+E eventually reaches the same five teams, but E cannot help D and D must wait for C. Equal seed cost and equal final coverage conceal a missed deadline.
+
+<RateComparison client:visible
+  title="Coverage before the deadline and at closure"
+  countsLabel="Active teams out of the fixed total"
+  differenceLabel="First coverage minus second"
+  scenarios={[{"label":"End of round two","groups":[{"label":"Seeds A and D","events":5,"total":5},{"label":"Seeds A and E","events":4,"total":5}]},{"label":"At closure","groups":[{"label":"Seeds A and D","events":5,"total":5},{"label":"Seeds A and E","events":5,"total":5}]}]}
+/>
+
+The chart divides active teams by the same fixed total. Its contrast is a difference in coverage, **not a probability of success**. No plan or person was sampled randomly.
+
+A useful result report names the seed plan, the active set, and the round. “It reaches everyone” leaves out the very condition that decides this job. If the deadline changed, you would need to rerun the comparison.
+
+<MCQ client:visible
+  question="At the deadline in the comparison table, how many more teams are active under the earlier-finishing plan?"
+  options={[{"text":"None."},{"text":"One.","correct":true},{"text":"Two."},{"text":"All teams."}]}
+  explanation="The first plan has five active teams and the second has four at the end of round two. The difference is one team; the equal final coverage answers another question."
+/>
+
+## Prove the budget against every cheaper permitted plan
+
+Finding one working plan proves sufficiency: this budget can work. Proving a **minimum** also requires necessity: no cheaper permitted plan works. Checking the cheapest cases is the missing half of many confident launch slides.
+
+Here the empty set fails, and the singleton table shows that no single seed activates everyone by the deadline. A successful pair therefore establishes a minimum of two planning units. To identify all minimum-cost plans, check every pair rather than selecting the most impressive-looking node.
+
+| Two seeds | Active by end round two | Meets all-team deadline |
+| --- | ---: | --- |
+| A, B | 4 | No |
+| A, C | 5 | Yes |
+| A, D | 5 | Yes |
+| A, E | 4 | No |
+| B, C | 4 | No |
+| B, D | 5 | Yes |
+| B, E | 4 | No |
+| C, D | 5 | Yes |
+| C, E | 5 | Yes |
+| D, E | 2 | No |
+
+For example, C+E gives A at the first update and B+D at the second, completing the set on time. A+C instead gives B+D at the first update and E at the second. Different paths can satisfy the same objective.
+
+There are five successful pairs, not one uniquely best launch. All have the same cost and meet the specified deadline. Calling A+D *the* optimum would erase these ties. Calling two seeds a universal “critical mass” would erase the graph, requirements and deadline that made the result true.
+
+Under these fixed progressive rules, adding seeds cannot remove an active team at a given round: it cannot reduce any incoming count. That is a local monotonicity claim. A larger seed set can still be worse on cost, and departures or changing thresholds would require another argument.
+
+<Categorize client:visible
+  question="What does each check establish?"
+  buckets={["Sufficiency","Necessity","Neither"]}
+  items={[{"text":"Exhibit a pair that reaches everyone by the deadline.","bucket":"Sufficiency"},{"text":"Show that the empty plan and every single-seed plan miss the deadline.","bucket":"Necessity"},{"text":"Show that a plan eventually reaches everyone, without checking the deadline.","bucket":"Neither"},{"text":"Count successful pairs and call that a measured adoption probability.","bucket":"Neither"}]}
+  explanation="A feasible plan proves a budget can work. Excluding all cheaper plans proves it is needed. Eventual reach alone does not establish the deadline, and counting plans supplies no probability law."
+/>
+
+## Transfer to a changed requirement
+
+Keep every arrow, commitment rule and update convention. Change only D's required incoming count to **one**. Commit only A. Before using the control, write the newly active set for each update and decide whether the deadline is met.
+
+<MCQ client:visible
+  question="With the changed requirement, which sequence of new activations follows the initial A?"
+  options={[{"text":"B, then C, then D, then E."},{"text":"B and D, then C and E.","correct":true},{"text":"Every other team immediately."},{"text":"E, then D, then B and C."}]}
+  explanation="A now supplies enough for both B and D at the first update. B supplies C and D supplies E at the second. C and E still wait: newly active B and D cannot contribute within the first update."
+/>
+
+<details>
+<summary>Check the complete transfer calculation</summary>
+
+| Round | Active before the update | Newly active | Active after the update |
+| ---: | --- | --- | --- |
+| 0 | Initial commitment | A | A |
+| 1 | A | B and D | A, B, D |
+| 2 | A, B, D | C and E | A, B, C, D, E |
+
+Only D's requirement changed. The eventual reach from A is still five; completion moves from round four to round two. This isolates a timing improvement from an increase in final coverage. In the visual, choose D's lower requirement and reset to A alone to inspect it.
+
+</details>
+
+A real change in a team's requirement would need evidence: what counts as an incoming contact, when it is observed, whether the team actually adopts at that count, and whether it stays active. The table stipulates all of these; it does not discover them.
+
+<Callout variant="warning" title="A trace is a conditional result">
+The exact answer depends on fixed directed contacts, threshold-triggered adoption, persistent activation and synchronized updates. Refusal, departures, shared outside announcements or extra communication delays can change both timing and coverage. One successful rollout does not identify the arrows or thresholds that caused it.
+</Callout>
+
+The source model in [Easley and Kleinberg, chapter nineteen](https://www.cs.cornell.edu/home/kleinber/networks-book/networks-book-ch19.pdf) links local adoption thresholds, initial adopters and network structure. It uses an undirected coordination game with fractional thresholds. Our directed contact counts are a deliberately constructed variant; its calculations above are derived from its own rules. [Granovetter's original paper](https://snap.stanford.edu/class/cs224w-readings/granovetter78threshold.pdf) also develops threshold models and discusses the importance of social structure and the limits of treating everyone as connected to everyone else.
+
+## Reconstruct the decision
+
+Without looking back, explain why E alone closes immediately, why A+D and A+E differ at the deadline, and what excludes a cheaper plan. Then use the recap to check which part of the argument you omitted.
+
+<MindMap client:visible
+  title="A network plan that can be checked"
+  root={{"label":"Local threshold plan","children":[{"label":"Declare the process","children":[{"label":"Directed incoming contacts"},{"label":"Committed initial seeds"},{"label":"One snapshot per round"},{"label":"Activations persist"}]},{"label":"Compute the trace","children":[{"label":"Count current exposures"},{"label":"Add eligible teams together"},{"label":"Distinguish partial closure"}]},{"label":"Compare the objective","children":[{"label":"Coverage by a stated deadline"},{"label":"Cost per seed"},{"label":"Exclude all cheaper plans"},{"label":"Keep tied solutions"}]},{"label":"Check transfer limits","children":[{"label":"Change one assumption explicitly"},{"label":"Timing and final reach differ"},{"label":"Model data need real evidence"}]}]}}
+/>
+
+<Quiz client:visible
+  title="Check the network plan"
+  questions={[{"question":"With only C committed, how many teams are active by the end of round two?","options":[{"text":"Two."},{"text":"Three."},{"text":"Four.","correct":true},{"text":"Five."}],"explanation":"C is committed at round zero. A joins at the first update; B and D join at the second. That gives four active teams in total. E still waits for D to contribute at the next update."},{"question":"An analyst activates B and then lets B activate C in the same round. What changed?","options":[{"text":"Only the drawing order; the process is identical."},{"text":"The analyst replaced simultaneous updates with within-round propagation.","correct":true},{"text":"The threshold of D necessarily fell."},{"text":"The analyst removed seed commitment."}],"explanation":"The declared update reads one start-of-round snapshot. A newly activated team cannot contribute until the following update."},{"question":"Which statements follow from the declared persistent-activation rules?","allowMultiple":true,"options":[{"text":"Adding committed seeds cannot remove an activation at the same round.","correct":true},{"text":"A directed cycle with no committed seeds starts itself."},{"text":"Every run eventually reaches every team."},{"text":"Closure means no inactive team currently meets its threshold.","correct":true}],"explanation":"With fixed positive thresholds, extra active sources cannot reduce exposures. A cycle supplies no exposure while all its teams are inactive; a partial closure is possible."},{"question":"With A and E committed, how many updates after the initial commitment are needed to activate all five teams?","options":[{"text":"One."},{"text":"Two."},{"text":"Three.","correct":true},{"text":"Four."}],"explanation":"A and E start active. B joins at the first update, C at the second and D at the third. The plan reaches everyone at round three, one update after the stated deadline."},{"question":"Why does the list of successful pairs establish a minimum only after checking single seeds?","options":[{"text":"A successful pair is automatically minimal in any network."},{"text":"The cheaper permitted plans must also be ruled out.","correct":true},{"text":"Every successful pair costs less than one seed."},{"text":"A directed graph must have exactly one optimum."}],"explanation":"A feasible pair proves a budget is sufficient. Empty and singleton plans must fail before that budget is proved necessary; all teams cost the same here."},{"question":"A real team refuses to remain active after joining. Which part of the model needs revision?","options":[{"text":"The assumption that activation persists.","correct":true},{"text":"Only the initial seed cost; later exposures stay fixed when a source leaves."},{"text":"Only the deadline; closure always protects earlier contacts."},{"text":"Nothing: the model already simulates departures."}],"explanation":"This model retains every activation. A departure can remove exposures and invalidate both the closure calculation and the monotonicity argument."}]}
+/>
+
+Next: [the final exam](/critical-mass/final-exam). It presents one question at a time, locks submitted answers, and shows the score at the end.
