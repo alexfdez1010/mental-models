@@ -1,407 +1,534 @@
 ---
-title: "Elasticidad: cuánto reacciona la cantidad"
-description: "Dos bienes pueden cumplir ambos la ley de la demanda y, aun así, reaccionar de forma completamente distinta ante una subida de precio. La insulina apenas se inmuta; una cena de lujo se desploma. La elasticidad mide la sensibilidad — y decide si subir el precio te hace más rico o más pobre."
+title: "Elasticidad con bases porcentuales explícitas"
+description: "Calcula elasticidad de punto medio, ingreso finito y beneficio modelado, y distingue las comparaciones de extremos de la respuesta local."
 topic: "es/supply-and-demand"
 order: 5
-minutes: 12
-updated: 2026-06-23
+minutes: 23
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, Categorize, Callout, ElasticityExplorer } from '@/components/react';
+import { MCQ, Quiz, Categorize, MatchConcepts, FillBlank, MindMap, FirstPrinciplesBuilder, ElasticityExplorer } from '@/components/react';
 
-Hasta ahora sabes que cuando el precio sube, la cantidad demandada **baja**. Bien. Pero eso
-solo te dice la *dirección* de la reacción, nunca su *tamaño*. Y el tamaño es donde está, en
-realidad, todo el dinero — y casi todo el drama del mundo real.
+Un puesto de venta a granel compara dos precios para un mismo día hipotético. El precio sube un veinte por ciento; los litros vendidos bajan un veinte por ciento. Un compañero dice que los porcentajes se cancelan y el ingreso debe quedar igual. Comprueba el producto antes de darle la razón.
 
-Imagina dos bienes. Sube el precio de la **insulina** un 10% y un diabético compra, bueno,
-básicamente la misma cantidad, porque la alternativa es morir. Sube un 10% el menú degustación
-de los sábados de un **restaurante de lujo** concreto y la mitad de las mesas se vacían, porque
-hay otros cuarenta restaurantes calle abajo. La misma ley de la demanda. El mismo "precio sube
-→ cantidad baja". Una *cantidad* de bajada radicalmente distinta.
+## Lee las dos políticas
 
-Esa "cantidad de bajada" tiene nombre: **elasticidad (elasticity)**. Esta lección te enseña a
-medirla, predecirla y — la recompensa — usarla para saber si una subida de precio te llena los
-bolsillos o te los vacía.
-
-<MCQ
-  client:visible
-  pretest
-  pretestLabel="Antes de leer — adivina"
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="Una farmacia sube un 10% el precio de un fármaco que salva vidas y no tiene sustituto. Las ventas caen solo un 2%. Comparada con una cafetería de moda que sube los lattes un 10% y pierde un 25% de clientes, la demanda del fármaco es..."
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — prueba"}
+  question={"El precio sube un veinte por ciento y la cantidad vendida baja un veinte por ciento, ambos medidos respecto a la política original. ¿Qué ocurre con el ingreso total?"}
   options={[
-    { text: 'Más sensible al precio (reacciona mucho)' },
-    { text: 'Menos sensible al precio (la cantidad apenas se inmuta)', correct: true },
-    { text: 'Exactamente igual de sensible — ambos precios subieron un 10%' },
-    { text: 'Imposible de comparar sin conocer los precios en euros' },
-  ]}
-  explanation="La cantidad del fármaco apenas se movió (2%) ante un gran salto de precio, así que los compradores son insensibles — eso es demanda inelástica. La cafetería perdió una cuarta parte de sus compradores con la misma subida — eso es elástica. Lo que importa es cuánto reacciona la CANTIDAD, no el cambio de precio en sí."
+  {
+    "text": "Permanece igual porque coinciden las magnitudes porcentuales",
+    "correct": false
+  },
+  {
+    "text": "Baja porque los factores de precio y cantidad se multiplican",
+    "correct": true
+  },
+  {
+    "text": "Sube porque el vendedor recibe más por cada litro",
+    "correct": false
+  }
+]}
+  explanation={"El factor del ingreso es uno coma dos por cero coma ocho: cero coma noventa y seis. El ingreso baja un cuatro por ciento. Los porcentajes iguales sobre bases originales no se cancelan en un producto."}
+  pretest={true}
 />
 
-## La idea y la fórmula
+Es un **modelo de demanda construido**, no una estimación de un puesto real. Para un día de actividad, la cantidad solicitada es `Q(P)=200−10P`, solo con precios de **8 a 12 créditos por litro**. `P` es el valor numérico del precio en créditos por litro; `Q` son los litros solicitados durante ese día. Las demás condiciones de la demanda se mantienen fijas por supuesto.
 
-Imagina dos **muelles**. Uno es un muelle rígido de puerta de garaje; apoyas todo el peso de
-tu cuerpo y se comprime quizá un centímetro. El otro es un endeble muelle de bolígrafo; el
-mismo empujón lo aplasta del todo. La misma fuerza, un estiramiento totalmente distinto.
+Hay al menos 120 litros disponibles, se vende cada litro solicitado al precio anunciado común y no hay devoluciones, impuestos ni racionamiento. Ese supuesto de cumplimiento permite usar aquí la cantidad solicitada como cantidad vendida. Una tabla de demanda, por sí sola, no establece las ventas completadas.
 
-La demanda es exactamente así. El "empujón" es un cambio de precio. El "estiramiento" es cuánto
-se mueve la cantidad. Un bien **rígido** apenas reacciona — eso es demanda **inelástica
-(inelastic)**. Un bien **flojo** reacciona mucho — eso es demanda **elástica (elastic)**. La
-elasticidad no es más que un número que te dice qué muelle tienes entre manos.
+| Política | Precio en créditos/litro | Litros vendidos en el día | Ingreso en créditos |
+|---|---:|---:|---:|
+| A | 10 | 100 | 1000 |
+| B | 12 | 80 | 960 |
 
-Con precisión, la **elasticidad-precio de la demanda (price elasticity of demand)** (escrita
-$E_d$) es el cambio porcentual de la cantidad demandada dividido entre el cambio porcentual del
-precio:
+Las dos filas son alternativas para el mismo día modelado. No son dos días observados con los que hayamos identificado un efecto causal del precio. El tiempo, los competidores o los presupuestos de los compradores podrían cambiar una demanda real.
 
-$$E_d = \frac{\%\ \text{change in quantity demanded}}{\%\ \text{change in price}}$$
+## Identifica las bases de los porcentajes
 
-Como el precio y la cantidad siempre se mueven en direcciones opuestas, esta fracción sale
-negativa. Para no volvernos locos, **tomamos el valor absoluto** de modo que $E_d$ sea un
-número positivo limpio. Cuanto mayor es el número, más flojo es el muelle.
+La **elasticidad-precio de la demanda (price elasticity of demand)** mide la sensibilidad de la cantidad al precio en términos relativos. Para cambios finitos, hay que nombrar la convención porcentual. Aquí trabajamos con una demanda descendente y expresamos las magnitudes como números no negativos.
 
-<Callout variant="info" title="La fórmula en lenguaje llano">
-$E_d$ responde a una sola pregunta: *"Por cada 1% que cambio el precio, ¿qué porcentaje se
-mueve la cantidad?"* Si la cantidad se mueve más de un 1% → el bien es delicado (**elástico**).
-Si se mueve menos de un 1% → el bien es testarudo (**inelástico**). Esa es toda la idea.
-</Callout>
+Usando la **política original como base**, pasar de A a B da un cambio de precio de `2/10=20 %` y de cantidad de `−20/100=−20 %`. El cociente de magnitudes es **1**. Al volver de B a A cambian las bases: el precio cambia `−2/12`; la cantidad, `20/80`; el cociente de magnitudes es **3/2**. Ambos cocientes sobre bases originales están bien calculados y describen comparaciones que dependen del sentido del cambio.
 
-Aquí tienes la clasificación:
+El **método del punto medio**, también llamado elasticidad de arco de punto medio, usa la media de los dos precios y de las dos cantidades. Esas bases se mantienen al invertir el sentido:
 
-| Valor de $E_d$ | Nombre | Significado | Muelle |
-|---|---|---|---|
-| $E_d > 1$ | **elástica** | la cantidad reacciona *más* que el precio | flojo |
-| $E_d < 1$ | **inelástica** | la cantidad reacciona *menos* que el precio | rígido |
-| $E_d = 1$ | **elasticidad unitaria** | la cantidad reacciona *exactamente* igual que el precio | intermedio |
+$$E_{\mathrm{arc}}=\left|\frac{(Q_2-Q_1)/((Q_1+Q_2)/2)}{(P_2-P_1)/((P_1+P_2)/2)}\right|.$$
 
-**Ejemplo resuelto.** Supón que una tienda sube un precio un **10%** y la cantidad vendida cae
-un **5%**:
+El precio medio es `(10+12)/2=11`; la cantidad media, `(100+80)/2=90`. Por tanto:
 
-$$E_d = \frac{5\%}{10\%} = 0.5$$
+$$E_{\mathrm{arc}}=\frac{20/90}{2/11}=\frac{11}{9}.$$
 
-Como $0.5 < 1$, la demanda es **inelástica** — la cantidad apenas se inmutó. Ahora un bien
-distinto: el precio sube un **10%** y la cantidad cae un **20%**:
+En sentido inverso sigue siendo 11/9, aproximadamente 1,222. Con esta convención, un arco es **elástico** por encima de uno, **inelástico** por debajo y de **elasticidad unitaria** exactamente en uno. Los cocientes sobre bases originales, los coeficientes de arco y los locales son resúmenes distintos; indica el nombre junto al número.
 
-$$E_d = \frac{20\%}{10\%} = 2$$
+Un coeficiente es adimensional: convertir créditos a centésimas de crédito cambia la pendiente bruta, pero ese cambio se cancela en los porcentajes. Mantén precios y cantidades positivos en los extremos de las comparaciones que usamos aquí. Si los precios son iguales, el cambio porcentual del precio es cero y este cociente no permite identificar la elasticidad; no fabriques un coeficiente cero.
 
-Como $2 > 1$, la demanda es **elástica** — la cantidad reaccionó el doble de fuerte que el
-precio.
-
-**Trampa.** No confundas una *línea de aspecto empinado* con la inelasticidad a ojo de buen
-cubero, ni confundas un *precio grande* con una elasticidad grande. La elasticidad va de
-**porcentajes**, no de euros ni de la pendiente bruta. Una entrada de cine de \$2 y un coche de
-\$60,000 pueden tener exactamente el mismo $E_d$; lo que importa es el *porcentaje* que se mueve
-cada uno.
-
-### Cuándo usarla
-
-Echa mano de $E_d$ en cuanto alguien diga "¿qué pasa si cambiamos el precio?" — ya seas una
-empresa fijando precios, un gobierno gravando el tabaco, o simplemente un comprador decidiendo
-si una rebaja es para tanto. Convierte una corazonada vaga ("la gente comprará menos") en un
-número con el que de verdad puedes actuar.
-
-## Qué hace que la demanda sea elástica o inelástica
-
-¿Por qué la insulina es un muelle rígido y un menú degustación uno flojo? Lo deciden cuatro
-fuerzas. Apréndelas y normalmente podrás *adivinar* la elasticidad de un bien antes de hacer
-ninguna cuenta.
-
-**(a) Disponibilidad de sustitutos — el factor más importante con diferencia.** Cuantos más
-reemplazos fáciles tenga un bien, más elástico es. Si tu marca de refresco favorita sube el
-precio, te encoges de hombros y coges la lata rival de al lado — la demanda de *esa marca* es
-muy elástica. Pero "la sal" en general no tiene un sustituto real, así que la demanda de sal es
-tercamente inelástica. Cuanto más estrechamente definas un bien ("cola de la marca X" frente a
-"todas las bebidas"), más sustitutos existen y más elástico se vuelve.
-
-**(b) Necesidad frente a lujo.** Los bienes de primera necesidad (medicinas, comida básica, la
-electricidad para mantener las luces encendidas) son inelásticos — los compras en un enorme
-rango de precios porque *debes* hacerlo. Los lujos (un segundo viaje, un reloj de diseño, un
-menú degustación) son elásticos — al primer indicio de una subida de precio sencillamente
-prescindes de ellos.
-
-**(c) Peso en tu presupuesto.** Un bien que se lleva un buen pellizco de tus ingresos es más
-elástico, porque una subida de precio *duele* y te lanzas a buscar alternativas. Un salto del
-20% en el precio de la sal de mesa te cuesta unos céntimos al año — ni te enterarás
-(inelástica). Un salto del 20% en el alquiler o en el precio de un coche son cientos o miles de
-euros — buscarás a fondo (elástica).
-
-**(d) Horizonte temporal.** La demanda es **más elástica a largo plazo** porque la gente
-necesita tiempo para ajustarse. Cuando el precio de la **gasolina** se dispara, esta semana
-sigues yendo a trabajar igual — la demanda a corto plazo es muy inelástica. Pero con los años
-compras un coche más eficiente, te mudas más cerca del trabajo o te pasas al transporte
-público, y tu cantidad cae mucho — la demanda a largo plazo es mucho más elástica.
-
-| Bien | $E_d$ probable | Por qué |
-|---|---|---|
-| Insulina | muy inelástica | necesidad, sin sustituto |
-| Sal de mesa | inelástica | peso mínimo en el presupuesto, sin sustituto |
-| Gasolina (la semana que viene) | inelástica | difícil cambiar de hábitos rápido |
-| Gasolina (a lo largo de 5 años) | más elástica | tiempo para cambiar de coche / trayecto |
-| Los billetes de una aerolínea concreta | elástica | las aerolíneas rivales son sustitutos cercanos |
-| Un refresco de marca con rivales | elástica | coge el de la competencia |
-| Un reloj de lujo | elástica | puro lujo, fácil de saltarse |
-| Vacaciones en el extranjero | elástica | lujo, gran peso en el presupuesto |
-
-**Mini-ejemplo resuelto.** "Los coches" como categoría son bastante inelásticos — casi todo el
-mundo necesita *un* coche. Pero "este modelo exacto de Toyota" es elástico, porque si Toyota
-sube el precio, hay un Honda casi idéntico justo al lado. El mismo objeto físico, distinta
-elasticidad, enteramente por culpa de cuántos sustitutos dejes entrar en la comparación.
-
-**Trampa.** Tratar "elástico" e "inelástico" como etiquetas fijas estampadas en un bien para
-siempre. El *mismo* bien puede ser inelástico esta semana y elástico la próxima década
-(gasolina), o inelástico como categoría y elástico como marca. Pregúntate siempre: *¿sustitutos
-de qué, en qué marco temporal?*
-
-### Cuándo usarlo
-
-Usa los cuatro determinantes siempre que necesites una estimación rápida y sin calculadora —
-proponer un cambio de precio, predecir cómo caerá un impuesto, o juzgar si la subida de precio
-de un competidor es un suicidio. Si un bien tiene sustitutos cercanos, no es esencial y cuesta
-dinero de verdad, apuesta por elástico. Si es un artículo barato e imprescindible sin
-alternativa, apuesta por inelástico.
-
-## El giro del ingreso (la recompensa)
-
-Aquí es donde la elasticidad deja de ser trivia y empieza a ser dinero. El **ingreso total
-(total revenue)** de un vendedor es de lo más sencillo:
-
-$$\text{Total revenue} = \text{price} \times \text{quantity sold}$$
-
-Cuando subes el precio, dos cosas pelean entre sí: cada venta gana *más* (bueno), pero haces
-*menos* ventas (malo). ¿Quién gana? **Lo decide la elasticidad.**
-
-- **Demanda inelástica → subir el precio → el ingreso SUBE.** La cantidad apenas cae, así que
-  el precio más gordo gana. (Muelle rígido: los pocos compradores que pierdes no pueden superar
-  el extra que cobras a todos los demás.)
-- **Demanda elástica → subir el precio → el ingreso BAJA.** Los compradores huyen en masa, y
-  las ventas perdidas ahogan al precio más alto. (Muelle flojo.)
-- **Elasticidad unitaria → el ingreso se queda igual.** Los dos efectos se cancelan a la
-  perfección.
-
-**Ejemplo resuelto — el caso inelástico.** Un fármaco vende **100 unidades** a **\$10** cada
-una. Ingreso = 100 × \$10 = **\$1,000**. El fabricante sube el precio un 10% (a \$11). La
-demanda es inelástica ($E_d = 0.5$), así que la cantidad cae solo un 5%, a **95 unidades**.
-Nuevo ingreso = 95 × \$11 = **\$1,045**. Sube \$45. **Subir el precio los hizo más ricos.**
-
-**Ejemplo resuelto — el caso elástico.** Una cafetería de moda vende **100 lattes** a **\$10**.
-Ingreso = \$1,000. Sube el precio un 10% (a \$11), pero la demanda es elástica ($E_d = 2$), así
-que la cantidad cae un 20%, a **80 lattes**. Nuevo ingreso = 80 × \$11 = **\$880**. Baja \$120.
-**La misma subida de precio los hizo más pobres.**
-
-| Escenario | $E_d$ | Precio antiguo × cant. | Precio nuevo (+10%) × cant. | Ingreso |
-|---|---|---|---|---|
-| Fármaco (inelástico) | 0.5 | \$10 × 100 = \$1,000 | \$11 × 95 = \$1,045 | **▲ +\$45** |
-| Cafetería (elástica) | 2.0 | \$10 × 100 = \$1,000 | \$11 × 80 = \$880 | **▼ −\$120** |
-
-La misma subida de precio del 10%. Resultado opuesto — y la elasticidad es lo *único* que
-cambió. Esta única tabla explica una enorme tajada de la fijación de precios del mundo real.
-¿Un fármaco en monopolio sin sustituto? Inelástico — así que el fabricante lo pone por las
-nubes y el ingreso no para de subir. ¿Una tiendecita en un mercado competitivo? Su demanda es
-elástica (los clientes pueden ir a la de al lado), así que *no puede* subir precios sin más —
-perdería más ventas de las que gana. El mercado la disciplina.
-
-<ElasticityExplorer
-  client:visible
-  title="¿Muelle rígido o muelle flojo?"
-  caption="Ajusta el dial de elasticidad y luego arrastra el precio. La caja verde es el ingreso total. Cruza de inelástica a elástica y observa cómo la caja pasa de crecer-con-el-precio a encogerse-con-el-precio."
-  eyebrow="¿Cuánto reacciona la cantidad?"
-  instructions="Ajusta cuán elástica es la demanda y luego mueve el precio. Observa cómo reacciona la cantidad — y cómo el ingreso total (la caja sombreada) crece o se encoge."
-  priceAxisLabel="Precio"
-  quantityAxisLabel="Cantidad"
-  elasticityLabel="Elasticidad"
-  inelasticLabel="inelástica (un bien básico)"
-  elasticLabel="elástica (un lujo)"
-  priceSliderLabel="Precio"
-  demandLabel="Demanda"
-  revenueLabel="Ingreso = precio × cantidad"
-  elasticVerdict="elástica"
-  inelasticVerdict="inelástica"
-  unitVerdict="elasticidad unitaria"
-  readoutTemplate="Elasticidad ≈ {e} ({verdict}). A {price}, los compradores se llevan {qty} unidades. {dir}"
-  revenueUpPhrase="La demanda es inelástica, así que subir el precio AUMENTA el ingreso total — la caja crece a medida que sube el precio."
-  revenueDownPhrase="La demanda es elástica, así que subir el precio REDUCE el ingreso total — los compradores huyen más rápido de lo que sube el precio y la caja se encoge."
-  revenueFlatPhrase="La demanda tiene elasticidad unitaria, así que el ingreso apenas se mueve — la caída porcentual de la cantidad compensa justo la subida del precio."
-  revenueReadoutLabel="Ingreso total"
+<FillBlank client:visible
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"correctos"}
+  question={"Elige las bases del cálculo de punto medio."}
+  text={"Para precios de diez y doce, la base del punto medio es {{once|diez|doce}}. Para cantidades de cien litros y ochenta litros, la base del punto medio es {{noventa|cien|ochenta}}. Invertir la comparación deja el coeficiente de punto medio {{igual|invertido|a cero}}."}
+  explanation={"Las medias son once y noventa. Cambiar el sentido invierte ambos signos de las diferencias y mantiene esas bases, de modo que el coeficiente absoluto sigue siendo once novenos."}
 />
 
-<Callout variant="warning" title="La trampa: una subida de precio NO siempre significa más dinero">
-Este es el error de elasticidad más común con diferencia. "Cobra más, gana más" solo es cierto
-cuando la demanda es **inelástica**. Si la demanda es **elástica**, subir el precio *encoge* tu
-ingreso, porque pierdes más clientes de los que el precio extra compensa. Antes de celebrar una
-subida de precio, pregúntate: *¿mi muelle es rígido o flojo?*
-</Callout>
+## Calcula el ingreso del cambio completo
 
-<MCQ
-  client:visible
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="El pan de una panadería es inelástico ($E_d = 0.4$). Sube el precio un 10%. ¿Qué le pasa al ingreso total?"
+El **ingreso total (total revenue)** es el precio por la cantidad realmente vendida. Aquí `10×100=1000` y `12×80=960` créditos. El ingreso baja **40 créditos**, un **4 %**. Eso no afirma que baje el beneficio.
+
+Reconstruye el ingreso de la segunda política en dos partes que no se solapan: los ochenta litros conservados al precio antiguo aportan **800**; los dos créditos adicionales por cada uno de esos ochenta litros aportan **160**. Total: **960**. Frente al ingreso antiguo, la ganancia de precio de 160 es menor que la contribución al precio antiguo de los veinte litros perdidos: `20×10=200`.
+
+<FirstPrinciplesBuilder client:visible
+  locale={"es"}
+  eyebrow={""}
+  title={"Reconstruye el ingreso de la política B"}
+  analogyValue={1000}
+  analogyLabel={"Ingreso de la política A"}
+  analogyNote={"10 créditos/litro × 100 litros."}
+  parts={[
+  {
+    "label": "Litros conservados al precio antiguo",
+    "value": 800,
+    "note": "80 litros × 10 créditos/litro."
+  },
+  {
+    "label": "Precio adicional en los litros conservados",
+    "value": 160,
+    "note": "80 litros × 2 créditos adicionales/litro."
+  }
+]}
+  rebuiltLabel={"Contribuciones de ingreso seleccionadas"}
+  instructions={"Añade cada contribución para reconstruir el nuevo total."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Añadir ambas contribuciones"}
+  resetLabel={"Quitar contribuciones"}
+  verdictTemplate={"{total} es el ingreso completo de B en este modelo, frente a los 1000 cr de A."}
+/>
+
+En general, si el precio sube una fracción `g` y la cantidad vendida baja una fracción `h`, ambas respecto a los valores originales, el factor de ingreso es **`(1+g)(1−h)`**. Vale uno cuando `h=g/(1+g)`, no cuando `h=g`. Con precio 12, mantener el ingreso antiguo de 1000 créditos requiere **250/3 litros**, unos **83,333**. Las fracciones de litro tienen sentido; ochenta litros no llegan.
+
+Incluso un cociente sobre bases originales **menor que uno** es insuficiente para aplicar el atajo exacto habitual del ingreso. En **otra tabla de extremos**, mantén el cambio de precio de 10 a 12, pero cambia la cantidad de 100 a 82. El cociente sobre bases originales es `18 %/20 %=0,9`, pero el ingreso pasa a `12×82=984`: **baja un 1,6 %**. Su coeficiente de punto medio es `99/91`, mayor que uno. Este extremo modificado no se deduce de la función lineal anterior al precio doce.
+
+Con dos extremos positivos de la demanda descendente y un segundo precio mayor, la regla del ingreso de **punto medio** es exacta: elasticidad de arco menor que uno acompaña a un ingreso mayor; mayor que uno, a un ingreso menor; igual a uno, a ingresos iguales. Comprueba los productos cuando tengas los extremos.
+
+<details>
+<summary>Comprueba la identidad exacta de punto medio</summary>
+
+Sustituye la fórmula de punto medio y simplifica:
+
+$$R_2-R_1=\frac{(P_2-P_1)(Q_1+Q_2)}{2}(1-E_{\mathrm{arc}}).$$
+
+Cuando `P2>P1` y `Q2≤Q1`, el factor de fuera del paréntesis es positivo. La diferencia de ingreso tiene, por tanto, el signo de `1−E_arc`. La identidad describe los extremos declarados; no valida sus estimaciones ni predice otras condiciones.
+
+</details>
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — prueba"}
+  question={"En la tabla modificada, el precio sube de diez a doce y la cantidad baja de cien a ochenta y dos. ¿Cómo cambia el ingreso?"}
   options={[
-    { text: 'El ingreso sube — la cantidad cae menos de un 10%, así que precio × cantidad crece', correct: true },
-    { text: 'El ingreso baja — cualquier subida de precio pierde clientes' },
-    { text: 'El ingreso se queda exactamente igual' },
-    { text: 'El ingreso depende solo del precio en euros, no de la elasticidad' },
-  ]}
-  explanation="Inelástica significa que la cantidad reacciona MENOS que el precio. Con Ed = 0.4, una subida de precio del 10% recorta la cantidad solo un 4% aproximadamente, así que precio × cantidad sube. Inelástica + precio arriba = ingreso arriba."
+  {
+    "text": "Sube un dos por ciento, restando los cambios porcentuales",
+    "correct": false
+  },
+  {
+    "text": "Queda igual porque el cociente sobre bases originales es menor que uno",
+    "correct": false
+  },
+  {
+    "text": "Baja un uno coma seis por ciento al multiplicar los dos factores de cambio",
+    "correct": true
+  }
+]}
+  explanation={"Doce por ochenta y dos da novecientos ochenta y cuatro. Al dividir por el ingreso anterior de mil, resulta cero coma novecientos ochenta y cuatro. El término del producto importa en un cambio finito."}
 />
 
-<MCQ
-  client:visible
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="Los billetes de una aerolínea en una ruta con tres aerolíneas competidoras son elásticos ($E_d = 3$). Sube las tarifas un 10%. El resultado más probable es..."
+## Resta los costes por separado
+
+Declara **todos los costes de este modelo construido** para el mismo día como `C(Q)=100+4Q` créditos: cien fijos más cuatro por cada litro vendido. El **beneficio del modelo** es el ingreso menos esos costes modelados.
+
+| Política | Ingreso | Coste fijo | Coste variable | Coste total | Beneficio del modelo |
+|---|---:|---:|---:|---:|---:|
+| A | 1000 | 100 | 400 | 500 | 500 |
+| B | 960 | 100 | 320 | 420 | 540 |
+
+El ingreso baja cuarenta; los costes totales bajan ochenta; por tanto, el beneficio del modelo sube cuarenta. Comparamos dos políticas estipuladas, no todas las decisiones empresariales posibles. Una cuenta real también debe considerar los costes omitidos de este modelo, incluidos los costes de oportunidad pertinentes.
+
+<FirstPrinciplesBuilder client:visible
+  locale={"es"}
+  eyebrow={""}
+  title={"Reconstruye los costes de la política B"}
+  analogyValue={500}
+  analogyLabel={"Costes totales de la política A"}
+  analogyNote={"100 fijos + 4 × 100 créditos variables."}
+  parts={[
+  {
+    "label": "Coste fijo diario",
+    "value": 100,
+    "note": "No cambia entre las dos políticas."
+  },
+  {
+    "label": "Coste variable de ochenta litros",
+    "value": 320,
+    "note": "80 litros × 4 créditos/litro."
+  }
+]}
+  rebuiltLabel={"Contribuciones de coste seleccionadas"}
+  instructions={"Añade cada contribución para reconstruir el nuevo total."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Añadir ambas contribuciones"}
+  resetLabel={"Quitar contribuciones"}
+  verdictTemplate={"{total} es el coste completo de B en el modelo; réstalo del ingreso para calcular el beneficio modelado."}
+/>
+<MatchConcepts client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"✓ Todas las parejas correctas"}
+  partialResultWord={"correctas"}
+  pickDefinitionHint={"→ elige una definición"}
+  notLinkedHint={"sin pareja todavía"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+  question={"Relaciona cada cantidad de la política B con su significado."}
+  pairs={[
+  {
+    "term": "960 créditos",
+    "definition": "El ingreso del día, antes de restar costes."
+  },
+  {
+    "term": "420 créditos",
+    "definition": "Los costes fijos y variables modelados del día."
+  },
+  {
+    "term": "540 créditos",
+    "definition": "La diferencia entre el ingreso y los costes modelados."
+  }
+]}
+  explanation={"Ingreso menos coste total modelado da beneficio: novecientos sesenta menos cuatrocientos veinte son quinientos cuarenta. Una subida o bajada del ingreso no determina por sí sola el beneficio."}
+/>
+
+## Distingue las afirmaciones locales y las de intervalo
+
+La elasticidad **local**, o puntual, describe la sensibilidad cerca de un precio. No tiene por qué ser constante a lo largo de una curva de demanda. En nuestra función lineal estipulada, cerca del precio diez, una unidad adicional de precio reduce la cantidad en diez litros. Al ajustar esa pendiente local por precio/cantidad, la magnitud es `10×10/100=1` en ese punto. Eso no hace constante el ingreso del cambio finito a doce: ya calculamos 960 frente a 1000.
+
+<details>
+<summary>Cálculo opcional de la tasa local</summary>
+
+Una derivada es la tasa local de cambio. Cuando la cantidad es positiva y la curva es derivable, la magnitud de demanda descendente es `E_point=−Q′(P)P/Q(P)`. Aquí `Q′(P)=−10`. Además, `R(P)=P(200−10P)=1000−10(P−10)^2`. El ingreso tiene un cambio de primer orden cero en diez, pero baja cuarenta en doce. Un punto de elasticidad unitaria no es un intervalo entero de ingreso constante.
+
+</details>
+
+La figura siguiente es una **familia construida distinta**, no un ajuste a la tabla del puesto: **`Q(P)=5(P/5)^(−e)` solo para 5≤P≤10**. La cantidad son litros durante un día fijo del modelo; el precio, créditos/litro; el ingreso, créditos de ese día. Esta familia tiene elasticidad local constante `e` en todo el intervalo admitido. Su ingreso es `25(P/5)^(1−e)`.
+
+<ElasticityExplorer client:visible
+  title={"Examina un modelo de elasticidad local constante"}
+  locale={"es"}
+  eyebrow={""}
+  instructions={"Mantén fija la elasticidad al mover el precio de 5 a 10. P son créditos/litro; Q, litros durante un día del modelo; el rectángulo representa el ingreso de ese día."}
+  priceAxisLabel={"P"}
+  quantityAxisLabel={"Q"}
+  elasticityLabel={"Elasticidad local constante e"}
+  inelasticLabel={"e < 1"}
+  elasticLabel={"e > 1"}
+  priceSliderLabel={"Precio P (créditos/litro)"}
+  pricePrefix={""}
+  demandLabel={"Modelo declarado, precios de 5 a 10"}
+  revenueLabel={"Área del rectángulo = ingreso"}
+  elasticVerdict={"elástica"}
+  inelasticVerdict={"inelástica"}
+  unitVerdict={"unitaria"}
+  readoutTemplate={"e = {e} ({verdict}); P = {price} créditos/litro; Q ≈ {qty} litros. {dir}"}
+  revenueUpPhrase={"En esta familia de e constante, subir el precio aumenta el ingreso."}
+  revenueDownPhrase={"En esta familia de e constante, subir el precio reduce el ingreso."}
+  revenueFlatPhrase={"El ingreso se mantiene constante en todo el intervalo de precios admitido de esta familia."}
+  revenueReadoutLabel={"Ingreso modelado (créditos)"}
+  caption={"Los ejes se mantienen en Q de 0 a 5 y P de 0 a 10; la curva solo se muestra para P de 5 a 10. Las cifras de lectura están redondeadas; cantidad e ingreso se calculan sin redondear."}
+/>
+
+Con **e=1**, mover el precio de 5 a 10 cambia la cantidad de 5 a 2,5 y mantiene el ingreso en **25**. El precio se duplica y la cantidad se reduce a la mitad: un ingreso igual no requiere iguales magnitudes porcentuales sobre las bases originales. Con **e=0,9**, el ingreso aumenta con el precio; con **e=1,1**, disminuye. Ninguno de esos parámetros es exactamente unitario. Estos resultados dependen de la familia de e constante, no de que cualquier mercado real tenga esa forma.
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — prueba"}
+  question={"Una curva de demanda descendente tiene elasticidad local unitaria en un precio. ¿Qué se deduce para un cambio grande de precio?"}
   options={[
-    { text: 'El ingreso sube porque ahora cada billete cuesta más' },
-    { text: 'El ingreso baja con fuerza — los pasajeros se cambian a las aerolíneas rivales', correct: true },
-    { text: 'El ingreso no se ve afectado — tarifas y asientos siempre se compensan' },
-    { text: 'La cantidad no cambia porque la gente tiene que volar' },
-  ]}
-  explanation="La demanda elástica (Ed = 3) significa que la cantidad reacciona mucho MÁS que el precio: ~30% menos pasajeros ante una subida de tarifa del 10%. Con sustitutos cercanos (otras aerolíneas), los compradores huyen y el ingreso baja. Por esto exactamente los vendedores competitivos no pueden subir precios libremente."
+  {
+    "text": "El ingreso debe ser exactamente constante durante todo el cambio",
+    "correct": false
+  },
+  {
+    "text": "Toda su curva de demanda debe tener elasticidad local constante",
+    "correct": false
+  },
+  {
+    "text": "El coeficiente de un punto no basta para determinar el cambio finito de ingreso",
+    "correct": true
+  }
+]}
+  explanation={"Un coeficiente local describe el comportamiento cerca de un punto. Nuestra función lineal tiene coeficiente unitario en diez, pero menor ingreso en doce. El ingreso constante del intervalo de la otra figura se deduce de su función de e constante, no de un solo punto."}
 />
 
-### Cuándo usarlo
+## Interpreta el coeficiente en su contexto
 
-Usa el giro del ingreso siempre que estés decidiendo en qué dirección mover un precio, o
-intentando explicar la fijación de precios de *otro*. Los impuestos al tabaco recaudan
-toneladas de dinero precisamente porque la demanda es inelástica. Una startup que rebaja
-precios a saco para ganar un mercado elástico y lleno de sustitutos está aplicando la misma
-lógica al revés. Ajusta la jugada al muelle.
+Los sustitutos, las restricciones presupuestarias, el tiempo de adaptación y la capacidad disponible pueden importar para la sensibilidad. Son consideraciones para plantear y probar un modelo, no etiquetas permanentes que determinen una elasticidad medida para cualquier medicamento, lujo o ciudad. Especifica el bien, la población, el intervalo de precios y el horizonte que describe el coeficiente. Un precio alto o una gráfica de aspecto empinado no lo identifican por sí solos.
 
-## Elasticidad de la oferta (el lado del productor)
+La **elasticidad de la oferta (price elasticity of supply)** aplica la misma normalización de punto medio a las cantidades ofrecidas. En otra tabla de oferta estipulada, un precio de 10 a 12 acompaña a una cantidad ofrecida de 100 a 140 litros para un día. El coeficiente de oferta de punto medio es `(40/120)/(2/11)=11/6`, mayor que uno. Es cantidad **ofrecida**, no un registro de ventas completadas. Una restricción de oferta puede impedir satisfacer la demanda y romper el supuesto de cumplimiento del cálculo anterior del ingreso.
 
-La demanda no es la única curva con personalidad. La **elasticidad-precio de la oferta (price
-elasticity of supply)** mide lo mismo para los *vendedores*: cuánto reacciona la cantidad
-*ofrecida* ante un cambio de precio.
+Del mismo modo, dos registros reales de ventas de días distintos pueden diferir porque cambien el tiempo, los ingresos o los competidores. Puedes calcular un cociente porcentual descriptivo con los registros; atribuirlo solo al precio requiere evidencia que separe esos otros cambios. Esta lección no proporciona esa identificación empírica con dos observaciones.
 
-$$E_s = \frac{\%\ \text{change in quantity supplied}}{\%\ \text{change in price}}$$
-
-Si el precio sube y los productores pueden inundar el mercado con unidades extra, la oferta es
-**elástica**. Si están atascados produciendo más o menos lo mismo pase lo que pase con el
-precio, la oferta es **inelástica**. Lo deciden tres cosas:
-
-- **Capacidad ociosa.** Una fábrica con máquinas paradas puede acelerar rápido → oferta
-  elástica. Una fábrica ya al 100% no puede → inelástica.
-- **Tiempo para acelerar.** Igual que la demanda, la oferta es más elástica a largo plazo. Hoy
-  no puedes hacer aparecer una mina nueva; a lo largo de una década puedes cavar varias.
-- **Almacenabilidad.** Los bienes que puedes acumular (comida en conserva, oro) tienen una
-  oferta más elástica — sueltas inventario cuando los precios suben. Los perecederos y los
-  activos fijos no.
-
-**El ejemplo estrella — la vivienda.** A corto plazo, la **oferta de vivienda es
-extremadamente inelástica**: sencillamente no puedes construir casas nuevas este mes, por muy
-altos que se pongan los precios. Licencias, construcción y mano de obra tardan *años*. Así que
-cuando una ola de nueva demanda golpea una ciudad — nuevos empleos, hipotecas más baratas — la
-cantidad ofrecida no puede moverse, y todo el golpe se estrella contra el **precio** en su
-lugar. Por eso un repunte de demanda en un mercado de vivienda tensionado no añade muchas casas;
-solo encarece brutalmente las que ya existen.
-
-<Callout variant="tip" title="Por qué esto importa para lo que viene">
-La oferta inelástica es el villano secreto detrás de un montón de historias de "el precio se
-volvió loco". Cuando la cantidad *no puede* responder, el precio absorbe todo el golpe. Ten
-presente el rígido muelle de la oferta de vivienda — prepara la siguiente lección, donde los
-gobiernos intentan *forzar* a los precios a quedarse quietos.
-</Callout>
-
-<Categorize
-  client:visible
-  instructions="Coloca cada elemento en su grupo."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  explanationLabel="Explicación"
-  allCorrectLabel="✓ Todo ordenado"
-  partialResultWord="correctas"
-  question="Clasifica cada bien según cómo reacciona su DEMANDA ante un cambio de precio."
-  buckets={['Elástica', 'Inelástica']}
+<Categorize client:visible
+  instructions={"Coloca cada elemento en su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todo clasificado"}
+  partialResultWord={"correctos"}
+  question={"Clasifica las afirmaciones según lo que describen."}
+  buckets={[
+  "Resultado condicional del modelo",
+  "Falta evidencia"
+]}
   items={[
-    { text: 'Insulina (sin sustituto)', bucket: 'Inelástica' },
-    { text: 'Sal de mesa', bucket: 'Inelástica' },
-    { text: 'Los billetes de una aerolínea concreta (existen rivales)', bucket: 'Elástica' },
-    { text: 'Un refresco de marca con muchos rivales en la estantería', bucket: 'Elástica' },
-    { text: 'Gasolina, esta semana', bucket: 'Inelástica' },
-    { text: 'Un reloj de lujo', bucket: 'Elástica' },
-  ]}
-  explanation="Los bienes inelásticos son de primera necesidad, baratos o no tienen sustitutos (insulina, sal, gasolina a corto plazo). Los bienes elásticos son lujos o tienen sustitutos cercanos a los que puedes cambiarte (una sola aerolínea, un refresco de marca, un reloj de lujo)."
+  {
+    "text": "La tabla de extremos proporcionada da elasticidad de punto medio de once sextos.",
+    "bucket": "Resultado condicional del modelo"
+  },
+  {
+    "text": "Dos días de ventas sin control establecen que solo el precio causó el cambio de cantidad.",
+    "bucket": "Falta evidencia"
+  },
+  {
+    "text": "Llamar lujo a un bien establece su elasticidad numérica.",
+    "bucket": "Falta evidencia"
+  },
+  {
+    "text": "Con los costes completos declarados, el beneficio modelado de B es quinientos cuarenta.",
+    "bucket": "Resultado condicional del modelo"
+  }
+]}
+  explanation={"La aritmética puede establecer una consecuencia de entradas estipuladas. Una afirmación causal o medida sobre un mercado real exige evidencia más allá de una etiqueta o dos registros que cambian juntos."}
 />
 
-<Quiz
-  client:visible
-  title="Comprueba lo que sabes: elasticidad"
-  questionLabel="Pregunta"
-  ofLabel="de"
-  scoreLabel="Tu puntuación"
-  restartLabel="Reiniciar"
-  nextLabel="Siguiente"
-  backLabel="Atrás"
-  seeResultsLabel="Ver resultados"
-  completeLabel="Completado"
-  completeTitleLabel="Cuestionario completado"
-  correctCountLabel="correctas"
-  gateLabel="Comprueba tu respuesta para continuar."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  perfectMessage="Puntuación perfecta, ¡bien hecho!"
-  goodMessage="Buen trabajo, repasa las que has fallado."
-  keepPracticingMessage="Sigue practicando, lo tienes."
+## Transfiere y recupera el cálculo
+
+Usa una **tabla de otro mercado**, no la función lineal anterior. Para un día hipotético, el precio cambia de **8 a 10 créditos/litro** y la cantidad vendida, de **150 a 125 litros**. Se vende toda la cantidad al precio común declarado y las condiciones de la comparación se mantienen fijas. Calcula la elasticidad de punto medio y ambos ingresos antes de abrir la solución.
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — prueba"}
+  question={"En la tabla independiente, ¿qué pareja da la elasticidad de punto medio de la demanda y el cambio de ingreso?"}
+  options={[
+  {
+    "text": "Nueve onceavos; el ingreso sube cincuenta créditos",
+    "correct": true
+  },
+  {
+    "text": "Dos tercios; el ingreso no cambia",
+    "correct": false
+  },
+  {
+    "text": "Once novenos; el ingreso baja cincuenta créditos",
+    "correct": false
+  }
+]}
+  explanation={"El precio medio es nueve; la cantidad media, ciento treinta y siete coma cinco. El cociente de punto medio es veinticinco entre ciento treinta y siete coma cinco, dividido entre dos novenos: nueve onceavos. El ingreso pasa de mil doscientos a mil doscientos cincuenta."}
+/>
+
+<details>
+<summary>Comprueba la transferencia independiente</summary>
+
+El precio medio es **9**; la cantidad media, **137,5**. El coeficiente de punto medio es `(25/137,5)/(2/9)=9/11`, aproximadamente 0,818. Los ingresos son `8×150=1200` y `10×125=1250`: suben cincuenta. Al precio diez, el ingreso antiguo requeriría **120 litros**; los 125 dados superan ese umbral. El cociente sobre bases originales es `((25/150)/(2/8))=2/3`, otra convención identificada. Ninguna tabla de dos extremos identifica por sí sola una curva local única ni un beneficio sin costes.
+
+</details>
+
+<MindMap client:visible
+  eyebrow={""}
+  outlineLabel={"Esquema de texto"}
+  title={"¿Qué describe el número?"}
+  root={{
+  "label": "Auditoría de elasticidad",
+  "children": [
+    {
+      "label": "Medición",
+      "children": [
+        {
+          "label": "Unidades, intervalo de precios, ventana temporal y ventas cumplidas"
+        }
+      ]
+    },
+    {
+      "label": "Bases porcentuales",
+      "children": [
+        {
+          "label": "Valor original, punto medio o tasa local; nombra la convención"
+        }
+      ]
+    },
+    {
+      "label": "Ingreso y costes",
+      "children": [
+        {
+          "label": "Multiplica los factores del cambio completo; resta los costes modelados por separado"
+        }
+      ]
+    },
+    {
+      "label": "Límites del modelo",
+      "children": [
+        {
+          "label": "Un punto no es un intervalo; una etiqueta o dos registros no son evidencia causal"
+        }
+      ]
+    }
+  ]
+}}
+/>
+<Quiz client:visible
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"correctas"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Cuestionario completado"}
+  perfectMessage={"Todas las respuestas son correctas."}
+  goodMessage={"Revisa las respuestas que has fallado."}
+  keepPracticingMessage={"Repasa el razonamiento de las respuestas."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Atrás"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  title={"Comprueba las bases y las cuentas"}
   questions={[
-    {
-      question: 'Un precio sube un 10% y la cantidad demandada cae un 20%. ¿Cuál es Ed y cómo se llama?',
-      options: [
-        { text: 'Ed = 2, elástica', correct: true },
-        { text: 'Ed = 0.5, inelástica' },
-        { text: 'Ed = 2, inelástica' },
-        { text: 'Ed = 0.5, elástica' },
-      ],
-      explanation: 'Ed = 20% ÷ 10% = 2. Como 2 > 1, la cantidad reaccionó MÁS que el precio, así que la demanda es elástica.',
-    },
-    {
-      question: '¿Qué factor por sí solo aumenta más la elasticidad-precio de la demanda de un bien?',
-      options: [
-        { text: 'Tener muchos sustitutos cercanos disponibles', correct: true },
-        { text: 'Venderse en un envase elegante' },
-        { text: 'Tener un precio muy alto en euros' },
-        { text: 'Estar legalmente obligado a comprarlo' },
-      ],
-      explanation: 'Los sustitutos son el mayor impulsor: cuantos más reemplazos fáciles existan, más rápido huyen los compradores de una subida de precio, lo que hace la demanda más elástica. Un precio alto por sí solo no dice nada sobre la elasticidad.',
-    },
-    {
-      question: 'Un monopolio vende un fármaco sin sustitutos (demanda inelástica) y sube el precio. ¿Qué le pasa a su ingreso, y por qué?',
-      options: [
-        { text: 'El ingreso sube, porque la cantidad cae menos de lo que subió el precio', correct: true },
-        { text: 'El ingreso baja, porque toda subida de precio pierde clientes' },
-        { text: 'El ingreso no cambia, porque precio × cantidad es constante' },
-        { text: 'El ingreso baja, porque los compradores se cambian a sustitutos' },
-      ],
-      explanation: 'La demanda inelástica significa que la cantidad apenas se mueve cuando el precio sube, así que precio × cantidad crece — el ingreso sube. Sin sustitutos, los compradores no pueden huir, que es exactamente por lo que los bienes de primera necesidad en monopolio se ponen tan caros.',
-    },
-  ]}
+  {
+    "question": "En la tabla principal, ¿qué base de precio se usa para el punto medio?",
+    "options": [
+      {
+        "text": "Diez créditos por litro",
+        "correct": false
+      },
+      {
+        "text": "Once créditos por litro",
+        "correct": true
+      },
+      {
+        "text": "Doce créditos por litro",
+        "correct": false
+      }
+    ],
+    "explanation": "Haz la media de los precios diez y doce: su punto medio es once."
+  },
+  {
+    "question": "La tabla principal tiene iguales magnitudes porcentuales sobre bases originales. ¿Por qué es menor el ingreso?",
+    "options": [
+      {
+        "text": "Los factores de precio y cantidad dan un producto menor que uno",
+        "correct": true
+      },
+      {
+        "text": "El método de punto medio cambia los litros realmente vendidos",
+        "correct": false
+      },
+      {
+        "text": "Los costes del vendedor deben haber aumentado en la comparación",
+        "correct": false
+      }
+    ],
+    "explanation": "Los factores son uno coma dos y cero coma ocho. Su producto es cero coma noventa y seis; las convenciones porcentuales no cambian las cantidades de los extremos."
+  },
+  {
+    "question": "Al precio mayor de la tabla de transferencia, ¿cuántos litros conservan el ingreso antiguo?",
+    "options": [
+      {
+        "text": "Ciento veinticinco",
+        "correct": false
+      },
+      {
+        "text": "Ciento cincuenta",
+        "correct": false
+      },
+      {
+        "text": "Ciento veinte",
+        "correct": true
+      }
+    ],
+    "explanation": "El ingreso antiguo es ocho por ciento cincuenta: mil doscientos. Divídelo por el nuevo precio diez para obtener ciento veinte litros."
+  },
+  {
+    "question": "¿Qué cantidades se necesitan para comparar el beneficio modelado?",
+    "options": [
+      {
+        "text": "El ingreso y todos los costes incluidos en la cuenta declarada",
+        "correct": true
+      },
+      {
+        "text": "Solo la clasificación de elasticidad del intervalo de demanda",
+        "correct": false
+      },
+      {
+        "text": "La misma ventana contable para las dos políticas alternativas",
+        "correct": true
+      }
+    ],
+    "explanation": "El beneficio resta los costes del ingreso dentro de una ventana y una frontera coherentes. Una etiqueta de elasticidad no proporciona los costes.",
+    "allowMultiple": true
+  },
+  {
+    "question": "El precio no cambia entre dos registros y la cantidad es distinta. ¿Qué ocurre con el cociente finito de elasticidad-precio?",
+    "options": [
+      {
+        "text": "Vale cero porque un precio sin cambios significa elasticidad cero",
+        "correct": false
+      },
+      {
+        "text": "No está definido porque el cambio porcentual del precio es cero",
+        "correct": true
+      },
+      {
+        "text": "Vale uno porque los registros comparten el mismo precio original",
+        "correct": false
+      }
+    ],
+    "explanation": "Un cambio de precio cero no puede ser el denominador de este cociente finito. Los registros pueden contener otro cambio, pero no proporcionan esta elasticidad."
+  }
+]}
 />
 
-## Hacia dónde va esto
+Después viene **Controles de precios y la señal**. Mantén la distinción entre una tabla de cantidades, una cantidad completada y los supuestos del modelo al leer los casos de límites de precios.
 
-Ya sabes medir *con cuánta fuerza* reacciona un mercado ante un cambio de precio, y predecir si
-una subida hace a un vendedor más rico o más pobre. También conociste al alborotador silencioso:
-la **oferta inelástica**, donde la cantidad no puede responder y el precio se lleva todo el
-golpe.
+### Fuentes y alcance
 
-Eso plantea una pregunta tentadora para los gobiernos: si los precios pueden oscilar de forma
-tan violenta, ¿por qué no simplemente *ordenarles* que se queden quietos — limitar el alquiler,
-fijar un salario mínimo, congelar el precio del pan? En la **Lección 6 — Controles de precios y
-la señal**, veremos qué pasa de verdad cuando luchas contra el mercado con un techo o un suelo
-de precios, por qué aparecen escaseces y excedentes, y cómo la elasticidad decide hasta qué
-punto sale mal la jugada.
+La convención porcentual sigue la [sección 5.1 de OpenStax](https://openstax.org/books/principles-economics-3e/pages/5-1-price-elasticity-of-demand-and-price-elasticity-of-supply). La distinción de tasa local se contrasta con esta [hoja matemática primaria](https://math.mit.edu/~rud/184-workshops/workshop6.pdf) y las [secciones puntual y de arco de Business Calculus with Excel](https://opentext.uleth.ca/ExcelCalculus/sec-5-3-Elasticity.html). Las definiciones de ingreso y coste siguen la [sección 7.1 de OpenStax](https://openstax.org/books/principles-economics-3e/pages/7-1-explicit-and-implicit-costs-and-accounting-and-economic-profit). Todas las funciones numéricas, costes y comparaciones de modelos están construidos; no son estimaciones empíricas de elasticidad ni recomendaciones para un vendedor real.

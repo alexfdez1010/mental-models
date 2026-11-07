@@ -3,6 +3,8 @@ import { cx } from '@/components/react/cx';
 
 /** Props for the {@link ElasticityExplorer} island. */
 export interface ElasticityExplorerProps {
+  /** Number formatting for visible text and range accessible values. */
+  locale?: 'en' | 'es';
   /** Heading above the card. */
   title?: string;
   /** Eyebrow label. Defaults to `'How much does quantity react?'`. */
@@ -17,9 +19,9 @@ export interface ElasticityExplorerProps {
   quantityAxisLabel?: string;
   /** Slider label for the elasticity dial. Defaults to `'Elasticity'`. */
   elasticityLabel?: string;
-  /** Caption on the inelastic end of the elasticity slider. Defaults to `'inelastic (a necessity)'`. */
+  /** Caption on the inelastic end of the elasticity slider. Defaults to `'inelastic: e < 1'`. */
   inelasticLabel?: string;
-  /** Caption on the elastic end of the elasticity slider. Defaults to `'elastic (a luxury)'`. */
+  /** Caption on the elastic end of the elasticity slider. Defaults to `'elastic: e > 1'`. */
   elasticLabel?: string;
   /** Slider label for the price the learner sets. Defaults to `'Price'`. */
   priceSliderLabel?: string;
@@ -62,49 +64,50 @@ const PAD_B = 38;
 const PLOT_W = W - PAD_L - PAD_R;
 const PLOT_H = H - PAD_T - PAD_B;
 
+const P_MIN = 5;
 const P_MAX = 10;
-const Q_MAX = 10;
+const Q_MAX = 5;
 const P0 = 5; // reference price
 const Q0 = 5; // reference quantity at P0
 
 const sx = (q: number) => PAD_L + (q / Q_MAX) * PLOT_W;
 const sy = (p: number) => PAD_T + PLOT_H - (p / P_MAX) * PLOT_H;
-const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-/** Constant-elasticity demand: Q(P) = Q0 · (P/P0)^(−E). */
-function quantityAt(price: number, e: number): number {
-  if (price <= 0) return Q_MAX;
-  return clamp(Q0 * Math.pow(price / P0, -e), 0, Q_MAX);
+/** The admitted constant-local-elasticity family, not a fitted empirical curve. */
+export function calculateElasticityModel(price: number, elasticity: number): {
+  quantity: number;
+  revenue: number;
+  classification: 'inelastic' | 'unit' | 'elastic';
+} {
+  if (!Number.isFinite(price) || price < P_MIN || price > P_MAX
+    || !Number.isFinite(elasticity) || elasticity < 0.2 || elasticity > 2.5) {
+    throw new Error('ElasticityExplorer: price must be in [5,10] and local elasticity in [0.2,2.5].');
+  }
+  const quantity = Q0 * Math.pow(price / P0, -elasticity);
+  return {
+    quantity,
+    revenue: price * quantity,
+    classification: elasticity < 1 ? 'inelastic' : elasticity > 1 ? 'elastic' : 'unit',
+  };
 }
 
 /**
- * Interactive **elasticity explorer** — "how hard does quantity react when the
- * price moves?" made visible, with the revenue twist that makes elasticity
- * matter.
- *
- * The learner sets an **elasticity** dial (from a steep, barely-reacting
- * necessity to a flat, wildly-reacting luxury) and drags the **price**. The
- * demand curve reshapes, the quantity demanded slides along it, and a shaded
- * **revenue rectangle** (price × quantity) grows or shrinks. The lesson the
- * island teaches by construction: when demand is *inelastic* (E < 1) raising the
- * price *raises* revenue, but when it is *elastic* (E > 1) raising the price
- * *lowers* revenue — the rectangle visibly flips direction as the dial crosses 1.
- *
- * Both controls are native, keyboard-operable range inputs with visible labels;
- * the readout is announced via `aria-live`; the SVG is static per setting and the
- * tweens are cosmetic, disabled under `prefers-reduced-motion`.
+ * Inspect Q(P)=5(P/5)^(-e) only on P in [5,10]. Fixed axes contain the
+ * entire admitted family, so a quantity cap never changes the actual elasticity.
+ * Native controls drive the revenue rectangle; motion reduction disables tweens.
  */
 export function ElasticityExplorer({
   title,
+  locale = 'en',
   eyebrow = 'How much does quantity react?',
-  instructions = 'Set how elastic demand is, then move the price. Watch the quantity react — and watch total revenue (the shaded box) grow or shrink.',
+  instructions = 'Choose a constant local elasticity, then move price between 5 and 10. The shaded rectangle represents modeled revenue.',
   caption,
   priceAxisLabel = 'Price',
   quantityAxisLabel = 'Quantity',
   elasticityLabel = 'Elasticity',
-  inelasticLabel = 'inelastic (a necessity)',
-  elasticLabel = 'elastic (a luxury)',
+  inelasticLabel = 'inelastic: e < 1',
+  elasticLabel = 'elastic: e > 1',
   priceSliderLabel = 'Price',
   pricePrefix = '$',
   demandLabel = 'Demand',
@@ -112,46 +115,48 @@ export function ElasticityExplorer({
   elasticVerdict = 'elastic',
   inelasticVerdict = 'inelastic',
   unitVerdict = 'unit elastic',
-  readoutTemplate = 'Elasticity ≈ {e} ({verdict}). At {price}, buyers take {qty} units. {dir}',
-  revenueUpPhrase = 'Demand is inelastic, so raising the price RAISES total revenue — the box gets bigger as price climbs.',
-  revenueDownPhrase = 'Demand is elastic, so raising the price LOWERS total revenue — buyers flee faster than the price rises and the box shrinks.',
-  revenueFlatPhrase = 'Demand is unit elastic, so revenue barely moves — the percentage drop in quantity just offsets the rise in price.',
+  readoutTemplate = 'Local elasticity {e} ({verdict}). Price {price}; modeled quantity {qty}. {dir}',
+  revenueUpPhrase = 'Within this constant-elasticity model, higher price raises revenue.',
+  revenueDownPhrase = 'Within this constant-elasticity model, higher price lowers revenue.',
+  revenueFlatPhrase = 'Revenue is constant throughout this model’s price interval.',
   revenueReadoutLabel = 'Total revenue',
   className,
 }: ElasticityExplorerProps) {
+  if (locale !== 'en' && locale !== 'es') throw new Error('ElasticityExplorer: locale must be en or es.');
+  const numberFormat = new Intl.NumberFormat(locale === 'es' ? 'es-ES' : 'en-US', { maximumFractionDigits: 1 });
+  const format = (value: number) => numberFormat.format(value === 0 ? 0 : round1(value));
   const reactId = useId();
   const [elasticity, setElasticity] = useState(0.5);
   const [price, setPrice] = useState(P0);
 
   const model = useMemo(() => {
-    const q = quantityAt(price, elasticity);
-    const revenue = price * q;
+    const { quantity: q, revenue, classification } = calculateElasticityModel(price, elasticity);
     // Demand curve sampled across the price domain.
     const pts: string[] = [];
     const n = 40;
     for (let i = 0; i <= n; i++) {
-      const p = (i / n) * P_MAX;
-      const qq = quantityAt(p, elasticity);
+      const p = P_MIN + (i / n) * (P_MAX - P_MIN);
+      const qq = calculateElasticityModel(p, elasticity).quantity;
       pts.push(`${sx(qq).toFixed(1)},${sy(p).toFixed(1)}`);
     }
-    return { q, revenue, path: `M ${pts.join(' L ')}` };
+    return { q, revenue, classification, path: `M ${pts.join(' L ')}` };
   }, [price, elasticity]);
 
-  const { q, revenue, path } = model;
+  const { q, revenue, classification, path } = model;
 
   const verdict =
-    elasticity > 1.1 ? elasticVerdict : elasticity < 0.9 ? inelasticVerdict : unitVerdict;
+    classification === 'elastic' ? elasticVerdict : classification === 'inelastic' ? inelasticVerdict : unitVerdict;
   const dir =
-    elasticity > 1.1 ? revenueDownPhrase : elasticity < 0.9 ? revenueUpPhrase : revenueFlatPhrase;
+    classification === 'elastic' ? revenueDownPhrase : classification === 'inelastic' ? revenueUpPhrase : revenueFlatPhrase;
 
-  const priceTxt = `${pricePrefix}${round1(price)}`;
-  const revTxt = `${pricePrefix}${round1(revenue)}`;
+  const priceTxt = `${pricePrefix}${format(price)}`;
+  const revTxt = `${pricePrefix}${format(revenue)}`;
 
   const readout = readoutTemplate
-    .replace('{e}', String(round1(elasticity)))
+    .replace('{e}', format(elasticity))
     .replace('{verdict}', verdict)
     .replace('{price}', priceTxt)
-    .replace('{qty}', String(round1(q)))
+    .replace('{qty}', format(q))
     .replace('{rev}', revTxt)
     .replace('{dir}', dir);
 
@@ -164,10 +169,10 @@ export function ElasticityExplorer({
   const rectH = Math.max(0, PAD_T + PLOT_H - sy(price));
 
   return (
-    <figure className={cx('brutal my-6 bg-surface p-5 sm:p-6', className)}>
-      <p className="font-display text-xs font-semibold uppercase tracking-wide text-brand-600">
+    <figure aria-label={title || instructions} className={cx('brutal my-6 bg-surface p-5 sm:p-6', className)}>
+      {eyebrow ? <p className="font-display text-xs font-semibold uppercase tracking-wide text-brand-600">
         {eyebrow}
-      </p>
+      </p> : null}
       {title ? (
         <p className="mt-1 font-display text-lg font-semibold text-ink-900">{title}</p>
       ) : null}
@@ -175,7 +180,7 @@ export function ElasticityExplorer({
       <p className="mt-2 text-sm font-medium text-ink-700">{instructions}</p>
 
       <div className="mt-4 overflow-hidden rounded-card border border-ink-100 bg-surface-sunken">
-        <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={readout}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`${readout} ${revenueReadoutLabel}: ${revTxt}`}>
           <rect x="0" y="0" width={W} height={H} fill="var(--color-surface-sunken)" />
 
           {/* Revenue rectangle */}
@@ -193,12 +198,16 @@ export function ElasticityExplorer({
           {/* Axes */}
           <line x1={PAD_L} y1={PAD_T} x2={PAD_L} y2={PAD_T + PLOT_H} stroke="var(--color-ink-400)" strokeWidth="1.5" />
           <line x1={PAD_L} y1={PAD_T + PLOT_H} x2={PAD_L + PLOT_W} y2={PAD_T + PLOT_H} stroke="var(--color-ink-400)" strokeWidth="1.5" />
-          <text x={PAD_L - 6} y={PAD_T + 4} textAnchor="end" fontSize="11" fill="var(--color-ink-500)">
+          <text x={priceAxisLabel.length > 2 ? 20 : 12} y={priceAxisLabel.length > 2 ? 85 : 49} textAnchor={priceAxisLabel.length > 2 ? 'middle' : 'start'} transform={priceAxisLabel.length > 2 ? 'rotate(-90 20 85)' : undefined} className="text-[20px] sm:text-[11px]" fill="var(--color-ink-500)">
             {priceAxisLabel}
           </text>
-          <text x={PAD_L + PLOT_W} y={H - 10} textAnchor="end" fontSize="11" fill="var(--color-ink-500)">
+          <text x={PAD_L + PLOT_W - 20} y={H - 6} textAnchor="end" className="text-[20px] sm:text-[11px]" fill="var(--color-ink-500)">
             {quantityAxisLabel}
           </text>
+
+          {/* Numeric axes stay fixed across both controls. Names sit outside the ticks. */}
+          {[5, 10].map(value => <text key={`p-${value}`} x={PAD_L - 6} y={sy(value) + 4} textAnchor="end" className="text-[20px] sm:text-[10px]" fill="var(--color-ink-700)">{format(value)}</text>)}
+          {[0, 5].map(value => <text key={`q-${value}`} x={sx(value)} y={PAD_T + PLOT_H + 24} textAnchor="middle" className="text-[20px] sm:text-[10px]" fill="var(--color-ink-700)">{format(value)}</text>)}
 
           {/* Demand curve */}
           <path d={path} fill="none" stroke="var(--color-brand-600)" strokeWidth="3" strokeLinecap="round" className={lineTween} />
@@ -248,7 +257,7 @@ export function ElasticityExplorer({
             step={0.1}
             value={elasticity}
             onChange={(e) => setElasticity(Number(e.target.value))}
-            aria-valuetext={`${round1(elasticity)} — ${verdict}`}
+            aria-valuetext={`${format(elasticity)} — ${verdict}`}
             className="mt-1 h-1.5 w-full cursor-pointer accent-brand-600"
           />
           <div className="flex justify-between text-[0.6rem] font-medium uppercase tracking-wide text-ink-400">
@@ -264,7 +273,7 @@ export function ElasticityExplorer({
             <input
               id={`${reactId}-p`}
               type="range"
-              min={1}
+              min={P_MIN}
               max={P_MAX}
               step={0.5}
               value={price}
