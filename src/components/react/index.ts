@@ -335,3 +335,6 @@ export type { BranchingDistributionProps, BranchingDistributionLabels, Branching
 
 export { SecretaryLimitCurve, secretaryLimitValue } from '@/components/react/SecretaryLimitCurve';
 export type { SecretaryLimitCurveProps, SecretaryLimitLabels } from '@/components/react/SecretaryLimitCurve';
+
+export { ReferenceChoiceAudit, getReferenceChoiceResult } from '@/components/react/ReferenceChoiceAudit';
+export type { ReferenceChoiceCase, ReferenceChoiceLabels, ReferenceChoiceAuditProps, ReferenceChoiceResult } from '@/components/react/ReferenceChoiceAudit';
