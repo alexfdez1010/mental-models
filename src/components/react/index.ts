@@ -338,3 +338,6 @@ export type { SecretaryLimitCurveProps, SecretaryLimitLabels } from '@/component
 
 export { ReferenceChoiceAudit, getReferenceChoiceResult } from '@/components/react/ReferenceChoiceAudit';
 export type { ReferenceChoiceCase, ReferenceChoiceLabels, ReferenceChoiceAuditProps, ReferenceChoiceResult } from '@/components/react/ReferenceChoiceAudit';
+
+export { MixedStrategyAudit, auditMixedStrategy, mixedAuditFraction, MIXED_AUDIT_PERCENTAGES } from '@/components/react/MixedStrategyAudit';
+export type { MixedStrategyAuditProps, MixedStrategyAuditLabels, MixedStrategyAuditResult, MixedAuditPercent, MixedAuditMatrix } from '@/components/react/MixedStrategyAudit';

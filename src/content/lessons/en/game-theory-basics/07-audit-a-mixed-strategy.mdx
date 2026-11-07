@@ -1,0 +1,401 @@
+---
+title: "Audit a Mixed Strategy"
+description: "Compute joint probabilities, both players’ expected utilities and deviation gains, then test independence and a nonuniform equilibrium."
+topic: "en/game-theory-basics"
+order: 8
+minutes: 28
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, MatchConcepts, Categorize, PayoffMatrix, MixedStrategyAudit, RateComparison, Callout, MindMap, Quiz } from '@/components/react';
+
+Two players say they choose Heads half the time. It sounds like the matching-pennies equilibrium from lesson three. Before accepting the claim, ask how their choices are generated. Two private coins and one shared coin can produce identical individual frequencies and completely different results.
+
+This workshop audits the rules rather than a short run of lucky outcomes. You will compute what each player expects, what each could gain by changing their own rule, and which assumptions make that comparison valid.
+
+## Write down the decision before averaging
+
+<MCQ client:visible className="not-prose" pretest
+  question="Both players choose Heads half the time. Is that enough to certify the matching-pennies equilibrium?"
+  options={[
+    { text: 'Yes, equal frequencies alone establish the equilibrium' },
+    { text: 'No, the joint randomisation and information still matter', correct: true },
+    { text: 'No, equilibrium requires equal realised scores every time' },
+    { text: 'Yes, any random rule removes profitable deviations' },
+  ]}
+  explanation="A frequency for each player does not say which actions occur together. Independent private randomisations and a shared instruction can have the same individual frequencies. We must also specify what a player knows when choosing whether to follow a rule."
+/>
+
+Our constructed game has two players, **Row** and **Column**. Each chooses **Heads** or **Tails** without seeing the other's realised action. Row likes a match; Column likes a mismatch. There is one decision, with this fixed table of **utility points**:
+
+<PayoffMatrix client:visible className="not-prose" editable={false}
+  title="The fixed rules: matching helps Row"
+  instructions="Each cell lists (Row utility, Column utility). These are constructed utility points; higher is better for that player. The rings test responses to pure actions only."
+  rowPlayer="Row" colPlayer="Column"
+  rowStrategies={['Heads', 'Tails']} colStrategies={['Heads', 'Tails']}
+  payoffs={[[{ row: 1, col: -1 }, { row: -1, col: 1 }], [{ row: -1, col: 1 }, { row: 1, col: -1 }]]}
+  caption="Every cell sums to zero. No pure cell survives both players’ deviation tests; the workshop will test probability rules instead."
+/>
+
+**Utility** is the player's numerical valuation of an outcome. Here we stipulate that each player chooses the rule with the highest **expected utility**: the sum of each possible utility multiplied by its probability. The scale matters for that averaging. Merely relabelling outcomes from best to worst does not tell us how the player values uncertain combinations.
+
+A **pure strategy** chooses one action with certainty. A **mixed strategy** specifies probabilities over the actions, including a probability of zero or one. A **profile** is the pair of players' strategies. For now, their random draws are private and **independent**: learning the realised result of one draw would not change the distribution of the other. The probability rules are known; the realised actions are hidden until both commit.
+
+We are analysing a stipulated mathematical game, not measuring someone's risk preferences or advising anyone to bet. A randomising rule is also different from alternating on a visible schedule: if the rival can infer your next action, the information in this model has changed.
+
+<FillBlank client:visible className="not-prose"
+  question="Fix what is being compared."
+  text="A mixed strategy specifies {{probabilities|past scores|rankings}} over actions. In this audit the realised choices are {{hidden|announced|shared}} until both players commit, and each player maximises expected {{utility|frequency|surprise}}."
+  explanation="The rule assigns probabilities before the action is realised. Expected utility weights the utilities by those probabilities. The hidden, independent draws are assumptions we must check, not benefits supplied automatically by the word random."
+/>
+
+### When this model applies
+
+Use the audit when the actions, utilities and information are specified well enough to calculate a comparison. If either player values uncertainty differently from the stated utility scale, observes the rival's action, or changes behaviour after a recommendation, write down that new problem first.
+
+## Turn two probabilities into four outcomes
+
+<MCQ client:visible className="not-prose" pretest
+  question="Row chooses Heads one quarter of the time and Column chooses it three quarters of the time, independently. Which pair should be most common?"
+  options={[
+    { text: 'Heads for both players' },
+    { text: 'Heads for Row and Tails for Column' },
+    { text: 'Tails for Row and Heads for Column', correct: true },
+    { text: 'Tails for both players' },
+  ]}
+  explanation="Row usually chooses Tails and Column usually chooses Heads. Independence lets us multiply those two probabilities. Their combination has probability nine sixteenths; the other three combinations must also be included in the average."
+/>
+
+Let $p$ be Row's probability of Heads and $q$ Column's probability of Heads. The leftover probabilities are $1-p$ and $1-q$. A **marginal probability** concerns one player's action; a **joint probability** concerns a pair of actions. Under the stated independence assumption:
+
+| Action pair, Row first | Joint probability | At $p=1/4$, $q=3/4$ | Row utility | Contribution to Row's mean |
+| --- | --- | --- | --- | --- |
+| Heads, Heads | $pq$ | $3/16$ | $1$ | $3/16$ |
+| Heads, Tails | $p(1-q)$ | $1/16$ | $-1$ | $-1/16$ |
+| Tails, Heads | $(1-p)q$ | $9/16$ | $-1$ | $-9/16$ |
+| Tails, Tails | $(1-p)(1-q)$ | $3/16$ | $1$ | $3/16$ |
+
+For example, the Tails–Heads probability is $(3/4)(3/4)=9/16$. The four probabilities sum to $(3+1+9+3)/16=1$, as a complete distribution must. Adding the two cells where Row chooses Heads recovers $4/16=1/4$; adding the two where Column chooses Heads recovers $12/16=3/4$.
+
+Multiply each probability by the cell's utility, then add **all four contributions**:
+
+$$
+U_R=\frac{3-1-9+3}{16}=-\frac14,
+\qquad U_C=-U_R=\frac14.
+$$
+
+The subscripts identify Row and Column. Their means are opposite because the utilities are opposite in every cell. They do not each receive the same average just because both randomise.
+
+<MixedStrategyAudit client:visible
+  title="Independent mixtures: audit both players"
+  rowPlayer="Row" colPlayer="Column"
+  rowStrategies={['Heads', 'Tails']} colStrategies={['Heads', 'Tails']}
+  rowPayoffs={[[1, -1], [-1, 1]]}
+  initialRowPercent={25} initialColumnPercent={75}
+  caption="Start with the table’s probabilities. Changing either rule recomputes all four cells. The utility axis stays fixed as the controls change; the tables retain exact fractions."
+/>
+
+<MCQ client:visible className="not-prose"
+  question="In the biased profile just calculated, what is Column’s expected utility?"
+  options={[
+    { text: 'Minus one quarter' },
+    { text: 'Plus one half' },
+    { text: 'Exactly zero' },
+    { text: 'Plus one quarter', correct: true },
+  ]}
+  explanation="Column has the negative of Row’s utility in every cell. Row’s four contributions sum to minus one quarter, so Column’s sum is plus one quarter. The plus one half figure belongs to a pure deviation we will calculate next."
+/>
+
+An expected utility is a probability-weighted mean, not a promised score for this decision. Row can realise only $1$ or $-1$ here, never $-1/4$. Over repeated independent copies of this fixed experiment the sample mean can fluctuate. A handful of realised wins does not certify a strategy profile.
+
+## Hold their rule fixed and test your alternatives
+
+<MCQ client:visible className="not-prose" pretest
+  question="Column already has positive expected utility in the biased profile. Does that mean Column has no profitable deviation?"
+  options={[
+    { text: 'Yes, a positive mean is the equilibrium condition' },
+    { text: 'No, another own rule may give an even higher mean', correct: true },
+    { text: 'Yes, the player currently ahead cannot improve' },
+    { text: 'No, the players must change both rules together' },
+  ]}
+  explanation="The Nash test compares current utility with the best available unilateral alternative. Being ahead is insufficient: Column currently earns one quarter but could earn one half while Row keeps the same rule."
+/>
+
+A **best response to a mixture** is a strategy with the highest expected utility against that fixed mixture. Hold Column's Heads probability at $q=3/4$ and compare Row's pure actions. Then hold Row's at $p=1/4$ and do the same for Column, using **Column's own utility**:
+
+| Player changing alone | Always Heads | Always Tails | Current mean | Best pure mean | Gain from changing |
+| --- | --- | --- | --- | --- | --- |
+| Row, with $q=3/4$ fixed | $(3/4)(1)+(1/4)(-1)=1/2$ | $(3/4)(-1)+(1/4)(1)=-1/2$ | $-1/4$ | $1/2$ | $1/2-(-1/4)=3/4$ |
+| Column, with $p=1/4$ fixed | $(1/4)(-1)+(3/4)(1)=1/2$ | $(1/4)(1)+(3/4)(-1)=-1/2$ | $1/4$ | $1/2$ | $1/2-1/4=1/4$ |
+
+The **unilateral deviation gain** is best-response utility minus current expected utility, in utility points for that player. It measures an available improvement against a held-fixed rival rule. It is not a feeling of regret after seeing the outcome, and it is not an accumulated learning score.
+
+Why check only the two pure alternatives? Any new mixture is an average of their two values. If a candidate gives Heads probability $s$, Row's value against this fixed $q$ is:
+
+$$s\left(\frac12\right)+(1-s)\left(-\frac12\right)=s-\frac12\leq\frac12 \quad (0\leq s\leq1).$$
+
+The average cannot exceed its larger ingredient. The same argument works for Column. Pure deviations therefore suffice to test whether **any** mixed deviation improves utility, not just the six control options. If both pure values tie, every mixture of those two actions ties against that rival rule.
+
+<MCQ client:visible className="not-prose"
+  question="Which pair gives the gains from deviating alone in the biased profile, Row first?"
+  options={[
+    { text: 'Three quarters and one quarter', correct: true },
+    { text: 'One half and one half' },
+    { text: 'One quarter and three quarters' },
+    { text: 'Minus one quarter and plus one quarter' },
+  ]}
+  explanation="Subtract each current mean from its own best pure value. Row improves from minus one quarter to one half, a gain of three quarters. Column improves from one quarter to one half, a gain of one quarter. Reporting the best values or the current values skips the subtraction."
+/>
+
+<MatchConcepts client:visible className="not-prose"
+  question="Match each quantity to the question it answers."
+  pairs={[
+    { term: 'Joint probability', definition: 'How likely is this particular pair of actions?' },
+    { term: 'Expected utility', definition: 'What is the sum of all probability-weighted utilities?' },
+    { term: 'Best response', definition: 'Which own rule maximises utility against the fixed rival rule?' },
+    { term: 'Deviation gain', definition: 'How much higher is the best available utility than the current mean?' },
+  ]}
+  explanation="The joint distribution supplies weights, the mean combines utilities, the best response compares alternatives, and the gain measures the remaining incentive to switch. None of those quantities alone is an observed score."
+/>
+
+### When the comparison is useful
+
+Audit both sides of a proposed arrangement. A zero gain for Row alone is not enough. Try Row at half and Column at three quarters: Column cannot improve its mean of zero against Row's half mixture, but Row can improve from zero to one half. One satisfied player does not make a mutually stable profile.
+
+## Find the two mixtures that pass
+
+<MCQ client:visible className="not-prose" pretest
+  question="To make Row indifferent between Heads and Tails, whose probability must you solve for?"
+  options={[
+    { text: 'Row’s, because a player’s own probability fixes their pure values' },
+    { text: 'Both at once, without comparing any pure values' },
+    { text: 'Column’s, because Row’s pure values depend on Column’s rule', correct: true },
+    { text: 'Neither, because randomisation automatically makes actions tie' },
+  ]}
+  explanation="Fixing a pure Row action leaves only Column’s uncertainty to average over. Thus Column’s Heads probability determines whether Row prefers Heads or Tails. The other equation similarly solves Row’s probability to make Column indifferent."
+/>
+
+**Indifference** means equal expected utilities, not a demand that someone feel undecided. With both actions receiving positive probability at equilibrium, neither can be strictly worse than the other: otherwise moving its probability to the better action would help.
+
+| Player's pure alternatives | Expected utility | Condition for a tie |
+| --- | --- | --- |
+| Row Heads / Tails | $2q-1$ / $1-2q$ | $2q-1=1-2q$, so $q=1/2$ |
+| Column Heads / Tails | $1-2p$ / $2p-1$ | $1-2p=2p-1$, so $p=1/2$ |
+
+For instance, Row's Heads value is $q(1)+(1-q)(-1)=2q-1$. At the two half mixtures all four cells have probability $1/4$. Row's mean is $(1-1-1+1)/4=0$; Column's is also zero. Every pure-response value is zero, so both deviation gains are zero. No other mixture can exceed those tied endpoints. This verifies the mixed Nash equilibrium for the stated game.
+
+Set both controls to half and check the two zero gains. This result requires **both** rules; randomising at arbitrary probabilities is not sufficient. The equal split comes from these particular payoffs and independence, not from the word mixed.
+
+<FillBlank client:visible className="not-prose"
+  question="Complete the audit rule."
+  text="To test a unilateral change, hold the {{rival’s|player’s|joint}} probability rule fixed. At a mixed Nash equilibrium, the best available gain is {{zero|positive|equal}} for {{both players|one player|the winner}}."
+  explanation="The deviating player may choose another probability rule while the other keeps theirs. A profile passes only if neither player gains. A zero expected utility is not required; the transfer game will have nonzero equilibrium utilities."
+/>
+
+## Check whether the draws really are independent
+
+<MCQ client:visible className="not-prose" pretest
+  question="A device sends the same fair Heads-or-Tails instruction to both players. They follow it. What happens to Row’s mean?"
+  options={[
+    { text: 'It is zero because both marginal probabilities are halves' },
+    { text: 'It is minus one because sharing creates mismatches' },
+    { text: 'It is one half because only one coin was drawn' },
+    { text: 'It is plus one because their actions always match', correct: true },
+  ]}
+  explanation="Following the same instruction produces only Heads–Heads and Tails–Tails. Both give Row plus one. Each individual still chooses Heads half the time, but the pair distribution is no longer the independent product."
+/>
+
+Enumerate four equally likely pairs of fair seed bits. A zero bit means Heads and a one means Tails. **Independent** uses one bit per player. **Shared-same** uses the first bit for both and ignores the second. **Shared-opposite** gives Column the opposite of the first bit and also ignores the second.
+
+| Seed pair | Independent actions | Shared-same actions | Shared-opposite actions |
+| --- | --- | --- | --- |
+| $00$ | Heads, Heads | Heads, Heads | Heads, Tails |
+| $01$ | Heads, Tails | Heads, Heads | Heads, Tails |
+| $10$ | Tails, Heads | Tails, Tails | Tails, Heads |
+| $11$ | Tails, Tails | Tails, Tails | Tails, Heads |
+
+These are the complete possible seeds, not four observations from a sampled game. Count what each mechanism produces:
+
+| Mechanism | HH | HT | TH | TT | Row mean | Column mean |
+| --- | --- | --- | --- | --- | --- | --- |
+| Independent | $1/4$ | $1/4$ | $1/4$ | $1/4$ | $0$ | $0$ |
+| Shared-same | $1/2$ | $0$ | $0$ | $1/2$ | $1$ | $-1$ |
+| Shared-opposite | $0$ | $1/2$ | $1/2$ | $0$ | $-1$ | $1$ |
+
+Each row still gives each player a Heads marginal of $1/2$. The marginal summaries have thrown away which actions occur together. The product formula belongs to the independent row only.
+
+<RateComparison client:visible locale="en"
+  title="Which seed pairs produce matching actions?"
+  countsLabel="Matching seed pairs out of the four equally likely pairs"
+  differenceLabel="First mechanism minus second mechanism"
+  scenarios={[{ label: 'Exhaustive seed enumeration, not sampled observations', groups: [
+    { label: 'Independent', events: 2, total: 4 },
+    { label: 'Shared-same', events: 4, total: 4 },
+    { label: 'Shared-opposite', events: 0, total: 4 },
+  ] }]}
+/>
+
+Does a shared rule make a stable agreement? State the information before answering. Suppose both know the shared-same rule, each receives their recommended action, then each can privately decide whether to follow. To test a unilateral deviation, hold Row’s rule fixed: Row follows its recommendation. Column knows Row has been told the same action. Flipping its own recommendation instead of following then makes a mismatch every time: Column's utility rises from $-1$ to $1$, a gain of $2$. Even committing to always Heads **before** receiving a recommendation earns Column zero instead of minus one, a gain of one.
+
+Thus this shared proposal is not self-enforcing under either of those deviation opportunities. A shared draw is not automatically an equilibrium. Information and allowed responses determine the right comparison; the two independent controls above do not model these recommendation-dependent rules.
+
+<MCQ client:visible className="not-prose" allowMultiple
+  question="Select the statements justified by the complete seed table and the shared-same rule."
+  options={[
+    { text: 'The three mechanisms preserve both players’ Heads marginals', correct: true },
+    { text: 'Equal marginals force the four action pairs to be equally likely' },
+    { text: 'Column benefits by flipping its known shared-same recommendation', correct: true },
+    { text: 'The independent product calculation fits all three mechanisms' },
+  ]}
+  explanation="Each player has Heads on half the seeds in every mechanism. Yet the joint probabilities and means differ. In shared-same, a known recommendation reveals the prescribed Row action, so Column can flip and turn a certain loss into a certain gain."
+/>
+
+## Transfer the audit when one payoff changes
+
+<MCQ client:visible className="not-prose" pretest
+  question="A new version doubles Row’s utility when both choose Heads, while keeping the other cells unchanged and Column’s utilities opposite. Should you reuse the half mixtures?"
+  options={[
+    { text: 'Yes, every two-action zero-sum game uses equal mixing' },
+    { text: 'Recompute both players’ pure values before deciding', correct: true },
+    { text: 'Only Row’s realised score changes, so the rules stay optimal' },
+    { text: 'No mixture can be an equilibrium after a payoff changes' },
+  ]}
+  explanation="Changing one cell changes the expected utilities of the pure responses. The equal split must be checked again. We can derive the new mixture by making each player indifferent under the other player’s probability."
+/>
+
+Here is the **new constructed game**, with the same timing, independent private draws and expected-utility objective. Every listed entry is Row's utility; Column receives its negative:
+
+| Row / Column | Heads | Tails |
+| --- | --- | --- |
+| Heads | $2$ | $-1$ |
+| Tails | $-1$ | $1$ |
+
+Before opening the solution, calculate both pure-response pairs, find $p$ and $q$ that tie them, and verify both current means and gains. The island starts at the old half profile so you can inspect why it fails.
+
+<MixedStrategyAudit client:visible
+  title="Transfer: the Heads–Heads cell changes"
+  rowPlayer="Row" colPlayer="Column"
+  rowStrategies={['Heads', 'Tails']} colStrategies={['Heads', 'Tails']}
+  rowPayoffs={[[2, -1], [-1, 1]]}
+  initialRowPercent={50} initialColumnPercent={50}
+  caption="The rules are fixed within this instance. Try your proposed probability pair and check both gains. The scale is fixed from minus two to plus two utility points."
+/>
+
+<details>
+<summary>Check the complete transfer calculation</summary>
+
+Row's pure Heads utility is $2q-(1-q)=3q-1$; its Tails utility is $-q+(1-q)=1-2q$. Tie them: $3q-1=1-2q$, so $5q=2$ and $q=2/5$.
+
+Column's pure Heads utility is $-2p+(1-p)=1-3p$; its Tails utility is $p-(1-p)=2p-1$. Tie them: $1-3p=2p-1$, so $p=2/5$ too.
+
+| Action pair | Joint probability at $p=q=2/5$ | Row contribution | Column contribution |
+| --- | --- | --- | --- |
+| Heads, Heads | $4/25$ | $8/25$ | $-8/25$ |
+| Heads, Tails | $6/25$ | $-6/25$ | $6/25$ |
+| Tails, Heads | $6/25$ | $-6/25$ | $6/25$ |
+| Tails, Tails | $9/25$ | $9/25$ | $-9/25$ |
+
+Row's mean is $(8-6-6+9)/25=1/5$; Column's is $-1/5$. Substituting two fifths into both Row pure formulas gives $1/5$; both Column pure formulas give $-1/5$. Both gains are exactly zero. This verifies the equilibrium, even though Column's expected utility is negative.
+
+At the old half profile, Row's current mean is $(2-1-1+1)/4=1/4$. Its pure Heads value is $1/2$ and pure Tails value zero, so its gain is $1/4$. Column's current mean is $-1/4$; pure Heads gives $-1/2$ and pure Tails zero, so its gain is also $1/4$. The equal mixtures fail both tests.
+
+</details>
+
+<MCQ client:visible className="not-prose"
+  question="For the changed game, which pair gives each player’s Heads probability and then Row’s equilibrium mean?"
+  options={[
+    { text: 'One half for each, then one quarter' },
+    { text: 'Three fifths for each, then one fifth' },
+    { text: 'Two fifths for each, then one fifth', correct: true },
+    { text: 'Two fifths for each, then zero' },
+  ]}
+  explanation="The two indifference equations each give two fifths. Weighting the four Row utilities then gives eight minus six minus six plus nine, all over twenty-five: one fifth. Zero-sum requires opposite utilities, not zero utility for each player."
+/>
+
+## State what the audit establishes
+
+<MCQ client:visible className="not-prose" pretest
+  question="You verify that neither player can improve unilaterally at a profile. What follows about repeated human play?"
+  options={[
+    { text: 'Nothing about a learning path follows without further assumptions', correct: true },
+    { text: 'Every sequence of best responses must reach that profile' },
+    { text: 'A short observed run must have the equilibrium mean' },
+    { text: 'The players must already know the correct utility table' },
+  ]}
+  explanation="The audit is a conditional statement about a specified profile, information and utilities. It does not supply a learning rule, evidence about players’ knowledge, or a guarantee about a short realised sequence."
+/>
+
+Nash's finite-game existence result and a numerical equilibrium check answer different questions from “how will these players learn?”. Even in our first game, a rule that updates each pure action to a best response to the **previous** pair can cycle:
+
+| Previous pair | Next pair under simultaneous pure best-response updates |
+| --- | --- |
+| Heads, Heads | Heads, Tails |
+| Heads, Tails | Tails, Tails |
+| Tails, Tails | Tails, Heads |
+| Tails, Heads | Heads, Heads |
+
+At every step the previous loser changes and the previous winner stays. This particular deterministic update returns to its starting point. It is a constructed counterexample to automatic convergence, not a theorem that all learning fails. The independent half profile still exists and passes the unilateral test.
+
+Use the audit as a checklist for a proposed rule, not a substitute for observing the actual game. You need a defensible utility scale, available actions, timing and randomisation law. If the opponent sees your action before choosing, if a common device couples the actions, or if future rewards matter, the comparison must represent those changes. A successful deviation against a fixed rule does not predict what happens after the rival changes its rule too.
+
+<Categorize client:visible className="not-prose"
+  question="Which conclusions does the stated one-decision audit support?"
+  buckets={['Supported by the audit', 'Needs another model or evidence']}
+  items={[
+    { text: 'Neither player improves against the other’s fixed equilibrium mixture', bucket: 'Supported by the audit' },
+    { text: 'The same marginal frequencies certify independent choices', bucket: 'Needs another model or evidence' },
+    { text: 'The equilibrium mean is the score of every realised play', bucket: 'Needs another model or evidence' },
+    { text: 'A positive gain identifies a profitable unilateral change under the stated rules', bucket: 'Supported by the audit' },
+    { text: 'Players who update repeatedly must converge to the equilibrium', bucket: 'Needs another model or evidence' },
+  ]}
+  explanation="A fixed-profile calculation establishes expected-utility comparisons under its assumptions. Independence needs a mechanism or evidence, single outcomes need not equal means, and learning requires a specified dynamic model."
+/>
+
+## Rebuild the audit from memory
+
+<MindMap client:visible className="not-prose"
+  title="From random rules to a checked profile"
+  root={{ label: 'Mixed-strategy audit', children: [
+    { label: 'Specify the game', children: [{ label: 'Actions, cardinal utilities, timing and hidden realisations' }] },
+    { label: 'Build the joint law', children: [{ label: 'Multiply marginals only for independent draws' }] },
+    { label: 'Compute both means', children: [{ label: 'Every cell probability times that player’s utility' }] },
+    { label: 'Compare unilateral changes', children: [{ label: 'Hold the rival fixed and test both pure alternatives' }] },
+    { label: 'Verify equilibrium', children: [{ label: 'Both deviation gains are exactly zero' }] },
+    { label: 'Recheck the assumptions', children: [{ label: 'Shared signals or new payoffs require a fresh audit' }] },
+  ] }}
+/>
+
+<Quiz client:visible className="not-prose" title="Check the probabilities and the incentives"
+  questions={[
+    { question: 'Independent Row Heads probability is one quarter and Column Heads probability is three quarters. What is the probability of Row Tails and Column Heads?', options: [
+      { text: 'Three sixteenths' }, { text: 'Nine sixteenths', correct: true }, { text: 'One sixteenth' }, { text: 'One half' },
+    ], explanation: 'Row Tails has probability three quarters, as does Column Heads. Independence gives their product, nine sixteenths. Multiplying the two Heads probabilities would answer a different cell.' },
+    { question: 'In the original game, the biased profile gives Row mean minus one quarter and best pure utility one half. What is its unilateral deviation gain?', options: [
+      { text: 'One quarter' }, { text: 'One half' }, { text: 'Three quarters', correct: true }, { text: 'Minus three quarters' },
+    ], explanation: 'The gain is one half minus minus one quarter, giving three quarters. It compares two expected utilities before the random outcome, not a realised score.' },
+    { question: 'Select what is true when both deviation gains are zero in the stated independent model.', allowMultiple: true, options: [
+      { text: 'Neither pure deviation gives either player higher expected utility', correct: true }, { text: 'Every realised play gives both players exactly their mean' },
+      { text: 'No mixture of the pure deviations can yield a higher expected utility', correct: true }, { text: 'Every adaptive update rule must reach this profile' },
+    ], explanation: 'A mixture is a weighted average of the pure utilities against the fixed rival rule. If neither endpoint improves, their averages cannot improve either. This says nothing about the score of a single play or a learning path.' },
+    { question: 'Both players follow the same fair recommendation in the original matching game. Column can see its own recommendation before acting. What gain does flipping it produce?', options: [
+      { text: 'Two utility points', correct: true }, { text: 'One utility point' }, { text: 'Zero utility points' }, { text: 'Half a utility point' },
+    ], explanation: 'Following gives Column minus one on every seed; flipping gives plus one on every seed. The improvement is two. Choosing a constant action instead would give zero, an improvement of only one.' },
+    { question: 'In the changed game, both players choose Heads with probability two fifths. Which statement gives Row’s mean and Column’s best pure utility?', options: [
+      { text: 'Row gets zero; Column’s best pure utility is zero' }, { text: 'Row gets one quarter; Column’s best pure utility is zero' },
+      { text: 'Row gets minus one fifth; Column’s best pure utility is plus one fifth' }, { text: 'Row gets plus one fifth; Column’s best pure utility is minus one fifth', correct: true },
+    ], explanation: 'The joint weights are four, six, six and nine twenty-fifths. Row’s weighted utilities sum to one fifth. Column has the opposite mean, and both its pure values tie at minus one fifth, so its deviation gain is zero.' },
+    { question: 'The changed game is played with half mixtures. Row’s mean is one quarter and Column’s is minus one quarter. Each best pure utility is respectively one half and zero. Which gains result?', options: [
+      { text: 'One half for Row and zero for Column' }, { text: 'One quarter for each player', correct: true }, { text: 'Zero for both players' }, { text: 'One quarter for Row and minus one quarter for Column' },
+    ], explanation: 'Row gains one half minus one quarter. Column gains zero minus minus one quarter. Both gains are positive one quarter, so the half profile is not an equilibrium of the changed game.' },
+    { question: 'Which changes require revisiting the audit rather than reusing all its conclusions?', allowMultiple: true, options: [
+      { text: 'The players use a shared recommendation instead of independent draws', correct: true }, { text: 'The opponent sees the chosen action before responding', correct: true },
+      { text: 'A different seed realises another action pair under the same rules' }, { text: 'One payoff changes while the probability rules are kept', correct: true },
+    ], explanation: 'Shared recommendations change the joint law, observation changes information and available responses, and a payoff change alters expected utilities and incentives. A payoff change alone does not invalidate the product probabilities when the independent rules stay fixed. Another realisation under the same stated law is already represented by the existing distribution.' },
+  ]}
+/>
+
+### Sources and the boundary of the examples
+
+The distribution and equilibrium definitions follow [Nash's original equilibrium note](https://doi.org/10.1073/pnas.36.1.48). The expected-utility formula and the sufficiency of checking pure deviations are set out in [MIT's lecture on normal-form games and Nash equilibrium](https://www.mit.edu/~6.7980/nfgs_nash.html). The distinction between independent strategies and a recommendation device is explained in [MIT's section on correlated play](https://www.mit.edu/~6.7980/correlated.html). All numerical tables, seed mechanisms and the transfer case here are constructed and derived from their declared rules.
+
+The final exam now includes these calculations alongside the earlier games. Keep the four steps in order: specify the rules, build the joint law, compute both means, and check both unilateral gains.

@@ -1,0 +1,539 @@
+---
+title: "Comprueba una estrategia mixta"
+description: "Calcula probabilidades conjuntas, utilidades esperadas y mejoras por desvío de ambos jugadores; comprueba independencia y un equilibrio no uniforme."
+topic: "es/game-theory-basics"
+order: 8
+minutes: 28
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, MatchConcepts, Categorize, PayoffMatrix, MixedStrategyAudit, RateComparison, Callout, MindMap, Quiz } from '@/components/react';
+
+Dos jugadores dicen que eligen cara la mitad de las veces. Suena al equilibrio de igualar monedas de la tercera lección. Antes de aceptar la afirmación, pregunta cómo generan sus elecciones. Dos monedas privadas y una moneda compartida pueden producir las mismas frecuencias individuales y resultados completamente distintos.
+
+Este taller comprueba las reglas, en lugar de una racha breve de resultados afortunados. Calcularás qué espera obtener cada jugador, cuánto podría mejorar cambiando su propia regla y qué supuestos permiten hacer esa comparación.
+
+## Describe la decisión antes de promediar
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose" pretest
+  question="Los dos jugadores eligen cara la mitad de las veces. ¿Basta para certificar el equilibrio del juego de igualar monedas?"
+  options={[
+    { text: 'Sí, las frecuencias iguales bastan para establecer el equilibrio' },
+    { text: 'No, aún importan el sorteo conjunto y la información disponible', correct: true },
+    { text: 'No, el equilibrio exige puntuaciones realizadas iguales cada vez' },
+    { text: 'Sí, cualquier regla aleatoria elimina los desvíos que compensan' },
+  ]}
+  explanation="Una frecuencia de cada jugador no indica qué acciones ocurren juntas. Los sorteos privados independientes y una instrucción compartida pueden tener las mismas frecuencias individuales. También hay que precisar qué sabe cada jugador cuando decide si sigue una regla."
+/>
+
+Nuestro juego inventado tiene dos jugadores, **Filas** y **Columnas**. Cada uno elige **cara** o **cruz** sin ver la acción realizada del otro. A Filas le interesa coincidir; a Columnas, discrepar. Hay una sola decisión, con esta tabla fija de **puntos de utilidad**:
+
+<PayoffMatrix
+  eyebrow="Matriz de pagos"
+  analysisLabel="Lo que dice la matriz"
+  dominantLineTemplate="{player} — estrategia dominante: {strategy}"
+  noneLabel="ninguna"
+  nashLabel="Equilibrio de Nash puro:"
+  noNashLabel="ninguno en estrategias puras"
+  bestResponseLegend="Un anillo identifica una mejor respuesta pura. Dos anillos en la misma casilla indican un equilibrio puro."
+  nashBadge="EN"
+  resetLabel="Reiniciar pagos"
+  increaseLabel="aumentar"
+  decreaseLabel="disminuir"
+  tableCaptionTemplate="{rowPlayer} elige una fila y {colPlayer} una columna. Cada casilla muestra primero la utilidad de filas y después la de columnas." client:visible className="not-prose" editable={false}
+  title="Las reglas fijas: coincidir favorece a Filas"
+  instructions="Cada casilla indica (utilidad de Filas, utilidad de Columnas). Son puntos de utilidad inventados; cada jugador prefiere una cifra mayor. Los anillos solo comprueban respuestas a acciones puras."
+  rowPlayer="Filas" colPlayer="Columnas"
+  rowStrategies={['Cara', 'Cruz']} colStrategies={['Cara', 'Cruz']}
+  payoffs={[[{ row: 1, col: -1 }, { row: -1, col: 1 }], [{ row: -1, col: 1 }, { row: 1, col: -1 }]]}
+  caption="Todas las casillas suman cero. Ninguna casilla pura supera las pruebas de desvío de ambos jugadores; en el taller comprobaremos reglas de probabilidad."
+/>
+
+La **utilidad** es la valoración numérica que el jugador asigna a un resultado. Aquí estipulamos que cada uno elige la regla con mayor **utilidad esperada**: la suma de cada utilidad posible multiplicada por su probabilidad. La escala importa al promediar. Etiquetar los resultados de mejor a peor no basta para saber cómo valora el jugador sus combinaciones inciertas.
+
+Una **estrategia pura** elige una acción con certeza. Una **estrategia mixta** especifica probabilidades sobre las acciones, incluidas las probabilidades cero y uno. Un **perfil** es la pareja de estrategias de los jugadores. Por ahora, sus sorteos son privados e **independientes**: conocer el resultado realizado de uno no cambiaría la distribución del otro. Las reglas de probabilidad se conocen; las acciones realizadas permanecen ocultas hasta que ambos se comprometen.
+
+Analizamos un juego matemático estipulado, sin medir las preferencias de nadie ante el riesgo ni recomendar apuestas. Una regla aleatoria también es distinta de alternar según un calendario visible: si el rival puede deducir tu próxima acción, la información de este modelo ha cambiado.
+
+<FillBlank
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas" client:visible className="not-prose"
+  question="Fija qué estamos comparando."
+  text="Una estrategia mixta especifica {{probabilidades|puntuaciones pasadas|clasificaciones}} sobre las acciones. En esta comprobación, las elecciones realizadas permanecen {{ocultas|anunciadas|compartidas}} hasta que ambos se comprometen y cada jugador maximiza la {{utilidad|frecuencia|sorpresa}} esperada."
+  explanation="La regla asigna probabilidades antes de realizarse la acción. La utilidad esperada pondera las utilidades por esas probabilidades. Los sorteos ocultos e independientes son supuestos que debemos comprobar; la palabra aleatorio no los incorpora por sí sola."
+/>
+
+### Cuándo sirve este modelo
+
+Usa la comprobación cuando las acciones, utilidades e información estén lo bastante definidas para calcular una comparación. Si algún jugador valora la incertidumbre de forma distinta a la escala de utilidad declarada, observa la acción del rival o cambia de conducta tras una recomendación, describe primero ese nuevo problema.
+
+## Pasa de dos probabilidades a cuatro resultados
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose" pretest
+  question="Filas elige cara una cuarta parte de las veces y Columnas, tres cuartas partes, de forma independiente. ¿Qué pareja debería ser más frecuente?"
+  options={[
+    { text: 'Cara para ambos jugadores' },
+    { text: 'Cara para Filas y cruz para Columnas' },
+    { text: 'Cruz para Filas y cara para Columnas', correct: true },
+    { text: 'Cruz para ambos jugadores' },
+  ]}
+  explanation="Filas suele elegir cruz y Columnas suele elegir cara. La independencia permite multiplicar esas dos probabilidades. Su combinación tiene probabilidad nueve dieciseisavos; las otras tres combinaciones también deben entrar en la media."
+/>
+
+Llamamos $p$ a la probabilidad de cara de Filas y $q$ a la de Columnas. Las probabilidades restantes son $1-p$ y $1-q$. Una **probabilidad marginal** se refiere a la acción de un jugador; una **probabilidad conjunta**, a una pareja de acciones. Bajo el supuesto de independencia declarado:
+
+| Pareja de acciones, Filas primero | Probabilidad conjunta | Con $p=1/4$, $q=3/4$ | Utilidad de Filas | Contribución a la media de Filas |
+| --- | --- | --- | --- | --- |
+| Cara, cara | $pq$ | $3/16$ | $1$ | $3/16$ |
+| Cara, cruz | $p(1-q)$ | $1/16$ | $-1$ | $-1/16$ |
+| Cruz, cara | $(1-p)q$ | $9/16$ | $-1$ | $-9/16$ |
+| Cruz, cruz | $(1-p)(1-q)$ | $3/16$ | $1$ | $3/16$ |
+
+Por ejemplo, la probabilidad de cruz–cara es $(3/4)(3/4)=9/16$. Las cuatro probabilidades suman $(3+1+9+3)/16=1$, como debe ocurrir en una distribución completa. Sumar las dos casillas en las que Filas elige cara recupera $4/16=1/4$; sumar las dos en las que Columnas elige cara recupera $12/16=3/4$.
+
+Multiplica cada probabilidad por la utilidad de su casilla y suma **las cuatro contribuciones**:
+
+$$
+U_R=\frac{3-1-9+3}{16}=-\frac14,
+\qquad U_C=-U_R=\frac14.
+$$
+
+Los subíndices identifican a Filas y Columnas, a partir de sus nombres en inglés. Sus medias son opuestas porque sus utilidades son opuestas en cada casilla. El hecho de que ambos sorteen sus acciones no les da la misma media.
+
+<MixedStrategyAudit client:visible locale="es"
+  title="Mezclas independientes: comprueba a los dos jugadores"
+  rowPlayer="Filas" colPlayer="Columnas"
+  rowStrategies={['Cara', 'Cruz']} colStrategies={['Cara', 'Cruz']}
+  rowPayoffs={[[1, -1], [-1, 1]]}
+  initialRowPercent={25} initialColumnPercent={75}
+  caption="Empieza con las probabilidades de la tabla. Cambiar una regla recalcula las cuatro casillas. El eje de utilidad permanece fijo al mover los controles; las tablas conservan las fracciones exactas."
+/>
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose"
+  question="En el perfil desequilibrado que acabamos de calcular, ¿cuál es la utilidad esperada de Columnas?"
+  options={[
+    { text: 'Menos un cuarto' },
+    { text: 'Más un medio' },
+    { text: 'Exactamente cero' },
+    { text: 'Más un cuarto', correct: true },
+  ]}
+  explanation="Columnas recibe el negativo de la utilidad de Filas en cada casilla. Las cuatro contribuciones de Filas suman menos un cuarto, así que las de Columnas suman más un cuarto. El más un medio corresponde a un desvío puro que calcularemos después."
+/>
+
+Una utilidad esperada es una media ponderada por probabilidades, no una puntuación prometida para esta decisión. Aquí Filas solo puede obtener $1$ o $-1$, nunca $-1/4$. En repeticiones independientes de este experimento fijo, la media observada puede fluctuar. Unas pocas victorias realizadas no certifican un perfil de estrategias.
+
+## Mantén fija su regla y prueba tus alternativas
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose" pretest
+  question="Columnas ya tiene utilidad esperada positiva en el perfil desequilibrado. ¿Significa que no dispone de un desvío que mejore su resultado?"
+  options={[
+    { text: 'Sí, una media positiva es la condición de equilibrio' },
+    { text: 'No, otra regla propia puede darle una media aún mayor', correct: true },
+    { text: 'Sí, el jugador que va por delante ya no puede mejorar' },
+    { text: 'No, los jugadores deben cambiar ambas reglas a la vez' },
+  ]}
+  explanation="La prueba de Nash compara la utilidad actual con la mejor alternativa unilateral disponible. Ir por delante no basta: Columnas obtiene ahora un cuarto, pero podría obtener un medio mientras Filas mantiene la misma regla."
+/>
+
+Una **mejor respuesta a una mezcla** es una estrategia con la mayor utilidad esperada frente a esa mezcla fija. Mantén la probabilidad de cara de Columnas en $q=3/4$ y compara las acciones puras de Filas. Después mantén la de Filas en $p=1/4$ y haz lo mismo para Columnas, usando **la utilidad de Columnas**:
+
+| Jugador que cambia en solitario | Siempre cara | Siempre cruz | Media actual | Mejor media pura | Mejora al cambiar |
+| --- | --- | --- | --- | --- | --- |
+| Filas, con $q=3/4$ fijo | $(3/4)(1)+(1/4)(-1)=1/2$ | $(3/4)(-1)+(1/4)(1)=-1/2$ | $-1/4$ | $1/2$ | $1/2-(-1/4)=3/4$ |
+| Columnas, con $p=1/4$ fijo | $(1/4)(-1)+(3/4)(1)=1/2$ | $(1/4)(1)+(3/4)(-1)=-1/2$ | $1/4$ | $1/2$ | $1/2-1/4=1/4$ |
+
+La **mejora por desvío unilateral** es la utilidad de la mejor respuesta menos la utilidad esperada actual, en puntos de utilidad de ese jugador. Mide una mejora disponible frente a una regla rival que se mantiene fija. No es una sensación de arrepentimiento después de ver el resultado ni una puntuación acumulada de aprendizaje.
+
+¿Por qué basta con comprobar las dos alternativas puras? Cualquier mezcla nueva es una media de sus dos valores. Si una candidata asigna probabilidad $s$ a cara, la utilidad de Filas frente a este $q$ fijo es:
+
+$$s\left(\frac12\right)+(1-s)\left(-\frac12\right)=s-\frac12\leq\frac12 \quad (0\leq s\leq1).$$
+
+La media no puede superar su ingrediente mayor. El mismo argumento sirve para Columnas. Por tanto, los desvíos puros bastan para comprobar si **algún** desvío mixto mejora la utilidad, no solo las seis opciones del control. Si los dos valores puros empatan, cualquier mezcla de esas dos acciones empata frente a esa regla rival.
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose"
+  question="¿Qué pareja indica las mejoras por cambiar en solitario en el perfil desequilibrado, Filas primero?"
+  options={[
+    { text: 'Tres cuartos y un cuarto', correct: true },
+    { text: 'Un medio y un medio' },
+    { text: 'Un cuarto y tres cuartos' },
+    { text: 'Menos un cuarto y más un cuarto' },
+  ]}
+  explanation="Resta la media actual de cada jugador a su mejor valor puro. Filas pasa de menos un cuarto a un medio: mejora tres cuartos. Columnas pasa de un cuarto a un medio: mejora un cuarto. Dar los mejores valores o los valores actuales se salta esa resta."
+/>
+
+<MatchConcepts
+  instructions="Elige un término y después su definición."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="✓ Todo emparejado"
+  partialResultWord="correctas"
+  pickDefinitionHint="→ elige una definición"
+  notLinkedHint="aún sin emparejar"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones" client:visible className="not-prose"
+  question="Empareja cada magnitud con la pregunta que responde."
+  pairs={[
+    { term: 'Probabilidad conjunta', definition: '¿Qué probabilidad tiene esta pareja concreta de acciones?' },
+    { term: 'Utilidad esperada', definition: '¿Cuánto suman todas las utilidades ponderadas por sus probabilidades?' },
+    { term: 'Mejor respuesta', definition: '¿Qué regla propia maximiza la utilidad frente a la regla fija del rival?' },
+    { term: 'Mejora por desvío', definition: '¿Cuánto supera la mejor utilidad disponible a la media actual?' },
+  ]}
+  explanation="La distribución conjunta aporta los pesos, la media combina las utilidades, la mejor respuesta compara alternativas y la mejora mide el incentivo que queda para cambiar. Ninguna de esas magnitudes es por sí sola una puntuación observada."
+/>
+
+### Cuándo ayuda la comparación
+
+Comprueba los dos lados de una propuesta. No basta con que Filas tenga mejora cero. Prueba Filas en una mitad y Columnas en tres cuartas partes: Columnas no puede mejorar su media de cero frente a la mezcla por mitades de Filas, pero Filas sí puede pasar de cero a un medio. Un jugador satisfecho no convierte el perfil en mutuamente estable.
+
+## Encuentra las dos mezclas que superan la prueba
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose" pretest
+  question="Para que Filas sea indiferente entre cara y cruz, ¿de quién debes calcular la probabilidad?"
+  options={[
+    { text: 'De Filas, porque su propia probabilidad fija sus valores puros' },
+    { text: 'De ambos a la vez, sin comparar valores puros' },
+    { text: 'De Columnas, porque los valores puros de Filas dependen de su regla', correct: true },
+    { text: 'De nadie, porque sortear las acciones ya las hace empatar' },
+  ]}
+  explanation="Al fijar una acción pura de Filas, solo queda la incertidumbre de Columnas sobre la que promediar. Por eso su probabilidad de cara determina si Filas prefiere cara o cruz. La otra ecuación calcula la probabilidad de Filas que hace indiferente a Columnas."
+/>
+
+La **indiferencia** significa igualdad de utilidades esperadas; no exige que alguien se sienta indeciso. Si las dos acciones tienen probabilidad positiva en equilibrio, ninguna puede ser estrictamente peor: trasladar su probabilidad a la mejor acción permitiría mejorar.
+
+| Alternativas puras del jugador | Utilidad esperada | Condición de empate |
+| --- | --- | --- |
+| Cara / cruz de Filas | $2q-1$ / $1-2q$ | $2q-1=1-2q$, así que $q=1/2$ |
+| Cara / cruz de Columnas | $1-2p$ / $2p-1$ | $1-2p=2p-1$, así que $p=1/2$ |
+
+Por ejemplo, el valor de cara de Filas es $q(1)+(1-q)(-1)=2q-1$. Con ambas mezclas por mitades, cada casilla tiene probabilidad $1/4$. La media de Filas es $(1-1-1+1)/4=0$ y la de Columnas también es cero. Todos los valores de respuesta pura son cero, de modo que ambas mejoras por desvío son cero. Ninguna otra mezcla puede superar esos extremos empatados. Así queda verificado el equilibrio de Nash mixto del juego declarado.
+
+Pon ambos controles en una mitad y comprueba las dos mejoras nulas. El resultado requiere **las dos** reglas; sortear con probabilidades cualesquiera no basta. El reparto por mitades procede de estos pagos concretos y de la independencia, no de la palabra mixto.
+
+<FillBlank
+  instructions="Elige la opción correcta para cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas" client:visible className="not-prose"
+  question="Completa la regla de comprobación."
+  text="Para comprobar un cambio unilateral, mantén fija la regla de probabilidad {{del rival|del jugador|conjunta}}. En un equilibrio de Nash mixto, la mayor mejora disponible es {{cero|positiva|igual}} para {{ambos jugadores|un jugador|el ganador}}."
+  explanation="El jugador que se desvía puede elegir otra regla de probabilidad mientras el otro mantiene la suya. Un perfil solo supera la prueba si ninguno mejora. No se exige utilidad esperada cero; el juego de transferencia tendrá utilidades de equilibrio distintas de cero."
+/>
+
+## Comprueba si los sorteos son independientes
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose" pretest
+  question="Un dispositivo manda a ambos jugadores la misma instrucción equiprobable de cara o cruz. La siguen. ¿Qué ocurre con la media de Filas?"
+  options={[
+    { text: 'Es cero porque ambas probabilidades marginales son mitades' },
+    { text: 'Es menos uno porque compartir produce discrepancias' },
+    { text: 'Es un medio porque solo se ha sorteado una moneda' },
+    { text: 'Es más uno porque sus acciones siempre coinciden', correct: true },
+  ]}
+  explanation="Seguir la misma instrucción produce solo cara–cara y cruz–cruz. Las dos dan a Filas más uno. Cada jugador sigue eligiendo cara la mitad de las veces, pero la distribución de parejas ya no es el producto independiente."
+/>
+
+Enumera cuatro parejas equiprobables de bits de una semilla aleatoria. El cero significa cara y el uno, cruz. El mecanismo **independiente** usa un bit para cada jugador. **Compartido igual** usa el primer bit para ambos e ignora el segundo. **Compartido opuesto** da a Columnas el contrario del primer bit y también ignora el segundo.
+
+| Pareja de bits | Acciones independientes | Acciones compartidas iguales | Acciones compartidas opuestas |
+| --- | --- | --- | --- |
+| $00$ | Cara, cara | Cara, cara | Cara, cruz |
+| $01$ | Cara, cruz | Cara, cara | Cara, cruz |
+| $10$ | Cruz, cara | Cruz, cruz | Cruz, cara |
+| $11$ | Cruz, cruz | Cruz, cruz | Cruz, cara |
+
+Son todas las semillas posibles, no cuatro observaciones de una partida muestreada. Cuenta qué produce cada mecanismo. En la tabla, H significa cara y T significa cruz:
+
+| Mecanismo | HH | HT | TH | TT | Media de Filas | Media de Columnas |
+| --- | --- | --- | --- | --- | --- | --- |
+| Independiente | $1/4$ | $1/4$ | $1/4$ | $1/4$ | $0$ | $0$ |
+| Compartido igual | $1/2$ | $0$ | $0$ | $1/2$ | $1$ | $-1$ |
+| Compartido opuesto | $0$ | $1/2$ | $1/2$ | $0$ | $-1$ | $1$ |
+
+Cada fila sigue dando a cada jugador una probabilidad marginal de cara de $1/2$. Los resúmenes marginales han perdido qué acciones ocurren juntas. La fórmula del producto solo corresponde a la fila independiente.
+
+<RateComparison client:visible locale="es"
+  title="¿Qué parejas de bits producen acciones coincidentes?"
+  countsLabel="Semillas que producen acciones coincidentes, de las cuatro parejas equiprobables"
+  differenceLabel="Primer mecanismo menos segundo mecanismo"
+  scenarios={[{ label: 'Enumeración completa de semillas, no observaciones muestreadas', groups: [
+    { label: 'Independiente', events: 2, total: 4 },
+    { label: 'Compartido igual', events: 4, total: 4 },
+    { label: 'Compartido opuesto', events: 0, total: 4 },
+  ] }]}
+/>
+
+¿Una regla compartida crea un acuerdo estable? Declara la información antes de responder. Supón que ambos conocen la regla compartida igual, cada uno recibe su acción recomendada y después puede decidir en privado si la sigue. Para comprobar un desvío unilateral, mantén fija la regla de Filas: sigue su recomendación. Columnas sabe que a Filas le han indicado la misma acción. Invertir su propia recomendación en lugar de seguirla produce entonces una discrepancia cada vez: su utilidad pasa de $-1$ a $1$, una mejora de $2$. Incluso comprometerse a elegir siempre cara **antes** de recibir la recomendación da a Columnas cero en lugar de menos uno: mejora uno.
+
+Por tanto, la propuesta compartida no se sostiene por sus propios incentivos con ninguna de esas dos posibilidades de desvío. Un sorteo compartido no es automáticamente un equilibrio. La información y las respuestas permitidas determinan qué comparación procede; los dos controles independientes anteriores no modelan estas reglas que dependen de una recomendación.
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose" allowMultiple
+  question="Selecciona las afirmaciones que justifican la tabla completa de semillas y la regla compartida igual."
+  options={[
+    { text: 'Los tres mecanismos conservan las marginales de cara de ambos jugadores', correct: true },
+    { text: 'Unas marginales iguales obligan a que las cuatro parejas sean equiprobables' },
+    { text: 'A Columnas le conviene invertir su recomendación compartida igual conocida', correct: true },
+    { text: 'El cálculo del producto independiente sirve para los tres mecanismos' },
+  ]}
+  explanation="Cada jugador tiene cara en la mitad de las semillas con cada mecanismo. Sin embargo, las probabilidades conjuntas y las medias difieren. En el compartido igual, conocer la recomendación revela la acción indicada a Filas, así que Columnas puede invertirla y convertir una pérdida cierta en una ganancia cierta."
+/>
+
+## Aplica la comprobación cuando cambia un pago
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose" pretest
+  question="Una versión nueva duplica la utilidad de Filas cuando ambos eligen cara, mantiene las otras casillas y deja las utilidades de Columnas opuestas. ¿Debes reutilizar las mezclas por mitades?"
+  options={[
+    { text: 'Sí, todo juego de suma cero con dos acciones usa mezclas iguales' },
+    { text: 'Recalcula los valores puros de ambos antes de decidir', correct: true },
+    { text: 'Solo cambia la puntuación realizada de Filas; las reglas siguen siendo óptimas' },
+    { text: 'Ninguna mezcla puede ser un equilibrio después de cambiar un pago' },
+  ]}
+  explanation="Cambiar una casilla cambia las utilidades esperadas de las respuestas puras. Hay que volver a comprobar el reparto por mitades. Podemos obtener la nueva mezcla haciendo indiferente a cada jugador bajo la probabilidad del otro."
+/>
+
+Este es el **nuevo juego inventado**, con los mismos tiempos de decisión, sorteos privados independientes y objetivo de utilidad esperada. Cada entrada es la utilidad de Filas; Columnas recibe su negativo:
+
+| Filas / Columnas | Cara | Cruz |
+| --- | --- | --- |
+| Cara | $2$ | $-1$ |
+| Cruz | $-1$ | $1$ |
+
+Antes de abrir la solución, calcula las dos parejas de valores de respuesta pura, encuentra $p$ y $q$ que las empatan y verifica las dos medias actuales y sus mejoras. La isla empieza en el antiguo perfil por mitades para que compruebes por qué falla.
+
+<MixedStrategyAudit client:visible locale="es"
+  title="Transferencia: cambia la casilla cara–cara"
+  rowPlayer="Filas" colPlayer="Columnas"
+  rowStrategies={['Cara', 'Cruz']} colStrategies={['Cara', 'Cruz']}
+  rowPayoffs={[[2, -1], [-1, 1]]}
+  initialRowPercent={50} initialColumnPercent={50}
+  caption="Las reglas permanecen fijas dentro de esta instancia. Prueba tu pareja de probabilidades y comprueba ambas mejoras. La escala va de menos dos a más dos puntos de utilidad y no cambia."
+/>
+
+<details>
+<summary>Comprueba el cálculo completo de transferencia</summary>
+
+La utilidad de cara pura de Filas es $2q-(1-q)=3q-1$; la de cruz es $-q+(1-q)=1-2q$. Iguala ambas: $3q-1=1-2q$, así que $5q=2$ y $q=2/5$.
+
+La utilidad de cara pura de Columnas es $-2p+(1-p)=1-3p$; la de cruz es $p-(1-p)=2p-1$. Iguala ambas: $1-3p=2p-1$, así que también $p=2/5$.
+
+| Pareja de acciones | Probabilidad conjunta con $p=q=2/5$ | Contribución de Filas | Contribución de Columnas |
+| --- | --- | --- | --- |
+| Cara, cara | $4/25$ | $8/25$ | $-8/25$ |
+| Cara, cruz | $6/25$ | $-6/25$ | $6/25$ |
+| Cruz, cara | $6/25$ | $-6/25$ | $6/25$ |
+| Cruz, cruz | $9/25$ | $9/25$ | $-9/25$ |
+
+La media de Filas es $(8-6-6+9)/25=1/5$; la de Columnas es $-1/5$. Sustituir dos quintos en las dos fórmulas puras de Filas da $1/5$; las dos fórmulas puras de Columnas dan $-1/5$. Ambas mejoras son exactamente cero. Queda verificado el equilibrio, aunque la utilidad esperada de Columnas sea negativa.
+
+En el antiguo perfil por mitades, la media actual de Filas es $(2-1-1+1)/4=1/4$. Su valor de cara pura es $1/2$ y el de cruz pura, cero: mejora $1/4$. La media actual de Columnas es $-1/4$; cara pura da $-1/2$ y cruz pura, cero: también mejora $1/4$. Las mezclas iguales fallan las dos pruebas.
+
+</details>
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose"
+  question="En el juego modificado, ¿qué pareja indica la probabilidad de cara de cada jugador y después la media de equilibrio de Filas?"
+  options={[
+    { text: 'Una mitad para cada uno y después un cuarto' },
+    { text: 'Tres quintos para cada uno y después un quinto' },
+    { text: 'Dos quintos para cada uno y después un quinto', correct: true },
+    { text: 'Dos quintos para cada uno y después cero' },
+  ]}
+  explanation="Las dos ecuaciones de indiferencia dan dos quintos. Ponderar las cuatro utilidades de Filas da después ocho menos seis menos seis más nueve, todo dividido entre veinticinco: un quinto. La suma cero exige utilidades opuestas, no utilidad cero para cada jugador."
+/>
+
+## Precisa qué demuestra la comprobación
+
+<MCQ
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretestLabel="Antes de leer, prueba" client:visible className="not-prose" pretest
+  question="Verificas que ninguno de los jugadores mejora unilateralmente en un perfil. ¿Qué se deduce sobre el juego humano repetido?"
+  options={[
+    { text: 'No se deduce una trayectoria de aprendizaje sin más supuestos', correct: true },
+    { text: 'Toda secuencia de mejores respuestas debe llegar a ese perfil' },
+    { text: 'Una racha breve observada debe tener la media de equilibrio' },
+    { text: 'Los jugadores ya deben conocer la tabla correcta de utilidades' },
+  ]}
+  explanation="La comprobación es una afirmación condicional sobre un perfil, una información y unas utilidades especificados. No aporta una regla de aprendizaje, pruebas de lo que saben los jugadores ni una garantía sobre una secuencia breve de resultados realizados."
+/>
+
+El resultado de existencia de Nash para juegos finitos y una comprobación numérica del equilibrio responden a preguntas distintas de «¿cómo aprenderán estos jugadores?». Incluso en nuestro primer juego, una regla que actualiza cada acción pura a una mejor respuesta a la **pareja anterior** puede entrar en un ciclo:
+
+| Pareja anterior | Pareja siguiente al actualizar simultáneamente a mejores respuestas puras |
+| --- | --- |
+| Cara, cara | Cara, cruz |
+| Cara, cruz | Cruz, cruz |
+| Cruz, cruz | Cruz, cara |
+| Cruz, cara | Cara, cara |
+
+En cada paso cambia el perdedor anterior y se queda el ganador anterior. Esta actualización determinista concreta vuelve a su punto de partida. Es un contraejemplo construido frente a la convergencia automática, no un teorema según el cual todo aprendizaje fracasa. El perfil independiente por mitades sigue existiendo y supera la prueba unilateral.
+
+Usa la comprobación para revisar una regla propuesta, sin sustituir la observación del juego real. Necesitas una escala de utilidad defendible, acciones disponibles, tiempos y una ley de sorteo. Si el rival ve tu acción antes de elegir, si un dispositivo común vincula las acciones o si importan recompensas futuras, la comparación debe recoger esos cambios. Un desvío que mejora frente a una regla fija no predice qué sucederá cuando el rival cambie también la suya.
+
+<Categorize
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo ordenado"
+  partialResultWord="correctas" client:visible className="not-prose"
+  question="¿Qué conclusiones permite esta comprobación de una sola decisión?"
+  buckets={['Justificado por la comprobación', 'Requiere otro modelo o pruebas']}
+  items={[
+    { text: 'Ningún jugador mejora frente a la mezcla de equilibrio fija del otro', bucket: 'Justificado por la comprobación' },
+    { text: 'Las mismas frecuencias marginales certifican elecciones independientes', bucket: 'Requiere otro modelo o pruebas' },
+    { text: 'La media de equilibrio es la puntuación de cada partida realizada', bucket: 'Requiere otro modelo o pruebas' },
+    { text: 'Una mejora positiva identifica un cambio unilateral que compensa bajo las reglas declaradas', bucket: 'Justificado por la comprobación' },
+    { text: 'Los jugadores que actualizan repetidamente deben converger al equilibrio', bucket: 'Requiere otro modelo o pruebas' },
+  ]}
+  explanation="El cálculo de un perfil fijo establece comparaciones de utilidad esperada bajo sus supuestos. La independencia necesita un mecanismo o pruebas; los resultados individuales no tienen por qué igualar sus medias y el aprendizaje requiere un modelo dinámico definido."
+/>
+
+## Reconstruye la comprobación de memoria
+
+<MindMap
+  eyebrow="Visión de conjunto"
+  outlineLabel="Esquema" client:visible className="not-prose"
+  title="De las reglas aleatorias a un perfil comprobado"
+  root={{ label: 'Comprobar estrategias mixtas', children: [
+    { label: 'Definir el juego', children: [{ label: 'Acciones, utilidades cardinales, tiempos y realizaciones ocultas' }] },
+    { label: 'Construir la ley conjunta', children: [{ label: 'Multiplicar marginales solo con sorteos independientes' }] },
+    { label: 'Calcular ambas medias', children: [{ label: 'Probabilidad de cada casilla por la utilidad de ese jugador' }] },
+    { label: 'Comparar cambios unilaterales', children: [{ label: 'Mantener fijo al rival y probar las dos alternativas puras' }] },
+    { label: 'Verificar el equilibrio', children: [{ label: 'Las dos mejoras por desvío son exactamente cero' }] },
+    { label: 'Revisar los supuestos', children: [{ label: 'Señales compartidas o pagos nuevos exigen otra comprobación' }] },
+  ] }}
+/>
+
+<Quiz
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Todas correctas. Has comprobado las probabilidades y los incentivos."
+  goodMessage="Repasa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Vuelve a calcular las tablas antes de repetir el cuestionario."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Tu puntuación"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="¡Correcto!"
+  incorrectLabel="No exactamente."
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación" client:visible className="not-prose" title="Comprueba las probabilidades y los incentivos"
+  questions={[
+    { question: 'Filas tiene probabilidad de cara un cuarto y Columnas tres cuartos, de forma independiente. ¿Qué probabilidad tiene cruz de Filas y cara de Columnas?', options: [
+      { text: 'Tres dieciseisavos' }, { text: 'Nueve dieciseisavos', correct: true }, { text: 'Un dieciseisavo' }, { text: 'Un medio' },
+    ], explanation: 'Cruz de Filas tiene probabilidad tres cuartos, igual que cara de Columnas. La independencia da su producto: nueve dieciseisavos. Multiplicar las dos probabilidades de cara respondería a otra casilla.' },
+    { question: 'En el juego original, el perfil desequilibrado da a Filas media menos un cuarto y mejor utilidad pura un medio. ¿Cuánto mejora por desvío unilateral?', options: [
+      { text: 'Un cuarto' }, { text: 'Un medio' }, { text: 'Tres cuartos', correct: true }, { text: 'Menos tres cuartos' },
+    ], explanation: 'La mejora es un medio menos menos un cuarto: tres cuartos. Compara dos utilidades esperadas antes del resultado aleatorio, no una puntuación realizada.' },
+    { question: 'Selecciona qué es cierto cuando las dos mejoras por desvío son cero en el modelo independiente declarado.', allowMultiple: true, options: [
+      { text: 'Ningún desvío puro da a ningún jugador una utilidad esperada mayor', correct: true }, { text: 'Cada partida realizada da a ambos jugadores exactamente su media' },
+      { text: 'Ninguna mezcla de los desvíos puros puede dar una utilidad esperada mayor', correct: true }, { text: 'Toda regla adaptativa debe llegar a este perfil' },
+    ], explanation: 'Una mezcla es una media ponderada de las utilidades puras frente a la regla rival fija. Si ninguno de los extremos mejora, sus medias tampoco pueden mejorar. Esto no dice cuál será la puntuación de una partida ni la trayectoria de aprendizaje.' },
+    { question: 'Los dos jugadores siguen la misma recomendación equiprobable en el juego original. Columnas ve su propia recomendación antes de actuar. ¿Cuánto mejora al invertirla?', options: [
+      { text: 'Dos puntos de utilidad', correct: true }, { text: 'Un punto de utilidad' }, { text: 'Cero puntos de utilidad' }, { text: 'Medio punto de utilidad' },
+    ], explanation: 'Seguirla da a Columnas menos uno en cada semilla; invertirla da más uno en cada semilla. La mejora es dos. Elegir una acción constante daría cero: una mejora de solo uno.' },
+    { question: 'En el juego modificado, ambos eligen cara con probabilidad dos quintos. ¿Qué afirmación indica la media de Filas y la mejor utilidad pura de Columnas?', options: [
+      { text: 'Filas obtiene cero; la mejor utilidad pura de Columnas es cero' }, { text: 'Filas obtiene un cuarto; la mejor utilidad pura de Columnas es cero' },
+      { text: 'Filas obtiene menos un quinto; la mejor utilidad pura de Columnas es más un quinto' }, { text: 'Filas obtiene más un quinto; la mejor utilidad pura de Columnas es menos un quinto', correct: true },
+    ], explanation: 'Los pesos conjuntos son cuatro, seis, seis y nueve veinticincoavos. Las utilidades ponderadas de Filas suman un quinto. Columnas tiene la media opuesta y sus dos valores puros empatan en menos un quinto, de modo que su mejora por desvío es cero.' },
+    { question: 'El juego modificado usa mezclas por mitades. La media de Filas es un cuarto y la de Columnas, menos un cuarto. Sus mejores utilidades puras son respectivamente un medio y cero. ¿Qué mejoras resultan?', options: [
+      { text: 'Un medio para Filas y cero para Columnas' }, { text: 'Un cuarto para cada jugador', correct: true }, { text: 'Cero para ambos jugadores' }, { text: 'Un cuarto para Filas y menos un cuarto para Columnas' },
+    ], explanation: 'Filas mejora un medio menos un cuarto. Columnas mejora cero menos menos un cuarto. Las dos mejoras son un cuarto positivo, así que el perfil por mitades no es un equilibrio del juego modificado.' },
+    { question: '¿Qué cambios exigen revisar la comprobación en lugar de reutilizar todas sus conclusiones?', allowMultiple: true, options: [
+      { text: 'Los jugadores usan una recomendación compartida en lugar de sorteos independientes', correct: true }, { text: 'El rival ve la acción elegida antes de responder', correct: true },
+      { text: 'Otra semilla realiza una pareja de acciones distinta bajo las mismas reglas' }, { text: 'Cambia un pago mientras se mantienen las reglas de probabilidad', correct: true },
+    ], explanation: 'Las recomendaciones compartidas cambian la ley conjunta, observar cambia la información y las respuestas disponibles, y cambiar un pago altera las utilidades esperadas y los incentivos. Un cambio de pago por sí solo no invalida las probabilidades del producto si las reglas independientes se mantienen fijas. Otra realización bajo la misma ley ya está representada en la distribución existente.' },
+  ]}
+/>
+
+### Fuentes y alcance de los ejemplos
+
+Las definiciones de distribución y equilibrio siguen la [nota original de Nash sobre el equilibrio](https://doi.org/10.1073/pnas.36.1.48). La fórmula de utilidad esperada y el hecho de que baste comprobar desvíos puros se explican en la [lección del MIT sobre juegos en forma normal y equilibrio de Nash](https://www.mit.edu/~6.7980/nfgs_nash.html). La distinción entre estrategias independientes y un dispositivo de recomendaciones se desarrolla en la [sección del MIT sobre juego correlacionado](https://www.mit.edu/~6.7980/correlated.html). Todas las tablas numéricas, los mecanismos de semillas y el caso de transferencia son inventados y se deducen de sus reglas declaradas.
+
+El examen final incluye ahora estas cuentas junto a los juegos anteriores. Conserva el orden de los cuatro pasos: definir las reglas, construir la ley conjunta, calcular ambas medias y comprobar las dos mejoras unilaterales.
