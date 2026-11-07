@@ -318,3 +318,6 @@ export type { BidPaymentRule, BidCatalogueState, BidFraction, BidCatalogueRow, B
 
 export { StoppingTrace } from '@/components/react/StoppingTrace';
 export type { StoppingTraceProps, StoppingExample } from '@/components/react/StoppingTrace';
+
+export { CommonsRuleLedger } from '@/components/react/CommonsRuleLedger';
+export type { CommonsProfile, CommonsRuleModel, CommonsAccounts, CommonsRuleLabels, CommonsRuleLedgerProps } from '@/components/react/CommonsRuleLedger';
