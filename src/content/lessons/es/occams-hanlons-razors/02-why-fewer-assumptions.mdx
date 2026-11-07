@@ -1,308 +1,260 @@
 ---
-title: "Por qué ganan los que asumen menos"
-description: "La navaja de Occam no es estética: es aritmética. Cada supuesto que añades es una cosa más que tiene que ser cierta, y las probabilidades de afirmaciones independientes se multiplican hacia abajo. Más piezas móviles, más formas de equivocarse."
+title: "Qué demuestra la conjunción"
+description: "Distingue inclusión, independencia y probabilidad condicionada con recuentos finitos. Más frases no implica menos probabilidad."
 topic: "es/occams-hanlons-razors"
 order: 3
-minutes: 12
-updated: 2026-06-24
+minutes: 20
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, Categorize, FillBlank, MindMap, Reveal, Callout } from '@/components/react';
+import { MCQ, Quiz, Categorize, FillBlank, MindMap, Callout, RateComparison } from '@/components/react';
 
-Imaginad que estáis construyendo una torre de vasos, apilando uno encima de otro. ¿Un vaso? Firme como una roca. Añadid un segundo, equilibrado sobre el borde del primero: ya tiembla un poco. Un tercero, un cuarto, un quinto, y ahora estáis conteniendo la respiración, porque la torre entera solo se sostiene si *cada uno de los vasos* se queda quieto. Tirad uno y todo el invento se viene abajo.
+«Cada condición adicional puede fallar; por eso la explicación con menos frases es más probable». La primera parte necesita un suceso bien definido. La conclusión compara objetos que quizá no sean partes uno del otro. Vamos a comprobar dónde está el salto.
 
-Eso es una explicación con muchos supuestos. Cada supuesto es otro vaso. La historia solo «se sostiene» si todos son ciertos *a la vez*, y como veréis dentro de un momento, cuantos más apiláis, menores son las probabilidades de que el conjunto aguante.
-
-En la lección anterior conocisteis la **navaja de Occam (Occam's razor)**: cuando dos explicaciones encajan igual de bien con los hechos, prefiere la que necesita **menos supuestos (assumptions)** (un **supuesto** es algo que una explicación exige en silencio que sea cierto, una afirmación que aceptáis por fe para que la historia funcione). Aquella lección os contó *qué* dice la navaja. Esta os enseña el **motor que tiene debajo**, y el motor no es más que una multiplicación.
-
-<MCQ
-  client:visible
-  pretest
-  pretestLabel="Antes de leer — adivina"
-  question="Dos explicaciones encajan con los hechos. La explicación A se apoya en 1 supuesto bastante probable. La explicación B se apoya en 4 supuestos, cada uno también bastante probable por separado. ¿Qué historia completa es más probable que sea cierta?"
-  options={[
-    { text: 'La explicación A — menos supuestos, así que menos cosas que tienen que cumplirse todas a la vez', correct: true },
-    { text: 'La explicación B — más supuestos significa que explica más, así que tiene que ser más completa' },
-    { text: 'La explicación B — cuatro cosas probables le ganan a una cosa probable' },
-    { text: 'Son exactamente igual de probables, ya que cada supuesto es plausible' },
-  ]}
-  explanation="Más supuestos solo pueden arrastrar la probabilidad conjunta hacia abajo, nunca hacia arriba. Hasta cuatro afirmaciones individualmente probables, todas exigidas a la vez, suelen multiplicarse hasta dar menos que una sola afirmación probable en solitario. Al final de esta lección las cuentas te parecerán obvias."
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
+  pretest={true}
+  question="Un suceso se describe con varias condiciones y otro con una sola. Sin conocer qué condiciones son ni sus probabilidades, ¿podemos ordenar sus probabilidades contando las frases?"
+  options={[{"text":"Sí, siempre gana la descripción con menos condiciones"},{"text":"Sí, siempre gana la más detallada"},{"text":"No; necesitamos definir los sucesos y su relación","correct":true},{"text":"Los sucesos con varias condiciones no tienen probabilidad"}]}
+  explanation="La regla de inclusión compara un suceso con otro que lo contiene. El número de frases no demuestra esa relación ni asigna probabilidades a sucesos distintos."
 />
 
-## La regla de la conjunción: la «y» sale cara
+## Definir el suceso antes de contar
 
-Aquí está la jugada clave. Para creerse una explicación entera, hay que creerse que **todos** sus supuestos son ciertos **a la vez**. No uno de ellos. No la mayoría. *Todos*, al mismo tiempo.
+Un **resultado** es una posibilidad concreta del modelo. Un **suceso** es un conjunto de resultados. La **probabilidad** asigna a cada suceso un número entre cero y uno según el modelo especificado. Solo cuando todos los resultados son equiprobables podemos dividir el número de resultados del suceso entre el total para obtener su probabilidad.
 
-Esa palabra **y** está cargando con mucho peso. «El paquete llega tarde **y** el mensajero lo perdió **y** el almacén lo etiquetó mal» es una sola historia hecha de tres afirmaciones distintas, y solo es correcta si la afirmación 1 *y* la afirmación 2 *y* la afirmación 3 se cumplen todas. En probabilidad, esa combinación de «todo a la vez» se llama **conjunción (conjunction)**: dos o más afirmaciones unidas por «y».
+**Tarjeta de los dígitos.** Caso construido: generamos un trío ordenado de dígitos decimales. Cada posición toma un valor de 0 a 9 con igual probabilidad y las posiciones son mutuamente independientes. Hay $10\times10\times10=1\,000$ resultados equiprobables, incluidos los que empiezan por cero. No son mil personas encuestadas ni una muestra observada.
 
-Para afirmaciones que no se afectan entre sí en sus probabilidades (las llamamos **independientes (independent)**: conocer una no te dice nada sobre la otra), la probabilidad de la conjunción es la de las afirmaciones **multiplicadas entre sí**:
+| Nombre | Condición completa | Ejemplo que cumple | Ejemplo que no cumple |
+|---|---|---|---|
+| A | Primer dígito menor que 9 | 082 | 982 |
+| B | Segundo dígito menor que 9 | 982 | 092 |
+| C | Tercer dígito menor que 9 | 982 | 089 |
+| D | Primer dígito igual a 9 | 982 | 082 |
 
-$$P(A \land B \land C) = P(A) \times P(B) \times P(C)$$
+Una lupa ayuda a imaginar la operación: elegimos resultados que cumplen un filtro. Su límite es que un filtro no asigna probabilidades por sí solo; necesitamos el reparto de probabilidad del modelo.
 
-(El pequeño símbolo $\land$ solo significa «y».)
+### Cuándo usarlo
 
-Y aquí viene la parte que hace funcionar toda la navaja. Una **probabilidad** es siempre un número entre 0 y 1 (del 0 % al 100 %). Y cuando multiplicas números menores que 1, el resultado solo se hace **más pequeño**.
+Antes de multiplicar una lista de supuestos, definid el suceso, el conjunto de posibilidades y el modelo que permite asignar probabilidades. «Parece bastante probable» no es un dato numérico.
 
-<Callout variant="info" title="Por qué multiplicar encoge las cosas">
-La mitad de una mitad es un cuarto. $0.5 \times 0.5 = 0.25$. Coge un $0.9$ de aspecto probable y multiplícalo por otro $0.9$ y ya estás en $0.81$. Cada factor por debajo de 1 que añadas solo puede tirar el producto **hacia abajo** (o, si es un 1.0 absolutamente seguro, dejarlo igual). *Nunca* puede empujarlo hacia arriba. Así que cada supuesto extra es un impuesto sobre la credibilidad de toda la historia, y el impuesto nunca te lo devuelven.
-</Callout>
-
-<FillBlank
-  client:visible
-  question="Completa el hueco sobre las conjunciones:"
-  text="Para afirmaciones independientes, la probabilidad de que todas sean ciertas a la vez es igual a sus probabilidades {{multiplicadas entre sí|sumadas entre sí}}, y como cada una está por debajo de 1, añadir otro supuesto solo puede hacer el total {{más pequeño|más grande}}."
-  explanation="Se multiplica, no se suma — y multiplicar números por debajo de 1 solo encoge el resultado. Ese único hecho es toda la razón matemática por la que ganan los que asumen menos."
+<FillBlank client:visible
+  className="not-prose"
+  instructions="Elige una opción en cada hueco."
   checkLabel="Comprobar"
   retryLabel="Reintentar"
   explanationLabel="Explicación"
-  instructions="Elige la opción correcta para cada hueco y comprueba."
-  correctResultLabel="✓ Correcto"
+  correctResultLabel="Todo correcto"
   partialResultWord="correctas"
+  question="Completa las condiciones que hacen válida la cuenta de la tarjeta."
+  text="Un suceso es un {{conjunto de resultados|número de frases}}. Podemos calcular su probabilidad por recuento porque los resultados son {{equiprobables|observaciones clínicas}}. Los datos de la tarjeta son {{estipulados por el modelo|frecuencias empíricas de personas}}."
+  explanation="Contar resultados equiprobables da una probabilidad del modelo construido. No estima automáticamente una probabilidad real fuera de ese modelo."
 />
 
-## El ejemplo resuelto: mira hundirse por debajo del 50 % a una historia plausible
+## Una conjunción vive dentro de sus partes
 
-Concretemos esto con números reales. Supongamos que ha pasado algo y tenéis dos explicaciones rivales.
+La **conjunción** «A y B» exige ambas condiciones en el mismo resultado; se escribe $A\cap B$. Todo trío que cumple A y B cumple A. El conjunto no puede hacerse más grande al conservar solo los resultados que pasan el filtro adicional.
 
-- **Explicación ligera:** necesita solo **un** supuesto cierto, y ese supuesto es **90 % probable** ($0.9$).
-- **Explicación pesada:** necesita **tres** supuestos y —aquí está la trampa— cada uno suena bastante razonable por sí solo, **70 % probable** ($0.7$).
+| Suceso | Cuenta completa | Resultados | Probabilidad |
+|---|---:|---:|---:|
+| A | $9\times10\times10$ | 900 | $900/1\,000=0{,}9$ |
+| A y B | $9\times9\times10$ | 810 | $810/1\,000=0{,}81$ |
+| A, B y C | $9\times9\times9$ | 729 | $729/1\,000=0{,}729$ |
 
-Un setenta por ciento parece seguro, ¿verdad? Aceptaríais una apuesta al 70 %. Pero la historia pesada necesita que los tres supuestos del 70 % salgan *juntos*. Mirad lo que le hace la regla de la conjunción:
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Comparación"
+  countsLabel="Resultados que cumplen entre todos los equiprobables"
+  differenceLabel="Primera proporción menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="El filtro adicional conserva o reduce el conjunto"
+  scenarios={[{"label":"Añadir la segunda condición","groups":[{"label":"A","events":900,"total":1000},{"label":"A y B","events":810,"total":1000}]},{"label":"Añadir la tercera condición","groups":[{"label":"A y B","events":810,"total":1000},{"label":"A, B y C","events":729,"total":1000}]}]}
+/>
 
-| Explicación | Supuestos exigidos | Probabilidad de cada uno | Probabilidad conjunta (multiplicar) | En % |
-|---|---|---|---|---|
-| Ligera | 1 | 0.9 | $0.9$ | **90 %** |
-| Pesada | 3 | 0.7, 0.7, 0.7 | $0.7 \times 0.7 \times 0.7 = 0.343$ | **~34 %** |
+La regla general es:
 
-Fijaos en eso. Cada supuesto individual del 70 % sonaba perfectamente creíble, pero apilar tres de ellos arrastra toda la historia hasta el **34 %**, *por debajo de un cara o cruz*. La explicación ligera, al 90 %, no es solo un poco mejor; es casi **tres veces** más probable que sea el relato verdadero.
+$$A\cap B\subseteq A\quad\Longrightarrow\quad P(A\cap B)\leq P(A)$$
 
-Y empeora cuanto más apilas. Mirad una historia hecha de cuatro supuestos *muy* creíbles cada uno, del 80 %:
+Esto **no exige independencia**. Puede haber igualdad: si la condición adicional ya estaba garantizada por A, no descarta nada. La regla habla de sucesos anidados bajo el mismo reparto de probabilidad. No dice que cualquier explicación escrita con más condiciones sea menos probable que cualquier rival.
 
-| Explicación | Supuestos exigidos | Probabilidad de cada uno | Probabilidad conjunta (multiplicar) | En % |
-|---|---|---|---|---|
-| Historia de cuatro partes | 4 | 0.8, 0.8, 0.8, 0.8 | $0.8 \times 0.8 \times 0.8 \times 0.8 \approx 0.41$ | **~41 %** |
-
-Cuatro afirmaciones, cada una sólida al 80 %, y la historia completa sigue estando solo en un **41 %** de aire a cara o cruz. Esa es la navaja en acción: la explicación elaborada no perdió porque alguna de sus piezas fuera débil. Perdió porque *creerse todas las piezas a la vez es difícil*, y las cuentas te cobran por cada «y».
-
-<Callout variant="tip" title="La conclusión en una línea">
-Una cadena de afirmaciones que suenan plausibles no es una historia plausible. Cada «y» multiplica las probabilidades hacia abajo, así que cuanto más tenga que asumir una explicación, menos probable es que *el conjunto* sea cierto.
-</Callout>
-
-<MCQ
-  client:visible
-  question="Una explicación necesita que dos supuestos independientes sean ciertos los dos: el primero es 80 % probable (0.8), el segundo es 50 % probable (0.5). ¿Cuál es la probabilidad de que toda la explicación se sostenga?"
-  options={[
-    { text: '40 % — se multiplica: 0.8 × 0.5 = 0.4', correct: true },
-    { text: '130 % — se suman las dos probabilidades' },
-    { text: '65 % — se promedian las dos probabilidades' },
-    { text: '80 % — lo que importa es la mayor de las dos' },
-  ]}
-  explanation="Conjunción significa multiplicar: 0.8 × 0.5 = 0.4, o sea 40 %. Fíjate en que incluso emparejar una afirmación fuerte del 80 % con una del 50 % a cara o cruz hunde toda la historia muy por debajo de la mitad. Cada eslabón débil arrastra todo con él."
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
+  question="Para justificar que una conjunción no supera la probabilidad de una de sus partes, ¿qué necesitamos?"
+  options={[{"text":"Que las partes sean independientes"},{"text":"Que se compare el mismo modelo de probabilidad y la conjunción esté incluida en esa parte","correct":true},{"text":"Que la conjunción se escriba con más palabras"},{"text":"Que las dos probabilidades sean estrictamente distintas"}]}
+  explanation="La inclusión basta: todos los resultados de la conjunción pertenecen a cada parte. Puede haber dependencia e incluso igualdad de probabilidades."
 />
 
-## Menos supuestos = menos formas de equivocarse
+### Cuándo usar esta regla
 
-Hay una segunda manera de ver la misma verdad, sin necesidad de cuentas. Pensad en cada supuesto como un **punto de fallo**: un sitio por donde la historia podría romperse.
+Usadla para detectar una comparación imposible: «A y B» no puede superar a «A» bajo el mismo modelo. No la trasladéis a dos hipótesis sin comprobar antes si una implica la otra.
 
-Una explicación de un supuesto tiene exactamente una cosa que tiene que salir bien. Una explicación de cinco supuestos tiene cinco cosas distintas que *todas* tienen que salir bien, lo que significa que tiene **cinco formas distintas de equivocarse**. Añade un eslabón a una cadena y habrás añadido un sitio por donde puede romperse.
+## Cuándo se multiplican las probabilidades
 
-Por eso las explicaciones más sencillas no son solo más elegantes: son más **robustas**. Sencillamente hay menos partes que puedan estar equivocadas. (Los ingenieros piensan así constantemente: un diseño con menos piezas tiene menos piezas que puedan fallar. Algunos llaman al primo deliberado de esta idea un *margen de seguridad*: dejar hueco para el eslabón roto inevitable. Hay un curso entero sobre esa idea más adelante; por ahora, basta con notar la forma: más partes, más fragilidad.)
+Dos sucesos son **independientes** si conocer que ocurre uno no cambia la probabilidad del otro. En la tarjeta, las posiciones independientes justifican:
 
-<Categorize
-  client:visible
-  question="Clasifica cada afirmación según haga una explicación MÁS creíble o MENOS creíble."
-  buckets={['Más creíble', 'Menos creíble']}
-  items={[
-    { text: 'Exige que menos supuestos separados sean ciertos', bucket: 'Más creíble' },
-    { text: 'Cada cosa que asume es ya de por sí muy probable', bucket: 'Más creíble' },
-    { text: 'Amontona afirmaciones extra de «y además pasó esto»', bucket: 'Menos creíble' },
-    { text: 'Tiene muchos puntos independientes donde podría equivocarse', bucket: 'Menos creíble' },
-    { text: 'Explica los hechos sin inventar entidades nuevas', bucket: 'Más creíble' },
-  ]}
-  explanation="Menos supuestos, y supuestos individualmente fuertes, elevan las probabilidades de una historia. Cada afirmación extra exigida y cada punto de fallo extra las tiran hacia abajo. El mismo principio, dos ángulos: probabilidad y fragilidad."
+$$P(A\cap B\cap C)=0{,}9\times0{,}9\times0{,}9=0{,}729$$
+
+En general, para $P(A)>0$, la regla de dos sucesos es:
+
+$$P(A\cap B)=P(A)P(B\mid A)$$
+
+La barra se lee «dado que». Solo si B es independiente de A podemos sustituir $P(B\mid A)$ por $P(B)$. La independencia mutua de las posiciones justifica el producto de las tres probabilidades marginales de esta tarjeta; llamar «separadas» a tres frases no demuestra esa independencia.
+
+**Contraejemplo a multiplicar sin comprobar.** Llamemos R a «el primer dígito es menor que 9». R es exactamente el mismo suceso que A, aunque tenga otra letra. A y R conserva los 900 resultados de A:
+
+| Cálculo | Resultado |
+|---|---:|
+| Probabilidad correcta de A y R | $900/1\,000=0{,}9$ |
+| Producto injustificado de los marginales | $0{,}9\times0{,}9=0{,}81$ |
+| Probabilidad de R dado A | $900/900=1$ |
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="R repite exactamente la condición A de la tarjeta. ¿Qué probabilidad tiene que se cumplan ambas?"
+  options={[{"text":"Ochenta y una centésimas"},{"text":"Una décima"},{"text":"Cero"},{"text":"Nueve décimas","correct":true}]}
+  explanation="Repetir la misma condición no elimina resultados: siguen siendo novecientos entre mil. El producto de nueve décimas por nueve décimas sería incorrecto porque esos sucesos no son independientes."
+/>
+
+### Cuándo usar el producto
+
+Cuando la independencia esté estipulada o justificada por el modelo. Si no lo está, necesitáis probabilidades condicionadas u otra información sobre la distribución conjunta. La inclusión sigue siendo válida; una multiplicación arbitraria no se convierte por ello en una aproximación útil.
+
+## Contar frases no compara explicaciones distintas
+
+Ahora comparemos A y B y C con D. El primero exige tres condiciones y reúne 729 resultados. D se expresa con una sola condición y reúne 100. El suceso de tres condiciones tiene mayor probabilidad: $0{,}729>0{,}1$.
+
+D no contiene la conjunción anterior. De hecho, son incompatibles: el primer dígito no puede ser a la vez menor que 9 e igual a 9. La regla de inclusión no ordenaba esta pareja por el número de condiciones.
+
+Llamemos **E** a «los tres dígitos son menores que 9». E es exactamente A y B y C. Agruparlo en una sola frase no lo hace más probable.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Comparación"
+  countsLabel="Resultados del suceso entre todos los equiprobables"
+  differenceLabel="Primera proporción menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Distinto suceso o distinta redacción"
+  scenarios={[{"label":"Sucesos distintos, no una cadena de inclusión","groups":[{"label":"A, B y C","events":729,"total":1000},{"label":"D","events":100,"total":1000}]},{"label":"Dos nombres para el mismo suceso","groups":[{"label":"A, B y C","events":729,"total":1000},{"label":"E","events":729,"total":1000}]}]}
+/>
+
+<Categorize client:visible
+  className="not-prose"
+  instructions="Asigna cada afirmación a su grupo."
   checkLabel="Comprobar"
   retryLabel="Reintentar"
   explanationLabel="Explicación"
-  instructions="Coloca cada elemento en su grupo."
-  allCorrectLabel="✓ Todo ordenado"
+  allCorrectLabel="Todo clasificado"
   partialResultWord="correctas"
+  question="Clasifica estas comparaciones según lo que cambia."
+  buckets={["Se restringe el mismo suceso","Se cambia de suceso sin inclusión","Solo se renombra el mismo suceso"]}
+  items={[{"text":"Pasar de A a exigir A y B","bucket":"Se restringe el mismo suceso"},{"text":"Comparar A y B y C con D","bucket":"Se cambia de suceso sin inclusión"},{"text":"Llamar E a la condición completa A y B y C","bucket":"Solo se renombra el mismo suceso"}]}
+  explanation="La restricción permite aplicar inclusión. Comparar sucesos distintos requiere sus probabilidades. Renombrar no cambia el conjunto de resultados."
 />
 
-## La falacia de la conjunción: por qué el detalle nos seduce
+### Cuándo volver a Occam
 
-Ahora dad la vuelta a la cámara. Las cuentas dicen que añadir afirmaciones solo puede *bajar* la probabilidad de una historia. Pero nuestra intuición hace justo lo contrario: encuentra las historias detalladas y vívidas *más* convincentes. Ese instinto al revés tiene nombre.
+Al comparar explicaciones, preguntad qué compromisos son innecesarios para el trabajo. Para afirmar una probabilidad previa, especificad un modelo probabilístico que la justifique. El ejemplo de los dígitos no proporciona probabilidades de un despliegue, una intrusión o una intención humana.
 
-En un experimento famoso, los psicólogos **Amos Tversky y Daniel Kahneman** describieron a una mujer:
+## Añadir una condición y observar evidencia
 
-> Linda tiene 31 años, está soltera, es directa y muy inteligente. De estudiante le preocupaban profundamente la discriminación y la justicia social, y participó en manifestaciones antinucleares.
+Exigir «A y B» conserva solo resultados que cumplen ambas condiciones dentro del conjunto original. **Condicionar** a B significa pasar a evaluar probabilidades dentro de los resultados compatibles con B. El denominador cambia.
 
-Luego preguntaron qué es más probable:
+Por eso observar una evidencia puede aumentar una probabilidad. En el ejemplo R=A, antes de observar R tenemos $P(A)=900/1\,000=0{,}9$; dado R, $P(A\mid R)=900/900=1$. No hay contradicción: estamos comparando medidas condicionadas distintas, no diciendo que la conjunción se haya vuelto mayor que A.
 
-1. Linda es cajera de banco.
-2. Linda es cajera de banco **y** activa en el movimiento feminista.
+**Tarjeta de transferencia.** Otro caso construido: pares ordenados $(u,v)$ equiprobables. $u$ toma los valores 0,1,2,3 y $v$ toma 0,1,2,3,4, de manera independiente. Hay 20 pares. Definimos F: $u<3$; G: $v<2$; H: $v=4$.
 
-La mayoría de la gente eligió la **2**. Simplemente *parece* más correcta: el detalle activista encaja tan bien con la historia de Linda. Pero al elegir la 2 habéis cometido una imposibilidad matemática. La opción 2 es un **subconjunto** de la opción 1: toda Linda que sea cajera feminista es, por definición, también cajera. La «y» solo puede *estrechar* el grupo, nunca ampliarlo. Así que la opción 2 puede ser **como mucho** tan probable como la opción 1, y casi siempre menos.
+| Suceso | Recuento para verificar después de calcular |
+|---|---:|
+| F | $3\times5=15$ |
+| G | $4\times2=8$ |
+| F y G | $3\times2=6$ |
+| H | $4\times1=4$ |
 
-Este error —juzgar una conjunción específica y detallada como *más* probable que la afirmación amplia dentro de la que vive— es la **falacia de la conjunción (conjunction fallacy)**. Es nuestro cerebro dejándose engañar por el *encaje*: el detalle añadido «feminista» casa con la descripción vívida, así que la combinación parece más plausible, aunque cada detalle que atornilles multiplica las probabilidades **hacia abajo**, exactamente como mostraba la tabla de arriba.
-
-<Reveal client:visible summary="¿Y por qué añadir un detalle que encaja parece más probable?">
-Porque confundimos la **representatividad** con la **probabilidad**. Una cajera feminista *se parece* a la Linda que nos describieron, así que parece un encaje mejor, y leemos «encaje mejor» como «más probable». Pero el parecido no son probabilidades. La historia del crimen con el móvil detallado, el diagnóstico que explica cada síntoma con una sola enfermedad exótica, la conspiración que ata catorce casualidades: todas parecen *más* ciertas precisamente por los detalles que, matemáticamente, las hacen *menos* probables. La falacia de la conjunción es la regla de la conjunción corriendo al revés dentro de tu cabeza.
-</Reveal>
-
-<MCQ
-  client:visible
-  question="¿Qué afirmación NUNCA puede ser más probable que la otra?"
-  options={[
-    { text: '«Hoy ha llovido Y el autobús ha llegado tarde» nunca puede ser más probable que «el autobús ha llegado tarde».', correct: true },
-    { text: '«El autobús ha llegado tarde» nunca puede ser más probable que «ha llovido Y el autobús ha llegado tarde».' },
-    { text: 'Añadir un detalle que encaja con la situación hace más probable la afirmación combinada.' },
-    { text: 'Una conjunción es siempre exactamente tan probable como su parte más probable.' },
-  ]}
-  explanation="Una conjunción (A y B) es un subconjunto de cada parte, así que puede ser como mucho tan probable como cualquiera de las partes por separado, nunca más. Creer que la versión detallada es más probable es la falacia de la conjunción."
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
+  question="En la tarjeta de transferencia, si sabemos que F se cumple, ¿qué fracción de los resultados restantes cumple G?"
+  options={[{"text":"Seis de veinte"},{"text":"Ocho de veinte"},{"text":"Seis de quince","correct":true},{"text":"Quince de veinte"}]}
+  explanation="Al condicionar a F quedan quince resultados equiprobables. Seis cumplen además G. La probabilidad condicionada es seis quinceavos; seis veinteavos sería la probabilidad conjunta en el conjunto original."
 />
 
-## Cómo conecta esto con el resto de tu caja de herramientas
+<details>
+<summary>Comprobar las probabilidades de transferencia</summary>
 
-Esta lección no es un truco suelto: es la bisagra sobre la que giran varias ideas:
+$P(F\cap G)=6/20=0{,}3$; $P(H)=4/20=0{,}2$. La conjunción de dos condiciones supera a H, una condición distinta. $P(G\mid F)=6/15=0{,}4$, igual a $P(G)=8/20=0{,}4$ por la independencia estipulada. Cada cociente indica su denominador.
 
-- **Pensar en probabilidades / tasas base (base rates).** Esto *es* probabilidad aplicada a las explicaciones. En lugar de preguntar «¿podría ser cierta esta historia?», preguntas «¿cuáles son las *probabilidades* de que toda la historia sea cierta a la vez?», y lo respondes multiplicando. La plausibilidad de una historia es un número, no un buen rollo.
-- **La navaja de Occam (lección anterior).** Ahora ya sabes *por qué* corta la navaja. «Prefiere menos supuestos» no es una preferencia estilística; es una consecuencia directa de la regla de la conjunción. Menos supuestos significa literalmente una probabilidad conjunta más alta, en igualdad de condiciones.
-- **El sesgo de confirmación.** Una historia detallada que *coincide con lo que ya crees* parece todavía más probable: esa es la falacia de la conjunción convertida en arma por tus opiniones previas. La conspiración más rica y satisfactoria suele ser la que halaga tu visión del mundo, y cada «y» que contiene está drenando en silencio su probabilidad real.
+</details>
 
-<MindMap
-  client:visible
-  title="Por qué ganan los que asumen menos"
-  eyebrow="Visión de conjunto"
-  outlineLabel="Esquema"
-  root={{
-    label: 'Ganan los que asumen menos',
-    children: [
-      { label: 'El impuesto de la «y»', children: [
-        { label: 'Creerse una historia = creerse TODOS sus supuestos a la vez' },
-        { label: 'Conjunción: P(A y B) = P(A) × P(B)' },
-        { label: 'Multiplicar números bajo 1 solo encoge' },
-      ]},
-      { label: 'Números resueltos', children: [
-        { label: '1 supuesto al 0.9 -> 90 %' },
-        { label: '3 supuestos al 0.7 -> 34 %' },
-        { label: '4 supuestos al 0.8 -> 41 %' },
-      ]},
-      { label: 'Dos vistas, una verdad', children: [
-        { label: 'Menos supuestos = probabilidad conjunta más alta' },
-        { label: 'Menos supuestos = menos formas de equivocarse' },
-      ]},
-      { label: 'La trampa: la falacia de la conjunción', children: [
-        { label: 'El problema de Linda (Tversky y Kahneman)' },
-        { label: 'El detalle parece más probable, es en realidad menos probable' },
-        { label: 'Las mismas cuentas, corriendo al revés' },
-      ]},
-      { label: 'Letra pequeña honesta', children: [
-        { label: 'Los supuestos no siempre son independientes' },
-        { label: 'Una historia poco probable aún puede ser la VERDADERA' },
-      ]},
-    ],
-  }}
-/>
+### Cuándo mirar el denominador
 
-## La letra pequeña honesta
-
-Dos matices, porque un buen modelo mental conoce sus propios límites.
-
-**Primero: los supuestos no siempre son independientes.** La regla limpia de la multiplicación —$P(A \land B) = P(A) \times P(B)$— solo se cumple exactamente cuando las afirmaciones no se influyen entre sí. En el mundo real a menudo lo hacen: si «el vuelo se canceló» es cierto, entonces «perdí la conexión» se vuelve *mucho* más probable, así que no puedes multiplicar sin más sus probabilidades por separado. Cuando las afirmaciones están **correlacionadas (correlated)**, el número exacto se desviará.
-
-Pero —y esta es la parte importante— la **conclusión cualitativa sobrevive intacta.** Incluso con supuestos correlacionados, amontonar más afirmaciones exigidas solo puede mantener plana la probabilidad conjunta o empujarla hacia abajo. *Nunca* puede empujarla hacia arriba. Así que tratad la multiplicación como un **modelo**: la cifra exacta es una aproximación, pero la lección («más supuestos → no más probable») es sólida como una roca.
-
-**Segundo: una explicación de menor probabilidad aún puede ser la verdadera.** Este es el redoble recurrente del curso. La probabilidad es un **prior (prior)**, no un veredicto. La explicación más sencilla es la apuesta por defecto inteligente, el sitio por donde empezar, no una garantía. A veces la historia elaborada e improbable es exactamente lo que pasó; las cosas raras ocurren, y el universo no tiene ninguna obligación de ser ordenado. La navaja te dice dónde poner las fichas, no cómo se jugará la mano. Sujetad vuestras explicaciones sencillas con firmeza, pero no tan fuerte que la evidencia real no pueda arrancároslas.
-
-<Callout variant="warning" title="No afeites de más">
-Los que asumen menos ganan *en igualdad de condiciones*. Si una explicación más sencilla sencillamente no encaja con los hechos, ninguna elegancia la salva: no puedes ignorar la evidencia solo porque te obligaría a añadir un supuesto. La navaja deshace empates; no anula la realidad.
-</Callout>
+Cuando alguien diga que una prueba «añade otro supuesto y por tanto baja la probabilidad», aclarad si habla de una conjunción, de una actualización con evidencia o de una hipótesis distinta. Esas operaciones no se sustituyen contando palabras.
 
 ## Repaso
 
-<Quiz
-  client:visible
-  title="Fija las cuentas que hay detrás de la navaja"
-  questions={[
-    {
-      question: 'Una explicación necesita que tres supuestos independientes sean todos ciertos, cada uno 90 % probable (0.9). ¿Cuál es la probabilidad de que toda la explicación se sostenga?',
-      options: [
-        { text: 'Alrededor del 73 % — se multiplica: 0.9 × 0.9 × 0.9 ≈ 0.729', correct: true },
-        { text: '270 % — se suman las tres probabilidades' },
-        { text: '90 % — tres afirmaciones del 90 % siguen dando 90 %' },
-        { text: '30 % — se reparte 0.9 entre las tres afirmaciones' },
-      ],
-      explanation: '0.9 × 0.9 × 0.9 ≈ 0.729, o sea alrededor del 73 %. Hasta tres supuestos muy fuertes, todos exigidos a la vez, sueltan aproximadamente una sexta parte de la certeza.',
-    },
-    {
-      question: '¿Por qué añadir más supuestos a una explicación tiende a hacer TODA la explicación menos probable?',
-      options: [
-        { text: 'Porque las probabilidades de afirmaciones independientes se multiplican, y multiplicar números por debajo de 1 solo encoge el resultado', correct: true },
-        { text: 'Porque las explicaciones complicadas son siempre falsas' },
-        { text: 'Porque los supuestos extra se suman, empujando el total por encima del 100 %' },
-        { text: 'Porque las explicaciones más largas tardan más en verificarse' },
-      ],
-      explanation: 'Es la regla de la conjunción: P(A y B y C) = P(A) × P(B) × P(C). Cada factor por debajo de 1 solo puede arrastrar hacia abajo la probabilidad conjunta.',
-    },
-    {
-      question: 'En el problema de Linda, ¿por qué «Linda es cajera de banco Y feminista» nunca puede ser más probable que «Linda es cajera de banco»?',
-      options: [
-        { text: 'Porque la conjunción es un subconjunto — toda cajera feminista es también cajera, así que añadir la «y» solo puede estrechar el grupo', correct: true },
-        { text: 'Porque las feministas rara vez son cajeras de banco' },
-        { text: 'Porque la descripción hacía que Linda sonara activista, así que la afirmación combinada encaja mejor' },
-        { text: 'Porque dos afirmaciones son siempre menos fiables que una sola fuente' },
-      ],
-      explanation: 'Una conjunción vive dentro de cada una de sus partes, así que puede ser como mucho tan probable como cualquiera de las partes por separado. Juzgarla más probable porque el detalle encaja es la falacia de la conjunción.',
-    },
-    {
-      question: '¿Qué afirmación sobre la regla de la multiplicación es la más exacta?',
-      options: [
-        { text: 'Es exacta solo para afirmaciones independientes, pero incluso cuando las afirmaciones están correlacionadas, más supuestos siguen sin poder SUBIR la probabilidad conjunta', correct: true },
-        { text: 'Es siempre exacta para cualquier explicación del mundo real, esté correlacionada o no' },
-        { text: 'Una vez que las afirmaciones están correlacionadas, más supuestos pueden hacer toda la historia más probable' },
-        { text: 'Demuestra que la explicación más sencilla es siempre la verdadera' },
-      ],
-      explanation: 'El producto exacto necesita independencia; la correlación desvía el número preciso. Pero la dirección nunca se invierte: las afirmaciones extra exigidas solo pueden mantener plana la probabilidad o bajarla. Y recuerda: una historia poco probable aún puede ser cierta.',
-    },
-  ]}
-  questionLabel="Pregunta"
-  ofLabel="de"
-  scoreLabel="Tu puntuación"
-  restartLabel="Reiniciar"
-  nextLabel="Siguiente"
-  backLabel="Atrás"
-  seeResultsLabel="Ver resultados"
-  completeLabel="Completado"
-  completeTitleLabel="Cuestionario completado"
-  correctCountLabel="correctas"
-  gateLabel="Comprueba tu respuesta para continuar."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  perfectMessage="Puntuación perfecta, ¡bien hecho!"
-  goodMessage="Buen trabajo, repasa las que has fallado."
-  keepPracticingMessage="Sigue practicando, lo tienes."
+<MindMap client:visible
+  eyebrow=""
+  outlineLabel="Esquema de texto"
+  title="Qué demuestra la conjunción"
+  root={{"label":"Definir antes de multiplicar","children":[{"label":"Sucesos","children":[{"label":"Conjuntos de resultados"},{"label":"Modelo de probabilidad explícito"}]},{"label":"Inclusión","children":[{"label":"La conjunción está dentro de sus partes"},{"label":"No requiere independencia"},{"label":"Puede conservar la probabilidad"}]},{"label":"Producto","children":[{"label":"Marginales bajo independencia"},{"label":"Si no, probabilidades condicionadas"}]},{"label":"Comparación","children":[{"label":"Más frases no asigna menos probabilidad"},{"label":"Renombrar conserva el suceso"},{"label":"Evidencia puede cambiar el denominador"}]}]}}
 />
 
-Ya conocéis los engranajes que giran dentro de la navaja de Occam: cada «y» es un impuesto, y la factura se paga en probabilidad. A continuación, la **navaja de Hanlon (Hanlon's razor)**, la hermana traviesa de la navaja, que pregunta por qué tan a menudo echamos mano de una historia elaborada de maldad cuando una aburrida sobre un simple error nos serviría igual.
+<Quiz client:visible
+  className="not-prose"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Has acertado todas las preguntas."
+  goodMessage="Revisa las explicaciones de tus errores."
+  keepPracticingMessage="Vuelve a los ejemplos y prueba otra vez."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  title="Reconstruye la comparación"
+  questions={[{"question":"Según la tarjeta de dígitos, ¿cuántos resultados cumplen las tres condiciones de menores que el límite indicado?","options":[{"text":"Novecientos"},{"text":"Setecientos veintinueve","correct":true},{"text":"Cien"}],"explanation":"Cada posición admite nueve dígitos: nueve por nueve por nueve da setecientos veintinueve resultados equiprobables."},{"question":"¿Qué afirmaciones son válidas?","allowMultiple":true,"options":[{"text":"Una conjunción pertenece a cada una de sus partes","correct":true},{"text":"Renombrar la misma conjunción aumenta su probabilidad"},{"text":"La independencia permite el producto de los marginales correspondiente","correct":true}],"explanation":"La inclusión no depende de la redacción. La independencia de la tarjeta justifica ese producto de marginales."},{"question":"La transferencia compara F y G con H. ¿Qué suceso tiene mayor probabilidad bajo su modelo?","options":[{"text":"H porque se expresa con una condición"},{"text":"F y G porque reúne más pares del mismo total","correct":true},{"text":"No se puede contar un conjunto finito"}],"explanation":"La conjunción reúne seis pares y H cuatro, ambos entre veinte. El número de condiciones no ordena sucesos no anidados."},{"question":"Observamos una condición que informa sobre A. ¿Qué operación responde a la probabilidad de A tras esa observación?","options":[{"text":"Multiplicar siempre las probabilidades marginales"},{"text":"Contar cuántas palabras tiene A"},{"text":"Condicionar al dato observado y declarar el denominador","correct":true}],"explanation":"Actualizar con evidencia exige el modelo conjunto o las probabilidades condicionadas relevantes. No es la operación de añadir una condición a una conjunción manteniendo el mismo denominador."}]}
+/>
+
+A continuación, **la navaja de Hanlon** trata explicaciones de la conducta. Las cuentas de esta lección no asignan por sí solas probabilidades a motivos ni demuestran intenciones.
+
+### Fuentes y alcance
+
+[Yen-Chi Chen, University of Washington: sucesos, inclusión, independencia y probabilidad condicionada](https://faculty.washington.edu/yenchic/20A_stat512/Lec1_probability.html). Los dos espacios finitos y sus recuentos son construidos; no describen una encuesta ni un experimento psicológico. No hace falta independencia para la inclusión; la independencia estipulada en la tarjeta justifica sus productos de marginales.
