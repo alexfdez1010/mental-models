@@ -118,26 +118,19 @@ interface Totals {
 const EMPTY_TOTALS: Totals = { rounds: 0, sumOvershoot: 0, sumOverpay: 0, sumProfit: 0 };
 
 /**
- * Interactive **winner's-curse** island. A hidden true *common value* sits behind
- * the scenes; each of *N* simulated bidders draws a noisy private estimate of it
- * (`trueValue ± noise`, uniform) and bids. The **highest** bidder wins and — in a
- * first-price auction — pays their own bid.
+ * Illustrate maximum selection under independent uniform errors around a fixed
+ * common reference. With raw estimate bids, the highest estimate wins and pays
+ * its bid; the expected maximum error is positive for nonzero noise and N > 1.
+ * Individual outcomes and finite-batch means can differ from that expectation.
  *
- * The whole point is to make *conditioning on winning* visible. The winner is,
- * by construction, whoever drew the most *optimistic* estimate, so the winning
- * estimate sits systematically **above** the truth — and that gap grows with more
- * bidders and more noise. Run auctions and watch the running **average
- * overpayment** climb: winning is bad news.
+ * The optional shared offset subtracts the same expected-maximum error from
+ * EVERY bidder's estimate. It preserves their ranking and centers the ensemble's
+ * mean winning payment at the reference under this imposed rule. It is not an
+ * equilibrium strategy or an individual bidder's optimal response.
  *
- * A **bid-shading** toggle applies the classic correction (shade down by
- * `noise·(N−1)/(N+1)`, the optimum for uniform errors in a common-value
- * first-price auction), which pulls the winner's expected profit back toward zero —
- * and shades *more* the more rivals there are, the model's signature paradox that
- * tougher competition means bidding *less* per signal.
- *
- * Randomness lives entirely in event handlers (button clicks), so nothing is
- * generated during render and there is no motion on mount; the only transition is a
- * cosmetic tween of the markers, disabled under `prefers-reduced-motion`.
+ * Randomness lives only in event handlers. Changing settings retains earlier
+ * totals until Reset; compare fresh batches after resetting. Marker transitions
+ * are cosmetic and disabled under prefers-reduced-motion.
  */
 export function WinnerCurseSim({
   locale = 'en',
@@ -198,8 +191,9 @@ export function WinnerCurseSim({
   };
 
   /**
-   * The optimal shade for uniform errors in [−noise, +noise], first-price common
-   * value: subtract `noise·(N−1)/(N+1)` from your estimate. Zero when noise is 0.
+   * Exact expected maximum error for iid Uniform[−noise, +noise] draws. Applying
+   * this same offset to all bidders centers mean payment; it does not optimize
+   * an individual bid. Zero noise gives zero offset.
    */
   const shadeAmount = useMemo(
     () => (noise * (bidders - 1)) / (bidders + 1),

@@ -1,216 +1,393 @@
 ---
 title: "The Selection Mechanism"
-description: The engine of the winner's curse — why conditioning on winning shifts the odds so that the expected value given you won is below the expected value overall, worked out with real numbers, and its deep tie to regression to the mean.
+description: "Separate unbiased errors from selection, compute exact maxima, and test the limits of uniform formulas, dependence and fresh measurements."
 topic: "en/winners-curse"
 order: 3
-minutes: 16
-updated: 2026-07-11
+minutes: 35
+updated: 2026-11-07
 ---
 
-import { Callout, MCQ, Reveal, WinnerCurseSim } from '@/components/react';
+import { MCQ, Quiz, Callout, FillBlank, MatchConcepts, Categorize, MindMap, RateComparison, WinnerCurseSim } from '@/components/react';
 
-You now know *where* the curse lives — common value. This lesson opens the engine
-and shows *how* it works. The whole thing turns on one deceptively simple idea:
-**winning is information.** The event "I won this auction" is not neutral. It's a
-filter that tells you something specific and unwelcome about your own estimate. Learn
-to read that signal and the curse stops being a mystery and becomes a number you can
-subtract.
+Put four estimates on a desk and take their average. Now put the same estimates on the desk and keep only the largest. The inputs did not change; the operation did. An auction that mechanically selects the largest estimate does not average estimation errors away.
 
-<MCQ
-  client:visible
+This lesson rebuilds that selection mechanism with a complete finite model. It also separates three questions: how estimates err before selection, what the selected estimate looks like, and what a bidder can infer about value. The **values, error laws and credits below are invented teaching inputs**, not auction observations or bidding recommendations.
+
+<MCQ client:visible
+  question={"An estimator is unbiased. What does that fact specify by itself?"}
+  options={[{"text":"Its probability-weighted mean error is zero.","correct":true},{"text":"Its positive and negative errors occur equally often."},{"text":"Its possible errors form a symmetric distribution."},{"text":"Its error remains mean-zero after every selection."}]}
+  explanation={"Unbiasedness is a statement about a specified average. Sign probabilities, symmetry and conditional averages need additional information."}
   pretest
-  question="Before we start — take a guess. Your estimate of an oil field's value is unbiased: on average, across all fields, it's neither too high nor too low. You bid your estimate and WIN. Conditional on winning, is your estimate still unbiased?"
-  options={[
-    { text: 'No — conditional on winning it is biased HIGH, because you tend to win exactly when your estimate happened to be too optimistic', correct: true },
-    { text: 'Yes — an unbiased estimate stays unbiased no matter what happens', correct: false },
-    { text: 'No — conditional on winning it is biased LOW', correct: false },
-    { text: 'It depends on the seller, not on your estimate', correct: false },
-  ]}
-  explanation="It's the first, and it's the crux of the whole model. Your estimate is unbiased BEFORE you know the outcome. But 'I won' isn't random news — you win disproportionately when your estimate ran high. So the act of conditioning on winning filters out your low estimates and keeps your high ones, dragging the conditional average above the truth. Unbiased overall, biased-high given you won."
+  className={"not-prose"}
 />
+## Mean-zero is a weighted claim
 
-## Winning is a filter, not a coin flip
+An **estimation error** is estimate minus true value. An estimate is **unbiased** in a stated model when its expected error is zero. Expected means probability-weighted average over the model's possible results, not a promise about one result.
 
-Start with a single bidder in isolation. Your geologists estimate an oil field at
-\$100M. Their method is honest — over many fields, their estimates are **unbiased**,
-landing above the truth exactly as often as below it, scattered symmetrically around
-the real number. If someone picked a field at random and asked "is your estimate too
-high or too low here?" the answer would genuinely be a coin flip.
+A balanced account need not contain equal numbers of positive and negative entries. For a separate, asymmetric error model:
 
-Now put you in an auction with nine rivals, all using similarly honest methods, all
-estimating the *same* field. Everyone bids their estimate. You win — meaning your
-\$100M was the **highest** of the ten estimates. Ask the question again: *given that
-you won, is your estimate too high or too low?*
+| Error | Probability | Contribution to mean error |
+|---:|---:|---:|
+| −2 | 1/3 | −2/3 |
+| +1 | 2/3 | +2/3 |
 
-It's no longer a coin flip. You won **because** your estimate topped everyone
-else's, and the way to have the highest estimate of ten is to have drawn a big
-positive error. Losing bidders were disproportionately the ones who estimated low
-(closer to, or below, the truth); winning bidders are disproportionately the ones who
-estimated high. **The auction hands the prize to the optimist.** So conditional on
-winning, your estimate is biased *upward*, even though it was unbiased before the
-auction started. The winning bid isn't a readout of the field's value — it's a
-readout of the largest error in the room.
+The mean error is $(-2)(1/3)+(1)(2/3)=0$. Yet the probability of a positive error is $2/3$, not $1/2$. This estimator is unbiased without being symmetric or equally likely to err in either direction. Large negative errors can balance more frequent small positive errors.
 
-<Callout variant="info" title="E[value | you won] < E[value]">
-Here's the model in one line of notation. Your estimate is unbiased, so
-`E[value] = your estimate`. But the estimate *conditional on winning* is inflated:
-`E[value | you won] < your estimate`. The gap between them is the winner's curse. Bid
-your raw estimate and you're paying `E[value]` for something whose value, *given that
-you won*, is really `E[value | you won]` — systematically less. You lose the
-difference on average, every time you win.
+**Symmetry** would impose more: errors and their reflections have the same distribution. Even symmetry alone would not establish independence between different bidders. **Independence** means that learning one error does not change the probabilities for the other, within the stated model. A **marginal distribution** describes one error alone; the joint distribution describes several together. Keep those two descriptions separate.
+
+<FillBlank client:visible
+  question={"Separate properties before using them"}
+  text={"Unbiasedness specifies a weighted {{mean|median|maximum}}. Independence concerns the {{joint law|sign count|payment rule}} of several errors. Neither property says that a selected individual result must be correct."}
+  explanation={"A zero mean does not specify a sign probability or symmetry. A marginal distribution describes one error; a joint law describes how the errors vary together."}
+  className={"not-prose"}
+/>
+### When to use the definition
+
+Use “unbiased” only with a named target and averaging model. Before conditioning on an auction result, specify the signals, their dependence, how bids use them and how a winner is selected. Unbiasedness alone does not supply that whole model.
+
+## Enumerate what the maximum selects
+
+<MCQ client:visible
+  question={"Two bidders mechanically bid their estimates. The higher bid wins and pays its bid. Which operation determines the winning estimate?"}
+  options={[{"text":"The maximum of the pair, retaining the joint probabilities.","correct":true},{"text":"The average of the pair, canceling errors within each auction."},{"text":"The earlier mean estimate, ignoring both realized errors."},{"text":"The true value, replacing each estimate before selection."}]}
+  explanation={"The winner is chosen by rank under this imposed rule. To average its error, first compute the maximum in every possible pair."}
+  pretest
+  className={"not-prose"}
+/>
+Fix the common value at **100 credits for the analyst**. Write it as $V=100$. Each of two mechanical bidders has an estimate $S_i=100+\varepsilon_i$. Each error is either −10 or +10 with probability one half, independently of the other bidder. Thus each individual estimate has mean 100.
+
+The bidders follow the stipulated rule **bid the raw estimate**. First price means the winner pays that bid. One lot is always awarded, losers pay nothing and there are no other costs. In a tie, an independent fair coin chooses the winner's identity; the tied estimate and payment are the same either way. We are analyzing this mechanism, not proving that mechanical bids are rational or optimal. No distribution of possible values V or bidder posterior has been supplied.
+
+Four ordered error pairs are equally likely because $(1/2)(1/2)=1/4$ for each:
+
+| Errors A, B | Probability | Highest estimate and payment | Winner profit |
+|---|---:|---:|---:|
+| −10, −10 | 1/4 | 90 | +10 |
+| −10, +10 | 1/4 | 110 | −10 |
+| +10, −10 | 1/4 | 110 | −10 |
+| +10, +10 | 1/4 | 110 | −10 |
+
+Let $M=\max(S_A,S_B)$, the highest estimate. Its error is −10 once and +10 three times. Therefore:
+
+$$E[M]=\frac{90+110+110+110}{4}=105,$$
+
+$$E[M-100]=5,\qquad E[100-M]=-5.$$
+
+The winner's average payment exceeds value by 5; the average winner profit is −5. But the first row has a **positive profit of 10**. “Loss on average” is not “loss in every case.” Ties are part of the sample space, not rows to discard.
+
+For contrast, the mean of the two estimates in the four rows is 90, 100, 100 and 110. Its expectation is $(90+100+100+110)/4=100$. Selecting the maximum and averaging the estimates answer different questions.
+
+<RateComparison client:visible
+  locale={"en"}
+  title={"Proportions under the finite rule"}
+  scenarios={[{"label":"Independent errors, four equally likely pairs","groups":[{"label":"Payment above reference","events":3,"total":4},{"label":"Payment below reference","events":1,"total":4}]}]}
+  scenarioLabel={"Joint error model"}
+  countsLabel={"Equally likely cases meeting the condition, out of all cases"}
+  differenceLabel={"First probability minus second"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+/>
+The bars count equally likely **model cases**, not observed auctions. There is overpayment in three quarters and underpayment in one quarter. The probability contrast is 50 percentage points; it is not a 50-credit loss. Here the error magnitudes are both 10, so the mean error is $10(3/4)-10(1/4)=5$ credits. If magnitudes differed, the two rates alone would not recover the mean.
+
+<MCQ client:visible
+  question={"In the four-pair model, what are the expected highest estimate and the average winner profit?"}
+  options={[{"text":"One hundred five credits; minus five credits.","correct":true},{"text":"One hundred credits; zero credits."},{"text":"One hundred ten credits; minus ten credits."},{"text":"Ninety-five credits; plus five credits."}]}
+  explanation={"Average the four payments: (90+110+110+110)/4=105. Subtract each payment from the fixed 100, or use 100−105=−5. Averaging all estimates instead would give 100."}
+  className={"not-prose"}
+/>
+### When the finite table helps
+
+Use a complete table when a few joint states can expose selection without a formula. Keep the payment rule attached: negative expected profit here follows from paying the highest raw estimate in first price. Another payment or bidding rule requires its own account.
+
+## Keep selected error separate from value
+
+<MCQ client:visible
+  question={"In the model that fixes the common value at one hundred, does learning that a particular bidder won change that fixed value?"}
+  options={[{"text":"No; it can change the distribution of selected errors, not the fixed reference.","correct":true},{"text":"Yes; it lowers the reference by the mean winning error in every auction."},{"text":"Yes; it makes the reference equal the realized highest estimate."},{"text":"No; therefore selection cannot affect any payment or profit."}]}
+  explanation={"A constant remains the same constant after conditioning on an event with positive probability. Estimates, payments and errors can still have different conditional distributions."}
+  pretest
+  className={"not-prose"}
+/>
+The selected estimate has mean 105. The object in this particular model still has value 100. These are different quantities: a random estimate and a fixed value. Since V is fixed here, $E[V]=100$ and $E[V\mid W]=100$ for a winning event W with positive probability. The upward selected error is **not** a proof that a random value's conditional mean has fallen.
+
+An observed estimate is also different from an expected value. If A's observed estimate is 110 in this fixed-reference calculation, its error is 10. The assertion “A's method has mean error zero” does not turn that observed 110 into $E[V]$.
+
+A genuine bidder inference such as $E[V\mid I,W_b]$ needs a model for uncertain V and its relationship with the available information I, rival behavior and the candidate's winning event $W_b$. It can differ from $E[V\mid I]$. We have not specified those value probabilities in this fixed-reference experiment, so we have not derived a Bayesian valuation or an optimal bid. The [MIT auction lecture](https://ocw.mit.edu/courses/14-271-industrial-organization-i-fall-2022/mit14_271_f22_lec22slides.pdf) keeps common-value information and bidding strategies explicit; our four-pair construction isolates selection instead.
+
+<details>
+<summary>Check a particular bidder’s winning error</summary>
+
+Fair tie-breaking makes A win the two-negative pair with probability $1/8$, the A-positive/B-negative pair with probability $1/4$, and the two-positive pair with probability $1/8$. A never wins the A-negative/B-positive pair. Thus $P(W_A)=1/2$, and:
+
+$$E[\varepsilon_A\mid W_A]=\frac{(-10)(1/8)+(10)(1/4)+(10)(1/8)}{1/2}=5.$$
+
+That conditional average matches the population winner's mean error **under these symmetric joint and tie assumptions**. It is not the error conditional on an already observed estimate, nor a formula for a bidder's value posterior in a different information model.
+
+The −5 profit figure averages one winner per auction. For A, mean profit conditional on an award is also −5 here. A wins half the opportunities, so its mean profit per opportunity is $(1/2)(-5)=-2.5$; its non-awarded rows contribute zero.
+
+</details>
+
+<Callout className="not-prose" variant="info" title="Name the quantity being averaged">
+An individual estimate, the selected estimate, a fixed reference and an uncertain object's conditional value are different quantities. Attach the model and condition before comparing their means.
 </Callout>
 
-## A worked example with real numbers
-
-Let's put numbers on it so the effect isn't just a slogan. A field is truly worth
-**\$100M**. Each bidder's estimate is the truth plus a random error, and to keep the
-arithmetic clean say each error is equally likely to be anywhere from **−\$30M to
-+\$30M** (uniform). So every individual estimate is unbiased: its average is exactly
-\$100M.
-
-Now vary how many bidders show up, and track the *expected highest estimate* — the
-one that wins.
-
-| Bidders (N) | Expected highest estimate | Overshoot above the \$100M truth |
-|---|---|---|
-| 1 | \$100M | \$0M |
-| 2 | \$110M | +\$10M |
-| 4 | \$118M | +\$18M |
-| 6 | \$121M | +\$26M... |
-| 10 | \$125M | +\$25M |
-| 20 | \$129M | +\$29M |
-
-*(For a uniform −a to +a error and N bidders, the expected maximum sits about
-`a·(N−1)/(N+1)` above the truth — with a = \$30M that's \$10M at N=2, \$18M at N=4,
-\$25M at N=10, nearing the full \$30M ceiling as N grows.)*
-
-Read down that column and the model jumps out. With **one** bidder, no selection,
-zero overshoot — your unbiased estimate is just unbiased. With **two**, the winner
-already overshoots by \$10M on average. By **ten** bidders, the winning estimate is
-\$125M for a \$100M field — a **25% overpayment** baked in purely by the selection,
-before anyone has done anything foolish. Every bidder was honest; every estimate was
-unbiased; and the auction still manufactured a systematic \$25M overpayment out of
-thin air, just by crowning the maximum.
-
-And notice the direction of the effect: **more competition makes it worse.** In
-almost every part of life, more options and more scrutiny help the buyer. Here, each
-extra rival stretches the maximum further into the optimistic tail, so the winner's
-overshoot *grows*. Twenty geologists guessing means the winner beat nineteen others —
-their guess had to be an even wilder overestimate to come out on top.
-
-<MCQ
-  client:visible
-  question="In the worked example, going from 2 bidders to 10 bidders raised the winner's expected overshoot from $10M to $25M. What does this imply about competition in common-value auctions?"
-  options={[
-    { text: 'More bidders makes the winner\'s curse WORSE, because the maximum of more estimates reaches further above the truth', correct: true },
-    { text: 'More bidders makes the curse milder, because the estimates average out', correct: false },
-    { text: 'The number of bidders has no effect on the winner\'s overshoot', correct: false },
-    { text: 'More bidders lowers the true value of the field', correct: false },
-  ]}
-  explanation="More bidders is worse for the winner. Averaging would help if you took the MEAN of all estimates — but the auction doesn't; it takes the MAXIMUM, and the maximum of more draws sits further out in the optimistic tail. Winning against 10 rivals is stronger evidence you overestimated than winning against 2. This is the counter-intuitive heart of the model: in a common-value auction, a crowded room is a more dangerous room."
+<MatchConcepts client:visible
+  question={"Match each quantity with its role"}
+  pairs={[{"term":"Observed estimate","definition":"The realized signal available in a particular case"},{"term":"Mean selected estimate","definition":"Average maximum over the stated joint error model"},{"term":"Fixed reference value","definition":"The constant held at one hundred by the analyst"},{"term":"Conditional value assessment","definition":"An average of uncertain value given specified information and an event"}]}
+  explanation={"The same word “estimate” must not stand in for all four. A selection calculation alone does not supply the missing value model."}
+  className={"not-prose"}
 />
+### When the distinction matters
 
-## Drive it yourself
+Use the fixed-reference calculation to audit a measurement-selection rule. Use a joint value/information model to evaluate an actual candidate bid. The later [bid catalogue workshop](/winners-curse/06-audit-a-winning-bid) supplies such a model and recomputes the winning event for every allowed bid.
 
-Now feel the mechanism instead of just reading it. Run ×50 at a few bidders, note the
-average overpayment, then drag the bidder slider up and run ×50 again. Do the same
-with the noise slider. Both dials push the overpayment the same way — up.
+## Follow a fresh measurement
 
-<WinnerCurseSim
-  client:visible
-  title="Watch the overpayment grow with rivals and noise"
-  caption="Set bidders low (say 3) and run ×50 — note the average overpayment. Now set bidders to 20 and run ×50 again: the overpayment jumps, because the winning estimate is now the max of twenty draws. Then push the noise slider: more uncertainty per guess widens the tail the maximum is drawn from, so the winner overshoots further still. More rivals AND more uncertainty each make winning worse."
-  initialBidders={4}
-  initialNoise={20}
+<MCQ client:visible
+  question={"After selecting the highest estimate, a fresh independent unbiased measurement is taken of the same fixed value. What should you expect?"}
+  options={[{"text":"Its mean returns to the reference; a realized measurement can still rise.","correct":true},{"text":"Its realized value must fall; fresh error cannot repeat a positive result."},{"text":"Its mean stays at the earlier maximum; the reference was selected upward."},{"text":"Its realized value equals the reference; unbiasedness removes all noise."}]}
+  explanation={"An independent mean-zero error has mean zero even after the earlier selection. A statement about that mean does not order every pair of realized measurements."}
+  pretest
+  className={"not-prose"}
 />
+Return to the finite case. After selecting M, take a fresh measurement $Y=100+\eta$, where $\eta$ is again −10 or +10 with probability one half, independent of both earlier errors. The reference does not change.
 
-Two dials, one direction. **More bidders** and **more noise** both stretch the gap
-between the winning estimate and the truth. That's worth sitting with, because it
-inverts two instincts at once: that competition protects the buyer (it doesn't, in
-common value) and that you should bid boldly when the value is very uncertain (you
-should bid *more cautiously* — high noise is exactly when the curse is deepest).
+The old maximum is 90 with probability $1/4$ and 110 with probability $3/4$. Combine each possibility with the fresh coin flip:
 
-## The tie to regression to the mean
+| Old maximum M | Fresh measurement Y | Joint probability | Change Y − M |
+|---:|---:|---:|---:|
+| 90 | 90 | 1/8 | 0 |
+| 90 | 110 | 1/8 | +20 |
+| 110 | 90 | 3/8 | −20 |
+| 110 | 110 | 3/8 | 0 |
 
-If you've met **regression to the mean**, the winner's curse should feel like an old
-friend in a new costume — because it *is* one. Regression to the mean says: an
-extreme measurement is extreme partly because of genuine signal and partly because of
-lucky noise, and the noise part won't repeat, so the next measurement drifts back
-toward average. The tallest fathers have shorter sons; the best first-quarter fund
-cools off; the rookie on the magazine cover slumps.
+The probabilities sum to one. The new mean is $E[Y]=100$, so the expected change is $100-105=-5$. You can also calculate $20(1/8)-20(3/8)=-5$. Yet Y exceeds M with probability $1/8$ and equals it with probability $1/2$.
 
-The winning estimate is exactly such an extreme measurement. It's the **maximum** of
-many noisy guesses, so it's high partly because the field really might be good and
-partly because that particular estimate caught a lucky updraft of positive error. The
-signal part is real; the noise part is not going to be there when reality shows up.
-So *ex post* — once the wells are drilled, the cash flows arrive, the player takes
-the field — the outcome **regresses down** toward the truth, and the deal
-underperforms the rosy estimate that won it. The winner's curse is regression to the
-mean with a price tag attached: you paid the extreme, you receive the regressed
-value, and you eat the difference.
+<RateComparison client:visible
+  locale={"en"}
+  title={"Directions of a fresh measurement"}
+  scenarios={[{"label":"Fresh independent measurement, eight equally likely joint cases","groups":[{"label":"Fresh measurement lower","events":3,"total":8},{"label":"Fresh measurement higher","events":1,"total":8}]}]}
+  scenarioLabel={"Joint error model"}
+  countsLabel={"Equally likely cases meeting the condition, out of all cases"}
+  differenceLabel={"First probability minus second"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+/>
+Half the joint cases have **no change** and are outside both plotted event groups. The figure compares the probability of a lower measurement with that of a higher one; it does not claim every measurement falls. This is the conditional-expectation idea behind **regression to the mean** in this stable-reference, fresh-noise example.
 
-<Reveal client:visible label="Why 'the acquirer's estimate always looked so good'">
-<Callout variant="success" title="Selection, then regression, then disappointment">
-This is the shape of nearly every disappointing deal. First **selection**: the
-auction crowns whoever's estimate ran highest. Then **regression**: that lucky
-high estimate falls back toward reality as the actual results come in. Then
-**disappointment**: the winner, having paid for the extreme, gets the regressed
-value and calls it "bad luck." It isn't bad luck — it's the utterly predictable
-consequence of paying the maximum of a noisy sample and then watching it regress. The
-only real surprise is that anyone is surprised.
-</Callout>
-</Reveal>
+Keep the measurement and the payoff separate. The winner's actual profit in our auction is $100-M$. A later noisy estimate Y does not alter the stipulated value or turn $Y-M$ into realized profit. A changed underlying value, persistent errors or an intervention would need another model.
 
-<MCQ
-  client:visible
+<MCQ client:visible
+  question={"Which claims hold for this fresh-measurement model? Select all that apply."}
+  options={[{"text":"The fresh measurement has a mean equal to the fixed reference.","correct":true},{"text":"A fresh measurement can exceed the earlier selected maximum.","correct":true},{"text":"Every repeated positive error violates the independence assumption."},{"text":"The later measurement determines the earlier auction’s payment."}]}
+  explanation={"Fresh independent error has mean zero, but can again be positive. The table gives an increase with probability 1/8. The payment remains the earlier first-price winning bid."}
   allowMultiple
-  question="Which of these correctly connect the winner's curse to regression to the mean? (Select all that apply.)"
-  options={[
-    { text: 'The winning estimate is the maximum of many noisy guesses, so it is high partly due to luck that will not repeat', correct: true },
-    { text: 'Ex post, the actual outcome regresses down toward the truth, so the deal underperforms the winning estimate', correct: true },
-    { text: 'The winner pays for the extreme value but receives the regressed value, and loses the difference', correct: true },
-    { text: 'Regression guarantees every auction winner loses money on every single deal', correct: false },
-    { text: 'The connection only holds when there is exactly one bidder', correct: false },
-  ]}
-  explanation="The first three are the link: the winning estimate is an extreme (a maximum) inflated by luck, which regresses toward the truth after the fact, so the winner pays the peak and collects the regressed value. The last two are traps — regression is about AVERAGES, so any single deal can still come in high (you might have won on a genuinely great field); and with a single bidder there's no selection and no curse at all."
+  className={"not-prose"}
 />
+### When to use the regression link
 
-## When to use it
+Use it to separate an expected follow-up from an individual path. Do not turn it into a claim that real asset value must fall, that a high signal can never repeat or that every disappointing acquisition was caused by selection.
 
-Pull out this mechanism the moment you catch yourself about to win a competitive bid
-on uncertain common value. The mental move is concrete:
+## Extend to independent uniform errors
 
-- **Condition on winning before you win.** Ask: "If I win this, it's because my
-  estimate beat everyone else's — so my estimate was probably near the top of the
-  pile. How far above the truth does that put me?"
-- **Count the room.** More rivals means a more extreme winning estimate, so more
-  bidders should make you *more* cautious per signal, not less.
-- **Respect the noise.** The more uncertain the value, the wider the tail the
-  maximum is drawn from, and the deeper the curse. High uncertainty is a reason to
-  shade harder, not to swing bigger.
-- **Expect regression.** Whatever estimate won will look, in hindsight, like it
-  regressed. Price the deal against the *regressed* value, not the winning one.
+<MCQ client:visible
+  question={"Replace the binary errors with a continuous uniform distribution. Can the old four-row average be reused unchanged?"}
+  options={[{"text":"No; derive the maximum under the new distribution and dependence assumptions.","correct":true},{"text":"Yes; every unbiased distribution has the same expected maximum error."},{"text":"Yes; symmetry fixes the maximum’s mean without the number of draws."},{"text":"No; continuous errors prevent any exact expected-maximum formula."}]}
+  explanation={"The finite table was tied to its error law. A new law requires a new calculation; continuous distributions can still have exact expectations."}
+  pretest
+  className={"not-prose"}
+/>
+Now take N independent, identically distributed (iid) errors, each **uniform on $[-a,a]$**. Uniform means probability is proportional to interval length; the endpoints bound each error. “Identically distributed” means the same law is used for every bidder. Let N be a positive integer and $a\geq0$, with the same fixed V and mechanical raw-estimate selection.
 
-<Callout variant="warning" title="The trap this sets for you">
-The seductive misread is to treat your winning estimate as your *best* estimate — "my
-number came out on top, so it must be the sharpest read in the room." Exactly
-backwards. In a common-value auction, coming out on top is evidence your number was
-the most *optimistic*, not the most *accurate*. The winning estimate is the one
-data point you should trust **least**, precisely because it won.
-</Callout>
+For these conditions, the exact formula is:
 
-## Recap
+$$E[\max_i\varepsilon_i]=a\frac{N-1}{N+1},\qquad E[M]=V+a\frac{N-1}{N+1}.$$
 
-The engine of the winner's curse is **conditioning on winning**. Your estimate can be
-perfectly unbiased on its own, but "I won" is a filter that selects your optimistic
-draws and discards your pessimistic ones, so `E[value | you won]` sits below your
-raw estimate — and the gap is the curse. Worked out with numbers, ten honest bidders
-guessing a \$100M field produce a winning estimate near \$125M: a 25% overpayment
-manufactured by selection alone, and it *grows* with more bidders and more noise. It's
-**regression to the mean** wearing a price tag: the winning estimate is an extreme
-maximum inflated by luck, which regresses down after the fact, leaving the winner to
-pay the peak and collect the trough.
+For V = 100 and a = 30, all amounts below are credits. Approximate columns round to two decimals; fractions stay exact.
 
-So the diagnosis is complete — now the cure. If winning means you overestimated by a
-predictable amount, the fix is to **subtract that amount in advance.** That's bid
-shading, and it's where we go next.
+| N | Exact mean winning error | Approximate error | Exact mean highest estimate | Approximate estimate |
+|---:|---:|---:|---:|---:|
+| 1 | 0 | 0.00 | 100 | 100.00 |
+| 2 | 10 | 10.00 | 110 | 110.00 |
+| 4 | 18 | 18.00 | 118 | 118.00 |
+| 6 | 150/7 | 21.43 | 850/7 | 121.43 |
+| 10 | 270/11 | 24.55 | 1370/11 | 124.55 |
+| 20 | 190/7 | 27.14 | 890/7 | 127.14 |
+
+For example, with six bidders the error is $30(6-1)/(6+1)=150/7$. Add the reference: $100+150/7=850/7$. With twenty bidders it is $30(19)/21=190/7$, not 29. With ten it is $270/11$, not exactly 25. For positive a and finite N the expected error is below a, approaching that ceiling as N grows.
+
+<details>
+<summary>Optional derivation using cumulative probability and area</summary>
+
+Assume $a>0$; zero noise gives zero error directly. Write $Z=\max_i\varepsilon_i$. For a cutoff $t\in[-a,a]$, a uniform error is at most t with probability $(t+a)/(2a)$. The maximum is at most t exactly when every error is. Independence gives:
+
+$$P(Z\leq t)=\left(\frac{t+a}{2a}\right)^N.$$
+
+This is a **cumulative probability**: the chance that a variable is at or below a cutoff. Set $H=Z+a$, so H lies between zero and $2a$. A nonnegative bounded variable's expectation is the area under its exceedance probability, $P(H>y)$. Integrating that area gives:
+
+$$E[H]=\int_0^{2a}\left[1-\left(\frac{y}{2a}\right)^N\right]dy=2a-\frac{2a}{N+1}.$$
+
+Subtract a to return to Z:
+
+$$E[Z]=2a-\frac{2a}{N+1}-a=a\frac{N-1}{N+1}.$$
+
+The proof uses elementary integration; the main table and exercises only require substitution into the stated formula. The formula is our derivation for this distribution, not an auction-equilibrium theorem from the cited lecture.
+
+</details>
+
+### Explore the continuous rule
+
+<WinnerCurseSim client:visible
+  title={"Independent continuous-uniform illustration"}
+  eyebrow={"Estimate selection"}
+  instructions={"All bidders follow the same imposed rule. Reset totals before each comparison of bidders, noise or offset; earlier batches remain in the running means."}
+  caption={"Fictional credits; amounts and offset round to whole credits, means to one decimal. Out-of-range payments have a marker at the axis edge; the readout shows their rounded amount. This continuous illustration does not derive an optimal bid."}
+  trueValue={100}
+  initialBidders={6}
+  initialNoise={30}
+  minBidders={1}
+  maxBidders={24}
+  maxNoise={40}
+  unit={""}
+  locale={"en"}
+  className={"not-prose"}
+  biddersLabel={"Bidders N"}
+  noiseLabel={"Uniform half-width a, in credits"}
+  shadeLabel={"Shared payment offset"}
+  shadeOffLabel={"Bid each raw estimate"}
+  shadeOnLabel={"Subtract the same offset from every bid"}
+  runOneLabel={"Run one auction"}
+  runManyLabel={"Run {n} auctions"}
+  resetLabel={"Reset totals"}
+  trueValueLabel={"Fixed reference"}
+  bidderLabel={"Estimate"}
+  winnerLabel={"Highest estimate"}
+  shadedBidLabel={"Payment after shared offset"}
+  lastLabel={"Last outcome, amounts in credits"}
+  averagesLabel={"Running means, amounts in credits"}
+  roundsLabel={"Auctions in totals"}
+  overshootLabel={"Winning estimate minus reference"}
+  overpayLabel={"Payment minus reference"}
+  profitLabel={"Reference minus payment"}
+  emptyLabel={"Run an auction to inspect the imposed rule. Reset before comparing settings."}
+  shadeNoteTemplate={"Displayed shared offset {shade}, rounded. It centers the model’s mean payment; it is not an optimal bid."}
+  lastTemplate={"Highest estimate {winner}; reference {true}; payment {bid}; winner profit {profit}."}
+/>
+Reset before comparing settings or the shared offset. Each run adds to earlier totals; changing sliders does not clear them. More N increases the expected maximum **under this unchanged iid law**, and increasing a scales its expected error. A fresh batch of fifty can move the other way by chance. The exact table, rather than a particular batch, establishes the expectation.
+
+There is also a simpler pointwise fact: when you add an observation to the **same existing set**, its maximum cannot decrease. That fact does not require independence. The closed uniform formula does. Neither fact states that rational auction bids or realized averages from separate batches must move in one direction.
+
+### What the shared offset does
+
+The simulator can subtract $c=a(N-1)/(N+1)$ from **every** bid. The ranking is unchanged because $S_i-c>S_j-c$ exactly when $S_i>S_j$. It does not reduce a particular bidder's chance of winning by making only that bidder more cautious.
+
+The resulting winning payment is $M-c$, with expectation $E[M]-c=V$. In the six-bidder example, $(850/7)-(150/7)=100$, so the ensemble's mean winner profit becomes zero under the imposed rule. This is a centering identity, **not an optimal strategy**, a best response or a guaranteed profit. Those claims require the bidder's information, rival strategies, payment and alternatives.
+
+<FillBlank client:visible
+  question={"Keep the offset’s job bounded"}
+  text={"Subtracting the same constant from all bids preserves their {{ranking|mean level|profit}}. Under the uniform formula it centers mean winning {{payment|signal error|win probability}} at the fixed reference."}
+  explanation={"The common subtraction changes payment but not which estimate is largest. The pre-offset maximum error remains selected; neither ranking preservation nor mean centering solves a strategic optimization."}
+  className={"not-prose"}
+/>
+<MCQ client:visible
+  question={"With four iid uniform errors of half-width twelve, what is the exact mean winning error?"}
+  options={[{"text":"Thirty-six fifths of a credit.","correct":true},{"text":"Twelve fifths of a credit."},{"text":"Thirty-six thirds of a credit."},{"text":"Zero credits from mean-zero errors."}]}
+  explanation={"Substitute a=12 and N=4:12(4−1)/(4+1)=36/5=7.2. This is the expected maximum error, not an individual error or a universal bid discount."}
+  className={"not-prose"}
+/>
+### When to use the formula
+
+Use it to audit this specific maximum-of-uniforms experiment. Change the distribution or dependence and recompute. A higher expected maximum under fixed mechanical bids does not establish that more competition universally worsens outcomes for bidders who adapt their strategies.
+
+## Transfer the model by changing dependence
+
+<MCQ client:visible
+  question={"Both bidders keep the same individual error distribution, but their errors now always match. Must their mean maximum error stay the same?"}
+  options={[{"text":"No; the maximum depends on the joint law, not just the individual marginals.","correct":true},{"text":"Yes; mean-zero individual errors uniquely determine every selected average."},{"text":"Yes; matching signs leave the four independent pairs equally likely."},{"text":"No; matching errors necessarily remove all positive realized errors."}]}
+  explanation={"A marginal distribution is the law of one bidder’s error. The maximum uses their joint possibilities, which have changed."}
+  pretest
+  className={"not-prose"}
+/>
+Keep V = 100, the same two mechanical first-price bidders, raw-estimate bids, fair identity ties and no other costs. Each error is still −10 or +10 with probability one half. Change only their dependence: they are **always identical**.
+
+| Errors A, B | Probability |
+|---|---:|
+| −10, −10 | 1/2 |
+| +10, +10 | 1/2 |
+
+These two rows replace the four independent rows. Both individual error means are still zero. Before opening the solution, compute the mean winning error and the average winner profit.
+
+<MCQ client:visible
+  question={"Under the identical-error transfer, what are the mean winning error and average winner profit?"}
+  options={[{"text":"Zero credits; zero credits.","correct":true},{"text":"Plus five credits; minus five credits."},{"text":"Plus ten credits; minus ten credits."},{"text":"Minus five credits; plus five credits."}]}
+  explanation={"The maximum error is−10 half the time and+10 half: mean 0. The payment is 90 or 110, mean 100. Winner profit is+10 or−10, also mean 0."}
+  className={"not-prose"}
+/>
+<details>
+<summary>Check the dependence transfer</summary>
+
+The maximum now equals either individual error in every case. Its expectation is $(-10)(1/2)+(10)(1/2)=0$. Winning payment has mean $(90+110)/2=100$ and winner profit has mean $(10-10)/2=0$.
+
+The individual marginals match the earlier case, but overpayment probability changes from $3/4$ to $1/2$ and mean winning error from 5 to zero. The iid-uniform formula cannot be imported into this different model. This example shows that dependence can change the result; it does not show that correlation universally prevents overpayment or solves common-value bidding.
+
+</details>
+
+<RateComparison client:visible
+  locale={"en"}
+  title={"Change dependence, keep each marginal"}
+  scenarios={[{"label":"Independent errors, four equally likely pairs","groups":[{"label":"Payment above reference","events":3,"total":4},{"label":"Payment below reference","events":1,"total":4}]},{"label":"Identical errors, two equally likely pairs","groups":[{"label":"Payment above reference","events":1,"total":2},{"label":"Payment below reference","events":1,"total":2}]}]}
+  scenarioLabel={"Joint error model"}
+  countsLabel={"Equally likely cases meeting the condition, out of all cases"}
+  differenceLabel={"First probability minus second"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+/>
+### When to inspect dependence
+
+Use the transfer to test whether you have a joint model or merely several separate error summaries. If bidders rely on the same source, knowing each source's accuracy in isolation does not determine the maximum's behavior. Specify how errors move together before drawing a selection conclusion.
+
+## Use selection as a diagnostic
+
+<MCQ client:visible
+  question={"A real winner has the highest bid. What is the next useful step before treating that as evidence of overpayment?"}
+  options={[{"text":"Specify how bids relate to signals, value, allocation and payment in that setting.","correct":true},{"text":"Subtract the uniform maximum-error formula regardless of the signal model."},{"text":"Reject the selected estimate as the least accurate observation by definition."},{"text":"Infer a loss because a high ranking directly determines the realized value."}]}
+  explanation={"A rank is not a full value model. Bids can reflect information, costs, private value and strategy; profit also depends on payment and applicable costs."}
+  pretest
+  className={"not-prose"}
+/>
+A usable diagnosis names the object being averaged and the information held fixed:
+
+1. State the value model: fixed reference for a selection experiment, or uncertain V for a bidder's valuation problem.
+2. Specify the joint signal/error law and how bids use it, including ties and participation.
+3. Compute the selected statistic under that rule. Do not replace a maximum with a mean.
+4. Apply the actual payment and cost rules before discussing profit.
+5. Check which model inputs changed before carrying an offset or inference elsewhere.
+
+In the finite experiment, “mean winner profit −5” describes the imposed raw-bid mechanism. It does not choose a bid or prove that a rational bidder must accept a negative expected profit. [Thaler's abstract](https://doi.org/10.1257/jep.2.1.191) distinguishes the difficulty of solving a common-value bid from an empirical claim about actual behavior.
+
+The tempting rule “trust the winning estimate least” is too broad. The highest estimate is the most optimistic **under a shared-reference raw-signal rule**; accuracy rankings can differ if information quality, private value or bidding strategies differ. Selection prompts an audit, not automatic distrust of every winner.
+
+<Categorize client:visible
+  question={"Separate deductions from claims needing more assumptions"}
+  buckets={["Deduced in the stated model","Needs another model or evidence"]}
+  items={[{"text":"The finite independent-pair mean winning error is five credits","bucket":"Deduced in the stated model"},{"text":"The identical-error transfer has the same individual marginals","bucket":"Deduced in the stated model"},{"text":"A shared constant offset preserves the simulated bid ranking","bucket":"Deduced in the stated model"},{"text":"Every real winner necessarily paid above true value","bucket":"Needs another model or evidence"},{"text":"The uniform offset is an individual bidder’s optimal strategy","bucket":"Needs another model or evidence"},{"text":"Every later measurement must be lower than a selected maximum","bucket":"Needs another model or evidence"}]}
+  explanation={"The first claims follow from the supplied probabilities and operations. The others add conclusions about strategies, every outcome or another setting that were not proved."}
+  className={"not-prose"}
+/>
+### When to carry the mechanism forward
+
+Reach for it when a decision selects an extreme from noisy inputs. Preserve the joint model and selection rule; then rebuild value, payment and alternatives for the actual decision. The [later finite bid audit](/winners-curse/06-audit-a-winning-bid) supplies those decision ingredients rather than treating an ensemble offset as a bid.
+
+## Reconstruct the distinctions
+
+<MindMap client:visible
+  title={"From errors to a selected estimate"}
+  root={{"label":"Selection mechanism","children":[{"label":"Before selection","children":[{"label":"Unbiased means weighted mean error zero"},{"label":"Symmetry and independence are separate assumptions"}]},{"label":"Finite maximum","children":[{"label":"Four independent pairs and explicit ties"},{"label":"Mean payment and realized profit differ"}]},{"label":"Conditioning","children":[{"label":"Selected error differs from a value posterior"},{"label":"Fixed reference stays fixed"}]},{"label":"Fresh measurement","children":[{"label":"Expected return does not bound realized paths"}]},{"label":"Uniform extension","children":[{"label":"Exact formula needs its iid law"},{"label":"Shared offset centers payment without optimizing"}]},{"label":"Transfer","children":[{"label":"Same marginals can have a different joint maximum"}]}]}}
+  className={"not-prose"}
+/>
+<Quiz client:visible
+  title={"Selection mechanism practice"}
+  questions={[{"question":"An error is minus two with probability one third and plus one otherwise. What are its mean and chance of being positive?","options":[{"text":"Zero; two thirds.","correct":true},{"text":"Zero; one half."},{"text":"Minus one half; two thirds."},{"text":"Plus one third; one half."}],"explanation":"The mean is(−2)(1/3)+(1)(2/3)=0. The positive error occurs with probability 2/3; unbiasedness is not a fair sign coin."},{"question":"Two independent errors are minus ten or plus ten, equally likely. Under raw-estimate maximum selection, how often is the winning error negative?","options":[{"text":"One quarter of auctions.","correct":true},{"text":"One half of auctions."},{"text":"Three quarters of auctions."},{"text":"None of the auctions."}],"explanation":"Only the pair(−10,−10) has a negative maximum. Independence gives probability(1/2)(1/2)=1/4."},{"question":"A fixed reference is one hundred and the selected estimate averages one hundred five. What can be concluded about the fixed value after winning?","options":[{"text":"It remains one hundred; the selected estimate is a different quantity.","correct":true},{"text":"It becomes ninety-five; conditioning subtracts the mean selected error."},{"text":"It becomes one hundred five; the auction selects the reference too."},{"text":"It becomes random; every selected estimate creates a prior distribution."}],"explanation":"The constructed reference is constant. A value posterior in an uncertain-value model requires additional joint information."},{"question":"A fresh independent measurement follows a selected maximum. Which statements are valid here? Select all that apply.","options":[{"text":"The fresh mean is the fixed reference.","correct":true},{"text":"One fresh measurement can exceed the earlier maximum.","correct":true},{"text":"The new measurement must equal the expected value."},{"text":"The new measurement changes the payment already made."}],"explanation":"Fresh mean-zero noise does not impose an individual bound. In the finite example an increase has probability 1/8, while payment remains fixed by the earlier auction.","allowMultiple":true},{"question":"Six iid uniform errors have half-width thirty. Which exact mean maximum error follows?","options":[{"text":"One hundred fifty sevenths of a credit.","correct":true},{"text":"Twenty-six credits."},{"text":"Thirty credits."},{"text":"Eight hundred fifty sevenths of a credit."}],"explanation":"30(6−1)/(6+1)=150/7. Adding reference 100 gives 850/7 for the highest estimate, a different quantity."},{"question":"Only dependence changes so both errors always match, with the same marginal signs. What explains the changed maximum?","options":[{"text":"The possible joint pairs and their weights changed.","correct":true},{"text":"Each bidder’s marginal positive-error chance increased."},{"text":"The fixed object value fell when the signals matched."},{"text":"The first-price payment was replaced by a second-price rule."}],"explanation":"The marginals, reference and payment stayed fixed. The independent mixed-sign pairs disappeared; the two remaining pairs each have probability 1/2."}]}
+  className={"not-prose"}
+/>
+Next: [Shading Your Bid](/winners-curse/03-shading-your-bid). Keep a strategic bid distinct from the shared centering offset just analyzed; the later [complete catalogue workshop](/winners-curse/06-audit-a-winning-bid) compares candidate decisions explicitly.

@@ -1,268 +1,519 @@
 ---
 title: "El mecanismo de selección"
-description: El motor de la maldición del ganador (winner's curse) — por qué condicionar sobre ganar desplaza las probabilidades de modo que el valor esperado dado que ganas queda por debajo del valor esperado global, desarrollado con números reales, y su profundo vínculo con la reversión a la media.
+description: "Distingue errores sin sesgo y selección, calcula máximos exactos y comprueba los límites de las fórmulas uniformes, la dependencia y las mediciones nuevas."
 topic: "es/winners-curse"
 order: 3
-minutes: 16
-updated: 2026-07-11
+minutes: 35
+updated: 2026-11-07
 ---
 
-import { Callout, MCQ, Reveal, WinnerCurseSim } from '@/components/react';
+import { MCQ, Quiz, Callout, FillBlank, MatchConcepts, Categorize, MindMap, RateComparison, WinnerCurseSim } from '@/components/react';
 
-Ya sabes *dónde* vive la maldición: en el valor común (common value). Esta lección abre
-el motor y muestra *cómo* funciona. Todo gira en torno a una idea engañosamente simple:
-**ganar es información.** El suceso «he ganado esta subasta» no es neutro. Es un
-filtro que te dice algo concreto e incómodo sobre tu propia estimación. Aprende a
-leer esa señal y la maldición deja de ser un misterio para convertirse en un número que
-puedes restar.
+Coloca cuatro estimaciones en una mesa y calcula su media. Ahora coloca las mismas estimaciones y conserva solo la mayor. Los datos no han cambiado; la operación sí. Una subasta que selecciona mecánicamente la estimación mayor no promedia los errores para que se cancelen.
 
-<MCQ
-  client:visible
+Esta lección reconstruye el mecanismo de selección con un modelo finito completo. También separa tres preguntas: cómo se equivocan las estimaciones antes de seleccionar, cómo es la estimación seleccionada y qué puede inferir un pujador sobre el valor. Los **valores, las distribuciones de errores y los créditos son datos docentes inventados**, no observaciones de subastas ni recomendaciones de puja.
+
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Un estimador es insesgado. ¿Qué especifica ese dato por sí solo?"}
+  options={[{"text":"Su error medio ponderado por probabilidades es cero.","correct":true},{"text":"Sus errores positivos y negativos ocurren igual de a menudo."},{"text":"Sus errores posibles forman una distribución simétrica."},{"text":"Su error conserva media cero tras cualquier selección."}]}
+  explanation={"La ausencia de sesgo se refiere a una media definida. Las probabilidades de cada signo, la simetría y las medias condicionales necesitan más información."}
   pretest
-  pretestLabel="Antes de leer — arriésgate a adivinar"
-  checkLabel="Comprobar"
-  retryLabel="Inténtalo de nuevo"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="Antes de empezar — adivina. Tu estimación del valor de un yacimiento petrolífero es insesgada: de media, a lo largo de todos los yacimientos, no es ni demasiado alta ni demasiado baja. Pujas tu estimación y GANAS. Condicionada a ganar, ¿sigue siendo insesgada tu estimación?"
-  options={[
-    { text: 'No — condicionada a ganar está sesgada AL ALZA, porque tiendes a ganar precisamente cuando tu estimación resultó ser demasiado optimista', correct: true },
-    { text: 'Sí — una estimación insesgada sigue siendo insesgada pase lo que pase', correct: false },
-    { text: 'No — condicionada a ganar está sesgada A LA BAJA', correct: false },
-    { text: 'Depende del vendedor, no de tu estimación', correct: false },
-  ]}
-  explanation="Es la primera, y es el meollo de todo el modelo. Tu estimación es insesgada ANTES de conocer el resultado. Pero «he ganado» no es una noticia al azar: ganas desproporcionadamente cuando tu estimación resultó alta. Así que el acto de condicionar sobre ganar filtra tus estimaciones bajas y conserva las altas, arrastrando la media condicional por encima de la verdad. Insesgada en global, sesgada al alza dado que ganas."
+  className={"not-prose"}
 />
+## Una media cero es una afirmación ponderada
 
-## Ganar es un filtro, no lanzar una moneda
+Un **error de estimación** es la estimación menos el valor real. Una estimación es **insesgada (unbiased)** en un modelo declarado cuando su error esperado es cero. «Esperado» significa media ponderada por probabilidades entre los resultados posibles del modelo, no una promesa sobre un resultado.
 
-Empecemos con un único pujador en solitario. Tus geólogos estiman un yacimiento
-petrolífero en \$100M. Su método es honesto: a lo largo de muchos yacimientos, sus
-estimaciones son **insesgadas**, cayendo por encima de la verdad exactamente tantas
-veces como por debajo, esparcidas simétricamente alrededor del número real. Si alguien
-eligiera un yacimiento al azar y preguntara «¿tu estimación es aquí demasiado alta o
-demasiado baja?», la respuesta sería, de verdad, cara o cruz.
+Una cuenta equilibrada no necesita igual número de partidas positivas y negativas. Considera este modelo distinto de errores asimétricos:
 
-Ahora te ponemos en una subasta con nueve rivales, todos usando métodos igual de
-honestos, todos estimando el *mismo* yacimiento. Todos pujan su estimación. Ganas —
-lo que significa que tus \$100M fueron la **más alta** de las diez estimaciones. Vuelve
-a hacer la pregunta: *dado que has ganado, ¿es tu estimación demasiado alta o demasiado
-baja?*
+| Error | Probabilidad | Contribución al error medio |
+|---:|---:|---:|
+| −2 | 1/3 | −2/3 |
+| +1 | 2/3 | +2/3 |
 
-Ya no es cara o cruz. Has ganado **porque** tu estimación superó a la de todos los
-demás, y la forma de tener la estimación más alta de diez es haber sacado un gran
-error positivo. Los pujadores perdedores fueron desproporcionadamente los que estimaron
-bajo (más cerca de la verdad, o por debajo); los pujadores ganadores son
-desproporcionadamente los que estimaron alto. **La subasta entrega el premio al
-optimista.** Así que, condicionada a ganar, tu estimación está sesgada *al alza*,
-aunque fuera insesgada antes de que empezara la subasta. La puja ganadora no es una
-lectura del valor del yacimiento: es una lectura del mayor error de la sala.
+El error medio es $(-2)(1/3)+(1)(2/3)=0$. Sin embargo, la probabilidad de un error positivo es $2/3$, no $1/2$. El estimador es insesgado sin ser simétrico ni equivocarse con igual frecuencia en ambas direcciones. Unos errores negativos grandes pueden compensar errores positivos pequeños más frecuentes.
 
-<Callout variant="info" title="E[valor | ganas] < E[valor]">
-Aquí tienes el modelo en una línea de notación. Tu estimación es insesgada, así que
-`E[valor] = tu estimación`. Pero la estimación *condicionada a ganar* está inflada:
-`E[valor | ganas] < tu estimación`. La diferencia entre ambas es la maldición del
-ganador. Puja tu estimación en bruto y estarás pagando `E[valor]` por algo cuyo valor,
-*dado que has ganado*, es en realidad `E[valor | ganas]` — sistemáticamente menor.
-Pierdes la diferencia de media, cada vez que ganas.
+La **simetría** exigiría algo más: que los errores y sus reflejos tengan la misma distribución. Ni siquiera la simetría establecería por sí sola independencia entre pujadores. La **independencia** significa que conocer un error no cambia las probabilidades del otro dentro del modelo declarado. Una **distribución marginal** describe un error por separado; la distribución conjunta describe varios juntos. Distingue ambas descripciones.
+
+<FillBlank client:visible
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"correctas"}
+  question={"Distingue las propiedades antes de usarlas"}
+  text={"El estadístico ponderado del error que especifica la ausencia de sesgo es {{la media|la mediana|el máximo}}. La independencia se refiere a la {{ley conjunta|cuenta de signos|regla de pagos}} de varios errores. Ninguna propiedad exige que un resultado individual seleccionado sea correcto."}
+  explanation={"Una media cero no especifica probabilidades de signo ni simetría. Una distribución marginal describe un error; una ley conjunta describe cómo varían los errores entre sí."}
+  className={"not-prose"}
+/>
+### Cuándo usar la definición
+
+Usa «insesgado» con un objetivo y un modelo de promediado definidos. Antes de condicionar a un resultado de subasta, especifica las señales, su dependencia, cómo se convierten en pujas y cómo se elige al ganador. La ausencia de sesgo no proporciona por sí sola todo ese modelo.
+
+## Enumera qué selecciona el máximo
+
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Dos pujadores pujan mecánicamente sus estimaciones. La mayor puja gana y paga lo pujado. ¿Qué operación determina la estimación ganadora?"}
+  options={[{"text":"El máximo del par, conservando las probabilidades conjuntas.","correct":true},{"text":"La media del par, cancelando errores dentro de cada subasta."},{"text":"La estimación media previa, ignorando ambos errores realizados."},{"text":"El valor real, sustituyendo cada estimación antes de seleccionar."}]}
+  explanation={"La regla impuesta elige al ganador por el orden de las pujas. Para promediar su error, calcula primero el máximo de cada par posible."}
+  pretest
+  className={"not-prose"}
+/>
+Fija el valor común en **100 créditos para el analista**. Lo escribimos $V=100$. Cada uno de dos pujadores mecánicos tiene una estimación $S_i=100+\varepsilon_i$. Cada error es −10 o +10 con probabilidad de un medio, independientemente del otro pujador. Cada estimación individual tiene, por tanto, media 100.
+
+Los pujadores siguen la regla estipulada **pujar la estimación bruta**. Primer precio significa que el ganador paga su puja. Siempre se adjudica un lote, los perdedores no pagan y no hay otros costes. Si hay empate, una moneda equilibrada e independiente elige la identidad del ganador; la estimación empatada y el pago son iguales gane quien gane. Analizamos este mecanismo, sin demostrar que las pujas mecánicas sean racionales u óptimas. No hemos dado una distribución de posibles valores V ni una valoración posterior del pujador.
+
+Los cuatro pares ordenados de errores son equiprobables porque $(1/2)(1/2)=1/4$ para cada uno:
+
+| Errores A, B | Probabilidad | Estimación máxima y pago | Beneficio del ganador |
+|---|---:|---:|---:|
+| −10, −10 | 1/4 | 90 | +10 |
+| −10, +10 | 1/4 | 110 | −10 |
+| +10, −10 | 1/4 | 110 | −10 |
+| +10, +10 | 1/4 | 110 | −10 |
+
+Sea $M=\max(S_A,S_B)$ la estimación máxima. Su error es −10 una vez y +10 tres veces. Por tanto:
+
+$$E[M]=\frac{90+110+110+110}{4}=105,$$
+
+$$E[M-100]=5,\qquad E[100-M]=-5.$$
+
+El pago medio del ganador supera al valor en 5; su beneficio medio es −5. Pero la primera fila da un **beneficio positivo de 10**. «Pérdida media» no significa «pérdida en todos los casos». Los empates forman parte de los resultados posibles; no son filas que se deban descartar.
+
+En cambio, la media de las dos estimaciones en las cuatro filas es 90, 100, 100 y 110. Su esperanza es $(90+100+100+110)/4=100$. Seleccionar el máximo y promediar estimaciones responden a preguntas distintas.
+
+<RateComparison client:visible
+  locale={"es"}
+  title={"Proporciones bajo la regla finita"}
+  scenarios={[{"label":"Errores independientes, cuatro pares equiprobables","groups":[{"label":"Pago superior a la referencia","events":3,"total":4},{"label":"Pago inferior a la referencia","events":1,"total":4}]}]}
+  scenarioLabel={"Modelo conjunto de errores"}
+  countsLabel={"Casos equiprobables que cumplen la condición, del total"}
+  differenceLabel={"Primera probabilidad menos segunda"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+/>
+Las barras cuentan **casos equiprobables del modelo**, no subastas observadas. Hay sobrepago en tres cuartos e infrapago en un cuarto. El contraste de probabilidades es de 50 puntos porcentuales; no es una pérdida de 50 créditos. Aquí ambos errores tienen magnitud 10, de modo que el error medio es $10(3/4)-10(1/4)=5$ créditos. Si las magnitudes fueran distintas, esas dos proporciones no bastarían para obtener la media.
+
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"En el modelo de cuatro pares, ¿cuáles son la estimación máxima esperada y el beneficio medio del ganador?"}
+  options={[{"text":"Ciento cinco créditos; menos cinco créditos.","correct":true},{"text":"Cien créditos; cero créditos."},{"text":"Ciento diez créditos; menos diez créditos."},{"text":"Noventa y cinco créditos; más cinco créditos."}]}
+  explanation={"Promedia los cuatro pagos: (90+110+110+110)/4=105. Resta cada pago del valor fijo 100, o calcula 100−105=−5. Promediar todas las estimaciones daría 100."}
+  className={"not-prose"}
+/>
+### Cuándo ayuda la tabla finita
+
+Utiliza una tabla completa cuando unos pocos estados conjuntos permitan mostrar la selección sin una fórmula. Conserva la regla de pago: aquí la pérdida esperada se deriva de pagar la estimación bruta máxima en primer precio. Otra regla de pago o de puja necesita su propia cuenta.
+
+## Separa el error seleccionado del valor
+
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"En el modelo que fija el valor común en cien, ¿saber que ganó un pujador concreto cambia ese valor fijo?"}
+  options={[{"text":"No; puede cambiar la distribución de errores seleccionados, no la referencia fija.","correct":true},{"text":"Sí; reduce la referencia en el error medio ganador en todas las subastas."},{"text":"Sí; hace que la referencia iguale la estimación máxima realizada."},{"text":"No; por tanto, la selección no puede afectar a ningún pago ni beneficio."}]}
+  explanation={"Una constante sigue siendo la misma constante al condicionar a un suceso de probabilidad positiva. Las estimaciones, los pagos y los errores sí pueden tener distribuciones condicionales distintas."}
+  pretest
+  className={"not-prose"}
+/>
+La estimación seleccionada tiene media 105. El objeto de este modelo concreto sigue valiendo 100. Son cantidades distintas: una estimación aleatoria y un valor fijo. Como aquí V es fijo, $E[V]=100$ y $E[V\mid W]=100$ para un suceso de victoria W de probabilidad positiva. El error seleccionado al alza **no** demuestra que haya bajado la media condicional de un valor aleatorio.
+
+Una estimación observada también es distinta de un valor esperado. Si la estimación observada de A es 110 en este cálculo con referencia fija, su error es 10. Que el método de A tenga error medio cero no convierte ese 110 observado en $E[V]$.
+
+Una inferencia real del pujador, como $E[V\mid I,W_b]$, necesita un modelo para V incierto y su relación con la información disponible I, la conducta rival y el suceso de victoria $W_b$ de cada candidato. Puede ser distinta de $E[V\mid I]$. No hemos especificado esas probabilidades del valor en este experimento de referencia fija, así que no hemos deducido una valoración bayesiana ni una puja óptima. La [lección de subastas del MIT](https://ocw.mit.edu/courses/14-271-industrial-organization-i-fall-2022/mit14_271_f22_lec22slides.pdf) explicita la información del valor común y las estrategias de puja; nuestra construcción de cuatro pares aísla la selección.
+
+<details>
+<summary>Comprueba el error ganador de un pujador concreto</summary>
+
+Con desempate equilibrado, A gana el par de dos negativos con probabilidad $1/8$, el par A positivo/B negativo con probabilidad $1/4$ y el par de dos positivos con probabilidad $1/8$. Nunca gana el par A negativo/B positivo. Así, $P(W_A)=1/2$, y:
+
+$$E[\varepsilon_A\mid W_A]=\frac{(-10)(1/8)+(10)(1/4)+(10)(1/8)}{1/2}=5.$$
+
+Esa media condicional coincide con el error medio del ganador de la población **bajo estos supuestos conjuntos simétricos y de desempate**. No es el error condicionado a una estimación ya observada ni una fórmula para la valoración posterior de un pujador con otro modelo de información.
+
+La cifra de beneficio −5 promedia un ganador por subasta. Para A, el beneficio medio condicionado a recibir el lote también es −5 aquí. A gana la mitad de las oportunidades, así que su beneficio medio por oportunidad es $(1/2)(-5)=-2.5$; sus filas sin adjudicación aportan cero.
+
+</details>
+
+<Callout className="not-prose" variant="info" label="Información" title="Nombra la cantidad que promedias">
+Una estimación individual, la estimación seleccionada, una referencia fija y el valor condicional de un objeto incierto son cantidades distintas. Declara el modelo y la condición antes de comparar sus medias.
 </Callout>
 
-## Un ejemplo resuelto con números reales
-
-Pongamos números para que el efecto no sea solo un eslogan. Un yacimiento vale de verdad
-**\$100M**. La estimación de cada pujador es la verdad más un error aleatorio y, para
-mantener la aritmética limpia, digamos que cada error es igual de probable en cualquier
-punto entre **−\$30M y +\$30M** (uniforme). Así que cada estimación individual es
-insesgada: su media es exactamente \$100M.
-
-Ahora varía cuántos pujadores aparecen y sigue la *estimación más alta esperada* — la
-que gana.
-
-| Pujadores (N) | Estimación más alta esperada | Exceso sobre la verdad de \$100M |
-|---|---|---|
-| 1 | \$100M | \$0M |
-| 2 | \$110M | +\$10M |
-| 4 | \$118M | +\$18M |
-| 6 | \$121M | +\$26M... |
-| 10 | \$125M | +\$25M |
-| 20 | \$129M | +\$29M |
-
-*(Para un error uniforme de −a a +a y N pujadores, el máximo esperado se sitúa unos
-`a·(N−1)/(N+1)` por encima de la verdad — con a = \$30M eso son \$10M en N=2, \$18M en
-N=4, \$25M en N=10, acercándose al techo completo de \$30M a medida que N crece.)*
-
-Lee esa columna hacia abajo y el modelo salta a la vista. Con **un** pujador, sin
-selección, cero exceso — tu estimación insesgada es simplemente insesgada. Con **dos**,
-el ganador ya se excede en \$10M de media. Con **diez** pujadores, la estimación
-ganadora es \$125M para un yacimiento de \$100M — un **sobrepago del 25%** incorporado
-puramente por la selección, antes de que nadie haya hecho ninguna tontería. Cada pujador
-fue honesto; cada estimación fue insesgada; y aun así la subasta fabricó un sobrepago
-sistemático de \$25M de la nada, sencillamente coronando al máximo.
-
-Y fíjate en la dirección del efecto: **más competencia lo empeora.** En casi todos los
-ámbitos de la vida, más opciones y más escrutinio ayudan al comprador. Aquí, cada rival
-adicional estira el máximo aún más hacia la cola optimista, así que el exceso del
-ganador *crece*. Veinte geólogos adivinando significa que el ganador batió a otros
-diecinueve — su conjetura tuvo que ser una sobreestimación aún más disparatada para
-salir ganadora.
-
-<MCQ
-  client:visible
-  checkLabel="Comprobar"
-  retryLabel="Inténtalo de nuevo"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="En el ejemplo resuelto, pasar de 2 pujadores a 10 pujadores elevó el exceso esperado del ganador de $10M a $25M. ¿Qué implica esto sobre la competencia en las subastas de valor común?"
-  options={[
-    { text: 'Más pujadores EMPEORA la maldición del ganador, porque el máximo de más estimaciones llega más lejos por encima de la verdad', correct: true },
-    { text: 'Más pujadores suaviza la maldición, porque las estimaciones se promedian', correct: false },
-    { text: 'El número de pujadores no tiene efecto sobre el exceso del ganador', correct: false },
-    { text: 'Más pujadores reduce el valor real del yacimiento', correct: false },
-  ]}
-  explanation="Más pujadores es peor para el ganador. Promediar ayudaría si tomaras la MEDIA de todas las estimaciones — pero la subasta no lo hace; toma el MÁXIMO, y el máximo de más extracciones se sitúa más lejos en la cola optimista. Ganar contra 10 rivales es una evidencia más fuerte de que sobreestimaste que ganar contra 2. Este es el corazón contraintuitivo del modelo: en una subasta de valor común, una sala abarrotada es una sala más peligrosa."
+<MatchConcepts client:visible
+  instructions={"Elige un término y después su definición."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  allCorrectLabel={"✓ Todas las parejas correctas"}
+  partialResultWord={"correctas"}
+  pickDefinitionHint={"→ elige una definición"}
+  notLinkedHint={"sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+  question={"Empareja cada cantidad con su función"}
+  pairs={[{"term":"Estimación observada","definition":"La señal realizada disponible en un caso concreto"},{"term":"Estimación seleccionada media","definition":"El máximo promediado sobre el modelo conjunto de errores"},{"term":"Valor de referencia fijo","definition":"La constante que el analista mantiene en cien"},{"term":"Valoración condicional","definition":"Una media de valor incierto dada cierta información y un suceso"}]}
+  explanation={"La misma palabra «estimación» no debe representar las cuatro cosas. Calcular la selección no proporciona por sí solo el modelo de valor que falta."}
+  className={"not-prose"}
 />
+### Cuándo importa la distinción
 
-## Condúcelo tú mismo
+Usa el cálculo con referencia fija para auditar una regla de selección de mediciones. Usa un modelo conjunto de valor e información para evaluar una puja candidata. El [taller posterior del catálogo de pujas](/es/winners-curse/06-audit-a-winning-bid) proporciona ese modelo y recalcula el suceso de victoria para cada puja permitida.
 
-Ahora siente el mecanismo en lugar de solo leerlo. Repite ×50 con unos pocos pujadores,
-anota el sobrepago medio, luego sube el deslizador de pujadores y repite ×50 otra vez.
-Haz lo mismo con el deslizador de ruido. Ambos mandos empujan el sobrepago en la misma
-dirección — al alza.
+## Sigue una medición nueva
 
-<WinnerCurseSim
-  client:visible
-  title="Observa cómo crece el sobrepago con rivales y ruido"
-  caption="Pon los pujadores bajos (digamos 3) y repite ×50 — anota el sobrepago medio. Ahora pon los pujadores en 20 y repite ×50 otra vez: el sobrepago se dispara, porque la estimación ganadora es ahora el máximo de veinte extracciones. Luego empuja el deslizador de ruido: más incertidumbre por conjetura ensancha la cola de la que se extrae el máximo, así que el ganador se excede todavía más. Más rivales Y más incertidumbre hacen, cada uno, que ganar sea peor."
-  initialBidders={4}
-  initialNoise={20}
-  instructions="Cada pujador estima el mismo valor real oculto y luego puja. La puja más alta gana y paga su propia puja. Celebra subastas y observa el sobrepago medio: ganar significa que fuiste el más optimista."
-  eyebrow="Laboratorio de la maldición del ganador"
-  biddersLabel="Número de pujadores"
-  noiseLabel="Ruido de la estimación (cuánto puede errar cada conjetura)"
-  shadeLabel="Regla de puja"
-  shadeOffLabel="Ingenua (puja tu estimación)"
-  shadeOnLabel="Rebajada (corrige por ganar)"
-  runOneLabel="Celebrar una subasta"
-  runManyLabel="Repetir ×50"
-  resetLabel="Reiniciar"
-  trueValueLabel="Valor real"
-  bidderLabel="Una puja"
-  winnerLabel="Estimación ganadora"
-  shadedBidLabel="Puja ganadora rebajada"
-  lastLabel="Última subasta"
-  averagesLabel="Promedios hasta ahora"
-  roundsLabel="Subastas celebradas"
-  overshootLabel="Media: estimación ganadora sobre el valor real"
-  overpayLabel="Sobrepago medio (puja − valor)"
-  profitLabel="Beneficio medio del ganador"
-  emptyLabel="Pulsa «Celebrar una subasta» para celebrar una. Luego repite ×50 para ver cómo se asientan los promedios."
-  shadeNoteTemplate="Rebajando en {shade} = ruido × (N−1)/(N+1). Más profundo con más rivales."
-  lastTemplate="El ganador estimó {winner} por algo que vale {true}, pujó {bid} y se fue con un beneficio de {profit}."
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Tras seleccionar la estimación máxima, se toma otra medición insesgada e independiente del mismo valor fijo. ¿Qué debes esperar?"}
+  options={[{"text":"Su media vuelve a la referencia; una medición realizada aún puede subir.","correct":true},{"text":"Su valor realizado debe bajar; el error nuevo no puede repetir un positivo."},{"text":"Su media permanece en el máximo anterior; se seleccionó la referencia al alza."},{"text":"Su valor realizado iguala la referencia; la ausencia de sesgo elimina el ruido."}]}
+  explanation={"Un error independiente de media cero conserva esa media tras la selección anterior. Una afirmación sobre la media no ordena todas las parejas de mediciones realizadas."}
+  pretest
+  className={"not-prose"}
 />
+Vuelve al caso finito. Después de seleccionar M, toma una medición nueva $Y=100+\eta$, donde $\eta$ vuelve a ser −10 o +10 con probabilidad de un medio, independientemente de ambos errores anteriores. La referencia no cambia.
 
-Dos mandos, una dirección. **Más pujadores** y **más ruido** estiran ambos la brecha
-entre la estimación ganadora y la verdad. Merece la pena detenerse en esto, porque
-invierte dos instintos a la vez: que la competencia protege al comprador (no lo hace, en
-valor común) y que deberías pujar con audacia cuando el valor es muy incierto (deberías
-pujar *con más cautela* — el ruido alto es exactamente cuando la maldición es más
-profunda).
+El máximo anterior es 90 con probabilidad $1/4$ y 110 con probabilidad $3/4$. Combina cada posibilidad con el nuevo lanzamiento:
 
-## El vínculo con la reversión a la media
+| Máximo anterior M | Medición nueva Y | Probabilidad conjunta | Cambio Y − M |
+|---:|---:|---:|---:|
+| 90 | 90 | 1/8 | 0 |
+| 90 | 110 | 1/8 | +20 |
+| 110 | 90 | 3/8 | −20 |
+| 110 | 110 | 3/8 | 0 |
 
-Si has conocido la **reversión a la media** (regression to the mean), la maldición del
-ganador debería parecerte una vieja amiga con un disfraz nuevo — porque lo *es*. La
-reversión a la media dice: una medición extrema es extrema en parte por señal genuina y
-en parte por ruido afortunado, y la parte de ruido no se repetirá, así que la siguiente
-medición deriva de vuelta hacia la media. Los padres más altos tienen hijos más bajos;
-el mejor fondo del primer trimestre se enfría; el novato en la portada de la revista
-se hunde.
+Las probabilidades suman uno. La nueva media es $E[Y]=100$, por lo que el cambio esperado es $100-105=-5$. También puedes calcular $20(1/8)-20(3/8)=-5$. Aun así, Y supera a M con probabilidad $1/8$ y lo iguala con probabilidad $1/2$.
 
-La estimación ganadora es exactamente una medición extrema así. Es el **máximo** de
-muchas conjeturas ruidosas, así que es alta en parte porque el yacimiento realmente
-podría ser bueno y en parte porque esa estimación en concreto pilló una racha
-afortunada de error positivo. La parte de señal es real; la parte de ruido no va a
-estar ahí cuando aparezca la realidad. Así que *ex post* — una vez perforados los pozos,
-llegados los flujos de caja, tomado el yacimiento por el jugador — el resultado
-**revierte a la baja** hacia la verdad, y el trato rinde por debajo de la rosada
-estimación que lo ganó. La maldición del ganador es la reversión a la media con una
-etiqueta de precio pegada: pagaste el extremo, recibes el valor revertido y te comes la
-diferencia.
+<RateComparison client:visible
+  locale={"es"}
+  title={"Direcciones de la nueva medición"}
+  scenarios={[{"label":"Nueva medición independiente, ocho casos conjuntos equiprobables","groups":[{"label":"Nueva medición inferior","events":3,"total":8},{"label":"Nueva medición superior","events":1,"total":8}]}]}
+  scenarioLabel={"Modelo conjunto de errores"}
+  countsLabel={"Casos equiprobables que cumplen la condición, del total"}
+  differenceLabel={"Primera probabilidad menos segunda"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+/>
+La mitad de los casos conjuntos **no cambia** y queda fuera de los dos grupos de sucesos dibujados. La figura compara la probabilidad de una medición inferior con la de una superior; no afirma que todas bajen. Esa es la idea de esperanza condicional tras la **regresión a la media (regression to the mean)** en este ejemplo de referencia estable y ruido nuevo.
 
-<Reveal client:visible label="Por qué «la estimación del comprador siempre parecía tan buena»">
-<Callout variant="success" title="Selección, luego reversión, luego decepción">
-Esta es la forma de casi todos los tratos decepcionantes. Primero **selección**: la
-subasta corona a aquel cuya estimación resultó más alta. Luego **reversión**: esa
-afortunada estimación alta cae de vuelta hacia la realidad a medida que llegan los
-resultados reales. Luego **decepción**: el ganador, tras haber pagado por el extremo,
-obtiene el valor revertido y lo llama «mala suerte». No es mala suerte — es la
-consecuencia absolutamente predecible de pagar el máximo de una muestra ruidosa y luego
-verlo revertir. La única sorpresa real es que alguien se sorprenda.
-</Callout>
-</Reveal>
+Separa medición y resultado económico. El beneficio real del ganador en nuestra subasta es $100-M$. Una estimación ruidosa posterior Y no cambia el valor estipulado ni convierte $Y-M$ en beneficio realizado. Un valor subyacente cambiante, errores persistentes o una intervención necesitarían otro modelo.
 
-<MCQ
-  client:visible
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"¿Qué afirmaciones se cumplen en este modelo de medición nueva? Selecciona todas las correctas."}
+  options={[{"text":"La nueva medición tiene una media igual a la referencia fija.","correct":true},{"text":"Una medición nueva puede superar el máximo seleccionado anterior.","correct":true},{"text":"Todo error positivo repetido viola el supuesto de independencia."},{"text":"La medición posterior determina el pago de la subasta anterior."}]}
+  explanation={"El error nuevo e independiente tiene media cero, pero puede volver a ser positivo. La tabla da una subida con probabilidad 1/8. El pago sigue siendo la puja ganadora anterior de primer precio."}
   allowMultiple
-  checkLabel="Comprobar"
-  retryLabel="Inténtalo de nuevo"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="¿Cuáles de estas afirmaciones conectan correctamente la maldición del ganador con la reversión a la media? (Selecciona todas las que apliquen.)"
-  options={[
-    { text: 'La estimación ganadora es el máximo de muchas conjeturas ruidosas, así que es alta en parte por una suerte que no se repetirá', correct: true },
-    { text: 'Ex post, el resultado real revierte a la baja hacia la verdad, así que el trato rinde por debajo de la estimación ganadora', correct: true },
-    { text: 'El ganador paga por el valor extremo pero recibe el valor revertido, y pierde la diferencia', correct: true },
-    { text: 'La reversión garantiza que todo ganador de subasta pierde dinero en cada trato individual', correct: false },
-    { text: 'La conexión solo se cumple cuando hay exactamente un pujador', correct: false },
-  ]}
-  explanation="Las tres primeras son el vínculo: la estimación ganadora es un extremo (un máximo) inflado por la suerte, que revierte hacia la verdad a posteriori, así que el ganador paga el pico y cobra el valor revertido. Las dos últimas son trampas — la reversión trata de PROMEDIOS, así que cualquier trato individual todavía puede salir alto (podrías haber ganado con un yacimiento genuinamente excelente); y con un único pujador no hay selección ni maldición alguna."
+  className={"not-prose"}
 />
+### Cuándo usar el vínculo con la regresión
 
-## Cuándo usarlo
+Úsalo para separar un seguimiento esperado de una trayectoria individual. No lo conviertas en que el valor real del activo deba bajar, en que una señal alta no pueda repetirse ni en que toda adquisición decepcionante sea consecuencia de la selección.
 
-Saca este mecanismo en cuanto te pilles a punto de ganar una puja competitiva sobre un
-valor común incierto. El movimiento mental es concreto:
+## Amplía a errores uniformes independientes
 
-- **Condiciona sobre ganar antes de ganar.** Pregúntate: «Si gano esto, es porque mi
-  estimación batió a la de todos los demás — así que mi estimación estaba probablemente
-  cerca de lo más alto del montón. ¿Cuánto por encima de la verdad me sitúa eso?»
-- **Cuenta la sala.** Más rivales significa una estimación ganadora más extrema, así que
-  más pujadores deberían volverte *más* cauteloso por señal, no menos.
-- **Respeta el ruido.** Cuanto más incierto es el valor, más ancha es la cola de la que
-  se extrae el máximo, y más profunda la maldición. La incertidumbre alta es una razón
-  para rebajar con más fuerza, no para lanzarte con más ímpetu.
-- **Espera la reversión.** Cualquier estimación que gane parecerá, en retrospectiva, que
-  revirtió. Valora el trato frente al valor *revertido*, no frente al ganador.
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Sustituyes los errores binarios por una distribución uniforme continua. ¿Puedes reutilizar sin cambios la media de las cuatro filas?"}
+  options={[{"text":"No; deduce el máximo con la nueva distribución y los supuestos de dependencia.","correct":true},{"text":"Sí; todas las distribuciones insesgadas tienen el mismo error máximo esperado."},{"text":"Sí; la simetría fija la media del máximo sin importar cuántas extracciones hay."},{"text":"No; los errores continuos impiden cualquier fórmula exacta del máximo esperado."}]}
+  explanation={"La tabla finita dependía de su distribución de errores. Otra ley exige otro cálculo; una distribución continua también puede tener esperanzas exactas."}
+  pretest
+  className={"not-prose"}
+/>
+Toma ahora N errores independientes e idénticamente distribuidos (iid), cada uno **uniforme en $[-a,a]$**. Uniforme significa que la probabilidad es proporcional a la longitud del intervalo; los extremos acotan cada error. «Idénticamente distribuidos» significa que todos los pujadores usan la misma ley. N es un entero positivo y $a\geq0$, con el mismo V fijo y selección mecánica de estimaciones brutas.
 
-<Callout variant="warning" title="La trampa que te tiende">
-La lectura errónea seductora es tratar tu estimación ganadora como tu *mejor*
-estimación — «mi número salió el primero, así que debe de ser la lectura más afinada de
-la sala». Exactamente al revés. En una subasta de valor común, salir el primero es
-evidencia de que tu número fue el más *optimista*, no el más *preciso*. La estimación
-ganadora es el único dato en el que deberías confiar **menos**, precisamente porque
-ganó.
+Bajo estas condiciones, la fórmula exacta es:
 
-</Callout>
+$$E[\max_i\varepsilon_i]=a\frac{N-1}{N+1},\qquad E[M]=V+a\frac{N-1}{N+1}.$$
 
-## Repaso
+Para V = 100 y a = 30, todas las cantidades siguientes son créditos. Las columnas aproximadas redondean a dos decimales; las fracciones siguen siendo exactas.
 
-El motor de la maldición del ganador es **condicionar sobre ganar**. Tu estimación puede
-ser perfectamente insesgada por sí sola, pero «he ganado» es un filtro que selecciona
-tus extracciones optimistas y descarta las pesimistas, así que `E[valor | ganas]` se
-sitúa por debajo de tu estimación en bruto — y la brecha es la maldición. Desarrollado
-con números, diez pujadores honestos adivinando un yacimiento de \$100M producen una
-estimación ganadora cercana a \$125M: un sobrepago del 25% fabricado solo por la
-selección, y *crece* con más pujadores y más ruido. Es la **reversión a la media** con
-una etiqueta de precio puesta: la estimación ganadora es un máximo extremo inflado por
-la suerte, que revierte a la baja a posteriori, dejando al ganador pagar el pico y
-cobrar el valle.
+| N | Error ganador medio exacto | Error aproximado | Estimación máxima media exacta | Estimación aproximada |
+|---:|---:|---:|---:|---:|
+| 1 | 0 | 0,00 | 100 | 100,00 |
+| 2 | 10 | 10,00 | 110 | 110,00 |
+| 4 | 18 | 18,00 | 118 | 118,00 |
+| 6 | 150/7 | 21,43 | 850/7 | 121,43 |
+| 10 | 270/11 | 24,55 | 1370/11 | 124,55 |
+| 20 | 190/7 | 27,14 | 890/7 | 127,14 |
 
-Así que el diagnóstico está completo — ahora la cura. Si ganar significa que
-sobreestimaste en una cantidad predecible, el remedio es **restar esa cantidad por
-adelantado.** Eso es la rebaja de puja (bid shading), y es adonde vamos a continuación.
+Por ejemplo, con seis pujadores el error es $30(6-1)/(6+1)=150/7$. Suma la referencia: $100+150/7=850/7$. Con veinte es $30(19)/21=190/7$, no 29. Con diez es $270/11$, no exactamente 25. Para a positivo y N finito, el error esperado queda por debajo de a y se aproxima a ese techo cuando N crece.
+
+<details>
+<summary>Deducción opcional con probabilidad acumulada y área</summary>
+
+Supón $a>0$; con ruido cero el error es cero directamente. Escribe $Z=\max_i\varepsilon_i$. Para un umbral $t\in[-a,a]$, un error uniforme queda como máximo en t con probabilidad $(t+a)/(2a)$. El máximo queda como máximo en t exactamente cuando lo hacen todos los errores. La independencia da:
+
+$$P(Z\leq t)=\left(\frac{t+a}{2a}\right)^N.$$
+
+Es una **probabilidad acumulada**: la probabilidad de que una variable quede en un umbral o por debajo de él. Define $H=Z+a$, de modo que H está entre cero y $2a$. La esperanza de una variable no negativa y acotada es el área bajo su probabilidad de excedencia, $P(H>y)$. Integrar esa área da:
+
+$$E[H]=\int_0^{2a}\left[1-\left(\frac{y}{2a}\right)^N\right]dy=2a-\frac{2a}{N+1}.$$
+
+Resta a para volver a Z:
+
+$$E[Z]=2a-\frac{2a}{N+1}-a=a\frac{N-1}{N+1}.$$
+
+La prueba usa integración elemental; la tabla y los ejercicios principales solo necesitan sustituir en la fórmula declarada. La fórmula es nuestra deducción para esta distribución, no un teorema de equilibrio de subastas de la lección citada.
+
+</details>
+
+### Explora la regla continua
+
+<WinnerCurseSim client:visible
+  title={"Ilustración uniforme continua e independiente"}
+  eyebrow={"Selección de estimaciones"}
+  instructions={"Todos siguen la misma regla impuesta. Reinicia los totales antes de comparar pujadores, ruido o ajuste; los lotes anteriores permanecen en las medias acumuladas."}
+  caption={"Créditos ficticios: importes y ajuste se redondean a enteros; las medias, a una decimal. Si un pago queda fuera del eje, su marcador aparece en el borde; la cifra muestra el importe redondeado. Esta ilustración continua no deduce una puja óptima."}
+  trueValue={100}
+  initialBidders={6}
+  initialNoise={30}
+  minBidders={1}
+  maxBidders={24}
+  maxNoise={40}
+  unit={""}
+  locale={"es"}
+  className={"not-prose"}
+  biddersLabel={"Pujadores N"}
+  noiseLabel={"Semiamplitud uniforme a, en créditos"}
+  shadeLabel={"Ajuste común del pago"}
+  shadeOffLabel={"Pujar cada estimación bruta"}
+  shadeOnLabel={"Restar el mismo ajuste a todas las pujas"}
+  runOneLabel={"Celebrar una subasta"}
+  runManyLabel={"Celebrar {n} subastas"}
+  resetLabel={"Reiniciar totales"}
+  trueValueLabel={"Referencia fija"}
+  bidderLabel={"Estimación"}
+  winnerLabel={"Estimación máxima"}
+  shadedBidLabel={"Pago tras el ajuste común"}
+  lastLabel={"Último resultado, cantidades en créditos"}
+  averagesLabel={"Medias acumuladas, cantidades en créditos"}
+  roundsLabel={"Subastas en los totales"}
+  overshootLabel={"Estimación ganadora menos referencia"}
+  overpayLabel={"Pago menos referencia"}
+  profitLabel={"Referencia menos pago"}
+  emptyLabel={"Celebra una subasta para inspeccionar la regla impuesta. Reinicia antes de comparar ajustes."}
+  shadeNoteTemplate={"Ajuste común mostrado {shade}, redondeado. Centra el pago medio del modelo; no es una puja óptima."}
+  lastTemplate={"Estimación máxima {winner}; referencia {true}; pago {bid}; beneficio del ganador {profit}."}
+/>
+Reinicia antes de comparar configuraciones o el ajuste común. Cada ejecución suma a los totales anteriores; cambiar los deslizadores no los borra. Aumentar N eleva el máximo esperado **bajo esta ley iid sin cambios**, y el error esperado cambia en la misma proporción que a. Un lote nuevo de cincuenta puede moverse en la dirección contraria por azar. La tabla exacta, no un lote concreto, establece la esperanza.
+
+También hay un hecho más sencillo para cada resultado: al añadir una observación al **mismo conjunto existente**, su máximo no puede bajar. Ese hecho no necesita independencia. La fórmula uniforme cerrada sí. Ninguno afirma que las pujas racionales o las medias realizadas de lotes separados deban moverse en una sola dirección.
+
+### Qué hace el ajuste común
+
+El simulador puede restar $c=a(N-1)/(N+1)$ de **todas** las pujas. El orden se conserva porque $S_i-c>S_j-c$ exactamente cuando $S_i>S_j$. No reduce la probabilidad de ganar de un pujador concreto haciendo solo su puja más cauta.
+
+El pago ganador pasa a ser $M-c$, con esperanza $E[M]-c=V$. En el ejemplo de seis pujadores, $(850/7)-(150/7)=100$, de modo que el beneficio medio del ganador entre subastas pasa a cero bajo la regla impuesta. Es una identidad de centrado, **no una estrategia óptima**, una mejor respuesta ni un beneficio garantizado. Eso exige conocer la información del pujador, las estrategias rivales, el pago y las alternativas.
+
+<FillBlank client:visible
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"correctas"}
+  question={"Delimita la función del ajuste"}
+  text={"Restar la misma constante a todas las pujas conserva su {{orden|nivel medio|beneficio}}. Bajo la fórmula uniforme centra el {{pago|error de señal|porcentaje de victorias}} ganador medio en la referencia fija."}
+  explanation={"La resta común cambia el pago, pero no qué estimación es mayor. El error máximo previo al ajuste sigue seleccionado; conservar el orden o centrar una media no resuelve una optimización estratégica."}
+  className={"not-prose"}
+/>
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Con cuatro errores uniformes iid de semiamplitud doce, ¿cuál es el error ganador medio exacto?"}
+  options={[{"text":"Treinta y seis quintos de crédito.","correct":true},{"text":"Doce quintos de crédito."},{"text":"Treinta y seis tercios de crédito."},{"text":"Cero créditos por errores de media cero."}]}
+  explanation={"Sustituye a=12 y N=4:12(4−1)/(4+1)=36/5=7,2. Es el error máximo esperado, no un error individual ni una rebaja universal de puja."}
+  className={"not-prose"}
+/>
+### Cuándo usar la fórmula
+
+Úsala para auditar este experimento concreto de máximos uniformes. Cambia la distribución o la dependencia y recalcula. Un máximo esperado mayor bajo pujas mecánicas fijas no demuestra que más competencia empeore universalmente los resultados de pujadores que adaptan sus estrategias.
+
+## Traslada el modelo cambiando la dependencia
+
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Ambos pujadores mantienen la misma distribución individual de error, pero ahora sus errores siempre coinciden. ¿Debe mantenerse el error máximo medio?"}
+  options={[{"text":"No; el máximo depende de la ley conjunta, no solo de las marginales individuales.","correct":true},{"text":"Sí; los errores individuales de media cero fijan cualquier media seleccionada."},{"text":"Sí; coincidir en signo mantiene equiprobables los cuatro pares independientes."},{"text":"No; hacer coincidir errores elimina necesariamente todos los positivos realizados."}]}
+  explanation={"Una distribución marginal es la ley del error de un pujador. El máximo usa sus posibilidades conjuntas, que han cambiado."}
+  pretest
+  className={"not-prose"}
+/>
+Mantén V = 100, los dos pujadores mecánicos de primer precio, las pujas de estimaciones brutas, el desempate de identidad equilibrado y la ausencia de otros costes. Cada error sigue siendo −10 o +10 con probabilidad de un medio. Cambia solo la dependencia: **siempre son idénticos**.
+
+| Errores A, B | Probabilidad |
+|---|---:|
+| −10, −10 | 1/2 |
+| +10, +10 | 1/2 |
+
+Estas dos filas sustituyen a las cuatro independientes. Las medias de ambos errores individuales siguen siendo cero. Antes de abrir la solución, calcula el error ganador medio y el beneficio medio del ganador.
+
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"En la transferencia con errores idénticos, ¿cuáles son el error ganador medio y el beneficio medio del ganador?"}
+  options={[{"text":"Cero créditos; cero créditos.","correct":true},{"text":"Más cinco créditos; menos cinco créditos."},{"text":"Más diez créditos; menos diez créditos."},{"text":"Menos cinco créditos; más cinco créditos."}]}
+  explanation={"El error máximo es−10 la mitad de las veces y+10 la otra mitad: media 0. El pago es 90 o 110, de media 100. El beneficio ganador es+10 o−10, también con media 0."}
+  className={"not-prose"}
+/>
+<details>
+<summary>Comprueba la transferencia de dependencia</summary>
+
+El máximo coincide ahora con cualquiera de los errores individuales en cada caso. Su esperanza es $(-10)(1/2)+(10)(1/2)=0$. El pago ganador tiene media $(90+110)/2=100$ y el beneficio ganador, $(10-10)/2=0$.
+
+Las distribuciones individuales coinciden con las anteriores, pero la probabilidad de sobrepago pasa de $3/4$ a $1/2$ y el error ganador medio pasa de 5 a cero. La fórmula uniforme iid no puede trasladarse a este otro modelo. El ejemplo demuestra que la dependencia puede cambiar el resultado; no que la correlación impida universalmente el sobrepago ni resuelva las pujas de valor común.
+
+</details>
+
+<RateComparison client:visible
+  locale={"es"}
+  title={"Cambia la dependencia, conserva cada marginal"}
+  scenarios={[{"label":"Errores independientes, cuatro pares equiprobables","groups":[{"label":"Pago superior a la referencia","events":3,"total":4},{"label":"Pago inferior a la referencia","events":1,"total":4}]},{"label":"Errores idénticos, dos pares equiprobables","groups":[{"label":"Pago superior a la referencia","events":1,"total":2},{"label":"Pago inferior a la referencia","events":1,"total":2}]}]}
+  scenarioLabel={"Modelo conjunto de errores"}
+  countsLabel={"Casos equiprobables que cumplen la condición, del total"}
+  differenceLabel={"Primera probabilidad menos segunda"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+/>
+### Cuándo inspeccionar la dependencia
+
+Usa la transferencia para comprobar si tienes un modelo conjunto o solo varios resúmenes separados de errores. Si los pujadores recurren a la misma fuente, conocer su precisión por separado no determina cómo se comportará el máximo. Especifica cómo se mueven juntos los errores antes de concluir algo sobre la selección.
+
+## Usa la selección como diagnóstico
+
+<MCQ client:visible
+  pretestLabel={"Antes de leer, prueba"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Un ganador real tiene la puja más alta. ¿Cuál es el siguiente paso útil antes de tratarlo como prueba de sobrepago?"}
+  options={[{"text":"Especificar cómo se relacionan pujas, señales, valor, adjudicación y pago en ese contexto.","correct":true},{"text":"Restar la fórmula del error máximo uniforme con independencia del modelo de señales."},{"text":"Descartar la estimación seleccionada como la observación menos precisa por definición."},{"text":"Inferir una pérdida porque un puesto alto determina directamente el valor realizado."}]}
+  explanation={"Una posición en el orden no es un modelo completo de valor. Las pujas pueden reflejar información, costes, valor privado y estrategia; el beneficio también depende del pago y de los costes aplicables."}
+  pretest
+  className={"not-prose"}
+/>
+Un diagnóstico útil nombra qué se promedia y qué información se mantiene fija:
+
+1. Declara el modelo de valor: referencia fija para un experimento de selección, o V incierto para el problema de valoración de un pujador.
+2. Especifica la ley conjunta de señales o errores y cómo se convierten en pujas, incluidos empates y participación.
+3. Calcula la estadística seleccionada bajo esa regla. No sustituyas un máximo por una media.
+4. Aplica las reglas reales de pago y costes antes de hablar de beneficio.
+5. Comprueba qué datos del modelo han cambiado antes de trasladar un ajuste o una inferencia.
+
+En el experimento finito, «beneficio ganador medio −5» describe el mecanismo impuesto de pujas brutas. No elige una puja ni demuestra que un pujador racional deba aceptar un beneficio esperado negativo. El [resumen de Thaler](https://doi.org/10.1257/jep.2.1.191) distingue la dificultad de resolver una puja de valor común de una afirmación empírica sobre la conducta.
+
+La regla tentadora «confía menos en la estimación ganadora» es demasiado amplia. La mayor estimación es la más optimista **bajo una regla de señales brutas con referencia compartida**; el orden de precisión puede ser distinto si cambian la calidad de la información, el valor privado o las estrategias. La selección pide una auditoría, no desconfianza automática hacia cualquier ganador.
+
+<Categorize client:visible
+  instructions={"Asigna cada afirmación a su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todo clasificado"}
+  partialResultWord={"correctas"}
+  question={"Distingue deducciones de afirmaciones que necesitan otros supuestos"}
+  buckets={["Deducido en el modelo declarado","Necesita otro modelo o evidencia"]}
+  items={[{"text":"El error ganador medio del par independiente finito es cinco créditos","bucket":"Deducido en el modelo declarado"},{"text":"La transferencia de errores idénticos conserva las marginales individuales","bucket":"Deducido en el modelo declarado"},{"text":"Un ajuste constante común conserva el orden de las pujas simuladas","bucket":"Deducido en el modelo declarado"},{"text":"Todo ganador real pagó necesariamente por encima del valor verdadero","bucket":"Necesita otro modelo o evidencia"},{"text":"El ajuste uniforme es la estrategia óptima de un pujador individual","bucket":"Necesita otro modelo o evidencia"},{"text":"Toda medición posterior debe quedar por debajo del máximo seleccionado","bucket":"Necesita otro modelo o evidencia"}]}
+  explanation={"Las primeras afirmaciones se derivan de las probabilidades y operaciones dadas. Las otras añaden conclusiones no demostradas sobre estrategias, todos los resultados u otro contexto."}
+  className={"not-prose"}
+/>
+### Cuándo trasladar el mecanismo
+
+Úsalo cuando una decisión seleccione un extremo entre datos ruidosos. Conserva el modelo conjunto y la regla de selección; después reconstruye valor, pago y alternativas de la decisión real. El [taller posterior de pujas finitas](/es/winners-curse/06-audit-a-winning-bid) proporciona esos ingredientes de decisión en lugar de tratar un ajuste entre subastas como una puja.
+
+## Reconstruye las distinciones
+
+<MindMap client:visible
+  eyebrow={"Relaciones del taller"}
+  outlineLabel={"Esquema en texto"}
+  title={"De los errores a una estimación seleccionada"}
+  root={{"label":"Mecanismo de selección","children":[{"label":"Antes de seleccionar","children":[{"label":"Sin sesgo significa error medio ponderado cero"},{"label":"Simetría e independencia son supuestos distintos"}]},{"label":"Máximo finito","children":[{"label":"Cuatro pares independientes y empates explícitos"},{"label":"Pago medio y beneficio realizado son distintos"}]},{"label":"Condicionamiento","children":[{"label":"Error seleccionado distinto de valoración posterior"},{"label":"La referencia fija sigue fija"}]},{"label":"Medición nueva","children":[{"label":"El retorno esperado no acota trayectorias realizadas"}]},{"label":"Extensión uniforme","children":[{"label":"La fórmula exacta necesita su ley iid"},{"label":"El ajuste común centra el pago sin optimizar"}]},{"label":"Transferencia","children":[{"label":"Las mismas marginales pueden dar otro máximo conjunto"}]}]}}
+  className={"not-prose"}
+/>
+<Quiz client:visible
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"correctas"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso terminado"}
+  perfectMessage={"Todo correcto. Comprueba que puedes explicar tus decisiones."}
+  goodMessage={"Revisa las preguntas que has fallado."}
+  keepPracticingMessage={"Vuelve al ejemplo y prueba de nuevo."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultado"}
+  backLabel={"Anterior"}
+  scoreLabel={"Resultado"}
+  restartLabel={"Repetir"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentarlo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"Todavía no"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  title={"Práctica del mecanismo de selección"}
+  questions={[{"question":"Un error es menos dos con probabilidad de un tercio y más uno en otro caso. ¿Cuáles son su media y su probabilidad de ser positivo?","options":[{"text":"Cero; dos tercios.","correct":true},{"text":"Cero; un medio."},{"text":"Menos un medio; dos tercios."},{"text":"Más un tercio; un medio."}],"explanation":"La media es(−2)(1/3)+(1)(2/3)=0. El error positivo ocurre con probabilidad 2/3; la ausencia de sesgo no es una moneda de signos equilibrada."},{"question":"Dos errores independientes son menos diez o más diez, equiprobables. Al seleccionar la estimación bruta máxima, ¿con qué frecuencia es negativo el error ganador?","options":[{"text":"En un cuarto de las subastas.","correct":true},{"text":"En la mitad de las subastas."},{"text":"En tres cuartos de las subastas."},{"text":"En ninguna de las subastas."}],"explanation":"Solo el par(−10,−10) tiene máximo negativo. La independencia da probabilidad(1/2)(1/2)=1/4."},{"question":"La referencia fija es cien y la estimación seleccionada tiene media ciento cinco. ¿Qué se concluye sobre el valor fijo tras ganar?","options":[{"text":"Sigue siendo cien; la estimación seleccionada es otra cantidad.","correct":true},{"text":"Pasa a noventa y cinco; condicionar resta el error medio seleccionado."},{"text":"Pasa a ciento cinco; la subasta también selecciona la referencia."},{"text":"Se vuelve aleatorio; toda estimación seleccionada crea una distribución previa."}],"explanation":"La referencia construida es constante. Una valoración posterior en un modelo de valor incierto necesita más información conjunta."},{"question":"Una medición nueva e independiente sigue a un máximo seleccionado. ¿Qué afirmaciones son válidas aquí? Selecciona todas las correctas.","options":[{"text":"La nueva media es la referencia fija.","correct":true},{"text":"Una medición nueva puede superar el máximo anterior.","correct":true},{"text":"La nueva medición debe igualar el valor esperado."},{"text":"La nueva medición cambia el pago ya realizado."}],"explanation":"El ruido nuevo de media cero no impone una cota individual. En el ejemplo finito hay una subida con probabilidad 1/8 y el pago sigue fijado por la subasta anterior.","allowMultiple":true},{"question":"Seis errores uniformes iid tienen semiamplitud treinta. ¿Qué error máximo medio exacto se deduce?","options":[{"text":"Ciento cincuenta séptimos de crédito.","correct":true},{"text":"Veintiséis créditos."},{"text":"Treinta créditos."},{"text":"Ochocientos cincuenta séptimos de crédito."}],"explanation":"30(6−1)/(6+1)=150/7. Sumar la referencia 100 da 850/7 para la estimación máxima, que es otra cantidad."},{"question":"Solo cambia la dependencia: ambos errores siempre coinciden y mantienen sus signos marginales. ¿Qué explica el máximo distinto?","options":[{"text":"Han cambiado los pares conjuntos posibles y sus pesos.","correct":true},{"text":"Ha aumentado la probabilidad marginal de error positivo de cada pujador."},{"text":"El valor fijo del objeto bajó al coincidir las señales."},{"text":"El pago de primer precio se sustituyó por una regla de segundo precio."}],"explanation":"Las marginales, la referencia y el pago siguen fijos. Desaparecen los pares de signos mezclados; los dos restantes tienen probabilidad 1/2 cada uno."}]}
+  className={"not-prose"}
+/>
+A continuación: [Rebajar tu puja](/es/winners-curse/03-shading-your-bid). Distingue una puja estratégica del ajuste común de centrado que acabamos de analizar; el [taller posterior del catálogo completo](/es/winners-curse/06-audit-a-winning-bid) compara explícitamente decisiones candidatas.
