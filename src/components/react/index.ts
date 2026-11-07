@@ -359,3 +359,6 @@ export type { ResponseChordProfile, ResponseChordLabels, ResponseChordDiagramPro
 
 export { FixedRuleComparison } from '@/components/react/FixedRuleComparison';
 export type { FixedRule, FixedRuleRecord, FixedRuleComparisonLabels, FixedRuleComparisonProps } from '@/components/react/FixedRuleComparison';
+
+export { GeometricThresholdTrace, calculateGeometricThresholdScenario, formatGeometricRational, auditGeometricThresholdTrace } from '@/components/react/GeometricThresholdTrace';
+export type { GeometricThresholdScenario, GeometricThresholdPoint, GeometricThresholdCalculation, GeometricThresholdTraceLabels, GeometricThresholdTraceProps } from '@/components/react/GeometricThresholdTrace';
