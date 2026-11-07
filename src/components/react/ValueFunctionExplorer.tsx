@@ -3,6 +3,8 @@ import { cx } from '@/components/react/cx';
 
 /** Props for the {@link ValueFunctionExplorer} island. */
 export interface ValueFunctionExplorerProps {
+  /** Coefficient display only; numeric calculations and SVG geometry are unchanged. */
+  locale?: 'en' | 'es';
   /** Heading above the card. */
   title?: string;
   /** Eyebrow label. Defaults to `'Losses loom larger'`. */
@@ -99,6 +101,7 @@ function value(x: number, lambda: number): number {
  * tween disabled under `prefers-reduced-motion`.
  */
 export function ValueFunctionExplorer({
+  locale = 'en',
   title,
   eyebrow = 'Losses loom larger',
   instructions = 'Drag the loss-aversion slider and watch the curve. Gains bend gently up; losses plunge — and the more loss-averse you are (higher λ), the deeper the drop. The kink at zero is the whole model.',
@@ -123,6 +126,9 @@ export function ValueFunctionExplorer({
   lossFrameReadout = 'In the loss frame the curve is convex, so the sure 400 deaths feels worse than gambling to avoid them: most people roll the dice (risk-seeking) — the exact same outcomes, the opposite choice.',
   className,
 }: ValueFunctionExplorerProps) {
+  if (locale !== 'en' && locale !== 'es') {
+    throw new Error('ValueFunctionExplorer: locale must be en or es.');
+  }
   const reactId = useId();
   const [lambdaPct, setLambdaPct] = useState(225); // λ × 100, so 100..300
   const [frame, setFrame] = useState<'gain' | 'loss'>('gain');
@@ -169,9 +175,9 @@ export function ValueFunctionExplorer({
     };
   }, [lambda]);
 
-  const ratio = lambda.toFixed(2);
+  const ratio = lambda.toFixed(2).replace('.', locale === 'es' ? ',' : '.');
   const curveReadout = curveReadoutTemplate
-    .replace('{lambda}', lambda.toFixed(2))
+    .replace('{lambda}', ratio)
     .replace('{gain}', model.gain100.toFixed(0))
     .replace('{loss}', model.loss100.toFixed(0))
     .replace('{ratio}', ratio);
@@ -285,10 +291,10 @@ export function ValueFunctionExplorer({
           step={5}
           value={lambdaPct}
           onChange={(e) => setLambdaPct(Number(e.target.value))}
-          aria-valuetext={`λ = ${lambda.toFixed(2)}`}
+          aria-valuetext={`λ = ${ratio}`}
           className="h-1.5 w-full cursor-pointer accent-accent-600"
         />
-        <span className="w-16 shrink-0 text-right font-mono text-xs font-semibold text-ink-700">λ = {lambda.toFixed(2)}</span>
+        <span className="w-16 shrink-0 text-right font-mono text-xs font-semibold text-ink-700">λ = {ratio}</span>
       </div>
 
       {/* ── Framing flip ─────────────────────────────────────────────────── */}

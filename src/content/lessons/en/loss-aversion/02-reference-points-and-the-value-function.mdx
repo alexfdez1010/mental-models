@@ -1,209 +1,387 @@
 ---
-title: "Reference Points & the Value Function"
-description: "We don't judge outcomes as final wealth — we judge them as gains and losses from a reference point, along an S-shaped value function that's concave for gains, convex for losses, and steeper on the loss side. The two-gear engine behind loss aversion."
+title: "Reference Points and the Value Function"
+description: "Compute a curved reference-dependent score, separate curvature from loss asymmetry, and test how decision weights change a conditional ranking."
 topic: "en/loss-aversion"
 order: 3
-minutes: 11
-updated: 2026-06-29
+minutes: 30
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, Callout, Reveal, Categorize, ValueFunctionExplorer } from '@/components/react';
+import { MCQ, FillBlank, MatchConcepts, Categorize, ValueFunctionExplorer, BenchmarkTrace, MindMap, Quiz } from '@/components/react';
 
-Last lesson handed you a number — losses loom about **2.25×** larger than equal gains — and a slogan to go with it: *we judge outcomes from a reference point, not as final wealth.* That number is the headline. This lesson is the engine room. Because "losses hurt more" only becomes a *prediction machine* once you can answer two questions precisely: **more than what?** (the reference point) and **how much more, at every size of outcome?** (the value function). Get those two gears turning and you can forecast a startling amount of behavior — including the bit where the *same* person plays it safe with gains and gambles with losses in the same breath.
+A fictional credit exercise offers two alternatives: finish with 150 for certain, or finish with 100 or 200, equally likely. Both have the same monetary mean. A report calls the second alternative a gain; another calls it a possible loss. Before explaining anyone's choice, we need the zero they used and the rule that turns a change into a score.
 
-Two gears, then. The **reference point** decides where zero sits. The **value function** decides how steeply the world bends on either side of it. Loss aversion is what you get when you bolt them together.
+This lesson supplies those inputs. We will compute a curved prototype, then change one assumption to see its ranking reverse. No person's preferences have been measured by the calculation.
 
-As always: lock in a guess before you peek.
-
-<MCQ
-  client:visible
-  pretest
-  question="You were quietly expecting a $2,000 raise this year. Your boss announces a $5,000 raise. Your coworker was expecting $10,000 and also got $5,000. Same $5,000 in both pockets — why does it feel like a gift to you and a slap to them?"
+<MCQ client:visible className="not-prose" pretest
+  question="Suppose the final amounts and their chances stay fixed while the model's reference changes. What must be recalculated?"
   options={[
-    { text: 'You each judge the $5,000 against a different reference point (your expectation), so the same amount lands as a $3,000 gain for you and a $5,000 shortfall for them', correct: true },
-    { text: 'You are simply more grateful by personality than your coworker is' },
-    { text: 'The raises are not actually equal — there must be a hidden difference in the paychecks' },
-    { text: 'Money has no effect on feelings unless the amount is very large' },
+    { text: 'The physical chances attached to the same final outcomes' },
+    { text: 'Every change from reference, including the certain outcome', correct: true },
+    { text: 'Only the risky outcome that already had a negative score' },
+    { text: 'The final credits, because moving zero creates new payments' }
   ]}
-  explanation="No grade on a pretest — just lock in the shape. The dollars are identical; the *baselines* are not. You scored $5,000 against an expectation of $2,000, so it reads as a +$3,000 gain. Your coworker scored the same $5,000 against an expectation of $10,000, so it reads as a $5,000 shortfall — a loss. Outcomes aren't felt as final states of wealth; they're felt as steps up or down from wherever you happened to set zero. That movable zero is the reference point, and it's about to do a lot of work."
+  explanation="Subtract the new reference from every final amount. Moving a model's zero need not change any payment or physical probability, and the certain alternative does not automatically stay at zero."
 />
 
-## The reference point: where you put zero changes everything
+## Fix the menu before moving its zero
 
-**The analogy.** Stick one hand in ice water and the other in hot water for a minute, then plunge both into the same lukewarm bowl. The cold hand screams *warm*; the hot hand screams *cold* — from the **same** water. Your skin doesn't report absolute temperature; it reports the *change* from where it just was. Your sense of money, status, and outcomes works the identical way. There's no absolute "good paycheck" — only a paycheck that's *higher or lower than the one your mind was braced for.*
+A **reference point** is the baseline used to code an outcome as a gain or loss. Think of moving the zero mark on a ruler: the recorded distances change while the objects stay in place. The analogy has a limit. Our valuation rule can treat negative distances differently from positive ones; a ruler does not.
 
-**The precise definition.** A **reference point** is the baseline against which you judge an outcome as a **gain** (a step up) or a **loss** (a step down). It's usually the **status quo** (what you have right now) or an **expectation** (what you were braced to get). Crucially, prospect theory's whole claim is that you evaluate the *change* from this point — **not** the final state of wealth. Two people can end the day with the exact same bank balance and feel opposite things, because they started the day pointed at different baselines.
+There is one decision and one outcome date. Nothing else is paid or received: no entry fee, later plays, resource restriction or other consequence enters this invented example. Credits are teaching units.
 
-**Worked example — one paycheck, two feelings.** Take the pretest's two raises and write them out. Same \$5,000 hits both accounts; the only thing that differs is the baseline each person carried into the room.
+<div className="not-prose my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label="One final-credit menu with known probabilities">
+<table data-audit-table="menu" className="w-full text-left text-sm" style={{ minWidth: '32rem', display: 'table', overflow: 'visible', margin: 0 }}>
+<caption className="mb-3 text-left font-semibold text-ink-900">One final-credit menu with known probabilities</caption>
+<thead><tr><th scope="col" className="p-3">Alternative or outcome</th><th scope="col" className="p-3">Final credits</th><th scope="col" className="p-3">Physical probability</th></tr></thead>
+<tbody><tr><td className="p-3">Certain</td><td className="p-3">150</td><td className="p-3">1</td></tr>
+<tr><td className="p-3">Risky, lower outcome</td><td className="p-3">100</td><td className="p-3">1/2</td></tr>
+<tr><td className="p-3">Risky, higher outcome</td><td className="p-3">200</td><td className="p-3">1/2</td></tr></tbody>
+</table>
+</div>
 
-| | You | Your coworker |
-|---|---|---|
-| Reference point (what you expected) | \$2,000 | \$10,000 |
-| Actual raise | \$5,000 | \$5,000 |
-| Felt as | a **+\$3,000 gain** | a **−\$5,000 loss** |
-| Emotional reading | a happy surprise | a punch in the gut |
+The **monetary expectation** is the average of final credits weighted by their probabilities: $(100+200)/2=150$, the same as the certain alternative. Equal means do not make the distributions identical: the risky alternative can finish below or above 150.
 
-Nothing about the money explains the gap — both got \$5,000. Everything about the *reference points* does. You beat your baseline by \$3,000 and felt the glow of a gain; your coworker fell \$5,000 short of theirs and felt the sting of a loss, even while taking home a raise. The exact same dollars, scored against different zeros, produce opposite emotions.
+Write $R$ for the shared reference, $W$ for final credits and $x=W-R$ for the change. The sign of $x$ defines a gain or loss in the model. Zero is an outcome matching the reference.
 
-**Worked example — the friendly reference point at the pump.** Now watch someone *choose your zero for you.* A gas station charges \$3.00 a gallon for credit and \$2.95 for cash. Two ways to post that identical pair of prices:
+<div className="not-prose my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label="Changes in credits from each stipulated reference">
+<table data-audit-table="coding" className="w-full text-left text-sm" style={{ minWidth: '34rem', display: 'table', overflow: 'visible', margin: 0 }}>
+<caption className="mb-3 text-left font-semibold text-ink-900">Changes in credits from each stipulated reference</caption>
+<thead><tr><th scope="col" className="p-3">Reference</th><th scope="col" className="p-3">Certain change</th><th scope="col" className="p-3">Lower risky change</th><th scope="col" className="p-3">Higher risky change</th></tr></thead>
+<tbody><tr><td className="p-3">100</td><td className="p-3">50</td><td className="p-3">0</td><td className="p-3">100</td></tr>
+<tr><td className="p-3">200</td><td className="p-3">−50</td><td className="p-3">−100</td><td className="p-3">0</td></tr></tbody>
+</table>
+</div>
 
-| Sign | Reference price (the "real" price) | Cash feels like | Credit feels like |
-|---|---|---|---|
-| "Credit \$3.00 — **cash discount** \$2.95" | \$3.00 | a **5¢ gain** (a reward) | the normal price |
-| "Cash \$2.95 — **credit surcharge** \$3.05" | \$2.95 | the normal price | a **10¢ loss** (a penalty) |
+For example, 150 final credits give $150-100=50$ at the first reference and $150-200=-50$ at the second. These are two stipulated codings, not evidence that a person adopts a reference when someone names it. We will also hold the valuation parameters fixed between them, another assumption of this exercise.
 
-Same two numbers at the pump. But the word *discount* plants your reference point at the higher price, so paying cash feels like *winning* a nickel — and loss aversion means that framing massively outperforms a "surcharge" sign that makes credit users feel *penalized.* This is not an accident; credit-card lobbyists fought hard to keep stations saying "cash discount" instead of "credit surcharge." Same prices, friendlier zero.
-
-<Callout variant="info" title="The reference point is movable — and you don't always hold the pen">
-The single most useful thing to remember about reference points is that they *move,* and that other people move them on purpose. A marketer's "was \$120, now \$80" sets your zero at \$120 so \$80 reads as a \$40 win. A negotiator's outrageous opening offer resets your zero so their real target later feels like a relief. An employer's hinted bonus becomes the baseline against which the actual bonus disappoints. None of these change the underlying outcome by a cent — they change the *baseline you measure it from,* which is often the whole ballgame.
-</Callout>
-
-### When to use it
-
-Reach for the reference point the instant an outcome feels much better or worse than the bare numbers justify — a raise that disappoints, a discount that thrills, a "loss" that's actually still a profit. Ask the operative question: *what baseline am I scoring this against, and did I choose it or did someone hand it to me?* If a feeling seems out of proportion to the dollars, the reference point is almost always doing the lifting. And when you're *describing* an outcome to someone else, remember you're choosing their zero whether you mean to or not.
-
-## The value function: the curve that turns outcomes into feelings
-
-**The analogy.** Imagine a machine that takes in an *objective* outcome — "+\$100," "−\$400" — and spits out a *subjective* feeling, "how good or bad that actually lands." That machine has a personality, and its personality is a curve. Plot objective outcome along the bottom and felt value up the side, and you don't get a straight 45-degree line (which is what a cold calculator would draw). You get a lopsided, kinked **S**.
-
-**The precise definition.** The **value function** is the curve mapping objective outcomes to subjective value — how good a gain *feels* and how bad a loss *hurts*, as a function of size. Kahneman and Tversky's value function has three defining properties, and together they *are* prospect theory's psychology of risk:
-
-1. **Reference-dependent.** The curve is centered at the **reference point** — the origin is your zero, gains stretch right, losses stretch left. (That's gear one, bolted in.)
-2. **Diminishing sensitivity.** The curve is **concave for gains** (bends and flattens as gains grow) and **convex for losses** (bends and flattens as losses grow). In plain terms: the jump from \$0 to \$100 feels *bigger* than the jump from \$1,000 to \$1,100, even though both add \$100. The first \$100 of a windfall thrills; the hundredth barely registers. Same on the loss side — the first \$100 lost stings far more than the difference between losing \$1,000 and losing \$1,100.
-3. **Loss aversion.** The curve is **steeper on the loss side than the gain side** — it takes a sharp downward bend right at the origin, the famous **kink**. That kink *is* the 2.25× from last lesson, drawn as geometry: the loss arm plunges faster than the gain arm climbs.
-
-That's the whole engine: a curve, centered on a movable point, gentle going up, steep going down. Drive it yourself below — drag the loss-aversion slider and watch the loss arm dive while the gain arm only ambles up.
-
-<ValueFunctionExplorer
-  client:visible
-  title="Drive the value function: gentle up, steep down, kinked at zero"
-  caption="Slide λ up and the loss arm plunges while the gain arm barely moves — that gap at ±100 is loss aversion drawn as geometry. The lower panel turns the same curve loose on a real choice; we unpack that flip in the next section and the next lesson."
+<FillBlank client:visible className="not-prose"
+  question="Keep the accounting and the coding separate"
+  text="Moving the reference changes {{every outcome's distance from zero|the amount paid in every outcome|the physical chance of each outcome}}. The certain alternative {{must also be recoded|must always have a zero score|must be omitted from the comparison}}. The monetary mean of the final menu {{stays the same|becomes a valuation coefficient|must reverse with the reference}}."
+  explanation="The menu still contains the same final credits and probabilities. The subtraction changes for both alternatives. Reframing only the conspicuous gamble would compare different references."
 />
 
-Notice what the slider reveals. At the default λ ≈ 2.25, winning \$100 feels like a modest climb but losing \$100 feels like a steep fall — the loss point sits more than twice as far below zero as the gain point sits above it. Crank λ higher and the loss arm crashes toward the floor; pull it down to 1.00 and the curve becomes symmetric (a person who weighs losses and gains exactly the same). The *bend* of each arm is diminishing sensitivity; the *difference in steepness between the arms* is loss aversion. Two distinct features of one curve.
+### When to use this first step
 
-<Callout variant="tip" title="Two gears, two jobs — don't blur them">
-Diminishing sensitivity and loss aversion are easy to confuse because they live on the same curve. Keep them apart: **diminishing sensitivity** is about *size* — each extra dollar (won or lost) matters less than the one before, which is why both arms *bend.* **Loss aversion** is about *direction* — losses are weighted more than equal gains, which is why the loss arm is *steeper.* You could have one without the other. A curve can bend without being lopsided; ours does both.
-</Callout>
+Write final outcomes before discussing gains and losses. It prevents a different payment, probability or fee from being mistaken for a reference change. The old slogan 'same deal' needs an actual unchanged menu behind it.
 
-## Diminishing sensitivity flips your risk attitude
+## Give the curve and the loss multiplier different jobs
 
-Here's the payoff that makes the curve worth drawing: those two bends don't just describe feelings, they *predict gambles.* And they predict something genuinely strange — the same person is **cautious about gains** and **reckless about losses.**
+A **value function** maps a change from reference to a valuation score. We use this declared power form:
 
-**The analogy.** Think of the value curve as a hill on the gain side and a cliff on the loss side. On a gently rounding hill, a sure step up is worth more than a coin-flip between a bigger step and no step — the curve "rewards" certainty. On a plunging cliff, a sure drop is so painful that a coin-flip offering *any* chance of not falling looks tempting — the curve "rewards" the gamble. Same person, opposite instinct, because the ground bends the opposite way on each side.
+$$v(x)=\begin{cases}x^{\alpha},&x\ge0,\\-\lambda(-x)^{\alpha},&x<0,\end{cases}\qquad \alpha=0.88=\frac{22}{25},\quad \lambda=2.25=\frac94.$$
 
-**The precise idea.** Because the gain arm is **concave**, a sure gain beats a risky gain of equal average value — so people are **risk-averse for gains**. Because the loss arm is **convex**, a sure loss feels worse than a risky loss of equal average value — so people are **risk-seeking for losses**: they'll gamble to *avoid* a certain loss. Let's walk both with real numbers.
+The exponent **alpha** controls curvature within each arm. **Lambda** multiplies the loss arm. Valuation-score units are arbitrary; they are not final credits or a physical measurement of pleasure and pain. The numbers resemble fitted medians reported in the 1992 paper, but here they are assumptions chosen for an inspectable example.
 
-**Worked example — the gain side (concave ⇒ risk-averse).** I offer you a choice. Most people grab the sure thing, even though the gamble pays the same on average.
+**Diminishing sensitivity** means that equal increments have less effect farther from the reference. A gain arm is **concave** when its successive slopes decrease. The loss arm is **convex** here: as losses get larger in magnitude, each further equal loss adds less score magnitude than the previous one. The following values are rounded to six decimals.
 
-| Option | Outcomes | Average value | What most people pick |
-|---|---|---|---|
-| **A — sure thing** | \$50 guaranteed | \$50 | ✅ the sure \$50 |
-| **B — gamble** | 50% of \$100, 50% of \$0 | \$50 | passed over |
+<div className="not-prose my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label="Equal distances and the declared curved scores">
+<table data-audit-table="power" className="w-full text-left text-sm" style={{ minWidth: '35rem', display: 'table', overflow: 'visible', margin: 0 }}>
+<caption className="mb-3 text-left font-semibold text-ink-900">Equal distances and the declared curved scores</caption>
+<thead><tr><th scope="col" className="p-3">Distance from reference, credits</th><th scope="col" className="p-3">Gain score</th><th scope="col" className="p-3">Magnitude of loss score</th></tr></thead>
+<tbody><tr><td className="p-3">0</td><td className="p-3">0</td><td className="p-3">0</td></tr>
+<tr><td className="p-3">50</td><td className="p-3">31.267532</td><td className="p-3">70.351947</td></tr>
+<tr><td className="p-3">100</td><td className="p-3">57.543994</td><td className="p-3">129.473986</td></tr></tbody>
+</table>
+</div>
 
-Equal averages, yet the concave gain arm makes the *certain* \$50 feel worth more than the bumpy ride to an average \$50 — so you pocket the sure thing. **Risk-averse for gains.**
+The first 50-credit gain adds about 31.267532 score units; the next 50 adds $57.543994-31.267532\approx26.276462$. On the loss side, the first 50 has magnitude about 70.351947; the next 50 adds about 59.122039. Those smaller successive increments show curvature. They are different from comparing a gain with a loss of equal size.
 
-**Worked example — the loss side (convex ⇒ risk-seeking).** Now mirror it. Identical structure, flipped into losses. Watch the preference flip too.
+For any distance $a>0$, this particular function gives $-v(-a)/v(a)=\lambda$. Thus the 100-credit loss has 2.25 times the score magnitude of the 100-credit gain. That is the stipulated **loss asymmetry**. Setting lambda to one removes that asymmetry while leaving the exponent and curvature intact.
 
-| Option | Outcomes | Average value | What most people pick |
-|---|---|---|---|
-| **C — sure thing** | lose \$50 guaranteed | −\$50 | passed over |
-| **D — gamble** | 50% of losing \$100, 50% of losing \$0 | −\$50 | ✅ the gamble |
+<MatchConcepts client:visible className="not-prose"
+  question="Match each quantity to the operation it controls"
+  pairs={[
+    { term: 'Reference', definition: 'Subtract the same baseline from every final amount.' },
+    { term: 'Curvature exponent', definition: 'Determine how successive equal increments change score within an arm.' },
+    { term: 'Loss multiplier', definition: 'Scale the loss arm relative to matched gains in this specified form.' },
+    { term: 'Outcome weight', definition: 'Multiply an outcome score before summing it into the prospect score.' }
+  ]}
+  explanation="Reference coding, within-arm curvature, loss/gain asymmetry and outcome weighting are different operations. A single observed preference does not identify their separate inputs."
+/>
 
-Same equal averages — and now most people *refuse* the sure loss and roll the dice, hoping to escape losing anything at all. The convex loss arm makes a certain \$50 loss feel *worse* than the average-\$50 gamble, so they gamble to dodge the sure hit. **Risk-seeking for losses.** Same human, same \$50 stakes, opposite choice — purely because one frame is gains and the other is losses.
+## Compute both alternatives with ordinary probabilities
 
-This flip is the spine of the next lesson: if a sure outcome reverses from "grab it" to "avoid it" just by recoloring it as a gain or a loss, then *how you word a choice can flip what people choose* — with the actual outcomes untouched. (Kahneman and Tversky pinned the curvature of these bends with a parameter near **0.88** — the exponent the explorer above uses to draw each arm — so this isn't hand-waving; it's a measured, fitted shape.)
+For now, a risky prospect's score is the mean of its outcome scores using the stated physical probabilities. The certain score has weight one. Call the scores $S$ and $T$, and compare $D=T-S$. Positive $D$ ranks risky higher, negative ranks certain higher, and zero is indifference under this rule. A score is a criterion; it has not recorded anyone's behavior.
 
-<Categorize
-  client:visible
-  question="Sort each situation by which instinct the value function predicts. Are people leaning safe because it's framed as a gain, or gambling because it's framed as a loss?"
-  buckets={['Risk-averse (gain frame)', 'Risk-seeking (loss frame)']}
+<div className="not-prose my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label="Every contribution under ordinary probability weights">
+<table data-audit-table="ordinary" className="w-full text-left text-sm" style={{ minWidth: '47rem', display: 'table', overflow: 'visible', margin: 0 }}>
+<caption className="mb-3 text-left font-semibold text-ink-900">Every contribution under ordinary probability weights, rounded to six decimals</caption>
+<thead><tr><th scope="col" className="p-3">Reference</th><th scope="col" className="p-3">Outcome</th><th scope="col" className="p-3">Change, credits</th><th scope="col" className="p-3">Score</th><th scope="col" className="p-3">Weight</th><th scope="col" className="p-3">Weighted score</th></tr></thead>
+<tbody><tr><td className="p-3">100</td><td className="p-3">Certain</td><td className="p-3">50</td><td className="p-3">31.267532</td><td className="p-3">1</td><td className="p-3">31.267532</td></tr>
+<tr><td className="p-3">100</td><td className="p-3">Risky, lower</td><td className="p-3">0</td><td className="p-3">0</td><td className="p-3">1/2</td><td className="p-3">0</td></tr>
+<tr><td className="p-3">100</td><td className="p-3">Risky, higher</td><td className="p-3">100</td><td className="p-3">57.543994</td><td className="p-3">1/2</td><td className="p-3">28.771997</td></tr>
+<tr><td className="p-3">200</td><td className="p-3">Certain</td><td className="p-3">−50</td><td className="p-3">−70.351947</td><td className="p-3">1</td><td className="p-3">−70.351947</td></tr>
+<tr><td className="p-3">200</td><td className="p-3">Risky, lower</td><td className="p-3">−100</td><td className="p-3">−129.473986</td><td className="p-3">1/2</td><td className="p-3">−64.736993</td></tr>
+<tr><td className="p-3">200</td><td className="p-3">Risky, higher</td><td className="p-3">0</td><td className="p-3">0</td><td className="p-3">1/2</td><td className="p-3">0</td></tr></tbody>
+</table>
+</div>
+
+At reference 100, $S=50^{\alpha}\approx31.267532$, while $T=(0+100^{\alpha})/2\approx28.771997$. Certain ranks higher. At reference 200, $S=-\lambda50^{\alpha}\approx-70.351947$, while $T=(-\lambda100^{\alpha}+0)/2\approx-64.736993$. Risky ranks higher: minus 64.7 is greater than minus 70.4.
+
+<div className="not-prose my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label="The two conditional score comparisons">
+<table data-audit-table="summary" className="w-full text-left text-sm" style={{ minWidth: '35rem', display: 'table', overflow: 'visible', margin: 0 }}>
+<caption className="mb-3 text-left font-semibold text-ink-900">The two conditional score comparisons, rounded to six decimals</caption>
+<thead><tr><th scope="col" className="p-3">Reference</th><th scope="col" className="p-3">Certain S</th><th scope="col" className="p-3">Risky T</th><th scope="col" className="p-3">Risky minus certain D</th></tr></thead>
+<tbody><tr><td className="p-3">100</td><td className="p-3">31.267532</td><td className="p-3">28.771997</td><td className="p-3">−2.495535</td></tr>
+<tr><td className="p-3">200</td><td className="p-3">−70.351947</td><td className="p-3">−64.736993</td><td className="p-3">5.614954</td></tr></tbody>
+</table>
+</div>
+
+With ordinary probabilities, concavity puts the sure gain above the average gain score; convexity puts the sure loss below the average loss score. This is a calculation for this function and menu. It does not establish that all people always prefer certainty in gains or risk in losses. The broader theory also includes decision weights, which we will test below.
+
+<MCQ client:visible className="not-prose"
+  question="At the higher reference, why does the rule rank the risky alternative above the certain one?"
+  options={[
+    { text: 'Its final-credit mean rises when the reference is subtracted' },
+    { text: 'Its negative expected score is lower, so it must be preferred' },
+    { text: 'Its expected score is less negative than the certain score', correct: true },
+    { text: 'Its certain comparison has been reset to a zero score again' }
+  ]}
+  explanation="Compare the two scores: risky is about minus sixty-five and certain about minus seventy. The higher score is the less negative one. Both final-credit means remain one hundred fifty, and the certain score is not zero."
+/>
+
+### Read the explorer using its own menu
+
+The explorer below uses the same power exponent and lets you vary lambda. Its top graph draws changes only between minus 100 and plus 100. Its **vertical scale readjusts** with lambda: the loss marker stays at the same relative height and the gain marker shifts. Follow the numerical values and ratio; a changing screen height is not a measured emotional response.
+
+Its lower panel has a separate fixed demonstration: 200 final credits for certain, or 0/600 with probabilities 2/3 and 1/3. References zero and 600 turn that menu into gains or losses. Both final-credit means are 200. The same formula evaluates those changes, including ones beyond the upper graph's displayed range. At lambda 2.25:
+
+<div className="not-prose my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label="The explorer's separate fixed demonstration">
+<table data-audit-table="auxiliary" className="w-full text-left text-sm" style={{ minWidth: '34rem', display: 'table', overflow: 'visible', margin: 0 }}>
+<caption className="mb-3 text-left font-semibold text-ink-900">The explorer's separate fixed demonstration, score units rounded to six decimals</caption>
+<thead><tr><th scope="col" className="p-3">Reference</th><th scope="col" className="p-3">Certain score</th><th scope="col" className="p-3">Risky score</th></tr></thead>
+<tbody><tr><td className="p-3">0</td><td className="p-3">105.902545</td><td className="p-3">92.822197</td></tr>
+<tr><td className="p-3">600</td><td className="p-3">−438.525963</td><td className="p-3">−417.699889</td></tr></tbody>
+</table>
+</div>
+
+<ValueFunctionExplorer client:visible className="not-prose" locale="en"
+  title="Inspect curvature and the loss multiplier"
+  eyebrow=""
+  instructions="Vary the loss multiplier. The exponent stays fixed; the vertical scale readjusts. Read the numbers as arbitrary valuation units."
+  lambdaLabel="Loss multiplier lambda"
+  gainsAxisLabel="Gains"
+  lossesAxisLabel="Losses"
+  valueAxisLabel="Score"
+  gainLegendLabel="Positive change score"
+  lossLegendLabel="Negative change score"
+  curveReadoutTemplate="Lambda {lambda}: a gain of one hundred scores about {gain}; a loss of one hundred scores about {loss}. Their magnitude ratio is {ratio}. Scores are rounded here."
+  framingTitle="Separate fixed menu of six hundred credits"
+  framingInstructions="Compare two references for the same final menu: two hundred certain, or zero and six hundred with two thirds and one third. Ordinary probabilities are used."
+  gainFrameLabel="R = 0"
+  lossFrameLabel="R = 600"
+  sureGainOption="Certain: two hundred final credits"
+  gambleGainOption="Risky: one third for six hundred final credits, otherwise zero"
+  sureLossOption="Certain: two hundred final credits"
+  gambleLossOption="Risky: one third for six hundred final credits, otherwise zero"
+  leansHereLabel="Higher declared score"
+  gainFrameReadout="At reference zero, the certain score exceeds the risky average for this curved function. The highlight calculates the rule; it does not observe a person."
+  lossFrameReadout="At reference six hundred, the risky score is less negative. A common positive loss multiplier scales both scores and leaves this ranking unchanged."
+  caption="The graph covers changes up to one hundred in either direction. The separate lower menu is evaluated by the same formula. Moving lambda changes loss values and rescales the graph; it does not change either lower-panel ranking."
+/>
+
+## Check what the multiplier cannot explain
+
+Keep the main menu and ordinary probabilities but set lambda to one. At reference 200, the scores become $S=-50^{\alpha}\approx-31.267532$ and $T=-100^{\alpha}/2\approx-28.771997$. Risky still ranks higher. The gain-side scores did not change either. **Removing loss asymmetry has not removed the curvature comparison.**
+
+More generally, when both alternatives have only losses or zero, a common positive lambda multiplies every contribution. It cannot change which of those scores is higher. This observation does not cover a mixed prospect containing both gains and losses, where lambda need not factor out.
+
+For a second control, change the exponent to one while retaining lambda 2.25 and ordinary probabilities. This is a different, piecewise-linear rule. At reference 100, $S=50$ and $T=100/2=50$. At reference 200, $S=-2.25\times50=-112.5$ and $T=-2.25\times100/2=-112.5$. Both comparisons tie. A loss multiplier does not create within-arm curvature. The later workshop develops that linear form using a different menu; preserve its own inputs.
+
+<details>
+<summary>What does the often-drawn corner mean at zero?</summary>
+
+For the power form used here, there are no two finite one-sided slopes at zero. With $h>0$, the gain-side secant slope from zero is $h^{\alpha}/h=h^{-3/25}$. The loss-side counterpart is $\lambda h^{-3/25}$. Both grow without bound as $h$ approaches zero. Away from zero, matched nonzero magnitudes can still be compared, and $-v(-a)/v(a)=\lambda$ for $a>0$.
+
+Calling the drawing 'kinked' does not make lambda the ratio of two finite derivatives at zero. Its value is defined by the formula, not by measuring an angle on the screen. The function itself is continuous there because both scores approach zero.
+
+</details>
+
+<MCQ client:visible className="not-prose" allowMultiple
+  question="Which two checks correctly separate the mechanisms in the declared example? Select both."
+  options={[
+    { text: 'A positive common loss multiplier changes the ranking of every all-loss pair' },
+    { text: 'Removing loss asymmetry also removes curvature within the gain arm' },
+    { text: 'The symmetric curved function can still rank the gain and loss comparisons differently', correct: true },
+    { text: 'Linear arms with ordinary weights tie in these equal-mean pure-domain comparisons', correct: true }
+  ]}
+  explanation="Lambda one leaves the exponent below one, so the two curvature comparisons remain. With exponent one, each pure arm is linear and the equal-mean scores tie. A positive common multiplier cannot reverse an all-loss comparison by itself."
+/>
+
+## Transfer by changing weights rather than chances
+
+So far each risky outcome score has been weighted by its physical probability. A **decision weight** is a coefficient in the valuation rule; it need not be a probability or a belief about how often an outcome occurs. In the broader prospect-theory accounts, value and weighting jointly affect rankings.
+
+Keep the main menu, physical probabilities, exponent and lambda unchanged. The certain score still has weight one. Now stipulate weight $q=0.7=7/10$ for the single **nonzero outcome score** in each reference coding. The zero score contributes zero. At reference 100 the nonzero score belongs to final 200; at reference 200 it belongs to final 100. We have changed the rule's weighting, not the chance of those final amounts. This is an illustrative weight, not a fitted estimate or a complete cumulative-weighting function.
+
+<MCQ client:visible className="not-prose" pretest
+  question="With the new nonzero-outcome weight, predict the pair of rankings before opening the calculation."
+  options={[
+    { text: 'Risky at the lower reference; certain at the higher reference', correct: true },
+    { text: 'Certain at the lower reference; risky at the higher reference' },
+    { text: 'Certain at both references, because both means have fallen' },
+    { text: 'Risky at both references, because the chances have risen' }
+  ]}
+  explanation="The new weight raises the positive risky score and increases the magnitude of the negative risky score. Both comparisons reverse. The full arithmetic below keeps the same physical probabilities and scores the certain alternative too."
+/>
+
+<details>
+<summary>Check the transfer, the threshold and the supplied score plots</summary>
+
+At reference 100, the risky score is $T=q100^{\alpha}=0.7\times57.5439937\ldots\approx40.280796$, above the unchanged $S\approx31.267532$. At reference 200, $T=-\lambda q100^{\alpha}\approx-90.631790$, below $S\approx-70.351947$. The monetary expectation of final credits remains 150 for both alternatives. These newly weighted scores are **not ordinary expectations** of valuation under the physical half-and-half law.
+
+<div className="not-prose my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label="Transfer scores after changing only the nonzero-outcome decision weight">
+<table data-audit-table="transfer" className="w-full text-left text-sm" style={{ minWidth: '35rem', display: 'table', overflow: 'visible', margin: 0 }}>
+<caption className="mb-3 text-left font-semibold text-ink-900">Transfer scores, rounded to six decimals</caption>
+<thead><tr><th scope="col" className="p-3">Reference</th><th scope="col" className="p-3">Certain S</th><th scope="col" className="p-3">Weighted risky T</th><th scope="col" className="p-3">Risky minus certain D</th></tr></thead>
+<tbody><tr><td className="p-3">100</td><td className="p-3">31.267532</td><td className="p-3">40.280796</td><td className="p-3">9.013264</td></tr>
+<tr><td className="p-3">200</td><td className="p-3">−70.351947</td><td className="p-3">−90.631790</td><td className="p-3">−20.279843</td></tr></tbody>
+</table>
+</div>
+
+The threshold is exact. In gains, risky and certain tie when $q100^{\alpha}=50^{\alpha}$, giving
+
+$$q_* =\frac{50^{\alpha}}{100^{\alpha}}=2^{-\alpha}=2^{-22/25}\approx0.543367431263.$$
+
+The loss-side equality gives the same threshold after cancelling positive lambda. Below $q_*$, the original rankings hold; above it, the transferred rankings hold. At exactly $q_*$ both comparisons tie. A rounded decimal is an approximation, not permission to erase a small real difference. The four supplied settings below bracket the threshold without claiming to land exactly on it.
+
+<div className="not-prose my-6 overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label="Supplied weight settings and score magnitudes">
+<table data-audit-table="sensitivity" className="w-full text-left text-sm" style={{ minWidth: '43rem', display: 'table', overflow: 'visible', margin: 0 }}>
+<caption className="mb-3 text-left font-semibold text-ink-900">Supplied settings, rounded to six decimals; the last two columns are positive loss magnitudes</caption>
+<thead><tr><th scope="col" className="p-3">q</th><th scope="col" className="p-3">Gain certain S</th><th scope="col" className="p-3">Gain risky T</th><th scope="col" className="p-3">Loss certain magnitude</th><th scope="col" className="p-3">Loss risky magnitude</th></tr></thead>
+<tbody><tr><td className="p-3">0.50</td><td className="p-3">31.267532</td><td className="p-3">28.771997</td><td className="p-3">70.351947</td><td className="p-3">64.736993</td></tr>
+<tr><td className="p-3">0.54</td><td className="p-3">31.267532</td><td className="p-3">31.073757</td><td className="p-3">70.351947</td><td className="p-3">69.915952</td></tr>
+<tr><td className="p-3">0.55</td><td className="p-3">31.267532</td><td className="p-3">31.649197</td><td className="p-3">70.351947</td><td className="p-3">71.210692</td></tr>
+<tr><td className="p-3">0.70</td><td className="p-3">31.267532</td><td className="p-3">40.280796</td><td className="p-3">70.351947</td><td className="p-3">90.631790</td></tr></tbody>
+</table>
+</div>
+
+<BenchmarkTrace client:visible className="not-prose" locale="en"
+  title="Gain scores at the supplied weights"
+  instructions="Select an authored weight setting. Both series are positive scores; higher is preferred by this rule. The scale stays fixed within this figure."
+  previousLabel="Previous weight setting" nextLabel="Next weight setting" checkpointLabel="Nonzero-outcome weight"
+  gapLabel="Certain score minus risky score" reductionLabel="First listed score minus current score"
+  aLabel="Certain gain score" bLabel="Risky gain score" unit="valuation units"
+  observations={[
+    { label: 'One half', a: 31.267532059704936, b: 28.771996866857847 },
+    { label: 'Fifty-four hundredths', a: 31.267532059704936, b: 31.073756616206474 },
+    { label: 'Fifty-five hundredths', a: 31.267532059704936, b: 31.649196553543634 },
+    { label: 'Seven tenths', a: 31.267532059704936, b: 40.280795613600985 }
+  ]}
+  caption="These supplied values are calculations, not observations or a policy solver. A positive displayed difference favors certain here; a negative one favors risky. Reductions are signed comparisons with the first setting."
+/>
+
+<BenchmarkTrace client:visible className="not-prose" locale="en"
+  title="Magnitudes of the negative loss scores"
+  instructions="This figure plots positive magnitudes of negative scores. A smaller magnitude means a higher score and is preferred. Its own scale stays fixed; do not compare heights across figures."
+  previousLabel="Previous weight setting" nextLabel="Next weight setting" checkpointLabel="Nonzero-outcome weight"
+  gapLabel="Certain magnitude minus risky magnitude" reductionLabel="First listed magnitude minus current magnitude"
+  aLabel="Certain loss-score magnitude" bLabel="Risky loss-score magnitude" unit="valuation units"
+  observations={[
+    { label: 'One half', a: 70.3519471343361, b: 64.73699295043015 },
+    { label: 'Fifty-four hundredths', a: 70.3519471343361, b: 69.91595238646457 },
+    { label: 'Fifty-five hundredths', a: 70.3519471343361, b: 71.21069224547317 },
+    { label: 'Seven tenths', a: 70.3519471343361, b: 90.63179013060222 }
+  ]}
+  caption="The table above retains the negative scores. A positive magnitude difference favors risky here; a negative one favors certain. These controls display supplied settings and do not infer a person's decision weights."
+/>
+
+</details>
+
+<FillBlank client:visible className="not-prose"
+  question="Interpret what changed in the transfer"
+  text="The physical chance of each final amount {{remained one half|became the displayed decision weight|was inferred from the preferred option}}. The nonzero score belongs to {{different final outcomes in the two reference codings|the higher final amount in both reference codings|the certain amount in both reference codings}}. The new weighted score {{is not an ordinary expectation under the stated law|is the unchanged final-credit mean|measures a visitor's actual preference}}."
+  explanation="At the lower reference, the higher final amount has the positive nonzero score; at the higher reference, the lower amount has the negative nonzero score. Changing its decision weight did not change the half-and-half physical distribution."
+/>
+
+## Use the calculation to ask better empirical questions
+
+Prospect theory comes from research on choice under risk. The [1979 paper](https://web.mit.edu/curhan/www/docs/Articles/15341_Readings/Behavioral_Decision_Theory/Kahneman_Tversky_1979_Prospect_theory.pdf) distinguishes reference coding, value and decision weights, while qualifying the proposed shape. The [1992 cumulative paper](https://christosaioannou.com/Advances_in_Prospect_Theory.pdf) develops the weighting treatment and reports fitted parameter medians under a chosen functional form. Those authors discuss the limitations of estimating a complex model.
+
+The exponent 0.88 and loss coefficient 2.25 are useful historical context. They are not universal individual constants. The example's references, weights and unchanged functional form across references were stipulated separately. Its algebra is not a measurement of a participant, an estimate of wording's effect or a recommendation to select the model's preferred action.
+
+Use the function to formulate a checkable explanation when a risky choice may be represented as gains and losses. First keep the final menu visible. Then ask what reference, value shape and weights are justified, whether constraints or competing models explain the same choice, and which observations distinguish them. A changed label is an intervention to investigate, not proof that a reference changed.
+
+<Categorize client:visible className="not-prose"
+  question="Classify each statement in this constructed exercise"
+  buckets={['Stipulated input', 'Calculated consequence', 'Not identified here']}
   items={[
-    { text: 'Taking a guaranteed $500 bonus over a coin flip for $1,000 or nothing', bucket: 'Risk-averse (gain frame)' },
-    { text: 'Refusing a sure $200 settlement and rolling the dice in court hoping to owe nothing instead of a certain $200', bucket: 'Risk-seeking (loss frame)' },
-    { text: 'Cashing out a small but certain investment profit rather than holding for a possibly larger, possibly zero gain', bucket: 'Risk-averse (gain frame)' },
-    { text: 'A gambler down $300 making one big reckless bet to "get back to even" rather than accept the sure $300 loss', bucket: 'Risk-seeking (loss frame)' },
-    { text: 'Locking in a guaranteed prize on a game show instead of risking it for a bigger one', bucket: 'Risk-averse (gain frame)' },
-    { text: 'A company doubling down on a failing project, gambling on a turnaround, rather than booking the certain write-off now', bucket: 'Risk-seeking (loss frame)' },
+    { text: 'The risky final amounts have equal physical probabilities.', bucket: 'Stipulated input' },
+    { text: 'With ordinary weights, the gain-side certain score is higher.', bucket: 'Calculated consequence' },
+    { text: 'Every reader uses the reference selected in the calculation.', bucket: 'Not identified here' },
+    { text: 'The power exponent is fixed while the transfer changes a weight.', bucket: 'Stipulated input' },
+    { text: 'The weight threshold is the same in these two pure-domain codings.', bucket: 'Calculated consequence' },
+    { text: 'The fitted median is the exact multiplier of a particular visitor.', bucket: 'Not identified here' }
   ]}
-  explanation="Gain frames sit on the concave arm, where a sure thing beats an equal-average gamble — so people lock in the certain bonus, profit, or prize (risk-averse). Loss frames sit on the convex arm, where a sure loss feels worse than an equal-average gamble — so people roll the dice to escape the certain hit: fighting in court, chasing losses at the table, doubling down on a doomed project (risk-seeking). It's one curve producing two opposite instincts, depending only on which side of zero you're standing."
+  explanation="Declared inputs generate conditional results. Inferring a person's reference or coefficient requires evidence capable of distinguishing explanations; drawing a curve supplies neither."
 />
 
-<MCQ
-  client:visible
-  question="Cause and effect: which property of the value function is directly responsible for people being risk-SEEKING when they face a sure loss?"
-  options={[
-    { text: 'The convexity of the loss arm — a sure loss feels worse than a gamble with the same average loss, so people gamble to avoid the certain hit', correct: true },
-    { text: 'The concavity of the gain arm, which makes sure gains attractive' },
-    { text: 'The reference point being movable, which has nothing to do with curvature' },
-    { text: 'The fact that the curve passes through the origin' },
-  ]}
-  explanation="Risk-seeking for losses comes from the *convex* (outward-bending) shape of the loss arm: a certain $50 loss lands lower on the curve than the average of a 50/50 gamble between $0 and $100 lost, so the gamble feels less bad — and people take it to dodge the sure loss. The concave gain arm explains the *opposite* instinct (risk-aversion for gains). A movable reference point and the curve passing through the origin are real features of the model, but neither is what creates the risk-seeking flip — that's pure convexity."
+## Reconstruct the four operations
+
+Before opening the recap, recover the two changes of the certain outcome, explain why lambda cancels from the loss-side threshold, and name the final outcome receiving weight q in each reference. Then check the connections and test the distinctions below.
+
+<MindMap client:visible className="not-prose" eyebrow="" title="A conditional reference-dependent comparison" outlineLabel="Text outline"
+  root={{ label: 'Compute before inferring', children: [
+    { label: 'Keep the final menu', children: [{ label: 'Amounts, physical probabilities and the certain alternative' }] },
+    { label: 'Code a shared reference', children: [{ label: 'Every final amount becomes a change from the same zero' }] },
+    { label: 'Separate valuation features', children: [{ label: 'Curvature within arms' }, { label: 'Loss multiplier across matched magnitudes' }] },
+    { label: 'Declare weights', children: [{ label: 'Ordinary probabilities and decision weights can differ' }] },
+    { label: 'Compare and test limits', children: [{ label: 'Retain exact ties and recompute under changed inputs' }, { label: 'A calculated ranking does not identify a person' }] }
+  ] }}
 />
 
-<Reveal client:visible label="Wait — does this mean people are just irrational?" buttonLabel="Show the answer">
-No — and this is the heart of why prospect theory is a *model* and not an insult. People aren't random or stupid; they're following a **consistent, fitted curve.** The risk-averse-for-gains, risk-seeking-for-losses pattern shows up reliably, across cultures, with a measurable shape (curvature ≈ 0.88, loss-aversion ≈ 2.25). "Irrational" implies unpredictable; this is the opposite — it's so predictable you can *exploit* it (which marketers and casinos do) or *defend against* it (which lesson 5 will teach you). The departure from cold expected-value math is systematic, not chaotic. That's exactly what makes it dangerous and useful at the same time.
-</Reveal>
-
-## The pitfall: assuming people optimize final wealth
-
-<Callout variant="warning" title="The two traps that ambush this lens">
-**Trap 1 — assuming people optimize final wealth.** The tidy textbook agent of *expected value* and *expected utility* cares only about final states: end the day with \$1,005,000 and it doesn't matter whether you got there by gaining \$5,000 or losing \$5,000 from \$1,010,000. Real humans care enormously which path it was, because they live at a reference point and feel the *change.* If you model people as cold final-wealth maximizers, you'll mispredict nearly every risky choice they make — the coin flip they refuse, the stock they won't sell at a loss, the lawsuit they fight past all reason.
-
-**Trap 2 — forgetting the reference point is a choice someone can set.** It's tempting to treat your baseline as a neutral fact of nature. It isn't. The marketer's "was \$120," the negotiator's anchor, the employer's hinted figure — each one *plants your zero* so the real outcome reads as a win or a loss. **Ignoring your reference point doesn't make it neutral; it just hands the pen to someone else.** The only defense is to notice the baseline you're using and ask who chose it.
-</Callout>
-
-### When to use it
-
-Pull out the value function whenever a choice involves risk *and* you can spot which side of zero it's framed on. Ask: *is this dressed as a gain or a loss?* If it's a gain, expect yourself (and others) to play it safe — sometimes too safe, cashing out winners early. If it's a loss, expect the reckless lean — fighting sunk costs, chasing losses, doubling down on the doomed project. And the master move, the one that defuses half of these traps at once: before you decide, *re-anchor.* Restate the choice in terms of final outcomes, name your reference point out loud, and check whether someone handed you that zero on purpose. A choice that flips when you move the baseline was never really about the outcomes.
-
-## Recap
-
-The two-gear engine behind loss aversion, in five bolts:
-
-1. A **reference point** is the baseline (usually the status quo or an expectation) you score outcomes against. You judge the *change* from it — a **gain** or a **loss** — **not** final wealth. The same \$5,000 is a gift or a slap depending on the zero you carried in.
-2. The reference point is **movable**, and marketers, negotiators, and employers routinely set it for you ("cash discount," "was \$120," outrageous opening offer). Ignoring yours just hands someone else the pen.
-3. The **value function** maps objective outcomes to subjective feeling. It's **reference-dependent** (centered at your zero), shows **diminishing sensitivity** (concave for gains, convex for losses — each extra dollar matters less), and exhibits **loss aversion** (steeper on the loss side — the kink at the origin, the 2.25× drawn as geometry).
-4. Diminishing sensitivity flips your risk attitude: concavity makes you **risk-averse for gains** (sure \$50 over a 50/50 shot at \$100), convexity makes you **risk-seeking for losses** (gamble over a sure \$50 loss). Same person, opposite instinct, set only by which side of zero the choice sits on. K&T fit the curvature near **0.88**.
-5. The pitfalls: don't model people as cold **final-wealth maximizers** (they feel the path, not just the destination), and don't treat your **reference point as neutral** — it's a choice, and often someone else's.
-
-<Quiz
-  client:visible
-  title="Check yourself: reference points and the value function"
+<Quiz client:visible className="not-prose" title="Check the curved comparison"
   questions={[
-    {
-      question: 'Two investors both end the year with a $500,000 portfolio. One started at $400,000; the other started at $600,000. Prospect theory predicts:',
-      options: [
-        { text: 'They feel very differently — the first scores it as a $100,000 gain, the second as a $100,000 loss — because outcomes are judged from a reference point, not as final wealth', correct: true },
-        { text: 'They feel identical, since both ended with exactly $500,000 in the account', correct: false },
-        { text: 'The second investor is happier, because $600,000 is a bigger number than $400,000', correct: false },
-        { text: 'Neither feels anything, because the portfolios are now equal', correct: false },
-      ],
-      explanation: 'Identical final wealth, opposite reference points. Investor one beat their $400k baseline by $100k (a gain — relief and pride); investor two fell $100k below their $600k baseline (a loss — and with loss aversion, it stings about twice as hard). The whole point of the model is that we feel the *change* from the reference point, not the final state. The final-wealth answer is exactly the textbook assumption prospect theory overturns.',
-    },
-    {
-      question: 'Which pairing correctly matches a curve property to the behavior it produces?',
-      options: [
-        { text: 'Convex loss arm → risk-seeking for losses (gambling to avoid a sure loss); concave gain arm → risk-averse for gains (taking the sure thing)', correct: true },
-        { text: 'Convex loss arm → risk-averse for losses; concave gain arm → risk-seeking for gains', correct: false },
-        { text: 'Both arms concave → risk-averse everywhere, gains and losses alike', correct: false },
-        { text: 'The steepness of the loss arm is what makes people risk-averse for gains', correct: false },
-      ],
-      explanation: 'Concave gains make a sure gain beat an equal-average gamble (risk-averse for gains); convex losses make a sure loss feel worse than an equal-average gamble (risk-seeking for losses). The other options scramble the directions. And note steepness (the loss arm being steeper) is *loss aversion* — a separate feature from the curvature that drives the risk-attitude flip.',
-    },
-    {
-      question: 'A store advertises a jacket as "Was $200 — now $130." Using reference points, what is the advertised price most cleverly doing?',
-      options: [
-        { text: 'Planting your reference point at $200 so $130 reads as a $70 gain, rather than letting you judge $130 on its own', correct: true },
-        { text: 'Proving the jacket is objectively worth exactly $200', correct: false },
-        { text: 'Nothing about reference points — it is just stating two unrelated numbers', correct: false },
-        { text: 'Making the jacket feel like a loss, which discourages buying', correct: false },
-      ],
-      explanation: 'The "Was $200" sets your zero at $200, so $130 lands as a $70 *gain* — a reward for buying — instead of being weighed as $130 of money leaving your pocket. The seller chose your reference point for you; that is the entire trick. It says nothing about the jacket\'s true worth, and far from discouraging the purchase, the gain frame is engineered to encourage it.',
-    },
+    { question: 'What is the certain change at the higher reference in the main menu?', options: [
+      { text: 'Zero credits, because certain always defines the reference' },
+      { text: 'Plus fifty credits, because the certain amount is larger' },
+      { text: 'Minus fifty credits, after subtracting the higher reference', correct: true },
+      { text: 'Minus one hundred credits, after copying the lower risky change' }
+    ], explanation: 'One hundred fifty minus two hundred is minus fifty. The certain alternative must be scored from the same reference as the risky outcomes.' },
+    { question: 'With ordinary weights at the lower reference, compare the certain and risky valuation scores.', options: [
+      { text: 'About thirty-one versus twenty-nine; certain ranks higher', correct: true },
+      { text: 'About twenty-nine versus thirty-one; risky ranks higher' },
+      { text: 'One hundred fifty each; the valuation scores must tie' },
+      { text: 'Zero versus fifty; certain remains fixed at zero' }
+    ], explanation: 'The scores are about thirty-one point two seven and twenty-eight point seven seven. One hundred fifty is their common monetary mean, not a valuation score.' },
+    { question: 'Set the loss multiplier to one while retaining the curved exponent and ordinary weights. What follows?', options: [
+      { text: 'The curve becomes linear, so every comparison must tie' },
+      { text: 'Loss asymmetry disappears, while the curvature comparisons remain', correct: true },
+      { text: 'The physical probabilities change to eliminate all possible losses' },
+      { text: 'The certain alternative becomes a gain at every possible reference' }
+    ], explanation: 'Multiplying losses by one makes matched gain/loss magnitudes symmetric. The exponent stays below one, so the gain arm remains concave and the loss arm convex.' },
+    { question: 'Which two statements about the transfer are correct? Select both.', allowMultiple: true, options: [
+      { text: 'Its physical probabilities remain equal despite the changed decision weight.', correct: true },
+      { text: 'Its new weight is a measured belief that the higher final amount is more likely.' },
+      { text: 'Its certain score must be reset to zero when the weight changes.' },
+      { text: 'Its nonzero score belongs to different physical outcomes across the two references.', correct: true }
+    ], explanation: 'The higher amount has the nonzero score in the gain coding; the lower amount does in the loss coding. A decision weight in the rule does not by itself measure a probability belief.' },
+    { question: 'At the higher reference with the transferred weight, which score comparison is correct?', options: [
+      { text: 'Risky is about minus sixty-five, so the old comparison is unchanged' },
+      { text: 'Both equal the monetary mean, so the alternatives must tie' },
+      { text: 'Certain is about minus ninety-one, so risky must rank higher' },
+      { text: 'Risky is about minus ninety-one versus minus seventy; certain ranks higher', correct: true }
+    ], explanation: 'The transferred risky score is about minus ninety point six three; the certain score stays about minus seventy point three five. The higher score is the less negative one.' },
+    { question: 'The exact threshold is a little above fifty-four hundredths and below fifty-five. What happens exactly at that threshold?', options: [
+      { text: 'Both pure-domain comparisons tie under the declared score rule', correct: true },
+      { text: 'Certain wins both comparisons because every tie must favor safety' },
+      { text: 'Risky wins both comparisons because every tie must favor risk' },
+      { text: 'The two final-credit means change as the threshold is crossed' }
+    ], explanation: 'The threshold is the ratio of the certain gain power to the nonzero risky gain power. Positive lambda cancels from the loss-side equality. Equality supplies no behavioral tie-break.' },
+    { question: 'What does the explorer show when its loss multiplier increases?', options: [
+      { text: 'Loss values stay numerically fixed because their marker stays at one height' },
+      { text: 'Gain values decrease because their marker moves on a fixed vertical axis' },
+      { text: 'Loss magnitudes increase and the vertical scale readjusts', correct: true },
+      { text: 'A measured visitor must switch the preferred option within each frame' }
+    ], explanation: 'The vertical scale uses the current loss multiplier. Loss values change while their relative plot height stays fixed; gain values remain fixed even though their height changes.' },
+    { question: 'What is the sound use of the historical fitted parameters in a new empirical report?', options: [
+      { text: 'Treat them as exact measurements of the next participant before collecting choices' },
+      { text: 'Use them as model-specific context and test the assumptions for the new case', correct: true },
+      { text: 'Replace the final menu with the fitted coefficients whenever outcomes differ' },
+      { text: 'Infer the same causal mechanism from any observed refusal of a risky option' }
+    ], explanation: 'A fitted median belongs to a specified model and study. New evidence must distinguish references, shapes, weights and constraints instead of borrowing a universal coefficient.' }
   ]}
 />
 
-## Where this goes next
-
-You now hold the full engine: a movable reference point that sets zero, and an S-shaped value function — concave up, convex down, kinked and steeper on the loss side — that turns outcomes into feelings and quietly flips your appetite for risk depending on which side of zero you're standing. Lesson 3, **Framing Effects**, takes that engine and does something almost unsettling with it: it flips a real, high-stakes choice using *nothing but wording.* The same medical program, the same lives, the same odds — described once as "lives saved" and once as "lives lost" — and people reverse their preference, exactly as the value function predicts. You've already met the flip in miniature in the explorer's lower panel and the sure-thing-versus-gamble tables. Next we let it loose on the famous Asian-disease problem and watch a frame change minds without changing a single fact.
+Next: [framing effects](/loss-aversion/03-framing-effects). Keep the distinction between equivalent final menus, a conditional valuation calculation and evidence about how respondents actually choose.
