@@ -1,212 +1,345 @@
 ---
-title: "The Bell Curve and Power Laws"
-description: "Two rival shapes of randomness. The bell curve makes extremes astronomically rare; power laws make them rare but inevitable. Learn how the wrong one buries the biggest risks."
+title: "Compare Normal and Pareto Tails"
+description: "Calculate normal and Pareto model tails, distinguish exponents and moments, and audit what is needed to choose a distribution."
 topic: "en/fat-tails"
 order: 3
-minutes: 9
-updated: 2026-06-29
+minutes: 32
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+import { MCQ, RateComparison, FactorChainTrace, FillBlank, MatchConcepts, Categorize, MindMap, Quiz } from '@/components/react';
 
-In lesson 01 you met two worlds. **Mediocristan**, where no single event can move the average much (heights, shoe sizes), and **Extremistan**, where one event can dwarf everything else (wealth, book sales, pandemics). Those worlds aren't just vibes — each has a *signature shape* that describes how its randomness behaves. Mediocristan runs on the **bell curve**. Extremistan runs on **power laws**. This lesson is about how those two shapes treat the tails — the rare, far-out events — because that is exactly where they violently disagree, and where picking the wrong one gets you hurt.
+An instrument records a very large load. One analyst says, “That was impossible.” Another says, “Then it must be a power law.” Both have skipped a step: specify a model, calculate what it predicts, and check what the observation can actually establish.
 
-<MCQ
-  client:visible
-  pretest
-  question="Quick gut check before we start. A model says a particular market move is a '10-sigma event' — something that, under that model, shouldn't happen once in the lifetime of the universe. Yet it just happened. What's the most likely explanation?"
-  options={[
-    { text: "You witnessed a genuinely once-in-the-universe miracle.", correct: false, explanation: "If your model says an event is impossible and it keeps happening, the event isn't the problem — the model is. 'Once in the universe' should make you suspect the math, not the world." },
-    { text: "The model is the wrong shape — it under-counts extremes, so a normal event looks impossible to it.", correct: true, explanation: "Exactly. A '10-sigma event' is almost always a sign you fitted a thin-tailed (bell-curve) model to fat-tailed data. The world is fine; the model is mis-specified." },
-    { text: "The sigma was calculated wrong but the model is sound.", correct: false, explanation: "Arithmetic slips happen, but a 10-sigma reading isn't a rounding error. It's the unmistakable smell of a bell curve being asked to describe Extremistan." },
-    { text: "Markets are simply unpredictable and no model applies.", correct: false, explanation: "Too defeatist. Power-law models predict these moves as rare-but-expected. The issue isn't that prediction is impossible — it's that the wrong distribution was used." },
-  ]}
+This lesson compares mathematical models with given parameters. It does not estimate a distribution for a real instrument, market or population. Keep that distinction in view: a correct calculation inside a model is still conditional on choosing an adequate model.
+
+## A normal model specifies probabilities, not a boundary
+
+<MCQ client:visible
+  className="not-prose"
+  question="A specified normal model gives a very small chance to an event that occurs. What follows by logic alone?"
+  options={[{"text":"Its parameters must have been estimated without error."},{"text":"The observation establishes a Pareto law for this process."},{"text":"The event was possible under the stated normal model.","correct":true},{"text":"Every future observation will exceed the same threshold."}]}
+  explanation="Positive probability permits an event without making it typical. One observation alone does not identify the model or eliminate other explanations."
+  pretest={true}
 />
 
-## Sums of small things pile up into a bell
+The **normal distribution**, also called the **Gaussian distribution**, is a continuous probability model with mean $\mu$ and positive standard deviation $\sigma$. Its density is
 
-Imagine measuring the height of every adult in a city and stacking the results. You don't get a flat line or random spikes — you get a smooth hill, fat in the middle, thin at both ends. Most people cluster near average; very tall and very short people are rare and symmetric. That hill is the **normal distribution**, also called the **Gaussian** or, affectionately, the **bell curve**.
+$$f(x)=\frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right).$$
 
-Its home discipline is statistics, and its origin story is simple: when a quantity is the *sum of many small, independent effects*, those effects mostly cancel and pile up into a bell. Height is a stack of many genes plus nutrition plus sleep — no single gene makes you nine feet tall. Measurement errors, the average of many dice rolls, the total of many coin flips: all bells.
+A **density** is not the probability of an exact value: probabilities are areas over intervals. Standardize a value with $Z=(X-\mu)/\sigma$. Under the specified model, $Z$ has the standard normal distribution. A threshold three standard deviations above the mean is $Z>3$; an equally extreme value on either side is $|Z|>3$.
 
-Two numbers describe a bell completely:
+Those are different events. Symmetry makes the two-sided probability twice the upper-tail probability for a positive threshold. For example, $P(Z>3)\approx0.001349898$ whereas $P(|Z|>3)\approx0.002699796$. The second event also includes the lower tail, $Z<-3$.
 
-- The **mean** ($\mu$, "mu") — the center of the hill, the average value.
-- The **standard deviation** ($\sigma$, "sigma") — the typical distance from the mean, i.e. how wide the hill is. A small $\sigma$ is a narrow, pointy hill; a large $\sigma$ is a broad, gentle one.
-
-Everything in a bell curve is measured in units of $\sigma$ away from $\mu$. "Two sigma above the mean" means "twice the typical wobble above average." That single ruler is what makes the bell so seductive — and, in the wrong world, so dangerous.
-
-<Callout type="info" title="Why so many things are bell-shaped">
-The **Central Limit Theorem** says that if you average enough independent, finite-variance pieces, the average drifts toward a bell *no matter what shape the pieces had*. It's the reason the Gaussian is everywhere in nature — and the reason people reach for it by reflex, even when its assumptions (independent, finite, additive) quietly fail.
-</Callout>
-
-## The 68–95–99.7 rule, and how fast the tail vanishes
-
-The bell curve has a famous rhythm. Move out in steps of one $\sigma$ and the probability of landing inside collapses on a fixed schedule:
-
-- About **68%** of outcomes fall within $1\sigma$ of the mean.
-- About **95%** fall within $2\sigma$.
-- About **99.7%** fall within $3\sigma$.
-
-That last 0.3% is the tail, and here's the brutal part — the tail doesn't shrink politely, it *implodes*. Watch how fast the odds of exceeding $k$ sigma fall:
-
-| Beyond... | Roughly this often | In words |
-|---|---|---|
-| $3\sigma$ | 1 in 370 | a bad week |
-| $4\sigma$ | 1 in 15,800 | a bad career |
-| $5\sigma$ | 1 in 3.5 million | a bad civilization |
-| $6\sigma$ | 1 in ~500 million | basically never |
-
-Each extra sigma multiplies the rarity by a huge factor. This is because the bell curve's tail decays *super-exponentially* — its height falls like $e^{-x^2/2}$, where the $x^2$ in the exponent means the probability nosedives faster than any ordinary exponential. Push out to far values of $x$ and the curve hugs zero so tightly that extremes become astronomically, comically unlikely.
-
-That collapse is precisely why a Gaussian model, fed a real-world crash, declares it a "10-sigma, once-since-the-Big-Bang" event. The model isn't lying about its own math — it's just describing a world that doesn't exist.
-
-<MCQ
-  client:visible
-  question="Under a normal distribution, roughly how much rarer is a 5-sigma event than a 4-sigma event?"
-  options={[
-    { text: "About 5/4 as rare — a small step up.", correct: false, explanation: "That would be true if rarity grew linearly. It doesn't. The bell's tail decays super-exponentially, so each sigma costs you orders of magnitude." },
-    { text: "Hundreds of times rarer.", correct: true, explanation: "Right order of magnitude: 4-sigma is about 1 in 15,800 and 5-sigma about 1 in 3.5 million — roughly 200x rarer. One extra sigma, two more zeros." },
-    { text: "Exactly twice as rare.", correct: false, explanation: "Doubling would be gentle. Reality is far steeper: the jump from 4 to 5 sigma is a factor of hundreds, because the tail falls like e^(-x²/2)." },
-    { text: "Slightly more common, because tails fatten far out.", correct: false, explanation: "That's the power-law behavior, not the bell's. The Gaussian tail does the opposite — it thins ferociously the further out you go." },
-  ]}
+<RateComparison client:visible
+  locale="en"
+  title="Count one side or both"
+  scenarioLabel="Model case"
+  countsLabel="Rounded model numerator / one billion"
+  differenceLabel="First fraction minus second"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{"label":"One standard deviation","groups":[{"label":"Upper tail","events":158655254,"total":1000000000},{"label":"Both tails","events":317310508,"total":1000000000}]},{"label":"Two standard deviations","groups":[{"label":"Upper tail","events":22750132,"total":1000000000},{"label":"Both tails","events":45500264,"total":1000000000}]},{"label":"Three standard deviations","groups":[{"label":"Upper tail","events":1349898,"total":1000000000},{"label":"Both tails","events":2699796,"total":1000000000}]}]}
 />
 
-### When the bell curve is the right tool
+The fractions in the figure are rounded model probabilities, expressed on a common billion-part scale. They are not counts from an experiment. Printed percentages round again; use the table for the much smaller probabilities below.
 
-Reach for the Gaussian when the quantity is genuinely **additive, bounded, and from Mediocristan**: heights, weights, measurement errors, the average of many independent draws, manufacturing tolerances. These are sums of many small finite effects with no single dominant term — exactly the recipe the Central Limit Theorem rewards.
+| Threshold | Upper tail $P(Z>k)$ | Both tails $P(\lvert Z\rvert>k)$ | Approximate reciprocal of both tails |
+|---:|---:|---:|---:|
+| 3 | 0.001349898 | 0.002699796 | One in 370 |
+| 4 | 0.00003167124 | 0.00006334248 | One in 15,787 |
+| 5 | 0.0000002866516 | 0.0000005733031 | One in 1,744,278 |
+| 6 | 0.0000000009865876 | 0.000000001973175 | One in 506,797,346 |
 
-<Callout type="warning" title="The default-distribution trap">
-The bell curve is the distribution everyone is taught first, so it becomes the silent default — the shape you assume when you haven't thought about which shape applies. That reflex is the single most common way fat-tailed risk gets hidden. Before fitting a Gaussian, ask: *is this quantity actually additive and bounded, or could one observation be bigger than all the others combined?* If the second sounds possible, you're in Extremistan, and the bell will betray you.
-</Callout>
+The normal tail becomes very small, but it remains positive at every finite threshold. “Very unlikely under this model” is a different statement from “cannot happen.” Observing a surprising result can motivate checking the model, parameter estimates, dependence, measurement and selection process. It does not identify a unique replacement distribution.
 
-## Power laws: the big ones rule
-
-Now picture wealth instead of height. There is no "average billionaire" the way there's an average height — one fortune can exceed the bottom million people combined. Stack net worths and you don't get a hill; you get a cliff at zero, a long body, and a tail that refuses to die. That shape is a **power law**, and its everyday philosophy is blunt: *the big ones rule.*
-
-Precisely: in a power law, the probability of exceeding some value $x$ falls off like a power of $x$,
-
-$$P(X > x) \propto x^{-\alpha}.$$
-
-The exponent $\alpha$ ("alpha") is the **tail exponent**, and it sets how fat the tail is. The counterintuitive part: a **smaller $\alpha$ means a fatter tail**. A small exponent means $x^{-\alpha}$ shrinks lazily as $x$ grows, so giant values stay surprisingly probable.
-
-The whole drama is in *how* the two distributions decay. The bell curve's tail falls **exponentially** (really super-exponentially), $e^{-x^2/2}$ — it slams shut. A power law's tail falls only **polynomially**, $x^{-\alpha}$ — it eases shut. Far out in the tail, a polynomial is enormously larger than an exponential, so the power law assigns *vastly* more probability to extreme events. Same distance from "normal," wildly different verdict.
-
-<MCQ
-  client:visible
-  question="Two power-law quantities, one with tail exponent α = 1.2 and one with α = 3.5. Which has the fatter tail — the bigger risk of monster outliers?"
-  options={[
-    { text: "α = 3.5, because a bigger exponent means bigger extremes.", correct: false, explanation: "Backwards. A bigger exponent makes x^(-α) shrink faster, which thins the tail. Big alpha = tamer." },
-    { text: "α = 1.2, because a smaller exponent decays more slowly, keeping giants probable.", correct: true, explanation: "Yes. Smaller α means the tail x^(-α) falls off lazily, so extreme values stay surprisingly likely. α = 1.2 is genuinely wild (the mean may not even be stable); α = 3.5 is comparatively tame." },
-    { text: "They're equally fat — α only shifts the curve, not its tail weight.", correct: false, explanation: "α is precisely the tail-weight dial. It controls how much probability lives far out, which is the whole game in Extremistan." },
-    { text: "Neither is fat-tailed; all power laws are thin-tailed.", correct: false, explanation: "Power laws are the canonical fat tails. Their polynomial decay leaves far more mass in the extremes than any bell curve." },
-  ]}
+<MCQ client:visible
+  className="not-prose"
+  question="Which calculation counts both sides of the specified symmetric normal model?"
+  options={[{"text":"Keep the upper-tail probability unchanged."},{"text":"Add the matching upper and lower tail probabilities.","correct":true},{"text":"Square the probability of the upper-tail event."},{"text":"Subtract the lower tail from the upper tail."}]}
+  explanation="For a positive threshold the two disjoint tails have equal probability. Their union therefore has twice either individual probability."
 />
 
-## Scale invariance and the 80/20 rule
+### When to use this calculation
 
-Power laws have a strange beauty: they look the same at every zoom level. Take the top 20% of earners; within *them*, wealth is still wildly unequal — a top 20% of that top 20% hoards most of it, and so on, forever. That property is **scale invariance** (or self-similarity): zoom in on the tail and you find a smaller copy of the same lopsidedness.
+Use it when a normal model with these parameters is the hypothesis you want to examine. State which tail you counted. Do not turn one realization into a theorem about the population that generated it.
 
-The everyday face of this is the **80/20 rule**, also called the **Pareto principle**: roughly 80% of effects come from 20% of causes. 80% of a software product's bug reports from 20% of its bugs; 80% of sales from 20% of customers. And because power laws self-nest, the rule recurses.
+## A bell-shaped limit concerns standardized averages
 
-Watch the nesting with round numbers. Start with 100 units of "effect" produced by 100 "causes":
-
-| Layer | Causes (cumulative) | Effect (cumulative) |
-|---|---|---|
-| Top 20% of causes | 20% | 80% |
-| Top 20% *of those* | 4% | ~64% |
-| Top 20% *of those* | 0.8% | ~51% |
-
-Apply 80/20 to the top slice and you get 80% of 80% ≈ **64% of the effect from just 4% of the causes**. One more layer and roughly half of everything traces back to under 1% of the causes. The giants inside the giants are where the action lives.
-
-<Callout type="tip" title="Use the nesting as a triage tool">
-When effort is scarce, don't spread it evenly — power laws say you can't afford to. Find the vital few (the 20%, then the 20% of the 20%) and pour your attention there. The flip side: in *risk*, the same nesting means a tiny number of events carry most of the danger, so "average" preparation is exactly backwards.
-</Callout>
-
-## Where power laws actually live
-
-This isn't a finance curiosity. Once you know the shape, you see it everywhere humans, networks, or energy concentrate. The common thread: the quantity is *scalable* — one unit can be copied, linked, or compounded without a natural ceiling.
-
-| Quantity | Rough tail behaviour |
-|---|---|
-| Personal wealth | Heavy power-law tail; a few fortunes dominate |
-| City sizes | **Zipf's law** — the nth city is about 1/n the size of the largest |
-| Word frequencies | Power law — "the" and "of" swamp the long tail of rare words |
-| Book / music sales | Extreme power law — a handful of megahits, a vast cold tail |
-| Earthquake energy | Power law (Gutenberg–Richter) — rare quakes release most total energy |
-| Computer file sizes | Heavy-tailed — a few huge files dominate storage |
-| Web links per page | Power law — a few hubs collect most of the links |
-
-Notice none of these are bounded sums of small independent effects. They're winner-take-most processes — wealth begets wealth, popular links get more links — and that feedback is the engine that manufactures fat tails.
-
-## The punchline: rare vs. expected
-
-Here is the whole lesson in one collision. Take an event far out in the tail — call it "5-sigma-ish," the kind of move that sits well beyond everyday experience. Hand the *same data* to a thin-tailed and a fat-tailed model and ask, "how often?"
-
-| Model | Verdict on a far-tail event | What it tells you to do |
-|---|---|---|
-| Bell curve (thin tail) | "Essentially impossible — once in millions." | Ignore it; don't budget for it. |
-| Power law (fat tail) | "Rare, but fully expected — plan for it." | Carry a buffer; it *will* visit. |
-
-Same world, same numbers, opposite advice — and only one model is right about Extremistan. The Gaussian's tail vanishes like $e^{-x^2/2}$; the power law's lingers like $x^{-\alpha}$. Out where crashes, pandemics, and viral hits live, that gap is the difference between "can't happen" and "happens on schedule."
-
-<Reveal client:visible buttonLabel="Why is fitting a normal curve to fat-tailed data so dangerous?">
-Because the Gaussian *will* fit the calm middle beautifully — 99% of the data sits in the body, where both shapes look alike, so the fit looks excellent. But the bell then forces its own thin tail onto the extremes, declaring the very events that matter most "impossible." You get a model that is accurate exactly where nothing important happens and catastrophically wrong exactly where everything important happens. The good fit is the trap.
-</Reveal>
-
-<Callout type="success" title="Choosing the shape">
-Reach for a **power-law / fat-tail** model whenever the quantity is *scalable, social, or economic*, or whenever you notice a few giants dominating the total. Reach for the **bell curve** only for *bounded, additive, Mediocristan* quantities — the sums of many small independent things. When unsure, assume the fat tail: being over-prepared for an extreme costs a buffer; being under-prepared costs the whole game.
-</Callout>
-
-<MCQ
-  client:visible
-  question="An analyst fits a normal distribution to daily stock returns. The fit looks excellent — it matches the data beautifully. Why should you still distrust its estimate of crash risk?"
-  options={[
-    { text: "Because the fit is probably an arithmetic mistake.", correct: false, explanation: "No — the fit is genuinely good in the body. That's exactly what makes it deceptive; the problem isn't a calculation error." },
-    { text: "Because returns are fat-tailed, so the Gaussian matches the calm middle but radically under-counts the crashes in the tail.", correct: true, explanation: "Precisely. ~99% of days live in the body where both shapes agree, so the fit looks great — while the bell's thin tail labels real crashes 'impossible.' The good central fit hides the fatal tail error." },
-    { text: "Because stock returns are bounded, so no distribution applies.", correct: false, explanation: "Returns are emphatically not bounded in the way that matters — that's the point. They're scalable and fat-tailed, which is why the bell fails." },
-    { text: "Because the normal distribution always overestimates risk.", correct: false, explanation: "The opposite. On fat-tailed data the Gaussian *underestimates* tail risk, calling expected extremes impossible." },
-  ]}
+<MCQ client:visible
+  className="not-prose"
+  question="Collecting many independent observations makes which object approximately normal under the stated central-limit assumptions?"
+  options={[{"text":"The distribution of the largest raw observation."},{"text":"The population distribution of each original observation."},{"text":"The next observed value, regardless of its original law."},{"text":"The distribution of the standardized sample mean.","correct":true}]}
+  explanation="The theorem concerns a centered and scaled mean across repeated samples. It does not change the distribution that generates each raw observation."
+  pretest={true}
 />
 
-## Recap
+One version of the **central limit theorem** concerns independent, identically distributed observations with finite mean and finite positive variance. For the sample mean $\bar X_n$, it states that
 
-<Quiz
-  client:visible
-  questions={[
-    {
-      question: "What single feature of the bell curve makes it under-count extremes?",
-      options: [
-        { text: "Its tail decays super-exponentially (like e^(-x²/2)), so far-out probability collapses astonishingly fast.", correct: true, explanation: "That super-exponential decay is the whole mechanism — each extra sigma costs orders of magnitude, so genuine extremes look impossible." },
-        { text: "It has no mean.", correct: false, explanation: "The bell has a perfectly well-defined mean (μ). Its problem is the speed at which its tail vanishes, not a missing center." },
-        { text: "It is asymmetric, leaning toward large values.", correct: false, explanation: "The bell is symmetric. It's power laws that are lopsided toward the giants." },
-      ],
-    },
-    {
-      question: "In a power law P(X > x) ∝ x^(-α), what does a SMALLER tail exponent α mean?",
-      options: [
-        { text: "A fatter tail — extreme values stay more probable.", correct: true, explanation: "Smaller α makes x^(-α) decay slowly, leaving more probability far out. Smaller exponent, fatter tail, wilder world." },
-        { text: "A thinner tail, closer to a bell curve.", correct: false, explanation: "Backwards — a larger α is the tame, thinner-tailed case. Small α is the dangerous one." },
-        { text: "Nothing about the tail; α only sets the average.", correct: false, explanation: "α is the tail-fatness dial itself. It governs how much mass sits in the extremes." },
-      ],
-    },
-    {
-      question: "Applying the 80/20 rule twice (nesting it), roughly what share of effects comes from the top 4% of causes?",
-      options: [
-        { text: "About 64% — that's 80% of 80%.", correct: true, explanation: "Nesting 80/20 gives 80% × 80% ≈ 64% of effects from 20% × 20% = 4% of causes. Power laws self-repeat." },
-        { text: "About 80%, the same as one layer.", correct: false, explanation: "One layer gives 80% from 20%. Nesting tightens it to ~64% from just 4% — the concentration compounds." },
-        { text: "About 20% — the effect spreads out as you nest.", correct: false, explanation: "It concentrates, not spreads. Each nested layer pulls more of the effect into fewer causes." },
-      ],
-    },
-    {
-      question: "A 'once-in-the-universe' event under your model just happened for the third time this decade. The honest conclusion is:",
-      options: [
-        { text: "Your model is the wrong shape — it's a thin tail on fat-tailed data.", correct: true, explanation: "Repeated 'impossible' events are the signature of a Gaussian fitted to a power-law world. Fix the distribution, not your sense of luck." },
-        { text: "You're extraordinarily unlucky but the model is fine.", correct: false, explanation: "Three impossibilities in a decade isn't bad luck — it's a mis-specified model loudly announcing itself." },
-        { text: "Extreme events are unmodellable, so give up.", correct: false, explanation: "Fat-tail models predict these as rare-but-expected. The lesson isn't 'don't model' — it's 'use the right shape.'" },
-      ],
-    },
-  ]}
+$$\frac{\bar X_n-\mu}{\sigma/\sqrt n}$$
+
+approaches a standard normal distribution as the sample size grows. The original observations need not be normal. Their distribution does not become normal because more of them were recorded, and a finite sample size does not make the approximation exact.
+
+Consider independent fair zero-or-one draws. Each has mean $1/2$ and standard deviation $1/2$. The **standard error** is the standard deviation of their sample mean across repeated samples. Here it is $1/(2\sqrt n)$:
+
+| Sample size | Standard error in proportion units | Same quantity in percentage points |
+|---:|---:|---:|
+| 1 | 1/2 | 50 |
+| 4 | 1/4 | 25 |
+| 16 | 1/8 | 12.5 |
+
+Quadrupling independent sample size halves this standard error. It does not promise that the next realized mean will be closer to the population mean. At four draws, the mean still has only five possible values; it is not an exactly continuous bell curve.
+
+Compare that with making four or sixteen perfect copies of **one** draw. Their average remains the original zero-or-one value, so its standard deviation stays at fifty percentage points. More rows have not supplied more independent information.
+
+<FactorChainTrace client:visible
+  locale="en"
+  title="New observations versus copies"
+  instructions="Step through nominal sizes one, four and sixteen. The first rule adds independent draws; the second keeps copying the same original draw."
+  scenarios={[{"label":"Fair zero-or-one draw","start":50,"unit":"pp","chains":[{"label":"Independent new draws","factorHundredths":[50,50]},{"label":"Perfect copies of one draw","factorHundredths":[100,100]}]}]}
+  labels={{"scenarioLabel":"Sampling model","stepTemplate":"Size stage {step} of {total}","startLabel":"One recorded draw","backLabel":"Previous stage","nextLabel":"Next stage","resetLabel":"Return to one draw","chainLabel":"Sampling rule","previousLabel":"Previous standard error","factorLabel":"Multiplier of standard error","resultLabel":"Standard error","initialCellLabel":"Initial","tableCaption":"Standard error at nominal sample sizes one, four and sixteen","chartDescription":"Compare standard-error paths for independent new draws and perfect copies of one original draw.","valueAxisLabel":"Standard error in percentage points","stepAxisLabel":"Sample-size stage","initialAnnouncementTemplate":"At one draw: {first}; {second}.","stepAnnouncementTemplate":"Size stage {step}: {first}; {second}.","precisionNote":"These exact factors apply to the two stipulated models; percentage points measure variation of a proportion, not the probability of an error."}}
 />
 
-**Where this goes next:** if the bell curve is the wrong shape, then the very tools it taught us — the **mean** and the **standard deviation** — inherit its blind spot. In lesson 03 we'll see why, in fat-tailed data, the average and the standard deviation themselves become misleading: they swing wildly with each new observation and quietly lie about the risk you're actually carrying.
+Each step in the figure compares a nominal size of one, four and sixteen. The multipliers apply to standard error, not to sample size. The second chain retains the same original random draw throughout; it is not a second independent sampling model.
+
+<MCQ client:visible
+  className="not-prose"
+  question="Select every conclusion supported by the fair-draw and perfect-copy models."
+  allowMultiple={true}
+  options={[{"text":"Quadrupling independent sample size halves this standard error.","correct":true},{"text":"Four copies of one draw halve its average’s standard deviation."},{"text":"More independent observations need not make raw draws Gaussian.","correct":true},{"text":"A larger sample must produce a closer realized mean next time."}]}
+  explanation="The independent formula scales with the square root of sample size. Perfect copies retain the original random value, and a distributional precision statement does not guarantee the next realized error."
+/>
+
+### When this limit helps
+
+It can support an approximation for averages when its assumptions and approximation error are defensible. It cannot justify a normal model for the largest raw observation, remove dependence, or supply finite variance when the population lacks it.
+
+## Define a Pareto tail before comparing exponents
+
+<MCQ client:visible
+  className="not-prose"
+  question="Two Pareto models share their cutoff. At the same threshold above it, which survival exponent gives more probability above the threshold?"
+  options={[{"text":"The smaller exponent.","correct":true},{"text":"The larger exponent."},{"text":"Either exponent gives exactly the same probability."},{"text":"The answer depends only on how many draws were recorded."}]}
+  explanation="At a common cutoff and an above-cutoff threshold, the ratio raised to the exponent lies between zero and one. A smaller positive exponent therefore leaves a larger survival probability."
+  pretest={true}
+/>
+
+A continuous **Pareto model** with lower cutoff $x_m>0$ and survival exponent $\alpha>0$ specifies
+
+$$P(X>x)=\left(\frac{x_m}{x}\right)^\alpha,\qquad x\ge x_m.$$
+
+The **survival probability** counts outcomes above a threshold. Below the cutoff, every outcome is at least $x_m$, so survival is one. For this continuous model, changing $>$ to $\ge$ at one point does not alter its probability. That equality need not hold in a discrete model with point masses.
+
+Work a complete comparison with the same cutoff, $x_m=1$, and the same threshold, $x=4$. Exponent two gives $(1/4)^2=1/16$; exponent four gives $(1/4)^4=1/256$. The first probability is sixteen times the second. A smaller survival exponent gives a larger upper-tail probability when the cutoff is held fixed and the threshold is above it.
+
+<RateComparison client:visible
+  locale="en"
+  title="Change the exponent at a fixed cutoff"
+  scenarioLabel="Model case"
+  countsLabel="Exact model fraction"
+  differenceLabel="First fraction minus second"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{"label":"Threshold two","groups":[{"label":"Survival exponent two","events":1,"total":4},{"label":"Survival exponent four","events":1,"total":16}]},{"label":"Threshold four","groups":[{"label":"Survival exponent two","events":1,"total":16},{"label":"Survival exponent four","events":1,"total":256}]},{"label":"Threshold eight","groups":[{"label":"Survival exponent two","events":1,"total":64},{"label":"Survival exponent four","events":1,"total":4096}]}]}
+/>
+
+These ratios come from the declared models, not from observed ticket frequencies. Both models have unbounded support. Even exponent four remains a power-law tail; it does not turn into a normal distribution.
+
+Different sources sometimes use $\alpha$ for the exponent of the **density** instead. Here differentiating the distribution gives
+
+$$f(x)=\frac{\alpha x_m^\alpha}{x^{\alpha+1}}.$$
+
+Thus survival exponent two corresponds to density exponent three. Read the definition beside a reported exponent before comparing it with this lesson.
+
+<FillBlank client:visible
+  className="not-prose"
+  question="Distinguish the two exponent conventions."
+  text="With survival exponent two, the density exponent is {{three|two|fourteen}}. With density exponent three, the survival exponent is {{two|three|four}}."
+  explanation="In this continuous model the density exponent is one greater. Read which function defines the reported exponent."
+/>
+
+### When this comparison is valid
+
+It compares specified Pareto models at a common cutoff and threshold. Different cutoffs can change the ordering at a chosen numerical threshold. Neither a single large observation nor an economic label establishes these parameters or the Pareto family.
+
+## Heavy tails do not always remove the mean
+
+<MCQ client:visible
+  className="not-prose"
+  question="The given continuous Pareto model has survival exponent one point two. Which description is correct?"
+  options={[{"text":"Both population moments are finite because every sample is finite."},{"text":"Its population mean is finite but its variance is infinite.","correct":true},{"text":"Its mean is infinite because its variance is infinite."},{"text":"Its sample mean cannot be calculated until the population mean exists."}]}
+  explanation="The survival exponent is above one but not above two. A finite sample mean and a population expectation are different objects."
+  pretest={true}
+/>
+
+For the Pareto convention just defined, the mean is finite when $\alpha>1$:
+
+$$E[X]=\frac{\alpha x_m}{\alpha-1}.$$
+
+The variance is finite only when $\alpha>2$, in which case
+
+$$\operatorname{Var}(X)=\frac{\alpha x_m^2}{(\alpha-1)^2(\alpha-2)}.$$
+
+For $0<\alpha\le1$, the mean is infinite, so the ordinary variance about a finite population mean is undefined. For $1<\alpha\le2$, the mean is finite but the variance is infinite. These thresholds describe the ideal model with an unlimited upper tail. A specified finite upper cutoff changes its moments.
+
+| Survival exponent, cutoff one | Mean | Variance |
+|---|---:|---|
+| 0.8 | Infinite | Not finite |
+| 1.2 | 6 | Infinite |
+| 2 | 2 | Infinite |
+| 4 | 4/3 | 2/9 |
+
+For exponent $1.2=6/5$, the mean calculation is $(6/5)/(1/5)=6$. Independent draws from this model have a finite absolute mean, so the law of large numbers applies to their sample mean even though the variance is infinite. A slowly settling estimate in a short record is not a proof that the population mean does not exist.
+
+Finite does not mean evenly contributed. In that same model, the probability above thirty-two is $32^{-6/5}=1/64$. Yet this region contributes half the finite mean: its expected contribution is three of the total six load units. The share of the mean contributed above a threshold $t\ge x_m$ is $(x_m/t)^{\alpha-1}$ when $\alpha>1$. This is a ratio of expectations, not a promise about the largest draw in one finite sample.
+
+<RateComparison client:visible
+  locale="en"
+  title="Compare an outcome probability with a contribution share"
+  scenarioLabel="Model case"
+  countsLabel="Declared fraction with the denominator named by each row"
+  differenceLabel="First fraction minus second"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{"label":"Exponent one point two, threshold thirty-two","groups":[{"label":"Share of the model mean above the threshold","events":1,"total":2},{"label":"Probability above the threshold","events":1,"total":64}]},{"label":"Exponent two, threshold two","groups":[{"label":"Share of the model mean above the threshold","events":1,"total":2},{"label":"Probability above the threshold","events":1,"total":4}]},{"label":"Exponent four, threshold two","groups":[{"label":"Share of the model mean above the threshold","events":1,"total":8},{"label":"Probability above the threshold","events":1,"total":16}]}]}
+/>
+
+The figure compares an outcome probability with a share of the model mean, naming their different denominators. Both are fractions; they answer different questions. A small probability can coexist with a substantial expected contribution without making the mean infinite.
+
+Conversely, a finite sample always has an ordinary arithmetic mean when its recorded values are finite. That does not manufacture a finite population expectation for the model with exponent $0.8$.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  question="Match each object to what it describes."
+  pairs={[{"term":"Sample mean","definition":"The arithmetic average of the finite recorded values."},{"term":"Population expectation","definition":"The mean under the specified probability law, when it exists."},{"term":"Population variance","definition":"The expected squared deviation about a finite population mean; it may be infinite."},{"term":"Law of large numbers","definition":"Under suitable assumptions, connects a sample mean with a finite expectation."}]}
+  explanation="Calculating a sample average does not prove that the model expectation exists. A finite expectation does not establish finite variance."
+/>
+
+### When moments matter
+
+Check the moment your proposed method actually requires. A finite mean can support a law-of-large-numbers claim under independence while failing the finite-variance assumption of the central limit theorem stated above. “Fat-tailed” alone does not settle either question.
+
+## Separate scale invariance from a universal eighty-twenty split
+
+<MCQ client:visible
+  className="not-prose"
+  question="One dataset has an eighty-twenty concentration summary. Does that alone determine the top four percent’s contribution?"
+  options={[{"text":"Yes: every concentration summary must repeat inside itself."},{"text":"Yes: every right-skewed finite dataset has the same ranking."},{"text":"No: the split inside the leading group is additional information.","correct":true},{"text":"No: a share of effects cannot be calculated for any finite dataset."}]}
+  explanation="The nesting calculation needs the same split inside the first group. An aggregate summary does not specify that internal allocation."
+  pretest={true}
+/>
+
+In the specified Pareto model, for a multiplier $c\ge1$ and threshold $t\ge x_m$,
+
+$$P(X>ct\mid X>t)=\frac{P(X>ct)}{P(X>t)}=c^{-\alpha}.$$
+
+With cutoff one, exponent two and $t=2$, the unconditional probability above four is $1/16$. Conditioning on already exceeding two changes the denominator to $1/4$, so the conditional probability is $(1/16)/(1/4)=1/4$. That conditional probability is the same as the original probability above twice the cutoff. This is the model's scale relationship, not a claim that finite samples reproduce identical shapes at every zoom.
+
+<RateComparison client:visible
+  locale="en"
+  title="Change the denominator after an observation"
+  scenarioLabel="Model case"
+  countsLabel="Exact model fraction"
+  differenceLabel="First fraction minus second"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{"label":"Exponent two, exceed four given above two","groups":[{"label":"Conditional above two","events":1,"total":4},{"label":"Unconditional above four","events":1,"total":16}]},{"label":"Exponent four, exceed four given above two","groups":[{"label":"Conditional above two","events":1,"total":16},{"label":"Unconditional above four","events":1,"total":256}]},{"label":"Exponent two, double the retained threshold","groups":[{"label":"Exceed eight given above four","events":1,"total":4},{"label":"Exceed two from the original cutoff","events":1,"total":4}]}]}
+/>
+
+Concentration introduces another quantity: the **share of the total model mean** contributed by the largest fraction $p$ of observations. When the Pareto mean is finite, that share is $p^{(\alpha-1)/\alpha}$. For exponent two, the top quarter contributes one half of the mean total; the top sixteenth contributes one quarter. The model has a power-law tail without an eighty-twenty split.
+
+If a constructed ranking stipulates that the top twenty percent contribute eighty percent, **and the same split repeats inside that group**, then the top four percent contribute sixty-four percent: $0.2\times0.2=0.04$ and $0.8\times0.8=0.64$. The second stipulation is doing work. One eighty-twenty summary in a finite dataset does not prove it.
+
+<MCQ client:visible
+  className="not-prose"
+  question="Select every valid distinction in the specified Pareto calculations."
+  allowMultiple={true}
+  options={[{"text":"Conditioning above a threshold keeps the original unconditional denominator."},{"text":"A conditional exceedance uses the probability of the conditioning event as denominator.","correct":true},{"text":"Every power-law tail imposes the same eighty-twenty contribution split."},{"text":"A contribution share and an exceedance probability have different denominators.","correct":true}]}
+  explanation="Conditioning divides by the probability of the retained event. A mean-contribution share instead divides by the total model mean. Neither implies a universal concentration percentage."
+/>
+
+### When to use the scaling relationship
+
+Use a specified tail model to calculate conditional exceedances or concentration, keeping their denominators distinct. Do not convert an empirical concentration summary into a guaranteed recursion, or a positive probability into an appointment on a calendar.
+
+## Transfer the calculation, then audit the model choice
+
+<MCQ client:visible
+  className="not-prose"
+  question="At the common threshold of six, compare the given exponent-two models with cutoffs one and three. Which has the greater survival probability?"
+  options={[{"text":"The model with cutoff one, because its support starts earlier."},{"text":"The model with cutoff three, because the threshold is a smaller multiple of its cutoff.","correct":true},{"text":"They must agree because their exponents are equal."},{"text":"Neither probability exists above a finite threshold."}]}
+  explanation="With the exponent fixed, the ratio of cutoff to threshold also matters. The calculations give one thirty-sixth versus one quarter."
+  pretest={true}
+/>
+
+An independent constructed case has cutoff three load units and survival exponent two. Its upper-tail probabilities are
+
+$$P(X>6)=(3/6)^2=1/4,\qquad P(X>12)=(3/12)^2=1/16.$$
+
+Given that a load already exceeds six, its probability of exceeding twelve is $(1/16)/(1/4)=1/4$. Copying the old cutoff one would instead give $P(X>6)=1/36$, a different calculation for a different model.
+
+<RateComparison client:visible
+  locale="en"
+  title="Keep the new cutoff in the calculation"
+  scenarioLabel="Model case"
+  countsLabel="Exact model fraction"
+  differenceLabel="First fraction minus second"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{"label":"Exceed six, exponent two","groups":[{"label":"Cutoff three","events":1,"total":4},{"label":"Cutoff one","events":1,"total":36}]},{"label":"Exceed twelve, exponent two","groups":[{"label":"Cutoff three","events":1,"total":16},{"label":"Cutoff one","events":1,"total":144}]},{"label":"Cutoff three, exceed twelve","groups":[{"label":"Given above six","events":1,"total":4},{"label":"Before observing a threshold","events":1,"total":16}]}]}
+/>
+
+For independent draws with a fixed exceedance probability $p>0$, the chance of at least one exceedance in $n$ trials is $1-(1-p)^n$. With $p=1/4$ and four draws, this is $1-(3/4)^4=175/256$, about sixty-eight percent. It is not certainty within those four trials. Independence and an unchanged probability are additional assumptions; a marginal probability alone does not specify a sequence of events.
+
+<MCQ client:visible
+  className="not-prose"
+  question="In the given four independent draws with exceedance probability one quarter, what is the chance of at least one exceedance?"
+  options={[{"text":"About thirty-two percent."},{"text":"Exactly seventy-five percent."},{"text":"Certainty during those four draws."},{"text":"About sixty-eight percent.","correct":true}]}
+  explanation="The chance of no exceedance is three quarters multiplied by itself four times: eighty-one over two hundred and fifty-six. Subtracting from one gives one hundred and seventy-five over two hundred and fifty-six."
+/>
+
+The harder question is whether the model describes a real process. A fitted line on logarithmic axes, a large mean-to-median gap, or one extreme observation does not by itself establish a power law. A lognormal or a truncated model can offer competing explanations. A serious empirical analysis must specify the fitted range, estimate parameters appropriately, check fit, compare alternatives and inspect how observations were obtained. This workshop has done none of those empirical steps for a real dataset.
+
+Even a model not rejected by a chosen fit test has not been proved uniquely true. Use the diagnosis to decide what evidence or sensitivity analysis is needed, rather than replacing one automatic default with another.
+
+<Categorize client:visible
+  className="not-prose"
+  question="Separate model calculations from claims needing evidence."
+  buckets={["Follows from the given model","Needs additional evidence"]}
+  items={[{"text":"The probability above twelve is one sixteenth in the new case.","bucket":"Follows from the given model"},{"text":"A real instrument’s data follow precisely that law.","bucket":"Needs additional evidence"},{"text":"The density exponent is one greater than the survival exponent.","bucket":"Follows from the given model"},{"text":"The sample was collected without selection or dependence.","bucket":"Needs additional evidence"},{"text":"A good visual fit excludes all alternative models.","bucket":"Needs additional evidence"}]}
+  explanation="The equations yield conditional conclusions. Choosing the family, parameters and collection assumptions requires other evidence."
+/>
+
+### When to repeat the audit
+
+Repeat it after a change in scale, cutoff, observation window, selection, dependence or possible physical bound. The operational question is which conclusions survive those changes, given a stated decision and its consequences. A tail label supplies no universal policy by itself.
+
+## Reconstruct the distinctions
+
+<MCQ client:visible
+  className="not-prose"
+  question="A fitted curve looks straight on logarithmic axes. Which next claim is justified by that appearance alone?"
+  options={[{"text":"It is a candidate pattern that still requires model checks.","correct":true},{"text":"The population must follow one exact power law at every scale."},{"text":"Every competing tail model has already been excluded."},{"text":"The data collection process must be independent and complete."}]}
+  explanation="Visual appearance can suggest a candidate. It cannot establish the fitted range, adequacy, uniqueness or sampling assumptions."
+  pretest={true}
+/>
+
+<MindMap client:visible
+  title="Rebuild the tail comparison"
+  root={{"label":"Calculate within a model and check its scope","children":[{"label":"Specify the normal model","children":[{"label":"Parameters and one tail or both"},{"label":"Positive probability is not impossibility"}]},{"label":"Check sampling assumptions","children":[{"label":"Standardized means under independence and finite variance"},{"label":"Dependent copies add no information"}]},{"label":"Define Pareto","children":[{"label":"Cutoff and survival exponent"},{"label":"Density uses a different exponent"}]},{"label":"Check moments","children":[{"label":"Finite mean need not mean finite variance"},{"label":"A finite sample does not create a population expectation"}]},{"label":"Keep the denominator","children":[{"label":"Conditioning and contribution share"},{"label":"Nesting needs an extra assumption"}]},{"label":"Audit the application","children":[{"label":"Family scale observations and alternatives"}]}]}}
+  eyebrow=""
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title="Check the models and their limits"
+  questions={[{"question":"Retrieve the convention: a survival exponent of two corresponds to which density exponent?","options":[{"text":"One"},{"text":"Three","correct":true},{"text":"Two"},{"text":"Four"}],"explanation":"For this continuous Pareto model the density exponent is one greater than the survival exponent."},{"question":"A normal upper-tail calculation returns a tiny positive number. Which interpretation is accurate?","options":[{"text":"The event cannot occur in any finite record."},{"text":"The event proves that the model is false if observed once."},{"text":"The event remains possible under that model.","correct":true},{"text":"The event must occur at regularly spaced times."}],"explanation":"A positive probability is neither impossibility nor a schedule. Model adequacy needs evidence beyond this calculation."},{"question":"Compare the two sampling chains. Why do the copied rows retain the original standard error?","options":[{"text":"Every row is the same random draw, so averaging does not create new information.","correct":true},{"text":"The copies have acquired an infinite population variance."},{"text":"Every finite sample mean always has the same standard error."},{"text":"Independent observations and identical copies have equal covariance."}],"explanation":"Perfect dependence keeps the average equal to the original draw. The independent square-root formula does not apply."},{"question":"Which conditions were held fixed in this lesson’s comparison of Pareto exponents? Select every applicable item.","allowMultiple":true,"options":[{"text":"A common lower cutoff.","correct":true},{"text":"A normal model for each raw draw."},{"text":"The same above-cutoff threshold.","correct":true},{"text":"A proof that all real-world data are power laws."}],"explanation":"The monotone exponent comparison holds inside the specified Pareto family at the same scale and threshold."},{"question":"The top quarter contributes half the model mean under the given exponent-two Pareto law. What does this refute?","options":[{"text":"That the model has any upper-tail probability."},{"text":"That its population mean can exist."},{"text":"That conditional exceedance can be computed."},{"text":"That every power law forces an eighty-twenty split.","correct":true}],"explanation":"This specified power law has a different concentration split. Concentration depends on the exponent and the quantity measured."},{"question":"A second analyst changes the cutoff but keeps the exponent. What must be recalculated?","options":[{"text":"Only the number of observations in a previous sample."},{"text":"Threshold probabilities using the new cutoff-to-threshold ratio.","correct":true},{"text":"The historical observations, which must change retrospectively."},{"text":"Nothing, because the exponent completely specifies every Pareto model."}],"explanation":"Scale is part of the model. A threshold probability cannot be carried over solely because the exponent stayed the same."}]}
+/>
+
+### Sources and scope
+
+The [NIST normal-distribution reference](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm) specifies the normal model; the central-limit statement here explicitly adds the independent, identical-distribution and finite-variance assumptions used in this lesson. [SciPy's Pareto definition](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pareto.html) gives the continuous density and cutoff convention. The moment, conditional-probability and constructed finite calculations above can be reproduced from those definitions.
+
+Clauset, Shalizi and Newman's [Power-law distributions in empirical data](https://arxiv.org/abs/0706.1062) explains why visual fitting alone cannot establish a power law and why alternative models matter. Selected introduction, definitions and model-checking passages informed this lesson; no empirical fit or statistical test from that paper has been executed here.
+
+Continue to [When the Average Lies](/fat-tails/03-when-the-average-lies), keeping the distinction between a finite sample mean, a population mean and its estimation assumptions.

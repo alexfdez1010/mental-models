@@ -1,212 +1,464 @@
 ---
-title: "La campana de Gauss y las leyes de potencia"
-description: "Dos formas rivales del azar. La campana de Gauss hace los extremos astronómicamente raros; las leyes de potencia los hacen raros pero inevitables. Aprende cómo la forma equivocada entierra los mayores riesgos."
+title: "Compara las colas normal y de Pareto"
+description: "Calcula colas de modelos normal y Pareto, distingue exponentes y momentos, y comprueba qué hace falta para elegir una distribución."
 topic: "es/fat-tails"
 order: 3
-minutes: 9
-updated: 2026-06-29
+minutes: 32
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+import { MCQ, RateComparison, FactorChainTrace, FillBlank, MatchConcepts, Categorize, MindMap, Quiz } from '@/components/react';
 
-En la lección 01 conociste dos mundos. **Mediocristán**, donde ningún suceso aislado puede mover mucho la media (estaturas, tallas de zapato), y **Extremistán**, donde un solo suceso puede eclipsar todo lo demás (la riqueza, las ventas de libros, las pandemias). Esos mundos no son solo una sensación: cada uno tiene una *forma característica* que describe cómo se comporta su azar. Mediocristán funciona con la **campana de Gauss**. Extremistán funciona con **leyes de potencia**. Esta lección trata de cómo esas dos formas tratan las colas — los sucesos raros y lejanos — porque ahí es exactamente donde discrepan con violencia, y donde elegir la forma equivocada te hace daño.
+Un instrumento registra una carga muy elevada. Un analista dice: «Eso era imposible». Otro responde: «Entonces tiene que seguir una ley de potencias (power law)». Ambos se han saltado un paso: especificar un modelo, calcular qué predice y comprobar qué permite concluir la observación.
 
-<MCQ
-  client:visible
-  pretest
-  question="Comprobación de instinto antes de empezar. Un modelo afirma que cierto movimiento del mercado es un 'suceso de 10 sigmas' — algo que, según ese modelo, no debería ocurrir ni una vez en la vida del universo. Y sin embargo acaba de ocurrir. ¿Cuál es la explicación más probable?"
-  options={[
-    { text: "Has presenciado un milagro genuino que solo pasa una vez en el universo.", correct: false, explanation: "Si tu modelo dice que un suceso es imposible y aun así sigue pasando, el problema no es el suceso: es el modelo. 'Una vez en el universo' debería hacerte sospechar de las matemáticas, no del mundo." },
-    { text: "El modelo tiene la forma equivocada — infracuenta los extremos, así que un suceso normal le parece imposible.", correct: true, explanation: "Exacto. Un 'suceso de 10 sigmas' es casi siempre la señal de que has ajustado un modelo de cola fina (la campana) a datos de cola gruesa. El mundo está bien; el modelo está mal especificado." },
-    { text: "El cálculo de las sigmas estaba mal, pero el modelo es sólido.", correct: false, explanation: "Los errores de aritmética existen, pero una lectura de 10 sigmas no es un redondeo. Es el inconfundible olor de una campana a la que se le pide describir Extremistán." },
-    { text: "Los mercados son simplemente impredecibles y no se les aplica ningún modelo.", correct: false, explanation: "Demasiado derrotista. Los modelos de ley de potencia predicen estos movimientos como raros-pero-esperados. El problema no es que predecir sea imposible: es que se usó la distribución equivocada." },
-  ]}
+Esta lección compara modelos matemáticos con parámetros dados. No estima una distribución para un instrumento, un mercado o una población reales. Ten presente la distinción: un cálculo correcto dentro de un modelo sigue dependiendo de que el modelo elegido sea adecuado.
+
+## Un modelo normal define probabilidades, no un límite de valores
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un modelo normal dado asigna una probabilidad muy pequeña a un suceso que ocurre. ¿Qué se deduce solo por lógica?"
+  options={[{"text":"Sus parámetros tuvieron que estimarse sin ningún error."},{"text":"La observación demuestra que el proceso sigue una ley de Pareto."},{"text":"El suceso era posible bajo el modelo normal especificado.","correct":true},{"text":"Todas las observaciones futuras superarán el mismo umbral."}]}
+  explanation="Una probabilidad positiva permite el suceso sin convertirlo en habitual. Una observación sola no identifica el modelo ni descarta otras explicaciones."
+  pretest={true}
 />
 
-## Las sumas de cosas pequeñas se apilan en una campana
+La **distribución normal (normal distribution)**, también llamada **distribución gaussiana (Gaussian distribution)**, es un modelo continuo de probabilidad con media $\mu$ y desviación típica positiva $\sigma$. Su densidad es
 
-Imagina que mides la estatura de cada adulto de una ciudad y apilas los resultados. No obtienes una línea plana ni picos aleatorios: obtienes una colina suave, gruesa en el centro y fina en los dos extremos. La mayoría se agrupa cerca de la media; las personas muy altas y muy bajas son raras y simétricas. Esa colina es la **distribución normal**, también llamada **gaussiana** o, con cariño, la **campana de Gauss**.
+$$f(x)=\frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right).$$
 
-Su disciplina de origen es la estadística, y su historia es sencilla: cuando una magnitud es la *suma de muchos efectos pequeños e independientes*, esos efectos casi se cancelan y se apilan en una campana. La estatura es una pila de muchos genes más nutrición más sueño — ningún gen aislado te hace medir tres metros. Los errores de medición, la media de muchas tiradas de dado, el total de muchas tiradas de moneda: todas campanas.
+Una **densidad** no es la probabilidad de un valor exacto: las probabilidades son áreas sobre intervalos. Estandariza un valor mediante $Z=(X-\mu)/\sigma$. Bajo el modelo especificado, $Z$ sigue la distribución normal estándar. Un umbral situado tres desviaciones típicas por encima de la media corresponde a $Z>3$; un valor igual de extremo en cualquiera de los dos lados corresponde a $|Z|>3$.
 
-Dos números describen una campana por completo:
+Son sucesos distintos. Por simetría, para un umbral positivo la probabilidad de las dos colas es el doble de la probabilidad de la cola superior. Por ejemplo, $P(Z>3)\approx0.001349898$, mientras que $P(|Z|>3)\approx0.002699796$. El segundo suceso también incluye la cola inferior, $Z<-3$.
 
-- La **media** ($\mu$, "mu") — el centro de la colina, el valor promedio.
-- La **desviación típica** ($\sigma$, "sigma") — la distancia habitual a la media, es decir, lo ancha que es la colina. Una $\sigma$ pequeña es una colina estrecha y puntiaguda; una $\sigma$ grande es una colina ancha y suave.
-
-Todo en una campana se mide en unidades de $\sigma$ a partir de $\mu$. "Dos sigmas por encima de la media" significa "el doble del bamboleo habitual por encima del promedio". Esa regla única es lo que hace a la campana tan seductora — y, en el mundo equivocado, tan peligrosa.
-
-<Callout type="info" title="Por qué tantas cosas tienen forma de campana">
-El **teorema central del límite** dice que si promedias suficientes piezas independientes y de varianza finita, la media tiende a una campana *sea cual sea la forma que tuvieran las piezas*. Es la razón de que la gaussiana esté por todas partes en la naturaleza — y la razón de que la gente recurra a ella por reflejo, incluso cuando sus supuestos (independiente, finita, aditiva) fallan en silencio.
-</Callout>
-
-## La regla 68–95–99,7 y lo rápido que se desvanece la cola
-
-La campana tiene un ritmo famoso. Avanza en pasos de una $\sigma$ y la probabilidad de caer dentro se desploma según un calendario fijo:
-
-- Alrededor del **68%** de los resultados cae dentro de $1\sigma$ de la media.
-- Alrededor del **95%** cae dentro de $2\sigma$.
-- Alrededor del **99,7%** cae dentro de $3\sigma$.
-
-Ese último 0,3% es la cola, y aquí viene la parte brutal: la cola no se encoge con educación, *implosiona*. Mira lo rápido que caen las probabilidades de superar $k$ sigmas:
-
-| Más allá de... | Aproximadamente con esta frecuencia | En palabras |
-|---|---|---|
-| $3\sigma$ | 1 entre 370 | una mala semana |
-| $4\sigma$ | 1 entre 15.800 | una mala carrera profesional |
-| $5\sigma$ | 1 entre 3,5 millones | una mala civilización |
-| $6\sigma$ | 1 entre ~500 millones | básicamente nunca |
-
-Cada sigma extra multiplica la rareza por un factor enorme. Esto se debe a que la cola de la campana decae de forma *superexponencial* — su altura cae como $e^{-x^2/2}$, donde el $x^2$ del exponente hace que la probabilidad se hunda más rápido que cualquier exponencial corriente. Empuja hacia valores lejanos de $x$ y la curva se pega tanto a cero que los extremos se vuelven astronómica, cómicamente improbables.
-
-Ese desplome es justo la razón de que un modelo gaussiano, al recibir un crac real, lo declare un suceso "de 10 sigmas, una vez desde el Big Bang". El modelo no miente sobre sus propias matemáticas — simplemente describe un mundo que no existe.
-
-<MCQ
-  client:visible
-  question="Bajo una distribución normal, ¿cuánto más raro es aproximadamente un suceso de 5 sigmas que uno de 4 sigmas?"
-  options={[
-    { text: "Unas 5/4 veces más raro — un pequeño escalón.", correct: false, explanation: "Eso sería cierto si la rareza creciera de forma lineal. No lo hace. La cola de la campana decae de forma superexponencial, así que cada sigma te cuesta órdenes de magnitud." },
-    { text: "Cientos de veces más raro.", correct: true, explanation: "Orden de magnitud correcto: 4 sigmas es aproximadamente 1 entre 15.800 y 5 sigmas aproximadamente 1 entre 3,5 millones — unas 200 veces más raro. Un sigma extra, dos ceros más." },
-    { text: "Exactamente el doble de raro.", correct: false, explanation: "Duplicar sería suave. La realidad es mucho más empinada: el salto de 4 a 5 sigmas es un factor de cientos, porque la cola cae como e^(-x²/2)." },
-    { text: "Algo más común, porque las colas engordan a lo lejos.", correct: false, explanation: "Eso es el comportamiento de la ley de potencia, no el de la campana. La cola gaussiana hace lo contrario: se adelgaza ferozmente cuanto más lejos vas." },
-  ]}
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Caso del modelo"
+  countsLabel="Numerador aproximado del modelo / mil millones"
+  differenceLabel="Primera fracción menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Cuenta un lado o ambos"
+  scenarios={[{"label":"Una desviación estándar","groups":[{"label":"Cola superior","events":158655254,"total":1000000000},{"label":"Ambas colas","events":317310508,"total":1000000000}]},{"label":"Dos desviaciones estándar","groups":[{"label":"Cola superior","events":22750132,"total":1000000000},{"label":"Ambas colas","events":45500264,"total":1000000000}]},{"label":"Tres desviaciones estándar","groups":[{"label":"Cola superior","events":1349898,"total":1000000000},{"label":"Ambas colas","events":2699796,"total":1000000000}]}]}
 />
 
-### Cuándo la campana es la herramienta correcta
+Las fracciones de la figura son probabilidades redondeadas del modelo, expresadas sobre una escala común de mil millones de partes. No son recuentos de un experimento. Los porcentajes mostrados vuelven a redondear; consulta la tabla para las probabilidades mucho menores que aparecen a continuación.
 
-Recurre a la gaussiana cuando la magnitud sea genuinamente **aditiva, acotada y de Mediocristán**: estaturas, pesos, errores de medición, la media de muchas extracciones independientes, las tolerancias de fabricación. Son sumas de muchos efectos pequeños y finitos sin ningún término dominante — exactamente la receta que el teorema central del límite premia.
+| Umbral | Cola superior $P(Z>k)$ | Ambas colas $P(\lvert Z\rvert>k)$ | Inverso aproximado de la probabilidad de ambas colas |
+|---:|---:|---:|---:|
+| 3 | 0,001349898 | 0,002699796 | Una entre 370 |
+| 4 | 0,00003167124 | 0,00006334248 | Una entre 15 787 |
+| 5 | 0,0000002866516 | 0,0000005733031 | Una entre 1 744 278 |
+| 6 | 0,0000000009865876 | 0,000000001973175 | Una entre 506 797 346 |
 
-<Callout type="warning" title="La trampa de la distribución por defecto">
-La campana es la distribución que a todo el mundo le enseñan primero, así que se convierte en el valor por defecto silencioso — la forma que supones cuando no has pensado en qué forma aplica. Ese reflejo es la manera más común de que el riesgo de cola gruesa quede oculto. Antes de ajustar una gaussiana, pregúntate: *¿es esta magnitud realmente aditiva y acotada, o podría una sola observación ser mayor que todas las demás juntas?* Si lo segundo te suena posible, estás en Extremistán, y la campana te traicionará.
-</Callout>
+La cola normal se vuelve muy pequeña, pero su probabilidad sigue siendo positiva para cualquier umbral finito. «Muy improbable bajo este modelo» no significa «no puede ocurrir». Un resultado sorprendente puede motivar una revisión del modelo, de las estimaciones de sus parámetros, de la dependencia, de la medición y del proceso de selección. No identifica una única distribución alternativa.
 
-## Leyes de potencia: mandan las grandes
-
-Ahora imagina la riqueza en lugar de la estatura. No existe un "multimillonario medio" como existe una estatura media — una sola fortuna puede superar al millón de personas más pobres juntas. Apila patrimonios y no obtienes una colina; obtienes un acantilado en el cero, un cuerpo largo y una cola que se niega a morir. Esa forma es una **ley de potencia**, y su filosofía cotidiana es contundente: *mandan las grandes.*
-
-Con precisión: en una ley de potencia, la probabilidad de superar cierto valor $x$ decae como una potencia de $x$,
-
-$$P(X > x) \propto x^{-\alpha}.$$
-
-El exponente $\alpha$ ("alfa") es el **exponente de la cola**, y fija lo gruesa que es. Lo contraintuitivo: un **$\alpha$ más pequeño significa una cola más gruesa**. Un exponente pequeño hace que $x^{-\alpha}$ se encoja con pereza al crecer $x$, así que los valores gigantes siguen siendo sorprendentemente probables.
-
-Todo el drama está en *cómo* decaen las dos distribuciones. La cola de la campana cae **exponencialmente** (en realidad superexponencialmente), $e^{-x^2/2}$ — se cierra de golpe. La cola de una ley de potencia cae solo **polinómicamente**, $x^{-\alpha}$ — se cierra despacio. A lo lejos en la cola, un polinomio es enormemente mayor que una exponencial, así que la ley de potencia asigna *muchísima* más probabilidad a los sucesos extremos. La misma distancia desde lo "normal", veredictos radicalmente distintos.
-
-<MCQ
-  client:visible
-  question="Dos magnitudes que siguen leyes de potencia, una con exponente de cola α = 1,2 y otra con α = 3,5. ¿Cuál tiene la cola más gruesa — el mayor riesgo de valores atípicos monstruosos?"
-  options={[
-    { text: "α = 3,5, porque un exponente mayor significa extremos mayores.", correct: false, explanation: "Al revés. Un exponente mayor hace que x^(-α) se encoja más rápido, lo que adelgaza la cola. Alfa grande = más manso." },
-    { text: "α = 1,2, porque un exponente más pequeño decae más despacio y mantiene probables a los gigantes.", correct: true, explanation: "Sí. Una α más pequeña hace que la cola x^(-α) caiga con pereza, así que los valores extremos siguen siendo sorprendentemente probables. α = 1,2 es genuinamente salvaje (puede que ni siquiera la media sea estable); α = 3,5 es comparativamente manso." },
-    { text: "Son igual de gruesas — α solo desplaza la curva, no el peso de la cola.", correct: false, explanation: "α es precisamente el mando del peso de la cola. Controla cuánta probabilidad vive a lo lejos, que es todo el juego en Extremistán." },
-    { text: "Ninguna es de cola gruesa; todas las leyes de potencia son de cola fina.", correct: false, explanation: "Las leyes de potencia son las colas gruesas por excelencia. Su decaimiento polinómico deja muchísima más masa en los extremos que cualquier campana." },
-  ]}
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Qué cálculo cuenta ambos lados del modelo normal simétrico especificado?"
+  options={[{"text":"Mantener sin cambios la probabilidad de la cola superior."},{"text":"Sumar las probabilidades de las colas superior e inferior correspondientes.","correct":true},{"text":"Elevar al cuadrado la probabilidad de la cola superior."},{"text":"Restar la cola inferior de la cola superior."}]}
+  explanation="Para un umbral positivo, las dos colas disjuntas tienen la misma probabilidad. Su unión tiene el doble de la probabilidad de cada una."
 />
 
-## Invariancia de escala y la regla 80/20
+### Cuándo usar este cálculo
 
-Las leyes de potencia tienen una belleza extraña: se ven igual a cualquier nivel de zoom. Toma el 20% que más gana; dentro de *ellos*, la riqueza sigue siendo salvajemente desigual — un 20% superior de ese 20% acapara la mayoría, y así sucesivamente, para siempre. Esa propiedad es la **invariancia de escala** (o autosemejanza): haz zoom en la cola y encuentras una copia más pequeña del mismo desequilibrio.
+Úsalo cuando la hipótesis que quieres examinar sea un modelo normal con estos parámetros. Indica qué cola has contado. No conviertas una sola realización en un teorema sobre la población que la ha generado.
 
-La cara cotidiana de esto es la **regla 80/20**, también llamada **principio de Pareto**: aproximadamente el 80% de los efectos viene del 20% de las causas. El 80% de los informes de fallos de un programa vienen del 20% de sus fallos; el 80% de las ventas, del 20% de los clientes. Y como las leyes de potencia se anidan en sí mismas, la regla se repite.
+## La aproximación normal se refiere a medias estandarizadas
 
-Observa el anidamiento con números redondos. Empieza con 100 unidades de "efecto" producidas por 100 "causas":
-
-| Capa | Causas (acumuladas) | Efecto (acumulado) |
-|---|---|---|
-| Top 20% de las causas | 20% | 80% |
-| Top 20% *de esas* | 4% | ~64% |
-| Top 20% *de esas* | 0,8% | ~51% |
-
-Aplica el 80/20 a la franja superior y obtienes el 80% del 80% ≈ **64% del efecto a partir de solo el 4% de las causas**. Una capa más y aproximadamente la mitad de todo se rastrea hasta menos del 1% de las causas. Los gigantes dentro de los gigantes son donde está la acción.
-
-<Callout type="tip" title="Usa el anidamiento como herramienta de triaje">
-Cuando el esfuerzo es escaso, no lo repartas por igual — las leyes de potencia dicen que no te lo puedes permitir. Encuentra los pocos vitales (el 20%, y luego el 20% del 20%) y vuelca tu atención ahí. La otra cara: en el *riesgo*, ese mismo anidamiento significa que un número diminuto de sucesos carga con la mayor parte del peligro, así que la preparación "media" es exactamente lo contrario de lo que necesitas.
-</Callout>
-
-## Dónde viven realmente las leyes de potencia
-
-Esto no es una curiosidad de las finanzas. Una vez conoces la forma, la ves por todas partes donde los humanos, las redes o la energía se concentran. El hilo común: la magnitud es *escalable* — una unidad puede copiarse, enlazarse o componerse sin un techo natural.
-
-| Magnitud | Comportamiento aproximado de la cola |
-|---|---|
-| Riqueza personal | Cola de potencia gruesa; unas pocas fortunas dominan |
-| Tamaños de ciudades | **Ley de Zipf** — la enésima ciudad mide unas 1/n del tamaño de la mayor |
-| Frecuencias de palabras | Ley de potencia — "el" y "de" aplastan la larga cola de palabras raras |
-| Ventas de libros / música | Ley de potencia extrema — un puñado de superéxitos, una vasta cola fría |
-| Energía de los terremotos | Ley de potencia (Gutenberg–Richter) — los seísmos raros liberan casi toda la energía total |
-| Tamaños de archivos | Cola gruesa — unos pocos archivos enormes dominan el almacenamiento |
-| Enlaces por página web | Ley de potencia — unos pocos hubs acaparan la mayoría de los enlaces |
-
-Fíjate en que ninguna de estas es una suma acotada de efectos pequeños e independientes. Son procesos en los que el ganador se lo lleva casi todo — la riqueza engendra riqueza, los enlaces populares atraen más enlaces — y esa retroalimentación es el motor que fabrica las colas gruesas.
-
-## El remate: raro frente a esperado
-
-Aquí está toda la lección en una colisión. Toma un suceso muy a lo lejos en la cola — llámalo "de unos 5 sigmas", el tipo de movimiento que queda muy fuera de la experiencia cotidiana. Entrega los *mismos datos* a un modelo de cola fina y a uno de cola gruesa y pregunta: "¿cada cuánto?".
-
-| Modelo | Veredicto sobre un suceso de cola lejana | Qué te dice que hagas |
-|---|---|---|
-| Campana de Gauss (cola fina) | "Esencialmente imposible — una vez entre millones." | Ignóralo; no lo presupuestes. |
-| Ley de potencia (cola gruesa) | "Raro, pero del todo esperado — planifícalo." | Lleva un colchón; *vendrá*. |
-
-El mismo mundo, los mismos números, consejos opuestos — y solo un modelo acierta sobre Extremistán. La cola de la gaussiana se desvanece como $e^{-x^2/2}$; la de la ley de potencia persiste como $x^{-\alpha}$. Allí afuera donde viven los cracs, las pandemias y los éxitos virales, esa diferencia es la que separa "no puede pasar" de "pasa según calendario".
-
-<Reveal client:visible buttonLabel="¿Por qué es tan peligroso ajustar una campana a datos de cola gruesa?">
-Porque la gaussiana *sí* ajustará el centro tranquilo de maravilla — el 99% de los datos está en el cuerpo, donde ambas formas se parecen, así que el ajuste parece excelente. Pero entonces la campana impone su propia cola fina a los extremos, declarando "imposibles" justo los sucesos que más importan. Te queda un modelo que es preciso exactamente donde no pasa nada importante y catastróficamente erróneo exactamente donde pasa todo lo importante. El buen ajuste es la trampa.
-</Reveal>
-
-<Callout type="success" title="Elegir la forma">
-Recurre a un modelo de **ley de potencia / cola gruesa** siempre que la magnitud sea *escalable, social o económica*, o siempre que notes que unos pocos gigantes dominan el total. Recurre a la **campana de Gauss** solo para magnitudes *acotadas, aditivas y de Mediocristán* — las sumas de muchas cosas pequeñas e independientes. En caso de duda, asume la cola gruesa: estar sobrepreparado para un extremo cuesta un colchón; estar infrapreparado cuesta la partida entera.
-</Callout>
-
-<MCQ
-  client:visible
-  question="Un analista ajusta una distribución normal a los rendimientos diarios de una acción. El ajuste parece excelente — encaja con los datos a la perfección. ¿Por qué deberías seguir desconfiando de su estimación del riesgo de crac?"
-  options={[
-    { text: "Porque el ajuste es probablemente un error de aritmética.", correct: false, explanation: "No — el ajuste es genuinamente bueno en el cuerpo. Eso es justo lo que lo hace engañoso; el problema no es un error de cálculo." },
-    { text: "Porque los rendimientos son de cola gruesa, así que la gaussiana encaja con el centro tranquilo pero infracuenta radicalmente los cracs de la cola.", correct: true, explanation: "Precisamente. El ~99% de los días vive en el cuerpo, donde ambas formas coinciden, así que el ajuste parece estupendo — mientras la cola fina de la campana etiqueta los cracs reales como 'imposibles'. El buen ajuste central oculta el error fatal de la cola." },
-    { text: "Porque los rendimientos están acotados, así que no aplica ninguna distribución.", correct: false, explanation: "Los rendimientos no están acotados en el sentido que importa — ese es el quid. Son escalables y de cola gruesa, por eso la campana falla." },
-    { text: "Porque la distribución normal siempre sobreestima el riesgo.", correct: false, explanation: "Lo contrario. Con datos de cola gruesa, la gaussiana *infraestima* el riesgo de cola, llamando imposibles a extremos esperados." },
-  ]}
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Bajo las hipótesis indicadas del límite central, ¿qué objeto se aproxima a una normal al reunir muchas observaciones independientes?"
+  options={[{"text":"La distribución de la mayor observación original."},{"text":"La distribución poblacional de cada observación original."},{"text":"El siguiente valor observado, sea cual sea su ley de origen."},{"text":"La distribución de la media muestral estandarizada.","correct":true}]}
+  explanation="El teorema trata la media centrada y reescalada entre muestras repetidas. No cambia la distribución que genera cada observación original."
+  pretest={true}
 />
 
-## Repaso
+Una versión del **teorema central del límite (central limit theorem)** se refiere a observaciones independientes e idénticamente distribuidas, con media finita y varianza finita y positiva. Para la media muestral $\bar X_n$, afirma que
 
-<Quiz
-  client:visible
-  questions={[
-    {
-      question: "¿Qué única característica de la campana de Gauss hace que infracuente los extremos?",
-      options: [
-        { text: "Su cola decae de forma superexponencial (como e^(-x²/2)), así que la probabilidad lejana se desploma asombrosamente rápido.", correct: true, explanation: "Ese decaimiento superexponencial es todo el mecanismo — cada sigma extra cuesta órdenes de magnitud, así que los extremos genuinos parecen imposibles." },
-        { text: "No tiene media.", correct: false, explanation: "La campana tiene una media (μ) perfectamente definida. Su problema es la velocidad a la que se desvanece su cola, no un centro ausente." },
-        { text: "Es asimétrica, inclinada hacia los valores grandes.", correct: false, explanation: "La campana es simétrica. Son las leyes de potencia las que están sesgadas hacia los gigantes." },
-      ],
-    },
-    {
-      question: "En una ley de potencia P(X > x) ∝ x^(-α), ¿qué significa un exponente de cola α MÁS PEQUEÑO?",
-      options: [
-        { text: "Una cola más gruesa — los valores extremos siguen siendo más probables.", correct: true, explanation: "Una α más pequeña hace que x^(-α) decaiga despacio, dejando más probabilidad a lo lejos. Exponente más pequeño, cola más gruesa, mundo más salvaje." },
-        { text: "Una cola más fina, más cercana a una campana.", correct: false, explanation: "Al revés — una α mayor es el caso manso, de cola más fina. La α pequeña es la peligrosa." },
-        { text: "Nada sobre la cola; α solo fija la media.", correct: false, explanation: "α es el mando mismo del grosor de la cola. Gobierna cuánta masa se sienta en los extremos." },
-      ],
-    },
-    {
-      question: "Aplicando la regla 80/20 dos veces (anidándola), ¿qué porcentaje aproximado de los efectos viene del 4% superior de las causas?",
-      options: [
-        { text: "Alrededor del 64% — eso es el 80% del 80%.", correct: true, explanation: "Anidar 80/20 da 80% × 80% ≈ 64% de los efectos a partir del 20% × 20% = 4% de las causas. Las leyes de potencia se repiten a sí mismas." },
-        { text: "Alrededor del 80%, igual que con una capa.", correct: false, explanation: "Una capa da 80% a partir del 20%. Anidar lo aprieta hasta ~64% a partir de solo el 4% — la concentración se compone." },
-        { text: "Alrededor del 20% — el efecto se reparte al anidar.", correct: false, explanation: "Se concentra, no se reparte. Cada capa anidada tira de más efecto hacia menos causas." },
-      ],
-    },
-    {
-      question: "Un suceso 'que solo pasa una vez en el universo' según tu modelo acaba de ocurrir por tercera vez esta década. La conclusión honesta es:",
-      options: [
-        { text: "Tu modelo tiene la forma equivocada — es una cola fina sobre datos de cola gruesa.", correct: true, explanation: "Los sucesos 'imposibles' repetidos son la firma de una gaussiana ajustada a un mundo de ley de potencia. Arregla la distribución, no tu sentido de la suerte." },
-        { text: "Tienes una mala suerte extraordinaria, pero el modelo está bien.", correct: false, explanation: "Tres imposibilidades en una década no es mala suerte: es un modelo mal especificado anunciándose a gritos." },
-        { text: "Los sucesos extremos no son modelables, así que ríndete.", correct: false, explanation: "Los modelos de cola gruesa predicen estos sucesos como raros-pero-esperados. La lección no es 'no modeles': es 'usa la forma correcta'." },
-      ],
-    },
-  ]}
+$$\frac{\bar X_n-\mu}{\sigma/\sqrt n}$$
+
+se aproxima a una distribución normal estándar a medida que aumenta el tamaño de la muestra. Las observaciones originales no tienen por qué seguir una distribución normal. Su distribución no se vuelve normal por registrar más observaciones, y un tamaño muestral finito no hace exacta la aproximación.
+
+Considera extracciones independientes que dan cero o uno con la misma probabilidad. Cada una tiene media $1/2$ y desviación típica $1/2$. El **error estándar (standard error)** es la desviación típica de su media muestral entre muestras repetidas. Aquí es $1/(2\sqrt n)$:
+
+| Tamaño de la muestra | Error estándar en unidades de proporción | La misma cantidad en puntos porcentuales |
+|---:|---:|---:|
+| 1 | 1/2 | 50 |
+| 4 | 1/4 | 25 |
+| 16 | 1/8 | 12,5 |
+
+Cuadruplicar el tamaño de una muestra independiente reduce a la mitad este error estándar. No promete que la siguiente media observada esté más cerca de la media poblacional. Con cuatro extracciones, la media sigue teniendo solo cinco valores posibles; no es una campana continua exacta.
+
+Compáralo con hacer cuatro o dieciséis copias perfectas de **una sola** extracción. Su media sigue siendo el valor original, cero o uno, por lo que su desviación típica permanece en cincuenta puntos porcentuales. Añadir filas no ha aportado más información independiente.
+
+<FactorChainTrace client:visible
+  locale="es"
+  title="Nuevas observaciones frente a copias"
+  instructions="Avanza por tamaños nominales uno, cuatro y dieciséis. La primera regla añade sorteos independientes; la segunda duplica siempre el mismo sorteo original."
+  scenarios={[{"label":"Sorteo equiprobable de cero o uno","start":50,"unit":"pp","chains":[{"label":"Nuevos sorteos independientes","factorHundredths":[50,50]},{"label":"Copias perfectas de un sorteo","factorHundredths":[100,100]}]}]}
+  labels={{"scenarioLabel":"Modelo muestral","stepTemplate":"Etapa de tamaño {step} de {total}","startLabel":"Un sorteo registrado","backLabel":"Etapa anterior","nextLabel":"Etapa siguiente","resetLabel":"Volver a un sorteo","chainLabel":"Regla muestral","previousLabel":"Error estándar anterior","factorLabel":"Multiplicador del error estándar","resultLabel":"Error estándar","initialCellLabel":"Inicial","tableCaption":"Error estándar con tamaños nominales uno, cuatro y dieciséis","chartDescription":"Compara los errores estándar de nuevos sorteos independientes y copias perfectas de un sorteo original.","valueAxisLabel":"Error estándar en puntos porcentuales","stepAxisLabel":"Etapa de tamaño muestral","initialAnnouncementTemplate":"Con un sorteo: {first}; {second}.","stepAnnouncementTemplate":"Etapa de tamaño {step}: {first}; {second}.","precisionNote":"Estos factores exactos corresponden a los dos modelos estipulados; los puntos porcentuales miden variación de una proporción, no la probabilidad de un error."}}
 />
 
-**Adónde lleva esto:** si la campana es la forma equivocada, entonces las propias herramientas que nos enseñó — la **media** y la **desviación típica** — heredan su punto ciego. En la lección 03 veremos por qué, con datos de cola gruesa, la media y la desviación típica se vuelven engañosas: oscilan salvajemente con cada nueva observación y mienten en silencio sobre el riesgo que de verdad cargas.
+Cada paso de la figura compara tamaños nominales de uno, cuatro y dieciséis. Los multiplicadores se aplican al error estándar, no al tamaño de la muestra. La segunda cadena conserva la misma extracción aleatoria original en todo momento; no es un segundo modelo de muestreo independiente.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Selecciona todas las conclusiones que sostienen los modelos de sorteos equiprobables y copias perfectas."
+  allowMultiple={true}
+  options={[{"text":"Cuadruplicar la muestra independiente divide este error estándar por dos.","correct":true},{"text":"Cuatro copias de un sorteo reducen a la mitad la desviación de su media."},{"text":"Más observaciones independientes no tienen por qué volver gaussianos los datos originales.","correct":true},{"text":"Una muestra mayor debe producir una media realizada más cercana en el siguiente intento."}]}
+  explanation="La fórmula independiente escala con la raíz del tamaño muestral. Las copias perfectas conservan el valor aleatorio original, y una afirmación de precisión no garantiza el siguiente error observado."
+/>
+
+### Cuándo ayuda este límite
+
+Puede justificar una aproximación para las medias cuando sus supuestos y el error de aproximación sean defendibles. No justifica un modelo normal para la mayor observación original, ni elimina la dependencia, ni aporta una varianza finita cuando la población carece de ella.
+
+## Define una cola de Pareto antes de comparar exponentes
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Dos modelos de Pareto comparten el umbral inferior. Para un mismo nivel superior a él, ¿qué exponente de supervivencia deja más probabilidad por encima?"
+  options={[{"text":"El exponente menor.","correct":true},{"text":"El exponente mayor."},{"text":"Cualquier exponente da exactamente la misma probabilidad."},{"text":"La respuesta depende solo del número de observaciones registradas."}]}
+  explanation="Con el mismo umbral inferior y un nivel por encima, la razón elevada al exponente está entre cero y uno. Un exponente positivo menor deja una probabilidad de supervivencia mayor."
+  pretest={true}
+/>
+
+Una **distribución de Pareto (Pareto distribution)** continua, con umbral inferior $x_m>0$ y exponente de supervivencia $\alpha>0$, especifica
+
+$$P(X>x)=\left(\frac{x_m}{x}\right)^\alpha,\qquad x\ge x_m.$$
+
+La **probabilidad de supervivencia** cuenta los resultados que superan un umbral. Por debajo del umbral inferior, todos los resultados son al menos $x_m$, por lo que la supervivencia es uno. En este modelo continuo, cambiar $>$ por $\ge$ en un punto no altera su probabilidad. Esa igualdad no tiene por qué cumplirse en un modelo discreto con masas de probabilidad puntuales.
+
+Resuelve una comparación completa con el mismo umbral inferior, $x_m=1$, y el mismo umbral de interés, $x=4$. El exponente dos da $(1/4)^2=1/16$; el exponente cuatro da $(1/4)^4=1/256$. La primera probabilidad es dieciséis veces la segunda. Un exponente de supervivencia menor da una probabilidad de cola superior mayor cuando se mantiene fijo el umbral inferior y el umbral de interés está por encima de él.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Caso del modelo"
+  countsLabel="Fracción exacta del modelo"
+  differenceLabel="Primera fracción menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Cambia el exponente con el umbral inferior fijo"
+  scenarios={[{"label":"Nivel dos","groups":[{"label":"Exponente de supervivencia dos","events":1,"total":4},{"label":"Exponente de supervivencia cuatro","events":1,"total":16}]},{"label":"Nivel cuatro","groups":[{"label":"Exponente de supervivencia dos","events":1,"total":16},{"label":"Exponente de supervivencia cuatro","events":1,"total":256}]},{"label":"Nivel ocho","groups":[{"label":"Exponente de supervivencia dos","events":1,"total":64},{"label":"Exponente de supervivencia cuatro","events":1,"total":4096}]}]}
+/>
+
+Estas razones proceden de los modelos declarados, no de frecuencias de papeletas observadas. Ambos modelos tienen un soporte no acotado por arriba. Incluso con exponente cuatro la cola sigue una ley de potencias; no se convierte en una distribución normal.
+
+Algunas fuentes usan $\alpha$ para el exponente de la **densidad**. Aquí, al derivar la función de distribución, obtenemos
+
+$$f(x)=\frac{\alpha x_m^\alpha}{x^{\alpha+1}}.$$
+
+Por tanto, un exponente de supervivencia dos corresponde a un exponente de densidad tres. Lee la definición que acompaña a un exponente antes de compararlo con los de esta lección.
+
+<FillBlank client:visible
+  className="not-prose"
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="correctas"
+  question="Distingue las dos convenciones de exponente."
+  text="Con exponente de supervivencia dos, el exponente de densidad es {{tres|dos|catorce}}. Con exponente de densidad tres, el de supervivencia es {{dos|tres|cuatro}}."
+  explanation="En este modelo continuo, la densidad tiene un exponente mayor en uno. Hay que leer qué función define el exponente."
+/>
+
+### Cuándo es válida esta comparación
+
+Compara modelos de Pareto especificados con un umbral inferior y un umbral de interés comunes. Distintos umbrales inferiores pueden cambiar el orden de las probabilidades en un umbral numérico dado. Ni una sola observación grande ni una etiqueta económica establecen estos parámetros o la familia de Pareto.
+
+## Una cola pesada no siempre elimina la media
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="El modelo continuo de Pareto dado tiene exponente de supervivencia uno coma dos. ¿Qué descripción es correcta?"
+  options={[{"text":"Ambos momentos poblacionales son finitos porque toda muestra es finita."},{"text":"Su media poblacional es finita, pero su varianza es infinita.","correct":true},{"text":"Su media es infinita porque su varianza es infinita."},{"text":"No se puede calcular su media muestral hasta que exista la media poblacional."}]}
+  explanation="El exponente de supervivencia supera uno, pero no dos. La media de una muestra finita y la esperanza poblacional son objetos distintos."
+  pretest={true}
+/>
+
+Con la convención de Pareto que acabamos de definir, la media es finita cuando $\alpha>1$:
+
+$$E[X]=\frac{\alpha x_m}{\alpha-1}.$$
+
+La varianza solo es finita cuando $\alpha>2$, y en ese caso
+
+$$\operatorname{Var}(X)=\frac{\alpha x_m^2}{(\alpha-1)^2(\alpha-2)}.$$
+
+Para $0<\alpha\le1$, la media es infinita y la varianza ordinaria respecto a una media poblacional finita no está definida. Para $1<\alpha\le2$, la media es finita, pero la varianza es infinita. Estos umbrales describen el modelo ideal con una cola superior ilimitada. Un límite superior finito especificado cambia sus momentos.
+
+| Exponente de supervivencia, umbral inferior uno | Media | Varianza |
+|---|---:|---|
+| 0,8 | Infinita | No finita |
+| 1,2 | 6 | Infinita |
+| 2 | 2 | Infinita |
+| 4 | 4/3 | 2/9 |
+
+Para el exponente $1.2=6/5$, la media se calcula como $(6/5)/(1/5)=6$. Las extracciones independientes de este modelo tienen una esperanza absoluta finita, por lo que la **ley de los grandes números (law of large numbers)** se aplica a su media muestral aunque la varianza sea infinita. Que una estimación se estabilice lentamente en un registro corto no demuestra que la media poblacional no exista.
+
+Que la media sea finita no significa que todos los resultados contribuyan a ella por igual. En ese mismo modelo, la probabilidad de superar treinta y dos es $32^{-6/5}=1/64$. Sin embargo, esa región aporta la mitad de la media finita: su contribución esperada es tres de las seis unidades de carga totales de la media. La fracción de la media que procede de valores superiores a un umbral $t\ge x_m$ es $(x_m/t)^{\alpha-1}$ cuando $\alpha>1$. Es una razón de esperanzas, no una promesa sobre la mayor extracción de una muestra finita.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Caso del modelo"
+  countsLabel="Fracción estipulada con el denominador indicado en cada fila"
+  differenceLabel="Primera fracción menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Compara una probabilidad con una cuota de contribución"
+  scenarios={[{"label":"Exponente uno coma dos, nivel treinta y dos","groups":[{"label":"Cuota de la media aportada por encima del nivel","events":1,"total":2},{"label":"Probabilidad de superar el nivel","events":1,"total":64}]},{"label":"Exponente dos, nivel dos","groups":[{"label":"Cuota de la media aportada por encima del nivel","events":1,"total":2},{"label":"Probabilidad de superar el nivel","events":1,"total":4}]},{"label":"Exponente cuatro, nivel dos","groups":[{"label":"Cuota de la media aportada por encima del nivel","events":1,"total":8},{"label":"Probabilidad de superar el nivel","events":1,"total":16}]}]}
+/>
+
+La figura compara una probabilidad de resultado con una fracción de la media del modelo e identifica sus distintos denominadores. Ambas son fracciones; responden a preguntas distintas. Una probabilidad pequeña puede coexistir con una contribución esperada considerable sin que la media sea infinita.
+
+A la inversa, una muestra finita siempre tiene una media aritmética ordinaria cuando sus valores registrados son finitos. Eso no crea una esperanza poblacional finita para el modelo con exponente $0.8$.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un concepto y después su definición."
+  allCorrectLabel="Todo relacionado"
+  partialResultWord="correctas"
+  pickDefinitionHint="elige ahora una definición"
+  notLinkedHint="sin relacionar"
+  termsLabel="Conceptos"
+  definitionsLabel="Definiciones"
+  question="Relaciona cada objeto con lo que describe."
+  pairs={[{"term":"Media muestral","definition":"La media aritmética de los valores finitos registrados."},{"term":"Esperanza poblacional","definition":"La media bajo la ley de probabilidades especificada, cuando existe."},{"term":"Varianza poblacional","definition":"La desviación cuadrática esperada respecto a una media poblacional finita; puede ser infinita."},{"term":"Ley de los grandes números","definition":"Con las hipótesis adecuadas, relaciona la media muestral con una esperanza finita."}]}
+  explanation="Calcular una media muestral no demuestra que exista la esperanza del modelo. Una esperanza finita tampoco demuestra una varianza finita."
+/>
+
+### Cuándo importan los momentos
+
+Comprueba qué momento requiere realmente el método que propones. Una media finita puede justificar una afirmación basada en la ley de los grandes números bajo independencia, sin cumplir el supuesto de varianza finita del teorema central del límite enunciado antes. Decir «cola pesada» no resuelve ninguna de las dos cuestiones.
+
+## Distingue la invariancia de escala (scale invariance) de un reparto ochenta-veinte universal
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un conjunto de datos tiene un resumen de concentración ochenta-veinte. ¿Basta para determinar qué aporta el cuatro por ciento superior?"
+  options={[{"text":"Sí: todo resumen de concentración debe repetirse dentro de sí mismo."},{"text":"Sí: todos los datos finitos sesgados a la derecha tienen el mismo reparto."},{"text":"No: el reparto dentro del grupo principal es información adicional.","correct":true},{"text":"No: nunca se puede calcular una cuota de efectos con datos finitos."}]}
+  explanation="La anidación necesita el mismo reparto dentro del primer grupo. El resumen agregado no especifica ese reparto interior."
+  pretest={true}
+/>
+
+En el modelo de Pareto especificado, para un multiplicador $c\ge1$ y un umbral $t\ge x_m$,
+
+$$P(X>ct\mid X>t)=\frac{P(X>ct)}{P(X>t)}=c^{-\alpha}.$$
+
+Con umbral inferior uno, exponente dos y $t=2$, la probabilidad sin condicionar de superar cuatro es $1/16$. Condicionar a que ya se haya superado dos cambia el denominador a $1/4$, así que la probabilidad condicionada es $(1/16)/(1/4)=1/4$. Esa probabilidad condicionada coincide con la probabilidad original de superar el doble del umbral inferior. Es la relación de escala del modelo, no una afirmación de que las muestras finitas reproduzcan formas idénticas a cualquier aumento.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Caso del modelo"
+  countsLabel="Fracción exacta del modelo"
+  differenceLabel="Primera fracción menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Cambia el denominador después de observar"
+  scenarios={[{"label":"Exponente dos, superar cuatro dado que se supera dos","groups":[{"label":"Condicionada a superar dos","events":1,"total":4},{"label":"Sin condicionar, superar cuatro","events":1,"total":16}]},{"label":"Exponente cuatro, superar cuatro dado que se supera dos","groups":[{"label":"Condicionada a superar dos","events":1,"total":16},{"label":"Sin condicionar, superar cuatro","events":1,"total":256}]},{"label":"Exponente dos, duplicar el nivel conservado","groups":[{"label":"Superar ocho dado que se supera cuatro","events":1,"total":4},{"label":"Superar dos desde el umbral inferior original","events":1,"total":4}]}]}
+/>
+
+La concentración introduce otra cantidad: la **fracción de la media total del modelo** que aporta el grupo formado por las observaciones de mayor valor, cuya proporción es $p$. Cuando la media de Pareto es finita, esa contribución es $p^{(\alpha-1)/\alpha}$. Con exponente dos, la cuarta parte con valores más altos aporta la mitad de la media total; la dieciseisava parte superior aporta un cuarto. El modelo tiene una cola de ley de potencias sin un reparto ochenta-veinte.
+
+Si una clasificación construida estipula que el veinte por ciento superior aporta el ochenta por ciento, **y que el mismo reparto se repite dentro de ese grupo**, entonces el cuatro por ciento superior aporta el sesenta y cuatro por ciento: $0.2\times0.2=0.04$ y $0.8\times0.8=0.64$. El segundo supuesto es necesario. Un resumen ochenta-veinte en un conjunto de datos finito no lo demuestra.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Selecciona todas las distinciones válidas en los cálculos de Pareto especificados."
+  allowMultiple={true}
+  options={[{"text":"Condicionar por superar un umbral conserva el denominador incondicionado original."},{"text":"Una superación condicionada usa como denominador la probabilidad del suceso condicionante.","correct":true},{"text":"Toda cola de potencia impone el mismo reparto de contribución ochenta-veinte."},{"text":"Una cuota de contribución y una probabilidad de superación tienen denominadores distintos.","correct":true}]}
+  explanation="Al condicionar se divide por la probabilidad del suceso conservado. La cuota de contribución divide por la media total del modelo. Ninguna impone un porcentaje universal de concentración."
+/>
+
+### Cuándo usar la relación de escala
+
+Usa un modelo de cola especificado para calcular probabilidades de excedencia condicionadas o concentración, manteniendo separados sus denominadores. No conviertas un resumen empírico de concentración en una recurrencia garantizada, ni una probabilidad positiva en una cita en el calendario.
+
+## Transfiere el cálculo y después revisa la elección del modelo
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En el nivel común de seis, compara los modelos dados de exponente dos y umbrales inferiores uno y tres. ¿Cuál tiene mayor probabilidad de superación?"
+  options={[{"text":"El de umbral inferior uno, porque su soporte empieza antes."},{"text":"El de umbral inferior tres, porque el nivel es un múltiplo menor de su umbral inferior.","correct":true},{"text":"Deben coincidir porque tienen el mismo exponente."},{"text":"Ninguna probabilidad existe por encima de un nivel finito."}]}
+  explanation="Con el exponente fijo también importa la razón entre el umbral inferior y el nivel. Las cuentas dan un treintaiseisavo frente a un cuarto."
+  pretest={true}
+/>
+
+Un caso construido independiente tiene umbral inferior tres unidades de carga y exponente de supervivencia dos. Sus probabilidades de cola superior son
+
+$$P(X>6)=(3/6)^2=1/4,\qquad P(X>12)=(3/12)^2=1/16.$$
+
+Dado que una carga ya supera seis, su probabilidad de superar doce es $(1/16)/(1/4)=1/4$. Copiar el antiguo umbral inferior uno daría, en cambio, $P(X>6)=1/36$: otro cálculo para otro modelo.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Caso del modelo"
+  countsLabel="Fracción exacta del modelo"
+  differenceLabel="Primera fracción menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Conserva el umbral inferior nuevo en la cuenta"
+  scenarios={[{"label":"Superar seis, exponente dos","groups":[{"label":"Umbral inferior tres","events":1,"total":4},{"label":"Umbral inferior uno","events":1,"total":36}]},{"label":"Superar doce, exponente dos","groups":[{"label":"Umbral inferior tres","events":1,"total":16},{"label":"Umbral inferior uno","events":1,"total":144}]},{"label":"Umbral inferior tres, superar doce","groups":[{"label":"Dado que se supera seis","events":1,"total":4},{"label":"Antes de observar un nivel","events":1,"total":16}]}]}
+/>
+
+Para extracciones independientes con una probabilidad de excedencia fija $p>0$, la probabilidad de al menos una excedencia en $n$ ensayos es $1-(1-p)^n$. Con $p=1/4$ y cuatro extracciones, es $1-(3/4)^4=175/256$, alrededor del sesenta y ocho por ciento. No hay certeza de que ocurra en esos cuatro ensayos. La independencia y una probabilidad que no cambia son supuestos adicionales; una probabilidad marginal por sí sola no especifica una secuencia de sucesos.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="En los cuatro sorteos independientes dados, con probabilidad de superación de un cuarto, ¿cuál es la probabilidad de al menos una superación?"
+  options={[{"text":"Aproximadamente el treinta y dos por ciento."},{"text":"Exactamente el setenta y cinco por ciento."},{"text":"La certeza durante esos cuatro sorteos."},{"text":"Aproximadamente el sesenta y ocho por ciento.","correct":true}]}
+  explanation="No superar tiene probabilidad tres cuartos elevada a cuatro: ochenta y uno entre doscientos cincuenta y seis. Al restarla de uno queda ciento setenta y cinco entre doscientos cincuenta y seis."
+/>
+
+La cuestión más difícil es si el modelo describe un proceso real. Una recta ajustada en ejes logarítmicos, una diferencia grande entre media y mediana o una sola observación extrema no establecen por sí solas una ley de potencias. Un modelo lognormal o uno truncado pueden ofrecer explicaciones alternativas. Un análisis empírico riguroso debe especificar el rango ajustado, estimar los parámetros de forma adecuada, comprobar el ajuste, comparar alternativas y examinar cómo se obtuvieron las observaciones. Este taller no ha realizado ninguno de esos pasos empíricos sobre un conjunto de datos real.
+
+Incluso un modelo que no se rechace con una prueba de ajuste elegida no ha quedado demostrado como el único verdadero. Usa el diagnóstico para decidir qué evidencia o análisis de sensibilidad necesitas, en vez de sustituir una opción automática por otra.
+
+<Categorize client:visible
+  className="not-prose"
+  instructions="Asigna cada afirmación a su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="correctas"
+  question="Separa cálculos del modelo de afirmaciones que necesitan evidencia."
+  buckets={["Se deduce del modelo dado","Necesita evidencia adicional"]}
+  items={[{"text":"La probabilidad sobre doce es un dieciseisavo en el caso nuevo.","bucket":"Se deduce del modelo dado"},{"text":"Los datos de un instrumento real siguen exactamente esa ley.","bucket":"Necesita evidencia adicional"},{"text":"El exponente de densidad supera en uno al de supervivencia.","bucket":"Se deduce del modelo dado"},{"text":"La muestra se recogió sin selección ni dependencia.","bucket":"Necesita evidencia adicional"},{"text":"Un buen ajuste visual descarta todos los modelos alternativos.","bucket":"Necesita evidencia adicional"}]}
+  explanation="Las ecuaciones producen conclusiones condicionales. Elegir la familia, los parámetros y las hipótesis de recogida necesita otra evidencia."
+/>
+
+### Cuándo repetir la auditoría
+
+Repítela cuando cambien la escala, el umbral inferior, la ventana de observación, la selección, la dependencia o un posible límite físico. La pregunta operativa es qué conclusiones sobreviven a esos cambios, dadas una decisión y sus consecuencias. Una etiqueta de cola no proporciona por sí sola una política universal.
+
+## Reconstruye las distinciones
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Una curva ajustada parece recta en ejes logarítmicos. ¿Qué afirmación permite solo ese aspecto?"
+  options={[{"text":"Es un patrón candidato que aún requiere comprobar el modelo.","correct":true},{"text":"La población debe seguir una ley de potencia exacta en toda escala."},{"text":"Ya se han descartado todos los modelos de cola rivales."},{"text":"La recogida de datos debe ser independiente y completa."}]}
+  explanation="El aspecto visual puede sugerir un candidato. No establece el intervalo de ajuste, la adecuación, la unicidad ni las hipótesis muestrales."
+  pretest={true}
+/>
+
+<MindMap client:visible
+  eyebrow=""
+  outlineLabel="Esquema de texto"
+  title="Reconstruye la comparación de colas"
+  root={{"label":"Calcula dentro de un modelo y comprueba su alcance","children":[{"label":"Especifica la normal","children":[{"label":"Parámetros y una cola o dos"},{"label":"Probabilidad positiva no significa imposibilidad"}]},{"label":"Comprueba las hipótesis muestrales","children":[{"label":"Media estandarizada bajo independencia y varianza finita"},{"label":"Copias dependientes no añaden información"}]},{"label":"Define Pareto","children":[{"label":"Umbral inferior y exponente de supervivencia"},{"label":"La densidad usa otro exponente"}]},{"label":"Comprueba los momentos","children":[{"label":"Media finita no implica varianza finita"},{"label":"Muestra finita no crea una esperanza poblacional"}]},{"label":"Conserva el denominador","children":[{"label":"Condicionamiento y cuota de contribución"},{"label":"La anidación necesita una hipótesis adicional"}]},{"label":"Audita la aplicación","children":[{"label":"Familia escala observación y alternativas"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="bien"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Has acertado todas las preguntas."
+  goodMessage="Revisa las explicaciones de tus errores."
+  keepPracticingMessage="Vuelve a los ejemplos y prueba otra vez."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  title="Comprueba los modelos y sus límites"
+  questions={[{"question":"Recupera la convención: ¿qué exponente de densidad corresponde a un exponente de supervivencia dos?","options":[{"text":"Uno"},{"text":"Tres","correct":true},{"text":"Dos"},{"text":"Cuatro"}],"explanation":"En este modelo continuo de Pareto, el exponente de densidad supera en uno al de supervivencia."},{"question":"Una cuenta de cola superior normal da un número positivo diminuto. ¿Qué interpretación es correcta?","options":[{"text":"El suceso no puede ocurrir en ningún registro finito."},{"text":"Observarlo una vez demuestra que el modelo es falso."},{"text":"El suceso sigue siendo posible bajo ese modelo.","correct":true},{"text":"El suceso debe ocurrir a intervalos regulares."}],"explanation":"Una probabilidad positiva no equivale a imposibilidad ni a un calendario. La adecuación del modelo exige más evidencia que esta cuenta."},{"question":"Compara las dos cadenas muestrales. ¿Por qué las filas copiadas conservan el error estándar original?","options":[{"text":"Todas son el mismo sorteo aleatorio, de modo que promediar no crea información nueva.","correct":true},{"text":"Las copias han adquirido una varianza poblacional infinita."},{"text":"Toda media muestral finita tiene siempre el mismo error estándar."},{"text":"Las observaciones independientes y las copias idénticas tienen igual covarianza."}],"explanation":"La dependencia perfecta mantiene la media igual al sorteo original. No se aplica la fórmula independiente de la raíz."},{"question":"¿Qué condiciones se mantuvieron fijas al comparar los exponentes de Pareto en esta lección? Selecciona todas las que correspondan.","allowMultiple":true,"options":[{"text":"Un umbral inferior común.","correct":true},{"text":"Un modelo normal para cada observación original."},{"text":"El mismo nivel de comparación por encima del umbral inferior.","correct":true},{"text":"Una prueba de que todos los datos reales siguen leyes de potencia."}],"explanation":"La comparación monótona de exponentes vale dentro de la familia de Pareto especificada, con la misma escala y nivel."},{"question":"El cuarto superior aporta la mitad de la media bajo la ley de Pareto dada de exponente dos. ¿Qué refuta?","options":[{"text":"Que el modelo tenga probabilidad en la cola superior."},{"text":"Que su media poblacional pueda existir."},{"text":"Que se pueda calcular la superación condicionada."},{"text":"Que toda ley de potencia imponga un reparto ochenta-veinte.","correct":true}],"explanation":"Esta ley de potencia especificada tiene otro reparto de concentración. La concentración depende del exponente y de la magnitud que se mide."},{"question":"Otra analista cambia el umbral inferior y conserva el exponente. ¿Qué debe volver a calcular?","options":[{"text":"Solo el número de observaciones de una muestra anterior."},{"text":"Las probabilidades con la nueva razón entre umbral inferior y nivel.","correct":true},{"text":"Las observaciones históricas, que deben cambiar retrospectivamente."},{"text":"Nada: el exponente especifica por completo todos los modelos de Pareto."}],"explanation":"La escala forma parte del modelo. No se puede trasladar una probabilidad de superación solo porque el exponente no haya cambiado."}]}
+/>
+
+### Fuentes y alcance
+
+La [referencia de NIST sobre la distribución normal](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm) especifica el modelo normal; el enunciado del teorema central del límite añade expresamente los supuestos de independencia, distribución idéntica y varianza finita que se usan en esta lección. La [definición de Pareto de SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pareto.html) da la densidad continua y la convención del umbral inferior. Los cálculos de momentos, probabilidades condicionadas y casos finitos construidos anteriores pueden reproducirse a partir de esas definiciones.
+
+[Power-law distributions in empirical data](https://arxiv.org/abs/0706.1062), de Clauset, Shalizi y Newman, explica por qué el ajuste visual por sí solo no establece una ley de potencias y por qué importan los modelos alternativos. Se han usado pasajes seleccionados de la introducción, las definiciones y la comprobación de modelos para elaborar esta lección; aquí no se ha ejecutado ningún ajuste empírico ni ninguna prueba estadística de ese artículo.
+
+Continúa con [Cuando la media miente](/es/fat-tails/03-when-the-average-lies), manteniendo la distinción entre una media muestral finita, una media poblacional y los supuestos necesarios para estimarla.
