@@ -356,3 +356,6 @@ export type { IntervalAuditRecord, IntervalAuditRule, IntervalAuditScenario, Int
 
 export { ResponseChordDiagram } from '@/components/react/ResponseChordDiagram';
 export type { ResponseChordProfile, ResponseChordLabels, ResponseChordDiagramProps, ResponseChordFraction } from '@/components/react/ResponseChordDiagram';
+
+export { FixedRuleComparison } from '@/components/react/FixedRuleComparison';
+export type { FixedRule, FixedRuleRecord, FixedRuleComparisonLabels, FixedRuleComparisonProps } from '@/components/react/FixedRuleComparison';
