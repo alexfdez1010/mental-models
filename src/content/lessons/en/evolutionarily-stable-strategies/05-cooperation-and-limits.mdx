@@ -1,19 +1,19 @@
 ---
 title: "Cooperation, Waste, and Where the Model Lies"
-description: "ESS meets the repeated prisoner's dilemma: why Tit-for-Tat is only almost stable, why Always Defect is stable too — a world with two basins — and replicator dynamics as the engine that carries a population to its equilibrium. Then the honest catalogue: stability is not optimality, not every game has an ESS, and the assumptions that real populations break."
+description: "Score repeated policies consistently, see how the catalogue changes TFT, and separate invasion resistance from welfare and population dynamics."
 topic: "en/evolutionarily-stable-strategies"
 order: 6
 minutes: 14
-updated: 2026-07-10
+updated: 2026-11-07
 ---
 
-import { Callout, MCQ, Quiz, MatchConcepts, Categorize, FillBlank, Reveal, MindMap } from '@/components/react';
+import { Callout, MCQ, Quiz, MatchConcepts, Categorize, FillBlank, MindMap, PayoffMatrix } from '@/components/react';
 
 You have spent four lessons learning to distrust a comforting story. A behaviour is *not* stable because it looks clever, or because it "helps the species," or because a documentary narrator said so in a hushed voice. It is stable only if it survives the **invasion test**: a strategy $I$ is an ESS when, for every mutant $J$, either $E(I,I) > E(J,I)$, or $E(I,I) = E(J,I)$ with $E(I,J) > E(J,J)$.
 
 This final teaching lesson turns that lens on the most emotionally loaded question in all of evolutionary game theory — **can cooperation be stable?** — and then, having earned the right, catalogues honestly everywhere the model quietly lies to you.
 
-<MCQ
+<MCQ className={"not-prose"}
   client:visible
   pretest
   question="Before we start: in the one-shot prisoner's dilemma, cooperation is not an ESS because a defector mutant always out-earns a cooperator against a cooperative population. What single feature of the game do you think could flip that — making cooperation defensible?"
@@ -23,24 +23,28 @@ This final teaching lesson turns that lens on the most emotionally loaded questi
     { text: 'Making the reward for cooperation numerically bigger while keeping the game one-shot' },
     { text: 'Nothing — cooperation can never be evolutionarily stable under any conditions' },
   ]}
-  explanation="Repetition is the lever. If the same two players meet again with high enough probability, a strategy can condition today's move on yesterday's — and that shadow of the future is exactly what lets reciprocity resist defectors. Bigger populations or bigger one-shot rewards don't change the dominance of defection in a single round."
+  explanation="Repetition allows policies to condition later actions on earlier ones. Under the stated strict prisoner's-dilemma stage payoffs, the one-shot dominance remains. Whether a repeated policy resists invasion depends on the continuation rule, how payoffs are aggregated and which alternatives are allowed; repetition alone does not guarantee cooperation."
 />
 
 ## Repetition changes the game: the iterated prisoner's dilemma
 
 In the **one-shot prisoner's dilemma**, defection dominates. Whatever your partner does, you earn more by defecting, so a population of cooperators is trivially invaded — cooperation is not an ESS, full stop.
 
-Now play it **repeatedly**. After each round, the same two players meet again with probability $w$ — the **continuation probability**, or as biologists love to call it, the **shadow of the future**. If $w$ is high, "the same partner again" is likely, and a strategy can *remember*: it can reward yesterday's cooperation and punish yesterday's defection.
+For the constructed example, the same pair continues after each round with probability $w=3/4$, independently of the actions and previous history. A policy specifies an action after each possible history. Score it using the **normalized expected total**
+
+$$F=(1-w)\sum_{r=0}^{\infty}w^r u_r.$$
+
+Here $u_r$ is its expected round payoff conditional on the interaction reaching that round. The factor $w^r$ weights survival; the common positive factor $1-w$ normalizes the score. This is **not** the arithmetic mean of the per-round payoffs in a realised match of random length. Holding w fixed, the normalization preserves payoff inequalities. We must also state which policies and mixtures are allowed.
 
 The famous conditional strategy is **Tit-for-Tat (TFT)**: cooperate on the first move, then copy whatever your opponent did last round. Nice (never defects first), retaliatory (punishes defection immediately), and forgiving (returns to cooperation the moment the opponent does).
 
-Think of it as a **thermostat for trust**: it starts warm, cools instantly when chilled, and reheats the moment warmth returns. The question that made Robert Axelrod famous is whether that thermostat is *evolutionarily stable* — not just a good idea, but uninvadable.
+Think of TFT as a **thermostat for trust**: it starts warm and responds to the opponent's last action. The analogy describes its rule, not its stability. To test that, we need a complete payoff criterion and an explicit catalogue of alternatives.
 
 <Callout variant="info" title="The payoffs we'll reuse">
 We use the standard dilemma per round: mutual cooperation pays **3** each, mutual defection **1** each, and the tempted defector gets **5** while the exploited cooperator (the "sucker") gets **0**. So the ranking is Temptation (5) > Reward (3) > Punishment (1) > Sucker (0). Over a repeated game these per-round payoffs accumulate, weighted by how long the relationship lasts.
 </Callout>
 
-<MCQ
+<MCQ className={"not-prose"}
   client:visible
   question="What does a high continuation probability w actually buy a conditional strategy like Tit-for-Tat?"
   options={[
@@ -52,92 +56,137 @@ We use the standard dilemma per round: mutual cooperation pays **3** each, mutua
   explanation="w stretches the future. Defecting grabs a one-time bonus (5 instead of 3) but triggers retaliation for all the rounds that follow. When w is high, 'all the rounds that follow' is a lot of rounds, so the one-time grab is a bad trade. It does not guarantee anything about who your opponent is, nor does it change the per-round numbers."
 />
 
-## Tit-for-Tat is only *almost* an ESS
+## A complete score and two catalogues
 
-Here is the result that separates people who have actually done the algebra from people who have read a pop-science summary. When the shadow of the future is long enough, **TFT resists Always Defect (AllD)** — but it is **not a strict ESS**. It is only *neutrally* stable, and that "only" matters enormously.
+**AllD** always defects; **AllC** always cooperates. TFT cooperates first and then copies. A policy governs the entire match. A mixed policy can draw among these rules before each independent pairing; it does not change rule halfway through the match.
 
-**Step 1 — TFT beats the AllD invader.** Put one AllD mutant in a world of TFT players. On round one AllD defects against a cooperating TFT: it scores 5, the sucker scores 0. Sweet — for exactly one round. From round two on, TFT retaliates and both defect forever, scoring 1 each. Meanwhile two TFT players cooperate every round, scoring 3 each. Let's add it up over, say, a long relationship of many rounds:
+Two TFT policies always cooperate, so $F(T, T)=3$. AllD against TFT scores five first and one thereafter:
 
-| Matchup | Round 1 | Every later round | Long-run per-round average |
-|---|---|---|---|
-| TFT vs TFT | 3 | 3, 3, 3, … | ≈ 3 |
-| AllD vs TFT | 5 | 1, 1, 1, … | ≈ 1 (the 5 washes out) |
+$$F(D, T)=(1-w)5+w\cdot1=2.$$
 
-So $E(\text{TFT},\text{TFT}) \approx 3$ while $E(\text{AllD},\text{TFT}) \approx 1$. Because $E(\text{TFT},\text{TFT}) > E(\text{AllD},\text{TFT})$, TFT is a strict best reply to itself **against AllD** — AllD cannot invade. The one-round theft is drowned by a lifetime of punishment. So far, so heroic.
+TFT against AllD scores zero first and one thereafter:
 
-**Step 2 — the quiet saboteur: Always Cooperate (AllC).** Now try a *nice* mutant, **AllC**, which cooperates unconditionally. Against a TFT population, AllC cooperates every round and TFT — never provoked — also cooperates every round. They both earn 3 per round, forever. That means:
+$$F(T, D)=(1-w)0+w\cdot1=3/4.$$
 
-$$E(\text{TFT},\text{TFT}) = E(\text{AllC},\text{TFT}) = 3.$$
+The tail weights sum to w because $\sum_{r=1}^{\infty}(1-w)w^r=w$. By contrast, AllD against AllC always scores five and AllC against AllD always scores zero. The complete account is:
 
-A tie. TFT's first line of defence ($E(I,I) > E(J,I)$) does **not** hold against AllC. So we go to the tie-breaker: is $E(\text{TFT},\text{AllC}) > E(\text{AllC},\text{AllC})$? Against an AllC opponent, TFT cooperates the whole way (AllC never defects, so TFT never retaliates) and earns 3 per round; two AllC players also cooperate the whole way and earn 3 per round. Tie **again**: $E(\text{TFT},\text{AllC}) = E(\text{AllC},\text{AllC}) = 3$. The tie-breaker fails too.
-
-Both ESS conditions fail against AllC. TFT is therefore **not a strict ESS** — AllC is *selectively neutral* against TFT. In a finite world, neutral mutants **drift**: with no fitness penalty to stop them, AllC copies accumulate by chance.
-
-**Step 3 — the softened population gets mugged.** And here is the sting. Once AllC has drifted in and the population is a soft mix of TFT and AllC, an **AllD** mutant reappears — and now it thrives, because it can exploit all those unconditional cooperators for free (AllC never punishes) while only the dwindling TFT minority retaliates. Cooperation, undefended by memory, gets mugged.
-
-<Callout variant="warning" title="Neutral is not the same as safe">
-The lesson people miss: TFT is not felled by a *better* strategy. It is undermined by an *equally good* one. AllC never out-earns TFT — it just ties, drifts in on that tie, and rots away the retaliation that kept AllD out. "Uninvadable by anything that does strictly worse" is a weaker shield than "uninvadable, period." That gap between **strict ESS** and merely **neutrally stable** is the whole story here.
-</Callout>
+<div role="region" aria-label="Complete matrix of normalized repeated scores" tabIndex={0} className="my-6 max-w-full overflow-x-auto rounded-lg focus-visible:outline-2 focus-visible:outline-brand-600">
+<table style={{display:'table', overflow:'visible', margin:0, minWidth:"28rem"}}>
+<caption className="sr-only">F with continuation three quarters and stage payoffs three, one, five and zero</caption>
+<thead><tr><th scope="col">Row policy</th><th scope="col">Against AllD</th><th scope="col">Against TFT</th><th scope="col">Against AllC</th></tr></thead>
+<tbody>
+<tr><th scope="row">AllD</th><td>1</td><td>2</td><td>5</td></tr>
+<tr><th scope="row">TFT</th><td>3/4</td><td>3</td><td>3</td></tr>
+<tr><th scope="row">AllC</th><td>0</td><td>3</td><td>3</td></tr>
+</tbody>
+</table>
+</div>
 
 <MCQ
-  client:visible
-  question="Precisely why does Tit-for-Tat fail the ESS test — even though Always Defect cannot invade it?"
-  options={[
-    { text: 'Always Cooperate ties TFT on both E(I,I)=E(J,I) and the tie-breaker E(I,J) vs E(J,J), so it is neutral and drifts in, later opening the door to AllD', correct: true },
-    { text: 'Always Cooperate strictly out-earns TFT against a TFT population' },
-    { text: 'Always Defect strictly out-earns TFT when the shadow of the future is high' },
-    { text: 'TFT earns less than 3 per round against itself, so it is not a best reply to itself' },
-  ]}
-  explanation="Against TFT, AllC is a perfect tie: E(TFT,TFT)=E(AllC,TFT)=3, and the tie-breaker E(TFT,AllC)=E(AllC,AllC)=3 as well. Both ESS clauses fail, so AllC is selectively neutral, drifts in, and softens the population until an AllD mutant can invade. AllD by itself cannot beat TFT — it's the neutral drift that does the damage."
+  client: visible
+  className="not-prose"
+  question="With w = 3/4, AllD scores five in the first round against TFT and one in every later round. What is F?"
+  options={[{"text":"One: the first round disappears under every scoring rule"},{"text":"Five: only the first round counts"},{"text":"Two:(1/4)×5+(3/4)×1","correct": true},{"text":"Three: all repeated policies tie"}]}
+  explanation="The first round has weight1−w=1/4; the constant tail of ones has weightw=3/4. The normalized total is 5/4+3/4=2. We are not using a realised infinite-match average."
 />
 
-## Always Defect is an ESS too — so the world is bistable
+### First allow only AllD and TFT
 
-Cooperation's defenders often stop at "reciprocity can be stable" and take a victory lap. Don't. Run the invasion test on the *other* equilibrium and something sobering falls out.
+The catalogue includes these two policies and all their mixtures. Against resident AllD, TFT scores $3/4<1$; against resident TFT, AllD scores $2<3$. Both residents are strict best replies to themselves within this catalogue. Check every mixed mutant too: let q be its probability of choosing AllD and $\varepsilon$ its population share.
 
-Consider a population of pure **AllD**. Everyone defects every round; everyone earns the punishment payoff of 1 per round. Now drop in any nice mutant — TFT or AllC. On round one it cooperates (that is what "nice" means), the AllD natives defect, and the mutant eats the **sucker's payoff of 0**. From then on:
+- Resident AllD, alternative $q<1$:
 
-- **AllC** keeps cooperating into a wall of defectors — 0 every round. Catastrophic.
-- **TFT** cooperates once (0), gets burned, then retaliates and defects for the rest — 1 per round thereafter, exactly matching the natives, but it never recovers that lost first round.
+$$\Delta=(1-q)\left[\frac14-\frac54\varepsilon(1-q)\right]>0\quad\text{when }0<\varepsilon<1/5.$$
 
-Either way, $E(\text{AllD},\text{AllD}) = 1 > E(\text{mutant},\text{AllD})$ (which is at most 1, and strictly less once the round-one sucker loss is counted). No nice mutant can get a toehold. **AllD is a strict ESS.**
+- Resident TFT, alternative $q>0$:
 
-So the repeated prisoner's dilemma is **bistable**: it has *two* evolutionarily stable equilibria. "Everyone reciprocates" (a TFT-like cooperative regime) and "everyone defects" are *both* uninvadable. Which one a population ends up in is not decided by which is better — mutual cooperation pays 3, mutual defection pays a miserable 1 — but by **history, initial conditions, and the basin of attraction** it happened to start in.
+$$\Delta=q\left[1-\frac54\varepsilon q\right]>0\quad\text{when }0<\varepsilon<4/5.$$
 
-<Callout variant="info" title="Two valleys, one ball">
-Picture the fitness landscape as a terrain with two valleys — a deep, rich one (cooperation) and a shallow, poor one (defection) — separated by a ridge. A ball (the population) rolls to whichever valley it started nearest. It does not teleport to the better valley just because that valley is better. This is **path-dependence** in its purest form: the outcome is locked in by where you began, not by where it would be best to end up.
-</Callout>
+The factors supply positive barriers for **every** different mixed alternative. This space has two pure ESSs. That still does not specify a trajectory between them.
 
-This is why cooperation is **hard to restart once lost** (a defecting population sits in its own stable valley and punishes the first nice mutant) and yet **self-defending once established** (a reciprocating population repels defectors). Trust is expensive to build and cheap to burn — and now you can see *why* in the arithmetic, not just the aphorism.
+<PayoffMatrix
+  client: visible
+  className="not-prose"
+  title="The binary catalogue on a common scale"
+  eyebrow=""
+  rowPlayer="Row policy"
+  colPlayer="Column policy"
+  rowStrategies={["AllD","TFT"]}
+  colStrategies={["AllD","TFT"]}
+  payoffs={[[{"row":4,"col":4},{"row":8,"col":3}],[{"row":3,"col":8},{"row":12,"col":12}]]}
+  editable={false}
+  unit=""
+  unitPosition="suffix"
+  instructions="Cells show four times F. Divide by four to recover the table."
+  caption="Multiplying every payoff by the same positive factor preserves inequalities. The two highlighted pure Nash profiles do not replace the test against every mixture."
+/>
+
+### Add AllC without changing payoffs or w
+
+TFT and AllC score three in all their mutual encounters. Therefore,
+
+$$F(T, T)=F(C, T)=3,\qquad F(T, C)=F(C, C)=3.$$
+
+The first tie is not rescued by the second: **TFT is not ESS in the expanded catalogue**. There is no weaker category called “almost a strict ESS” doing the work here. AllC prevents the definition from being satisfied. T/C encounters are neutral on this face of the game, but neutrality does not force AllC to accumulate or predict takeover.
+
+AllD remains ESS against every mixture in the three-policy catalogue. For a mutant with probabilities $(d, t, c)$ of choosing AllD/TFT/AllC, define $s=t+c>0$. Its comparison with resident AllD gives
+
+$$\Delta=\frac t4+c+\varepsilon s\left(c-\frac{5t}{4}\right)\ge\frac{s(1-5\varepsilon)}4>0\quad\text{when }0<\varepsilon<1/5.$$
+
+The bound uses $t/4+c\ge s/4$, $c-5t/4\ge-5s/4$ and $s\le1$. It covers every mixture different from AllD within these three policies. It does not certify resistance against every conceivable history-dependent policy.
+
+<MCQ
+  client: visible
+  className="not-prose"
+  question="Keep payoffs and w fixed. Add AllC to the catalogue that previously allowed only AllD and TFT. Which change is justified?"
+  options={[{"text":"TFT ceases to be ESS because AllC ties both comparisons; no drift or takeover claim is required","correct": true},{"text":"TFT remains ESS because every tie protects it"},{"text":"AllD loses ESS because there are now three policy names"},{"text":"AllC necessarily accumulates until TFT is gone"}]}
+  explanation="TFT and AllC score three in all their mutual encounters. Resident TFT lacks the required strict advantage against that alternative. The strategy space changed, not the score of one fixed declared game."
+/>
+
+### Not every amount of AllC opens the door to AllD
+
+Define a cooperative policy R that, before each match, chooses AllC with probability c and TFT with $1-c$. Against an unperturbed R population, AllD scores $2+3c$ while R scores three. AllD has a strict advantage in that limiting comparison if $c>1/3$; at equality the second calculation still matters.
+
+When a share $\varepsilon$ uses AllD, the complete R-minus-AllD score difference is
+
+$$\Delta=1-3c+\frac{\varepsilon(9c-5)}4.$$
+
+At $c=1/3$ it equals $-\varepsilon/2$, not zero at positive frequency. And an arbitrary positive share of AllC does not guarantee an AllD advantage. These cases keep the same one-percent mutant share:
+
+<div role="region" aria-label="Full comparison against AllD at positive share" tabIndex={0} className="my-6 max-w-full overflow-x-auto rounded-lg focus-visible:outline-2 focus-visible:outline-brand-600">
+<table style={{display:'table', overflow:'visible', margin:0, minWidth:"30rem"}}>
+<caption className="sr-only">R chooses AllC with probability c and TFT otherwise before each match</caption>
+<thead><tr><th scope="col">c in policy R</th><th scope="col">AllD share epsilon</th><th scope="col">R minus AllD score</th></tr></thead>
+<tbody>
+<tr><th scope="row">1/10</th><td>1/100</td><td>2759/4000</td></tr>
+<tr><th scope="row">1/3</th><td>1/100</td><td>−1/200</td></tr>
+<tr><th scope="row">2/5</th><td>1/100</td><td>−407/2000</td></tr>
+</tbody>
+</table>
+</div>
+
+The first row favours R; the other two favour AllD. These are expected-score comparisons. Finite-population drift or realised takeover would need additional rules. The scoring distinction follows discounted sums and normalization in [Levin's official notes](https://web.stanford.edu/~jdlevin/Econ%20203/RepeatedGames.pdf); this example's numbers and catalogues are constructed.
 
 <FillBlank
-  client:visible
-  text="Because both all-reciprocate and all-defect pass the invasion test, the repeated dilemma is {{bistable|optimal|frictionless}}: it has more than one ESS. Which equilibrium a population reaches is set by its {{starting basin|group's welfare|mutation rate}}, not by which outcome pays more — a textbook case of {{path-dependence|group selection|random noise}}."
+  client: visible
+  className="not-prose"
+  question="Name the assumption that changed"
+  text="With w and scoring fixed, moving from AllD/TFT to AllD/TFT/AllC changes the {{strategy catalogue|stage payoff|value of epsilon}}. TFT resisting AllD {{does not suffice|always suffices|makes it impossible}} to prove resistance against every alternative in the expanded catalogue."
+  explanation="An ESS is relative to the declared space. One alternative tying both conditions is enough to rule out the claim."
 />
 
 <Categorize
-  client:visible
-  question="Sort each game by how many evolutionarily stable strategies it has."
-  buckets={['Has a single ESS', 'No ESS (dynamics cycle)', 'Bistable — multiple ESS']}
-  items={[
-    { text: 'Hawk–Dove with V < C — one mixed ESS at p* = V/C', bucket: 'Has a single ESS' },
-    { text: 'The sex-ratio game — one ESS at a 50:50 split', bucket: 'Has a single ESS' },
-    { text: 'Rock–paper–scissors side-blotched lizards — orange/blue/yellow chase each other', bucket: 'No ESS (dynamics cycle)' },
-    { text: 'A three-morph frequency game where each type beats one and loses to another', bucket: 'No ESS (dynamics cycle)' },
-    { text: 'The repeated prisoner\'s dilemma — all-reciprocate and all-defect are both stable', bucket: 'Bistable — multiple ESS' },
-    { text: 'A coordination game where both "everyone drives left" and "everyone drives right" resist invasion', bucket: 'Bistable — multiple ESS' },
-  ]}
-  explanation="Hawk–Dove and the sex ratio each settle on one attractor. Rock–paper–scissors games (the lizards, or any beats-one/loses-to-one triangle) have no ESS and orbit forever. The repeated dilemma and driving-side coordination are bistable — two basins, history decides. 'Find the ESS' can honestly return zero, one, or several answers."
-  checkLabel="Check"
-  retryLabel="Try again"
-  allCorrectLabel="✓ All sorted"
-  partialResultWord="correct"
-  explanationLabel="Explanation"
+  client: visible
+  className="not-prose"
+  question="Classify these conclusions using the declared models"
+  buckets={["ESS test passed","ESS test failed","Another motion rule is needed"]}
+  items={[{"text":"AllD within the AllD/TFT catalogue and all its mixtures","bucket":"ESS test passed"},{"text":"TFT when AllC is also allowed","bucket":"ESS test failed"},{"text":"The population will reach the highest-paying ESS from every start","bucket":"Another motion rule is needed"},{"text":"TFT within the restricted AllD/TFT catalogue and its mixtures","bucket":"ESS test passed"},{"text":"Every policy in the game paying two in every cell","bucket":"ESS test failed"}]}
+  explanation="The factorizations cover every mixture of each declared space. Complete neutrality fails ESS. A global-arrival claim needs another model and is not guaranteed by having two ESS."
 />
 
 ## Replicator dynamics: the engine that does the moving
 
-We keep saying selection "carries" a population toward an ESS. Time to name the engine. The **replicator equation** is the simplest honest model of that motion, and its one-line idea is the whole thing:
+Now add a **separate update model**. Under continuous finite-strategy replicator dynamics, payoff differences determine changes in population shares. This is a specified differential equation, not the definition of ESS and not an exact description of the shared lab's finite Euler steps.
 
 > **A strategy's share grows in proportion to how far above the population average its fitness is.** Fitter-than-average expands; below-average shrinks; exactly-average holds.
 
@@ -147,32 +196,24 @@ $$\frac{dp}{dt} = p\,(1-p)\,(W_A - W_B).$$
 
 Read it left to right and it almost narrates itself. The $p(1-p)$ term is just "you can only change if both types are actually present" (nothing to select between if everyone is already A or already B). The $(W_A - W_B)$ term is the steering wheel: **positive** where A beats B, so A's share rises; **negative** where A loses, so it falls; **zero** where they tie, which is a rest point. It's compound interest for behaviour — winners get proportionally more of next generation's "capital."
 
-Three connections tie this back to everything you've built:
+For the binary AllD/TFT catalogue above, let $x$ be the AllD population share. Then $W_D=2-x$ and $W_T=3-9x/4$, so
 
-1. **You already used it.** The "let selection run" button in the Hawk–Dove lab from Lesson 2 *is* this equation. Whatever fraction of hawks you started with, it drove the population to $p^* = V/C$ — because at any other mix, one strategy is above average and grows until the gap closes.
-2. **An ESS is an attractor.** In dynamical language, an ESS is an **asymptotically stable rest point** of the replicator dynamics: a resting mix that, if you nudge it, pulls itself back. That is the precise meaning of "stable" — not a metaphor, a mathematical property.
-3. **But not every system rests.** Rock–paper–scissors — the side-blotched lizards — has **no rest point that attracts**; the replicator dynamics send it **orbiting** around the center forever, orange chasing blue chasing yellow chasing orange. No attractor, no ESS. Cycles are a legitimate long-run behaviour, not a bug.
+$$\dot x=x(1-x)(5x/4-1).$$
+
+The rest points are $0,4/5,1$. For $0<x<4/5$, x falls; for $4/5<x<1$, x rises. The endpoints attract from their respective sides, and the interior point separates the basins. “Closest valley” is not the rule: a start at x=3/4 is closer to one than zero, but lies below the threshold and moves toward zero in this chosen model. The boundary states themselves remain fixed.
+
+The corresponding [replicator theorem](https://ocw.mit.edu/courses/14.126-game-theory-spring-2024/mit14_126_s24_lecture_slides_evolutionary_game_theory.pdf) connects ESS with **local** asymptotic stability under its stated model. We use that conditional result, not a definition equating ESS with any observed convergence. A finite animation, one initial state or a particular numerical integrator does not test every alternative or establish a global trajectory. No claim about perpetual lizard cycles follows from this equation.
 
 <Callout variant="tip" title="The one sentence to keep">
-Replicator dynamics = "fitter-than-average grows, below-average shrinks." An ESS is where that process comes to rest *and stays put* when disturbed. Some games rest at one point, some at several, and some never rest at all.
+A static invasion test and a population-update rule answer different questions. Under the specified replicator model, ESS has a local stability theorem. It does not follow that every initial population arrives at an ESS or that a settled animation has proved one.
 </Callout>
 
 <MatchConcepts
-  client:visible
-  question="Match each dynamical behaviour to what it means for the existence of an ESS."
-  pairs={[
-    { term: 'Replicator dynamics converge to one stable mix', definition: 'A single ESS attractor (e.g. Hawk–Dove settling at V/C)' },
-    { term: 'Two stable rest points with a ridge between them', definition: 'A bistable game with multiple ESSs, decided by starting basin' },
-    { term: 'A closed orbit that never settles', definition: 'No ESS — rock–paper–scissors cycles forever' },
-    { term: 'dp/dt = p(1−p)(W_A − W_B) is positive', definition: 'Strategy A is above the mean, so its share is currently growing' },
-  ]}
-  explanation="Convergence to one mix = one ESS; two basins = multiple ESSs and path-dependence; a perpetual orbit = no ESS at all. And the sign of dp/dt just reports whether A is beating the average right now — positive means growing."
-  checkLabel="Check"
-  retryLabel="Try again"
-  allCorrectLabel="✓ All matched"
-  termsLabel="Behaviours"
-  definitionsLabel="Meanings"
-  explanationLabel="Explanation"
+  client: visible
+  className="not-prose"
+  question="Match each result to what it actually establishes"
+  pairs={[{"term":"A has greater payoff than B and both are present","definition":"Under the specified two-type replicator equation, A share increases now"},{"term":"Both pure policies pass the ESS test","definition":"Two local resistance results, without choosing an update path"},{"term":"AllD share is three quarters in the binary example","definition":"Below the four-fifths threshold, so AllD share falls in the chosen ODE"},{"term":"One numerical path appears to settle","definition":"Not a universal test of every allowed mutant policy"}]}
+  explanation="Payoff signs, static resistance and trajectories are related only through declared assumptions. They are not interchangeable definitions."
 />
 
 ## Where the model lies: the honest catalogue
@@ -181,7 +222,7 @@ You now have a powerful tool. Powerful tools earn respect precisely because thei
 
 ### 1. Stability is not optimality
 
-This is the big one, and it's the one that trips up smart people. **An ESS is what selection settles into — not what would be best for the group.** The Hawk–Dove game proves it with numbers.
+An ESS has local resistance to rare alternatives under the specified game. **That property does not maximise group welfare.** Hawk–Dove supplies a numerical comparison.
 
 Recall from Lesson 2, with value $V = 6$ and cost $C = 10$, the mixed ESS is $p^* = V/C = 6/10 = 0.6$ hawks. At that equilibrium, every individual — hawk or dove — earns the same expected payoff, and that payoff works out to $V(C - V) / (2C)$:
 
@@ -194,29 +235,29 @@ Now imagine a population of **all Doves**. They share resources peacefully, and 
 | All-Dove utopia | 0% hawks | 3.0 |
 | The ESS | 60% hawks | 1.2 |
 
-So why doesn't the population just *go* to the lovely all-Dove world? Because all-Dove is **invadable**: drop one Hawk into a room of Doves and it wins every contest unopposed, earning the full $V = 6$ while doves split 3. Hawks flood in until $p^*$. The peaceful optimum is not stable, so selection can't hold the population there. **Selection optimises the individual gene's spread, not the group's welfare — and those are different goals.** ESS predicts the wasteful 1.2, and reality obliges.
+All-Dove fails the invasion test: a rare Hawk initially earns $V=6$ against Doves while they earn three. The mixed policy passes the all-alternative ESS test and pays 1.2. These are different criteria: resistance to an alternative and payoff across whole population arrangements. The calculation does not establish inevitable conflict, genetic optimisation or arrival from every initial state.
 
-<MCQ
+<MCQ className={"not-prose"}
   client:visible
   question="A population sits at the Hawk–Dove ESS earning 1.2 each, when everyone would earn 3.0 in an all-Dove world. Why can't natural selection just move the population to the better outcome?"
   options={[
-    { text: 'The all-Dove state is not an ESS — a single Hawk mutant invades it — so selection cannot hold the population there, even though it pays more', correct: true },
+    { text: "All-Dove fails the invasion test because a rare Hawk initially earns more; a higher group payoff does not establish ESS", correct: true },
     { text: 'The all-Dove state pays less than the ESS once you count fighting costs' },
     { text: 'Selection actively works to maximise total group payoff, and 1.2 across many individuals exceeds 3.0 for a few' },
     { text: 'The replicator equation has no rest point at the all-Dove state' },
   ]}
-  explanation="All-Dove pays a lovely 3.0 but fails the invasion test: a lone Hawk cleans up. Because selection acts on individual advantage, not group welfare, it drags the population off the peaceful optimum and into the wasteful ESS at 1.2. 'Best for the group' and 'evolutionarily stable' are simply different criteria — and when they conflict, stability wins."
+  explanation="Compare the two criteria. All-Dove pays3 but a rare Hawk scores 6 against it; the mixed ESS pays1.2. This does not by itself establish a global population path or guarantee that the higher-paying arrangement can never be observed."
 />
 
 ### 2. Not every game has an ESS — and some have several
 
-"Find the ESS" quietly assumes there is one to find. There need not be. Rock–paper–scissors (the lizards) has **none** — the dynamics cycle. Some games have only a **mixed** ESS (Hawk–Dove). Some have **multiple** ESSs (the bistable dilemma; any coordination game). The honest answer to "what is the ESS here?" can be *zero*, *one*, or *several* — and you don't know which until you've actually run the test.
+The answer can be zero, one or several. The specified zero-sum rock–paper–scissors game has no ESS, whereas our Hawk–Dove game has a mixed ESS. The restricted AllD/TFT catalogue above has two pure ESSs. Counts must come from the actual test and strategy space, not from the name “repeated dilemma,”a beats-loop sketch or a claim that all coordination games behave alike.
 
 ### 3. The classic model assumes an infinite, well-mixed population of unrelated strangers
 
 The tidy algebra of $E(I,I) > E(J,I)$ rides on three assumptions that real populations routinely break:
 
-- **Infinite population.** The math assumes mutants are vanishingly rare and averages are exact. Real populations are **finite**, so **random drift** can push a strategy out even when selection favours it (exactly the drift that let AllC creep into TFT), or fix a worse one by luck.
+- **Infinite population.** The continuum calculation uses exact expectations at arbitrarily small positive frequencies. A finite stochastic population can lose or fix a type through random sampling even when payoff selection favours another result. Such a process must be specified; neutrality alone does not force AllC to accumulate or a mutant to take over.
 - **Unrelated players.** ESS payoffs assume you meet strangers. Add **kin structure** and the effective payoffs change: helping a relative propagates shared genes, so cooperation can pay when **Hamilton's rule** $rB > C$ holds (relatedness $r$ times benefit $B$ to the recipient exceeds cost $C$ to the actor) — even where the stranger-only ESS says defect.
 - **Well-mixed encounters.** ESS assumes everyone is equally likely to meet everyone. Real interactions have **spatial or network structure** — who meets whom is lumpy. On a lattice, **cooperators can cluster** and shelter each other, surviving where a well-mixed model says they'd be exploited to extinction.
 
@@ -224,7 +265,7 @@ Each of these is not a footnote; each rewrites the payoff matrix.
 
 ### 4. It's a static snapshot of a moving world
 
-ESS is an **equilibrium** concept. It asks "what mix, once reached, stays put?" — and by construction ignores that the game itself is moving. $V$ and $C$ drift as environments change. Opponents **coevolve**, so a strategy chasing today's best reply aims at a moving target — a moving ESS. There are time lags, seasons, invasions. Real evolution is a **chase**, not a tidy resting point; ESS photographs one frame and pretends the film has stopped.
+ESS asks whether a declared resident resists every allowed rare alternative in a fixed game. It does not directly give arrival, path or speed. Changing environments can alter payoffs, matching or the available strategies; a result proved for one fixed game then needs to be checked again.
 
 ### 5. Loose narration is the biggest practical trap
 
@@ -232,7 +273,7 @@ The most common abuse of this whole field is not a math error — it's **storyte
 
 ### 6. The naturalistic fallacy
 
-Finally, the ethical guardrail carried over from the cooperation course: **an ESS describes what *evolves*, not what is good, fair, or right.** Stable fighting (Hawk–Dove), stable deception, and stable defection (the all-AllD world) are *all* ESSs. Being evolutionarily stable confers exactly zero moral endorsement. "It's natural" and "it's stable" are descriptions; "it's good" is a separate claim you have to argue on its own terms.
+Finally, the ethical guardrail carried over from the cooperation course: **an ESS is a local resistance property, not a verdict about what is good, fair or right.** Stable fighting (Hawk–Dove), stable deception, and stable defection (the all-AllD world) are *all* ESSs. Being evolutionarily stable confers exactly zero moral endorsement. "It's natural" and "it's stable" are descriptions; "it's good" is a separate claim you have to argue on its own terms.
 
 <Callout variant="tip" title="Practitioner's checklist — before you claim an ESS">
 To earn the phrase "this is an ESS," specify all of it:
@@ -241,73 +282,73 @@ To earn the phrase "this is an ESS," specify all of it:
 - **(b)** the **payoff function** E(A,B) — the numbers, not a vibe;
 - **(c)** best-reply-to-itself — check E(I,I) >= E(J,I) for every mutant J;
 - **(d)** the **tie-breaker** where E(I,I) = E(J,I) — check E(I,J) > E(J,J);
-- **(e)** confirm it's a rare-mutant-proof **attractor** of the dynamics.
+- **(e)** require a positive small-frequency interval for every different allowed policy; investigate any population trajectory with a separate update model.
 
 And keep in mind the count: **zero, one, or many** ESSs may exist. If you skipped (a)–(b), you never had a claim — just a story.
 </Callout>
 
-<MCQ
+<MCQ className={"not-prose"}
   client:visible
   allowMultiple
   question="Which of the following are genuine limitations of the classic ESS model? (Select all that apply.)"
   options={[
     { text: 'An ESS can be collectively wasteful — stability does not imply group optimality', correct: true },
-    { text: 'Some games have no ESS (cycles), and some have several', correct: true },
+    { text: "Some games have no ESS, and some have several; this does not by itself prescribe cycles", correct: true },
     { text: 'It assumes an infinite, well-mixed population of unrelated players; finiteness, kinship, and spatial structure all break it', correct: true },
     { text: 'It is a static equilibrium concept and ignores changing environments and coevolving opponents', correct: true },
     { text: 'It guarantees the population reaches whichever equilibrium pays the group the most' },
     { text: 'It proves that whatever is evolutionarily stable is also morally good' },
   ]}
-  explanation="The first four are real, load-bearing limits: stability ≠ optimality, ESS-count can be zero/one/many, the infinite/well-mixed/unrelated assumptions fail in real populations, and it's a snapshot of a moving game. The last two are exactly the errors the lesson warns against — selection doesn't optimise group welfare, and 'stable' carries no moral endorsement (the naturalistic fallacy)."
+  explanation="The first four describe limitations of this classic setup: resistance differs from welfare, the ESS count can vary, the encounter/population assumptions may fail, and a fixed-game test does not describe a changing environment. Neither global-welfare maximisation nor moral endorsement follows. No-ESS alone is not a cycle prediction."
 />
 
-<MatchConcepts
+<MatchConcepts className={"not-prose"}
   client:visible
   question="Match each limitation of the ESS model to a concrete example of it biting."
   pairs={[
-    { term: 'Stability ≠ optimality', definition: 'Hawk–Dove settles at 1.2 per head when all-Dove would pay 3' },
-    { term: 'Not every game has an ESS', definition: 'The side-blotched lizards cycle orange → blue → yellow forever' },
-    { term: 'Finite populations drift', definition: 'Neutral AllC copies drift into a TFT world and soften it' },
+    { term: 'Stability ≠ optimality', definition: "The Hawk–Dove ESS pays1.2 while all-Dove pays3 but fails the invasion test" },
+    { term: 'Not every game has an ESS', definition: "The specified zero-sum rock–paper–scissors game has no ESS" },
+    { term: 'Finite populations drift', definition: "A finite stochastic sampling model may lose or fix a neutral type; neutrality alone predicts no path" },
     { term: 'Kin structure changes payoffs', definition: 'Cooperation pays when rB > C even where the stranger-game says defect' },
     { term: 'Static snapshot of a moving game', definition: 'V and C themselves drift as the environment changes, moving the ESS' },
     { term: 'Naturalistic fallacy', definition: 'A stable deception strategy is not thereby fair or good' },
   ]}
-  explanation="Each limitation has teeth in a specific case: the wasteful Hawk–Dove equilibrium, the endless lizard cycle, neutral drift softening TFT, Hamilton's rB > C flipping the verdict under relatedness, drifting V and C, and the moral gap between 'stable' and 'good.'"
+  explanation="These examples distinguish payoff resistance, welfare and dynamic assumptions. A zero-sum RPS example has no ESS without establishing perpetual animal cycles. Drift needs a finite stochastic process; the remaining kinship, environment and moral cases concern different limits."
   checkLabel="Check"
   retryLabel="Try again"
   allCorrectLabel="✓ All matched"
   termsLabel="Limitations"
   definitionsLabel="Examples"
-  explanationLabel="Explanation"
 />
 
 ## Spaced recall: don't lose the core machinery
 
 You've added a lot today. Let's make sure the foundation from earlier lessons is still load-bearing.
 
-<Reveal client:visible>
-**Quick self-test — cover the answer.** A colleague says, "Cooperation obviously evolved because it's better for everyone — look how much richer a cooperative world is." Using *only* what you know about the invasion test, name the two things that claim gets wrong.
+<details>
+<summary>Check the claim “cooperation evolved because it helps everyone”</summary>
 
-**Answer.** (1) "Better for everyone" is a **group-welfare** argument, but the invasion test is about **individual** advantage against the current population — a strategy is stable only if no mutant out-earns it, regardless of group welfare (stability ≠ optimality; see the all-Dove world paying 3 yet being invadable). (2) The claim skips the mechanism entirely: it never names the strategy set or checks $E(I,I) \ge E(J,I)$ — it's a just-so story. Cooperation *can* be stable, but only via repetition/kinship/structure that actually passes the test, and even then the defect equilibrium is stable too (bistability).
-</Reveal>
+A group-welfare advantage is not an invasion test. Name the strategy space, score rule and matching assumptions; then check every alternative and any tie-breaker. In the constructed binary AllD/TFT catalogue, both pure policies are ESS. Add AllC and TFT fails. Neither result alone identifies a real evolutionary path or guarantees arrival at the higher-payoff state.
 
-<MCQ
+</details>
+
+<MCQ className={"not-prose"}
   client:visible
   question="Back to basics: Hawk–Dove with V = 6, C = 10. What is the mixed ESS fraction of Hawks, and what does the invasion test say about a population sitting there?"
   options={[
-    { text: 'p* = V/C = 0.6 Hawks; at that mix Hawk and Dove earn equal payoffs, so neither can invade the other — it is the attractor', correct: true },
+    { text: "p*=V/C=0.6; the positive-frequency comparison against every different mixed policy establishes ESS, not equality alone", correct: true },
     { text: 'p* = C/V = 1.67 Hawks, which rounds to an all-Hawk ESS' },
     { text: 'p* = 0.6 Hawks, but Doves always earn more there, so Doves keep invading' },
     { text: 'There is no ESS because Hawk–Dove cycles like rock–paper–scissors' },
   ]}
-  explanation="With V < C the ESS is the mix p* = V/C = 6/10 = 0.6. At exactly that fraction Hawks and Doves have equal expected payoff (here 1.2 each), so no rare mutant of either type out-earns the residents — the mix is an attractor of the replicator dynamics. Hawk–Dove has a genuine single ESS; it does not cycle."
+  explanation="With C>V>0, the mixed candidate is p*=V/C=3/5 and its payoff 1.2. The full resident-minus-mutant difference is C epsilon(q−p*)²/2, positive for every q different from p* and positive epsilon. That proves resistance under the specified game; a trajectory needs another model."
 />
 
 ## Recap
 
 You've now seen the model at its most powerful — pinning down when cooperation can and can't be stable — and at its most honest, cataloguing where it stops being trustworthy. The two halves are the same skill: **run the test, then respect its boundaries.**
 
-<MindMap
+<MindMap eyebrow={""}
   client:visible
   title="Cooperation, waste, and the limits of ESS"
   outlineLabel="Outline"
@@ -317,31 +358,31 @@ You've now seen the model at its most powerful — pinning down when cooperation
       {
         label: 'Iterated prisoner\'s dilemma',
         children: [
-          { label: 'Shadow of the future w makes memory pay' },
+          { label: "Declared continuation and normalized expected score" },
           { label: 'TFT: nice, retaliatory, forgiving' },
         ],
       },
       {
-        label: 'TFT is only almost an ESS',
+        label: "Adding AllC changes TFT status",
         children: [
-          { label: 'Beats AllD: E(TFT,TFT)≈3 > E(AllD,TFT)≈1' },
-          { label: 'Ties AllC on both clauses → neutral, drifts in' },
-          { label: 'Softened population then invaded by AllD' },
+          { label: "At w three quarters: TFT scores three against TFT; AllD scores two" },
+          { label: "AllC ties both conditions, so TFT is not ESS in the expanded catalogue" },
+          { label: "Neutrality does not force drift or takeover" },
         ],
       },
       {
-        label: 'AllD is a strict ESS → bistable world',
+        label: "Restricted AllD/TFT catalogue: two pure ESS",
         children: [
-          { label: 'Nice mutant eats sucker payoff, never recovers' },
-          { label: 'Two basins; history/path-dependence decides' },
+          { label: "All mixed alternatives covered by positive invasion barriers" },
+          { label: "A chosen replicator model has threshold four fifths" },
         ],
       },
       {
         label: 'Replicator dynamics = the engine',
         children: [
           { label: 'dp/dt = p(1−p)(W_A − W_B): fitter-than-average grows' },
-          { label: 'ESS = attractor (asymptotically stable rest point)' },
-          { label: 'RPS lizards orbit → no attractor, no ESS' },
+          { label: "A conditional theorem connects ESS to local stability" },
+          { label: "One settled numerical path does not prove ESS" },
         ],
       },
       {
@@ -358,33 +399,33 @@ You've now seen the model at its most powerful — pinning down when cooperation
   }}
 />
 
-<Quiz
+<Quiz className={"not-prose"}
   client:visible
   questions={[
     {
-      question: 'Why is Tit-for-Tat NOT a strict ESS, even when the shadow of the future is high?',
+      question: "With w=3/4 and the declared normalized score, why is TFT not ESS when AllC is allowed?",
       correct: 0,
       options: [
-        'Always Cooperate ties it on E(I,I)=E(J,I) and on the tie-breaker, so AllC is neutral, drifts in, and later lets AllD invade',
+        "AllC ties TFT both against TFT and against AllC, so the strict tie-breaker fails",
         'Always Defect strictly out-earns it against a TFT population',
         'It earns less than mutual defection when both players cooperate',
         'It has no rest point in the replicator dynamics',
       ],
-      explanation: 'AllC is a perfect tie against TFT on both ESS clauses, so it is selectively neutral, drifts in, and softens the population until AllD can invade. AllD alone cannot beat TFT — the neutral drift is what breaks strict stability.',
+      explanation: "All four T/C payoffs are three. This one alternative prevents ESS in the expanded catalogue. It does not guarantee drift, AllC accumulation or a later AllD takeover.",
     },
     {
-      question: 'The repeated prisoner\'s dilemma is "bistable." What does that mean?',
+      question: "Restrict the constructed repeated game to AllD/TFT and their mixtures. What do its two pure ESS results establish?",
       correct: 0,
       options: [
-        'Both all-reciprocate and all-defect pass the invasion test, so which one a population reaches depends on its starting basin, not on which pays more',
+        "Both pure policies resist every allowed rare alternative; an update model is needed to select a trajectory",
         'The game has exactly one ESS that flips between two values',
         'The population oscillates forever between cooperation and defection',
         'Cooperation always wins because it pays 3 versus 1',
       ],
-      explanation: 'Two equilibria are each uninvadable. History and initial conditions (the basin of attraction) decide the outcome — a case of path-dependence, not of the better outcome automatically winning.',
+      explanation: "The binary proofs cover every mixed alternative. The chosen continuous replicator model has a separating AllD threshold 4/5, but that model is separate from ESS. Adding AllC changes the strategy space and removes TFT ESS.",
     },
     {
-      question: 'In the replicator equation dp/dt = p(1−p)(W_A − W_B), what makes strategy A\'s share grow?',
+      question: "For an interior state0<p<1 in the specified two-type replicator equation, what makes A share grow?",
       correct: 0,
       options: [
         'A being above the population mean — i.e. W_A > W_B, making the term positive',
@@ -392,18 +433,18 @@ You've now seen the model at its most powerful — pinning down when cooperation
         'A having a higher mutation rate than B',
         'The environment rewarding group welfare over individual payoff',
       ],
-      explanation: 'The sign of (W_A − W_B) is the steering wheel: positive means A beats B, so A grows. It is "fitter-than-average expands." The p(1−p) term just scales the speed and is actually largest near a 50:50 mix, not at the extremes.',
+      explanation: "At an interior state, p(1−p)>0, so the sign is the sign of W_A−W_B. At either boundary the share does not move under this equation even if a missing type would have higher payoff.",
     },
     {
-      question: 'Hawk–Dove with V = 6, C = 10 settles at p* = 0.6 Hawks, paying 1.2 each, while all-Dove would pay 3. What does this show about ESS?',
+      question: "The Hawk–Dove ESS policy with V=6, C=10 pays1.2, while all-Dove pays3. What does this comparison show?",
       correct: 0,
       options: [
-        'Stability is not optimality — selection holds the wasteful stable mix because the better all-Dove world is invadable by a single Hawk',
+        "ESS resistance and group welfare are different criteria; all-Dove pays more but fails the invasion test",
         'The replicator dynamics made an arithmetic error',
         'All-Dove is also an ESS, so the game is bistable',
         'Group selection will eventually move the population to all-Dove',
       ],
-      explanation: 'All-Dove pays more but fails the invasion test (a lone Hawk cleans up), so selection cannot hold it. ESS predicts what selection settles into — the wasteful 1.2 — not what is best for the group.',
+      explanation: "All-Dove has the higher population payoff but a rare Hawk initially scores 6 against its three. The mixed policy passes the specified all-alternative test. This does not by itself specify the realised trajectory or optimise welfare.",
     },
     {
       question: 'Which assumption of the classic ESS model, when broken, can let cooperators survive by clustering together so they mostly interact with each other?',
@@ -420,14 +461,14 @@ You've now seen the model at its most powerful — pinning down when cooperation
       question: 'A speaker says, "This deceptive display is evolutionarily stable, which proves it\'s a good and fair adaptation." What is the core error?',
       correct: 0,
       options: [
-        'The naturalistic fallacy — an ESS describes what evolves, not what is good or fair; stable deception and stable defection are ESSs with no moral endorsement',
+        'The naturalistic fallacy — an ESS describes local payoff resistance to invasion, not what is good or fair; deception and defection can be ESSs in specified games with no moral endorsement',
         'They forgot that deception can never be an ESS',
         'They confused a mixed ESS with a pure one',
         'They should have used C/V instead of V/C',
       ],
-      explanation: 'Being evolutionarily stable is a descriptive fact about uninvadability, not a moral verdict. Stable fighting, deception, and defection are all ESSs — none is thereby good, fair, or right. That is the naturalistic fallacy.',
+      explanation: 'Being evolutionarily stable is a descriptive fact about uninvadability, not a moral verdict. Fighting, deception, and defection can be ESSs under specified game payoffs — none is thereby good, fair, or right. That is the naturalistic fallacy.',
     },
   ]}
 />
 
-That's the arc: from "is $I$ uninvadable?" to a full working knowledge of when cooperation can be stable, what engine drives populations there, and every place the model's tidy story frays. Use it the way a good mechanic uses a torque wrench — precisely, and knowing exactly what it can't measure.
+The arc separates a universal local invasion test, a declared policy catalogue and a separately chosen population-update model. The payoff calculations and the limits travel together. Use it the way a good mechanic uses a torque wrench — precisely, and knowing exactly what it can't measure.

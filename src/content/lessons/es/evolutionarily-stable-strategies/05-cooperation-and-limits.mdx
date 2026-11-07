@@ -1,19 +1,19 @@
 ---
 title: "Cooperación, despilfarro y dónde miente el modelo"
-description: "La ESS se enfrenta al dilema del prisionero repetido: por qué Tit-for-Tat solo es casi estable, por qué Desertar Siempre también es estable — un mundo con dos cuencas — y la dinámica del replicador como motor que lleva a una población a su equilibrio. Después, el catálogo honesto: estabilidad no es optimalidad, no todo juego tiene una ESS y los supuestos que las poblaciones reales rompen."
+description: "Puntúa las políticas repetidas, comprueba cómo el catálogo cambia TFT y separa resistencia a la invasión, bienestar y dinámica poblacional."
 topic: "es/evolutionarily-stable-strategies"
 order: 6
 minutes: 14
-updated: 2026-07-10
+updated: 2026-11-07
 ---
 
-import { Callout, MCQ, Quiz, MatchConcepts, Categorize, FillBlank, Reveal, MindMap } from '@/components/react';
+import { Callout, MCQ, Quiz, MatchConcepts, Categorize, FillBlank, MindMap, PayoffMatrix } from '@/components/react';
 
 Habéis pasado cuatro lecciones aprendiendo a desconfiar de una historia reconfortante. Un comportamiento *no* es estable porque parezca ingenioso, ni porque "ayude a la especie", ni porque un narrador de documentales lo dijera con voz solemne. Solo es estable si supera la **prueba de invasión**: una estrategia $I$ es una estrategia evolutivamente estable (evolutionarily stable strategy, ESS) cuando, para todo mutante $J$, o bien $E(I,I) > E(J,I)$, o bien $E(I,I) = E(J,I)$ con $E(I,J) > E(J,J)$.
 
 Esta última lección didáctica dirige esa lente hacia la pregunta más cargada emocionalmente de toda la teoría de juegos evolutiva — **¿puede ser estable la cooperación?** — y, tras habernos ganado el derecho, cataloga con honestidad todos los lugares donde el modelo os miente en voz baja.
 
-<MCQ
+<MCQ pretestLabel={"Antes de leer, prueba una respuesta"} className={"not-prose"}
   client:visible
   pretest
   question="Antes de empezar: en el dilema del prisionero de una sola ronda, la cooperación no es una ESS porque un mutante desertor siempre gana más que un cooperador frente a una población cooperativa. ¿Qué rasgo único del juego creéis que podría darle la vuelta a eso, haciendo defendible la cooperación?"
@@ -23,11 +23,11 @@ Esta última lección didáctica dirige esa lente hacia la pregunta más cargada
     { text: 'Hacer numéricamente mayor la recompensa por cooperar manteniendo el juego de una sola ronda' },
     { text: 'Nada: la cooperación no puede ser evolutivamente estable bajo ninguna condición' },
   ]}
-  explanation="La repetición es la palanca. Si los mismos dos jugadores se reencuentran con probabilidad suficientemente alta, una estrategia puede condicionar la jugada de hoy a la de ayer, y esa sombra del futuro (shadow of the future) es exactamente lo que permite a la reciprocidad resistir a los desertores. Poblaciones más grandes o recompensas de una sola ronda mayores no cambian el dominio de la deserción en una única ronda."
+  explanation="La repetición permite condicionar acciones posteriores a las anteriores. Bajo los pagos por ronda que mantienen el dilema del prisionero estricto, se conserva la dominancia de una sola ronda. La resistencia de una política repetida depende de la continuación, de cómo se agregan los pagos y de las alternativas permitidas; repetir por sí solo no garantiza cooperación."
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
 />
@@ -36,17 +36,21 @@ Esta última lección didáctica dirige esa lente hacia la pregunta más cargada
 
 En el **dilema del prisionero de una sola ronda**, la deserción domina. Haga lo que haga tu compañero, ganas más desertando, así que una población de cooperadores es invadida trivialmente: la cooperación no es una ESS, y punto.
 
-Ahora juégalo **repetidamente**. Tras cada ronda, los mismos dos jugadores se reencuentran con probabilidad $w$ — la **probabilidad de continuación**, o como les encanta llamarla a los biólogos, la **sombra del futuro (shadow of the future)**. Si $w$ es alta, "el mismo compañero otra vez" es probable, y una estrategia puede *recordar*: puede premiar la cooperación de ayer y castigar la deserción de ayer.
+En el ejemplo construido, la misma pareja continúa tras cada ronda con probabilidad $w=3/4$, independientemente de las acciones y del historial anterior. Una política especifica una acción para cada historial posible. La puntuamos mediante el **total esperado normalizado**
+
+$$F=(1-w)\sum_{r=0}^{\infty}w^r u_r.$$
+
+$u_r$ es su pago esperado en esa ronda, condicionado a que la interacción llegue hasta ella. El factor $w^r$ pondera la supervivencia; el factor positivo común $1-w$ normaliza la puntuación. Esto **no** es la media aritmética de los pagos por ronda de una partida realizada de duración aleatoria. Manteniendo w fijo, la normalización conserva las desigualdades de pagos. También debemos declarar qué políticas y mezclas se permiten.
 
 La famosa estrategia condicional es **Tit-for-Tat (toma y daca, TFT)**: coopera en la primera jugada y después copia lo que hiciera el oponente la ronda anterior. Amable (nunca deserta primero), vengativa (castiga la deserción de inmediato) e indulgente (vuelve a cooperar en cuanto el oponente lo hace).
 
-Piénsalo como un **termostato de la confianza**: arranca cálido, se enfría al instante cuando lo enfrían y se recalienta en cuanto vuelve el calor. La pregunta que hizo famoso a Robert Axelrod es si ese termostato es *evolutivamente estable* — no solo una buena idea, sino ininvadible.
+Piensa en TFT como un **termostato de la confianza**: empieza cálido y responde a la última acción del oponente. La analogía describe su regla, no su estabilidad. Para comprobarla necesitamos un criterio de pagos completo y un catálogo explícito de alternativas.
 
-<Callout variant="info" title="Los pagos que reutilizaremos">
+<Callout label={"Información"} variant="info" title="Los pagos que reutilizaremos">
 Usamos el dilema estándar por ronda: la cooperación mutua paga **3** a cada uno, la deserción mutua **1** a cada uno, y el desertor tentado obtiene **5** mientras que el cooperador explotado (el "primo") obtiene **0**. Así que el orden es Tentación (5) > Recompensa (3) > Castigo (1) > Primo (0). A lo largo de un juego repetido estos pagos por ronda se acumulan, ponderados por cuánto dura la relación.
 </Callout>
 
-<MCQ
+<MCQ pretestLabel={"Antes de leer, prueba una respuesta"} className={"not-prose"}
   client:visible
   question="¿Qué le compra realmente a una estrategia condicional como Tit-for-Tat una probabilidad de continuación w alta?"
   options={[
@@ -58,107 +62,143 @@ Usamos el dilema estándar por ronda: la cooperación mutua paga **3** a cada un
   explanation="w estira el futuro. Desertar agarra una bonificación única (5 en vez de 3) pero desencadena represalias durante todas las rondas siguientes. Cuando w es alta, 'todas las rondas siguientes' son muchas rondas, así que el pellizco único es un mal negocio. No garantiza nada sobre quién es tu oponente, ni cambia los números por ronda."
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
 />
 
-## Tit-for-Tat solo es *casi* una ESS
+## Una puntuación completa y dos catálogos
 
-Aquí llega el resultado que separa a quien de verdad ha hecho el álgebra de quien ha leído un resumen de divulgación. Cuando la sombra del futuro es suficientemente larga, **TFT resiste a Desertar Siempre (Always Defect, AllD)** — pero **no es una ESS estricta**. Solo es *neutralmente* estable, y ese "solo" importa enormemente.
+**AllD** deserta siempre; **AllC** coopera siempre. TFT coopera primero y copia después. La política se elige para toda la partida. Una política mixta puede sortear entre estas reglas antes de cada emparejamiento independiente; no cambia de regla a mitad de partida.
 
-**Paso 1 — TFT vence al invasor AllD.** Mete un mutante AllD en un mundo de jugadores TFT. En la ronda uno AllD deserta contra un TFT que coopera: saca 5, el primo saca 0. Estupendo, durante exactamente una ronda. De la ronda dos en adelante, TFT toma represalias y ambos desertan para siempre, sacando 1 cada uno. Mientras tanto dos jugadores TFT cooperan todas las rondas, sacando 3 cada uno. Sumemos a lo largo de, digamos, una relación larga de muchas rondas:
+Dos TFT cooperan siempre, de modo que $F(T, T)=3$. AllD contra TFT gana cinco primero y uno después:
 
-| Enfrentamiento | Ronda 1 | Cada ronda posterior | Media por ronda a largo plazo |
-|---|---|---|---|
-| TFT vs TFT | 3 | 3, 3, 3, … | ≈ 3 |
-| AllD vs TFT | 5 | 1, 1, 1, … | ≈ 1 (el 5 se diluye) |
+$$F(D, T)=(1-w)5+w\cdot1=2.$$
 
-Así que $E(\text{TFT},\text{TFT}) \approx 3$ mientras que $E(\text{AllD},\text{TFT}) \approx 1$. Como $E(\text{TFT},\text{TFT}) > E(\text{AllD},\text{TFT})$, TFT es una mejor respuesta estricta a sí misma **frente a AllD** — AllD no puede invadir. El robo de una ronda queda ahogado por una vida de castigo. Hasta aquí, todo heroico.
+TFT contra AllD obtiene cero primero y uno después:
 
-**Paso 2 — el saboteador silencioso: Cooperar Siempre (Always Cooperate, AllC).** Ahora prueba con un mutante *amable*, **AllC**, que coopera incondicionalmente. Frente a una población TFT, AllC coopera cada ronda y TFT — nunca provocado — también coopera cada ronda. Ambos ganan 3 por ronda, para siempre. Eso significa:
+$$F(T, D)=(1-w)0+w\cdot1=3/4.$$
 
-$$E(\text{TFT},\text{TFT}) = E(\text{AllC},\text{TFT}) = 3.$$
+Los pesos de la cola suman w porque $\sum_{r=1}^{\infty}(1-w)w^r=w$. En cambio, AllD contra AllC siempre gana cinco y AllC contra AllD siempre gana cero. La cuenta completa es:
 
-Un empate. La primera línea de defensa de TFT ($E(I,I) > E(J,I)$) **no** se cumple frente a AllC. Así que pasamos al desempate: ¿es $E(\text{TFT},\text{AllC}) > E(\text{AllC},\text{AllC})$? Frente a un oponente AllC, TFT coopera todo el camino (AllC nunca deserta, así que TFT nunca toma represalias) y gana 3 por ronda; dos jugadores AllC también cooperan todo el camino y ganan 3 por ronda. Empate **otra vez**: $E(\text{TFT},\text{AllC}) = E(\text{AllC},\text{AllC}) = 3$. El desempate también falla.
+<div role="region" aria-label="Matriz completa de puntuaciones repetidas normalizadas" tabIndex={0} className="my-6 max-w-full overflow-x-auto rounded-lg focus-visible:outline-2 focus-visible:outline-brand-600">
+<table style={{display:'table', overflow:'visible', margin:0, minWidth:"28rem"}}>
+<caption className="sr-only">F con w igual a tres cuartos y pagos por ronda tres, uno, cinco y cero</caption>
+<thead><tr><th scope="col">Política de fila</th><th scope="col">Contra AllD</th><th scope="col">Contra TFT</th><th scope="col">Contra AllC</th></tr></thead>
+<tbody>
+<tr><th scope="row">AllD</th><td>1</td><td>2</td><td>5</td></tr>
+<tr><th scope="row">TFT</th><td>3/4</td><td>3</td><td>3</td></tr>
+<tr><th scope="row">AllC</th><td>0</td><td>3</td><td>3</td></tr>
+</tbody>
+</table>
+</div>
 
-Ambas condiciones ESS fallan frente a AllC. Por tanto TFT **no es una ESS estricta** — AllC es *selectivamente neutral* frente a TFT. En un mundo finito, los mutantes neutrales **derivan**: sin penalización de aptitud que los frene, las copias de AllC se acumulan por azar.
-
-**Paso 3 — la población ablandada es asaltada.** Y aquí está el aguijón. Una vez que AllC ha derivado hacia dentro y la población es una mezcla blanda de TFT y AllC, un mutante **AllD** reaparece — y ahora prospera, porque puede explotar gratis a todos esos cooperadores incondicionales (AllC nunca castiga) mientras que solo la menguante minoría TFT toma represalias. La cooperación, sin la defensa de la memoria, es asaltada.
-
-<Callout variant="warning" title="Neutral no es lo mismo que seguro">
-La lección que la gente pasa por alto: a TFT no la derriba una estrategia *mejor*. La socava una *igual de buena*. AllC nunca gana más que TFT — solo empata, deriva hacia dentro sobre ese empate y pudre las represalias que mantenían fuera a AllD. "Ininvadible por cualquier cosa que lo haga estrictamente peor" es un escudo más débil que "ininvadible, sin más". Ese hueco entre **ESS estricta** y meramente **neutralmente estable** es toda la historia aquí.
-</Callout>
-
-<MCQ
-  client:visible
-  question="¿Por qué exactamente falla Tit-for-Tat la prueba ESS, aunque Desertar Siempre no pueda invadirla?"
-  options={[
-    { text: 'Cooperar Siempre empata con TFT tanto en E(I,I)=E(J,I) como en el desempate E(I,J) vs E(J,J), así que es neutral y deriva hacia dentro, abriendo después la puerta a AllD', correct: true },
-    { text: 'Cooperar Siempre gana estrictamente más que TFT frente a una población TFT' },
-    { text: 'Desertar Siempre gana estrictamente más que TFT cuando la sombra del futuro es alta' },
-    { text: 'TFT gana menos de 3 por ronda contra sí misma, así que no es una mejor respuesta a sí misma' },
-  ]}
-  explanation="Frente a TFT, AllC es un empate perfecto: E(TFT,TFT)=E(AllC,TFT)=3, y el desempate E(TFT,AllC)=E(AllC,AllC)=3 también. Ambas cláusulas ESS fallan, así que AllC es selectivamente neutral, deriva hacia dentro y ablanda la población hasta que un mutante AllD puede invadir. AllD por sí solo no puede vencer a TFT: es la deriva neutral la que hace el daño."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
+<MCQ pretestLabel={"Antes de leer, prueba una respuesta"} checkLabel={"Comprobar"} retryLabel={"Reintentar"} correctLabel={"Correcto"} incorrectLabel={"No exactamente"} correctAnswerLabel={"Respuesta correcta"} explanationLabel={"Explicación"}
+  client: visible
+  className="not-prose"
+  question="Con w = 3/4, AllD obtiene cinco en la primera ronda frente a TFT y uno en todas las posteriores. ¿Cuál es F?"
+  options={[{"text":"Uno: la primera ronda desaparece en cualquier criterio"},{"text":"Cinco: solo cuenta la primera ronda"},{"text":"Dos: (1/4)×5+(3/4)×1","correct": true},{"text":"Tres: todas las políticas repetidas empatan"}]}
+  explanation="La primera ronda pesa 1−w=1/4; la cola constante de unos pesa w=3/4. El total normalizado es 5/4+3/4=2. No estamos usando la media de una partida infinita realizada."
 />
 
-## Desertar Siempre también es una ESS — así que el mundo es biestable
+### Primero permite solo AllD y TFT
 
-Los defensores de la cooperación a menudo se quedan en "la reciprocidad puede ser estable" y se dan una vuelta de la victoria. No lo hagáis. Aplica la prueba de invasión al *otro* equilibrio y cae algo que da que pensar.
+El catálogo incluye esas dos políticas y todas sus mezclas. Contra residente AllD, TFT gana $3/4<1$; contra residente TFT, AllD gana $2<3$. Ambos residentes son mejores respuestas estrictas a sí mismos dentro de este catálogo. Compruébalo también para todo mutante mixto: sea q su probabilidad de elegir AllD y $\varepsilon$ su proporción poblacional.
 
-Considera una población de **AllD** puro. Todos desertan cada ronda; todos ganan el pago de castigo de 1 por ronda. Ahora suelta cualquier mutante amable — TFT o AllC. En la ronda uno coopera (eso es lo que significa "amable"), los nativos AllD desertan y el mutante se come el **pago del primo de 0**. A partir de ahí:
+- Residente AllD, alternativa $q<1$:
 
-- **AllC** sigue cooperando contra un muro de desertores — 0 cada ronda. Catastrófico.
-- **TFT** coopera una vez (0), se quema, luego toma represalias y deserta el resto — 1 por ronda a partir de entonces, igualando exactamente a los nativos, pero nunca recupera esa primera ronda perdida.
+$$\Delta=(1-q)\left[\frac14-\frac54\varepsilon(1-q)\right]>0\quad\text{si }0<\varepsilon<1/5.$$
 
-De cualquier modo, $E(\text{AllD},\text{AllD}) = 1 > E(\text{mutante},\text{AllD})$ (que es como mucho 1, y estrictamente menos una vez que se cuenta la pérdida del primo de la ronda uno). Ningún mutante amable consigue un punto de apoyo. **AllD es una ESS estricta.**
+- Residente TFT, alternativa $q>0$:
 
-Así que el dilema del prisionero repetido es **biestable (bistability)**: tiene *dos* equilibrios evolutivamente estables. "Todos reciprocan" (un régimen cooperativo tipo TFT) y "todos desertan" son *ambos* ininvadibles. En cuál acaba una población no lo decide cuál es mejor — la cooperación mutua paga 3, la deserción mutua paga un mísero 1 — sino la **historia, las condiciones iniciales y la cuenca de atracción** en la que resultó empezar.
+$$\Delta=q\left[1-\frac54\varepsilon q\right]>0\quad\text{si }0<\varepsilon<4/5.$$
 
-<Callout variant="info" title="Dos valles, una bola">
-Imagina el paisaje de aptitud como un terreno con dos valles — uno profundo y rico (cooperación) y otro llano y pobre (deserción) — separados por una cresta. Una bola (la población) rueda hacia el valle en el que empezó más cerca. No se teletransporta al valle mejor solo porque ese valle sea mejor. Esto es **dependencia del camino** en su forma más pura: el resultado queda fijado por dónde empezaste, no por dónde sería mejor acabar.
-</Callout>
+Los factores dan barreras positivas para **toda** alternativa mixta. Hay dos ESS puras en este espacio. Esto todavía no especifica una trayectoria entre ellas.
 
-Por eso la cooperación es **difícil de reiniciar una vez perdida** (una población desertora se asienta en su propio valle estable y castiga al primer mutante amable) y sin embargo **se autodefiende una vez establecida** (una población recíproca repele a los desertores). La confianza es cara de construir y barata de quemar — y ahora podéis ver *por qué* en la aritmética, no solo en el aforismo.
-
-<FillBlank
-  client:visible
-  instructions="Elige la opción correcta para cada hueco y comprueba."
-  text="Como tanto todos-reciprocan como todos-desertan superan la prueba de invasión, el dilema repetido es {{biestable|óptimo|sin fricción}}: tiene más de una ESS. Qué equilibrio alcanza una población lo fija su {{cuenca de partida|bienestar del grupo|tasa de mutación}}, no cuál resultado paga más — un caso de manual de {{dependencia del camino|selección de grupo|ruido aleatorio}}."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
+<PayoffMatrix analysisLabel={"Qué muestra la matriz"} dominantLineTemplate={"{player}: estrategia dominante {strategy}"} noneLabel={"ninguna"} nashLabel={"Equilibrio de Nash puro:"} noNashLabel={"ninguno en estrategias puras"} bestResponseLegend={"El resaltado indica las mejores respuestas frente a cada acción oponente."} nashBadge={"Nash"} resetLabel={"Restablecer pagos"} increaseLabel={"aumentar"} decreaseLabel={"reducir"} tableCaptionTemplate={"Pagos de {rowPlayer} frente a {colPlayer}"}
+  client: visible
+  className="not-prose"
+  title="El catálogo binario con una escala común"
+  eyebrow=""
+  rowPlayer="Política de fila"
+  colPlayer="Política de columna"
+  rowStrategies={["AllD","TFT"]}
+  colStrategies={["AllD","TFT"]}
+  payoffs={[[{"row":4,"col":4},{"row":8,"col":3}],[{"row":3,"col":8},{"row":12,"col":12}]]}
+  editable={false}
+  unit=""
+  unitPosition="suffix"
+  instructions="Las celdas muestran cuatro veces F. Divide entre cuatro para recuperar la tabla."
+  caption="Multiplicar todos los pagos por el mismo factor positivo conserva las desigualdades. Los dos perfiles Nash puros resaltados no sustituyen a la prueba frente a todas las mezclas."
 />
 
-<Categorize
-  client:visible
-  question="Ordena cada juego según cuántas estrategias evolutivamente estables tiene."
-  buckets={['Tiene una única ESS', 'Sin ESS (la dinámica cicla)', 'Biestable — múltiples ESS']}
-  items={[
-    { text: 'Halcón–Paloma con V < C — una ESS mixta en p* = V/C', bucket: 'Tiene una única ESS' },
-    { text: 'El juego de la proporción de sexos — una ESS en un reparto 50:50', bucket: 'Tiene una única ESS' },
-    { text: 'Piedra–papel–tijera de los lagartos de manchas laterales — naranja/azul/amarillo se persiguen', bucket: 'Sin ESS (la dinámica cicla)' },
-    { text: 'Un juego de frecuencias de tres morfos donde cada tipo vence a uno y pierde con otro', bucket: 'Sin ESS (la dinámica cicla)' },
-    { text: 'El dilema del prisionero repetido — todos-reciprocan y todos-desertan son ambos estables', bucket: 'Biestable — múltiples ESS' },
-    { text: 'Un juego de coordinación donde tanto "todos conducen por la izquierda" como "todos conducen por la derecha" resisten la invasión', bucket: 'Biestable — múltiples ESS' },
-  ]}
-  explanation="Halcón–Paloma y la proporción de sexos se asientan cada uno en un atractor. Los juegos de piedra–papel–tijera (los lagartos, o cualquier triángulo vence-a-uno/pierde-con-uno) no tienen ESS y orbitan para siempre. El dilema repetido y la coordinación del lado de conducción son biestables — dos cuencas, la historia decide. 'Encuentra la ESS' puede devolver honestamente cero, una o varias respuestas."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  allCorrectLabel="✓ Todo ordenado"
-  partialResultWord="correctas"
-  explanationLabel="Explicación"
+### Añade AllC sin cambiar los pagos ni w
+
+TFT y AllC ganan tres en todos sus encuentros mutuos. Por tanto,
+
+$$F(T, T)=F(C, T)=3,\qquad F(T, C)=F(C, C)=3.$$
+
+El primer empate no queda rescatado por el segundo: **TFT no es ESS en el catálogo ampliado**. No es una categoría más débil llamada «ESS casi estricta». La alternativa AllC impide satisfacer la definición. Los encuentros entre T y C son neutrales en esta cara del juego, pero la neutralidad no obliga a que AllC se acumule ni predice una sustitución.
+
+AllD sí conserva ESS frente a todas las mezclas del catálogo de tres políticas. Para un mutante con probabilidades $(d, t, c)$ de elegir AllD/TFT/AllC, define $s=t+c>0$. Su comparación con el residente AllD da
+
+$$\Delta=\frac t4+c+\varepsilon s\left(c-\frac{5t}{4}\right)\ge\frac{s(1-5\varepsilon)}4>0\quad\text{si }0<\varepsilon<1/5.$$
+
+La cota usa $t/4+c\ge s/4$, $c-5t/4\ge-5s/4$ y $s\le1$. Cubre cualquier mezcla diferente de AllD dentro de estas tres políticas. No certifica resistencia frente a todas las políticas imaginables que dependen del historial.
+
+<MCQ pretestLabel={"Antes de leer, prueba una respuesta"} checkLabel={"Comprobar"} retryLabel={"Reintentar"} correctLabel={"Correcto"} incorrectLabel={"No exactamente"} correctAnswerLabel={"Respuesta correcta"} explanationLabel={"Explicación"}
+  client: visible
+  className="not-prose"
+  question="Mantén los pagos y w. Añades AllC al catálogo que antes solo permitía AllD y TFT. ¿Qué cambio de veredicto está justificado?"
+  options={[{"text":"TFT deja de ser ESS porque AllC empata en ambas comparaciones; no hace falta afirmar deriva ni sustitución","correct": true},{"text":"TFT sigue siendo ESS porque cualquier empate la protege"},{"text":"AllD pierde ESS porque ahora existen tres nombres de políticas"},{"text":"AllC se acumula necesariamente hasta expulsar TFT"}]}
+  explanation="TFT y AllC ganan tres en todos sus encuentros mutuos. El residente TFT no obtiene la ventaja estricta requerida frente a esa alternativa. Cambió el espacio de estrategias, no la puntuación de un mismo juego declarado."
+/>
+
+### La puerta a AllD no se abre con cualquier cantidad de AllC
+
+Define una política cooperadora R que, antes de cada partida, elige AllC con probabilidad c y TFT con $1-c$. Contra una población R sin perturbar, AllD gana $2+3c$, mientras que R gana tres. AllD tiene ventaja estricta en esa comparación límite si $c>1/3$; en la igualdad aún hay que hacer el segundo cálculo.
+
+Si una proporción $\varepsilon$ usa AllD, la diferencia completa de pago R menos AllD es
+
+$$\Delta=1-3c+\frac{\varepsilon(9c-5)}4.$$
+
+En $c=1/3$ resulta $-\varepsilon/2$, no cero a frecuencia positiva. Y una proporción positiva cualquiera de AllC no asegura ventaja de AllD. Estos casos mantienen el mismo uno por ciento de mutantes:
+
+<div role="region" aria-label="Comparación completa frente a AllD con proporción positiva" tabIndex={0} className="my-6 max-w-full overflow-x-auto rounded-lg focus-visible:outline-2 focus-visible:outline-brand-600">
+<table style={{display:'table', overflow:'visible', margin:0, minWidth:"30rem"}}>
+<caption className="sr-only">R elige AllC con probabilidad c y TFT en caso contrario antes de cada partida</caption>
+<thead><tr><th scope="col">c en la política R</th><th scope="col">epsilon de AllD</th><th scope="col">Pago R menos AllD</th></tr></thead>
+<tbody>
+<tr><th scope="row">1/10</th><td>1/100</td><td>2759/4000</td></tr>
+<tr><th scope="row">1/3</th><td>1/100</td><td>−1/200</td></tr>
+<tr><th scope="row">2/5</th><td>1/100</td><td>−407/2000</td></tr>
+</tbody>
+</table>
+</div>
+
+La primera fila favorece a R; las otras dos, a AllD. Son comparaciones de puntuaciones esperadas. La deriva de una población finita o una sustitución realizada necesitarían sus reglas adicionales. El criterio de puntuación sigue la distinción entre suma descontada y normalización de las [notas oficiales de Levin](https://web.stanford.edu/~jdlevin/Econ%20203/RepeatedGames.pdf); los números y catálogos de este ejemplo son construidos.
+
+<FillBlank instructions={"Elige una opción en cada hueco y comprueba."} checkLabel={"Comprobar"} retryLabel={"Reintentar"} explanationLabel={"Explicación"} correctResultLabel={"Correcto"} partialResultWord={"bien"}
+  client: visible
+  className="not-prose"
+  question="Nombra el supuesto que cambió"
+  text="Con w y puntuación fijos, pasar de AllD/TFT a AllD/TFT/AllC cambia el {{catálogo de estrategias|pago por ronda|valor de epsilon}}. Que TFT resista AllD {{no basta|basta siempre|impide}} para probar resistencia frente a toda alternativa del catálogo ampliado."
+  explanation="Una ESS es relativa al espacio declarado. Una sola alternativa empatada en ambas condiciones basta para descartar la afirmación."
+/>
+
+<Categorize instructions={"Asigna cada elemento a su grupo y comprueba."} checkLabel={"Comprobar"} retryLabel={"Reintentar"} explanationLabel={"Explicación"} allCorrectLabel={"Todo clasificado"} partialResultWord={"bien"}
+  client: visible
+  className="not-prose"
+  question="Clasifica estas conclusiones usando los modelos declarados"
+  buckets={["Prueba ESS superada","Prueba ESS fallida","Hace falta otra regla de movimiento"]}
+  items={[{"text":"AllD dentro del catálogo AllD/TFT y todas sus mezclas","bucket":"Prueba ESS superada"},{"text":"TFT cuando también se permite AllC","bucket":"Prueba ESS fallida"},{"text":"La población llegará desde cualquier punto a la ESS que paga más","bucket":"Hace falta otra regla de movimiento"},{"text":"TFT dentro del catálogo limitado a AllD/TFT y sus mezclas","bucket":"Prueba ESS superada"},{"text":"Toda política en el juego que paga dos en cada celda","bucket":"Prueba ESS fallida"}]}
+  explanation="Las factorizaciones cubren todas las mezclas de cada espacio declarado. La neutralidad completa no supera ESS. Una afirmación de llegada global necesita otro modelo y no está garantizada ni siquiera por tener dos ESS."
 />
 
 ## Dinámica del replicador: el motor que hace el movimiento
 
-No dejamos de decir que la selección "lleva" a una población hacia una ESS. Hora de nombrar el motor. La **ecuación del replicador** es el modelo honesto más simple de ese movimiento, y su idea de una línea lo es todo:
+Añadamos ahora un **modelo de actualización aparte**. Bajo la dinámica replicadora continua de estrategias finitas, las diferencias de pagos determinan cambios en las proporciones poblacionales. Es una ecuación diferencial especificada, no la definición de ESS ni una descripción exacta de los pasos Euler finitos del laboratorio compartido.
 
 > **La cuota de una estrategia crece en proporción a cuánto por encima de la media poblacional está su aptitud.** Lo más apto que la media se expande; lo que está por debajo de la media encoge; lo exactamente medio se mantiene.
 
@@ -168,32 +208,24 @@ $$\frac{dp}{dt} = p\,(1-p)\,(W_A - W_B).$$
 
 Léela de izquierda a derecha y casi se narra sola. El término $p(1-p)$ es solo "solo puedes cambiar si ambos tipos están de verdad presentes" (nada que seleccionar si todos son ya A o ya B). El término $(W_A - W_B)$ es el volante: **positivo** donde A vence a B, así que la cuota de A sube; **negativo** donde A pierde, así que baja; **cero** donde empatan, que es un punto de reposo. Es interés compuesto para el comportamiento — los ganadores obtienen proporcionalmente más del "capital" de la siguiente generación.
 
-Tres conexiones enlazan esto con todo lo que habéis construido:
+Para el catálogo binario AllD/TFT anterior, sea $x$ la proporción poblacional AllD. Entonces $W_D=2-x$ y $W_T=3-9x/4$, así que
 
-1. **Ya la usasteis.** El botón "deja correr la selección" del laboratorio de Halcón–Paloma de la Lección 2 *es* esta ecuación. Con la fracción de halcones que empezaras, llevó a la población a $p^* = V/C$ — porque en cualquier otra mezcla, una estrategia está por encima de la media y crece hasta que el hueco se cierra.
-2. **Una ESS es un atractor.** En lenguaje dinámico, una ESS es un **punto de reposo asintóticamente estable** de la dinámica del replicador (replicator dynamics): una mezcla en reposo que, si la empujas, se recupera sola. Ese es el significado preciso de "estable" — no una metáfora, una propiedad matemática.
-3. **Pero no todo sistema reposa.** Piedra–papel–tijera — los lagartos de manchas laterales — **no tiene punto de reposo que atraiga**; la dinámica del replicador lo manda a **orbitar** el centro para siempre, naranja persiguiendo a azul persiguiendo a amarillo persiguiendo a naranja. Sin atractor, sin ESS. Los ciclos son un comportamiento legítimo a largo plazo, no un fallo.
+$$\dot x=x(1-x)(5x/4-1).$$
 
-<Callout variant="tip" title="La frase que hay que conservar">
-Dinámica del replicador = "lo más apto que la media crece, lo que está por debajo de la media encoge". Una ESS es donde ese proceso llega al reposo *y se queda ahí* cuando lo perturban. Algunos juegos reposan en un punto, algunos en varios, y algunos nunca reposan.
+Los puntos de reposo son $0,4/5,1$. Para $0<x<4/5$, x disminuye; para $4/5<x<1$, aumenta. Los extremos atraen desde sus respectivos lados y el punto interior separa las cuencas. «El valle más cercano» no es la regla: un inicio en x=3/4 está más cerca de uno que de cero, pero queda bajo el umbral y se mueve hacia cero en este modelo elegido. Los propios estados frontera permanecen fijos.
+
+El [teorema replicador correspondiente](https://ocw.mit.edu/courses/14.126-game-theory-spring-2024/mit14_126_s24_lecture_slides_evolutionary_game_theory.pdf) conecta ESS con estabilidad asintótica **local** bajo su modelo declarado. Usamos ese resultado condicional, no una definición que equipare ESS con cualquier convergencia observada. Una animación finita, un solo estado inicial o un integrador numérico concreto no prueban toda alternativa ni una trayectoria global. Esta ecuación no afirma ciclos perpetuos de lagartos.
+
+<Callout label={"Consejo"} variant="tip" title="La frase que hay que conservar">
+Una prueba estática de invasión y una regla de actualización poblacional responden a preguntas distintas. Bajo el modelo replicador especificado, ESS tiene un teorema de estabilidad local. No se deduce que toda población inicial llegue a una ESS ni que una animación asentada haya demostrado una.
 </Callout>
 
-<MatchConcepts
-  client:visible
-  question="Empareja cada comportamiento dinámico con lo que significa para la existencia de una ESS."
-  pairs={[
-    { term: 'La dinámica del replicador converge a una mezcla estable', definition: 'Un único atractor ESS (p. ej. Halcón–Paloma asentándose en V/C)' },
-    { term: 'Dos puntos de reposo estables con una cresta entre ellos', definition: 'Un juego biestable con múltiples ESS, decidido por la cuenca de partida' },
-    { term: 'Una órbita cerrada que nunca se asienta', definition: 'Sin ESS — piedra–papel–tijera cicla para siempre' },
-    { term: 'dp/dt = p(1−p)(W_A − W_B) es positivo', definition: 'La estrategia A está por encima de la media, así que su cuota crece ahora mismo' },
-  ]}
-  explanation="Convergencia a una mezcla = una ESS; dos cuencas = múltiples ESS y dependencia del camino; una órbita perpetua = ninguna ESS. Y el signo de dp/dt solo informa de si A supera a la media ahora mismo: positivo significa que crece."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  allCorrectLabel="✓ Todo emparejado"
-  termsLabel="Comportamientos"
-  definitionsLabel="Significados"
-  explanationLabel="Explicación"
+<MatchConcepts instructions={"Elige un concepto y después su definición."} checkLabel={"Comprobar"} retryLabel={"Reintentar"} allCorrectLabel={"Todo relacionado"} partialResultWord={"bien"} pickDefinitionHint={"Elige ahora una definición"} notLinkedHint={"Sin relacionar"} termsLabel={"Conceptos"} definitionsLabel={"Definiciones"}
+  client: visible
+  className="not-prose"
+  question="Relaciona cada resultado con lo que realmente establece"
+  pairs={[{"term":"A tiene mayor pago que B y ambas están presentes","definition":"Bajo la ecuación replicadora de dos tipos especificada, la proporción A aumenta ahora"},{"term":"Ambas políticas puras superan la prueba ESS","definition":"Dos resultados de resistencia local, sin elegir una trayectoria de actualización"},{"term":"La proporción AllD es tres cuartos en el ejemplo binario","definition":"Está bajo el umbral de cuatro quintos, así que AllD disminuye en la ecuación elegida"},{"term":"Una trayectoria numérica parece asentarse","definition":"No es una prueba universal de toda política mutante permitida"}]}
+  explanation="Los signos de pagos, la resistencia estática y las trayectorias se relacionan mediante supuestos declarados. No son definiciones intercambiables."
 />
 
 ## Dónde miente el modelo: el catálogo honesto
@@ -202,7 +234,7 @@ Ahora tenéis una herramienta poderosa. Las herramientas poderosas se ganan el r
 
 ### 1. Estabilidad no es optimalidad
 
-Esta es la gorda, y la que hace tropezar a la gente lista. **Una ESS es aquello en lo que la selección se asienta — no lo que sería mejor para el grupo.** El juego de Halcón–Paloma lo demuestra con números.
+Una ESS tiene resistencia local frente a alternativas raras bajo el juego especificado. **Esa propiedad no maximiza el bienestar del grupo.** Halcón–Paloma proporciona una comparación numérica.
 
 Recuerda de la Lección 2, con valor $V = 6$ y coste $C = 10$, la ESS mixta es $p^* = V/C = 6/10 = 0.6$ halcones. En ese equilibrio, cada individuo — halcón o paloma — gana el mismo pago esperado, y ese pago resulta ser $V(C - V) / (2C)$:
 
@@ -215,35 +247,35 @@ Ahora imagina una población de **todo Palomas**. Comparten recursos pacíficame
 | Utopía de todo Palomas | 0% halcones | 3.0 |
 | La ESS | 60% halcones | 1.2 |
 
-Entonces, ¿por qué la población no *va* sin más al encantador mundo de todo Palomas? Porque todo Palomas es **invadible**: suelta un Halcón en una sala de Palomas y gana todos los enfrentamientos sin oposición, ganando el $V = 6$ completo mientras las palomas se reparten 3. Los halcones inundan hasta llegar a $p^*$. El óptimo pacífico no es estable, así que la selección no puede mantener ahí a la población. **La selección optimiza la propagación del gen individual, no el bienestar del grupo — y son objetivos distintos.** La ESS predice el despilfarrador 1.2, y la realidad obedece.
+Todo-Paloma falla la prueba de invasión: un Halcón raro gana inicialmente $V=6$ contra Palomas mientras estas ganan tres. La política mixta supera la prueba ESS frente a todas las alternativas y paga 1,2. Son criterios distintos: resistencia frente a una alternativa y pago entre composiciones poblacionales completas. El cálculo no demuestra conflicto inevitable, optimización genética ni llegada desde cualquier estado inicial.
 
-<MCQ
+<MCQ pretestLabel={"Antes de leer, prueba una respuesta"} className={"not-prose"}
   client:visible
   question="Una población se sitúa en la ESS de Halcón–Paloma ganando 1.2 cada uno, cuando todos ganarían 3.0 en un mundo de todo Palomas. ¿Por qué la selección natural no puede simplemente mover la población al mejor resultado?"
   options={[
-    { text: 'El estado de todo Palomas no es una ESS — un único mutante Halcón lo invade — así que la selección no puede mantener ahí a la población, aunque pague más', correct: true },
+    { text: "Todo-Paloma falla la prueba porque un Halcón raro gana inicialmente más; un mayor pago de grupo no demuestra ESS", correct: true },
     { text: 'El estado de todo Palomas paga menos que la ESS una vez que cuentas los costes de pelea' },
     { text: 'La selección trabaja activamente para maximizar el pago total del grupo, y 1.2 entre muchos individuos supera 3.0 para unos pocos' },
     { text: 'La ecuación del replicador no tiene punto de reposo en el estado de todo Palomas' },
   ]}
-  explanation="Todo Palomas paga un encantador 3.0 pero falla la prueba de invasión: un Halcón solitario lo arrasa. Como la selección actúa sobre la ventaja individual, no sobre el bienestar del grupo, arrastra a la población fuera del óptimo pacífico y hacia la despilfarradora ESS en 1.2. 'Mejor para el grupo' y 'evolutivamente estable' son sencillamente criterios distintos — y cuando chocan, gana la estabilidad."
+  explanation="Compara ambos criterios. Todo-Paloma paga 3, pero un Halcón raro gana 6 contra ella; la ESS mixta paga 1,2. Esto no establece por sí solo una trayectoria poblacional global ni garantiza que nunca pueda observarse la composición mejor pagada."
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
 />
 
 ### 2. No todo juego tiene una ESS — y algunos tienen varias
 
-"Encuentra la ESS" da por sentado en voz baja que hay una que encontrar. No tiene por qué haberla. Piedra–papel–tijera (los lagartos) no tiene **ninguna** — la dinámica cicla. Algunos juegos tienen solo una ESS **mixta** (Halcón–Paloma). Algunos tienen **múltiples** ESS (el dilema biestable; cualquier juego de coordinación). La respuesta honesta a "¿cuál es la ESS aquí?" puede ser *cero*, *una* o *varias* — y no lo sabes hasta que has aplicado de verdad la prueba.
+La respuesta puede ser cero, una o varias. El juego especificado de piedra–papel–tijera de suma cero no tiene ESS, mientras que nuestro Halcón–Paloma tiene una ESS mixta. El catálogo restringido AllD/TFT anterior tiene dos ESS puras. El recuento debe proceder de la prueba y del espacio real, no del nombre «dilema repetido», de dibujar un ciclo de victorias ni de afirmar que todos los juegos de coordinación son iguales.
 
 ### 3. El modelo clásico supone una población infinita, bien mezclada, de desconocidos no emparentados
 
 El álgebra pulcra de $E(I,I) > E(J,I)$ cabalga sobre tres supuestos que las poblaciones reales rompen rutinariamente:
 
-- **Población infinita.** La matemática supone que los mutantes son infinitesimalmente raros y las medias, exactas. Las poblaciones reales son **finitas**, así que la **deriva aleatoria** puede expulsar a una estrategia incluso cuando la selección la favorece (exactamente la deriva que dejó colarse a AllC en TFT), o fijar una peor por suerte.
+- **Población infinita.** El cálculo continuo usa esperanzas exactas a frecuencias positivas arbitrariamente pequeñas. Una población estocástica finita puede perder o fijar un tipo por muestreo aleatorio aunque la selección por pagos favorezca otro resultado. Hay que especificar ese proceso; la neutralidad sola no obliga a que AllC se acumule ni a que un mutante sustituya al residente.
 - **Jugadores no emparentados.** Los pagos ESS suponen que te encuentras con desconocidos. Añade **estructura de parentesco** y los pagos efectivos cambian: ayudar a un pariente propaga genes compartidos, así que la cooperación puede compensar cuando se cumple la **regla de Hamilton (Hamilton's rule)** $rB > C$ (la relación de parentesco $r$ por el beneficio $B$ para el receptor supera al coste $C$ para el actor) — incluso donde la ESS de solo-desconocidos dice desertar.
 - **Encuentros bien mezclados.** La ESS supone que todos tienen la misma probabilidad de encontrarse con todos. Las interacciones reales tienen **estructura espacial o de red** — quién se encuentra con quién es grumoso. En una retícula, **los cooperadores pueden agruparse** y protegerse mutuamente, sobreviviendo donde un modelo bien mezclado dice que serían explotados hasta la extinción.
 
@@ -251,7 +283,7 @@ Cada uno de estos no es una nota al pie; cada uno reescribe la matriz de pagos.
 
 ### 4. Es una instantánea estática de un mundo en movimiento
 
-La ESS es un concepto de **equilibrio**. Pregunta "¿qué mezcla, una vez alcanzada, se queda quieta?" — y por construcción ignora que el propio juego se está moviendo. $V$ y $C$ derivan a medida que cambian los entornos. Los oponentes **coevolucionan**, así que una estrategia que persigue la mejor respuesta de hoy apunta a un blanco móvil — una ESS móvil. Hay desfases temporales, estaciones, invasiones. La evolución real es una **persecución**, no un pulcro punto de reposo; la ESS fotografía un fotograma y finge que la película se ha parado.
+La ESS pregunta si un residente declarado resiste toda alternativa rara permitida en un juego fijo. No da directamente llegada, trayectoria ni velocidad. Un entorno cambiante puede modificar pagos, emparejamientos o estrategias disponibles; un resultado demostrado para un juego fijo necesita entonces comprobarse de nuevo.
 
 ### 5. La narración descuidada es la mayor trampa práctica
 
@@ -259,85 +291,85 @@ El abuso más común de todo este campo no es un error matemático — es **cont
 
 ### 6. La falacia naturalista
 
-Por último, la barrera ética heredada del curso de cooperación: **una ESS describe lo que *evoluciona*, no lo que es bueno, justo o correcto.** La pelea estable (Halcón–Paloma), el engaño estable y la deserción estable (el mundo de todo-AllD) son *todos* ESS. Ser evolutivamente estable no confiere exactamente ningún respaldo moral. "Es natural" y "es estable" son descripciones; "es bueno" es una afirmación aparte que tienes que argumentar por sus propios méritos. Esta es la **falacia naturalista (naturalistic fallacy)**.
+Por último, la barrera ética heredada del curso de cooperación: **una ESS es una propiedad de resistencia local, no un veredicto sobre lo bueno, justo o correcto.** La pelea estable (Halcón–Paloma), el engaño estable y la deserción estable (el mundo de todo-AllD) son *todos* ESS. Ser evolutivamente estable no confiere exactamente ningún respaldo moral. "Es natural" y "es estable" son descripciones; "es bueno" es una afirmación aparte que tienes que argumentar por sus propios méritos. Esta es la **falacia naturalista (naturalistic fallacy)**.
 
-<Callout variant="tip" title="Lista de comprobación del profesional — antes de afirmar una ESS">
+<Callout label={"Consejo"} variant="tip" title="Lista de comprobación del profesional — antes de afirmar una ESS">
 Para ganarte la frase "esto es una ESS", especifícalo todo:
 
 - **(a)** el **conjunto de estrategias** — qué alternativas están sobre la mesa;
 - **(b)** la **función de pagos** E(A,B) — los números, no un ambiente;
 - **(c)** mejor-respuesta-a-sí-misma — comprueba E(I,I) >= E(J,I) para todo mutante J;
 - **(d)** el **desempate** donde E(I,I) = E(J,I) — comprueba E(I,J) > E(J,J);
-- **(e)** confirma que es un **atractor** a prueba de mutantes raros de la dinámica.
+- **(e)** exige un intervalo positivo de frecuencias pequeñas para toda política diferente permitida; investiga cualquier trayectoria poblacional con un modelo de actualización aparte.
 
 Y ten presente el recuento: pueden existir **cero, una o muchas** ESS. Si te saltaste (a)–(b), nunca tuviste una afirmación — solo una historia.
 </Callout>
 
-<MCQ
+<MCQ pretestLabel={"Antes de leer, prueba una respuesta"} className={"not-prose"}
   client:visible
   allowMultiple
   question="¿Cuáles de las siguientes son limitaciones genuinas del modelo clásico de ESS? (Selecciona todas las que apliquen.)"
   options={[
     { text: 'Una ESS puede ser colectivamente despilfarradora — la estabilidad no implica optimalidad del grupo', correct: true },
-    { text: 'Algunos juegos no tienen ESS (ciclos), y algunos tienen varias', correct: true },
+    { text: "Algunos juegos no tienen ESS y otros tienen varias; esto no impone por sí solo ciclos", correct: true },
     { text: 'Supone una población infinita, bien mezclada, de jugadores no emparentados; la finitud, el parentesco y la estructura espacial la rompen', correct: true },
     { text: 'Es un concepto de equilibrio estático e ignora entornos cambiantes y oponentes que coevolucionan', correct: true },
     { text: 'Garantiza que la población alcanza el equilibrio que más paga al grupo' },
     { text: 'Demuestra que aquello que es evolutivamente estable es también moralmente bueno' },
   ]}
-  explanation="Las cuatro primeras son límites reales y de carga: estabilidad ≠ optimalidad, el recuento de ESS puede ser cero/una/muchas, los supuestos de infinita/bien mezclada/no emparentada fallan en poblaciones reales, y es una instantánea de un juego en movimiento. Las dos últimas son exactamente los errores contra los que advierte la lección — la selección no optimiza el bienestar del grupo, y 'estable' no lleva ningún respaldo moral (la falacia naturalista)."
+  explanation="Las cuatro primeras describen límites de este planteamiento clásico: resistencia y bienestar difieren, el número de ESS puede variar, los supuestos poblacionales y de encuentros pueden fallar y una prueba de juego fijo no describe un entorno cambiante. No se deducen maximización global del bienestar ni respaldo moral. La ausencia de ESS por sí sola no predice ciclos."
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
 />
 
-<MatchConcepts
+<MatchConcepts instructions={"Elige un concepto y después su definición."} partialResultWord={"bien"} pickDefinitionHint={"Elige ahora una definición"} notLinkedHint={"Sin relacionar"} className={"not-prose"}
   client:visible
   question="Empareja cada limitación del modelo ESS con un ejemplo concreto de cómo muerde."
   pairs={[
-    { term: 'Estabilidad ≠ optimalidad', definition: 'Halcón–Paloma se asienta en 1.2 por cabeza cuando todo Palomas pagaría 3' },
-    { term: 'No todo juego tiene una ESS', definition: 'Los lagartos de manchas laterales ciclan naranja → azul → amarillo para siempre' },
-    { term: 'Las poblaciones finitas derivan', definition: 'Copias neutrales de AllC derivan hacia un mundo TFT y lo ablandan' },
+    { term: 'Estabilidad ≠ optimalidad', definition: "La ESS Halcón–Paloma paga 1,2, mientras todo-Paloma paga 3 pero falla la prueba de invasión" },
+    { term: 'No todo juego tiene una ESS', definition: "El juego especificado de piedra–papel–tijera de suma cero no tiene ESS" },
+    { term: 'Las poblaciones finitas derivan', definition: "Un modelo estocástico finito puede perder o fijar un tipo neutral; la neutralidad sola no predice una trayectoria" },
     { term: 'La estructura de parentesco cambia los pagos', definition: 'La cooperación compensa cuando rB > C incluso donde el juego de desconocidos dice desertar' },
     { term: 'Instantánea estática de un juego en movimiento', definition: 'V y C mismos derivan a medida que cambia el entorno, moviendo la ESS' },
     { term: 'Falacia naturalista', definition: 'Una estrategia de engaño estable no es por ello justa ni buena' },
   ]}
-  explanation="Cada limitación tiene dientes en un caso específico: el equilibrio despilfarrador de Halcón–Paloma, el ciclo interminable de los lagartos, la deriva neutral ablandando a TFT, el rB > C de Hamilton dándole la vuelta al veredicto bajo parentesco, la deriva de V y C, y el hueco moral entre 'estable' y 'bueno'."
+  explanation="Estos ejemplos distinguen resistencia de pagos, bienestar y supuestos dinámicos. El ejemplo de suma cero no tiene ESS sin demostrar ciclos animales perpetuos. La deriva necesita un proceso estocástico finito; los casos restantes de parentesco, entorno y moral tratan otros límites."
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  allCorrectLabel="✓ Todo emparejado"
-  termsLabel="Limitaciones"
-  definitionsLabel="Ejemplos"
-  explanationLabel="Explicación"
+  allCorrectLabel={"Todo relacionado"}
+  termsLabel={"Conceptos"}
+  definitionsLabel={"Definiciones"}
 />
 
 ## Recuerdo espaciado: no pierdas la maquinaria central
 
 Habéis añadido mucho hoy. Asegurémonos de que los cimientos de lecciones anteriores siguen siendo de carga.
 
-<Reveal client:visible>
-**Autotest rápido — tapa la respuesta.** Un colega dice: "La cooperación obviamente evolucionó porque es mejor para todos — mira cuánto más rico es un mundo cooperativo". Usando *solo* lo que sabes sobre la prueba de invasión, nombra las dos cosas que esa afirmación tiene mal.
+<details>
+<summary>Comprueba «la cooperación evolucionó porque beneficia a todos»</summary>
 
-**Respuesta.** (1) "Mejor para todos" es un argumento de **bienestar del grupo**, pero la prueba de invasión trata de la ventaja **individual** frente a la población actual — una estrategia solo es estable si ningún mutante gana más que ella, sin importar el bienestar del grupo (estabilidad ≠ optimalidad; ve el mundo de todo Palomas pagando 3 y aun así invadible). (2) La afirmación se salta el mecanismo por completo: nunca nombra el conjunto de estrategias ni comprueba $E(I,I) \ge E(J,I)$ — es una historia ad hoc. La cooperación *puede* ser estable, pero solo vía repetición/parentesco/estructura que de verdad supere la prueba, e incluso entonces el equilibrio de deserción también es estable (biestabilidad).
-</Reveal>
+Una ventaja de bienestar del grupo no es una prueba de invasión. Nombra el espacio de estrategias, la puntuación y el emparejamiento; comprueba después toda alternativa y los desempates necesarios. En el catálogo binario construido AllD/TFT, ambas políticas puras son ESS. Añade AllC y TFT falla. Ningún resultado identifica por sí solo una trayectoria evolutiva real ni garantiza llegar al estado mejor pagado.
 
-<MCQ
+</details>
+
+<MCQ pretestLabel={"Antes de leer, prueba una respuesta"} className={"not-prose"}
   client:visible
   question="Vuelta a lo básico: Halcón–Paloma con V = 6, C = 10. ¿Cuál es la fracción ESS mixta de Halcones, y qué dice la prueba de invasión sobre una población situada ahí?"
   options={[
-    { text: 'p* = V/C = 0.6 Halcones; en esa mezcla Halcón y Paloma ganan pagos iguales, así que ninguno puede invadir al otro — es el atractor', correct: true },
+    { text: "p*=V/C=0,6; la comparación a frecuencia positiva frente a toda política mixta diferente demuestra ESS, no la igualdad sola", correct: true },
     { text: 'p* = C/V = 1.67 Halcones, que redondea a una ESS de todo Halcón' },
     { text: 'p* = 0.6 Halcones, pero las Palomas siempre ganan más ahí, así que las Palomas siguen invadiendo' },
     { text: 'No hay ESS porque Halcón–Paloma cicla como piedra–papel–tijera' },
   ]}
-  explanation="Con V < C la ESS es la mezcla p* = V/C = 6/10 = 0.6. En esa fracción exacta Halcones y Palomas tienen pago esperado igual (aquí 1.2 cada uno), así que ningún mutante raro de ninguno de los tipos gana más que los residentes — la mezcla es un atractor de la dinámica del replicador. Halcón–Paloma tiene una ESS única genuina; no cicla."
+  explanation="Con C>V>0, la candidata mixta es p*=V/C=3/5 y su pago 1,2. La diferencia completa residente menos mutante es C epsilon(q−p*)²/2, positiva para todo q distinto de p* y epsilon positivo. Eso demuestra resistencia bajo el juego especificado; una trayectoria necesita otro modelo."
   checkLabel="Comprobar"
   retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
 />
@@ -346,7 +378,7 @@ Habéis añadido mucho hoy. Asegurémonos de que los cimientos de lecciones ante
 
 Ahora habéis visto el modelo en su punto más poderoso — fijando cuándo la cooperación puede y no puede ser estable — y en su punto más honesto, catalogando dónde deja de ser fiable. Las dos mitades son la misma destreza: **aplica la prueba, y luego respeta sus límites.**
 
-<MindMap
+<MindMap eyebrow={""}
   client:visible
   title="Cooperación, despilfarro y los límites de la ESS"
   outlineLabel="Esquema"
@@ -356,31 +388,31 @@ Ahora habéis visto el modelo en su punto más poderoso — fijando cuándo la c
       {
         label: 'Dilema del prisionero iterado',
         children: [
-          { label: 'La sombra del futuro w hace que la memoria compense' },
+          { label: "Continuación y puntuación esperada normalizada declaradas" },
           { label: 'TFT: amable, vengativa, indulgente' },
         ],
       },
       {
-        label: 'TFT solo es casi una ESS',
+        label: "Añadir AllC cambia el estatus de TFT",
         children: [
-          { label: 'Vence a AllD: E(TFT,TFT)≈3 > E(AllD,TFT)≈1' },
-          { label: 'Empata con AllC en ambas cláusulas → neutral, deriva hacia dentro' },
-          { label: 'Población ablandada, luego invadida por AllD' },
+          { label: "Con w tres cuartos: TFT gana tres contra TFT; AllD gana dos" },
+          { label: "AllC empata en ambas condiciones; TFT no es ESS en el catálogo ampliado" },
+          { label: "La neutralidad no obliga a deriva ni sustitución" },
         ],
       },
       {
-        label: 'AllD es una ESS estricta → mundo biestable',
+        label: "Catálogo restringido AllD/TFT: dos ESS puras",
         children: [
-          { label: 'El mutante amable se come el pago del primo, nunca se recupera' },
-          { label: 'Dos cuencas; la historia/dependencia del camino decide' },
+          { label: "Todas las alternativas mixtas cubiertas por barreras positivas" },
+          { label: "El modelo replicador elegido tiene umbral cuatro quintos" },
         ],
       },
       {
         label: 'Dinámica del replicador = el motor',
         children: [
           { label: 'dp/dt = p(1−p)(W_A − W_B): lo más apto que la media crece' },
-          { label: 'ESS = atractor (punto de reposo asintóticamente estable)' },
-          { label: 'Los lagartos de PPT orbitan → sin atractor, sin ESS' },
+          { label: "Un teorema condicional conecta ESS con estabilidad local" },
+          { label: "Una trayectoria numérica asentada no demuestra ESS" },
         ],
       },
       {
@@ -397,7 +429,7 @@ Ahora habéis visto el modelo en su punto más poderoso — fijando cuándo la c
   }}
 />
 
-<Quiz
+<Quiz correctCountLabel={"bien"} completeLabel={"Completado"} completeTitleLabel={"Repaso completado"} perfectMessage={"Has acertado todas las preguntas."} goodMessage={"Revisa las explicaciones de los errores."} keepPracticingMessage={"Vuelve a los ejemplos y reconstruye las cuentas."} gateLabel={"Comprueba tu respuesta para continuar."} seeResultsLabel={"Ver resultados"} checkLabel={"Comprobar"} retryLabel={"Reintentar"} correctLabel={"Correcto"} incorrectLabel={"No exactamente"} correctAnswerLabel={"Respuesta correcta"} explanationLabel={"Explicación"} className={"not-prose"}
   client:visible
   questionLabel="Pregunta"
   ofLabel="de"
@@ -407,29 +439,29 @@ Ahora habéis visto el modelo en su punto más poderoso — fijando cuándo la c
   backLabel="Atrás"
   questions={[
     {
-      question: '¿Por qué Tit-for-Tat NO es una ESS estricta, incluso cuando la sombra del futuro es alta?',
+      question: "Con w=3/4 y la puntuación normalizada declarada, ¿por qué TFT no es ESS cuando se permite AllC?",
       correct: 0,
       options: [
-        'Cooperar Siempre la empata en E(I,I)=E(J,I) y en el desempate, así que AllC es neutral, deriva hacia dentro y luego deja invadir a AllD',
+        "AllC empata con TFT tanto contra TFT como contra AllC, así que falla el desempate estricto",
         'Desertar Siempre gana estrictamente más que ella frente a una población TFT',
         'Gana menos que la deserción mutua cuando ambos jugadores cooperan',
         'No tiene punto de reposo en la dinámica del replicador',
       ],
-      explanation: 'AllC es un empate perfecto contra TFT en ambas cláusulas ESS, así que es selectivamente neutral, deriva hacia dentro y ablanda la población hasta que AllD puede invadir. AllD solo no puede vencer a TFT — es la deriva neutral la que rompe la estabilidad estricta.',
+      explanation: "Los cuatro pagos T/C valen tres. Esta única alternativa impide ESS en el catálogo ampliado. No garantiza deriva, acumulación de AllC ni una sustitución posterior por AllD.",
     },
     {
-      question: 'El dilema del prisionero repetido es "biestable". ¿Qué significa eso?',
+      question: "Limita el juego repetido construido a AllD/TFT y sus mezclas. ¿Qué establecen sus dos resultados de ESS puras?",
       correct: 0,
       options: [
-        'Tanto todos-reciprocan como todos-desertan superan la prueba de invasión, así que cuál alcanza una población depende de su cuenca de partida, no de cuál paga más',
+        "Ambas políticas puras resisten toda alternativa rara permitida; hace falta un modelo de actualización para elegir una trayectoria",
         'El juego tiene exactamente una ESS que oscila entre dos valores',
         'La población oscila para siempre entre cooperación y deserción',
         'La cooperación siempre gana porque paga 3 frente a 1',
       ],
-      explanation: 'Dos equilibrios son cada uno ininvadibles. La historia y las condiciones iniciales (la cuenca de atracción) deciden el resultado — un caso de dependencia del camino, no de que el mejor resultado gane automáticamente.',
+      explanation: "Las demostraciones binarias cubren toda alternativa mixta. El modelo replicador continuo elegido tiene un umbral separador AllD de 4/5, pero ese modelo es distinto de ESS. Añadir AllC cambia el espacio y elimina la ESS de TFT.",
     },
     {
-      question: 'En la ecuación del replicador dp/dt = p(1−p)(W_A − W_B), ¿qué hace que la cuota de la estrategia A crezca?',
+      question: "Para un estado interior 0<p<1 en la ecuación replicadora de dos tipos especificada, ¿qué hace crecer la proporción A?",
       correct: 0,
       options: [
         'Que A esté por encima de la media poblacional — es decir, W_A > W_B, haciendo el término positivo',
@@ -437,18 +469,18 @@ Ahora habéis visto el modelo en su punto más poderoso — fijando cuándo la c
         'Que A tenga una tasa de mutación más alta que B',
         'Que el entorno premie el bienestar del grupo sobre el pago individual',
       ],
-      explanation: 'El signo de (W_A − W_B) es el volante: positivo significa que A vence a B, así que A crece. Es "lo más apto que la media se expande". El término p(1−p) solo escala la velocidad y es de hecho máximo cerca de una mezcla 50:50, no en los extremos.',
+      explanation: "En un estado interior, p(1−p)>0, así que el signo es el de W_A−W_B. En cualquiera de las fronteras la proporción no se mueve bajo esta ecuación aunque un tipo ausente pudiera ganar más.",
     },
     {
-      question: 'Halcón–Paloma con V = 6, C = 10 se asienta en p* = 0.6 Halcones, pagando 1.2 cada uno, mientras que todo Palomas pagaría 3. ¿Qué muestra esto sobre la ESS?',
+      question: "La política ESS Halcón–Paloma con V=6, C=10 paga 1,2, mientras todo-Paloma paga 3. ¿Qué muestra esa comparación?",
       correct: 0,
       options: [
-        'La estabilidad no es optimalidad — la selección mantiene la mezcla estable despilfarradora porque el mejor mundo de todo Palomas es invadible por un único Halcón',
+        "La resistencia ESS y el bienestar del grupo son criterios distintos; todo-Paloma paga más pero falla la prueba",
         'La dinámica del replicador cometió un error aritmético',
         'Todo Palomas también es una ESS, así que el juego es biestable',
         'La selección de grupo acabará moviendo la población a todo Palomas',
       ],
-      explanation: 'Todo Palomas paga más pero falla la prueba de invasión (un Halcón solitario lo arrasa), así que la selección no puede mantenerlo. La ESS predice aquello en lo que la selección se asienta — el despilfarrador 1.2 — no lo que es mejor para el grupo.',
+      explanation: "Todo-Paloma tiene mayor pago poblacional, pero un Halcón raro gana inicialmente 6 frente a su 3. La política mixta supera la prueba frente a todas las alternativas especificadas. Esto no determina por sí solo la trayectoria realizada ni optimiza el bienestar.",
     },
     {
       question: '¿Qué supuesto del modelo clásico de ESS, al romperse, puede dejar sobrevivir a los cooperadores agrupándose juntos de modo que interactúen sobre todo entre ellos?',
@@ -465,14 +497,14 @@ Ahora habéis visto el modelo en su punto más poderoso — fijando cuándo la c
       question: 'Un ponente dice: "Esta exhibición engañosa es evolutivamente estable, lo que prueba que es una adaptación buena y justa". ¿Cuál es el error central?',
       correct: 0,
       options: [
-        'La falacia naturalista — una ESS describe lo que evoluciona, no lo que es bueno o justo; el engaño estable y la deserción estable son ESS sin respaldo moral',
+        'La falacia naturalista — una ESS describe la resistencia local a la invasión según los pagos, no lo que es bueno o justo; el engaño y la deserción pueden ser ESS en juegos concretos sin respaldo moral',
         'Olvidaron que el engaño nunca puede ser una ESS',
         'Confundieron una ESS mixta con una pura',
         'Deberían haber usado C/V en vez de V/C',
       ],
-      explanation: 'Ser evolutivamente estable es un hecho descriptivo sobre la ininvadibilidad, no un veredicto moral. La pelea, el engaño y la deserción estables son todos ESS — ninguno es por ello bueno, justo o correcto. Esa es la falacia naturalista.',
+      explanation: 'Ser evolutivamente estable es un hecho descriptivo sobre la ininvadibilidad, no un veredicto moral. La pelea, el engaño y la deserción pueden ser ESS en juegos con pagos concretos — ninguno es por ello bueno, justo o correcto. Esa es la falacia naturalista.',
     },
   ]}
 />
 
-Ese es el arco: de "¿es $I$ ininvadible?" a un conocimiento práctico completo de cuándo la cooperación puede ser estable, qué motor lleva a las poblaciones allí, y cada lugar donde la pulcra historia del modelo se deshilacha. Úsalo como un buen mecánico usa una llave dinamométrica — con precisión, y sabiendo exactamente qué no puede medir.
+El recorrido separa una prueba universal de invasión local, un catálogo de políticas declarado y un modelo de actualización poblacional elegido aparte. Los cálculos de pagos y sus límites van juntos. Úsalo como un buen mecánico usa una llave dinamométrica — con precisión, y sabiendo exactamente qué no puede medir.
