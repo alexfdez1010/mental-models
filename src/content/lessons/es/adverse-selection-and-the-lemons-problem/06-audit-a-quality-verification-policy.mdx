@@ -1,0 +1,499 @@
+---
+title: "Audita una política de verificación de calidad"
+description: "Filtra la participación, compara excedentes privados y conjuntos y distingue adoptar una inspección de continuar tras una tarifa hundida."
+topic: "es/adverse-selection-and-the-lemons-problem"
+order: 7
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, MatchConcepts, FillBlank, Categorize, MindMap, RateComparison, ExpectedValueCalculator, FirstPrinciplesBuilder, ConsequenceTree } from '@/components/react';
+
+Una comprobación de calidad puede aumentar el excedente conjunto y, aun así, ser una política que el comprador rechaza. Para entenderlo, separa tres cuentas: quién participa, quién gana y cuándo se paga la inspección.
+
+El taller usa un archivo ficticio que un vendedor ofrece a un único comprador. Auditarás cotizaciones y políticas de inspección concretas; después probarás otro caso. Los precios y valores son créditos de utilidad estipulados, no estimaciones de un mercado real.
+
+## Fija la oportunidad y las alternativas
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer: prueba a responder"}
+  question={"El vendedor conoce un tipo fijo antes de la oferta. ¿Qué debe comprobar primero la auditoría de una cotización?"}
+  options={[{"text":"Quién acepta cada precio propuesto.","correct":true},{"text":"Cómo trabaja el vendedor tras cobrar."},{"text":"Con qué frecuencia recibe reseñas."},{"text":"Qué informe de inspección impresiona más."}]}
+  explanation={"El tipo fijo y los valores de reserva determinan la entrada. El esfuerzo posterior, las reseñas y lo llamativo de un informe no forman parte de este modelo estipulado."}
+  pretest={true}
+/>
+
+Una **oportunidad** es un posible encuentro entre vendedor y comprador, antes de que nadie acepte. El vendedor sabe si el archivo es de tipo H o L; el comprador solo conoce las probabilidades previas y los valores siguientes. El tipo es fijo: ningún esfuerzo posterior cambia su calidad.
+
+<div role="region" tabIndex={0} aria-label={"Conjunto original: valores y probabilidades estipulados"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="main-types" className="w-full min-w-[36rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Conjunto original: valores y probabilidades estipulados"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Tipo"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Probabilidad previa"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Valor para comprador (cr)"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Reserva del vendedor (cr)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"H"}</th><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"22"}</td><td className="px-3 py-2 text-left align-middle">{"18"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"L"}</th><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"8"}</td><td className="px-3 py-2 text-left align-middle">{"6"}</td></tr>
+</tbody>
+</table>
+</div>
+
+El **valor de reserva** es lo que vale para el vendedor conservar el archivo. A un precio $p$, vender añade $p-r_t$ para un vendedor de tipo $t$ cuyo valor de reserva es $r_t$. Acepta cuando ese excedente es no negativo; aceptar en un empate exacto es una regla explícita del modelo. Conservar el archivo es su alternativa fuera del trato, con excedente incremental cero.
+
+El excedente del comprador en un intercambio realizado es $v_t-p$, donde $v_t$ es su valoración. Rechazar deja cero antes de pagar ninguna tarifa. Si se pudiera identificar H sin coste, intercambiarlo crearía $22-18=4$ créditos conjuntos; L crearía $8-6=2$. El precio reparte esa ganancia: no la crea.
+
+Todos los valores usan una misma escala cardinal estipulada. Ambas partes son neutrales al riesgo, de modo que comparan esperanzas en esa escala. No hay otro comprador, reventa, responsabilidad adicional, préstamos, coste de entrada ni intercambios repetidos. Una cotización común compromete al comprador a pagar ese precio si el vendedor acepta. Más adelante introduciremos otra política, con inspección y una decisión tras su informe.
+
+<MatchConcepts client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"✓ Todas las parejas enlazadas"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"Elige ahora una definición"}
+  notLinkedHint={"Sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+  question={"Relaciona cada cuenta con lo que mide."}
+  pairs={[{"term":"Excedente del vendedor","definition":"Pago por encima del valor de conservar el archivo."},{"term":"Excedente del comprador","definition":"Valor para el comprador menos sus pagos y la tarifa real."},{"term":"Excedente conjunto","definition":"Ganancias combinadas tras cancelar las transferencias internas."}]}
+/>
+
+### Cuándo fijar los límites
+
+Escribe las alternativas y el orden de las decisiones antes de llamar atractivo a un trato. Un rendimiento de compra positivo no basta si hay otra política disponible que rinde más. Estas cuentas describen este modelo de un solo comprador; no identifican un precio competitivo ni un equilibrio de negociación.
+
+## Condiciona a quienes aceptan
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer: prueba a responder"}
+  question={"Un comprador usa la previa original para valorar un archivo después de que el vendedor acepte. ¿Qué puede faltar?"}
+  options={[{"text":"La tarifa de inspección ya ha cambiado la calidad."},{"text":"El precio puede haber seleccionado otra mezcla de tipos.","correct":true},{"text":"El vendedor debe haber falseado el tipo de archivo."},{"text":"Las probabilidades originales deben ser iguales."}]}
+  explanation={"La aceptación depende del precio frente al valor de reserva de cada tipo. Condiciona a ese suceso en lugar de conservar la previa automáticamente."}
+  pretest={true}
+/>
+
+Con una cotización de seis, H rechaza porque seis es inferior a dieciocho. L acepta a su valor de reserva. Por tanto, la aceptación tiene probabilidad un medio. Dada la aceptación, el vendedor es L con probabilidad uno; el valor condicionado para el comprador es ocho.
+
+Aquí hay **selección adversa (adverse selection)**: la cotización filtra tipos que el vendedor conoce de forma privada. Cambia la composición del conjunto que acepta sin cambiar ningún archivo. El valor condicionado y la probabilidad de intercambio tienen denominadores distintos. A seis, el comprador gana dos por intercambio realizado, pero solo uno por oportunidad potencial:
+
+$$P(\mathrm{accept})=\frac12,\qquad E[v\mid\mathrm{accept}]=8,\qquad U_B=\frac12(8-6)=1.$$
+
+<div role="region" tabIndex={0} aria-label={"Cotizaciones comunes originales: entrada hipotética y cuentas completas por oportunidad"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="common-table" className="w-full min-w-[64rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Cotizaciones comunes originales: entrada hipotética y cuentas completas por oportunidad"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Cotización (cr)"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Tipos que aceptan"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Probabilidad de intercambio"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Proporción H dada la aceptación"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Valor dada la aceptación (cr/intercambio)"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Comprador (cr/oportunidad)"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Vendedor (cr/oportunidad)"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Conjunto (cr/oportunidad)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"5"}</th><td className="px-3 py-2 text-left align-middle">{"Nadie"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"Sin definir"}</td><td className="px-3 py-2 text-left align-middle">{"Sin definir"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"6"}</th><td className="px-3 py-2 text-left align-middle">{"L"}</td><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"8"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"7"}</th><td className="px-3 py-2 text-left align-middle">{"L"}</td><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"8"}</td><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"8"}</th><td className="px-3 py-2 text-left align-middle">{"L"}</td><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"8"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"15"}</th><td className="px-3 py-2 text-left align-middle">{"L"}</td><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"8"}</td><td className="px-3 py-2 text-left align-middle">{"−7/2"}</td><td className="px-3 py-2 text-left align-middle">{"9/2"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"18"}</th><td className="px-3 py-2 text-left align-middle">{"H y L"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"1/2"}</td><td className="px-3 py-2 text-left align-middle">{"15"}</td><td className="px-3 py-2 text-left align-middle">{"−3"}</td><td className="px-3 py-2 text-left align-middle">{"6"}</td><td className="px-3 py-2 text-left align-middle">{"3"}</td></tr>
+</tbody>
+</table>
+</div>
+
+Las filas de quince y dieciocho muestran respuestas hipotéticas de los vendedores, no políticas que el comprador adoptaría voluntariamente si puede elegir seis. A quince solo participa L, de modo que usar la media sin filtrar, quince, ocultaría una pérdida. A dieciocho participan ambos, pero el valor medio quince es inferior al pago prometido.
+
+<RateComparison client:visible
+  locale={"es"}
+  title={"Cómo cambia la proporción de H al aceptar"}
+  scenarioLabel={"Cotización común"}
+  countsLabel={"Pesos de probabilidad estipulados, no recuentos observados"}
+  differenceLabel={"Proporción H previa menos proporción H entre aceptantes"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+  scenarios={[{"label":"A seis: política preferida del comprador","groups":[{"label":"H entre oportunidades potenciales","events":1,"total":2},{"label":"H entre aceptantes","events":0,"total":1}]},{"label":"A dieciocho: entrada hipotética, pérdida del comprador","groups":[{"label":"H entre oportunidades potenciales","events":1,"total":2},{"label":"H entre aceptantes","events":1,"total":2}]}]}
+/>
+
+Las barras usan pesos de probabilidad estipulados. El primer denominador son todas las oportunidades potenciales; el segundo, las oportunidades aceptadas. La fila sin participantes carece de conjunto condicionado y se omite del gráfico: la proporción condicionada de H queda **sin definir**, en lugar de valer cero, cuando nadie acepta.
+
+<FillBlank client:visible
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+  question={"Completa la cuenta de la cotización de seis."}
+  text={"El excedente del comprador es {{uno|dos|tres}} por oportunidad potencial. Si nadie acepta, la composición condicionada {{no está definida|es todo tipo bajo|conserva la previa}}."}
+  explanation={"A seis solo acepta L. Su ganancia de dos créditos se pondera por probabilidad un medio y da uno. Condicionar a un suceso de masa cero no proporciona la composición de un conjunto."}
+/>
+
+### Cuándo aceptar aporta información
+
+Recalcula el conjunto según las condiciones efectivas. Si ambos tipos aceptan, la aceptación puede dejar intactas sus proporciones. Si solo acepta uno, ignorar ese filtro puede llevar a valorar mal la oportunidad. Ninguna de las dos observaciones revela por sí sola el motivo de un vendedor real.
+
+## Encuentra la mejor cotización para el comprador
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer: prueba a responder"}
+  question={"¿Debe un comprador neutral al riesgo pagar todo su valor esperado siempre que un vendedor acepte?"}
+  options={[{"text":"Sí; de lo contrario, la previa es inconsistente."},{"text":"Sí; si no, el vendedor siempre prefiere no vender."},{"text":"No; un techo de valoración no elige por sí solo el precio.","correct":true},{"text":"No; las esperanzas condicionadas no informan los precios."}]}
+  explanation={"El comprador puede ganar pagando menos que su valoración condicionada. Un precio competitivo o negociado exige reglas adicionales, no solo una esperanza."}
+  pretest={true}
+/>
+
+La cotización común puede ser cualquier número real $p\ge0$. Aquí la llamamos viable si atrae al menos a un tipo y deja al comprador un excedente esperado no negativo. El comprador también puede no ofrecer nada y obtener cero. Esta definición comprueba la política indicada, no predice un equilibrio.
+
+Si $p<6$, nadie acepta. Si $6\le p<18$, solo acepta L, por lo que
+
+$$U_B(p)=\frac12(8-p).$$
+
+Es no negativo exactamente hasta ocho y disminuye al subir la cotización. Si $p\ge18$, aceptan ambos tipos y
+
+$$U_B(p)=\frac12(22-p)+\frac12(8-p)=15-p<0.$$
+
+Así, las cotizaciones comunes viables son exactamente $6\le p\le8$. El máximo del comprador es un crédito por oportunidad, a seis. A siete, comprador y vendedor obtienen un medio cada uno; la ganancia conjunta sigue siendo uno. Elegir siete para repartir la ganancia responde a otro objetivo, distinto de maximizar el excedente del comprador.
+
+El valor medio de un conjunto es el techo de un comprador neutral al riesgo al compararlo con excedente cero, no una obligación de pagar toda la media. La competencia o la negociación pueden añadir una regla de precios; este modelo estipula un comprador capaz de comprometer su cotización.
+
+Cambia solo la previa: H tiene probabilidad tres cuartos y L, un cuarto. Si ambos aceptan, el valor medio para el comprador pasa a ser
+
+$$\frac34\times22+\frac14\times8=18.5.$$
+
+Las cotizaciones desde dieciocho hasta dieciocho y medio conservan ambos tipos con excedente esperado no negativo para el comprador. Por tanto, la calidad oculta no obliga a expulsar a todos los tipos buenos en cualquier configuración. El contraejemplo no cambia los valores de reserva ni la información disponible para el comprador.
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Con el objetivo original de cotización común, ¿qué elección maximiza el excedente del comprador?"}
+  options={[{"text":"Cotizar siete y repartir la misma ganancia a medias."},{"text":"Cotizar ocho y usar todo el valor del tipo bajo."},{"text":"Cotizar dieciocho y conservar ambos tipos."},{"text":"Cotizar seis y obtener uno por oportunidad.","correct":true}]}
+  explanation={"Solo las cotizaciones desde 6 hasta 8 combinan entrada con excedente no negativo del comprador. En ese intervalo (8−p)/2 disminuye con p; seis rinde uno. Las demás no maximizan este objetivo del comprador."}
+/>
+
+### Cuándo importa la regla de precios
+
+Separa el cálculo de una esperanza de la regla que elige un pago. Indica si el precio es una cotización comprometida, el pago de una subasta, un resultado competitivo o una regla de actualización estipulada. Una media no es las cuatro cosas a la vez.
+
+## Audita una política de inspección
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer: prueba a responder"}
+  question={"Una inspección aumenta el excedente conjunto frente a no inspeccionar. ¿Basta para que el comprador la adopte?"}
+  options={[{"text":"Sí; un total positivo elimina toda alternativa privada."},{"text":"No; compara su propio rendimiento con su mejor alternativa.","correct":true},{"text":"Sí; la entrada del vendedor determina la ganancia del comprador."},{"text":"No; pagar por información siempre reduce el excedente conjunto."}]}
+  explanation={"El comprador puede perder frente a su cotización disponible aunque el total conjunto aumente. La adopción privada exige los pagos, la tarifa y la alternativa efectivos."}
+  pretest={true}
+/>
+
+Vuelve a la previa original, mitad de cada tipo. Ahora el comprador ofrece precios condicionados a una inspección perfecta y veraz: diecinueve para H y siete para L. El vendedor decide si participa antes de que el comprador pague la tarifa de inspección no negativa $k$. Ambos tipos esperan obtener un crédito por encima de su valor de reserva y participan. La inspección revela el tipo sin cambiar la calidad; tras el informe, el comprador puede comprar al precio condicionado prometido o rechazar.
+
+<ConsequenceTree client:visible
+  decision={{"label":"Ofrecer precios H diecinueve y L siete con inspección","note":"Política propuesta; aún no se ha pagado la tarifa.","children":[{"label":"Ambos tipos deciden entrar","note":"Cada vendedor espera un crédito por encima de su reserva.","children":[{"label":"El comprador paga la tarifa una vez","note":"Después llega el informe perfecto y veraz.","children":[{"label":"Se revela H","children":[{"label":"Comprar a diecinueve añade tres al comprador","valence":"neutral"},{"label":"Rechazar añade cero después de la tarifa","valence":"neutral"}],"valence":"neutral"},{"label":"Se revela L","children":[{"label":"Comprar a siete añade uno al comprador","valence":"neutral"},{"label":"Rechazar añade cero después de la tarifa","valence":"neutral"}],"valence":"neutral"}],"valence":"neutral"}],"valence":"neutral"}],"valence":"neutral"}}
+  title={"Cuándo se paga la tarifa"}
+  eyebrow={""}
+  instructions={"Abre las etapas para seguir entrada, pago, informe y continuación. Los nodos son etapas, no una valoración de bueno o malo."}
+  decisionLabel={"Política ofrecida"}
+  orderLabels={["Entrada","Pago","Informe","Continuación"]}
+  promptLabel={"Mostrar siguiente etapa"}
+  expandAllLabel={"Mostrar todas las etapas"}
+  collapseLabel={"Cerrar etapas"}
+  valenceLabels={{"good":"Etapa","bad":"Etapa","mixed":"Etapa","neutral":"Etapa"}}
+  caption={"Las ramas son informes excluyentes del mismo archivo. La tarifa se paga una vez, no otra vez por cada rama que se dibuja."}
+/>
+
+Esta inspección consume recursos que cuestan $k$ por cada archivo que entra. La financia el comprador, el inspector la presta a coste y no obtiene ninguna renta adicional. Cuenta ese recurso real una sola vez en la cuenta conjunta. Los pagos entre comprador y vendedor son transferencias internas y se cancelan al sumar sus excedentes.
+
+Antes de la tarifa de inspección, el comprador obtiene $22-19=3$ en H y $8-7=1$ en L: media dos. Tras cualquiera de los informes, comprar añade una cantidad positiva frente a rechazar después de haber pagado la misma tarifa. Esa continuación respalda la cuenta de entrada; la inspección por sí sola no es una razón automática para intercambiar.
+
+<ExpectedValueCalculator client:visible
+  locale={"es"}
+  title={"Excedente del comprador antes de la tarifa"}
+  eyebrow={""}
+  instructions={"Modifica la previa; para una esperanza, los pesos deben sumar cien por cien. Los precios condicionados siguen fijos."}
+  scenario={{"prompt":"Ambos tipos entran. Se muestra valor menos precio del vendedor, todavía sin tarifa de inspección.","outcomes":[{"label":"H","payoff":3,"prob":50,"note":"Valor veintidós menos precio diecinueve."},{"label":"L","payoff":1,"prob":50,"note":"Valor ocho menos precio siete."}],"unit":" cr","unitPosition":"suffix"}}
+  probabilityLabel={"Probabilidad previa del tipo"}
+  payoffLabel={"Excedente antes de tarifa"}
+  contributionLabel={"Contribución ponderada"}
+  totalProbLabel={"Suma de pesos de entrada"}
+  normalizeHint={"Los pesos suman {sum}. Hasta formar una distribución completa, el resultado es una suma ponderada, no una esperanza."}
+  evLabel={"Excedente ponderado antes de tarifa"}
+  evHint={"esperanza solo con una distribución completa"}
+  costLabel={"Cantidad de comparación"}
+  netLabel={"Diferencia"}
+  worthVerdict={"Diferencia positiva."}
+  notWorthVerdict={"Diferencia negativa."}
+  breakEvenVerdict={"Igualdad aproximada."}
+  resetLabel={"Restaurar la previa original"}
+  caption={"cr son los créditos estipulados. Las barras se reescalan según las contribuciones actuales. Cambiar la previa exige recalcular también la alternativa sin inspección; restablecer recupera mitad de cada tipo."}
+/>
+
+Los deslizadores modifican las probabilidades **previas** de los dos tipos que entran, no una posterior inferida de la aceptación. La tabla de tarifas siguiente conserva la previa original, mitad de cada tipo. Si cambias los deslizadores, recalcula también la mejor cotización sin inspección; su referencia de un crédito no sirve para cualquier previa nueva.
+
+Con los precios y la previa originales, las cuentas esperadas completas por oportunidad potencial son
+
+$$U_B=2-k,\qquad U_S=1,\qquad U_B+U_S=3-k.$$
+
+<div role="region" tabIndex={0} aria-label={"Precios de inspección originales: créditos esperados por oportunidad potencial"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="fee-table" className="w-full min-w-[36rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Precios de inspección originales: créditos esperados por oportunidad potencial"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Tarifa k (cr/archivo que entra)"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Comprador"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Vendedor"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Conjunto"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Comprador menos mejor cotización común"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"0,5"}</th><td className="px-3 py-2 text-left align-middle">{"1,5"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"2,5"}</td><td className="px-3 py-2 text-left align-middle">{"0,5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"1"}</th><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"2"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"1,5"}</th><td className="px-3 py-2 text-left align-middle">{"0,5"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"1,5"}</td><td className="px-3 py-2 text-left align-middle">{"−0,5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"2"}</th><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"−1"}</td></tr>
+</tbody>
+</table>
+</div>
+
+Con una tarifa de uno y medio, el excedente conjunto pasa de uno con la mejor cotización común a uno y medio con inspección. Sin embargo, el comprador pasa de uno a un medio. La mejora agregada no hace que prefiera esta política. Con los precios diecinueve/siete especificados, prefiere débilmente inspeccionar exactamente cuando $2-k\ge1$, es decir, $k\le1$.
+
+<FirstPrinciplesBuilder client:visible
+  locale={"es"}
+  title={"Dos desembolsos de la rama H"}
+  eyebrow={""}
+  analogyValue={22}
+  analogyLabel={"Valor para el comprador en H"}
+  analogyNote={"Referencia de valor de esta rama, no un precio de mercado."}
+  parts={[{"label":"Pago al vendedor","value":19,"note":"Una transferencia que se cancela en el total conjunto."},{"label":"Tarifa de inspección","value":1.5,"note":"Un recurso real consumido una sola vez."}]}
+  rebuiltLabel={"Desembolsos seleccionados"}
+  instructions={"Añade los dos desembolsos para completar la cuenta de esta rama. El subtotal con una sola parte no es la cuenta completa."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Añadir ambos desembolsos"}
+  resetLabel={"Quitar desembolsos"}
+  verdictTemplate={"Los desembolsos de H suman {total}; el valor de veintidós deja uno y medio al comprador. Es una rama, no el promedio de la política."}
+  caption={"El pago al vendedor importa para el comprador; la suma conjunta cancela esa transferencia y conserva la tarifa real."}
+/>
+
+Ese umbral de tarifa depende del reparto a través de los precios. Conserva la tarifa de uno y medio y cambia los precios condicionados a dieciocho y medio/seis y medio: cada vendedor se queda con un medio. El excedente del comprador pasa a uno; el conjunto sigue siendo uno y medio. Ambos vendedores prefieren estrictamente participar, mientras el comprador empata con su mejor cotización común:
+
+$$U_B=\frac12(22-18.5-1.5)+\frac12(8-6.5-1.5)=1.$$
+
+Cambiar los precios redistribuyó el excedente; no redujo los recursos de inspección.
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Con tarifa de uno y medio y los precios de inspección originales, ¿qué conclusiones se deducen? Selecciona todas las correctas."}
+  options={[{"text":"El conjunto supera al de la mejor cotización común.","correct":true},{"text":"El comprador prefiere inspeccionar a su mejor cotización."},{"text":"Cambiar precios puede redistribuir la misma ganancia conjunta.","correct":true},{"text":"Hay que restar la tarifa dos veces a cada participante."}]}
+  explanation={"Con k=1,5, el conjunto es 1,5 frente a 1, pero el comprador obtiene 0,5 frente a 1. Los precios son transferencias; el recurso de inspección entra una sola vez en el total conjunto."}
+  allowMultiple={true}
+/>
+
+### Cuándo comparar cuentas privadas y conjuntas
+
+Usa la cuenta conjunta para ver los recursos creados o consumidos. Usa la cuenta de cada participante para comprobar si quiere la política propuesta, dadas sus alternativas. El umbral de tarifa de un crédito pertenece a una tabla de precios y una previa; no es un valor universal de la información ni un teorema sobre el mejor mecanismo.
+
+## Decide después de pagar la tarifa
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer: prueba a responder"}
+  question={"La tarifa ya está pagada y no puede cambiar. ¿Qué decide si comprar tras el informe?"}
+  options={[{"text":"Qué acción mejora la cuenta a partir de ahora.","correct":true},{"text":"Qué acción hace desaparecer la tarifa anterior."},{"text":"Si la política previa era óptima entre todas."},{"text":"Si la cuenta completa del pasado es positiva."}]}
+  explanation={"Compara continuaciones que comparten la misma tarifa hundida. Consérvala en la cuenta histórica y en la evaluación separada de la política previa."}
+  pretest={true}
+/>
+
+Supón que la política original ya ha pagado la tarifa de uno y medio y el informe es L. El precio de compra prometido es siete y el valor para el comprador es ocho. La tarifa es ahora la misma en las dos continuaciones:
+
+<div role="region" tabIndex={0} aria-label={"L conocido tras la tarifa: cuentas del comprador en créditos"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="sunk-table" className="w-full min-w-[36rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"L conocido tras la tarifa: cuentas del comprador en créditos"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Continuación"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Nuevo excedente de compra"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Tarifa ya pagada"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Total desde inicio de rama"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Comprar"}</th><td className="px-3 py-2 text-left align-middle">{"1"}</td><td className="px-3 py-2 text-left align-middle">{"−1,5"}</td><td className="px-3 py-2 text-left align-middle">{"−0,5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Rechazar"}</th><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"−1,5"}</td><td className="px-3 py-2 text-left align-middle">{"−1,5"}</td></tr>
+</tbody>
+</table>
+</div>
+
+Comprar mejora la cuenta del comprador en un crédito frente a rechazar. Aun así, deja una pérdida total de un medio desde el inicio de esta rama realizada. No contradice la comparación anterior: antes de pagar, esta política tenía un excedente esperado de un medio, inferior al crédito de la política de cotización común disponible.
+
+La tarifa pertenece a la elección previa de política y a una cuenta histórica completa. Solo se cancela al comparar las dos continuaciones que comparten ese pago ya realizado. **Hundido** significa que la elección presente no lo cambia, no que sea imaginario o inocuo.
+
+<Categorize client:visible
+  instructions={"Asigna cada elemento a un grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todos clasificados"}
+  partialResultWord={"bien"}
+  question={"Clasifica las afirmaciones sobre el tipo bajo revelado y la tarifa ya pagada."}
+  buckets={["Respaldada por las cuentas dadas","No respaldada por esas cuentas"]}
+  items={[{"text":"Comprar mejora la continuación en un crédito.","bucket":"Respaldada por las cuentas dadas"},{"text":"Comprar deja un total negativo desde el inicio de la rama.","bucket":"Respaldada por las cuentas dadas"},{"text":"Una continuación mejor demuestra que la política previa era la mejor.","bucket":"No respaldada por esas cuentas"},{"text":"Una tarifa hundida desaparece de toda cuenta histórica completa.","bucket":"No respaldada por esas cuentas"}]}
+  explanation={"Comprar suma −0,5; rechazar suma −1,5. La diferencia es+1. Mejora la continuación sin borrar la tarifa ni validar la política anterior."}
+/>
+
+### Cuándo cambia el momento de comparación
+
+Enumera qué cambia cada acción a partir de ahora. Si la pregunta es si conviene repetir la política, evalúala de nuevo en su conjunto. Una continuación favorable no demuestra retrospectivamente que la política inicial fuese la mejor.
+
+## Prueba otro conjunto de archivos
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer: prueba a responder"}
+  question={"Antes de trasladar la inspección a otro conjunto, ¿qué hay que recalcular?"}
+  options={[{"text":"Solo los nombres de los dos tipos."},{"text":"Solo el precio tras un informe de tipo alto."},{"text":"La previa, la entrada y la alternativa sin inspección.","correct":true},{"text":"La referencia anterior, fija para cualquier conjunto."}]}
+  explanation={"Otra previa y otros valores de reserva cambian quién acepta y la mejor cotización común. La referencia anterior de un crédito no se copia automáticamente."}
+  pretest={true}
+/>
+
+Usa una nueva oportunidad construida y conserva los demás límites y reglas de empate. H tiene probabilidad un cuarto; L, tres cuartos. La tarifa de inspección es uno. Examina los nuevos valores y reservas antes de abrir la solución.
+
+<div role="region" tabIndex={0} aria-label={"Transferencia independiente: valores y probabilidades estipulados"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="transfer-types" className="w-full min-w-[36rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Transferencia independiente: valores y probabilidades estipulados"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Tipo"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Probabilidad previa"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Valor para comprador (cr)"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Reserva del vendedor (cr)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"H"}</th><td className="px-3 py-2 text-left align-middle">{"1/4"}</td><td className="px-3 py-2 text-left align-middle">{"20"}</td><td className="px-3 py-2 text-left align-middle">{"14"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"L"}</th><td className="px-3 py-2 text-left align-middle">{"3/4"}</td><td className="px-3 py-2 text-left align-middle">{"10"}</td><td className="px-3 py-2 text-left align-middle">{"4"}</td></tr>
+</tbody>
+</table>
+</div>
+
+Compara tres políticas: la mejor cotización común sin inspección; inspección a precios diecisiete/siete; e inspección a precios catorce y cuarto/cuatro y cuarto. Trabaja por oportunidad potencial y cuenta la tarifa real una sola vez. Ambos tipos participan con cada tabla de precios de inspección.
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Calcula el nuevo conjunto antes de abrir la solución. ¿Qué comparación del excedente del comprador es correcta?"}
+  options={[{"text":"Cotización común: dos; inspección original: cuatro y medio."},{"text":"Cotización común: cuatro y medio; inspección original: dos.","correct":true},{"text":"Cotización común: cinco; inspección original: tres."},{"text":"Cotización común: tres; inspección original: cinco."}]}
+  explanation={"A precio común 4 solo entra L, con probabilidad 3/4: (3/4)×(10−4)=4,5. Con precios de inspección 17/7, cada tipo deja 3 antes de tarifa 1; el comprador obtiene 2."}
+/>
+
+<details>
+<summary>Comprueba la transferencia independiente</summary>
+
+Con una cotización común inferior a cuatro, nadie entra. Desde cuatro hasta antes de catorce solo entra L, por lo que el excedente del comprador es $\frac34(10-p)$, no negativo exactamente cuando $p\le10$. Desde catorce entran ambos, pero su valor medio es $\frac14\times20+\frac34\times10=12.5$, inferior a esa cotización. Por tanto, la mejor cotización común del comprador es cuatro, que rinde $\frac34(10-4)=4.5$; el excedente del vendedor es cero.
+
+Con precios de inspección diecisiete/siete, el comprador obtiene tres antes de la tarifa en cualquiera de los tipos y dos después. Cada vendedor obtiene tres, de modo que el excedente conjunto es cinco. El comprador prefiere su alternativa sin inspección, pese a que el total es mayor.
+
+A catorce y cuarto/cuatro y cuarto, el excedente del comprador después de la tarifa es cuatro y tres cuartos en cualquier tipo. Cada vendedor obtiene un cuarto:
+
+$$20-14.25-1=4.75,\qquad10-4.25-1=4.75.$$
+
+El conjunto sigue siendo cinco. Ahora el comprador supera su mejor cotización común y ambos vendedores prefieren estrictamente participar.
+
+<div role="region" tabIndex={0} aria-label={"Transferencia independiente: créditos esperados por oportunidad potencial"} className="not-prose my-6 max-w-full overflow-x-auto rounded-card border border-ink-300 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700">
+<table data-audit-table="transfer-results" className="w-full min-w-[36rem] border-collapse" style={{display:'table',overflow:'visible',margin:0}}>
+<caption className="px-3 py-3 text-left text-sm text-ink-700">{"Transferencia independiente: créditos esperados por oportunidad potencial"}</caption>
+<thead className="bg-surface-sunken"><tr><th scope="col" className="px-3 py-2 text-left align-middle">{"Política"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Comprador"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Vendedor"}</th><th scope="col" className="px-3 py-2 text-left align-middle">{"Conjunto"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Mejor cotización común a cuatro"}</th><td className="px-3 py-2 text-left align-middle">{"4,5"}</td><td className="px-3 py-2 text-left align-middle">{"0"}</td><td className="px-3 py-2 text-left align-middle">{"4,5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Inspección a diecisiete/siete"}</th><td className="px-3 py-2 text-left align-middle">{"2"}</td><td className="px-3 py-2 text-left align-middle">{"3"}</td><td className="px-3 py-2 text-left align-middle">{"5"}</td></tr>
+<tr><th scope="row" className="px-3 py-2 text-left align-middle">{"Inspección a catorce y cuarto/cuatro y cuarto"}</th><td className="px-3 py-2 text-left align-middle">{"4,75"}</td><td className="px-3 py-2 text-left align-middle">{"0,25"}</td><td className="px-3 py-2 text-left align-middle">{"5"}</td></tr>
+</tbody>
+</table>
+</div>
+
+Las dos tablas de precios de inspección consumen el mismo recurso y producen el mismo excedente conjunto. Las distintas transferencias cambian los incentivos privados para participar. Esto no establece un contrato óptimo entre todos los mecanismos posibles ni predice el precio de un mercado real.
+
+</details>
+
+<FillBlank client:visible
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+  question={"Completa la interpretación de la transferencia."}
+  text={"La inspección con precios revisados deja al comprador {{cuatro y tres cuartos|cuatro y un cuarto|dos y tres cuartos}}. Su mayor parte procede de {{redistribución|mayor calidad del archivo|una inspección más barata}}."}
+  explanation={"Ambos tipos dejan 4,75 después de tarifa 1; cada vendedor obtiene 0,25. El conjunto sigue en 5 porque los precios transfieren excedente sin cambiar valoraciones, reservas o recursos de inspección."}
+/>
+
+### Cuándo trasladar esta auditoría
+
+En otro contexto, vuelve a definir la característica oculta, la previa, las alternativas, la tecnología de información, el orden y las acciones factibles. Los errores de inspección, los informes estratégicos, las preferencias ante el riesgo, las ofertas rivales, los costes de entrada y los intercambios repetidos pueden cambiar el cálculo. Una propuesta real necesita pruebas sobre esos datos; las ganas de intercambiar no los proporcionan.
+
+## Reconstruye la auditoría de la política
+
+<MCQ client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer: prueba a responder"}
+  question={"Recuerda la primera auditoría: si nadie acepta, ¿qué se puede decir de la proporción condicionada del tipo alto?"}
+  options={[{"text":"Conserva la previa original del tipo alto."},{"text":"Vale cero porque no acepta ningún tipo alto."},{"text":"Vale uno porque no acepta ningún tipo bajo."},{"text":"No está definida: el conjunto aceptado está vacío.","correct":true}]}
+  explanation={"El denominador condicionado es la probabilidad de aceptación. Un conjunto aceptado vacío tiene masa cero: no le asignes cero ni conserves la previa como si hubiera composición."}
+  pretest={true}
+/>
+
+<MindMap client:visible
+  eyebrow={""}
+  outlineLabel={"Esquema textual"}
+  title={"La auditoría de una política"}
+  root={{"label":"Auditar cotización e inspección","children":[{"label":"Fijar la oportunidad","children":[{"label":"Tipo, previa, reservas y alternativas"},{"label":"Quién sabe qué y cuándo se paga una tarifa"}]},{"label":"Filtrar la participación","children":[{"label":"Condicionar a aceptación y nombrar denominadores"},{"label":"Sin aceptantes no hay composición definida"}]},{"label":"Comparar políticas","children":[{"label":"Mejor cotización común frente a inspección para cada parte"},{"label":"Cancelar transferencias y contar recursos una vez"}]},{"label":"Respetar el momento","children":[{"label":"Adopción previa distinta de continuación tras la tarifa"},{"label":"Transferir a otros datos antes de generalizar"}]}]}}
+/>
+
+<Quiz client:visible
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Cuestionario completado"}
+  perfectMessage={"Has acertado todas las preguntas de este cuestionario."}
+  goodMessage={"Revisa las explicaciones de las respuestas que has fallado."}
+  keepPracticingMessage={"Revisa los cálculos y sus explicaciones antes de volver a practicar."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Atrás"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  title={"Comprueba la auditoría"}
+  questions={[{"question":"Con la regla de empate declarada, ¿qué hace el tipo bajo a su valor de reserva?","options":[{"text":"Acepta con excedente incremental cero.","correct":true},{"text":"Rechaza porque la valoración del comprador es mayor."},{"text":"Acepta solo si la probabilidad previa es uno."},{"text":"Cambia de tipo para subir su valor de reserva."}],"explanation":"La participación incluye la igualdad por supuesto. Esta entrada débil es una regla del modelo, no una predicción de que todo vendedor real indiferente intercambie."},{"question":"A cotización común de siete en el conjunto original, ¿cuál es el excedente del comprador por oportunidad potencial?","options":[{"text":"Uno, la ganancia de su mejor cotización."},{"text":"Dos, sin ponderar la probabilidad de aceptación."},{"text":"Un medio, ponderando la ganancia de un crédito.","correct":true},{"text":"Siete, tomando el pago como ganancia del comprador."}],"explanation":"Solo entra L, con probabilidad 1/2. El comprador obtiene 8−7=1 en ese trato; el excedente esperado es 0,5 por oportunidad."},{"question":"La previa del tipo alto sube a tres cuartos. ¿Qué afirmación universal refuta el contraejemplo?","options":[{"text":"Un comprador puede tener excedente esperado no negativo."},{"text":"La calidad oculta debe expulsar a todos los tipos buenos.","correct":true},{"text":"La reserva del vendedor influye en su entrada."},{"text":"Una esperanza depende de la mezcla previa."}],"explanation":"Con esa previa, el valor del conjunto con ambos tipos es 18,5. Las cotizaciones 18–18,5 conservan ambos sin verificación; la calidad oculta por sí sola no implica colapso universal."},{"question":"Con los precios de inspección originales, ¿qué tarifa hace que el comprador empate con su mejor cotización común?","options":[{"text":"Un medio."},{"text":"Uno y medio."},{"text":"Dos."},{"text":"Uno.","correct":true}],"explanation":"El excedente 2−k debe igualar el excedente 1 de la mejor cotización común. Por tanto,k=1; el umbral depende de esta previa, estos precios y esta alternativa."},{"question":"¿Qué afirmaciones conservan la cuenta completa de inspección? Selecciona todas las correctas.","options":[{"text":"Cancelar las transferencias al sumar el excedente conjunto.","correct":true},{"text":"Contar una tarifa real por cada archivo que entra.","correct":true},{"text":"Restar otra vez la misma tarifa como pérdida del vendedor."},{"text":"Tomar cualquier total conjunto positivo como adopción privada."}],"explanation":"Las transferencias internas se cancelan, mientras el recurso de inspección permanece una vez. La adopción privada compara a cada participante con su alternativa disponible.","allowMultiple":true},{"question":"Tras una tarifa hundida y un informe de tipo bajo, comprar mejora la cuenta. ¿Qué sigue sin demostrarse?","options":[{"text":"Que la tarifa ya pagada fuese real."},{"text":"Que las dos continuaciones difieran."},{"text":"Que la política previa fuese la mejor.","correct":true},{"text":"Que se pueda calcular una pérdida histórica completa."}],"explanation":"La comparación de continuaciones condiciona a una tarifa ya pagada y a un informe. La comparación previa incluye la tarifa y las demás políticas disponibles."}]}
+/>
+
+### Fuentes y alcance
+
+[CORE Econ, unidad 12.6](https://books.core-econ.org/the-economy-v1/book/text/12.html) explica los atributos ocultos, la selección por las condiciones ofrecidas y el caso del coche usado. Su pregunta 12.6 también distingue el techo de valoración de un comprador del precio bajo competencia. [OpenStax, sección 16.1](https://openstax.org/books/principles-microeconomics-3e/pages/16-1-the-problem-of-imperfect-information-and-asymmetric-information) introduce la información desigual y los mecanismos que pueden facilitar el intercambio. Ninguna fuente aporta los valores del archivo ni demuestra que cualquier inspección merezca la pena: todas las políticas numéricas de aquí son construidas y se comprueban bajo los supuestos declarados.
+
+Continúa con el [examen final](/es/adverse-selection-and-the-lemons-problem/final-exam). Sus respuestas se bloquean al enviarlas; los cálculos de este taller añaden una auditoría de políticas a los ejemplos anteriores del curso.
