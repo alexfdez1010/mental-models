@@ -1,0 +1,354 @@
+---
+title: "Audit a Moving Benchmark"
+description: "Audit absolute progress, chosen gaps and rival response, then compare an upgrade with maintaining over the same horizon and explicit costs."
+topic: "en/red-queen-effect"
+order: 6
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, Callout, FillBlank, MatchConcepts, Categorize, MindMap, BenchmarkTrace, ExpectedValueCalculator, FirstPrinciplesBuilder, ConsequenceTree } from '@/components/react';
+
+A team brings a faster benchmark to a review meeting. Someone declares victory. Someone else notices a rival got faster too and declares the whole project wasted. Neither conclusion follows yet. The stopwatch has done its job; now the meeting needs to do its own.
+
+You will audit one invented service, separate the measurements from the explanation, and choose between an upgrade and active maintenance under stated assumptions. **Every organization, measurement, score, credit, cost and probability in this workshop is constructed for teaching.** None is evidence about a real market. The method is the transferable part.
+
+<MCQ
+  client:visible
+  question={"Both services complete the same job faster at each review. Which conclusion is already justified?"}
+  options={[{"text": "Each service improved its own measured time", "correct": true}, {"text": "The upgrade paid for itself despite imitation"}, {"text": "Each team changed because the other team did"}, {"text": "The slower service must now lose its customers"}]}
+  explanation={"A paired trace establishes the recorded changes, given comparable measurement. Cost, causal response and customer outcomes require additional information."}
+  pretest={true}
+  className="not-prose"
+/>
+
+## Choose what the gap measures
+
+A **benchmark** is a specified test used as a reference. Here both services perform the same standardized job, on the same test equipment, with unchanged quality requirements and the same measurement procedure at each checkpoint. Time is in **milliseconds per job**; lower is better. Treat the entries as exact inputs to this exercise, not estimates of noisy real-world means.
+
+| Checkpoint | Service A | Service B | Signed gap A − B | A's rank |
+|---|---:|---:|---:|---|
+| Initial | 1000 | 900 | 100 | Slower |
+| First recheck | 800 | 700 | 100 | Slower |
+| Second recheck | 650 | 600 | 50 | Slower |
+
+**Absolute improvement** compares a service with its own past: A reduces its time by 1000 − 800 = 200, then 800 − 650 = 150, for a total reduction of **350 milliseconds per job**. B reduces it by 200, then 100, for **300 milliseconds per job** in total.
+
+A **signed additive gap** subtracts the two times at a checkpoint: A − B. Positive means A takes longer; zero means a tie. The gap stays at 100 initially, then narrows to 50. The **rank**, just the ordering, never changes: A is slower in all three rows. A smaller deficit can matter even before a rank changes.
+
+<BenchmarkTrace
+  client:visible
+  observations={[{"label": "Initial", "a": 1000, "b": 900}, {"label": "First recheck", "a": 800, "b": 700}, {"label": "Second recheck", "a": 650, "b": 600}]}
+  aLabel={"Service A"}
+  bLabel={"Service B"}
+  unit={"ms/job"}
+  title={"Follow the paired measurements"}
+  instructions={"Advance one checkpoint at a time. Shorter bars mean less time; the scale stays fixed."}
+  previousLabel={"Previous checkpoint"}
+  nextLabel={"Next checkpoint"}
+  checkpointLabel={"Checkpoint"}
+  gapLabel={"Signed time gap A minus B"}
+  reductionLabel={"Time reduction since the initial checkpoint"}
+  caption={"These are supplied observations, with no fitted trend or claim about why either service changed."}
+/>
+
+A ratio asks a different question: **how many times B's time does A take?** Divide A by B. Initially 1000/900 = 10/9 ≈ 1.111; at the first recheck 800/700 = 8/7 ≈ 1.143; at the second 650/600 = 13/12 ≈ 1.083. Lower is better on this ratio too. From the initial test to the first recheck, the additive gap is unchanged while the ratio gets worse. Neither calculation is broken: one measures extra milliseconds, the other a multiple of B's time.
+
+### When to use this comparison
+
+Choose the measure that fits the decision before evaluating the result: an extra-time requirement may use the additive gap; a proportional slowdown requirement may use the ratio; a winner-only contest may use rank. Keep all relevant measures visible. A time table alone does not establish price, reliability, customer value or survival. A stopwatch is a measuring tool with a very modest job description.
+
+<MCQ
+  client:visible
+  question={"At the first recheck, which description respects all the displayed measures?"}
+  options={[{"text": "Both improved; the additive gap held, the ratio worsened for A, and rank stayed fixed", "correct": true}, {"text": "Both improved, so A necessarily rose in rank"}, {"text": "An unchanged additive gap forces an unchanged ratio"}, {"text": "An unchanged rank means neither service improved"}]}
+  explanation={"Subtract and divide separately. A and B each reduced time by two hundred milliseconds per job, but equal reductions do not preserve their ratio."}
+  className="not-prose"
+/>
+
+## Ask whether the other side actually responded
+
+Two rising capabilities can have several histories. Perhaps B copied A. Perhaps both adopted the same independently available tool. Perhaps both had projects planned before either release. The observed rows do not distinguish these explanations.
+
+In biology, **coevolution** requires reciprocal evolutionary response, not merely simultaneous change or a convenient match between traits. Janzen's [definition and cautions](https://doi.org/10.2307/2408229) make that distinction explicit. The [Dawkins–Krebs abstract](https://doi.org/10.1098/rspb.1979.0081) describes how reciprocal counter-adaptation *may* produce escalation and lists several ways a race can end. A business team deliberately changing software is an analogy to that feedback structure; it is not a genetic process established by those papers.
+
+Build a response audit before calling the service trace a race:
+
+| Evidence to collect | What it can help distinguish | Remaining limit |
+|---|---|---|
+| Plans dated before either release | Already planned work versus a response | A plan can change; inspect execution too |
+| B's exposure to A's release and subsequent choices | A plausible route from A's move to B's change | Timing alone does not exclude common causes |
+| Comparable workstreams with different exposure, tracked over a declared window | Shared improvements versus exposure-linked changes | Non-random exposure can select different teams |
+| A's later choices after B's move | A return response rather than only A influencing B | One observed direction does not establish reciprocity |
+
+**Worked audit.** Suppose both teams' dated plans specified the same new library before either release, and B did not see A's release before implementing it. That weakens the claim that *this* change by B was caused by A's release; it remains consistent with common technology. If B instead records an unplanned switch after seeing A, the copying explanation gains support, but an unmeasured common pressure could still matter.
+
+For a bounded test, declare the feature, exposure, quality measure and review window in advance. Where feasible, vary exposure randomly across comparable internal teams, avoid teams sharing the exposure across assignments, and measure every assigned team on the same schedule. That can test an exposure effect in the pilot under those assumptions; it does not make an external rival random, establish both directions, or guarantee later behavior. If random variation is unavailable, state the observational limitations rather than awarding the timeline a causal badge.
+
+### When the evidence is thin
+
+Use a range of response assumptions for planning and collect information that could change the choice. No response within a short window is not proof of no later response. Conversely, a possible response is not a certainty that every rival will match every gain forever.
+
+<Categorize
+  client:visible
+  question={"Separate a measured statement from an explanation or consequence."}
+  buckets={["Describes the record", "Needs more evidence"]}
+  items={[{"text": "A completed the final test in less time than the initial test", "bucket": "Describes the record"}, {"text": "B changed because A released first", "bucket": "Needs more evidence"}, {"text": "A remained slower in every recorded test", "bucket": "Describes the record"}, {"text": "Equal time gaps imply equal customer retention", "bucket": "Needs more evidence"}]}
+  explanation={"The recorded times support changes and ordering within the specified test. Causes and customer outcomes need their own evidence."}
+  className="not-prose"
+/>
+
+## Account for what imitation removes and what remains
+
+We now make a **separate invented planning model**. Its numbers do not come from converting milliseconds into value. A performance index is just a stipulated higher-is-better score. **Utility credits** put the benefits and costs on one common comparison scale; they are not currency or measured customer benefit. We assume credits add, and our decision rule prefers the larger probability-weighted net total. A person with a hard loss limit or a different attitude to uncertainty may need a different rule.
+
+Two feasible actions are available over **one period**. **Maintain** keeps the service operating at index 80; it is active maintenance, not shutting down for free. **Upgrade** raises A to 100 and pays an additional cost of 14 credits once. Ordinary operating costs are already treated consistently in all listed values.
+
+| Rule | Credits |
+|---|---:|
+| Functional value at A's index 80 | 8 |
+| Functional value at A's index 100 | 16 |
+| Positional premium if A is ahead of B | 14 |
+| Positional premium if tied | 4 |
+| Positional premium if behind | 0 |
+| Extra upgrade cost, paid once | 14 |
+
+The **functional value** depends here on A's capability; the **positional premium** depends on A's position against B. These are declared rules for this case. They are not a fixed prize pool, and we have not specified B's utility. Nothing here establishes a zero-sum game or a game-theoretic equilibrium, a combination of choices where neither party wants to change its own choice while the other holds theirs fixed.
+
+| A's action | B's response within the period | Functional value | Positional premium | Extra cost | A's net credits |
+|---|---|---:|---:|---:|---:|
+| Maintain at 80 | B remains at 90 | 8 | 0 | 0 | 8 |
+| Upgrade to 100 | B remains at 90 | 16 | 14 | 14 | 16 |
+| Upgrade to 100 | B matches at 100 | 16 | 4 | 14 | 6 |
+
+Reproduce each row: 8 + 0 − 0 = **8**; 16 + 14 − 14 = **16**; 16 + 4 − 14 = **6**. Matching removes ten credits of positional premium, not the eight-credit functional improvement from 8 to 16. Nevertheless, the upgrade's extra cost can make its *net* value worse than maintaining: 6 is below 8.
+
+<ConsequenceTree
+  client:visible
+  title={"Two possible responses after upgrading"}
+  eyebrow={"Conditional branches"}
+  instructions={"Open the decision to inspect the two mutually exclusive responses. Their probabilities are specified in the next section, not by the branch layout."}
+  decisionLabel={"Action"}
+  orderLabels={["Response", "Net result"]}
+  promptLabel={"Show branches"}
+  expandAllLabel={"Show all branches"}
+  collapseLabel={"Collapse branches"}
+  valenceLabels={{"neutral": "A stipulated possibility"}}
+  decision={{"label": "Upgrade A to index 100; pay the extra cost once", "children": [{"label": "B stays at 90", "note": "Functional 16 + positional 14 − cost 14 = net 16"}, {"label": "B matches at 100", "note": "Functional 16 + positional 4 − cost 14 = net 6"}]}}
+  caption={"Both branches retain the functional gain. The positional premium differs."}
+/>
+
+### When to use this account
+
+Break a mixed benefit into the parts your rival can erode and the parts that remain. Do not label an entire product either “absolute” or “positional” and throw away the other column. Also compare a concrete fallback: choosing not to buy this upgrade is not the same action as abandoning the service.
+
+<MCQ
+  client:visible
+  question={"If B matches the upgrade, which account is correct?"}
+  options={[{"text": "The functional gain remains, but net upgrade value is below active maintenance in this branch", "correct": true}, {"text": "Imitation deletes every benefit the upgrade ever produced"}, {"text": "A functional improvement guarantees the upgrade beats maintenance after cost"}, {"text": "Maintaining means the service immediately ceases to operate"}]}
+  explanation={"The matched branch retains functional value of sixteen, yet its net after the additional cost is six, compared with eight for Maintain."}
+  className="not-prose"
+/>
+
+## Weight the responses before choosing
+
+A **probability** is a weight between zero and one for a specified outcome. Let **q** be the assumed probability that B matches **within the period, conditional on A choosing Upgrade**. The other branch has probability 1 − q. These two outcomes cover every possibility *in this model*. The three earlier time measurements do not estimate q. Under Maintain we separately stipulate the listed net value of 8; we are not applying Upgrade's response probability to a different action.
+
+The **expected value** is a probability-weighted average. At q = 0.30, imagine the model spread across 100 equivalent hypothetical cases: 70 no-match outcomes at 16 and 30 match outcomes at 6. Divide their total by 100:
+
+$$E[U]=0.70(16)+0.30(6)=11.2+1.8=13.$$
+
+This is a calculation device, not a new sample or a guarantee that any 100 real cases would have those frequencies. In one case the upgrade realizes **16 or 6**, not 13. Maintaining gives 8 by assumption, so the expected advantage of upgrading is **13 − 8 = 5 credits**.
+
+For any allowed q:
+
+$$E[U]=(1-q)16+q6=16-10q,$$
+$$\Delta=E[U]-E[M]=(16-10q)-8=8-10q.$$
+
+Here Δ means upgrade minus maintenance on the same scale and horizon. Solve Δ = 0: 8 = 10q, hence **q = 0.80**. Below that threshold Upgrade has higher expected value; above it Maintain does. At equality this rule is indifferent; no preference between ties has been stipulated.
+
+| Assumed q under Upgrade | Expected upgrade | Maintain | Upgrade minus Maintain |
+|---|---:|---:|---:|
+| 0.30 | 13 | 8 | 5 |
+| 0.80 | 8 | 8 | 0 |
+| 0.90 | 7 | 8 | −1 |
+
+Explore the **incremental branch values**: no match gives 16 − 8 = **8**, and match gives 6 − 8 = **−2**. The cost and fallback are already deducted. Subtracting either again would double-count them.
+
+<ExpectedValueCalculator
+  client:visible
+  locale={"en"}
+  className={"not-prose"}
+  title={"Expected advantage over maintaining"}
+  eyebrow={"Response assumptions"}
+  instructions={"Adjust both sliders until their total is one hundred percent. Only then interpret the weighted sum as expected advantage."}
+  scenario={{"prompt": "One period; cost and maintenance already deducted", "unit": " utility credits", "unitPosition": "suffix", "outcomes": [{"label": "B does not match", "payoff": 8, "prob": 70}, {"label": "B matches", "payoff": -2, "prob": 30}]}}
+  probabilityLabel={"Probability"}
+  payoffLabel={"Branch advantage"}
+  contributionLabel={"Weighted contribution"}
+  totalProbLabel={"Probabilities total"}
+  normalizeHint={"They currently total {sum}. This weighting is not valid for deciding: adjust both sliders to one hundred percent before interpreting an expectation."}
+  evLabel={"Weighted sum"}
+  evHint={"expected advantage only with complete probabilities"}
+  costLabel={"Cost"}
+  netLabel={"Net value"}
+  worthVerdict={"The total exceeds cost."}
+  notWorthVerdict={"The total falls below cost."}
+  breakEvenVerdict={"The total is close to cost."}
+  resetLabel={"Reset probabilities"}
+  caption={"Do not subtract another cost: branches are net differences versus maintaining. Sliders are independent; an incomplete total is not a probability distribution."}
+/>
+
+### When to use the threshold
+
+Suppose your defensible assumptions only place q between 0.30 and 0.60. The advantage ranges from 5 to 2, so Upgrade wins throughout that range under the stated rule. If q might be anywhere from 0.60 to 0.90, the advantage ranges from 2 to −1 and changes sign. Do not hide that uncertainty inside a confident point estimate: identify evidence about response timing, revise the range, negotiate the cost, or defer this optional upgrade while actively maintaining. None of those follows from “our chart goes up” alone.
+
+<FillBlank
+  client:visible
+  question={"Complete the account without treating a conditional average as a promise."}
+  text={"The response weight is conditional on {{upgrading|maintaining|closing down}}. A weighted average describes {{expectation|one realized result|certainty}}. A negative incremental value favors {{Maintain|Upgrade|either action}} under the stated rule."}
+  explanation={"Keep the action, horizon and alternative attached to each value. A positive average is not a guarantee in the matched branch."}
+  className="not-prose"
+/>
+
+## Test whether copying or cost changes the decision
+
+The original cost of 14 consists of implementation 10 plus validation 4. Add the parts before using the total. A cost does not become irrelevant because it appears in a different department's budget.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  title={"Rebuild the additional one-time cost"}
+  eyebrow={"Cost scope"}
+  analogyValue={14}
+  analogyLabel={"Declared complete upgrade cost"}
+  analogyNote={"Same additional cost in either response branch."}
+  parts={[{"label": "Implementation", "value": 10}, {"label": "Validation", "value": 4}]}
+  rebuiltLabel={"Selected cost parts"}
+  instructions={"Add both parts to recover the cost used in the branch table."}
+  valuePrefix={""}
+  valueSuffix={" utility credits"}
+  revealAllLabel={"Add both parts"}
+  resetLabel={"Clear selection"}
+  verdictTemplate={"Complete additional cost: {total}. This is already deducted in each upgrade branch."}
+  caption={"The bar reference is the declared cost itself, not a separate benefit."}
+/>
+
+Now vary only that cost, calling it **C**, while preserving all other one-period rules. Gross upgrade value is 30 without a match and 20 with a match, so:
+
+$$\Delta=(1-q)(30-C)+q(20-C)-8=22-C-10q.$$
+
+| Cost C | Upgrade net if no match | Upgrade net if match | Advantage over Maintain | What follows for any q from zero to one |
+|---|---:|---:|---|---|
+| 8 | 22 | 12 | 14 − 10q | Upgrade always has higher expected value |
+| 14 | 16 | 6 | 8 − 10q | Choice changes at q = 0.80 |
+| 24 | 6 | −4 | −2 − 10q | Maintain always has higher expected value |
+
+At cost 8, even certain matching leaves 12, above Maintain's 8. Copying does **not** make every upgrade worthless. At cost 24, even no matching leaves only 6, below 8. An uncopied lead does **not** justify every price. These are bounded comparisons under fixed values, not instructions to ignore rivals or to spend without limit.
+
+### When to use sensitivity analysis
+
+A **sensitivity analysis** changes a stated input and recomputes the choice. Use it to discover which assumption matters before buying more data. If both response branches already beat the fallback, finer knowledge of q will not change this decision; costs, feasibility or omitted outcomes still might. If different branches favor different actions, response uncertainty can matter.
+
+<MCQ
+  client:visible
+  question={"Which result challenges the claim that a copied improvement cannot be worth buying?"}
+  options={[{"text": "At the lower stated cost, even the matched branch beats maintenance", "correct": true}, {"text": "The rival has a name and appears in the chart"}, {"text": "The earlier time trace contains several checkpoints"}, {"text": "Every upgrade is assumed to create a permanent lead"}]}
+  explanation={"Use the cost-eight row: the matched branch nets twelve against eight from maintaining. The functional improvement of eight equals the cost of eight; the remaining tie premium of four makes the net advantage strictly positive."}
+  className="not-prose"
+/>
+
+## Transfer to two periods without changing the comparison halfway
+
+A new proposal has a **one-time cost of 38** and a **two-period horizon**. This replaces the earlier cost and horizon. Credits add across periods, and later credits receive the same weight as earlier credits. The service is upgraded before period one; B cannot match until just before period two. B then either matches or does not match, with conditional probability q or 1 − q under Upgrade. There is no further renewal cost. Maintain produces 8 in each period.
+
+| Action and response | Period one gross | Period two gross | One-time extra cost | Two-period net | Difference versus Maintain |
+|---|---:|---:|---:|---:|---:|
+| Maintain | 8 | 8 | 0 | 16 | 0 |
+| Upgrade, no match before period two | 30 | 30 | 38 | 22 | 6 |
+| Upgrade, match before period two | 30 | 20 | 38 | 12 | −4 |
+
+Rebuild it: Maintain is 8 + 8 = **16**. No match gives 30 + 30 − 38 = **22**; match gives 30 + 20 − 38 = **12**. The incremental branches are therefore **6** and **−4**. Deducting 38 in both periods invents a second payment. Comparing either upgrade total with only one period of maintaining drops half the fallback.
+
+$$E[U]=(1-q)22+q12=22-10q,$$
+$$\Delta=(22-10q)-16=6-10q.$$
+
+The new tie is **q = 0.60**. At q = 0.30, Upgrade has expected value 19 versus 16, an advantage of 3. At q = 0.80, it has expected value 14 versus 16, a disadvantage of 2. The probability has to concern matching *by the specified time*. “They can copy eventually” is not a date.
+
+<ExpectedValueCalculator
+  client:visible
+  locale={"en"}
+  className={"not-prose"}
+  title={"Expected advantage over maintaining"}
+  eyebrow={"Response assumptions"}
+  instructions={"Adjust both sliders until their total is one hundred percent. Only then interpret the weighted sum as expected advantage."}
+  scenario={{"prompt": "Two-period horizon; cost and maintenance already deducted", "unit": " utility credits", "unitPosition": "suffix", "outcomes": [{"label": "B does not match", "payoff": 6, "prob": 70}, {"label": "B matches", "payoff": -4, "prob": 30}]}}
+  probabilityLabel={"Probability"}
+  payoffLabel={"Branch advantage"}
+  contributionLabel={"Weighted contribution"}
+  totalProbLabel={"Probabilities total"}
+  normalizeHint={"They currently total {sum}. This weighting is not valid for deciding: adjust both sliders to one hundred percent before interpreting an expectation."}
+  evLabel={"Weighted sum"}
+  evHint={"expected advantage only with complete probabilities"}
+  costLabel={"Cost"}
+  netLabel={"Net value"}
+  worthVerdict={"The total exceeds cost."}
+  notWorthVerdict={"The total falls below cost."}
+  breakEvenVerdict={"The total is close to cost."}
+  resetLabel={"Reset probabilities"}
+  caption={"Do not subtract another cost: branches are net differences versus maintaining. Sliders are independent; an incomplete total is not a probability distribution."}
+/>
+
+### Check the horizon before approving
+
+With the same cost 38 but only one period of benefit, even no matching would yield 30 − 38 = −8 against Maintain's 8. Two periods can change the result because the benefit repeats and the cost does not. That conclusion depends on actually receiving the second period's benefits: cancellation, new costs, quality failures, later responses or a different value of time require a new table.
+
+<MCQ
+  client:visible
+  question={"Which changes would invalidate the two-period calculation as written? Select every applicable change."}
+  options={[{"text": "The additional cost must be paid again before the second period", "correct": true}, {"text": "B can match before the first period begins", "correct": true}, {"text": "Maintenance still operates during both periods as specified"}, {"text": "The second period has a different functional value", "correct": true}]}
+  explanation={"All costs, response timing and period values are inputs. Changing any of those requires recomputing the table; leaving the fallback unchanged does not invalidate it."}
+  allowMultiple={true}
+  className="not-prose"
+/>
+
+## Write a decision someone else can audit
+
+**Worked memo.** “For the one-period proposal with additional cost 14, active maintenance yields 8. Upgrade yields 16 without a match and 6 with a match. On the declared expected-value rule its advantage is 8 − 10q. Our assumed q of 0.30 favors Upgrade by 5, but is not estimated from the latency trace. Before approval we must justify the response window, cost coverage, value rules and feasibility. We will revisit if those inputs change. The three benchmarks show time improvement; they establish neither causal reciprocity nor customer survival.”
+
+An independent case can use the same method without any service benchmark. An invented puzzle event can keep its current activity for **12 satisfaction credits**, or install a new activity whose net value is **18** if a nearby event does not match and **9** if it does. All values concern one weekend and already include costs; q is the conditional chance of matching before that weekend. Derive the advantage before revealing the answer.
+
+<details>
+<summary>Check the independent transfer</summary>
+
+The branch advantages are 18 − 12 = 6 and 9 − 12 = −3. Their weighted average is (1 − q)6 + q(−3) = **6 − 9q**. The tie is q = 2/3. At q = 1/3, the advantage is 3; at q = 1, it is −3. An estimate spanning the threshold does not support a robust expected-value preference. These invented satisfaction credits also assume a shared additive scale; if that assumption fails, the numerical rule needs replacing.
+
+</details>
+
+<MatchConcepts
+  client:visible
+  question={"Match each audit question with the information it needs."}
+  pairs={[{"term": "Did our measured performance improve?", "definition": "Comparable measurements of our own past and present"}, {"term": "Did our comparison with the benchmark change?", "definition": "A defined gap, ratio or rank against a specified benchmark"}, {"term": "Did the other side respond to us?", "definition": "Evidence separating causal response from rival explanations"}, {"term": "Should we buy this upgrade?", "definition": "Net conditional values and a feasible fallback over a shared horizon"}]}
+  explanation={"Each question has its own evidence. A performance trace cannot stand in for every other column."}
+  className="not-prose"
+/>
+
+## Reconstruct the audit from memory
+
+Use the Red Queen lens to ask how a relevant counterpart could change the payoff to your improvement. Then check whether the proposed response actually follows, which value it could erode, what the remaining benefit costs, and what you could do instead. The lens supplies questions; the case supplies the answer.
+
+<MindMap
+  client:visible
+  title={"From record to decision"}
+  root={{"label": "Audit a moving benchmark", "children": [{"label": "Comparable observations", "children": [{"label": "Own change, signed gap, ratio and rank answer different questions"}]}, {"label": "Response evidence", "children": [{"label": "Separate parallel change from reciprocal causal response"}]}, {"label": "Net value", "children": [{"label": "Functional benefit plus positional premium minus additional cost"}]}, {"label": "Conditional uncertainty", "children": [{"label": "Response probability tied to an action and deadline; average is not a realized outcome"}]}, {"label": "Fair decision", "children": [{"label": "Feasible fallback, same horizon, costs once, sensitivity and review conditions"}]}]}}
+  className="not-prose"
+/>
+
+<Quiz
+  client:visible
+  title={"Check the complete audit"}
+  questions={[{"question": "What can the unchanged additive gap at the first recheck establish?", "options": [{"text": "Only that the recorded extra time stayed the same on that measure", "correct": true}, {"text": "That the ratio and rank must both improve"}, {"text": "That customer value and survival stayed exactly constant"}], "explanation": "A chosen gap describes a defined comparison. Other measures and outcomes need separate calculations or evidence."}, {"question": "Which assumptions belong in a reproducible decision memo? Select all that apply.", "options": [{"text": "Response timing and the action the probability conditions on", "correct": true}, {"text": "Cost coverage and the fallback over the same horizon", "correct": true}, {"text": "The belief that every arms race continues forever"}, {"text": "How functional and positional values are combined", "correct": true}], "explanation": "List inputs that change the account. Endless escalation is not a general assumption supplied by the Red Queen.", "allowMultiple": true}, {"question": "Why is the calculator given already incremental branch values?", "options": [{"text": "So the weighted sum directly compares upgrading with maintaining after cost", "correct": true}, {"text": "So the upgrade cost can be subtracted repeatedly"}, {"text": "So any incomplete probability total becomes valid"}], "explanation": "Each branch already contains the difference from the fallback and the additional cost. Interpret an expectation only when the probability weights form the complete distribution."}, {"question": "The puzzle-event transfer has a response estimate above its derived threshold. What follows under the stated rule?", "options": [{"text": "Keep the current activity because its expected net value is higher", "correct": true}, {"text": "Install the new activity because copying always proves it is valuable"}, {"text": "Declare both activities worthless because a rival exists"}], "explanation": "Use the independent transfer equation: above its tie point the incremental expected value is negative. This conclusion depends on its invented values, horizon and decision rule."}]}
+  className="not-prose"
+/>
+
+The [Final Exam](/red-queen-effect/final-exam) is next. It locks each submitted answer and includes this workshop's distinctions and comparisons.

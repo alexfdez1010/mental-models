@@ -35,6 +35,8 @@ export interface CoevolutionRaceProps {
   relativeLabel?: string;
   /** Marker for the "even" mid-point of the meter. Defaults to `'Even'`. */
   evenLabel?: string;
+  /** Word following each racer name on the relative-advantage meter. */
+  aheadLabel?: string;
   /** Text on the auto-run button. Defaults to `'Auto-run ▸'`. */
   playLabel?: string;
   /** Text on the pause button. Defaults to `'Pause'`. */
@@ -102,6 +104,7 @@ export function CoevolutionRace({
   capabilityLabel = 'Capability',
   relativeLabel = 'Your relative advantage',
   evenLabel = 'Even',
+  aheadLabel = 'ahead',
   playLabel = 'Auto-run ▸',
   pauseLabel = 'Pause',
   stepLabel = 'Advance one generation ▸',
@@ -267,9 +270,9 @@ export function CoevolutionRace({
       {/* Relative-advantage meter */}
       <div className="mt-4">
         <div className="flex items-center justify-between text-[0.65rem] font-bold uppercase tracking-wide text-ink-500">
-          <span>{rivalLabel} ahead</span>
+          <span>{rivalLabel} {aheadLabel}</span>
           <span>{relativeLabel}</span>
-          <span>{youLabel} ahead</span>
+          <span>{youLabel} {aheadLabel}</span>
         </div>
         <div className="relative mt-1 h-3 w-full rounded-pill bg-gradient-to-r from-ink-300 via-surface-sunken to-accent-300 ring-1 ring-inset ring-ink-200">
           {/* Even mid-line */}

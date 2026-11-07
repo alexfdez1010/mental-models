@@ -33,6 +33,8 @@ export interface ExpectedValueScenario {
 
 /** Props for the {@link ExpectedValueCalculator} island. */
 export interface ExpectedValueCalculatorProps {
+  /** Number formatting only; authored label props still control the interface language. */
+  locale?: 'en' | 'es';
   /** The decision to explore. */
   scenario: ExpectedValueScenario;
   /** Heading above the card. */
@@ -74,10 +76,10 @@ export interface ExpectedValueCalculatorProps {
 }
 
 /** Format a value with its unit, placing a minus sign before any unit prefix. */
-function fmt(value: number, unit = '', position: 'prefix' | 'suffix' = 'prefix'): string {
+function fmt(value: number, unit = '', position: 'prefix' | 'suffix' = 'prefix', locale: 'en' | 'es' = 'en'): string {
   const rounded = Math.round(value * 100) / 100;
   const sign = rounded < 0 ? '-' : '';
-  const abs = Math.abs(rounded).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const abs = Math.abs(rounded).toLocaleString(locale === 'es' ? 'es-ES' : 'en-US', { maximumFractionDigits: 2 });
   if (!unit) return `${sign}${abs}`;
   return position === 'prefix' ? `${sign}${unit}${abs}` : `${sign}${abs}${unit}`;
 }
@@ -101,6 +103,7 @@ function fmt(value: number, unit = '', position: 'prefix' | 'suffix' = 'prefix')
  * `prefers-reduced-motion`. Fully keyboard-operable.
  */
 export function ExpectedValueCalculator({
+  locale = 'en',
   scenario,
   title,
   eyebrow = 'Expected value',
@@ -213,7 +216,7 @@ export function ExpectedValueCalculator({
 
               {/* Payoff (hidden on narrow screens, shown inline in the bar there) */}
               <span className="hidden self-center text-right font-mono text-sm text-ink-600 sm:block">
-                {fmt(o.payoff, unit, unitPosition)}
+                {fmt(o.payoff, unit, unitPosition, locale)}
               </span>
 
               {/* Contribution + bar */}
@@ -224,10 +227,10 @@ export function ExpectedValueCalculator({
                     contrib < 0 ? 'text-danger' : 'text-ink-900',
                   )}
                 >
-                  {fmt(contrib, unit, unitPosition)}
+                  {fmt(contrib, unit, unitPosition, locale)}
                 </span>
                 <span className="mt-1 block text-[0.65rem] text-ink-400 sm:hidden">
-                  {probs[i]}% × {fmt(o.payoff, unit, unitPosition)}
+                  {probs[i]}% × {fmt(o.payoff, unit, unitPosition, locale)}
                 </span>
                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-pill bg-surface-sunken">
                   <div
@@ -277,7 +280,7 @@ export function ExpectedValueCalculator({
               ev < 0 ? 'text-danger' : 'text-ink-900',
             )}
           >
-            {fmt(ev, unit, unitPosition)}
+            {fmt(ev, unit, unitPosition, locale)}
           </span>
         </p>
 
@@ -286,7 +289,7 @@ export function ExpectedValueCalculator({
             <div className="mt-3 space-y-1 border-t border-ink-200 pt-3 text-sm">
               <p className="flex items-baseline justify-between gap-2 text-ink-600">
                 <span>{costLabel}</span>
-                <span className="font-mono">−{fmt(Math.abs(cost ?? 0), unit, unitPosition)}</span>
+                <span className="font-mono">−{fmt(Math.abs(cost ?? 0), unit, unitPosition, locale)}</span>
               </p>
               <p className="flex items-baseline justify-between gap-2">
                 <span className="font-semibold text-ink-900">{netLabel}</span>
@@ -296,7 +299,7 @@ export function ExpectedValueCalculator({
                     net < 0 ? 'text-danger' : 'text-success',
                   )}
                 >
-                  {fmt(net, unit, unitPosition)}
+                  {fmt(net, unit, unitPosition, locale)}
                 </span>
               </p>
             </div>

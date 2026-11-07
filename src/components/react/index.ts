@@ -306,3 +306,6 @@ export type { PackingDiagramProps, PackingBox, PackingItem, PackingSpan, Packing
 
 export { KnowledgeWorlds, default as KnowledgeWorldsDefault } from '@/components/react/KnowledgeWorlds';
 export type { KnowledgeWorldsProps, KnowledgeWorldsLabels, KnowledgeWorld } from '@/components/react/KnowledgeWorlds';
+
+export { BenchmarkTrace, validateBenchmarkTrace } from '@/components/react/BenchmarkTrace';
+export type { BenchmarkObservation, BenchmarkTraceProps } from '@/components/react/BenchmarkTrace';
