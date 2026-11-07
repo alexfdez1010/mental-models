@@ -350,3 +350,6 @@ export { PolicyCostComparison } from '@/components/react/PolicyCostComparison';
 export { ScenarioDecisionAudit } from '@/components/react/ScenarioDecisionAudit';
 
 export { MarginalSurplusChart } from '@/components/react/MarginalSurplusChart';
+
+export { IntervalScoreAudit } from '@/components/react/IntervalScoreAudit';
+export type { IntervalAuditRecord, IntervalAuditRule, IntervalAuditScenario, IntervalScoreLabels, IntervalScoreAuditProps } from '@/components/react/IntervalScoreAudit';

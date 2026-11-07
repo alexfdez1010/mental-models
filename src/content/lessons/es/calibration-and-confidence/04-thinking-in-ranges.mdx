@@ -1,403 +1,361 @@
 ---
 title: "Pensar en rangos"
-description: "Convierte las estimaciones puntuales de falsa precisión en intervalos de confianza honestos: por qué tu primer margen de error siempre es demasiado estrecho, cómo ensancharlo y cómo dimensionar un margen de seguridad acorde al rango."
+description: "Define qué cubre un intervalo, puntúa anchura y fallos y compara registros completos sin confundir pocos aciertos con calibración."
 topic: "es/calibration-and-confidence"
 order: 5
-minutes: 10
-updated: 2026-06-29
+minutes: 18
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, RateComparison, IntervalScoreAudit } from '@/components/react';
 
-Allá por la lección 2 conociste la **sobreprecisión (overprecision)**: la cara más
-silenciosa y traicionera del exceso de confianza. No el "mi estimación es demasiado
-alta", sino "mis márgenes de error son demasiado estrechos". Viste cómo el famoso test
-del intervalo del 90% atrapaba la verdad solo la mitad de las veces: la gente dibuja
-rangos tan ajustados que la realidad se escapa por los lados. Esta lección es el
-antídoto, y es gloriosamente práctica. La sobreprecisión es un hábito, y los hábitos
-tienen cura. La cura consiste en aprender a pensar —y a *responder*— en **rangos**.
+Registras un intervalo del ochenta por ciento y esperas al resultado. ¿Qué sería un buen pronóstico: un rango estrecho, un acierto o la menor puntuación de error? Cada pregunta necesita información distinta. Esta lección fija la regla de evaluación antes de comparar los pronósticos.
 
-Ya aprendiste en *Pensar en probabilidades* que un rango le gana a una sola estimación.
-Aquí bajamos un nivel más: no solo "usa un rango", sino cómo calibrar su **anchura**
-para que el rango cuente la verdad honesta sobre lo que no sabes.
+El ejemplo es construido: seis tareas de exportación, sus rangos emitidos y sus tiempos transcurridos ya resueltos. No se ajusta ningún intervalo a los resultados que aparecen abajo. Compararás el registro emparejado completo y después probarás otro conjunto.
 
-<MCQ
-  client:visible
-  pretest
-  pretestLabel="Antes de leer — adivina"
-  question="Te piden los ingresos del próximo trimestre. ¿Qué respuesta refleja con más honestidad lo que de verdad sabes?"
-  options={[
-    { text: "“Unos 4 millones, pero estoy un 80% seguro de que la cifra real cae entre 3 y 6 millones.”", correct: true },
-    { text: "“4,0 millones.”" },
-    { text: "“4,2718 millones.”" },
-    { text: "“Ni idea, podría ser cualquier cosa.”" },
-  ]}
-  explanation="No hay penalización en un pretest. Una estimación puntual pelada (“4,0 millones”) esconde toda tu incertidumbre y casi seguro está equivocada hasta el último euro; y los decimales de más de “4,2718” son falsa precisión disfrazada de rigor. “Ni idea” tira a la basura la información real que sí tienes. La respuesta honesta da un centro Y un rango con una confianza asociada: ese rango es el contenido real de tu conocimiento. Esa es la lección entera."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-/>
+## Di a qué se refiere el intervalo
 
-## Una estimación puntual es una mentira segura de sí misma
-
-Cuando alguien te pregunta "¿cuánto tardará esto?" y respondes **"tres semanas"**,
-acabas de soltar una pequeña mentira con mucho aplomo. No porque seas deshonesto, sino
-porque la respuesta verdadera nunca fue un solo número. Era un abanico de resultados
-posibles, y lo aplastaste en un punto para sonar decidido. Una **estimación puntual
-(point estimate)** es un número sin anchura. Parece nítida y autoritaria, y se
-equivoca prácticamente siempre: el proyecto tarda 19 días, o 26, o 41, pero nunca
-*exactamente* los 21 que dijiste.
-
-La alternativa honesta es un **intervalo de confianza (confidence interval)** (también
-llamado **margen de error (error bar)**): un *rango* junto con una *probabilidad
-declarada* de que el valor verdadero cae dentro de él. "80% seguro: 3 a 5 semanas" es
-un intervalo de confianza. Lleva dos piezas de información que la estimación puntual
-tiró: lo ancha que es tu incertidumbre, y lo seguro que estás de esa anchura.
-
-Piénsalo como el parte meteorológico. "Mañana hará 22 grados" es una estimación
-puntual, y se equivocará. "Entre 18 y 25, y me sorprendería salir de ahí" es un margen
-de error, y puede ser *correcto*. El pronóstico no se volvió más vago: se volvió
-honesto.
-
-<Callout variant="tip" title="La definición en una línea">
-Un **intervalo de confianza** es un rango *más* una probabilidad: "estoy **C%** seguro
-de que el valor verdadero está entre **L** y **H**". El número C es una promesa por la
-que pueden calificarte, exactamente igual que las probabilidades de la lección 1: a lo
-largo de muchos intervalos, un intervalo del 80% bien calibrado debería contener la
-verdad en torno al 80% de las veces.
-</Callout>
-
-### Cuándo usarlo
-
-Echa mano de un intervalo en cuanto un solo número vaya a usarse como si fuera certero:
-presupuestos, plazos, pronósticos, cargas de ingeniería, pronósticos médicos. La
-prueba: *si me equivoco con este número, ¿cuesta algo?* Si la respuesta es sí, la
-anchura de tu incertidumbre forma parte de la respuesta, y esconderla dentro de una
-estimación puntual no hace más que esconder el riesgo. Guarda la estimación puntual
-para suposiciones de verdad triviales y de poco riesgo, donde nadie vaya a construir
-nada sobre el número.
-
-<MCQ
-  client:visible
-  question="¿Qué distingue exactamente a un intervalo de confianza de una simple estimación puntual?"
-  options={[
-    { text: 'Declara un rango Y una probabilidad de que el valor verdadero esté dentro', correct: true },
-    { text: 'Siempre es más ancho, así que siempre es más seguro de usar' },
-    { text: 'Garantiza que el valor verdadero está dentro del rango', correct: false },
-    { text: 'Sustituye el número por la palabra “probablemente”' },
-  ]}
-  explanation="Un intervalo lleva dos datos que le faltan a una estimación puntual: una anchura (el rango de L a H) y una confianza (la probabilidad C de que la verdad esté dentro). NO garantiza nada: un intervalo del 80% está pensado para fallar más o menos 1 de cada 5 veces. Esa probabilidad declarada es la parte que puedes puntuar, y es lo que hace que los intervalos sean honestos y no meramente vagos."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-/>
-
-## Tu primer intervalo siempre es demasiado estrecho
-
-Aquí está el fallo universal, y nombrarlo es la mitad del arreglo: **el primer
-intervalo que escribes es demasiado estrecho.** La sobreprecisión no es un defecto de
-gente rara; es el ajuste por defecto del estimador humano. Tu cerebro se ancla en el
-número que le viene a la mente, le rocía un poco de anchura para sentirse humilde, y se
-para... muchísimo antes de tiempo.
-
-Así que la cura es mecánica: **dibuja tu intervalo y luego ensánchalo a propósito.** El
-mejor movimiento para ensanchar es hacerte una sola pregunta —*"¿qué podría dejar la
-respuesta* **fuera** *de este rango?"*— y seguir estirando los límites hasta que te
-sorprendieras de verdad al equivocarte, no simplemente te incomodaras un poco.
-
-Estimemos algo que nadie ha memorizado: **el peso de una ballena azul adulta.**
-
-| Etapa | Bajo | Alto | Razonamiento |
-|---|---|---|---|
-| Primer instinto (demasiado estrecho) | 50 toneladas | 80 toneladas | "Animal grande, número grandecito." |
-| Pregunta: ¿qué queda fuera de esto? | — | — | Las crías pesan muchísimo menos; los machos récord pesan muchísimo más; podría tener mal las unidades. |
-| Intervalo ensanchado | 40 toneladas | 200 toneladas | Ahora sí me sorprendería fallar. |
-
-Una ballena azul típica pesa alrededor de **140 toneladas**. La primera estimación
-encogida de 50 a 80 **falla estrepitosamente**: la verdad nunca estuvo ni cerca de
-caer dentro. El intervalo ensanchado de 40 a 200 **contiene la verdad** con holgura.
-Fíjate en lo que te costó ensanchar: casi nada. Un rango más ancho es ligeramente menos
-impresionante en una cena y muchísimo más probable de ser *correcto*. Ese intercambio
-es uno que deberías aceptar casi siempre.
-
-<Callout variant="warning" title="Ensanchar no es hacer trampa">
-Estirar "50 a 80" hasta "40 a 200" da la sensación de rendirse. No lo es: es justo lo
-contrario de rendirse. Un intervalo estrecho que falla no te enseñó nada y le mintió a
-quien confió en él. Un intervalo ancho que contiene la verdad está haciendo su único
-trabajo. Si ensanchar tu rango te da sensación de debilidad, esa sensación *es* la
-sobreprecisión hablando.
-</Callout>
-
-### Cuándo usarlo
-
-Cada vez que produzcas un intervalo, pásale la pasada de ensanchado: es gratis y es
-donde de verdad ocurre la calibración. Importa más justo donde peor se siente: en
-preguntas que crees que *deberías* saber (el efecto difícil-fácil de la lección 2
-significa que los expertos se vuelven sobreprecisos en su propio terreno). Cuanto más
-seguro se sienta el primer intervalo, más necesita el interrogatorio del "¿qué queda
-fuera de esto?".
-
-<MCQ
-  client:visible
-  question="Tu intervalo honesto del 90% para una cantidad te parece vergonzosamente ancho. ¿Qué significa eso con más probabilidad?"
-  options={[
-    { text: 'Quizá por fin tenga más o menos la anchura correcta: los intervalos estrechos son el error habitual, no los anchos', correct: true },
-    { text: 'Está claro que no sabes nada y no deberías responder' },
-    { text: 'Deberías encogerlo para parecer más competente' },
-    { text: 'Los intervalos anchos siempre son mejores, sea cual sea la pregunta' },
-  ]}
-  explanation="El reflejo de encoger un intervalo ancho “para parecer competente” es precisamente la sobreprecisión que hace que los rangos del 90% de la mayoría atrapen la verdad solo la mitad de las veces. Un rango que parece incómodamente ancho suele ser el primero honesto. (Tampoco ancho es automáticamente virtuoso: un intervalo bien calibrado es tan estrecho como pueda serlo mientras sigue atrapando la verdad al ritmo declarado. El arreglo de la sobreprecisión es ensanchar hacia la honestidad, no cubrirse infinitamente.)"
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-/>
-
-## La disciplina del intervalo del 90%
-
-No puedes llegar a la calibración a base de intuición; tienes que *medirla*. Aquí va el
-ejercicio. Para un lote de estimaciones, fija cada intervalo a tu nivel honesto de
-**90% de confianza**. La promesa cocida dentro del "90%" es sencilla y comprobable: a
-lo largo del lote, deberías **fallar más o menos 1 de cada 10.** Haz diez, espera
-fallar uno. Si fallas cuatro o cinco de cada diez, tus rangos son sistemáticamente
-demasiado ajustados: eso es la sobreprecisión, cuantificada, mirándote a la cara.
-
-Un truco limpio para *construir* cada intervalo es la **técnica de los pares absolutos
-(absolute-pairs technique)**: no pienses en el rango como un todo. Piensa en los dos
-límites **por separado**.
-
-- Elige un límite **bajo** del que estés **95% seguro de que es demasiado bajo**: la
-  verdad está casi seguro por encima.
-- Elige un límite **alto** del que estés **95% seguro de que es demasiado alto**: la
-  verdad está casi seguro por debajo.
-
-Cose esos dos y obtienes un intervalo que tiene en torno al 90% de probabilidad de
-contener la respuesta (alrededor de un 5% de la probabilidad se escapa por cada
-extremo). Tratar los límites de uno en uno derrota el instinto del cerebro de abrazarse
-al ancla, porque ahora estás cazando activamente un número lo bastante bajo —y un
-número lo bastante alto— como para *sorprenderte* a ti mismo.
-
-Aquí va un lote trabajado. Fija cada intervalo del 90% y luego contrástalo con la
-realidad:
-
-| Pregunta | [Bajo, Alto] (90%) | Verdad | ¿Acierto? |
-|---|---|---|---|
-| Punto de ebullición del agua en la cima del Everest (°C) | [60, 90] | 71 | Acierto |
-| Año en que se inventó la imprenta | [1400, 1500] | 1440 | Acierto |
-| Envergadura de un Boeing 747 (metros) | [40, 80] | 68 | Acierto |
-| Número de huesos en el cuerpo humano adulto | [180, 230] | 206 | Acierto |
-| Longitud del Nilo (km) | [5.000, 7.500] | 6.650 | Acierto |
-| Población de Australia, 2023 (millones) | [15, 22] | 26 | Fallo |
-
-Cinco aciertos, un fallo de seis: una tasa de acierto de alrededor del **83%**. Para un
-intervalo del *90%* eso es un pelín bajo pero respetable: en un lote más largo querrías
-empujar los rangos un pelo más anchos para que la tasa de acierto a largo plazo suba
-hacia el 90%. El fallo de Australia es la pista: el límite alto (22) estaba anclado
-demasiado bajo; un límite 95%-demasiado-alto habría quedado más cerca de 30. Un fallo
-diagnosticado; ensancha y reapunta.
-
-<Reveal client:visible buttonText="¿Por qué apuntar a fallar 1 de cada 10, en vez de no fallar nunca?">
-Porque un intervalo que *nunca* fallas es inútilmente ancho. Si fijaras cada rango
-"entre cero e infinito", acertarías el 100% de las veces y no habrías dicho nada. La
-calibración es un acto de equilibrio: el intervalo debería ser **tan estrecho como sea
-posible mientras siga atrapando la verdad al ritmo que afirmaste.** Un intervalo del
-90% que de verdad falla 1 de cada 10 lleva la máxima información útil compatible con ser
-honesto. No fallar ninguno significa que ensanchaste de más; fallar cuatro significa que
-ensanchaste de menos. "Más o menos 1 de cada 10" es el punto dulce hacia el que la
-disciplina te está afinando.
-</Reveal>
-
-### Cuándo usarlo
-
-Haz el ejercicio completo de lote-y-puntuación periódicamente como *entrenamiento* —diez
-o veinte datos estimables, puntuados con honestidad— para descubrir hacia qué lado se
-sesgan tus rangos y por cuánto. Usa la técnica de los pares absolutos en *cada*
-intervalo individual que construyas, siempre; cuesta diez segundos y es la defensa única
-más fiable que tienes contra la sobreprecisión.
-
-## Los rangos no tienen por qué ser simétricos
-
-Un matiz rápido pero importante: un intervalo honesto **no** siempre está centrado en
-tu mejor estimación. La realidad suele ser desequilibrada, y tu rango también debería
-serlo. La parte negativa y la positiva sencillamente pueden diferir.
-
-El ejemplo más claro son los **plazos de proyectos**. Las tareas pueden terminar un
-poco antes, pero pueden retrasarse *enormemente*, porque todo lo que sale mal añade
-retraso y casi nada de lo que sale bien lo resta. Así que un intervalo realista para
-"tres semanas" podría ser **2,5 a 8 semanas**: apenas margen por debajo, una larga cola
-por arriba. Esa larga cola derecha es la **falacia de la planificación (planning
-fallacy)** y las **colas anchas (fat tails)** con ropa de trabajo: las estimaciones se
-sesgan largas por la misma razón estructural por la que los eventos extremos se agolpan
-en la cola. No fuerces un rango simétrico sobre un mundo asimétrico; pon la anchura
-donde de verdad viven las sorpresas.
-
-<MCQ
-  client:visible
-  question="¿Por qué un intervalo honesto para una fecha de entrega suele estar desequilibrado, con una larga cola por el lado alto?"
-  options={[
-    { text: 'Lo que sale mal añade retraso mientras que lo que sale bien rara vez resta mucho, así que el riesgo a la baja es sobre todo “más tarde”', correct: true },
-    { text: 'La gente es pesimista y exagera lo tarde que se retrasan las cosas' },
-    { text: 'Las fechas de entrega son aleatorias, así que cualquier forma de intervalo vale igual' },
-    { text: 'Los intervalos simétricos están matemáticamente prohibidos' },
-  ]}
-  explanation="Los calendarios se sesgan largos porque los modos de fallo son asimétricos: una docena de cosillas pueden empujar cada una la tarea más tarde, pero casi nada la empuja dramáticamente más pronto. Eso es la falacia de la planificación, y es la misma estructura de cola ancha que te encuentras en otros sitios: una larga cola derecha de malas sorpresas. Un intervalo honesto refleja esa forma: poco margen por debajo de la estimación, mucho por encima."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-/>
-
-## Los rangos son la entrada del margen de seguridad
-
-Ahora la recompensa: la razón por la que esta destreza merece el esfuerzo. Tu margen de
-error honesto es exactamente lo que te dice **cuánto colchón dejar.** Este es el modelo
-del **margen de seguridad (margin of safety)** (tema de su propio curso), hecho
-cuantitativo. Ingenieros, inversores y planificadores no dimensionan su colchón al
-*punto medio* de una estimación: lo dimensionan a la **anchura de la incertidumbre** que
-la rodea. Un intervalo bien calibrado es el número que convierte el margen de seguridad
-en un cálculo en lugar de una sensación.
-
-La lógica es directa: el margen de seguridad es la brecha entre lo que *puedes*
-soportar y lo que *esperas* afrontar. Pero "lo que esperas afrontar" no es un punto: es
-un rango. Cuanto mayor el rango, mayor el colchón que necesitas para estar a salvo en
-todo él. **Una estimación puntual no puede dimensionar un margen de seguridad en
-absoluto**, porque no tiene anchura; solo un intervalo puede.
-
-Ejemplo trabajado: una **pasarela peatonal**. Supón que tu *estimación puntual* de
-carga máxima es 8 toneladas. Tentador construir para, digamos, 10 y llamarlo un cómodo
-margen del 25%. Pero la estimación puntual escondió la verdadera pregunta. Tu intervalo
-honesto del 90% para la carga máxima, tras ensanchar y pensar en avalanchas de gente,
-festivales y algún camioncito ocasional, es **6 a 14 toneladas.**
-
-| Enfoque | Carga de diseño | Margen sobre... | Problema |
-|---|---|---|---|
-| Colchón sobre la estimación puntual | 10 toneladas | la *estimación* de 8 toneladas | Una multitud de festival de 13 toneladas la hace colapsar. |
-| Colchón sobre el techo del intervalo | 14 toneladas, luego añadir margen → ~18 toneladas | el *límite alto de 14 toneladas* | Dimensionado al peor caso real que verás de forma plausible. |
-
-El primer diseño parece prudente y es secretamente frágil: compró margen contra un
-número que ya sabías que estaba mal. El segundo dimensiona el colchón al **techo del
-rango honesto**: sobrevive a todo el intervalo, no solo al punto medio. La misma idea
-dimensiona un **presupuesto**: si tus costes son "80% seguro: 3 a 6 millones", no
-reservas un colchón encima de 4, sino que financias hacia el **6**, porque ahí es donde
-tu propio rango honesto te dijo que vive el peligro. El intervalo hizo la parte difícil;
-el margen de seguridad solo lee la respuesta en el extremo alto.
-
-<Callout variant="info" title="La cadena en una línea">
-Probabilidad calibrada → intervalo honesto → su **anchura** → el **margen de seguridad**
-que necesitas. Haz el intervalo demasiado estrecho (sobreprecisión) y cada colchón que
-construyas encima será demasiado pequeño. La sobreprecisión no es solo un error de
-estimación: es un error de *seguridad*, porque encoge el mismísimo número contra el que
-se supone que debe dimensionarse tu colchón.
-</Callout>
-
-### Cuándo usarlo
-
-Siempre que una decisión necesite un colchón —una carga estructural, una reserva de
-efectivo, una holgura de calendario, el tamaño de una posición— construye primero el
-intervalo calibrado y luego dimensiona el margen a su anchura (y al extremo *peor*
-relevante de un rango asimétrico). Si te pillas añadiendo un colchón a un solo número
-puntual, para: te has saltado el paso que te dice cómo de grande debería ser realmente
-el colchón.
-
-## Decirlo en voz alta
-
-Una última destreza, más silenciosa: comunicar el rango sin acobardarte. "**3 a 6
-millones, 80% de confianza**" es más útil que un nítido "4,2 millones": le entrega al
-oyente tu incertidumbre real para que *él* pueda dimensionar sus propias decisiones y
-colchones. El número nítido parece más competente e informa peor.
-
-La parte difícil no es dibujar el rango; es la **presión social por colapsarlo**. Las
-salas premian a quien da un golpe en la mesa con un único número seguro y desconfían en
-silencio del "está en algún punto entre 3 y 6". Resistir ese tirón —mantenerte honesto
-sobre la anchura cuando todos quieren falsa precisión— es una disciplina en sí misma.
-Es la tensión profunda entre sonar decidido y estar calibrado, y es exactamente donde
-arranca la próxima lección.
-
-## Repaso
-
-<Quiz
-  client:visible
-  questions={[
-    {
-      question: '¿Cuál es la cura práctica de la sobreprecisión cuando haces una estimación?',
-      options: [
-        { text: 'Dibuja tu intervalo y luego ensánchalo a propósito preguntando “¿qué podría dejar la respuesta fuera de este rango?” hasta que te sorprenderías al equivocarte', correct: true },
-        { text: 'Añade más decimales a la estimación puntual' },
-        { text: 'Elige el único número del que te sientas más seguro' },
-        { text: 'Niégate a estimar hasta tener información perfecta' },
-      ],
-      explanation: 'Tu primer intervalo es de forma fiable demasiado estrecho, así que el arreglo es mecánico: ensánchalo. La pregunta “¿qué podría dejar la respuesta fuera de este rango?” te obliga a cazar los modos de fallo que tu ancla escondió, y estiras hasta que equivocarte te sorprendería de verdad.',
-    },
-    {
-      question: 'Fijas diez intervalos del 90% y solo 5 contienen la verdad. ¿Qué te dice eso?',
-      options: [
-        { text: 'Tus rangos son sistemáticamente demasiado estrechos —sobreprecisión— y necesitan ensancharse', correct: true },
-        { text: 'Estás bien calibrado; 5 de 10 está bien para un intervalo del 90%' },
-        { text: 'Tus rangos son demasiado anchos y deberían ajustarse' },
-        { text: 'Nada: un intervalo del 90% nunca se puede comprobar' },
-      ],
-      explanation: 'Un intervalo del 90% bien calibrado debería atrapar la verdad unas 9 de cada 10 veces. Atraparla solo 5 significa que tus intervalos son muchísimo demasiado ajustados: sobreprecisión de manual. El ejercicio es exactamente este: puntúa un lote, ve la brecha y ensancha hasta que la tasa de acierto a largo plazo suba hacia el 90%.',
-    },
-    {
-      question: 'Usando la técnica de los pares absolutos, ¿cómo deberías elegir el límite BAJO de un intervalo del 90%?',
-      options: [
-        { text: 'Elige un valor del que estés en torno al 95% seguro de que es demasiado bajo (la verdad está casi seguro por encima)', correct: true },
-        { text: 'Elige tu mejor estimación única y réstale un 10%' },
-        { text: 'Elige el número más bajo con el que aún te sientas cómodo' },
-        { text: 'Elige un valor del que estés un 50% seguro de que es demasiado bajo' },
-      ],
-      explanation: 'El truco es dimensionar los dos límites por separado. Un límite bajo del que estás ~95% seguro de que es demasiado bajo, emparejado con un límite alto del que estás ~95% seguro de que es demasiado alto, deja escapar alrededor de un 5% por cada extremo y acota más o menos un intervalo del 90%, a la vez que derrota el hábito del cerebro de abrazarse al ancla.',
-    },
-    {
-      question: 'Un intervalo del 90% bien calibrado para la carga máxima de un puente es 6 a 14 toneladas. ¿Cómo usa esto el margen de seguridad?',
-      options: [
-        { text: 'Dimensiona el colchón al techo del rango honesto (en torno a 14), no al punto medio: el margen se dimensiona a la anchura de la incertidumbre', correct: true },
-        { text: 'Construye al punto medio, 10 toneladas, ya que es la mejor estimación' },
-        { text: 'Ignora el rango y usa la estimación puntual original de 8 toneladas' },
-        { text: 'Haz el intervalo más estrecho para que el puente salga más barato de construir' },
-      ],
-      explanation: 'El margen de seguridad se dimensiona a la ANCHURA de la incertidumbre, no al punto medio. Un colchón construido sobre la estimación puntual de 8 toneladas es secretamente frágil; dimensionar al techo del intervalo honesto (14 toneladas, luego añadir margen) sobrevive a todo el rango. El intervalo calibrado es la entrada que hace cuantitativo el colchón.',
-    },
-  ]}
-  questionLabel="Pregunta"
-  ofLabel="de"
-  nextLabel="Siguiente"
-  seeResultsLabel="Ver resultados"
-  backLabel="Atrás"
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
   checkLabel="Comprobar"
   retryLabel="Reintentar"
   correctLabel="Correcto"
-  incorrectLabel="Incorrecto"
+  incorrectLabel="No exactamente"
   correctAnswerLabel="Respuesta correcta"
   explanationLabel="Explicación"
-  scoreLabel="Tu puntuación"
-  correctCountLabel="correctas"
-  restartLabel="Reiniciar"
-  completeLabel="Completado"
-  gateLabel="Comprueba tu respuesta para continuar."
+  question="Un rango lleva la etiqueta de intervalo de confianza. ¿Qué debes comprobar antes de interpretarla?"
+  options={[{"text":"Si el rango parece lo bastante ancho para tranquilizar."},{"text":"Su objetivo, construcción y afirmación probabilística prevista.","correct":true},{"text":"Si su punto medio tiene varios decimales."},{"text":"Si sus extremos contuvieron por casualidad un resultado."}]}
+  explanation="Una observación futura, un valor fijo desconocido y un parámetro poblacional necesitan interpretaciones distintas. La etiqueta o un acierto no aportan la construcción."
+  pretest={true}
 />
 
-## Hacia dónde va esto
+Una **previsión puntual (point forecast)** da un valor, como seis horas para la siguiente tarea. Puede ser un resumen útil y puede puntuarse. Un **intervalo** da un límite inferior y otro superior, pero necesita un objetivo y una interpretación.
 
-Ya puedes convertir un número de falsa precisión en un intervalo honesto, ensancharlo
-más allá de tu primer instinto sobrepreciso, puntuar un lote contra la regla del 90% y
-alimentar su anchura directamente a un **margen de seguridad**. Lo que queda es
-convertir todo esto en una *práctica permanente*, y enfrentar la tensión que acabamos de
-insinuar: estar honestamente incierto (**calibración**) sin dejar de ser decisivo y útil
-(**resolución**).
+| Afirmación | Objetivo y significado |
+|---|---|
+| «Mis creencias asignan un ochenta por ciento a este rango para la duración de una tarea ya terminada que desconozco». | Incertidumbre subjetiva sobre un valor fijo que aún no se ha visto. |
+| «Este rango se emite para el tiempo transcurrido de la siguiente tarea». | Un **intervalo de predicción (prediction interval)** para una observación futura; declara la cobertura prevista y cómo se ha construido. |
+| «Esta regla de muestreo cubre la media del proceso en el noventa por ciento de las muestras repetidas bajo el modelo». | Cobertura de un **intervalo de confianza (confidence interval)** sobre un parámetro poblacional fijo, con límites aleatorios. |
 
-La lección 5, **Calibrarse**, es el programa de entrenamiento: registrar tus
-predicciones, hacer ejercicios de calibración, hacer autopsias a tus puntuaciones y qué
-hacen distinto los *superpronosticadores*. Es donde todo el curso se convierte en un
-hábito que conservas, incluida la valentía de decir "3 a 6 millones, 80% de confianza"
-en voz alta y no acobardarte.
+Un intervalo predictivo puede expresar un modelo subjetivo: «subjetivo» y «predictivo» no son opuestos. Un **intervalo de credibilidad bayesiano (Bayesian credible interval)** se refiere, en cambio, a una probabilidad posterior bajo un prior y una verosimilitud especificados. No atribuyas esa probabilidad posterior a un intervalo de confianza frecuentista solo porque ya conozcas sus extremos. La forma de una barra de error tampoco dice qué representa: lee su leyenda.
+
+Para auditar el pronóstico, registra el identificador de la tarea, cuándo se emitió, cómo se define el tiempo transcurrido, el horizonte, los límites y el nivel nominal. Indica si los valores en los extremos cuentan como aciertos. Aquí sí: el intervalo es cerrado, por lo que un resultado en cualquiera de sus límites está dentro.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  question="Relaciona cada declaración con lo que describe."
+  pairs={[{"term":"Intervalo predictivo","definition":"Rango emitido para una observación futura."},{"term":"Cobertura de confianza","definition":"Propiedad de una regla de intervalos bajo muestreo repetido."},{"term":"Creencia subjetiva","definition":"Probabilidad expresada bajo la información y el modelo de quien la declara."}]}
+  instructions="Elige un término y después su definición."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  allCorrectLabel="Todo enlazado"
+  partialResultWord="bien"
+  pickDefinitionHint="Elige una definición"
+  notLinkedHint="Sin enlazar"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+/>
+
+### Cuándo usar la distinción
+
+Comprueba el objetivo antes de interpretar un porcentaje. La incertidumbre sobre la media de un proceso no es la misma cantidad que la variación de su siguiente observación. Esta puede quedar fuera del intervalo predictivo emitido; los extremos no son límites absolutos.
+
+## Da un significado a las dos colas
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Un intervalo predictivo central debe estar a la misma distancia de la previsión puntual por ambos lados?"
+  options={[{"text":"Sí; central significa simetría geométrica."},{"text":"Sí; ambos extremos deben estar igual de cerca de la media."},{"text":"No; central se refiere a las probabilidades de las dos colas.","correct":true},{"text":"No; los intervalos centrales no tienen interpretación probabilística."}]}
+  explanation="Probabilidades de cola iguales no tienen por qué dar distancias iguales. La ley predictiva declarada determina los cuantiles."
+  pretest={true}
+/>
+
+Un **cuantil (quantile)** marca un nivel de probabilidad acumulada. Para un intervalo de predicción central del ochenta por ciento, los niveles inferior y superior previstos son un décimo y nueve décimos. «Central» se refiere a las probabilidades de las colas, no a distancias iguales desde una estimación puntual ni a un intervalo de anchura mínima.
+
+Usa este otro modelo de probabilidad estipulado para comprobar las cuentas. No es un modelo ajustado a la auditoría de seis tareas que viene después.
+
+| Tiempo transcurrido posible, horas | Peso sobre diez |
+|---|---:|
+| 2 | 1 |
+| 4 | 2 |
+| 6 | 4 |
+| 8 | 2 |
+| 10 | 1 |
+
+Elige tres y nueve como límites. Un décimo queda estrictamente por debajo de tres; un décimo, estrictamente por encima de nueve. Los ocho décimos restantes quedan dentro. Son probabilidades del modelo, no frecuencias observadas en diez experimentos.
+
+<RateComparison client:visible
+  locale="es"
+  title="Las dos colas del modelo estipulado"
+  scenarioLabel="Comparación"
+  countsLabel="Pesos del modelo, no experimentos observados"
+  differenceLabel="Primera probabilidad menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  scenarios={[{"label":"Intervalo de tres a nueve","groups":[{"label":"Por debajo de tres","events":1,"total":10},{"label":"Por encima de nueve","events":1,"total":10}]}]}
+/>
+
+La probabilidad discreta necesita una convención para los extremos. Aquí, un cuantil admisible $q$ de nivel $\tau$ cumple
+
+$$P(Y<q)\le\tau\le P(Y\le q).$$
+
+Puede haber varios valores admisibles. En esta ley, cualquier límite inferior entre dos y cuatro es un cuantil de nivel un décimo, y cualquier límite superior entre ocho y diez es un cuantil de nivel nueve décimos. El intervalo elegido contiene exactamente un ochenta por ciento de la masa; el intervalo cerrado de dos a diez contiene toda la masa. No supongas que cualquier intervalo central discreto tiene exactamente su cobertura nominal al incluir los extremos.
+
+<FillBlank client:visible
+  className="not-prose"
+  question="Completa la contabilidad del intervalo elegido."
+  text="Se usa la masa {{estrictamente exterior|incluida en los extremos|de cualquier intervalo}} para las dos colas. El nivel nominal no garantiza un {{recuento fijo|objetivo declarado|modelo explícito}} en una tanda finita."
+  explanation="Los extremos incluidos no son fallos. La probabilidad bajo un modelo y el recuento observado en pocos casos cumplen funciones distintas."
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Correcto"
+  partialResultWord="bien"
+/>
+
+### Cuándo usar cuantiles
+
+Úsalos cuando el contrato del pronóstico pida probabilidades de cola. Una distribución asimétrica puede dar distancias distintas entre una mediana y sus dos límites. La asimetría por sí sola no demuestra colas pesadas ni un mecanismo concreto de retraso en los proyectos.
+
+## Puntúa la anchura y la distancia exterior
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Un intervalo emitido más ancho contiene un resultado que otro más estrecho no contiene. ¿Qué se deduce sin calcular la pérdida declarada?"
+  options={[{"text":"El más ancho debe tener menor pérdida."},{"text":"El más estrecho debe tener menor pérdida."},{"text":"Ambos deben tener la misma pérdida."},{"text":"El acierto por sí solo no determina la clasificación de pérdidas.","correct":true}]}
+  explanation="En esta puntuación intervienen la anchura y la distancia exterior. Necesitas sus cantidades y el nivel nominal común."
+  pretest={true}
+/>
+
+Contar aciertos ignora la anchura y cuánto se ha alejado un fallo del intervalo. Un rango que lo abarque todo puede acumular aciertos sin aportar mucho detalle. Un intervalo diminuto puede ser informativo cuando acierta y fallar por mucho. Usaremos la **puntuación de intervalo (interval score)**, en la que menos es mejor, para intervalos centrales del mismo nivel nominal.
+
+Para cobertura nominal $1-\alpha$ con $0<\alpha<1$, límites finitos ordenados $l\le u$ y resultado finito $y$:
+
+$$IS_\alpha(l,u;y)=(u-l)+\frac{2}{\alpha}\max(l-y,0)+\frac{2}{\alpha}\max(y-u,0).$$
+
+Al ochenta por ciento, $\alpha=1/5$ y el multiplicador de penalización es diez. La puntuación suma la anchura y diez veces la distancia exterior hasta el límite más cercano. Dentro o exactamente en un extremo, esa distancia es cero. La puntuación tiene unidades de tiempo transcurrido; una penalización de treinta es una contribución a la pérdida de puntuación, no treinta horas de trabajo adicional ni de retraso observado.
+
+Para el intervalo $[4,8]$, la anchura es cuatro. Un resultado de seis u ocho puntúa cuatro. Un resultado de nueve queda una hora fuera y puntúa $4+10\times1=14$. Con once, la distancia es tres y la puntuación es $4+10\times3=34$. Ensanchar puede reducir la penalización exterior y aumentar a la vez el término de anchura. No hay una instrucción general de ensanchar siempre el primer rango.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Usa el intervalo resuelto y su resultado de once horas. ¿Cuál es la puntuación de intervalo?"
+  options={[{"text":"Cuatro, porque solo cuenta la anchura."},{"text":"Treinta, porque solo cuenta la penalización."},{"text":"Treinta y cuatro, sumando anchura y penalización.","correct":true},{"text":"Catorce, como en el fallo de una hora."}]}
+  explanation="La anchura es 4, la distancia exterior 3 y el multiplicador 10:4+10×3=34. Se puntúa una pérdida: menos es mejor."
+/>
+
+Si el valor absoluto del resultado tiene esperanza finita bajo la ley predictiva, sus cuantiles correspondientes minimizan la puntuación esperada. La puntuación no valida ese modelo, no demuestra la intención de nadie ni garantiza la menor puntuación observada. En un modelo discreto puede haber valores óptimos empatados. Puntuar dos cuantiles tampoco evalúa todas las propiedades de una distribución predictiva completa.
+
+<details>
+<summary>Comprueba el empate de puntuación esperada en la ley estipulada</summary>
+
+Con límites tres y nueve en el modelo de cinco valores, las puntuaciones son dieciséis, seis, seis, seis y dieciséis. Al ponderarlas obtenemos
+
+$$\frac{16+2\times6+4\times6+2\times6+16}{10}=8.$$
+
+Los intervalos $[2,10]$ y $[4,8]$ también tienen puntuación esperada ocho. Aquí los cuantiles no son únicos; un empate de puntuación esperada es compatible con coberturas distintas al incluir los extremos. No indica que debas dar un intervalo más ancho para toda tarea real.
+
+Para una demostración finita directa, escribe la puntuación esperada como $A(l)+B(u)$, donde
+
+$$A(l)=-l+\sum_i w_i\max(l-y_i,0),\qquad B(u)=u+\sum_i w_i\max(y_i-u,0).$$
+
+Aquí $w_i$ son los recuentos enteros de la tabla. Dividirlos por diez da los pesos de probabilidad; ese denominador se cancela con el multiplicador de penalización diez. Para $2\le l\le4$, $A(l)=-2$; por debajo de dos es mayor y, por encima de cuatro, las contribuciones de los dos primeros valores del soporte ya dan $A(l)\ge2l-10>-2$. Para $8\le u\le10$, $B(u)=10$; por encima de diez es mayor y, por debajo de ocho, las dos últimas contribuciones dan $B(u)\ge26-2u>10$. Por tanto, la puntuación esperada mínima es ocho y se alcanza en todo ese rectángulo de límites. La demostración se refiere a esta ley estipulada, no a un modelo real de pronóstico que sea el único mejor.
+
+</details>
+
+### Cuándo es útil una puntuación
+
+Declara la regla, el nivel nominal, los casos incluidos y los pesos antes de comparar métodos. Distintos criterios de pérdida pueden ordenar los métodos de otra manera. La puntuación de un pronóstico no es automáticamente el coste operativo de actuar según él.
+
+## Compara el registro completo fijado de antemano
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Todos los intervalos emitidos de una tanda pequeña contienen su resultado. ¿Demuestra que los rangos eran demasiado anchos?"
+  options={[{"text":"Sí; la etiqueta exige un fallo en cada tanda."},{"text":"No; el recuento finito fluctúa y no diagnostica la anchura por sí solo.","correct":true},{"text":"Sí; la calibración prohíbe tandas con todos los aciertos."},{"text":"No; no pueden evaluarse los intervalos predictivos."}]}
+  explanation="Se evalúa la cobertura con registros, pero un conjunto pequeño da evidencia incierta sobre una población. Un modelo probabilístico correcto puede producir todos los aciertos."
+  pretest={true}
+/>
+
+Tres reglas emitieron intervalos centrales del ochenta por ciento para las mismas seis tareas. N usó $[4,8]$, M usó $[3,10]$ y W usó $[2,12]$. Los tiempos transcurridos fueron cuatro, cinco, seis, siete, nueve y once horas. Son un conjunto ficticio y completo de evaluación; no se afirma que procedan de la ley de cinco valores anterior. Cada registro tiene el mismo peso y ninguna regla cambia tras los resultados.
+
+| Regla | Anchura total en seis casos | Penalización exterior total | Aciertos | Puntuación total | Media exacta |
+|---|---:|---:|---:|---:|---:|
+| N | 24 | 40 | 4/6 | 64 | 32/3 |
+| M | 42 | 10 | 5/6 | 52 | 26/3 |
+| W | 60 | 0 | 6/6 | 60 | 10 |
+
+M tiene la menor puntuación total y media en este conjunto. W acumula más aciertos. Ninguna afirmación implica que M tenga una cobertura poblacional exacta del ochenta por ciento ni que W sea necesariamente demasiado ancha. El inspector conserva los límites emitidos; elegir otro registro muestra otra parte de la misma auditoría.
+
+<IntervalScoreAudit client:visible
+  title="Inspecciona los intervalos emitidos"
+  instructions="Los selectores conservan los pronósticos y los casos. La puntuación está en horas, no representa trabajo adicional. Menos es mejor."
+  locale="es"
+  unit="h"
+  scenarios={[{"id":"main","label":"Primer conjunto","nominalPercent":80,"records":[{"id":"F01","label":"F01","value":4},{"id":"F02","label":"F02","value":5},{"id":"F03","label":"F03","value":6},{"id":"F04","label":"F04","value":7},{"id":"F05","label":"F05","value":9},{"id":"F06","label":"F06","value":11}],"rules":[{"id":"N","label":"N","intervals":[[4,8],[4,8],[4,8],[4,8],[4,8],[4,8]]},{"id":"M","label":"M","intervals":[[3,10],[3,10],[3,10],[3,10],[3,10],[3,10]]},{"id":"W","label":"W","intervals":[[2,12],[2,12],[2,12],[2,12],[2,12],[2,12]]}]}]}
+  labels={{"scenario":"Conjunto","rule":"Regla","record":"Registro","bounds":"Límites","outcome":"Resultado","width":"Anchura","outside":"Distancia exterior","penalty":"Penalización","score":"Puntuación","total":"Total","mean":"Media exacta","hits":"Aciertos","nominal":"Nivel central nominal","fixedScale":"Eje físico fijo: de cero a veinticuatro","intervalLegend":"Segmento grueso: intervalo emitido","outcomeLegend":"Punto: resultado resuelto; segmento discontinuo: distancia exterior","tableCaption":"Registros emparejados completos y puntuaciones de pérdida","lowest":"Menor total en este conjunto","allTied":"Todos los totales de este conjunto empatan","reset":"Volver a la vista inicial","summaryTemplate":"{rule}: total {total}; media {mean}; aciertos {hits}/{count}."}}
+/>
+
+Seis casos no determinan la cobertura de una población. Como cálculo aparte, supón que seis indicadores de acierto son independientes y que cada uno tiene probabilidad real $0.8$. Los seis aciertan con probabilidad $0.8^6=0.262144$: alrededor del veintiséis por ciento. Con probabilidad $0.9$ por acierto independiente, los seis aciertan con probabilidad $0.9^6=0.531441$. Que una tanda pequeña acierte siempre puede ser bastante corriente. Estas cifras exigen los supuestos de independencia y probabilidad común indicados; el conjunto evaluado no los establece por sí solo.
+
+Registra los fallos y examina dónde aparecen: pueden importar el horizonte, el tipo de tarea, los cambios de condiciones y la dependencia. Un patrón persistente en casos posteriores comparables es evidencia que investigar, no permiso para multiplicar las anchuras por una razón de fallos. Si ajustas una regla con estos resultados, identifícalo como desarrollo y fíjala antes de otra evaluación. Conserva todos los casos incluidos y compara candidatos con los mismos pesos.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="¿Qué afirmaciones permite el primer conjunto completo? Selecciona todas las correctas."
+  options={[{"text":"M tiene la menor puntuación media bajo el criterio elegido.","correct":true},{"text":"W demuestra una cobertura poblacional excesiva."},{"text":"W acumula más aciertos observados.","correct":true},{"text":"M tiene garantizado superar a las otras en tareas posteriores."}]}
+  explanation="Las medias exactas ordenan M, W, N; los aciertos observados ordenan W, M, N. No establecen calibración poblacional ni superioridad posterior."
+  allowMultiple={true}
+/>
+
+### Cuándo repetir la evaluación
+
+Repítela con resultados posteriores comparables y después de cambios relevantes del proceso. Comunica el recuento observado, el tamaño de la muestra, el sentido de la puntuación y los límites. No deduzcas competencia profesional, intención honesta ni cobertura futura de una sola tabla finita.
+
+## Prueba con otro conjunto
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Antes de comprobar el nuevo conjunto, ¿debe seguir siendo mejor la anchura favorecida en el primero?"
+  options={[{"text":"Sí; esta puntuación siempre favorece anchuras intermedias."},{"text":"Sí; una regla más ancha no puede ganar."},{"text":"No; los intervalos candidatos fijos y los resultados resueltos determinan esta comparación.","correct":true},{"text":"No; puede cambiarse el nivel nominal tras ver los resultados."}]}
+  explanation="Mantén objetivo y criterio. Otro conjunto emparejado puede dar una clasificación distinta sin autorizar cambios retrospectivos."
+  pretest={true}
+/>
+
+Mantén la misma puntuación central del ochenta por ciento y los extremos incluidos. Otro conjunto completo tiene tiempos de dos, tres, seis y nueve horas. La regla A emitió $[2,6]$ para cada caso; B emitió $[1,10]$. Ambas se fijaron antes de los resultados. Compara sus puntuaciones totales y medias y di con precisión qué permite concluir la clasificación.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Calcula el segundo conjunto con el criterio dado. ¿Qué comparación es correcta?"
+  options={[{"text":"A suma treinta y seis; B suma cuarenta y seis."},{"text":"A suma cuarenta y seis; B suma treinta y seis.","correct":true},{"text":"Ambas suman treinta y seis porque llevan la misma etiqueta."},{"text":"Ambas suman cuarenta y seis porque solo cuentan los fallos."}]}
+  explanation="A tiene tres puntuaciones de 4 y una de 34: total 46. B puntúa 9 en cuatro casos: total 36. B es menor aquí; la conclusión se limita a estos casos y esta puntuación."
+/>
+
+<details>
+<summary>Comprueba el segundo conjunto</summary>
+
+A puntúa cuatro, cuatro, cuatro y treinta y cuatro: total cuarenta y seis y media $23/2$. B puntúa nueve en cada caso: total treinta y seis y media nueve. La B más ancha obtiene la menor puntuación en este conjunto. No contradice al primero; cambian los resultados y los intervalos propuestos.
+
+<IntervalScoreAudit client:visible
+  title="Inspecciona los intervalos emitidos"
+  instructions="Los selectores conservan los pronósticos y los casos. La puntuación está en horas, no representa trabajo adicional. Menos es mejor."
+  locale="es"
+  unit="h"
+  scenarios={[{"id":"transfer","label":"Segundo conjunto","nominalPercent":80,"records":[{"id":"T01","label":"T01","value":2},{"id":"T02","label":"T02","value":3},{"id":"T03","label":"T03","value":6},{"id":"T04","label":"T04","value":9}],"rules":[{"id":"A","label":"A","intervals":[[2,6],[2,6],[2,6],[2,6]]},{"id":"B","label":"B","intervals":[[1,10],[1,10],[1,10],[1,10]]}]}]}
+  labels={{"scenario":"Conjunto","rule":"Regla","record":"Registro","bounds":"Límites","outcome":"Resultado","width":"Anchura","outside":"Distancia exterior","penalty":"Penalización","score":"Puntuación","total":"Total","mean":"Media exacta","hits":"Aciertos","nominal":"Nivel central nominal","fixedScale":"Eje físico fijo: de cero a veinticuatro","intervalLegend":"Segmento grueso: intervalo emitido","outcomeLegend":"Punto: resultado resuelto; segmento discontinuo: distancia exterior","tableCaption":"Registros emparejados completos y puntuaciones de pérdida","lowest":"Menor total en este conjunto","allTied":"Todos los totales de este conjunto empatan","reset":"Volver a la vista inicial","summaryTemplate":"{rule}: total {total}; media {mean}; aciertos {hits}/{count}."}}
+/>
+
+A acierta tres de cuatro; B, cuatro de cuatro. Son fracciones descriptivas. No demuestran la probabilidad del siguiente intervalo ni un resultado de calibración poblacional. Cambiar los extremos después de ver estos resultados crearía una nueva regla ajustada; no mejoraría retroactivamente el pronóstico registrado.
+
+</details>
+
+Comunica el pronóstico con su objetivo, horizonte, límites, interpretación nominal y supuestos. Una decisión también necesita consecuencias, acciones factibles y el criterio de servicio o pérdida pertinente. Un intervalo del ochenta por ciento no es un colchón universal de seguridad ni garantiza que no se supere su límite superior.
+
+## Reconstruye la auditoría
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de leer"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Recupera la distinción: ¿qué cantidades añade la puntuación a la información binaria de estar dentro?"
+  options={[{"text":"Los identificadores declarados de los casos."},{"text":"El número de resultados del denominador."},{"text":"El horizonte emitido."},{"text":"Las anchuras y las distancias de los fallos al intervalo.","correct":true}]}
+  explanation="El acierto binario registra si el resultado está dentro. La puntuación de intervalo también considera la anchura y la distancia exterior."
+  pretest={true}
+/>
+
+<MindMap client:visible
+  title="La auditoría de intervalos"
+  eyebrow=""
+  outlineLabel="Esquema textual"
+  root={{"label":"Evaluar un rango emitido","children":[{"label":"Objetivo","children":[{"label":"Valor fijo desconocido, observación futura o parámetro poblacional."},{"label":"Declara la interpretación, los límites y los extremos incluidos."}]},{"label":"Cuantiles","children":[{"label":"Central se refiere a las colas, no a distancias simétricas."},{"label":"Un modelo discreto puede tener cuantiles empatados."}]},{"label":"Puntuación","children":[{"label":"Suma anchura y penalización por distancia exterior."},{"label":"Menos es mejor bajo el mismo nivel y criterio."}]},{"label":"Evaluación","children":[{"label":"Conserva reglas, casos y pesos fijados."},{"label":"Comunica recuentos y medias sin garantías poblacionales."}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title="Comprueba las distinciones"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No exactamente"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="bien"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Has acertado todas las preguntas de este cuestionario."
+  goodMessage="Revisa las explicaciones de las preguntas falladas."
+  keepPracticingMessage="Repasa los ejemplos y sus explicaciones."
+  gateLabel="Comprueba la respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Atrás"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar cuestionario"
+  questions={[{"question":"Un resultado cae exactamente en un límite emitido. ¿Qué ocurre bajo la regla indicada?","options":[{"text":"Está fuera y recibe toda la penalización de cola."},{"text":"Está dentro; su penalización por distancia exterior es cero.","correct":true},{"text":"Debe descartarse el intervalo."},{"text":"Su puntuación es automáticamente cero."}],"explanation":"Los límites cerrados incluyen la igualdad. La puntuación conserva la anchura: acertar en el extremo no implica pérdida cero."},{"question":"En el primer conjunto, ¿qué media exacta corresponde a M?","options":[{"text":"Treinta y dos tercios."},{"text":"Diez."},{"text":"Veintiséis tercios.","correct":true},{"text":"Cincuenta y dos."}],"explanation":"M suma 52 en 6 registros con el mismo peso:52/6=26/3. Cincuenta y dos es el total, no la media."},{"question":"¿Qué implica el modelo indicado de aciertos independientes sobre una tanda que acierta todo?","options":[{"text":"Tiene probabilidad positiva aunque la cobertura real por caso coincida con el nivel nominal.","correct":true},{"text":"Demuestra que los casos del primer conjunto eran independientes."},{"text":"Exige que toda tanda posterior incluya un fallo."},{"text":"Muestra que ensanchar siempre es un error."}],"explanation":"La probabilidad se calcula bajo otro modelo independiente declarado. No identifica ese modelo a partir del conjunto ni crea fallos pendientes de compensar."},{"question":"¿Qué decisiones conservan la interpretación de esta auditoría? Selecciona todas las correctas.","options":[{"text":"Fijar límites y puntuación antes de evaluar.","correct":true},{"text":"Eliminar un caso si empeora la regla preferida."},{"text":"Usar los mismos casos incluidos y pesos en ambos métodos.","correct":true},{"text":"Ajustar con los resultados y llamar validación independiente al mismo conjunto."}],"explanation":"La comparación emparejada fijada conserva reglas, denominador y pesos. Ajustar produce datos de desarrollo, no una evaluación independiente.","allowMultiple":true},{"question":"Un modelo discreto admite varios cuantiles óptimos. ¿Qué debe evitar afirmar el informe?","options":[{"text":"Que el intervalo elegido tiene extremos explícitos."},{"text":"Que puede calcularse su puntuación esperada."},{"text":"Que puede declararse una convención de extremos."},{"text":"Que se ha establecido una única distribución predictiva completa como la mejor.","correct":true}],"explanation":"Se puntúan los cuantiles declarados. La ley construida tiene cuantiles empatados y coberturas que pueden diferir al incluir los extremos."},{"question":"¿Qué información adicional hace falta para convertir un pronóstico en una recomendación de acción?","options":[{"text":"Solo la anchura visual."},{"text":"Acciones factibles, consecuencias y el criterio de decisión pertinente.","correct":true},{"text":"Afirmar que los extremos son límites absolutos."},{"text":"Un cambio retrospectivo que garantice el acierto."}],"explanation":"La puntuación evalúa un informe. Elegir una acción necesita sus propias pérdidas, restricciones y consecuencias."}]}
+/>
+
+### Fuentes y alcance
+
+[Gneiting y Raftery](https://sites.stat.washington.edu/raftery/Research/PDF/Gneiting2007jasa.pdf), secciones 6.1–6.2, estudian los pronósticos de cuantiles y la puntuación de intervalo. Sus supuestos de cuantiles continuos no se imponen sin decirlo a nuestro ejemplo discreto; sus empates de puntuación esperada se comprueban directamente. [Bracher y sus colaboradores](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008618), sección 2.2, explican los componentes de anchura y fallo para intervalos predictivos centrales. Aquí no se usan datos sanitarios empíricos, ajustes de pronósticos ni resultados de intervenciones.
+
+La [interpretación de los intervalos de confianza de NIST](https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm) y su [explicación de la predicción](https://itl.nist.gov/div898/handbook/pmd/section5/pmd512.htm) distinguen la incertidumbre sobre un parámetro de la de una observación futura. Todos los tiempos, límites y pesos son construidos. Las cuentas establecen comparaciones finitas de puntuación, no cobertura o seguridad garantizadas.
+
+Continúa con [Calibrarse](/es/calibration-and-confidence/05-getting-calibrated), donde el registro se convierte en una práctica de evaluación continuada.

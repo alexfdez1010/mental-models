@@ -1,343 +1,263 @@
 ---
 title: "Thinking in Ranges"
-description: "Turn false-precision point estimates into honest confidence intervals: why your first error bar is always too narrow, how to widen it, and how to size a margin of safety to the range."
+description: "Define an interval’s target, score width and misses, and compare complete records without treating a few hits as proof of calibration."
 topic: "en/calibration-and-confidence"
 order: 5
-minutes: 10
-updated: 2026-06-29
+minutes: 18
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, Callout, Reveal } from '@/components/react';
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, RateComparison, IntervalScoreAudit } from '@/components/react';
 
-Back in lesson 2 you met **overprecision** — the quieter, nastier face of
-overconfidence. Not "my guess is too high," but "my error bars are too narrow."
-You watched the famous 90% interval test catch the truth only about half the time:
-people draw ranges so tight that reality slips out the side. This lesson is the
-antidote, and it is gloriously practical. Overprecision is a habit, and habits have
-cures. The cure is learning to think — and to *answer* — in **ranges**.
+You record an eighty-percent interval, then wait for the outcome. What would count as a good forecast: a narrow range, a hit, or the smallest error score? These questions need different information. This lesson makes the evaluation rule explicit before comparing the forecasts.
 
-You already learned in *Thinking in Probabilities* that a range beats a single guess.
-Here we go one level deeper: not just "use a range," but how to calibrate its
-**width** so the range tells the honest truth about what you don't know.
+The example is constructed: six export jobs, their issued ranges and their resolved elapsed times. No interval is fitted to the outcomes below. You will compare the complete paired record, then try a different collection.
 
-<MCQ
-  client:visible
-  pretest
-  question="You're asked for next quarter's revenue. Which answer is the most honest reflection of what you actually know?"
-  options={[
-    { text: '“About 4 million, but I’m 80% sure the real number lands between 3 and 6 million.”', correct: true },
-    { text: '“4.0 million.”' },
-    { text: '“4.2718 million.”' },
-    { text: '“I have no idea, could be anything.”' },
-  ]}
-  explanation="No penalty on a pretest. A bare point estimate (“4.0 million”) hides every bit of your uncertainty and is almost certainly wrong to the dollar — and the extra decimals in “4.2718” are false precision dressed up as rigor. “No idea” throws away the real information you do have. The honest answer states a center AND a range with a confidence attached: that range is the actual content of your knowledge. That's the whole lesson."
+## Say what the interval is about
+
+<MCQ client:visible
+  className="not-prose"
+  question="A range is labelled as a confidence interval. What must you check before interpreting the label?"
+  options={[{"text":"Whether the range looks reassuringly wide."},{"text":"Its target, construction and intended probability statement.","correct":true},{"text":"Whether its midpoint has several decimal places."},{"text":"Whether its endpoints happened to contain one outcome."}]}
+  explanation="A future observation, an unknown fixed value and a population parameter need different interpretations. A label or one hit cannot supply the construction."
+  pretest={true}
 />
 
-## A point estimate is a confident lie
+A **point forecast** gives one value, such as six hours for the next job. It can be a useful summary and can be scored. An **interval** gives lower and upper bounds, but the bounds need a target and an interpretation.
 
-When someone asks "how long will this take?" and you say **"three weeks,"** you have
-just told a small, confident lie. Not because you're dishonest — because the true
-answer was never a single number. It was a spread of possible outcomes, and you
-flattened it into a point to sound decisive. A **point estimate** is one number with
-no width. It looks crisp and authoritative, and it is wrong essentially every time:
-the project takes 19 days, or 26, or 41, but never *exactly* the 21 you named.
+| Statement | Target and meaning |
+|---|---|
+| “My belief assigns eighty percent to this range for an unknown completed job’s duration.” | A subjective uncertainty statement about a fixed but unseen value. |
+| “This range is issued for the next job’s elapsed time.” | A prediction interval for a future observation; state its intended coverage and how it was constructed. |
+| “This sampling rule covers the process mean in ninety percent of repeated samples under the model.” | A confidence-interval coverage statement about a fixed population parameter and random bounds. |
 
-The honest alternative is a **confidence interval** (also called an **error bar**): a
-*range* together with a *stated probability* that the true value falls inside it.
-"80% sure: 3 to 5 weeks" is a confidence interval. It carries two pieces of
-information the point estimate threw away — how wide your uncertainty is, and how sure
-you are about that width.
+A predictive interval can express a subjective model: “subjective” and “predictive” are not opposites. A Bayesian credible interval instead refers to posterior probability under a specified prior and likelihood. Do not claim that a frequentist confidence interval gives that posterior probability merely because its endpoints are now known. Nor does the visual shape of an error bar tell you what it represents; read its legend.
 
-Think of it like a weather forecast. "It will be 22 degrees tomorrow" is a point
-estimate, and it will be wrong. "18 to 25, and I'd be surprised to be outside that" is
-an error bar, and it can be *right*. The forecast didn't get vaguer — it got honest.
+For the forecast audit, record the job ID, the forecast’s issue time, the elapsed-time definition, the horizon, the bounds and the nominal level. Say whether boundary values count as hits. Here they do: the interval is closed, so an outcome on either bound is inside.
 
-<Callout variant="tip" title="The one-line definition">
-A **confidence interval** is a range *plus* a probability: "I'm **C%** sure the true
-value is between **L** and **H**." The number C is a promise you can be graded on,
-exactly like the probabilities in lesson 1 — over many such intervals, a calibrated
-80% interval should contain the truth about 80% of the time.
-</Callout>
-
-### When to use it
-
-Reach for an interval the moment a single number would be acted on as if it were
-certain — budgets, deadlines, forecasts, engineering loads, medical prognoses. The
-test: *if I'm wrong about this number, does it cost something?* If yes, the width of
-your uncertainty is part of the answer, and hiding it inside a point estimate just
-hides the risk. Keep the point estimate for genuinely trivial, low-stakes guesses
-where nobody will build on the number.
-
-<MCQ
-  client:visible
-  question="What exactly distinguishes a confidence interval from a plain point estimate?"
-  options={[
-    { text: 'It states a range AND a probability that the true value lies inside it', correct: true },
-    { text: 'It is always wider, so it is always safer to use' },
-    { text: 'It guarantees the true value is inside the range', correct: false },
-    { text: 'It replaces the number with the word “probably”' },
-  ]}
-  explanation="An interval carries two facts a point estimate lacks: a width (the range L to H) and a confidence (the probability C that the truth is inside). It does NOT guarantee anything — an 80% interval is meant to miss about 1 time in 5. That stated probability is the part you can score, which is what makes intervals honest rather than merely vague."
+<MatchConcepts client:visible
+  className="not-prose"
+  question="Match each statement to its target."
+  pairs={[{"term":"Prediction interval","definition":"Issued range for a future observation."},{"term":"Confidence coverage","definition":"Property of an interval rule under repeated sampling."},{"term":"Subjective belief","definition":"Probability expressed under the reporter’s information and model."}]}
 />
 
-## Your first interval is always too narrow
+### When to use the distinction
 
-Here is the universal bug, and naming it is half the fix: **the first interval you
-write down is too narrow.** Overprecision isn't a flaw in unusual people; it's the
-default setting of the human estimator. Your brain anchors on the number that comes
-to mind, sprinkles a little width around it to feel humble, and stops — far too soon.
+Check the target before interpreting a percentage. Uncertainty about a process mean is not the same quantity as variation in its next observation. The next observation may fall outside an issued prediction interval; the endpoints are not absolute limits.
 
-So the cure is mechanical: **draw your interval, then deliberately widen it.** The
-single best widening move is to ask one question — *"what could put the answer*
-**outside** *this range?"* — and keep stretching the bounds until you'd be genuinely
-**surprised** to be wrong, not merely a little uncomfortable.
+## Give the two tails a meaning
 
-Let's estimate something nobody memorized: **the weight of an adult blue whale.**
-
-| Stage | Low | High | Reasoning |
-|---|---|---|---|
-| First instinct (too narrow) | 50 tons | 80 tons | "Big animal, biggish number." |
-| Ask: what's outside this? | — | — | Calves are far lighter; record bulls are far heavier; my units could be off. |
-| Widened interval | 40 tons | 200 tons | Now I'd genuinely be surprised to miss. |
-
-A typical blue whale weighs around **140 tons**. The cramped first guess of 50 to 80
-**misses badly** — the truth was never even close to inside it. The widened 40-to-200
-interval **contains the truth** comfortably. Notice what widening cost you: almost
-nothing. A wider range is mildly less impressive at a dinner party and dramatically
-more likely to be *right*. That trade is one you should take nearly every time.
-
-<Callout variant="warning" title="Widening is not cheating">
-It feels like giving up to stretch "50 to 80" out to "40 to 200." It isn't — it's the
-opposite of giving up. A narrow interval that misses taught you nothing and lied to
-whoever trusted it. A wide interval that contains the truth is doing its only job. If
-widening your range feels like weakness, that feeling *is* the overprecision talking.
-</Callout>
-
-### When to use it
-
-Every single time you produce an interval, run the widening pass — it's free and it's
-where the calibration actually happens. It matters most exactly where it feels worst:
-on questions you feel you *should* know (the hard-easy effect from lesson 2 means
-experts get overprecise on their own turf). The more confident the first interval
-feels, the more it needs the "what's outside this?" interrogation.
-
-<MCQ
-  client:visible
-  question="Your honest 90% interval for a quantity feels embarrassingly wide. What does that most likely mean?"
-  options={[
-    { text: 'It might finally be about the right width — narrow intervals are the usual error, not wide ones', correct: true },
-    { text: 'You clearly know nothing and should not answer' },
-    { text: 'You should shrink it so you look more competent' },
-    { text: 'Wide intervals are always better, regardless of the question' },
-  ]}
-  explanation="The reflex to shrink a wide interval “to look competent” is precisely the overprecision that makes most people's 90% ranges catch the truth only half the time. A range that feels uncomfortably wide is often the first honest one. (Wide isn't automatically virtuous either — a calibrated interval is as narrow as it can be while still catching the truth at the stated rate. The fix for overprecision is widening toward honesty, not infinite hedging.)"
+<MCQ client:visible
+  className="not-prose"
+  question="Must a central prediction interval be equally distant from the point forecast on each side?"
+  options={[{"text":"Yes; central means geometric symmetry."},{"text":"Yes; both bounds must be equally close to the mean."},{"text":"No; central refers to the two tail probabilities.","correct":true},{"text":"No; central intervals have no probability interpretation."}]}
+  explanation="Equal tail probabilities need not give equal distances. The declared predictive law determines the quantiles."
+  pretest={true}
 />
 
-## The 90% interval discipline
+A **quantile** marks a cumulative-probability level. For a central eighty-percent prediction interval, the intended lower and upper levels are one tenth and nine tenths. “Central” refers to tail probabilities, not equal distances from a point estimate or a shortest-width interval.
 
-You can't feel your way to calibration; you have to *measure* it. Here's the drill.
-For a batch of estimates, set every interval to your honest **90% confidence** level.
-The promise baked into "90%" is simple and testable: across the batch, you should
-**miss about 1 in 10.** Get ten of them, expect to miss one. If you're missing four
-or five out of ten, your ranges are systematically too tight — that's overprecision,
-quantified, staring back at you.
+Use this separate stipulated probability model to see the accounting. It is not a model fitted to the six-job audit that follows.
 
-A clean trick for *building* each interval is the **absolute-pairs technique**: don't
-think about the range as a whole. Think about the two bounds **separately**.
+| Possible elapsed time, hours | Weight out of ten |
+|---:|---:|
+| 2 | 1 |
+| 4 | 2 |
+| 6 | 4 |
+| 8 | 2 |
+| 10 | 1 |
 
-- Pick a **low** bound you are **95% sure is too low** — the truth is almost certainly
-  above it.
-- Pick a **high** bound you are **95% sure is too high** — the truth is almost
-  certainly below it.
+Choose bounds three and nine. One tenth lies strictly below three; one tenth lies strictly above nine. The remaining eight tenths lie inside. These are model probabilities, not observed frequencies from ten experiments.
 
-Stitch those two together and you get an interval that's roughly 90% likely to contain
-the answer (about 5% of the probability leaks out each end). Treating the bounds one at
-a time defeats the brain's instinct to hug the anchor, because you're now actively
-hunting for a number low enough — and a number high enough — to *surprise* yourself.
-
-Here's a worked batch. Set each 90% interval, then check it against reality:
-
-| Question | [Low, High] (90%) | Truth | Hit? |
-|---|---|---|---|
-| Boiling point of water on Everest's summit (°C) | [60, 90] | 71 | Hit |
-| Year the printing press was invented | [1400, 1500] | 1440 | Hit |
-| Wingspan of a Boeing 747 (meters) | [40, 80] | 68 | Hit |
-| Number of bones in the adult human body | [180, 230] | 206 | Hit |
-| Length of the Nile (km) | [5,000, 7,500] | 6,650 | Hit |
-| Population of Australia, 2023 (millions) | [15, 22] | 26 | Miss |
-
-Five hits, one miss out of six — a hit rate of about **83%**. For a *90%* interval
-that's a touch low but respectable: on a longer batch you'd want to nudge the ranges a
-hair wider so the long-run hit rate climbs toward 90%. The Australia miss is the
-tell — the high bound (22) was anchored too low; a 95%-too-high bound would have sat
-nearer 30. One miss diagnosed; widen and re-aim.
-
-<Reveal client:visible buttonText="Why aim to miss 1 in 10, instead of never missing?">
-Because an interval you *never* miss is uselessly wide. If you set every range to
-"between zero and infinity," you'd be right 100% of the time and have said nothing.
-Calibration is a balancing act: the interval should be **as narrow as possible while
-still catching the truth at the rate you claimed.** A 90% interval that genuinely
-misses 1 in 10 is carrying the maximum useful information consistent with being
-honest. Missing none means you over-widened; missing four means you under-widened.
-"About 1 in 10" is the sweet spot the discipline is tuning you toward.
-</Reveal>
-
-### When to use it
-
-Run the full batch-and-score drill periodically as *training* — ten or twenty
-estimable facts, scored honestly — to find out which way your ranges are biased and by
-how much. Use the absolute-pairs technique on *every* individual interval you build,
-all the time; it costs ten seconds and it's the most reliable single defense against
-overprecision you have.
-
-## Ranges don't have to be symmetric
-
-A quick but important refinement: an honest interval is **not** always centered on
-your best guess. Reality is often lopsided, and your range should be too. The downside
-and the upside can simply differ.
-
-The cleanest example is **project timelines**. Tasks can finish a little early — but
-they can run *enormously* late, because everything that goes wrong adds delay and
-almost nothing that goes right subtracts it. So a realistic interval for "three weeks"
-might be **2.5 to 8 weeks**: barely any room below, a long tail above. That long
-right tail is the **planning fallacy** and **fat tails** wearing work clothes —
-estimates skew long for the same structural reason extreme events cluster in the tail.
-Don't force a symmetric range onto an asymmetric world; put the width where the
-surprises actually live.
-
-<MCQ
-  client:visible
-  question="Why is an honest interval for a project deadline usually lopsided, with a long tail on the high side?"
-  options={[
-    { text: 'Things that go wrong add delay while things that go right rarely subtract much, so the downside risk is mostly “later”', correct: true },
-    { text: 'People are pessimists and exaggerate how late things run' },
-    { text: 'Deadlines are random, so any shape of interval is equally valid' },
-    { text: 'Symmetric intervals are mathematically forbidden' },
-  ]}
-  explanation="Schedules skew long because the failure modes are asymmetric: a dozen small things can each push a task later, but almost nothing pushes it dramatically earlier. That's the planning fallacy, and it's the same fat-tailed structure you meet elsewhere — a long right tail of bad surprises. An honest interval mirrors that shape: little room below the estimate, a lot above."
+<RateComparison client:visible
+  locale="en"
+  title="The stipulated model’s two tails"
+  scenarioLabel="Comparison"
+  countsLabel="Model weights, not observed experiments"
+  differenceLabel="First probability minus second"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{"label":"Interval from three to nine","groups":[{"label":"Below three","events":1,"total":10},{"label":"Above nine","events":1,"total":10}]}]}
 />
 
-## Ranges are the input to margin of safety
+Discrete probability needs a boundary convention. Here an admissible quantile report $q$ at level $\tau$ satisfies
 
-Now the payoff — the reason this skill is worth the trouble. Your honest error bar is
-exactly what tells you **how big a buffer to leave.** This is the **margin of safety**
-model (the subject of its own course), made quantitative. Engineers, investors, and
-planners don't size their buffer to the *midpoint* of an estimate — they size it to
-the **width of the uncertainty** around it. A calibrated interval is the number that
-makes margin of safety a calculation instead of a vibe.
+$$P(Y<q)\le\tau\le P(Y\le q).$$
 
-The logic is direct: margin of safety is the gap between what you *can* withstand and
-what you *expect* to face. But "what you expect to face" isn't a point — it's a
-range. The bigger the range, the bigger the buffer you need to stay safe across all of
-it. **A point estimate can't size a margin of safety at all**, because it has no
-width; only an interval can.
+There may be several such reports. For this law, every lower bound from two through four is a one-tenth quantile, and every upper bound from eight through ten is a nine-tenths quantile. The chosen interval has exactly eighty-percent mass; the closed interval from two to ten has all the mass. Do not assume that every discrete central interval has exactly its nominal inclusive coverage.
 
-Worked example — a **pedestrian bridge**. Suppose your *point estimate* of peak load
-is 8 tons. Tempting to build for, say, 10 and call it a comfortable 25% margin. But
-the point estimate hid the real question. Your honest 90% interval for peak load,
-after widening and thinking about crowd surges, festivals, and the occasional small
-truck, is **6 to 14 tons.**
-
-| Approach | Design load | Margin over... | Problem |
-|---|---|---|---|
-| Buffer the point estimate | 10 tons | the 8-ton *guess* | A 13-ton festival crowd collapses it. |
-| Buffer the interval's top | 14 tons, then add margin → ~18 tons | the *14-ton high bound* | Sized to the real worst case you'll plausibly see. |
-
-The first design looks prudent and is secretly fragile: it bought margin against a
-number you already knew was wrong. The second sizes the buffer to the **top of the
-honest range** — it survives the whole interval, not just the midpoint. Same idea
-sizes a **budget**: if your costs are "80% sure: 3 to 6 million," you don't reserve a
-buffer on top of 4 — you fund toward the **6**, because that's where your own honest
-range told you the danger lives. The interval did the hard part; margin of safety just
-reads the answer off the top end.
-
-<Callout variant="info" title="The chain in one line">
-Calibrated probability → honest interval → its **width** → the **margin of safety** you
-need. Get the interval too narrow (overprecision) and every buffer you build on top of
-it is too small. Overprecision isn't just an estimation error — it's a *safety* error,
-because it shrinks the very number your buffer is supposed to be sized against.
-</Callout>
-
-### When to use it
-
-Whenever a decision needs a buffer — a structural load, a cash reserve, a schedule
-slack, a position size — build the calibrated interval *first*, then size the margin
-to its width (and to the *worst* relevant end of an asymmetric range). If you find
-yourself adding a buffer to a single point number, stop: you skipped the step that
-tells you how big the buffer should actually be.
-
-## Saying it out loud
-
-One last, quieter skill: communicating the range without flinching. "**3 to 6 million,
-80% confident**" is more useful than a crisp "4.2 million" — it hands the listener your
-actual uncertainty so *they* can size their own decisions and buffers. The crisp
-number feels more competent and informs worse.
-
-The hard part isn't drawing the range; it's the **social pressure to collapse it**.
-Rooms reward the person who bangs the table with one confident number and quietly
-distrust "it's somewhere between 3 and 6." Resisting that pull — staying honest about
-width when everyone wants false precision — is its own discipline. It's the deep
-tension between sounding decisive and being calibrated, and it's exactly where the
-next lesson picks up.
-
-## Recap
-
-<Quiz
-  client:visible
-  questions={[
-    {
-      question: 'What is the practical cure for overprecision when you make an estimate?',
-      options: [
-        { text: 'Draw your interval, then deliberately widen it by asking “what could put the answer outside this range?” until you’d be surprised to be wrong', correct: true },
-        { text: 'Add more decimal places to the point estimate' },
-        { text: 'Pick the single number you feel most confident about' },
-        { text: 'Refuse to estimate until you have perfect information' },
-      ],
-      explanation: 'Your first interval is reliably too narrow, so the fix is mechanical: widen it. The “what could put the answer outside this range?” question forces you to hunt for the failure modes your anchor hid, and you stretch until being wrong would genuinely surprise you.',
-    },
-    {
-      question: 'You set ten 90% intervals and only 5 of them contained the truth. What does that tell you?',
-      options: [
-        { text: 'Your ranges are systematically too narrow — overprecision — and need widening', correct: true },
-        { text: 'You are well calibrated; 5 out of 10 is fine for a 90% interval' },
-        { text: 'Your ranges are too wide and should be tightened' },
-        { text: 'Nothing — a 90% interval can never be checked' },
-      ],
-      explanation: 'A calibrated 90% interval should catch the truth about 9 times in 10. Catching it only 5 times means your intervals are far too tight — textbook overprecision. The drill is exactly this: score a batch, see the gap, and widen until the long-run hit rate climbs toward 90%.',
-    },
-    {
-      question: 'Using the absolute-pairs technique, how should you pick the LOW bound of a 90% interval?',
-      options: [
-        { text: 'Choose a value you are about 95% sure is too low (the truth is almost certainly above it)', correct: true },
-        { text: 'Choose your best single guess and subtract 10%' },
-        { text: 'Choose the lowest number that still feels comfortable' },
-        { text: 'Choose a value you are 50% sure is too low' },
-      ],
-      explanation: 'The trick is to size the two bounds separately. A low bound you’re ~95% sure is too low, paired with a high bound you’re ~95% sure is too high, leaks about 5% out each end and brackets roughly a 90% interval — while defeating the brain’s habit of hugging the anchor.',
-    },
-    {
-      question: 'A calibrated 90% interval for a bridge’s peak load is 6 to 14 tons. How does margin of safety use this?',
-      options: [
-        { text: 'Size the buffer to the top of the honest range (around 14), not to the midpoint — the margin is sized to the width of the uncertainty', correct: true },
-        { text: 'Build to the midpoint, 10 tons, since that’s the best estimate' },
-        { text: 'Ignore the range and use the original point estimate of 8 tons' },
-        { text: 'Make the interval narrower so the bridge is cheaper to build' },
-      ],
-      explanation: 'Margin of safety is sized to the WIDTH of the uncertainty, not the midpoint. A buffer built on the 8-ton point estimate is secretly fragile; sizing to the top of the honest interval (14 tons, then adding margin) survives the whole range. The calibrated interval is the input that makes the buffer quantitative.',
-    },
-  ]}
+<FillBlank client:visible
+  className="not-prose"
+  question="Complete the chosen interval’s accounting."
+  text="The two tails use mass {{strictly outside|on the included bounds|in any interval}}. A nominal level does not guarantee a {{fixed count|declared target|specified model}} in a finite batch."
+  explanation="Included endpoints are not misses. A model probability and an observed small-batch count have different roles."
 />
 
-## Where this goes next
+### When to use quantiles
 
-You can now turn a false-precision number into an honest interval, widen it past your
-overprecise first instinct, score a batch against the 90% rule, and feed its width
-straight into a **margin of safety**. What's left is turning all of this into a
-*standing practice* — and confronting the tension we just teased: being honestly
-uncertain (**calibration**) while still being decisive and useful (**resolution**).
+Use them when the forecast contract asks for tail probabilities. A skewed distribution can give unequal distances between a median and its two bounds. Skewness by itself establishes neither fat tails nor a particular project-delay mechanism.
 
-Lesson 5, **Getting Calibrated**, is the training program: tracking your predictions,
-running calibration drills, post-morteming your scores, and what the
-*superforecasters* do differently. It's where the whole course becomes a habit you
-keep — including the courage to say "3 to 6 million, 80% confident" out loud and not
-flinch.
+## Score width and outside distance
+
+<MCQ client:visible
+  className="not-prose"
+  question="A wider issued interval contains an outcome that a narrower one misses. Which result follows without calculating the declared loss?"
+  options={[{"text":"The wider one must have the lower loss."},{"text":"The narrower one must have the lower loss."},{"text":"Both must have equal losses."},{"text":"The hit alone does not determine their loss ranking.","correct":true}]}
+  explanation="Width and outside distance both enter this score. You need their quantities and the common nominal level."
+  pretest={true}
+/>
+
+A hit count ignores width and how far a miss fell outside. A range spanning everything can collect hits without giving much detail. A tiny interval can be informative when correct but miss badly. We will use the **interval score**, with lower values better, for central intervals at the same nominal level.
+
+For nominal coverage $1-\alpha$ with $0<\alpha<1$, finite ordered bounds $l\le u$ and a finite outcome $y$:
+
+$$IS_\alpha(l,u;y)=(u-l)+\frac{2}{\alpha}\max(l-y,0)+\frac{2}{\alpha}\max(y-u,0).$$
+
+At eighty percent, $\alpha=1/5$ and the penalty multiplier is ten. The score is width plus ten times the distance outside the nearest bound. Inside or exactly on a bound, that distance is zero. Scores have elapsed-time units; a penalty of thirty is a loss-score contribution, not thirty hours of extra work or observed delay.
+
+For interval $[4,8]$, the width is four. An outcome of six or eight scores four. An outcome of nine is one hour outside and scores $4+10\times1=14$. At eleven, the distance is three and the score is $4+10\times3=34$. Widening can lower an outside penalty while increasing the width term. There is no general instruction to widen every first range.
+
+<MCQ client:visible
+  className="not-prose"
+  question="Use the worked interval and its eleven-hour outcome. What is the interval score?"
+  options={[{"text":"Four, because only width counts."},{"text":"Thirty, because only the penalty counts."},{"text":"Thirty-four, adding width and penalty.","correct":true},{"text":"Fourteen, as for the one-hour miss."}]}
+  explanation="Width is 4, outside distance is 3 and the multiplier is 10:4+10×3=34. The score is a loss, so lower is better."
+/>
+
+When the predictive law has a finite expected absolute outcome, its corresponding quantile reports minimize the expected score. The score does not validate that model, establish anyone’s motives or guarantee the lowest realized score. In a discrete model, optimal reports can tie. An interval score for two quantiles also does not evaluate every feature of a full predictive distribution.
+
+<details>
+<summary>Check the expected-score tie in the stipulated law</summary>
+
+For bounds three and nine in the five-value model, scores are sixteen, six, six, six and sixteen. Weighting them gives
+
+$$\frac{16+2\times6+4\times6+2\times6+16}{10}=8.$$
+
+The intervals $[2,10]$ and $[4,8]$ also have expected score eight. In this example the quantiles are not unique; an expected-score tie is compatible with different inclusive coverages. It does not tell you to report a wider interval for every real task.
+
+For a direct finite proof, write the expected score as $A(l)+B(u)$, where
+
+$$A(l)=-l+\sum_i w_i\max(l-y_i,0),\qquad B(u)=u+\sum_i w_i\max(y_i-u,0).$$
+
+Here $w_i$ are the integer counts in the table. Dividing them by ten gives the probability weights; that denominator cancels the penalty multiplier of ten. On $2\le l\le4$, $A(l)=-2$; below two it is larger, and above four the first two support contributions already give $A(l)\ge2l-10>-2$. On $8\le u\le10$, $B(u)=10$; above ten it is larger, and below eight the last two contributions give $B(u)\ge26-2u>10$. Thus the minimum expected score is eight, attained throughout that rectangle of bounds. This proof concerns this stipulated law, not a unique best real forecasting model.
+
+</details>
+
+### When a score is useful
+
+Declare the score, nominal level, eligible cases and weights before comparing methods. Different loss criteria can rank methods differently. A forecast score is not automatically the operational cost of acting on it.
+
+## Compare the complete frozen record
+
+<MCQ client:visible
+  className="not-prose"
+  question="Every issued interval in a small batch contains its outcome. Does that establish that the ranges were too wide?"
+  options={[{"text":"Yes; the label requires a miss in every batch."},{"text":"No; a finite hit count fluctuates and does not diagnose width by itself.","correct":true},{"text":"Yes; calibration forbids all-hit batches."},{"text":"No; interval forecasts cannot be evaluated."}]}
+  explanation="Coverage is evaluated from records, but a small collection is uncertain evidence about a population. All hits can occur under a correctly specified probability model."
+  pretest={true}
+/>
+
+Three rules issued central eighty-percent intervals for the same six jobs. N used $[4,8]$, M used $[3,10]$, W used $[2,12]$. The elapsed times were four, five, six, seven, nine and eleven hours. They are a fictional complete evaluation panel, not draws claimed to follow the separate five-value law. Every record has equal weight; no rule changes after the outcomes.
+
+| Rule | Total width over six | Total outside penalty | Hits | Total score | Exact mean score |
+|---|---:|---:|---:|---:|---:|
+| N | 24 | 40 | 4/6 | 64 | 32/3 |
+| M | 42 | 10 | 5/6 | 52 | 26/3 |
+| W | 60 | 0 | 6/6 | 60 | 10 |
+
+M has the lowest total and mean score in this panel. W has the most hits. Neither claim implies that M has exact eighty-percent population coverage or that W is necessarily too wide. The inspector keeps issued bounds fixed; selecting another record reveals a different part of the same audit.
+
+<IntervalScoreAudit client:visible
+  title="Inspect the issued intervals"
+  instructions="Selectors retain the issued forecasts and cases. Scores have hour units and do not represent extra work. Lower is better."
+  locale="en"
+  unit="h"
+  scenarios={[{"id":"main","label":"First collection","nominalPercent":80,"records":[{"id":"F01","label":"F01","value":4},{"id":"F02","label":"F02","value":5},{"id":"F03","label":"F03","value":6},{"id":"F04","label":"F04","value":7},{"id":"F05","label":"F05","value":9},{"id":"F06","label":"F06","value":11}],"rules":[{"id":"N","label":"N","intervals":[[4,8],[4,8],[4,8],[4,8],[4,8],[4,8]]},{"id":"M","label":"M","intervals":[[3,10],[3,10],[3,10],[3,10],[3,10],[3,10]]},{"id":"W","label":"W","intervals":[[2,12],[2,12],[2,12],[2,12],[2,12],[2,12]]}]}]}
+  labels={{"scenario":"Collection","rule":"Rule","record":"Record","bounds":"Bounds","outcome":"Outcome","width":"Width","outside":"Outside distance","penalty":"Penalty","score":"Score","total":"Total","mean":"Exact mean","hits":"Hits","nominal":"Nominal central level","fixedScale":"Fixed physical axis: zero to twenty-four","intervalLegend":"Thick segment: issued interval","outcomeLegend":"Dot: resolved outcome; dashed segment: outside distance","tableCaption":"Complete paired records and loss scores","lowest":"Lowest total in this collection","allTied":"All totals in this collection tie","reset":"Restore first view","summaryTemplate":"{rule}: total {total}; mean {mean}; hits {hits}/{count}."}}
+/>
+
+Six cases do not fix a population’s coverage. As a separate calculation, suppose six hit indicators are independent and each has true probability $0.8$. All six hit with probability $0.8^6=0.262144$: about twenty-six percent. With probability $0.9$ per independent hit, all six hit with probability $0.9^6=0.531441$. Thus all hits in a small batch can be quite ordinary. These numbers require the stated independence and common-probability assumptions; the panel alone does not establish them.
+
+Record misses and inspect where they occur: horizon, task type, changing conditions and dependence can matter. A persistent pattern on comparable later cases is evidence to investigate, not a license to multiply widths by a miss-count ratio. If you tune a rule using these outcomes, label that development and freeze it before a new evaluation. Keep every eligible case and compare candidates on the same weights.
+
+<MCQ client:visible
+  className="not-prose"
+  question="Which claims are justified by the complete first panel? Select all that apply."
+  options={[{"text":"M has the lowest mean score under the chosen criterion.","correct":true},{"text":"W is proved to have excessive population coverage."},{"text":"W has the most observed hits.","correct":true},{"text":"M is guaranteed to beat the others on later tasks."}]}
+  explanation="The exact means rank M, W, N and the observed hits rank W, M, N. Those descriptive comparisons do not establish population calibration or later superiority."
+  allowMultiple={true}
+/>
+
+### When to repeat the evaluation
+
+Repeat it with later comparable outcomes and after relevant process changes. Report the observed count, sample size, score direction and limits. Do not infer professional competence, honest intent or future coverage from one finite table.
+
+## Try another collection
+
+<MCQ client:visible
+  className="not-prose"
+  question="Before checking the new collection, must the width favored in the first one remain best?"
+  options={[{"text":"Yes; an interval score always favors intermediate widths."},{"text":"Yes; a wider rule can never win."},{"text":"No; the fixed candidate intervals and resolved outcomes determine this comparison.","correct":true},{"text":"No; the nominal level may be changed after seeing the results."}]}
+  explanation="Keep the same target and criterion. A new paired collection can produce a different ranking without authorizing retrospective changes."
+  pretest={true}
+/>
+
+Keep the same central eighty-percent score and closed boundaries. A new complete collection has elapsed times two, three, six and nine hours. Rule A issued $[2,6]$ for each; B issued $[1,10]$. Both were fixed before the outcomes. Compare their total and mean scores, then state exactly what the ranking supports.
+
+<MCQ client:visible
+  className="not-prose"
+  question="Calculate the second collection under the given criterion. Which comparison is correct?"
+  options={[{"text":"A totals thirty-six; B totals forty-six."},{"text":"A totals forty-six; B totals thirty-six.","correct":true},{"text":"Both total thirty-six because every interval has the same label."},{"text":"Both total forty-six because only misses matter."}]}
+  explanation="A has three scores of 4 and one of 34, totaling 46. B scores 9 on four cases, totaling 36. B is lower here; the conclusion is bounded to these cases and this score."
+/>
+
+<details>
+<summary>Check the second collection</summary>
+
+A scores four, four, four and thirty-four: total forty-six and mean $23/2$. B scores nine on each case: total thirty-six and mean nine. The wider B has the lower score in this collection. It does not contradict the first panel; the outcomes and proposed intervals differ.
+
+<IntervalScoreAudit client:visible
+  title="Inspect the issued intervals"
+  instructions="Selectors retain the issued forecasts and cases. Scores have hour units and do not represent extra work. Lower is better."
+  locale="en"
+  unit="h"
+  scenarios={[{"id":"transfer","label":"Second collection","nominalPercent":80,"records":[{"id":"T01","label":"T01","value":2},{"id":"T02","label":"T02","value":3},{"id":"T03","label":"T03","value":6},{"id":"T04","label":"T04","value":9}],"rules":[{"id":"A","label":"A","intervals":[[2,6],[2,6],[2,6],[2,6]]},{"id":"B","label":"B","intervals":[[1,10],[1,10],[1,10],[1,10]]}]}]}
+  labels={{"scenario":"Collection","rule":"Rule","record":"Record","bounds":"Bounds","outcome":"Outcome","width":"Width","outside":"Outside distance","penalty":"Penalty","score":"Score","total":"Total","mean":"Exact mean","hits":"Hits","nominal":"Nominal central level","fixedScale":"Fixed physical axis: zero to twenty-four","intervalLegend":"Thick segment: issued interval","outcomeLegend":"Dot: resolved outcome; dashed segment: outside distance","tableCaption":"Complete paired records and loss scores","lowest":"Lowest total in this collection","allTied":"All totals in this collection tie","reset":"Restore first view","summaryTemplate":"{rule}: total {total}; mean {mean}; hits {hits}/{count}."}}
+/>
+
+A hits three of four; B hits four of four. Those fractions are descriptive. They do not prove the next interval’s probability or a population calibration result. Changing endpoints after seeing these outcomes would create a new fitted rule, not improve the recorded forecast retroactively.
+
+</details>
+
+Communicate a forecast with its target, horizon, bounds, nominal interpretation and supporting assumptions. A decision also needs consequences, feasible actions and any service or loss criterion. An eighty-percent interval is not a universal safety buffer or a guarantee that its upper endpoint cannot be exceeded.
+
+## Reconstruct the audit
+
+<MCQ client:visible
+  className="not-prose"
+  question="Retrieve the distinction: which quantities enter the interval score beyond binary containment?"
+  options={[{"text":"The declared case identifiers."},{"text":"The number of outcomes in the denominator."},{"text":"The issued horizon."},{"text":"Interval widths and outside miss distances.","correct":true}]}
+  explanation="A binary hit records containment. The interval score additionally accounts for width and distance beyond a bound."
+  pretest={true}
+/>
+
+<MindMap client:visible
+  title="The interval audit"
+  eyebrow=""
+  outlineLabel="Text outline"
+  root={{"label":"Evaluate an issued range","children":[{"label":"Target","children":[{"label":"Fixed unknown value, future observation or population parameter."},{"label":"Declare interpretation, bounds and included endpoints."}]},{"label":"Quantiles","children":[{"label":"Central refers to tails, not symmetric distances."},{"label":"A discrete law can have tied quantiles."}]},{"label":"Score","children":[{"label":"Add width and outside-distance penalty."},{"label":"Lower is better under the same level and criterion."}]},{"label":"Evaluation","children":[{"label":"Retain fixed rules, cases and weights."},{"label":"Report counts and means without population guarantees."}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title="Check the distinctions"
+  questions={[{"question":"An outcome lies exactly on an issued bound. What happens under the stated rule?","options":[{"text":"It is outside and receives a full tail penalty."},{"text":"It is inside; its outside-distance penalty is zero.","correct":true},{"text":"The interval must be discarded."},{"text":"Its score is automatically zero."}],"explanation":"Closed bounds include equality. The score still includes interval width, so a boundary hit need not have zero loss."},{"question":"For the first panel, which exact mean score belongs to M?","options":[{"text":"Thirty-two thirds."},{"text":"Ten."},{"text":"Twenty-six thirds.","correct":true},{"text":"Fifty-two."}],"explanation":"M totals 52 across 6 equally weighted records:52/6=26/3. Fifty-two is the total, not the mean."},{"question":"What does the stated independent-hit model imply about an all-hit batch?","options":[{"text":"It has positive probability even when the true per-case coverage matches the nominal level.","correct":true},{"text":"It proves the first panel’s cases were independent."},{"text":"It requires every following batch to include a miss."},{"text":"It shows widening is always mistaken."}],"explanation":"The probability calculation is conditional on a separate independent model. It does not identify that model from the observed panel or create owed misses."},{"question":"Which choices preserve the interpretation of this audit? Select all that apply.","options":[{"text":"Keep bounds and the scoring rule fixed before evaluation.","correct":true},{"text":"Remove a case if it worsens the preferred rule’s score."},{"text":"Use the same eligible cases and weights for both methods.","correct":true},{"text":"Tune on the outcomes and call the same collection independent validation."}],"explanation":"A paired frozen comparison preserves the issued rules, denominator and weights. Tuning creates development data, not an independent evaluation.","allowMultiple":true},{"question":"A discrete model has several optimal quantile reports. What must the report avoid claiming?","options":[{"text":"That a chosen interval has explicit endpoints."},{"text":"That its expected score can be calculated."},{"text":"That an endpoint convention can be stated."},{"text":"That a single uniquely best full predictive distribution has been established.","correct":true}],"explanation":"The score concerns the reported quantiles. The constructed law has tied quantile reports and inclusive coverages that can differ."},{"question":"What extra information is needed to turn a forecast into an action recommendation?","options":[{"text":"Only the visual width."},{"text":"Feasible actions, consequences and the relevant decision criterion.","correct":true},{"text":"A claim that its bounds are absolute limits."},{"text":"A retrospective change to guarantee a hit."}],"explanation":"A forecast score assesses a report. Choosing an action needs the decision’s own losses, constraints and consequences."}]}
+/>
+
+### Sources and scope
+
+[Gneiting and Raftery](https://sites.stat.washington.edu/raftery/Research/PDF/Gneiting2007jasa.pdf), sections 6.1–6.2, discuss quantile forecasts and the interval score. Their continuous quantile assumptions are not silently imposed on our discrete example; its expected-score ties are checked directly. [Bracher and colleagues](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008618), section 2.2, explain the width and miss components for central predictive intervals. No empirical health data, forecast fit or intervention result is used here.
+
+[NIST’s confidence-interval interpretation](https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm) and its [prediction discussion](https://itl.nist.gov/div898/handbook/pmd/section5/pmd512.htm) distinguish uncertainty about a parameter from a future observation. All job times, bounds and weights here are constructed. The calculations establish finite score comparisons, not guaranteed coverage or safety.
+
+Continue to [Getting Calibrated](/calibration-and-confidence/05-getting-calibrated), where the record becomes a continuing evaluation practice.
