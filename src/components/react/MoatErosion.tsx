@@ -56,6 +56,8 @@ export interface MoatErosionProps {
    * `{verdict}` are replaced.
    */
   readout?: string;
+  /** Localized accessible slider value; use {value} as the numeric placeholder. */
+  valueTextTemplate?: string;
   /** Extra classes merged onto the root element. */
   className?: string;
 }
@@ -128,6 +130,7 @@ export function MoatErosion({
   verdictEroding = 'a slowly eroding edge — real for now, but pressure is grinding it down',
   verdictCommodity = 'a mirage — fully competed away to commodity returns',
   readout = 'Moat {moat}/10 against pressure {pressure}/10: the firm starts {start} above its cost of capital and ends at {final} after {years} years — {verdict}.',
+  valueTextTemplate = '{value} of 10',
   className,
 }: MoatErosionProps) {
   const reactId = useId();
@@ -293,7 +296,7 @@ export function MoatErosion({
           step={1}
           value={moat}
           onChange={(e) => setMoat(Number(e.target.value))}
-          aria-valuetext={`${moat} of 10`}
+          aria-valuetext={valueTextTemplate.replace('{value}', String(moat))}
           className="mt-1 h-1.5 w-full cursor-pointer accent-success"
         />
         <div className="flex justify-between text-[0.6rem] font-medium uppercase tracking-wide text-ink-400">
@@ -318,7 +321,7 @@ export function MoatErosion({
           step={1}
           value={pressure}
           onChange={(e) => setPressure(Number(e.target.value))}
-          aria-valuetext={`${pressure} of 10`}
+          aria-valuetext={valueTextTemplate.replace('{value}', String(pressure))}
           className="mt-1 h-1.5 w-full cursor-pointer accent-danger"
         />
         <div className="flex justify-between text-[0.6rem] font-medium uppercase tracking-wide text-ink-400">
