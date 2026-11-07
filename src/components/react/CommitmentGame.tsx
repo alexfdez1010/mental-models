@@ -58,6 +58,12 @@ export interface CommitmentGameProps {
   verdictTrap?: string;
   /** Verdict — no commitment, and the rival walks all over your soft option. */
   verdictExposed?: string;
+  /** Accessible range value; {value} is replaced with the current integer. */
+  yourFightValueTemplate?: string;
+  /** Accessible range value; {value} is replaced with the current integer. */
+  rivalFightValueTemplate?: string;
+  /** Explains the selected tie policies without implying a unique equilibrium. */
+  tieVerdict?: string;
   /** Starting fight payoff to you (lower than the yield payoff of 5 shows the paradox). Defaults to `2`. */
   initialYourFight?: number;
   /** Starting fight payoff to the rival (below the stay-away payoff of 4 makes the threat bite). Defaults to `1`. */
@@ -138,6 +144,9 @@ export function CommitmentGame({
   verdictRedundant = 'Committing changed nothing this time: fighting was already your best reply, so tying your hands added no new credibility. Save the burnt bridge for when you would otherwise be tempted to yield.',
   verdictTrap = 'A commitment trap. The fight hurts the rival less than walking away costs them, so your threat does not bite — they challenge anyway. Uncommitted you could have yielded and cut your losses; committed, you are locked into a fight you cannot avoid. A threat only deters if carrying it out genuinely hurts the other side.',
   verdictExposed = 'Exposed. With your retreat intact, a costly fight is worse for you than folding, so the rival correctly predicts you will yield — and challenges. You keep the option to yield, and that soft option is exactly what invites the challenge. Burn your retreat and see what happens.',
+  yourFightValueTemplate = 'your fight payoff {value}',
+  rivalFightValueTemplate = 'rival fight payoff {value}',
+  tieVerdict = 'At these settings at least one comparison is tied. This model selects Yield when your Fight and Yield payoffs tie, and Stay when the rival’s predicted challenge payoff ties its outside option. The displayed path is a selected continuation; a tie does not establish a unique equilibrium or that committing raises your payoff.',
   initialYourFight = 2,
   initialRivalFight = 1,
   className,
@@ -169,7 +178,9 @@ export function CommitmentGame({
     const other = solve(!committed);
     // Classify the verdict by comparing this world with its counterfactual.
     let verdictKey: 'deters' | 'credibleAnyway' | 'redundant' | 'trap' | 'exposed';
-    if (committed) {
+    if (current.outcome === 'fight' && other.outcome === 'fight') {
+      verdictKey = 'redundant'; // removing Yield changes neither reply nor payoff
+    } else if (committed) {
       if (current.outcome === 'stay' && other.outcome !== 'stay') {
         verdictKey = 'deters'; // committing turned a challenge into a stay-away
       } else if (current.outcome === 'stay' && other.outcome === 'stay') {
@@ -186,7 +197,7 @@ export function CommitmentGame({
 
   const { current, verdictKey } = model;
 
-  const verdictText = {
+  const verdictText = yourFight === YOU_YIELD || rivalFight === RIVAL_STAY ? tieVerdict : {
     deters: verdictDeters,
     credibleAnyway: verdictCredibleAnyway,
     redundant: verdictRedundant,
@@ -367,7 +378,7 @@ export function CommitmentGame({
             step={1}
             value={yourFight}
             onChange={(e) => setYourFight(clamp(Number(e.target.value), -2, 8))}
-            aria-valuetext={`your fight payoff ${yourFight}`}
+            aria-valuetext={yourFightValueTemplate.replace('{value}', String(yourFight))}
             className="mt-1 h-1.5 w-full cursor-pointer accent-brand-500"
           />
           <p className="text-[0.6rem] font-medium text-ink-400">
@@ -389,7 +400,7 @@ export function CommitmentGame({
             step={1}
             value={rivalFight}
             onChange={(e) => setRivalFight(clamp(Number(e.target.value), -2, 8))}
-            aria-valuetext={`rival fight payoff ${rivalFight}`}
+            aria-valuetext={rivalFightValueTemplate.replace('{value}', String(rivalFight))}
             className="mt-1 h-1.5 w-full cursor-pointer accent-accent-500"
           />
           <p className="text-[0.6rem] font-medium text-ink-400">
