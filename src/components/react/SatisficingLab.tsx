@@ -493,7 +493,7 @@ export function SatisficingLab({
           </button>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-1" aria-hidden="true">
+        <div className="mt-3 flex flex-wrap gap-1" role="list" aria-label={demoLabel}>
           {demoField.map((q, i) => {
             const beforeStop = i < demo.chosenIdx;
             const isChosen = i === demo.chosenIdx;
@@ -501,6 +501,10 @@ export function SatisficingLab({
             return (
               <span
                 key={i}
+                role="listitem"
+                aria-posinset={i + 1}
+                aria-setsize={demoField.length}
+                aria-label={`${i + 1}: ${colQualityLabel} ${q}; ${isChosen ? acceptedLabel : beforeStop ? rejectedOptionTitle : unseenOptionTitle}${isBest ? `; ${bestOptionTitle}` : ''}`}
                 className={cx(
                   'flex h-6 w-6 items-center justify-center rounded text-[0.55rem] font-semibold tabular-nums ring-1 ring-inset',
                   isChosen
