@@ -1,0 +1,191 @@
+---
+title: "Audita un procedimiento de intervalos"
+description: "Construye intervalos sin conocer el valor verdadero y después audita su cobertura exacta y sus supuestos."
+topic: es/sample-size-and-sampling-uncertainty
+order: 6
+minutes: 38
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+Un procedimiento de intervalos es una máquina: recibe datos y devuelve un conjunto de valores del parámetro. Su afirmación de cobertura se refiere a la máquina al repetir la recogida.
+
+## Construye primero y audita por separado
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"Un procedimiento tiene cobertura del noventa y cinco por ciento al repetir el muestreo. Después de observar un intervalo, ¿qué se deduce solo de ese hecho?"}
+  options={[{"text":"El parámetro fijo desconocido tiene ahora esa probabilidad posterior de estar dentro.","correct":false},{"text":"Exactamente noventa y cinco de los próximos cien intervalos deben contenerlo.","correct":false},{"text":"Bajo el modelo indicado, el intervalo aleatorio contiene el parámetro fijo con al menos esa probabilidad nominal.","correct":true}]}
+  explanation={"La cobertura es una probabilidad del procedimiento repetido. No es una cuota realizada ni, sin un modelo probabilístico adicional para el parámetro, una probabilidad posterior sobre este intervalo observado."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de empezar"}
+/>
+
+En esta lección sustituimos el diseño de fichas finitas por $n$ ensayos de Bernoulli independientes e idénticamente distribuidos con probabilidad fija desconocida $p$. El recuento marcado es $K$. Su **ley binomial** asigna probabilidad $\binom nk p^k(1-p)^{n-k}$ al recuento $k$; $\binom nk$ cuenta qué $k$ posiciones están marcadas. No es el muestreo de identificadores distintos entre ocho fichas fijas.
+
+El constructor del intervalo recibe solo el recuento observado $k$, el tamaño $n$ y el método. **No** recibe el valor verdadero $p$. En la auditoría didáctica aportamos por separado $p$ para determinar qué intervalos posibles lo incluyen y sumamos sus probabilidades de muestreo. Esa suma es la **cobertura** en $p$.
+
+El primer método es el conocido **intervalo de Wald**, con la proporción muestral $\hat p=k/n$:
+
+$$
+\begin{aligned}
+I_W(k)=\Big[&\max\left(0,\hat p-\frac{49}{25}\sqrt{\frac{\hat p(1-\hat p)}n}\right),\\
+&\min\left(1,\hat p+\frac{49}{25}\sqrt{\frac{\hat p(1-\hat p)}n}\right)\Big].
+\end{aligned}
+$$
+
+Fijamos $49/25=1{,}96$ exactamente en esta receta y llamamos 95% a su nivel nominal. La aproximación no garantiza cobertura finita exacta. Para $n=4,p=1/2$, solo los recuentos 1, 2 y 3 cubren el objetivo. Sus probabilidades suman $(4+6+4)/16=7/8$, es decir, 87,5%.
+
+<BinomialCoverageAudit client:visible
+  className="not-prose"
+  title={"Construye sin el valor verdadero y comprueba después"}
+  instructions={"Empieza con cuatro ensayos independientes y equiprobables. Cambia el método y el recuento observado. El valor verdadero de la auditoría cambia la prueba de pertenencia, no la receta de construcción."}
+  cases={[{"id":"iid4-half","label":"Cuatro ensayos independientes, probabilidad un medio","note":"Las dieciséis secuencias binarias tienen la misma probabilidad."},{"id":"iid4-quarter","label":"Cuatro ensayos independientes, probabilidad un cuarto","note":"Los pesos de recuento son ochenta y uno, ciento ocho, cincuenta y cuatro, doce y uno entre doscientos cincuenta y seis."},{"id":"iid4-three-quarters","label":"Cuatro ensayos independientes, probabilidad tres cuartos","note":"Es el reflejo de la ley de un cuarto; la receta del intervalo no cambia."}]}
+  labels={{"caseLabel":"Ley que se audita","methodLabel":"Método del intervalo","countLabel":"Cantidad de elementos marcados","waldLabel":"Wald recortado","exactLabel":"Exacto de colas iguales","chartLabel":"Familia de intervalos y valor verdadero fijo","chartDescription":"Cada fila representa el intervalo construido a partir de ese recuento. La línea vertical discontinua indica el valor verdadero fijo. Las filas atenuadas tienen probabilidad nula bajo la ley elegida.","xAxisLabel":"Proporción del parámetro","countAxisLabel":"Recuento","tableLabel":"Construcción y auditoría por recuento","countColumn":"Cantidad marcada","probabilityColumn":"Probabilidad bajo la ley auditada","intervalColumn":"Límites visuales hacia fuera","coverageColumn":"Pertenencia exacta","containsLabel":"Incluye el valor verdadero","excludesLabel":"Excluye el valor verdadero","truthLabel":"Valor verdadero fijo","nominalLabel":"Cobertura nominal","coverageLabel":"Cobertura real del modelo","boundsNote":"Los límites se redondean hacia fuera a cuatro decimales para mostrarlos. La pertenencia se decide con colas inclusivas exactas o con la desigualdad cuadrática exacta, nunca con los límites redondeados.","selectionTemplate":"Recuento {count}: intervalo mostrado {interval}; {status}. Cobertura del procedimiento {coverage}."}}
+  initialMethod={"wald"}
+  locale={"es"}
+/>
+
+Con $k=0$, Wald informa [0,0]. Bajo $n=4,p=1/4$, esa observación tiene probabilidad $(3/4)^4=81/256$. Un error estándar calculado por sustitución que da cero no demuestra que $p=0$. El [informe técnico de Brown, Cai y DasGupta](https://www.stat.purdue.edu/~dasgupta/publications/tr99-19.pdf) documenta el mal comportamiento de cobertura de esta aproximación; nuestro cálculo finito se sostiene en la ley mostrada.
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"El intervalo se construye con {{la observación y el método|el objetivo oculto y el veredicto|la cobertura final deseada}}. Después se usa el objetivo {{para auditar la cobertura|para elegir el recuento observado|para reparar el intervalo realizado}}."}
+  explanation={"Usar el valor verdadero para ajustar el intervalo informado cambiaría el procedimiento evaluado. Aquí solo está disponible porque el ejemplo es un modelo especificado por completo."}
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Correcto"}
+  partialResultWord={"bien"}
+/>
+
+## Colas iguales exactas y significado de la garantía
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"¿Qué debe demostrar un argumento de cobertura exacta además de unos pocos valores dibujados del parámetro?"}
+  options={[{"text":"La cota deseada para cada valor del parámetro en el modelo declarado.","correct":true},{"text":"La misma anchura para todos los recuentos observados posibles.","correct":false},{"text":"La fracción nominal exacta de aciertos en cada tanda realizada.","correct":false}]}
+  explanation={"Comprobar una rejilla finita no demuestra una afirmación uniforme en un dominio continuo. La cobertura puede superar su cota nominal."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de empezar"}
+/>
+
+La segunda receta es el **intervalo cerrado de Clopper–Pearson de colas iguales**, con cobertura nominal $19/20$. Tras observar $k$, conserva un candidato $p$ exactamente cuando ambas colas binomiales inclusivas cumplen
+
+$$\Pr_p(K\le k)\ge\frac1{40},\qquad\Pr_p(K\ge k)\ge\frac1{40}.$$
+
+«Inclusivas» significa que incluyen el recuento observado. La igualdad se conserva. Invertimos dos condiciones de cola para construir un conjunto de valores candidatos del parámetro. El conjunto es un intervalo cerrado. Con $k=0$, su extremo inferior es 0; con $k=n$, su extremo superior es 1. Para $n=4,k=0$, el extremo superior resuelve $(1-p)^4=1/40$, lo que da $1-(1/40)^{1/4}\approx0{,}6023646$.
+
+La tabla redondea los límites hacia fuera a cuatro decimales. Por ejemplo, [0,0675; 0,9325] contiene los extremos exactos para $n=4,k=2$. La pertenencia se evalúa con las desigualdades exactas de cola, no con esos números redondeados. No debe descartarse por redondeo un candidato situado en una igualdad de cola.
+
+| Modelo auditado | Cobertura de Wald | Cobertura exacta de colas iguales |
+| --- | ---: | ---: |
+| $n=4,p=1/4$, independientes | 81/128 | 255/256 |
+| $n=4,p=1/2$, independientes | 7/8 | 1 |
+| $n=4,p=3/4$, independientes | 81/128 | 255/256 |
+| $n=8,p=1/2$, independientes | 119/128 | 127/128 |
+
+### Por qué el método exacto cubre al menos su nivel nominal
+
+Fija cualquier $p$ en [0,1] y conserva el modelo binomial independiente. Los recuentos excluidos porque su probabilidad acumulada inferior está por debajo de 1/40 forman un bloque inicial de recuentos. La probabilidad de todo ese bloque es su última probabilidad acumulada, menor que 1/40. Los recuentos excluidos porque su cola superior está por debajo de 1/40 forman un bloque final con probabilidad menor que 1/40. La probabilidad de su unión no supera la suma de ambas, como máximo 1/20. Por tanto, el intervalo retenido cubre ese $p$ fijo con probabilidad de al menos 19/20.
+
+El argumento se aplica a cada $p$, incluidos los bordes; no se deduce de los cinco casos del selector. La cota de la unión no exige que los dos sucesos de exclusión sean independientes. La naturaleza discreta puede hacer el procedimiento **conservador**: su cobertura real supera la nominal. La [documentación oficial de R](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/binom.test.html) establece la garantía y advierte que estos intervalos no suelen ser los más cortos disponibles.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Nivel nominal","definition":"Nivel de cobertura que un método busca o garantiza bajo sus condiciones"},{"term":"Cobertura real","definition":"Probabilidad de contener el objetivo fijo bajo una ley auditada"},{"term":"Límites visuales hacia fuera","definition":"Extremos redondeados para mostrar el intervalo sin decidir pertenencia exacta"},{"term":"Procedimiento conservador","definition":"Procedimiento cuya cobertura puede superar su cota nominal"}]}
+  question={"Separa una etiqueta, una propiedad y su representación."}
+  explanation={"Nominal no vuelve exacta una aproximación. Conservador no significa más corto, más informativo ni adecuado para cualquier modelo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  instructions={"Selecciona un término y después su definición."}
+  allCorrectLabel={"Todas las parejas son correctas"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"Elige ahora una definición"}
+  notLinkedHint={"Sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+## Conserva la construcción cuando cambie la ley auditada
+
+<BinomialCoverageAudit client:visible
+  className="not-prose"
+  title={"Mismos intervalos, otra ley de recogida"}
+  instructions={"Compara ocho ensayos independientes con dos bits copiados cuatro veces. Ambos usan el mismo constructor binomial; solo cambian las probabilidades de la auditoría."}
+  cases={[{"id":"iid8-half","label":"Ocho ensayos independientes y equiprobables","note":"El recuento sigue la ley binomial de ocho ensayos independientes."},{"id":"two-bits-copied-four","label":"Dos bits independientes copiados cuatro veces","note":"Los recuentos cero, cuatro y ocho tienen probabilidades un cuarto, un medio y un cuarto. Se incumple el supuesto de independencia del constructor."}]}
+  labels={{"caseLabel":"Ley que se audita","methodLabel":"Método del intervalo","countLabel":"Cantidad de elementos marcados","waldLabel":"Wald recortado","exactLabel":"Exacto de colas iguales","chartLabel":"Familia de intervalos y valor verdadero fijo","chartDescription":"Cada fila representa el intervalo construido a partir de ese recuento. La línea vertical discontinua indica el valor verdadero fijo. Las filas atenuadas tienen probabilidad nula bajo la ley elegida.","xAxisLabel":"Proporción del parámetro","countAxisLabel":"Recuento","tableLabel":"Construcción y auditoría por recuento","countColumn":"Cantidad marcada","probabilityColumn":"Probabilidad bajo la ley auditada","intervalColumn":"Límites visuales hacia fuera","coverageColumn":"Pertenencia exacta","containsLabel":"Incluye el valor verdadero","excludesLabel":"Excluye el valor verdadero","truthLabel":"Valor verdadero fijo","nominalLabel":"Cobertura nominal","coverageLabel":"Cobertura real del modelo","boundsNote":"Los límites se redondean hacia fuera a cuatro decimales para mostrarlos. La pertenencia se decide con colas inclusivas exactas o con la desigualdad cuadrática exacta, nunca con los límites redondeados.","selectionTemplate":"Recuento {count}: intervalo mostrado {interval}; {status}. Cobertura del procedimiento {coverage}."}}
+  initialMethod={"exact"}
+  locale={"es"}
+/>
+
+Bajo la ley copiada, solo $k=4$ cubre $p=1/2$ con cualquiera de las dos recetas; tiene probabilidad 1/2. La garantía binomial exacta no ha fallado bajo sus propios supuestos: ha cambiado la ley de los datos. Los mismos extremos no tienen por qué mantener la cobertura con otro proceso de recogida.
+
+### Una trampa de anchura y una transferencia
+
+Más observaciones no tienen por qué estrechar **cada intervalo realizado**. Cuatro ceros iniciales dan un intervalo exacto de anchura aproximada 0,6024. Si los cuatro resultados posteriores son unos, el recuento de ocho resultados pasa a cuatro; su anchura exacta es aproximadamente 0,6860. Esos resultados pueden aparecer bajo una ley de Bernoulli independiente fija. El primer intervalo empezaba cerca de un borde y el segundo está centrado.
+
+Antes de abrir la solución, audita: «Nuestro archivo copiado de ocho filas dio recuento cuatro y el intervalo exacto contiene un medio; por tanto, su procedimiento tiene cobertura de al menos el noventa y cinco por ciento para archivos copiados».
+
+<details>
+<summary>Separa este acierto del procedimiento completo</summary>
+
+Este intervalo realizado sí contiene un medio. Sin embargo, entre los archivos copiados, los recuentos cero y ocho aparecen cada uno con probabilidad un cuarto y excluyen un medio. Solo el recuento cuatro cubre, con probabilidad un medio. Un acierto realizado no demuestra cobertura. La reparación necesita un procedimiento justificado bajo la ley real de dos bits, no cambiar la etiqueta del mismo método binomial de ocho filas.
+
+</details>
+
+### Cuándo auditar la cobertura
+
+Hazlo antes de interpretar la etiqueta de un intervalo como una afirmación de fiabilidad. Declara el dominio del parámetro, la ley de muestreo, el constructor y la parada. Los intervalos exactos de colas iguales ofrecen una garantía binomial finita bajo sus supuestos, con resultados que pueden ser anchos o conservadores. No cubren automáticamente dependencia arbitraria, cambios de objetivo ni paradas guiadas por los datos.
+
+<MindMap client:visible
+  className="not-prose"
+  title={"Reconstruye el razonamiento"}
+  eyebrow=""
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Audita un procedimiento de intervalos","children":[{"label":"Construye","children":[{"label":"Solo recuento, tamaño y método"},{"label":"Las colas definen el intervalo exacto"}]},{"label":"Evalúa","children":[{"label":"Valor verdadero y ley de datos"},{"label":"Suma probabilidades de salidas que cubren"}]},{"label":"Interpreta","children":[{"label":"Cobertura es fiabilidad repetida"},{"label":"No es cuota realizada ni posterior por sí sola"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Comprueba la lección completa"}
+  questions={[{"question":"Para cuatro ensayos independientes y equiprobables, ¿cuál es la cobertura de Wald?","options":[{"text":"Diecinueve veinteavos.","correct":false},{"text":"Siete octavos.","correct":true},{"text":"Exactamente uno.","correct":false}],"explanation":"Cubren los recuentos uno, dos y tres. Sus pesos binomiales suman catorce de dieciséis."},{"question":"En una igualdad exacta de cola de un cuarentavo, ¿qué ocurre con ese candidato?","options":[{"text":"Se conserva por la construcción inclusiva.","correct":true},{"text":"Se excluye para que la cobertura sea exactamente nominal.","correct":false},{"text":"Su estado depende del redondeo a cuatro decimales.","correct":false}],"explanation":"Las desigualdades usan mayor o igual. La igualdad forma parte del intervalo cerrado de confianza."},{"question":"¿Qué cambio puede invalidar la garantía binomial sin cambiar la receta de los intervalos?","options":[{"text":"Traducir sus etiquetas.","correct":false},{"text":"Reordenar la tabla completa.","correct":false},{"text":"Sustituir ensayos independientes por grupos copiados.","correct":true}],"explanation":"La garantía depende del modelo binomial. Los grupos copiados cambian las probabilidades de los recuentos posibles."}]}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso completado"}
+  perfectMessage={"Todas las respuestas son correctas. Revisa los supuestos al aplicar el método."}
+  goodMessage={"Revisa las explicaciones de las respuestas que has fallado."}
+  keepPracticingMessage={"Vuelve a los ejemplos resueltos y comprueba cada paso."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+Para la distinción histórica entre cobertura y probabilidades después de observar un intervalo, véase [Neyman, sección II(a)](https://doi.org/10.1098/rsta.1937.0005). La construcción exacta sigue el método descrito por [NIST](https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm) y los casos de borde de [la implementación de R](https://svn.r-project.org/R/trunk/src/library/stats/R/binom.test.R).
+
+Continúa con [Diseña la auditoría antes de recoger datos](/es/sample-size-and-sampling-uncertainty/06-design-the-audit-before-collecting).

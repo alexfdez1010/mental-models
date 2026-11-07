@@ -1,0 +1,119 @@
+---
+title: "Define the Sampling Rule Before Counting"
+description: "Specify the population, frame, estimator and probability of each possible selection."
+topic: en/sample-size-and-sampling-uncertainty
+order: 2
+minutes: 25
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+A sample size is a property of a collection protocol. Without that protocol, “two observations” leaves nearly everything open.
+
+## Make the repeated experiment explicit
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"Four of eight labelled objects are marked. You select two different IDs uniformly, ignoring their order. How should probability be assigned?"}
+  options={[{"text":"Each possible marked count has equal probability.","correct":false},{"text":"Each unordered pair of distinct IDs has equal probability.","correct":true},{"text":"Each observed proportion has probability one half.","correct":false}]}
+  explanation={"The randomised units are ID pairs. Several different pairs can produce the same marked count, so counts need not be equally likely."}
+/>
+
+Our first model concerns a fixed set of eight inspection cards during one frozen audit period. Their classification is measured without error and does not change during collection. IDs A, B, C and D are marked; E, F, G and H are unmarked. The **target population** is all eight cards. Its fixed marked proportion is $P=4/8=1/2$. We reveal the full population here so that you can check a procedure; a real investigator may not know this target.
+
+| ID | A | B | C | D | E | F | G | H |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Marked value | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
+
+The **sampling frame** is the list from which selection is possible. Here it contains all eight IDs once. Select one unordered pair of distinct IDs uniformly: there are $8\times7/2=28$ such pairs, each with probability 1/28. No replacement means an ID cannot be drawn twice. This is a **simple random sample without replacement** of size $n=2$.
+
+The **estimator** is a function of the collected values. Write $K$ for the marked count and $\hat P=K/n$ for the estimated proportion. The hat marks a data-dependent quantity. AB gives $K=2,\hat P=1$; AE gives $K=1,\hat P=1/2$; EF gives $K=0,\hat P=0$. These are possible results of the same protocol, not different target populations.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"From selection rule to possible estimates"}
+  instructions={"The model keeps the population fixed and randomises which pair is collected. The target line does not follow your selected count."}
+  cases={[{"id":"srs2","label":"Two distinct IDs","note":"Choose one unordered pair uniformly from the eight IDs; four IDs are marked.","n":2,"weights":[6,16,6],"denominator":28,"truth":{"numerator":1,"denominator":2}}]}
+  labels={{"caseLabel":"Sampling rule","countLabel":"Observed marked count","chartLabel":"Sampling distribution of the proportion","chartDescription":"Bars show probability mass at each possible proportion. Dashed lines mark the expectation and the fixed target; they coincide when equal.","xAxisLabel":"Sample proportion","yAxisLabel":"Probability mass","tableLabel":"Complete count catalogue","countColumn":"Marked count","estimateColumn":"Sample proportion","probabilityColumn":"Probability","meanLabel":"Expectation — long dashes","truthLabel":"Target — short dashes","biasLabel":"Bias","varianceLabel":"Sampling variance","mseLabel":"Mean squared error","seLabel":"Standard error, approximately","exactNote":"Fractions are exact. The standard error is a rounded square root. The target is known here to audit the constructed model.","selectionTemplate":"Marked count {count}; sample proportion {estimate}; probability {probability}."}}
+/>
+
+The three counts have probabilities 6/28, 16/28 and 6/28. Why 16 mixed pairs? There are four choices for the marked ID and four for the unmarked ID. A particular pair and a particular count have different denominators.
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"In this design the target proportion is {{fixed|redrawn with each pair|chosen after seeing the pair}}, while the sample proportion {{can vary|is always correct|defines the target}}."}
+  explanation={"The population and criterion stay fixed. Selection changes which values enter the estimator."}
+/>
+
+### When to use the specification
+
+Write the protocol before attaching a probability to a sample result. Include the unit, time window, eligibility, replacement rule, selection probabilities and estimator. Uniformity is a feature stipulated or justified by the design; it is not a synonym for “we picked something”. Nonresponse or changing measurements would require additional rules.
+
+## A precise answer to the wrong population
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"You measure every item on an accessible list. Which conclusion follows without any further assumption?"}
+  options={[{"text":"The list represents everyone omitted from it.","correct":false},{"text":"There is no remaining measurement error anywhere.","correct":false},{"text":"There is no selection variation within that fixed measured list.","correct":true}]}
+  explanation={"A census fixes which listed units are measured. It does not establish a relationship between listed and omitted units or eliminate other errors."}
+/>
+
+Now change the model. The target contains 12 fixed cards, six marked. Only six are accessible: five marked and one unmarked. The excluded six contain one marked and five unmarked. We measure the accessible frame completely, with the same error-free fixed criterion.
+
+| Set | Marked | Total | Proportion |
+| --- | ---: | ---: | ---: |
+| Accessible frame | 5 | 6 | 5/6 |
+| Excluded cards | 1 | 6 | 1/6 |
+| Target population | 6 | 12 | 1/2 |
+
+The frame census always reports 5/6. Relative to the target 1/2 it has **bias** $5/6-1/2=1/3$: its expectation minus the target. Its sampling variance is zero under this census rule. Its **mean squared error**, the average squared distance from the target, is $(1/3)^2=1/9$. Precision within the frame has not repaired the target mismatch.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"Zero sampling variance, nonzero target error"}
+  instructions={"Compare the original complete-frame sample with this different twelve-card model. These are alternative models; changing the selector does not recollect one shared population."}
+  cases={[{"id":"srs2","label":"Two distinct IDs","note":"Choose one unordered pair uniformly from the eight IDs; four IDs are marked.","n":2,"weights":[6,16,6],"denominator":28,"truth":{"numerator":1,"denominator":2}},{"id":"frame","label":"Census of the accessible frame","note":"The accessible six IDs contain five marked items; the twelve-ID target population contains six.","n":6,"weights":[0,0,0,0,0,1,0],"denominator":1,"truth":{"numerator":1,"denominator":2}}]}
+  labels={{"caseLabel":"Sampling rule","countLabel":"Observed marked count","chartLabel":"Sampling distribution of the proportion","chartDescription":"Bars show probability mass at each possible proportion. Dashed lines mark the expectation and the fixed target; they coincide when equal.","xAxisLabel":"Sample proportion","yAxisLabel":"Probability mass","tableLabel":"Complete count catalogue","countColumn":"Marked count","estimateColumn":"Sample proportion","probabilityColumn":"Probability","meanLabel":"Expectation — long dashes","truthLabel":"Target — short dashes","biasLabel":"Bias","varianceLabel":"Sampling variance","mseLabel":"Mean squared error","seLabel":"Standard error, approximately","exactNote":"Fractions are exact. The standard error is a rounded square root. The target is known here to audit the constructed model.","selectionTemplate":"Marked count {count}; sample proportion {estimate}; probability {probability}."}}
+/>
+
+### Transfer before the answer
+
+A new fixed target has 20 cards: ten marked. A frame census measures eight cards containing six marked. Under the stated error-free census, calculate the reported proportion, its bias relative to the target, and its sampling variance. What would make this a census of the target?
+
+<details>
+<summary>Work through the frame audit</summary>
+
+The report is $6/8=3/4$. The target is $10/20=1/2$, so bias is $1/4$ and squared error is $1/16$. The sampling variance is zero because every repeat of this fixed frame census returns 3/4. Measuring all 20 target cards would remove this particular frame mismatch. Merely duplicating the eight measured records would not. In practice, the unmeasured cards' classifications may be unknown; these counts are supplied to make the constructed audit reproducible.
+
+</details>
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Frame mismatch","definition":"Eligible units differ from the population named in the claim"},{"term":"Sampling variation","definition":"Different selections produce different estimates"},{"term":"Measurement error","definition":"The recorded value differs from the defined unit value"}]}
+  question={"Separate errors that a larger row count might leave untouched."}
+  explanation={"These mechanisms need different checks. A sampling-variance calculation does not automatically include frame or measurement error."}
+/>
+
+### Limits and use
+
+A small, correctly randomised sample can still vary widely. A large, systematically restricted frame can still miss the target. Neither observation proves that every convenience sample is biased by a particular amount. To transport a frame result, state and defend an additional relationship between frame and target; its truth is not supplied by $n$.
+
+<MindMap client:visible
+  className="not-prose"
+  eyebrow=""
+  title={"Rebuild the argument"}
+  root={{"label":"Specify the experiment","children":[{"label":"Population","children":[{"label":"Fixed target and criterion"},{"label":"Frame eligibility"}]},{"label":"Selection","children":[{"label":"Distinct IDs"},{"label":"Known pair probabilities"}]},{"label":"Estimate","children":[{"label":"Marked count divided by rows"},{"label":"Bias relative to the target"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Check the whole lesson"}
+  questions={[{"question":"Under the eight-card pair design, what is the probability of a specific pair such as AE?","options":[{"text":"One third.","correct":false},{"text":"One sixteenth.","correct":false},{"text":"One twenty-eighth.","correct":true}],"explanation":"There are twenty-eight equally likely unordered pairs. Sixteen of them are mixed, but that is the probability of a count, not one specific pair."},{"question":"The accessible-frame census always reports five sixths for a target of one half. Which quantities are correct?","options":[{"text":"Bias one third and sampling variance zero.","correct":true},{"text":"Bias zero and sampling variance one third.","correct":false},{"text":"Bias one sixth and sampling variance one ninth.","correct":false}],"explanation":"The fixed census report minus the target is one third. Repeating that same census adds no selection variation."},{"question":"What must be added before using a frame result for omitted units?","options":[{"text":"A larger number of copied frame records.","correct":false},{"text":"A justified link between frame and target.","correct":true},{"text":"A more precise display of the same proportion.","correct":false}],"explanation":"Transport requires assumptions or evidence connecting eligible and omitted units. Extra digits do not provide that link."}]}
+/>
+
+The probability calculations in this course are constructed designs. For the distinction between a random sampling procedure and uncertainty assigned after observing its output, see [Neyman’s original discussion, section II(a)](https://doi.org/10.1098/rsta.1937.0005).
+
+Continue to [Enumerate the Samples](/sample-size-and-sampling-uncertainty/02-enumerate-the-samples).

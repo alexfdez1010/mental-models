@@ -1,0 +1,173 @@
+---
+title: "Enumera las muestras y después mide su dispersión"
+description: "Deduce esperanza, varianza, error estándar y corrección por población finita a partir de catálogos completos."
+topic: es/sample-size-and-sampling-uncertainty
+order: 3
+minutes: 30
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+La población está fija; la estimación puede moverse. Para medir ese movimiento, enumera primero qué puede ocurrir bajo la regla de recogida.
+
+## Construye toda la distribución muestral
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"En el modelo de ocho fichas, ¿qué cálculo da la probabilidad de observar una ficha marcada en una pareja uniforme?"}
+  options={[{"text":"Un recuento posible dividido entre tres recuentos posibles.","correct":false},{"text":"Dieciséis parejas mixtas entre veintiocho parejas posibles.","correct":true},{"text":"Cuatro fichas marcadas entre ocho fichas de la población.","correct":false}]}
+  explanation={"El suceso contiene dieciséis parejas de identificadores equiprobables. La proporción poblacional es otra cantidad y los recuentos no son equiprobables."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de empezar"}
+/>
+
+Conservamos los ocho identificadores y la selección uniforme de parejas sin orden. Hay seis parejas no marcadas: EF, EG, EH, FG, FH y GH. Hay seis parejas marcadas: AB, AC, AD, BC, BD y CD. Cada identificador marcado se empareja con cada uno de los cuatro no marcados, lo que da 16 parejas mixtas. Ya están las 28.
+
+Una **distribución muestral** enumera los valores de un estimador y sus probabilidades al repetir la recogida. Es un catálogo de probabilidad, no una promesa de que las próximas 28 recogidas mostrarán cada pareja una vez.
+
+| Recuento marcado $K$ | Proporción muestral $\hat P$ | Parejas | Probabilidad | Desviación al cuadrado respecto a 1/2 | Probabilidad × desviación al cuadrado |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 0 | 6 | 3/14 | 1/4 | 3/56 |
+| 1 | 1/2 | 16 | 4/7 | 0 | 0 |
+| 2 | 1 | 6 | 3/14 | 1/4 | 3/56 |
+
+La **esperanza**, escrita $E(\hat P)$, es la media ponderada por probabilidades: $0(3/14)+(1/2)(4/7)+1(3/14)=1/2$. El estimador es **insesgado** para este objetivo porque su esperanza coincide con $P$. Una estimación realizada puede aun así fallar.
+
+La **varianza** es $E[(\hat P-E\hat P)^2]=3/56+3/56=3/28$. Promedia sobre la ley de muestreo; no se vuelve a dividir entre las filas de esta tabla. El **error estándar** es la desviación típica del estimador, $\operatorname{SE}(\hat P)=\sqrt{3/28}\approx0{,}3273$. Se mide en unidades de proporción. La varianza usa esas unidades al cuadrado.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"Un catálogo finito se puede comprobar por completo"}
+  instructions={"Compara tamaños muestrales de la misma población fija. Cambiar el recuento observado resalta un resultado posible; no cambia la ley de muestreo."}
+  cases={[{"id":"srs2","label":"Dos identificadores distintos","note":"Se elige uniformemente una pareja sin orden entre los ocho identificadores; cuatro están marcados.","n":2,"weights":[6,16,6],"denominator":28,"truth":{"numerator":1,"denominator":2}},{"id":"srs4","label":"Cuatro identificadores distintos","note":"Se elige uniformemente un conjunto de cuatro entre los mismos ocho identificadores.","n":4,"weights":[1,16,36,16,1],"denominator":70,"truth":{"numerator":1,"denominator":2}},{"id":"census","label":"Los ocho identificadores","note":"Cada identificador se mide una vez y el criterio permanece fijo.","n":8,"weights":[0,0,0,0,1,0,0,0,0],"denominator":1,"truth":{"numerator":1,"denominator":2}}]}
+  labels={{"caseLabel":"Regla de muestreo","countLabel":"Cantidad de elementos marcados","chartLabel":"Distribución muestral de la proporción","chartDescription":"Las barras muestran la masa de probabilidad de cada proporción posible. Las líneas discontinuas indican la esperanza y el objetivo fijo; coinciden cuando son iguales.","xAxisLabel":"Proporción muestral","yAxisLabel":"Masa de probabilidad","tableLabel":"Catálogo completo de recuentos","countColumn":"Cantidad marcada","estimateColumn":"Proporción muestral","probabilityColumn":"Probabilidad","meanLabel":"Esperanza — trazos largos","truthLabel":"Objetivo — trazos cortos","biasLabel":"Sesgo","varianceLabel":"Varianza de muestreo","mseLabel":"Error cuadrático medio","seLabel":"Error estándar aproximado","exactNote":"Las fracciones son exactas. El error estándar es una raíz cuadrada redondeada. Aquí conocemos el objetivo para auditar el modelo construido.","selectionTemplate":"Cantidad marcada {count}; proporción muestral {estimate}; probabilidad {probability}."}}
+  locale={"es"}
+/>
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"El error estándar es la {{raíz cuadrada de la varianza de muestreo|potencia cuadrada del error realizado|mayor desviación muestral posible}}."}
+  explanation={"Describe la dispersión de un procedimiento bajo su modelo. No es una cota del error máximo ni el error de una estimación realizada."}
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Correcto"}
+  partialResultWord={"bien"}
+/>
+
+## Por qué muestrear más de una población fija cambia la regla
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"Al pasar de dos fichas distintas a las ocho, ¿qué ocurre con la varianza de muestreo de este estimador?"}
+  options={[{"text":"Se hace cero porque toda selección contiene la población fija completa.","correct":true},{"text":"Sigue siendo positiva porque las clasificaciones son binarias.","correct":false},{"text":"Se convierte en un octavo porque hay ocho filas.","correct":false}]}
+  explanation={"Con medidas sin error y población fija, todo censo devuelve exactamente cuatro octavos. Ya no queda variación de selección."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de empezar"}
+/>
+
+Para $n=4$, los recuentos de 0 a 4 aparecen en 1, 16, 36, 16 y 1 de los 70 conjuntos equiprobables. Por ejemplo, $K=2$ elige dos de cuatro identificadores marcados y dos de cuatro no marcados: $6\times6=36$. La suma ponderada de desviaciones al cuadrado da varianza $1/28$, tres veces menor que la varianza de las parejas. El cociente de errores estándar es $1/\sqrt3$, no $1/\sqrt2$.
+
+Este es el resultado general para una población finita y sus condiciones. Una población fija tiene tamaño $M>1$ y proporción marcada $P$. Muestreamos uniformemente $n$ unidades distintas. Sea $X_i$ el valor binario de la posición de extracción $i$. Cada extracción tiene media $P$ y varianza $P(1-P)$. Los valores de posiciones distintas tienen una relación negativa en este sentido preciso: su **covarianza**, $E(X_iX_j)-E(X_i)E(X_j)$, es
+
+$$\operatorname{Cov}(X_i,X_j)=-\frac{P(1-P)}{M-1}\quad(i\ne j).$$
+
+Para comprobarlo, llama $H=MP$ al recuento entero de marcadas en la población. La probabilidad de que dos posiciones distintas estén marcadas es $(H/M)((H-1)/(M-1))$. Resta $P^2$ y simplifica. Al desarrollar el cuadrado de la suma aparecen $n$ términos de varianza y $n(n-1)$ términos de covarianza. Dividir entre $n^2$ da
+
+$$\operatorname{Var}(\hat P)=\frac{P(1-P)}{n}\frac{M-n}{M-1}.$$
+
+El último factor es la **corrección por población finita** de la varianza. Para $M=8,P=1/2,n=2$ da $(1/8)(6/7)=3/28$. Para $n=4$ da $(1/16)(4/7)=1/28$. En el censo, $n=M$, vale cero.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Esperanza","definition":"Media del estimador ponderada por probabilidades"},{"term":"Varianza","definition":"Desviación al cuadrado respecto a esa media ponderada por probabilidades"},{"term":"Error estándar","definition":"Raíz cuadrada de la varianza del estimador"},{"term":"Corrección por población finita","definition":"Ajuste del muestreo uniforme sin reemplazo"}]}
+  question={"Reconstruye qué mide cada cálculo."}
+  explanation={"La corrección está ligada a este diseño. No se añade a una muestra agrupada o de conveniencia solo porque la población sea finita."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  instructions={"Selecciona un término y después su definición."}
+  allCorrectLabel={"Todas las parejas son correctas"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"Elige ahora una definición"}
+  notLinkedHint={"Sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+### Cuándo se aplica la regla de la raíz cuadrada
+
+Con extracciones binarias independientes e idénticamente distribuidas y probabilidad fija $P$, los términos de covarianza son cero, así que $\operatorname{Var}(\hat P)=P(1-P)/n$. Cuadruplicar $n$ reduce entonces el error estándar a la mitad. Al muestrear sin reemplazo de una población fija pequeña, también cambia la corrección. Si hay dependencia, debes comprobar las covarianzas. Es una afirmación sobre un estimador y una ley especificados, no un premio universal por añadir filas.
+
+## Transfiere a otra población finita
+
+Dos de diez fichas fijas están marcadas. Extrae uniformemente dos identificadores distintos. Antes de abrir la solución, encuentra todas las probabilidades de recuento, la esperanza de la proporción muestral y su varianza.
+
+<details>
+<summary>Enumera y verifica el catálogo nuevo</summary>
+
+Hay $10\times9/2=45$ parejas. Una pareja no marcada elige dos de ocho identificadores no marcados: $8\times7/2=28$. Una mixta elige uno de dos marcados y uno de ocho no marcados: 16. Los dos identificadores marcados forman una pareja. Los pesos son, por tanto, 28, 16 y 1.
+
+$E\hat P=(1/2)(16/45)+1/45=1/5$. El segundo momento ponderado es $(1/4)(16/45)+1/45=1/9$. La varianza es $1/9-(1/5)^2=16/225$. La fórmula de población finita da, por otra vía, $(1/5)(4/5)(1/2)(8/9)=16/225$. El error estándar es $4/15$.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"Comprueba la transferencia después de calcular"}
+  instructions={"Esta es otra población, de diez fichas, con objetivo y regla de selección explícitos."}
+  cases={[{"id":"transfer10","label":"Dos identificadores de diez","note":"Dos de diez identificadores están marcados. Las cuarenta y cinco parejas sin orden tienen la misma probabilidad.","n":2,"weights":[28,16,1],"denominator":45,"truth":{"numerator":1,"denominator":5}}]}
+  labels={{"caseLabel":"Regla de muestreo","countLabel":"Cantidad de elementos marcados","chartLabel":"Distribución muestral de la proporción","chartDescription":"Las barras muestran la masa de probabilidad de cada proporción posible. Las líneas discontinuas indican la esperanza y el objetivo fijo; coinciden cuando son iguales.","xAxisLabel":"Proporción muestral","yAxisLabel":"Masa de probabilidad","tableLabel":"Catálogo completo de recuentos","countColumn":"Cantidad marcada","estimateColumn":"Proporción muestral","probabilityColumn":"Probabilidad","meanLabel":"Esperanza — trazos largos","truthLabel":"Objetivo — trazos cortos","biasLabel":"Sesgo","varianceLabel":"Varianza de muestreo","mseLabel":"Error cuadrático medio","seLabel":"Error estándar aproximado","exactNote":"Las fracciones son exactas. El error estándar es una raíz cuadrada redondeada. Aquí conocemos el objetivo para auditar el modelo construido.","selectionTemplate":"Cantidad marcada {count}; proporción muestral {estimate}; probabilidad {probability}."}}
+  locale={"es"}
+/>
+
+</details>
+
+Un catálogo finito completo permite cálculos exactos. Una simulación grande solo aproximaría ese catálogo y añadiría variación de simulación. Enumera cuando el espacio de resultados sea manejable; cuando no lo sea, usa un modelo o una aproximación justificados, conservando la distinción entre incertidumbre del modelo y error de simulación.
+
+<MindMap client:visible
+  className="not-prose"
+  title={"Reconstruye el razonamiento"}
+  eyebrow=""
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Del diseño a la dispersión","children":[{"label":"Enumera","children":[{"label":"Primero selecciones de identificadores"},{"label":"Agrupa por recuento marcado"}]},{"label":"Calcula","children":[{"label":"Esperanza y sesgo"},{"label":"Varianza y error estándar"}]},{"label":"Comprueba supuestos","children":[{"label":"Reemplazo y dependencia"},{"label":"Corrección por población finita"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Comprueba la lección completa"}
+  questions={[{"question":"El estimador de parejas tiene media un medio y varianza tres veintiochoavos. ¿Su error realizado siempre coincide con su error estándar?","options":[{"text":"Sí; el error estándar es el error de cualquier pareja.","correct":false},{"text":"No; describe la dispersión de toda la ley de muestreo.","correct":true},{"text":"Sí; ser insesgado elimina toda variación respecto al objetivo.","correct":false}],"explanation":"Las proporciones realizadas son cero, un medio o uno. Sus errores difieren, mientras el procedimiento tiene una sola varianza de muestreo."},{"question":"Con extracciones binarias independientes e idénticas, ¿cómo cambia el error estándar al multiplicar el tamaño por cuatro?","options":[{"text":"Se reduce a la mitad, con probabilidad y estimador fijos.","correct":true},{"text":"Se reduce a un cuarto, con probabilidad y estimador fijos.","correct":false},{"text":"No cambia bajo ningún diseño posible.","correct":false}],"explanation":"Bajo estos supuestos la varianza es proporcional a uno entre n. Su raíz cuadrada da el factor un medio."},{"question":"¿Qué denominador produce la probabilidad de una pareja mixta en la transferencia?","options":[{"text":"Los diez identificadores de la población.","correct":false},{"text":"Las dieciséis parejas mixtas.","correct":false},{"text":"Las cuarenta y cinco parejas posibles.","correct":true}],"explanation":"Se dividen dieciséis parejas favorables entre cuarenta y cinco equiprobables: dieciséis cuarenta y cincoavos."}]}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso completado"}
+  perfectMessage={"Todas las respuestas son correctas. Revisa los supuestos al aplicar el método."}
+  goodMessage={"Revisa las explicaciones de las respuestas que has fallado."}
+  keepPracticingMessage={"Vuelve a los ejemplos resueltos y comprueba cada paso."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+Continúa con [Precisión real y estimada](/es/sample-size-and-sampling-uncertainty/03-true-and-estimated-precision).

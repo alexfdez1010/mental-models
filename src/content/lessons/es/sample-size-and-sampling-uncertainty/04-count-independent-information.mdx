@@ -1,0 +1,172 @@
+---
+title: "Cuenta información independiente, no solo filas"
+description: "Compara extracciones independientes, grupos copiados, efectos de diseño y planes de recogida para un estimador explícito."
+topic: es/sample-size-and-sampling-uncertainty
+order: 5
+minutes: 30
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+Duplicar un archivo puede costar muy poco. Duplicar su información es otro proyecto.
+
+## Define la unidad independiente
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"Dos bits independientes y equiprobables se copian cuatro veces cada uno. El archivo contiene ocho filas. ¿Qué determina la variabilidad de su media?"}
+  options={[{"text":"Ocho bits independientes y equiprobables.","correct":false},{"text":"Dos bits independientes con el mismo peso total.","correct":true},{"text":"Un bit independiente con ocho valores diferentes.","correct":false}]}
+  explanation={"La media de las ocho filas es la media de los dos bits subyacentes. Las copias añaden peso, pero no aleatoriedad nueva."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de empezar"}
+/>
+
+Un **ensayo de Bernoulli** es una observación binaria con una probabilidad de 1 especificada. En el primer modelo, los ocho ensayos son independientes y cada uno tiene probabilidad 1/2. Independencia significa que conocer los demás resultados no cambia la probabilidad de un ensayo; la ley conjunta se factoriza como producto de las probabilidades de sus componentes. Idénticamente distribuidos significa que todos usan la misma ley.
+
+En el segundo modelo, genera los bits independientes y equiprobables $Z_1,Z_2$. Escribe cuatro copias de $Z_1$ y cuatro de $Z_2$. La media de las ocho filas es $(4Z_1+4Z_2)/8=(Z_1+Z_2)/2$. Sus valores posibles son 0, 1/2 y 1, con probabilidades 1/4, 1/2 y 1/4. Su varianza es $1/8$. La media de ocho filas independientes tiene, en cambio, varianza $(1/4)/8=1/32$.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"Las copias cambian la dependencia, no el recuento nominal"}
+  instructions={"Cambia entre dos catálogos completos de probabilidad. En el modelo copiado, la mayoría de los recuentos tienen probabilidad cero."}
+  cases={[{"id":"iid8","label":"Ocho bits independientes y equiprobables","note":"Cada fila es un ensayo de Bernoulli independiente con probabilidad de éxito de un medio.","n":8,"weights":[1,8,28,56,70,56,28,8,1],"denominator":256,"truth":{"numerator":1,"denominator":2}},{"id":"cluster8","label":"Dos bits copiados cuatro veces","note":"Dos bits independientes y equiprobables se copian en cuatro filas cada uno. Las copias de cada grupo son idénticas.","n":8,"weights":[1,0,0,0,2,0,0,0,1],"denominator":4,"truth":{"numerator":1,"denominator":2}}]}
+  labels={{"caseLabel":"Regla de muestreo","countLabel":"Cantidad de elementos marcados","chartLabel":"Distribución muestral de la proporción","chartDescription":"Las barras muestran la masa de probabilidad de cada proporción posible. Las líneas discontinuas indican la esperanza y el objetivo fijo; coinciden cuando son iguales.","xAxisLabel":"Proporción muestral","yAxisLabel":"Masa de probabilidad","tableLabel":"Catálogo completo de recuentos","countColumn":"Cantidad marcada","estimateColumn":"Proporción muestral","probabilityColumn":"Probabilidad","meanLabel":"Esperanza — trazos largos","truthLabel":"Objetivo — trazos cortos","biasLabel":"Sesgo","varianceLabel":"Varianza de muestreo","mseLabel":"Error cuadrático medio","seLabel":"Error estándar aproximado","exactNote":"Las fracciones son exactas. El error estándar es una raíz cuadrada redondeada. Aquí conocemos el objetivo para auditar el modelo construido.","selectionTemplate":"Cantidad marcada {count}; proporción muestral {estimate}; probabilidad {probability}."}}
+  locale={"es"}
+/>
+
+Incluso cambia la probabilidad de un archivo extremo. Los ocho bits independientes son todos iguales con probabilidad $2/2^8=1/128$. El archivo copiado es todo igual cuando sus dos bits subyacentes coinciden, con probabilidad $2/4=1/2$. Una probabilidad del catálogo no es una frecuencia empírica medida en datos aportados.
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"En el modelo copiado, las unidades independientes son {{los dos bits subyacentes|las ocho filas escritas|las tres proporciones posibles}}."}
+  explanation={"Las tres proporciones posibles son resultados, no observaciones independientes. Cada bit subyacente genera un grupo entero de filas idénticas."}
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Correcto"}
+  partialResultWord={"bien"}
+/>
+
+## El efecto de diseño compara un estimador concreto
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"La media copiada tiene cuatro veces la varianza de la media de ocho filas independientes. ¿Qué significa aquí un tamaño efectivo de dos?"}
+  options={[{"text":"Todo análisis del archivo debe comportarse como si tuviera dos filas.","correct":false},{"text":"La media copiada coincide con la de ocho ensayos en cualquier archivo.","correct":false},{"text":"Una media de dos ensayos independientes tiene la misma varianza.","correct":true}]}
+  explanation={"El tamaño efectivo equipara una varianza con una referencia independiente especificada. No es un recuento intrínseco válido para todo estadístico."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de empezar"}
+/>
+
+El **efecto de diseño** es la varianza bajo el diseño real dividida por la varianza bajo un diseño de referencia explícito, para la comparación de objetivo y estimador indicada. Aquí $\operatorname{DEFF}=(1/8)/(1/32)=4$. Al equiparar la varianza con la de una media de bits independientes, obtenemos el **tamaño muestral efectivo** $n_{\mathrm{eff}}=8/4=2$.
+
+La dependencia no siempre aumenta la varianza. La muestra de dos fichas distintas entre ocho de la segunda lección tiene varianza $3/28$, frente a $1/8$ para dos bits independientes. La comparación da efecto de diseño $6/7$ y tamaño efectivo $2/(6/7)=7/3$. Un tamaño efectivo no entero y mayor que dos es coherente: es una equivalencia de varianza, no una tercera ficha observada a escondidas.
+
+### Cuándo usar esta comparación
+
+Declara el estimador, el objetivo, la referencia independiente y el diseño real antes de informar un efecto de diseño. La semejanza dentro de grupos, los pesos desiguales y el muestreo sin reemplazo pueden tener efectos distintos. Un único «n efectivo» no resuelve el sesgo del marco, la validez de las medidas, las probabilidades de cola ni la precisión de otros estadísticos. El [tutorial de varianza de CDC](https://wwwn.cdc.gov/nchs/nhanes/tutorials/varianceestimation.aspx) explica por qué la agrupación debe incluirse en los cálculos de precisión; los números exactos de aquí proceden de nuestras leyes construidas.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Tamaño nominal","definition":"Número de filas registradas"},{"term":"Unidad independiente","definition":"Entrada generada por separado bajo este modelo"},{"term":"Efecto de diseño","definition":"Cociente de varianzas respecto a una referencia declarada"},{"term":"Tamaño efectivo","definition":"Tamaño de la referencia independiente que iguala una varianza elegida"}]}
+  question={"Relaciona cada comparación con su significado."}
+  explanation={"Ninguna etiqueta vuelve representativo el marco. El tamaño efectivo está ligado al estimador y la referencia usados para calcularlo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  instructions={"Selecciona un término y después su definición."}
+  allCorrectLabel={"Todas las parejas son correctas"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"Elige ahora una definición"}
+  notLinkedHint={"Sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+## Gasta el presupuesto en un menú definido
+
+Dos bits existentes, independientes y equiprobables, ya aportan cuatro filas cada uno. El informe debe usar la media de **todas** las filas recogidas con igual peso por fila. Puedes gastar como máximo cuatro unidades ficticias de recogida. No afirmamos que una copia sea una persona, un ensayo o una medida nuevos.
+
+| Plan | Pesos de los bits independientes en la media final | Filas finales | Coste | Varianza de muestreo |
+| --- | --- | ---: | ---: | ---: |
+| Conservar el archivo | 4, 4 | 8 | 0 | 1/8 |
+| Copiar cada fila una vez | 8, 8 | 16 | 1 | 1/8 |
+| Añadir dos grupos nuevos de cuatro filas idénticas | 4, 4, 4, 4 | 16 | 4 | 1/16 |
+| Añadir cuatro filas individuales nuevas | 4, 4, 1, 1, 1, 1 | 12 | 4 | 1/16 |
+
+Cada bit nuevo es independiente de los antiguos y de los demás nuevos, con probabilidad 1/2. Recoger un grupo cuesta dos unidades por bit nuevo; recoger una fila individual cuesta una. Son costes estipulados y los cuatro planes constituyen todo el menú permitido.
+
+Para bits independientes y equiprobables con pesos $w_i$, la media ponderada tiene varianza
+
+$$\frac{\sum_i w_i^2}{4(\sum_i w_i)^2}.$$
+
+Se obtiene al desarrollar el cuadrado de la suma ponderada: las covarianzas se anulan por independencia y cada bit tiene varianza 1/4. En el último plan, los pesos al cuadrado suman $16+16+1+1+1+1=36$, así que la varianza es $36/(4\times12^2)=1/16$. El plan de grupos también da $64/(4\times16^2)=1/16$.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"Dos planes distintos cumplen el mismo objetivo de precisión"}
+  instructions={"Compara las leyes completas de recuento de las dos mejoras admisibles con el presupuesto. Sus cantidades de filas difieren, pero sus varianzas coinciden."}
+  cases={[{"id":"four-groups","label":"Cuatro grupos independientes","note":"Cuatro bits independientes y equiprobables, escritos cuatro veces cada uno.","n":16,"weights":[1,0,0,0,4,0,0,0,6,0,0,0,4,0,0,0,1],"denominator":16,"truth":{"numerator":1,"denominator":2}},{"id":"groups-individuals","label":"Dos grupos y cuatro individuos","note":"Dos bits independientes tienen peso cuatro cada uno; otros cuatro bits independientes tienen peso uno cada uno.","n":12,"weights":[1,4,6,4,3,8,12,8,3,4,6,4,1],"denominator":64,"truth":{"numerator":1,"denominator":2}}]}
+  labels={{"caseLabel":"Regla de muestreo","countLabel":"Cantidad de elementos marcados","chartLabel":"Distribución muestral de la proporción","chartDescription":"Las barras muestran la masa de probabilidad de cada proporción posible. Las líneas discontinuas indican la esperanza y el objetivo fijo; coinciden cuando son iguales.","xAxisLabel":"Proporción muestral","yAxisLabel":"Masa de probabilidad","tableLabel":"Catálogo completo de recuentos","countColumn":"Cantidad marcada","estimateColumn":"Proporción muestral","probabilityColumn":"Probabilidad","meanLabel":"Esperanza — trazos largos","truthLabel":"Objetivo — trazos cortos","biasLabel":"Sesgo","varianceLabel":"Varianza de muestreo","mseLabel":"Error cuadrático medio","seLabel":"Error estándar aproximado","exactNote":"Las fracciones son exactas. El error estándar es una raíz cuadrada redondeada. Aquí conocemos el objetivo para auditar el modelo construido.","selectionTemplate":"Cantidad marcada {count}; proporción muestral {estimate}; probabilidad {probability}."}}
+  locale={"es"}
+/>
+
+### Transferencia y decisión
+
+El criterio es coste máximo de cuatro y varianza máxima de 1/16 para la media de todas las filas indicada. ¿Qué planes cumplen? ¿Es uno de ellos el preferido único con esos criterios?
+
+<details>
+<summary>Aplica las dos restricciones</summary>
+
+Añadir dos grupos nuevos y añadir cuatro individuos cuestan cuatro y alcanzan varianza 1/16. Conservar o copiar el archivo mantiene varianza 1/8 y no cumple el requisito. Los dos planes admisibles empatan en los criterios dados; para elegir uno hace falta otro objetivo, como el formato de recogida permitido. No hemos buscado entre todos los estimadores o diseños concebibles, así que no es un teorema de optimalidad global.
+
+</details>
+
+<MindMap client:visible
+  className="not-prose"
+  title={"Reconstruye el razonamiento"}
+  eyebrow=""
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Cuenta lo que cambia el estimador","children":[{"label":"Filas y entradas","children":[{"label":"Las copias conservan la aleatoriedad antigua"},{"label":"Los bits independientes añaden información"}]},{"label":"Compara diseños","children":[{"label":"Declara la referencia"},{"label":"El tamaño efectivo depende del estadístico"}]},{"label":"Elige un plan","children":[{"label":"Ten en cuenta los pesos"},{"label":"Explicita costes y empates"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Comprueba la lección completa"}
+  questions={[{"question":"¿Qué dos planes permitidos alcanzan varianza de un dieciseisavo dentro del presupuesto?","options":[{"text":"Copiar las filas y añadir dos grupos.","correct":false},{"text":"Añadir dos grupos y cuatro individuos.","correct":true},{"text":"Conservar el archivo y añadir cuatro individuos.","correct":false}],"explanation":"Los dos planes que añaden información nueva tienen varianza de un dieciseisavo y coste cuatro. Copiar deja intacta la varianza original."},{"question":"¿Por qué la referencia sin reemplazo puede dar un tamaño efectivo mayor que el nominal?","options":[{"text":"Su covarianza negativa puede reducir la varianza de la media.","correct":true},{"text":"Sus observaciones duplicadas se vuelven independientes.","correct":false},{"text":"Su marco se amplía automáticamente más allá de la población.","correct":false}],"explanation":"Las extracciones distintas de esta población binaria finita tienen covarianza negativa y menor varianza que extracciones independientes."},{"question":"¿Qué afirmación respalda un tamaño efectivo basado en varianza?","options":[{"text":"Corrige el sesgo de las unidades omitidas.","correct":false},{"text":"Describe exactamente cualquier suceso de cola.","correct":false},{"text":"Iguala la varianza de un estimador declarado.","correct":true}],"explanation":"El cálculo equipara una varianza bajo leyes especificadas. No aporta todas las demás propiedades de los datos."}]}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso completado"}
+  perfectMessage={"Todas las respuestas son correctas. Revisa los supuestos al aplicar el método."}
+  goodMessage={"Revisa las explicaciones de las respuestas que has fallado."}
+  keepPracticingMessage={"Vuelve a los ejemplos resueltos y comprueba cada paso."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+Continúa con [Audita un procedimiento de intervalos](/es/sample-size-and-sampling-uncertainty/05-audit-an-interval-procedure).

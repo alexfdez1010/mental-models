@@ -1,0 +1,120 @@
+---
+title: "Count Independent Information, Not Just Rows"
+description: "Compare independent draws, copied groups, design effects and collection plans for one explicit estimator."
+topic: en/sample-size-and-sampling-uncertainty
+order: 5
+minutes: 30
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+Doubling a file can cost very little. Doubling its information is a different project.
+
+## Define the independent unit
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"Two independent fair bits are each copied four times. The file contains eight rows. Which input determines the variability of its mean?"}
+  options={[{"text":"Eight independent fair bits.","correct":false},{"text":"Two independent fair bits with equal total weights.","correct":true},{"text":"One independent fair bit with eight different values.","correct":false}]}
+  explanation={"The mean of the eight rows is the mean of the two underlying bits. The copies add weight but no new randomness."}
+/>
+
+A **Bernoulli trial** is a binary observation with a specified probability of 1. In the first model, eight trials are independent and each has probability 1/2. Independence means knowing the other outcomes does not change a trial's probability; the joint law factors into the product of its component probabilities. Identically distributed means the same probability law is used for each trial.
+
+In the second model, generate independent fair bits $Z_1,Z_2$. Write four copies of $Z_1$ and four of $Z_2$. The eight-row mean is $(4Z_1+4Z_2)/8=(Z_1+Z_2)/2$. Its possible values are 0, 1/2 and 1 with probabilities 1/4, 1/2 and 1/4. Its variance is $1/8$. The independent eight-row mean instead has variance $(1/4)/8=1/32$.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"Copies change the dependence, not the nominal count"}
+  instructions={"Switch between two complete probability catalogues. The copied model has zero probability for most marked counts."}
+  cases={[{"id":"iid8","label":"Eight independent fair bits","note":"Each row is a separate independent Bernoulli trial with success probability one half.","n":8,"weights":[1,8,28,56,70,56,28,8,1],"denominator":256,"truth":{"numerator":1,"denominator":2}},{"id":"cluster8","label":"Two fair bits copied four times","note":"Two independent fair bits are each copied into four rows. Copies within a group are identical.","n":8,"weights":[1,0,0,0,2,0,0,0,1],"denominator":4,"truth":{"numerator":1,"denominator":2}}]}
+  labels={{"caseLabel":"Sampling rule","countLabel":"Observed marked count","chartLabel":"Sampling distribution of the proportion","chartDescription":"Bars show probability mass at each possible proportion. Dashed lines mark the expectation and the fixed target; they coincide when equal.","xAxisLabel":"Sample proportion","yAxisLabel":"Probability mass","tableLabel":"Complete count catalogue","countColumn":"Marked count","estimateColumn":"Sample proportion","probabilityColumn":"Probability","meanLabel":"Expectation — long dashes","truthLabel":"Target — short dashes","biasLabel":"Bias","varianceLabel":"Sampling variance","mseLabel":"Mean squared error","seLabel":"Standard error, approximately","exactNote":"Fractions are exact. The standard error is a rounded square root. The target is known here to audit the constructed model.","selectionTemplate":"Marked count {count}; sample proportion {estimate}; probability {probability}."}}
+/>
+
+Even the probability of an extreme file differs. Eight independent fair bits are all equal with probability $2/2^8=1/128$. The copied file is all equal when its two underlying bits match, with probability $2/4=1/2$. A catalogued probability is not an empirical frequency measured from a supplied dataset.
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"For the copied model, the independent units are {{the two underlying bits|all eight written rows|the three possible proportions}}."}
+  explanation={"The three possible proportions are outcomes, not independent observations. Each underlying bit generates a whole group of identical rows."}
+/>
+
+## Design effects are comparisons tied to an estimator
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"The copied mean has four times the variance of the independent eight-row mean. What does an effective sample size of two mean here?"}
+  options={[{"text":"Every analysis of the file must behave as if it contained two rows.","correct":false},{"text":"The copied mean equals the independent eight-row mean in every file.","correct":false},{"text":"An independent mean with two fair trials has the same variance.","correct":true}]}
+  explanation={"Effective sample size matches a chosen variance to a specified independent reference. It is not an intrinsic count valid for every statistic."}
+/>
+
+The **design effect** is the variance under the actual design divided by the variance under a stated reference design, for the same target and estimator comparison. Here $\operatorname{DEFF}=(1/8)/(1/32)=4$. Matching the variance to an independent fair-bit mean gives **effective sample size** $n_{\mathrm{eff}}=8/4=2$.
+
+Dependence does not always increase variance. Lesson two's sample of two distinct cards from eight has variance $3/28$, compared with $1/8$ for two independent fair bits. That comparison gives design effect $6/7$ and effective sample size $2/(6/7)=7/3$. A noninteger effective size larger than two is coherent: it is a variance equivalence, not a hidden third observed card.
+
+### When to use the comparison
+
+State the estimator, target, independent reference and actual design before reporting a design effect. Group similarity, unequal weights and sampling without replacement can have different effects. A single “effective n” does not settle frame bias, measurement validity, tail probabilities or precision for every other statistic. The [CDC’s variance tutorial](https://wwwn.cdc.gov/nchs/nhanes/tutorials/varianceestimation.aspx) explains why clustering must be included in design-based precision calculations; the exact numbers here come from our toy laws.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Nominal size","definition":"Number of recorded rows"},{"term":"Independent unit","definition":"A separately generated input under this model"},{"term":"Design effect","definition":"Variance ratio relative to a declared reference"},{"term":"Effective size","definition":"Independent-reference size matching a chosen variance"}]}
+  question={"Match the comparison to its meaning."}
+  explanation={"None of these labels makes the collection frame representative. Effective size is tied to the estimator and reference used to calculate it."}
+/>
+
+## Spend a collection budget on a defined menu
+
+Suppose two existing independent fair bits each already contribute four rows. The report must use the equally weighted mean of **all** rows collected. You may spend at most four fictional collection units. A copied row is not claimed to be a new person, trial or measurement.
+
+| Plan | Independent-bit weights in the final mean | Final rows | Cost | Sampling variance |
+| --- | --- | ---: | ---: | ---: |
+| Retain existing file | 4, 4 | 8 | 0 | 1/8 |
+| Copy every existing row once | 8, 8 | 16 | 1 | 1/8 |
+| Add two new groups of four identical rows | 4, 4, 4, 4 | 16 | 4 | 1/16 |
+| Add four new individual rows | 4, 4, 1, 1, 1, 1 | 12 | 4 | 1/16 |
+
+Every newly introduced bit is independent of the old bits and other new bits, with probability 1/2. Group collection costs two units per new bit; individual collection costs one. These are stipulated costs and the four rows labelled “plan” are the entire allowed menu.
+
+For independent fair bits with weights $w_i$, the weighted mean has variance
+
+$$\frac{\sum_i w_i^2}{4(\sum_i w_i)^2}.$$
+
+This follows by expanding the squared weighted sum: covariance terms vanish by independence and each bit has variance 1/4. The last plan has squared weights summing to $16+16+1+1+1+1=36$, so variance is $36/(4\times12^2)=1/16$. The grouped plan gives $64/(4\times16^2)=1/16$ too.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"Two different plans meet the same precision target"}
+  instructions={"Compare the complete count laws for the two budget-feasible improvements. Their row counts differ, but their variances match."}
+  cases={[{"id":"four-groups","label":"Four independent groups","note":"Four independent fair bits, each written four times.","n":16,"weights":[1,0,0,0,4,0,0,0,6,0,0,0,4,0,0,0,1],"denominator":16,"truth":{"numerator":1,"denominator":2}},{"id":"groups-individuals","label":"Two groups and four individuals","note":"Two independent fair bits have weight four each; four more independent fair bits have weight one each.","n":12,"weights":[1,4,6,4,3,8,12,8,3,4,6,4,1],"denominator":64,"truth":{"numerator":1,"denominator":2}}]}
+  labels={{"caseLabel":"Sampling rule","countLabel":"Observed marked count","chartLabel":"Sampling distribution of the proportion","chartDescription":"Bars show probability mass at each possible proportion. Dashed lines mark the expectation and the fixed target; they coincide when equal.","xAxisLabel":"Sample proportion","yAxisLabel":"Probability mass","tableLabel":"Complete count catalogue","countColumn":"Marked count","estimateColumn":"Sample proportion","probabilityColumn":"Probability","meanLabel":"Expectation — long dashes","truthLabel":"Target — short dashes","biasLabel":"Bias","varianceLabel":"Sampling variance","mseLabel":"Mean squared error","seLabel":"Standard error, approximately","exactNote":"Fractions are exact. The standard error is a rounded square root. The target is known here to audit the constructed model.","selectionTemplate":"Marked count {count}; sample proportion {estimate}; probability {probability}."}}
+/>
+
+### Transfer and decision
+
+The decision criterion is cost at most four and variance at most 1/16 for the stipulated all-row mean. Which plans qualify? Is there a uniquely preferred plan from those criteria alone?
+
+<details>
+<summary>Apply the two constraints</summary>
+
+Adding two new groups and adding four individuals both cost four and reach variance 1/16. Retaining or copying the file leaves variance 1/8 and fails the precision requirement. The two qualifying plans tie on the stated criteria; a unique choice needs another objective, such as permitted collection format. We have not searched every conceivable estimator or collection design, so this is not a global optimality theorem.
+
+</details>
+
+<MindMap client:visible
+  className="not-prose"
+  eyebrow=""
+  title={"Rebuild the argument"}
+  root={{"label":"Count what changes the estimator","children":[{"label":"Rows and inputs","children":[{"label":"Copies retain the old randomness"},{"label":"New independent bits add randomness"}]},{"label":"Compare designs","children":[{"label":"Declare the reference"},{"label":"Effective size is statistic-specific"}]},{"label":"Choose a plan","children":[{"label":"Account for weights"},{"label":"Keep costs and ties explicit"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Check the whole lesson"}
+  questions={[{"question":"Which two allowed plans reach variance one sixteenth within the budget?","options":[{"text":"Copy all rows and add two groups.","correct":false},{"text":"Add two groups and add four individuals.","correct":true},{"text":"Retain the file and add four individuals.","correct":false}],"explanation":"The two new-information plans each have variance one sixteenth and cost four. Copying leaves the original variance unchanged."},{"question":"Why can the without-replacement reference give an effective size above the nominal size?","options":[{"text":"Its negative covariance can reduce the mean’s variance.","correct":true},{"text":"Its duplicated observations become independent.","correct":false},{"text":"Its frame automatically expands beyond the population.","correct":false}],"explanation":"Distinct draws from the finite population have negative covariance in this binary model, lowering variance relative to independent draws."},{"question":"Which claims are supported by a variance-based effective size?","options":[{"text":"It repairs omitted-unit bias.","correct":false},{"text":"It describes every tail event exactly.","correct":false},{"text":"It matches one declared estimator’s variance.","correct":true}],"explanation":"The calculation matches a variance under specified laws. It does not supply every other property of the data."}]}
+/>
+
+Continue to [Audit an Interval Procedure](/sample-size-and-sampling-uncertainty/05-audit-an-interval-procedure).

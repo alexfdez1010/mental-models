@@ -1,0 +1,121 @@
+---
+title: "Enumerate the Samples, Then Measure Their Spread"
+description: "Derive expectation, variance, standard error and the finite-population correction from complete catalogues."
+topic: en/sample-size-and-sampling-uncertainty
+order: 3
+minutes: 30
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+The population is fixed; the estimate can move. To measure that movement, first list what can happen under the collection rule.
+
+## Build the whole sampling distribution
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"In the eight-card model, which calculation gives the probability of observing one marked card in a uniform pair?"}
+  options={[{"text":"One possible count divided by three possible counts.","correct":false},{"text":"Sixteen mixed pairs divided by twenty-eight possible pairs.","correct":true},{"text":"Four marked cards divided by eight population cards.","correct":false}]}
+  explanation={"The event contains sixteen equally likely ID pairs. The population proportion is a different quantity, and counts are not equiprobable."}
+/>
+
+Keep the eight IDs and uniform unordered pair rule from lesson one. There are six unmarked pairs: EF, EG, EH, FG, FH and GH. There are six marked pairs: AB, AC, AD, BC, BD and CD. Each of the four marked IDs pairs with each of the four unmarked IDs, giving 16 mixed pairs. That accounts for all 28.
+
+A **sampling distribution** lists an estimator's values and their probabilities under repeated collection. It is a probability catalogue, not a promise that the next 28 collections will realise each pair once.
+
+| Marked count $K$ | Sample proportion $\hat P$ | Pair count | Probability | Squared departure from 1/2 | Probability × squared departure |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 0 | 6 | 3/14 | 1/4 | 3/56 |
+| 1 | 1/2 | 16 | 4/7 | 0 | 0 |
+| 2 | 1 | 6 | 3/14 | 1/4 | 3/56 |
+
+The **expectation**, written $E(\hat P)$, is the probability-weighted mean: $0(3/14)+(1/2)(4/7)+1(3/14)=1/2$. The estimator is **unbiased** for this target because its expectation equals $P$. A realised estimate can still miss.
+
+The **variance** is $E[(\hat P-E\hat P)^2]=3/56+3/56=3/28$. It averages over the sampling law; there is no extra division by the number of rows in this table. The **standard error** is the standard deviation of the estimator, $\operatorname{SE}(\hat P)=\sqrt{3/28}\approx0.3273$. It is measured in proportion units. The variance uses squared proportion units.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"A finite catalogue can be checked completely"}
+  instructions={"Compare sample sizes from the same fixed population. Moving the observed count highlights one possible outcome; it does not change the sampling law."}
+  cases={[{"id":"srs2","label":"Two distinct IDs","note":"Choose one unordered pair uniformly from the eight IDs; four IDs are marked.","n":2,"weights":[6,16,6],"denominator":28,"truth":{"numerator":1,"denominator":2}},{"id":"srs4","label":"Four distinct IDs","note":"Choose one unordered set of four uniformly from the same eight IDs.","n":4,"weights":[1,16,36,16,1],"denominator":70,"truth":{"numerator":1,"denominator":2}},{"id":"census","label":"All eight IDs","note":"Every ID is measured once with the criterion held fixed.","n":8,"weights":[0,0,0,0,1,0,0,0,0],"denominator":1,"truth":{"numerator":1,"denominator":2}}]}
+  labels={{"caseLabel":"Sampling rule","countLabel":"Observed marked count","chartLabel":"Sampling distribution of the proportion","chartDescription":"Bars show probability mass at each possible proportion. Dashed lines mark the expectation and the fixed target; they coincide when equal.","xAxisLabel":"Sample proportion","yAxisLabel":"Probability mass","tableLabel":"Complete count catalogue","countColumn":"Marked count","estimateColumn":"Sample proportion","probabilityColumn":"Probability","meanLabel":"Expectation — long dashes","truthLabel":"Target — short dashes","biasLabel":"Bias","varianceLabel":"Sampling variance","mseLabel":"Mean squared error","seLabel":"Standard error, approximately","exactNote":"Fractions are exact. The standard error is a rounded square root. The target is known here to audit the constructed model.","selectionTemplate":"Marked count {count}; sample proportion {estimate}; probability {probability}."}}
+/>
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"A standard error is the {{square root of sampling variance|square of the realised error|largest possible sampling error}}."}
+  explanation={"It describes the spread of a procedure under its model. It is neither a maximum error bound nor the error of one realised estimate."}
+/>
+
+## Why sampling more of a fixed population changes the rule
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"Moving from two distinct cards to all eight, what happens to this estimator’s sampling variance?"}
+  options={[{"text":"It becomes zero because every selection contains the whole fixed population.","correct":true},{"text":"It stays positive because the classifications are binary.","correct":false},{"text":"It becomes one eighth because there are eight rows.","correct":false}]}
+  explanation={"With error-free measurement and the population fixed, every census returns exactly four eighths. There is no selection variation left."}
+/>
+
+For $n=4$, counts 0 through 4 arise from 1, 16, 36, 16 and 1 of the 70 equally likely sets. For example, $K=2$ chooses two of four marked IDs and two of four unmarked IDs: $6\times6=36$. Computing the weighted squared deviations gives variance $1/28$, three times smaller than the pair variance. The standard-error ratio is $1/\sqrt3$, rather than $1/\sqrt2$.
+
+Here is the general finite-population result and why its conditions matter. A fixed population has size $M>1$ and marked proportion $P$. Sample $n$ distinct units uniformly. Let $X_i$ be the binary value at draw position $i$. Each draw has mean $P$ and variance $P(1-P)$. Distinct draw values are negatively associated in the following precise sense: their **covariance**, $E(X_iX_j)-E(X_i)E(X_j)$, is
+
+$$\operatorname{Cov}(X_i,X_j)=-\frac{P(1-P)}{M-1}\quad(i\ne j).$$
+
+To verify it, write $H=MP$ for the integer marked population count. The probability that two distinct positions are both marked is $(H/M)((H-1)/(M-1))$. Subtract $P^2$ and simplify. Expanding the squared sum gives $n$ variance terms and $n(n-1)$ covariance terms. Dividing by $n^2$ gives
+
+$$\operatorname{Var}(\hat P)=\frac{P(1-P)}{n}\frac{M-n}{M-1}.$$
+
+The last factor is the **finite-population correction** for the variance. For $M=8,P=1/2,n=2$ it gives $(1/8)(6/7)=3/28$. For $n=4$ it gives $(1/16)(4/7)=1/28$. At the census, $n=M$, it is zero.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Expectation","definition":"Probability-weighted mean of the estimator"},{"term":"Variance","definition":"Probability-weighted squared departure from that mean"},{"term":"Standard error","definition":"Square root of the estimator variance"},{"term":"Finite-population correction","definition":"Adjustment for uniform sampling without replacement"}]}
+  question={"Reconstruct what each calculation measures."}
+  explanation={"The correction is tied to this design. It cannot be attached to a clustered or convenience sample merely because the population is finite."}
+/>
+
+### When the square-root rule applies
+
+For independent, identically distributed binary draws with fixed probability $P$, covariance terms are zero, so $\operatorname{Var}(\hat P)=P(1-P)/n$. Quadrupling $n$ then halves the standard error. Without replacement from a small fixed population, the correction also changes. With dependence, the covariance terms must be checked. This is a claim about a specified estimator and law, not a universal reward for adding rows.
+
+## Transfer to a different finite population
+
+Two of ten fixed cards are marked. Draw two distinct IDs uniformly. Before opening the solution, find the complete count probabilities, expected sample proportion and variance.
+
+<details>
+<summary>Enumerate and verify the new catalogue</summary>
+
+There are $10\times9/2=45$ pairs. An unmarked pair chooses two of eight unmarked IDs: $8\times7/2=28$. A mixed pair chooses one of two marked and one of eight unmarked: 16. The two marked IDs form one pair. Thus the weights are 28, 16 and 1.
+
+$E\hat P=(1/2)(16/45)+1/45=1/5$. The weighted second moment is $(1/4)(16/45)+1/45=1/9$. Variance is $1/9-(1/5)^2=16/225$. The finite-population formula independently gives $(1/5)(4/5)(1/2)(8/9)=16/225$. Standard error is $4/15$.
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"Check the transfer after your calculation"}
+  instructions={"This is a different ten-card population, with the target and selection rule supplied explicitly."}
+  cases={[{"id":"transfer10","label":"Two IDs from ten","note":"Two of ten IDs are marked. All forty-five unordered pairs are equally likely.","n":2,"weights":[28,16,1],"denominator":45,"truth":{"numerator":1,"denominator":5}}]}
+  labels={{"caseLabel":"Sampling rule","countLabel":"Observed marked count","chartLabel":"Sampling distribution of the proportion","chartDescription":"Bars show probability mass at each possible proportion. Dashed lines mark the expectation and the fixed target; they coincide when equal.","xAxisLabel":"Sample proportion","yAxisLabel":"Probability mass","tableLabel":"Complete count catalogue","countColumn":"Marked count","estimateColumn":"Sample proportion","probabilityColumn":"Probability","meanLabel":"Expectation — long dashes","truthLabel":"Target — short dashes","biasLabel":"Bias","varianceLabel":"Sampling variance","mseLabel":"Mean squared error","seLabel":"Standard error, approximately","exactNote":"Fractions are exact. The standard error is a rounded square root. The target is known here to audit the constructed model.","selectionTemplate":"Marked count {count}; sample proportion {estimate}; probability {probability}."}}
+/>
+
+</details>
+
+A complete finite catalogue supports exact calculations. A large simulated sample would only approximate that catalogue and would add simulation variation. Use enumeration when the state space is small enough; use a justified model or approximation when it is not, while preserving the distinction between model uncertainty and simulation error.
+
+<MindMap client:visible
+  className="not-prose"
+  eyebrow=""
+  title={"Rebuild the argument"}
+  root={{"label":"From design to spread","children":[{"label":"Enumerate","children":[{"label":"ID selections first"},{"label":"Aggregate by marked count"}]},{"label":"Calculate","children":[{"label":"Expectation and bias"},{"label":"Variance then standard error"}]},{"label":"Check assumptions","children":[{"label":"Replacement and dependence"},{"label":"Finite-population correction"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Check the whole lesson"}
+  questions={[{"question":"The pair estimator has mean one half and variance three twenty-eighths. Is its realised error always its standard error?","options":[{"text":"Yes; the standard error is the error of every pair.","correct":false},{"text":"No; it describes spread across the entire sampling law.","correct":true},{"text":"Yes; unbiasedness removes all variation around the target.","correct":false}],"explanation":"The realised proportions are zero, one half or one. Their errors differ, while the procedure has one sampling variance."},{"question":"Under independent identical binary draws, multiplying the sample size by four changes standard error how?","options":[{"text":"It halves it, with probability and estimator fixed.","correct":true},{"text":"It quarters it, with probability and estimator fixed.","correct":false},{"text":"It leaves it unchanged for every possible design.","correct":false}],"explanation":"Variance is proportional to one over n under these assumptions. Taking its square root gives the factor one half."},{"question":"Which denominator produces the transfer probability of a mixed pair?","options":[{"text":"The ten population IDs.","correct":false},{"text":"The sixteen mixed pairs.","correct":false},{"text":"The forty-five possible ID pairs.","correct":true}],"explanation":"Sixteen favourable pairs are divided by forty-five equally likely pairs, yielding sixteen forty-fifths."}]}
+/>
+
+Continue to [True and Estimated Precision](/sample-size-and-sampling-uncertainty/03-true-and-estimated-precision).

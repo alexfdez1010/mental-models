@@ -368,3 +368,9 @@ export type { LocalUpdateTraceProps, LocalUpdateLabels, LocalUpdateCase, LocalUp
 
 export { AggregationTrace } from '@/components/react/AggregationTrace';
 export type { AggregationTraceProps } from '@/components/react/AggregationTrace';
+
+export { SamplingCatalogue } from '@/components/react/SamplingCatalogue';
+export type { SamplingCatalogueProps } from '@/components/react/SamplingCatalogue';
+
+export { BinomialCoverageAudit } from '@/components/react/BinomialCoverageAudit';
+export type { BinomialCoverageAuditProps } from '@/components/react/BinomialCoverageAudit';

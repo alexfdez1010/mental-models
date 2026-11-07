@@ -1,0 +1,139 @@
+---
+title: "Audit an Interval Procedure"
+description: "Construct intervals without knowing truth, then audit exact repeated coverage and its assumptions."
+topic: en/sample-size-and-sampling-uncertainty
+order: 6
+minutes: 38
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+An interval procedure is a machine: feed it data, receive a set of parameter values. Its coverage claim concerns the machine across repeated data collections.
+
+## Construct first, audit separately
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"A procedure has ninety-five percent repeated-sampling coverage. After one interval is observed, what follows by that fact alone?"}
+  options={[{"text":"The fixed unknown parameter now has a ninety-five percent posterior probability of lying inside.","correct":false},{"text":"Exactly ninety-five of the next hundred realised intervals must contain it.","correct":false},{"text":"Under the stated model, the random interval contains the fixed parameter with probability at least that nominal level.","correct":true}]}
+  explanation={"Coverage is a repeated-procedure probability. It is neither a realised quota nor, without an additional probability model for the parameter, a posterior probability about this observed interval."}
+/>
+
+For this lesson, replace the finite-card design with $n$ independent, identically distributed Bernoulli trials of unknown fixed probability $p$. The marked count is $K$. Its **binomial law** assigns probability $\binom nk p^k(1-p)^{n-k}$ to count $k$; $\binom nk$ counts which $k$ positions are marked. This is not sampling distinct IDs from eight fixed cards.
+
+An interval constructor receives only the observed count $k$, sample size $n$ and chosen method. It does **not** receive the true $p$. In our teaching audit we separately supply $p$ to determine which possible intervals include it, then add their sampling probabilities. That sum is **coverage** at $p$.
+
+The first method is the familiar **Wald interval**, using the sample proportion $\hat p=k/n$:
+
+$$
+\begin{aligned}
+I_W(k)=\Big[&\max\left(0,\hat p-\frac{49}{25}\sqrt{\frac{\hat p(1-\hat p)}n}\right),\\
+&\min\left(1,\hat p+\frac{49}{25}\sqrt{\frac{\hat p(1-\hat p)}n}\right)\Big].
+\end{aligned}
+$$
+
+We fix $49/25=1.96$ exactly in this recipe and call its nominal level 95%. This approximation is not an exact finite-coverage guarantee. For $n=4,p=1/2$, only counts 1, 2 and 3 cover the target. Their probabilities sum to $(4+6+4)/16=7/8$, or 87.5%.
+
+<BinomialCoverageAudit client:visible
+  className="not-prose"
+  title={"Build without truth, then check membership"}
+  instructions={"Start with four independent fair trials. Switch methods and observed counts. The audit truth changes the membership test, not the construction recipe."}
+  cases={[{"id":"iid4-half","label":"Four independent trials, probability one half","note":"All sixteen ordered binary outcomes are equally likely."},{"id":"iid4-quarter","label":"Four independent trials, probability one quarter","note":"The binomial count weights are eighty-one, one hundred eight, fifty-four, twelve and one over two hundred fifty-six."},{"id":"iid4-three-quarters","label":"Four independent trials, probability three quarters","note":"This is the reflected one-quarter law; the interval recipe is unchanged."}]}
+  labels={{"caseLabel":"Audit law","methodLabel":"Interval method","countLabel":"Observed marked count","waldLabel":"Clipped Wald","exactLabel":"Exact equal-tail","chartLabel":"Interval family and fixed truth","chartDescription":"Each row is the interval constructed from that count. The vertical dashed line is the fixed audit truth. Faded rows have zero probability under the selected law.","xAxisLabel":"Parameter proportion","countAxisLabel":"Count","tableLabel":"Construction and audit by count","countColumn":"Marked count","probabilityColumn":"Probability under audit law","intervalColumn":"Outward display bounds","coverageColumn":"Exact membership","containsLabel":"Includes truth","excludesLabel":"Excludes truth","truthLabel":"Fixed audit truth","nominalLabel":"Nominal coverage","coverageLabel":"Actual model coverage","boundsNote":"Bounds are rounded outward to four decimal places for display. Exact inclusive tails or the exact squared inequality decide membership; rounded bounds never decide it.","selectionTemplate":"Count {count}: displayed interval {interval}; {status}. Procedure coverage {coverage}."}}
+  initialMethod={"wald"}
+/>
+
+At $k=0$, Wald reports [0,0]. Under $n=4,p=1/4$, that observation still has probability $(3/4)^4=81/256$. A zero plug-in standard error does not prove that $p=0$. [Brown, Cai and DasGupta’s technical report](https://www.stat.purdue.edu/~dasgupta/publications/tr99-19.pdf) documents the poor coverage behaviour of this approximation; our finite calculation stands on its displayed law.
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"An interval is constructed from {{the observation and the method|the hidden target and its verdict|the desired final coverage score}}. The target is then used {{to audit coverage|to choose the observed count|to repair the realised interval}}."}
+  explanation={"Using the truth to tune a reported interval would change the procedure being evaluated. It is available here only because the example is a fully specified model."}
+/>
+
+## Exact equal tails and what the guarantee means
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"What must a valid exact-coverage argument establish beyond a few plotted parameter values?"}
+  options={[{"text":"The desired bound for every parameter value in the declared model.","correct":true},{"text":"Identical width for every possible observed count.","correct":false},{"text":"Exactly the nominal fraction covered in every realised batch.","correct":false}]}
+  explanation={"Checking a finite display grid does not prove a uniform statement over a continuous parameter domain. Coverage can exceed its nominal lower bound."}
+/>
+
+The second recipe is the closed **Clopper–Pearson equal-tail interval**, with nominal coverage $19/20$. For a candidate $p$, retain it after observing $k$ exactly when both inclusive binomial tails satisfy
+
+$$\Pr_p(K\le k)\ge\frac1{40},\qquad\Pr_p(K\ge k)\ge\frac1{40}.$$
+
+“Inclusive” includes the observed count. Equality is retained. This inverts two tail conditions to construct a set of candidate parameter values. The set is a closed interval. At $k=0$ its lower endpoint is 0; at $k=n$ its upper endpoint is 1. For $n=4,k=0$, the upper endpoint solves $(1-p)^4=1/40$, giving $1-(1/40)^{1/4}\approx0.6023646$.
+
+The table rounds bounds outward to four decimal places. For example, [0.0675, 0.9325] encloses the exact endpoints for $n=4,k=2$. Membership is evaluated from the exact tail inequalities, not these rounded numbers. A candidate at a tail equality must not be discarded by display rounding.
+
+| Audit model | Wald coverage | Exact equal-tail coverage |
+| --- | ---: | ---: |
+| $n=4,p=1/4$, independent | 81/128 | 255/256 |
+| $n=4,p=1/2$, independent | 7/8 | 1 |
+| $n=4,p=3/4$, independent | 81/128 | 255/256 |
+| $n=8,p=1/2$, independent | 119/128 | 127/128 |
+
+### Why the exact method covers at least its nominal level
+
+Fix any $p$ in [0,1] and keep the independent binomial model. Counts excluded because their lower cumulative probability is below 1/40 form an initial block of counts. The probability of that whole block is its final cumulative probability, less than 1/40. Counts excluded because their upper tail is below 1/40 form a final block with probability less than 1/40. The probability of their union is at most the sum of those two probabilities, at most 1/20. Therefore the retained interval covers this fixed $p$ with probability at least 19/20.
+
+This argument applies to every $p$, including the boundaries; it is not inferred from the five cases in the selector. The union bound does not require the two exclusion events to be independent. Discreteness can make the procedure **conservative**: actual coverage exceeds nominal coverage. [R’s official documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/binom.test.html) states the coverage guarantee and warns that these intervals are not generally the shortest available.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Nominal level","definition":"The coverage level a method targets or guarantees under its conditions"},{"term":"Actual coverage","definition":"Probability of containing the fixed target under a specified audit law"},{"term":"Outward display bounds","definition":"Rounded endpoints used to show an interval without deciding exact membership"},{"term":"Conservative procedure","definition":"A procedure whose coverage can exceed its nominal lower bound"}]}
+  question={"Separate a label, a property and its display."}
+  explanation={"Nominal does not make an approximation exact. Conservative does not mean shortest, most informative or suitable for every model."}
+/>
+
+## Keep the construction fixed when the audit law changes
+
+<BinomialCoverageAudit client:visible
+  className="not-prose"
+  title={"Same intervals, a different collection law"}
+  instructions={"Compare eight independent fair trials with two fair bits copied four times. Both use the same binomial interval constructor; only the audit probabilities change."}
+  cases={[{"id":"iid8-half","label":"Eight independent fair trials","note":"The count follows the binomial law for eight independent trials."},{"id":"two-bits-copied-four","label":"Two independent bits copied four times","note":"Counts zero, four and eight have probabilities one quarter, one half and one quarter. The independence assumption of the constructor is violated."}]}
+  labels={{"caseLabel":"Audit law","methodLabel":"Interval method","countLabel":"Observed marked count","waldLabel":"Clipped Wald","exactLabel":"Exact equal-tail","chartLabel":"Interval family and fixed truth","chartDescription":"Each row is the interval constructed from that count. The vertical dashed line is the fixed audit truth. Faded rows have zero probability under the selected law.","xAxisLabel":"Parameter proportion","countAxisLabel":"Count","tableLabel":"Construction and audit by count","countColumn":"Marked count","probabilityColumn":"Probability under audit law","intervalColumn":"Outward display bounds","coverageColumn":"Exact membership","containsLabel":"Includes truth","excludesLabel":"Excludes truth","truthLabel":"Fixed audit truth","nominalLabel":"Nominal coverage","coverageLabel":"Actual model coverage","boundsNote":"Bounds are rounded outward to four decimal places for display. Exact inclusive tails or the exact squared inequality decide membership; rounded bounds never decide it.","selectionTemplate":"Count {count}: displayed interval {interval}; {status}. Procedure coverage {coverage}."}}
+  initialMethod={"exact"}
+/>
+
+Under the copied law, only $k=4$ covers $p=1/2$ for either recipe; it has probability 1/2. The exact binomial guarantee did not fail on its own assumptions: the data law changed. The same interval endpoints need not retain the same coverage under a new collection process.
+
+### A width trap and a transfer
+
+More observations need not make **every realised interval** narrower. Four initial zero outcomes give exact interval width approximately 0.6024. If four later outcomes are all ones, the eight-outcome count becomes four; its exact interval width is approximately 0.6860. These outcomes can occur under a fixed independent Bernoulli law. The first interval started near a boundary, while the second is centred.
+
+Before opening the solution, audit this claim: “Our copied eight-row file gave count four, and the exact interval contains one half; therefore its procedure has at least ninety-five percent coverage for copied files.”
+
+<details>
+<summary>Separate this hit from the whole procedure</summary>
+
+This realised interval does contain one half. Across copied files, however, counts zero and eight each occur with probability one quarter and miss one half. Only count four covers, with probability one half. One successful realised interval does not establish coverage. A repair requires a procedure justified under the actual two-bit collection law, not relabelling the same eight-row binomial method.
+
+</details>
+
+### When to use a coverage audit
+
+Use it before interpreting an interval label as a reliability claim. State the parameter domain, sampling law, constructor and stopping rule. Equal-tail exact intervals offer a finite binomial guarantee under their assumptions, with potentially wide or conservative results. They do not cover arbitrary dependence, target shifts or data-dependent stopping automatically.
+
+<MindMap client:visible
+  className="not-prose"
+  eyebrow=""
+  title={"Rebuild the argument"}
+  root={{"label":"Audit an interval procedure","children":[{"label":"Construct","children":[{"label":"Count, size and method only"},{"label":"Candidate tails define exact intervals"}]},{"label":"Evaluate","children":[{"label":"Fixed truth and data law"},{"label":"Sum probabilities of covering outputs"}]},{"label":"Interpret","children":[{"label":"Coverage is repeated-procedure reliability"},{"label":"Neither a realised quota nor a posterior by itself"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Check the whole lesson"}
+  questions={[{"question":"For four independent fair trials, the Wald coverage is what?","options":[{"text":"Nineteen twentieths.","correct":false},{"text":"Seven eighths.","correct":true},{"text":"Exactly one.","correct":false}],"explanation":"Counts one, two and three cover. Their binomial weights sum to fourteen of sixteen."},{"question":"At an exact tail equality of one fortieth, what happens to that candidate parameter?","options":[{"text":"It is retained by the inclusive construction.","correct":true},{"text":"It is excluded to make coverage exactly nominal.","correct":false},{"text":"Its status is decided by four-decimal rounding.","correct":false}],"explanation":"The defining inequalities use greater than or equal to. Equality is part of the closed confidence interval."},{"question":"Which alteration can invalidate the binomial coverage guarantee while leaving the displayed interval recipe unchanged?","options":[{"text":"Translating its labels.","correct":false},{"text":"Reordering its complete table.","correct":false},{"text":"Replacing independent trials with copied groups.","correct":true}],"explanation":"The guarantee is conditional on the binomial sampling model. Copied groups change the probabilities of the possible counts."}]}
+/>
+
+For the historical distinction between coverage and probability statements after observing an interval, see [Neyman, section II(a)](https://doi.org/10.1098/rsta.1937.0005). The exact construction follows the method described by [NIST](https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm) and the boundary cases in [R’s implementation](https://svn.r-project.org/R/trunk/src/library/stats/R/binom.test.R).
+
+Continue to [Design the Audit Before Collecting](/sample-size-and-sampling-uncertainty/06-design-the-audit-before-collecting).

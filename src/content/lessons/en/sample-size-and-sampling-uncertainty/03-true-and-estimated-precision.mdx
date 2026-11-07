@@ -1,0 +1,125 @@
+---
+title: "True Precision and a Sample’s Precision Estimate"
+description: "Give an estimated variance its own sampling distribution and distinguish it from the true standard error."
+topic: en/sample-size-and-sampling-uncertainty
+order: 4
+minutes: 28
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+You can calculate an estimate from one sample. You can also calculate a number that estimates its precision. That second number is another statistic, with its own variation.
+
+## The spread is fixed; its estimate can change
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"A uniform pair contains two unmarked cards. The usual within-pair variance is zero. What does that establish about the eight-card target?"}
+  options={[{"text":"The target contains no marked cards.","correct":false},{"text":"The sampling procedure has zero variance.","correct":false},{"text":"Those two observed values are identical.","correct":true}]}
+  explanation={"A homogeneous pair can occur in a mixed population. The within-sample calculation does not reveal every unobserved card."}
+/>
+
+Return to the fixed eight-card population, four marked, with a uniform unordered sample of two. We already know the estimator's **true sampling variance** is $3/28$. “True” means calculated under the stipulated complete population and design; it is not a claim that an investigator normally knows that population.
+
+For the observed pair, define the **sample variance**
+
+$$s^2=\frac{(X_1-\hat P)^2+(X_2-\hat P)^2}{n-1},\qquad n=2.$$
+
+This $n-1$ denominator belongs to a statistic computed inside a sample. It is different from averaging squared errors across all selections in lesson two. A homogeneous pair gives $s^2=0$. A mixed pair has mean 1/2, so its two squared departures sum to $1/4+1/4=1/2$; dividing by $n-1=1$ gives $s^2=1/2$.
+
+For this simple random sample without replacement, use the variance estimator
+
+$$\widehat V=\left(1-\frac nM\right)\frac{s^2}{n}=\frac38s^2.$$
+
+Thus $\widehat V$ is zero for homogeneous pairs and $3/16$ for mixed pairs. It estimates the variance of $\hat P$, not the population proportion itself.
+
+| $K$ | Probability | $s^2$ | Estimated variance $\widehat V$ | Estimated standard error $\sqrt{\widehat V}$ |
+| ---: | ---: | ---: | ---: | ---: |
+| 0 | 3/14 | 0 | 0 | 0 |
+| 1 | 4/7 | 1/2 | 3/16 | $\sqrt3/4\approx0.4330$ |
+| 2 | 3/14 | 0 | 0 | 0 |
+
+<SamplingCatalogue client:visible
+  className="not-prose"
+  title={"One law, two statistics"}
+  instructions={"Select a count and compare its extra estimated-variance column with the sampling variance readout. The bars and moment readouts describe the sample proportion, not the extra statistic."}
+  cases={[{"id":"srs2","label":"Two distinct IDs","note":"Choose one unordered pair uniformly from the eight IDs; four IDs are marked.","n":2,"weights":[6,16,6],"denominator":28,"truth":{"numerator":1,"denominator":2},"varianceEstimates":[{"numerator":0,"denominator":1},{"numerator":3,"denominator":16},{"numerator":0,"denominator":1}],"varianceEstimateLabel":"Estimated variance from this pair","varianceEstimateNote":"The extra column is a statistic computed from each possible pair. The moment readouts above remain the moments of the sample proportion."}]}
+  labels={{"caseLabel":"Sampling rule","countLabel":"Observed marked count","chartLabel":"Sampling distribution of the proportion","chartDescription":"Bars show probability mass at each possible proportion. Dashed lines mark the expectation and the fixed target; they coincide when equal.","xAxisLabel":"Sample proportion","yAxisLabel":"Probability mass","tableLabel":"Complete count catalogue","countColumn":"Marked count","estimateColumn":"Sample proportion","probabilityColumn":"Probability","meanLabel":"Expectation — long dashes","truthLabel":"Target — short dashes","biasLabel":"Bias","varianceLabel":"Sampling variance","mseLabel":"Mean squared error","seLabel":"Standard error, approximately","exactNote":"Fractions are exact. The standard error is a rounded square root. The target is known here to audit the constructed model.","selectionTemplate":"Marked count {count}; sample proportion {estimate}; probability {probability}."}}
+/>
+
+### What unbiased means here
+
+Average the variance estimates over the pair catalogue:
+
+$$E\widehat V=0\frac3{14}+\frac3{16}\frac47+0\frac3{14}=\frac3{28}.$$
+
+So $\widehat V$ is unbiased for the true sampling variance **in this design**. Nevertheless, it reports zero with probability $3/14+3/14=3/7$. An estimator can be correct on average and poor for a particular realised sample. “Unbiased” is not a guarantee of a small realised error.
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"The quantity that varies from pair to pair is {{the estimated variance|the fixed sampling variance|the fixed population size}}."}
+  explanation={"The population and design fix the true variance. The observed values determine the precision estimate."}
+/>
+
+## Taking a square root changes the averaging
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"An unbiased variance estimate is square-rooted. Which conclusion follows automatically?"}
+  options={[{"text":"Its square root is also an unbiased standard-error estimate.","correct":false},{"text":"No unbiasedness conclusion follows from that operation alone.","correct":true},{"text":"Every positive estimate must now exceed the true standard error.","correct":false}]}
+  explanation={"Taking a nonlinear function and taking an expectation need not commute. The finite catalogue lets us calculate the result directly."}
+/>
+
+The true standard error is $\sqrt{3/28}\approx0.3273$. The average estimated standard error is
+
+$$E\sqrt{\widehat V}=\frac47\frac{\sqrt3}{4}=\frac{\sqrt3}{7}\approx0.2474.$$
+
+These differ. You can verify the strict comparison without trusting rounded decimals: the square of the second quantity is $3/49$, smaller than $3/28$. We have demonstrated the failure of a particular inference in a complete finite model. We have not established a universal numerical correction for every estimated standard error.
+
+| Quantity | Meaning | Value in this model |
+| --- | --- | ---: |
+| $\operatorname{SE}(\hat P)$ | True spread of the proportion estimator | $\sqrt{3/28}$ |
+| $\widehat{\operatorname{SE}}=\sqrt{\widehat V}$ | Statistic reported from one pair | 0 or $\sqrt3/4$ |
+| $E\widehat{\operatorname{SE}}$ | Average of that statistic over selections | $\sqrt3/7$ |
+
+### When to use the distinction
+
+Use it when a report presents a standard error as though it were an observed physical constant. Ask which estimator generated it and which collection assumptions justify that estimator. The simple random-sampling formula above is not automatically valid for copied rows, unequal selection probabilities or a changing population. Estimated precision can be unstable even when a target estimate is unbiased.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"True standard error","definition":"A property of the estimator under the stipulated sampling law"},{"term":"Estimated standard error","definition":"A statistic calculated from the observed sample"},{"term":"Unbiased variance estimate","definition":"An estimate whose expectation equals the sampling variance"}]}
+  question={"Keep the three claims separate."}
+  explanation={"The first is fixed within the audit. The second varies. Unbiasedness of a variance estimate does not pass automatically through a square root."}
+/>
+
+## Transfer without changing the collection law
+
+You receive one realised pair with values 1 and 1. A colleague says: “The estimated standard error is zero, so our proportion estimate is exact.” Calculate the reported proportion, its actual error in this teaching population, and the probability that this variance estimator reports zero.
+
+<details>
+<summary>Audit the claim</summary>
+
+The reported proportion is 1. The fixed target is 1/2, so the realised error is $1-1/2=1/2$. Both values are identical, giving $s^2=\widehat V=0$. Zero estimated standard error occurs for either kind of homogeneous pair, with probability $6/28+6/28=3/7$. It therefore cannot certify exactness. The known true standard error remains $\sqrt{3/28}$; it does not become the realised error of 1/2 either.
+
+</details>
+
+<MindMap client:visible
+  className="not-prose"
+  eyebrow=""
+  title={"Rebuild the argument"}
+  root={{"label":"Audit precision estimates","children":[{"label":"Sampling law","children":[{"label":"True variance"},{"label":"True standard error"}]},{"label":"Observed sample","children":[{"label":"Within-sample variance"},{"label":"Estimated variance and SE"}]},{"label":"Average carefully","children":[{"label":"Variance estimate can be unbiased"},{"label":"Its square root need not be"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Check the whole lesson"}
+  questions={[{"question":"How often does the variance estimate report zero in the pair model?","options":[{"text":"Three sevenths of the probability mass.","correct":true},{"text":"One half of the probability mass.","correct":false},{"text":"Three twenty-eighths of the probability mass.","correct":false}],"explanation":"Both homogeneous outcomes contribute three fourteenths, for a total of three sevenths."},{"question":"Which expectation equals the true sampling variance in this example?","options":[{"text":"The mean sample proportion.","correct":false},{"text":"The mean estimated standard error.","correct":false},{"text":"The mean estimated variance.","correct":true}],"explanation":"The mixed-pair estimate three sixteenths has probability four sevenths; their product is three twenty-eighths."},{"question":"Why cannot this variance formula simply be reused for four copies of each observation?","options":[{"text":"The copied values stop being binary.","correct":false},{"text":"The formula was justified for a different selection design.","correct":true},{"text":"Every copied file must have a different target.","correct":false}],"explanation":"Dependence changes the sampling law. A valid precision estimate needs justification under that law, rather than a substituted row count."}]}
+/>
+
+The usual $n-1$ sample-variance convention is documented in [R’s variance documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.html). The finite-design claims here are verified by the complete pair catalogue above.
+
+Continue to [Count Independent Information](/sample-size-and-sampling-uncertainty/04-count-independent-information).

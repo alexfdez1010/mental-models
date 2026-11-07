@@ -1,0 +1,120 @@
+---
+title: "Design the Audit Before Collecting"
+description: "Combine validity, precision, collection costs and a declared stopping rule in a complete audit protocol."
+topic: en/sample-size-and-sampling-uncertainty
+order: 7
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+The collection rule includes when you stop. A procedure evaluated at a fixed size does not automatically keep its reliability when the stopping decision follows the data.
+
+## A tiny stopping counterexample
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"A confidence-set procedure is calibrated for one fixed observation. You instead stop whenever an observed result is convenient. What should be checked?"}
+  options={[{"text":"Only whether the final set looks plausible.","correct":false},{"text":"Only whether the target stayed constant.","correct":false},{"text":"The coverage of the complete new stopping and reporting rule.","correct":true}]}
+  explanation={"A changed stopping rule changes which data lead to each reported set. Its reliability must be evaluated as part of the procedure."}
+/>
+
+Here is a separate, deliberately small model. A fixed parameter $\theta$ is known to be either 1/4 or 3/4; we assign no prior probabilities to those two possibilities. Conditional on either fixed value, two potential bits $X_1,X_2$ are independent Bernoulli trials with probability $\theta$.
+
+Our report is a **confidence set** containing just one of the two candidates: report $\{1/4\}$ after a zero and $\{3/4\}$ after a one. A singleton set is allowed because the parameter domain is explicitly only these two points. This is not the continuous-parameter interval method of lesson five.
+
+If you always use the first bit, coverage is 3/4 under either parameter. Always using the second bit has the same coverage. Now use this rule: stop after the first bit if it is one; otherwise collect the second bit and report from it. We can enumerate the four potential paths, even though the second bit is never observed after a first one.
+
+| Potential path | Probability at $\theta=1/4$ | Probability at $\theta=3/4$ | Fixed-second report | Stop-on-first-one report |
+| --- | ---: | ---: | --- | --- |
+| 00 | 9/16 | 1/16 | {1/4} | {1/4} |
+| 01 | 3/16 | 3/16 | {3/4} | {3/4} |
+| 10 | 3/16 | 3/16 | {1/4} | {3/4} |
+| 11 | 1/16 | 9/16 | {3/4} | {3/4} |
+
+At $\theta=1/4$, the stopping rule covers only on 00, with probability 9/16. At $\theta=3/4$, it covers on every path except 00, with probability 15/16. The fixed-second rule covers on 00 and 10 at the low parameter, and 01 and 11 at the high parameter, giving 12/16 in both cases.
+
+<RateComparison client:visible
+  className="not-prose"
+  title={"Coverage depends on the complete reporting rule"}
+  scenarios={[{"label":"Fixed parameter one quarter","groups":[{"label":"Fixed second observation","events":12,"total":16},{"label":"Stop on first one","events":9,"total":16}]},{"label":"Fixed parameter three quarters","groups":[{"label":"Fixed second observation","events":12,"total":16},{"label":"Stop on first one","events":15,"total":16}]}]}
+/>
+
+These denominators are equiprobable units of probability within each stipulated law, not observed sixteen-run batches. Do not average coverage over the two parameter values without specifying weights. The worst coverage over the two-point domain is 9/16 for the stopping rule, versus 3/4 for the fixed rule.
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"The changed procedure must include {{when collection stops|only the final row count|only the displayed confidence label}} as well as the reported set."}
+  explanation={"Two procedures with identical one-observation reporting rules can have different coverage once their stopping rules select which observation gets reported."}
+/>
+
+### Limits and use
+
+This counterexample does not prove that all adaptive designs are invalid. It shows why fixed-time coverage cannot be carried over without an argument. **Time-uniform** methods are designed to control coverage across a sequence of times; their assumptions and construction differ. [Howard and colleagues](https://arxiv.org/abs/1810.08240) develop such methods. We use that distinction, without implementing a confidence sequence here.
+
+## Assemble a decision protocol
+
+Return to lesson four's separate fair-bit collection menu. The target is the mean success probability, the required precision is variance at most 1/16 for the all-row mean, and the collection budget is four units. Two old bits have four rows each. Added bits are independent fair bits under this constructed model.
+
+<MCQ client:visible
+  className="not-prose"
+  question={"Which allowed plans satisfy both the budget and variance requirement?"}
+  options={[{"text":"Copy every existing row once.","correct":false},{"text":"Add two new groups of four identical rows.","correct":true},{"text":"Add four new individual rows.","correct":true},{"text":"Retain the existing file unchanged.","correct":false}]}
+  explanation={"The two new-information plans each cost four and reach variance one sixteenth. Copying or retaining leaves variance one eighth."}
+  allowMultiple={true}
+/>
+
+Both feasible plans tie on those requirements. A decision requires a declared further preference or acceptance of either plan, not an invented mathematical winner. If the actual target includes units excluded from the frame, satisfying this variance goal would still not establish target validity. That is a separate layer of the audit, not a claim that the finite-frame and independent-bit models are one joint probability law.
+
+| Protocol field | A reproducible entry | What would require review? |
+| --- | --- | --- |
+| Target and period | Named population quantity during a frozen period | The population, criterion or period changes |
+| Unit and frame | IDs or separately generated inputs; eligibility list | Omitted groups or duplicate identities appear |
+| Selection and dependence | Selection probabilities; shared inputs and weights | Collection departs from the specified rule |
+| Estimator | Exactly which rows and weights enter the report | Weights or exclusions change after collection |
+| Precision target and cost | Variance criterion and complete allowed menu | A new objective, plan or cost becomes relevant |
+| Interval procedure | Method and parameter domain | Sampling law or constructor changes |
+| Horizon and stopping | Fixed observations or a justified sequential rule | Results trigger unplanned continuation or stopping |
+
+This card lets another person reconstruct the claim. It also tells you when “collect more” is too vague: more what, from where, under which rule, and for which decision?
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Validity review","definition":"Check whether the collected units support the target claim"},{"term":"Precision review","definition":"Calculate variability under the collection design"},{"term":"Procedure review","definition":"Audit the estimator, interval and stopping rule together"},{"term":"Decision review","definition":"Compare allowed plans against the stated objective and cost"}]}
+  question={"Match the review to the question it can answer."}
+  explanation={"Good precision cannot by itself establish the right target. A valid target definition does not by itself guarantee precise estimates."}
+/>
+
+## Transfer a stopping rule, not its old verdict
+
+Keep the two-point parameter model and singleton reporting rule, but reverse the stopping condition: stop after the first zero; otherwise collect the second bit and report from it. Find coverage at each parameter and the worst-domain coverage. Does the old low-parameter verdict transfer unchanged?
+
+<details>
+<summary>Enumerate the changed rule</summary>
+
+The low report now occurs on potential paths 00, 01 and 10. Only 11 reports the high value. At $\theta=1/4$, coverage is $15/16$; at $\theta=3/4$, coverage is $9/16$. Worst-domain coverage remains $9/16$, but the parameter at which it occurs has changed. The old pointwise verdict does not transfer: the changed reporting event must be recomputed.
+
+The four path probabilities are unchanged; only the mapping from path to report changes. This is why a complete audit records both the data law and the reporting rule.
+
+</details>
+
+### Decide what evidence changes the plan
+
+Before collecting, state an observable revision trigger. For the grouped design, evidence that the proposed new groups share the same underlying bit would invalidate the independence calculation. For a target-frame claim, discovering an omitted eligible category would trigger a frame review. Neither finding is repaired by printing a narrower interval from the old model.
+
+<MindMap client:visible
+  className="not-prose"
+  eyebrow=""
+  title={"Rebuild the argument"}
+  root={{"label":"Design a defensible audit","children":[{"label":"Specify","children":[{"label":"Target and collection frame"},{"label":"Estimator, weights and cost"}]},{"label":"Evaluate","children":[{"label":"True versus estimated precision"},{"label":"Coverage under the actual law"}]},{"label":"Commit and review","children":[{"label":"Declare stopping before collecting"},{"label":"Reopen when a relevant assumption changes"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Check the whole lesson"}
+  questions={[{"question":"Why is the worst-domain coverage nine sixteenths rather than an average of the two coverages?","options":[{"text":"Worst-domain coverage takes the smaller pointwise value without inventing a prior.","correct":true},{"text":"The low parameter must occur more often than the high parameter.","correct":false},{"text":"The four paths are equally probable under both parameters.","correct":false}],"explanation":"No prior over parameter values was assigned. A worst-domain criterion takes the minimum over the declared parameter domain."},{"question":"A collection plan meets the variance target but excludes part of the target population. What remains unresolved?","options":[{"text":"The arithmetic must be zero.","correct":false},{"text":"The frame-to-target relationship.","correct":true},{"text":"The realised file must be duplicated.","correct":false}],"explanation":"The variance target is a precision criterion under a law. It does not establish that omitted units have the same distribution."},{"question":"What justifies carrying a coverage claim to a new stopping rule?","options":[{"text":"Keeping the same confidence label.","correct":false},{"text":"Reusing the same final sample size.","correct":false},{"text":"A proof or audit of the complete new procedure.","correct":true}],"explanation":"The stopping and reporting map determines which outputs occur. It must be included in the reliability argument."}]}
+/>
+
+Proceed to the [final exam](/sample-size-and-sampling-uncertainty/final-exam). Keep the protocol fields in view; the questions ask which claims their assumptions support.

@@ -1,0 +1,176 @@
+---
+title: "Diseña la auditoría antes de recoger datos"
+description: "Combina validez, precisión, costes y una parada declarada en un protocolo completo de auditoría."
+topic: es/sample-size-and-sampling-uncertainty
+order: 7
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, MatchConcepts, MindMap, SamplingCatalogue, BinomialCoverageAudit, RateComparison, FinalExam } from '@/components/react';
+
+La regla de recogida incluye cuándo paras. Un procedimiento evaluado con tamaño fijo no conserva automáticamente su fiabilidad si los datos deciden la parada.
+
+## Un contraejemplo pequeño sobre la parada
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question={"Un procedimiento de conjuntos de confianza está calibrado para una observación fija. En su lugar, paras cuando un resultado conviene. ¿Qué debes comprobar?"}
+  options={[{"text":"Solo si el conjunto final parece plausible.","correct":false},{"text":"Solo si el objetivo permaneció constante.","correct":false},{"text":"La cobertura de la regla nueva completa de parada e informe.","correct":true}]}
+  explanation={"Cambiar la parada cambia qué datos llevan a cada conjunto informado. Su fiabilidad debe evaluarse como parte del procedimiento."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de empezar"}
+/>
+
+Este es otro modelo, deliberadamente pequeño. Sabemos que el parámetro fijo $\theta$ es 1/4 o 3/4; no asignamos probabilidades previas a esas dos posibilidades. Condicionados a cada valor fijo, dos bits potenciales $X_1,X_2$ son ensayos de Bernoulli independientes con probabilidad $\theta$.
+
+Nuestro informe es un **conjunto de confianza** con un solo candidato: informa $\{1/4\}$ tras un cero y $\{3/4\}$ tras un uno. Se admite un conjunto unitario porque el dominio del parámetro contiene explícitamente solo esos dos puntos. No es el método de intervalos para un parámetro continuo de la quinta lección.
+
+Si usas siempre el primer bit, la cobertura es 3/4 con cualquiera de los parámetros. Usar siempre el segundo tiene la misma cobertura. Aplica ahora esta regla: para tras el primer bit si es uno; si no, recoge el segundo e informa a partir de él. Podemos enumerar los cuatro caminos potenciales, aunque nunca se observe el segundo bit después de un primer uno.
+
+| Camino potencial | Probabilidad con $\theta=1/4$ | Probabilidad con $\theta=3/4$ | Informe con segundo fijo | Informe al parar en primer uno |
+| --- | ---: | ---: | --- | --- |
+| 00 | 9/16 | 1/16 | {1/4} | {1/4} |
+| 01 | 3/16 | 3/16 | {3/4} | {3/4} |
+| 10 | 3/16 | 3/16 | {1/4} | {3/4} |
+| 11 | 1/16 | 9/16 | {3/4} | {3/4} |
+
+Con $\theta=1/4$, la regla de parada solo cubre en 00, con probabilidad 9/16. Con $\theta=3/4$, cubre en todos los caminos salvo 00, con probabilidad 15/16. La regla del segundo fijo cubre en 00 y 10 con el parámetro bajo, y en 01 y 11 con el alto: 12/16 en ambos casos.
+
+<RateComparison client:visible
+  className="not-prose"
+  title={"La cobertura depende de la regla completa de informe"}
+  scenarios={[{"label":"Parámetro fijo un cuarto","groups":[{"label":"Segunda observación fija","events":12,"total":16},{"label":"Parar en el primer uno","events":9,"total":16}]},{"label":"Parámetro fijo tres cuartos","groups":[{"label":"Segunda observación fija","events":12,"total":16},{"label":"Parar en el primer uno","events":15,"total":16}]}]}
+  locale={"es"}
+  scenarioLabel={"Escenario"}
+  countsLabel={"Unidades de probabilidad"}
+  differenceLabel={"Diferencia"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+/>
+
+Estos denominadores son unidades equiprobables de probabilidad dentro de cada ley estipulada, no tandas observadas de dieciséis ejecuciones. No promedies la cobertura entre los dos parámetros sin especificar pesos. La peor cobertura en el dominio de dos puntos es 9/16 para la regla de parada y 3/4 para la regla fija.
+
+<FillBlank client:visible
+  className="not-prose"
+  text={"El procedimiento modificado debe incluir {{cuándo para la recogida|solo el número final de filas|solo la etiqueta de confianza}} además del conjunto informado."}
+  explanation={"Dos procedimientos con la misma regla de informe para una observación pueden tener coberturas distintas si sus paradas seleccionan qué observación se informa."}
+  instructions={"Elige una opción para cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Correcto"}
+  partialResultWord={"bien"}
+/>
+
+### Límites y uso
+
+El contraejemplo no demuestra que todos los diseños adaptativos sean inválidos. Muestra por qué no se traslada la cobertura de tiempo fijo sin un argumento. Los métodos **uniformes en el tiempo** están diseñados para controlar la cobertura a lo largo de una secuencia de momentos; sus supuestos y construcción son distintos. [Howard y sus coautores](https://arxiv.org/abs/1810.08240) desarrollan esos métodos. Usamos esa distinción sin implementar aquí una secuencia de confianza.
+
+## Monta un protocolo de decisión
+
+Volvemos al menú separado de bits equiprobables de la cuarta lección. El objetivo es la probabilidad media de éxito, la precisión exigida es varianza máxima de 1/16 para la media de todas las filas y el presupuesto es cuatro unidades. Dos bits antiguos tienen cuatro filas cada uno. Los añadidos son independientes y equiprobables bajo este modelo construido.
+
+<MCQ client:visible
+  className="not-prose"
+  question={"¿Qué planes permitidos cumplen a la vez presupuesto y varianza?"}
+  options={[{"text":"Copiar cada fila existente una vez.","correct":false},{"text":"Añadir dos grupos nuevos de cuatro filas idénticas.","correct":true},{"text":"Añadir cuatro filas individuales nuevas.","correct":true},{"text":"Conservar el archivo existente sin cambios.","correct":false}]}
+  explanation={"Los dos planes que añaden información nueva cuestan cuatro y alcanzan varianza de un dieciseisavo. Copiar o conservar mantiene varianza de un octavo."}
+  allowMultiple={true}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de empezar"}
+/>
+
+Ambos planes admisibles empatan en esos requisitos. La decisión exige declarar otra preferencia o aceptar cualquiera de los dos, no inventar un ganador matemático. Si el objetivo real incluye unidades fuera del marco, cumplir la varianza no demostraría validez respecto al objetivo. Es otra capa de la auditoría, no una afirmación de que el modelo de marco finito y el de bits independientes forman una única ley conjunta.
+
+| Campo del protocolo | Entrada reproducible | ¿Qué exigiría revisarlo? |
+| --- | --- | --- |
+| Objetivo y periodo | Magnitud de una población nombrada en un periodo congelado | Cambian población, criterio o periodo |
+| Unidad y marco | Identificadores o entradas generadas por separado; lista de elegibilidad | Aparecen grupos omitidos o identidades duplicadas |
+| Selección y dependencia | Probabilidades; entradas compartidas y pesos | La recogida se aparta de la regla |
+| Estimador | Filas y pesos exactos del informe | Cambian pesos o exclusiones después de recoger |
+| Precisión y coste | Criterio de varianza y menú completo | Resulta relevante otro objetivo, plan o coste |
+| Procedimiento de intervalos | Método y dominio del parámetro | Cambia la ley de muestreo o el constructor |
+| Horizonte y parada | Observaciones fijas o regla secuencial justificada | Los resultados activan una continuación o parada no prevista |
+
+Esta ficha permite reconstruir la afirmación. También señala cuándo «recoger más» es demasiado vago: ¿más qué, de dónde, bajo qué regla y para qué decisión?
+
+<MatchConcepts client:visible
+  className="not-prose"
+  pairs={[{"term":"Revisión de validez","definition":"Comprueba si las unidades recogidas respaldan la afirmación sobre el objetivo"},{"term":"Revisión de precisión","definition":"Calcula la variabilidad bajo el diseño de recogida"},{"term":"Revisión del procedimiento","definition":"Audita juntos estimador, intervalo y parada"},{"term":"Revisión de la decisión","definition":"Compara planes permitidos con el objetivo y el coste declarados"}]}
+  question={"Relaciona la revisión con la pregunta que puede responder."}
+  explanation={"Una buena precisión no demuestra por sí sola que el objetivo sea adecuado. Definir bien el objetivo no garantiza por sí solo estimaciones precisas."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  instructions={"Selecciona un término y después su definición."}
+  allCorrectLabel={"Todas las parejas son correctas"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"Elige ahora una definición"}
+  notLinkedHint={"Sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+## Transfiere una parada, no su antiguo veredicto
+
+Conserva el modelo de parámetro de dos puntos y la regla de informe unitario, pero invierte la parada: para tras el primer cero; si no, recoge el segundo bit e informa con él. Encuentra la cobertura en cada parámetro y la peor del dominio. ¿Se traslada sin cambios el antiguo veredicto para el parámetro bajo?
+
+<details>
+<summary>Enumera la regla modificada</summary>
+
+Ahora se informa el valor bajo en los caminos potenciales 00, 01 y 10. Solo 11 informa el alto. Con $\theta=1/4$, la cobertura es $15/16$; con $\theta=3/4$, es $9/16$. La peor cobertura sigue siendo $9/16$, pero cambia el parámetro donde aparece. El veredicto punto a punto no se traslada: hay que recalcular el suceso que conduce a cada informe.
+
+Las cuatro probabilidades de camino no cambian; solo cambia la correspondencia entre camino e informe. Por eso una auditoría completa registra tanto la ley de los datos como la regla de informe.
+
+</details>
+
+### Decide qué evidencia cambia el plan
+
+Antes de recoger, declara un criterio observable de revisión. Para el diseño agrupado, descubrir que los grupos propuestos comparten el mismo bit subyacente invalidaría el cálculo de independencia. Para una afirmación de objetivo y marco, encontrar una categoría elegible omitida activaría una revisión del marco. Ningún hallazgo se repara imprimiendo un intervalo más estrecho con el modelo antiguo.
+
+<MindMap client:visible
+  className="not-prose"
+  title={"Reconstruye el razonamiento"}
+  eyebrow=""
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Diseña una auditoría defendible","children":[{"label":"Especifica","children":[{"label":"Objetivo y marco de recogida"},{"label":"Estimador, pesos y coste"}]},{"label":"Evalúa","children":[{"label":"Precisión real y estimada"},{"label":"Cobertura bajo la ley real"}]},{"label":"Fija y revisa","children":[{"label":"Declara la parada antes de recoger"},{"label":"Reabre si cambia un supuesto relevante"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title={"Comprueba la lección completa"}
+  questions={[{"question":"¿Por qué la peor cobertura es nueve dieciseisavos y no una media de las dos coberturas?","options":[{"text":"La peor cobertura toma el menor valor sin inventar una distribución previa.","correct":true},{"text":"El parámetro bajo debe aparecer más a menudo que el alto.","correct":false},{"text":"Los cuatro caminos son equiprobables con ambos parámetros.","correct":false}],"explanation":"No se asignó una distribución previa sobre los parámetros. El criterio del peor caso toma el mínimo en el dominio declarado."},{"question":"Un plan cumple la varianza, pero excluye parte de la población objetivo. ¿Qué queda sin resolver?","options":[{"text":"La aritmética tiene que dar cero.","correct":false},{"text":"La relación entre marco y objetivo.","correct":true},{"text":"El archivo realizado debe duplicarse.","correct":false}],"explanation":"El objetivo de varianza es un criterio de precisión bajo una ley. No demuestra que las unidades omitidas tengan la misma distribución."},{"question":"¿Qué justifica trasladar la cobertura a una nueva regla de parada?","options":[{"text":"Conservar la misma etiqueta de confianza.","correct":false},{"text":"Reutilizar el mismo tamaño muestral final.","correct":false},{"text":"Una prueba o auditoría del procedimiento nuevo completo.","correct":true}],"explanation":"La correspondencia de parada e informe determina qué salidas aparecen. Debe incluirse en el argumento de fiabilidad."}]}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso completado"}
+  perfectMessage={"Todas las respuestas son correctas. Revisa los supuestos al aplicar el método."}
+  goodMessage={"Revisa las explicaciones de las respuestas que has fallado."}
+  keepPracticingMessage={"Vuelve a los ejemplos resueltos y comprueba cada paso."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Intentar de nuevo"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No del todo"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+/>
+
+Continúa con el [examen final](/es/sample-size-and-sampling-uncertainty/final-exam). Ten presentes los campos del protocolo: las preguntas piden decidir qué afirmaciones respaldan sus supuestos.
