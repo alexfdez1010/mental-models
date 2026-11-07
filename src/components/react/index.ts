@@ -380,3 +380,9 @@ export type { QueueTimelineAuditProps } from '@/components/react/QueueTimelineAu
 
 export { MM1QueueExplorer } from '@/components/react/MM1QueueExplorer';
 export type { MM1QueueExplorerProps } from '@/components/react/MM1QueueExplorer';
+
+export { DimensionBalanceAudit } from '@/components/react/DimensionBalanceAudit';
+export type { DimensionBalanceAuditProps } from '@/components/react/DimensionBalanceAudit';
+
+export { GeometricScalingExplorer } from '@/components/react/GeometricScalingExplorer';
+export type { GeometricScalingExplorerProps } from '@/components/react/GeometricScalingExplorer';

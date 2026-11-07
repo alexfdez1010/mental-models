@@ -1,0 +1,262 @@
+---
+title: "Audit a Scaling Claim"
+description: "Audit complete height and cost claims, change a flow boundary, and separate unit compatibility from the model that supplies a prediction."
+topic: "en/dimensional-analysis-and-scaling"
+order: 7
+minutes: 26
+updated: "2026-11-07"
+---
+
+import { Categorize, ConsequenceTree, DimensionBalanceAudit, FirstPrinciplesBuilder, MCQ, MatchConcepts, MindMap, Quiz } from '@/components/react';
+
+A scaling claim often arrives as a finished-looking equation and a confident number. Your task is to reconstruct the steps that support it.
+
+Use a constructed filling problem. A tank has a constant horizontal cross-sectional area of 0.30 square metre. It starts empty. An inflow of fifteen litres per minute runs for twenty minutes; initially there are no other flows. We seek the increase in liquid height. All these inputs are declared exact within the model.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label={"The complete initial filling card"}>
+<table className="w-full text-left text-sm" style={{ minWidth: "36rem", display: "table", overflow: "visible", margin: 0 }}>
+<caption className="mb-2 text-left font-semibold">The complete initial filling card</caption>
+<thead><tr><th scope="col" className="p-3">Item</th><th scope="col" className="p-3">Declared value or condition</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">Cross-sectional area A</th><td className="p-3">0.30 m², constant over the height considered</td></tr>
+<tr><th scope="row" className="p-3">Initial volume</th><td className="p-3">0</td></tr>
+<tr><th scope="row" className="p-3">Inflow</th><td className="p-3">15 L/min, constant</td></tr>
+<tr><th scope="row" className="p-3">Outflow</th><td className="p-3">0</td></tr>
+<tr><th scope="row" className="p-3">Duration t</th><td className="p-3">20 min</td></tr>
+<tr><th scope="row" className="p-3">Target</th><td className="p-3">Height increase h, in metres</td></tr>
+<tr><th scope="row" className="p-3">Model boundary</th><td className="p-3">No other flows or changes of area</td></tr>
+</tbody>
+</table>
+</div>
+
+<MCQ client:visible
+  question={"Before calculating, which candidate cannot have height dimension when q is net volume per time, t is time and A is area?"}
+  options={[{"text":"qt/A.","correct":false},{"text":"Twice qt/A.","correct":false},{"text":"q/A.","correct":true},{"text":"Both qt/A and twice qt/A.","correct":false}]}
+  explanation={"Net flow q has L³/T. Dividing by area leaves L/T, a speed dimension. Multiplying by t is needed for length; a dimensionless factor two does not change the dimensional type."}
+  checkLabel={"Check"}
+  retryLabel={"Try again"}
+  correctLabel={"Correct!"}
+  incorrectLabel={"Not quite."}
+  correctAnswerLabel={"Correct answer"}
+  explanationLabel={"Explanation"}
+  pretestLabel={"Before reading, make a prediction"}
+  pretest={true}
+  className={"not-prose"}
+/>
+
+## Reconstruct the boundary and the target
+
+Think of the tank account as a ledger with an explicit boundary. The height comes from net accumulated volume and the given cross-section. Name the quantity before checking the arithmetic: $q$ is **net** volume per time, $t$ is duration and $A$ is area.
+
+For this constant-area, constant-net-flow model,
+
+$$
+V=qt,\qquad h=\frac VA=\frac{qt}{A}.
+$$
+
+The first equation is the declared flow account from an empty start. The second follows from the specified prismatic geometry. If area varied with height, a single constant $A$ would not describe that geometry. If the tank began partly full, distinguish the final height from the increase.
+
+<DimensionBalanceAudit client:visible
+  locale={"en"}
+  title={"Audit the proposed height expressions"}
+  instructions={"Choose an expression and follow each exponent into the sum. The axes keep the same scale across every candidate in this catalogue."}
+  cases={[{"id":"height","label":"Height from net flow, time and area","target":[0,1,0],"quantities":[{"id":"q","symbol":"q (net volume/time)","dimension":[0,3,-1]},{"id":"t","symbol":"t","dimension":[0,0,1]},{"id":"a","symbol":"A","dimension":[0,2,0]}],"candidates":[{"id":"height","label":"qt/A","powersTwice":[2,2,-2]},{"id":"speed","label":"q/A","powersTwice":[2,0,-2]},{"id":"double","label":"2qt/A","powersTwice":[2,2,-2]}]}]}
+  labels={{"case":"Case","candidate":"Candidate expression","quantity":"Quantity","dimension":"Dimension (M; L; T)","power":"Power in the expression","mass":"M contribution","length":"L contribution","time":"T contribution","sum":"Sum of contributions","target":"Required dimension","compatible":"Dimensions match","incompatible":"Dimensions differ","table":"Exact dimensional exponent calculation","legendSum":"Filled marker: calculated exponent","legendTarget":"Ring: required exponent","chart":"Dimensional exponents on one fixed scale","status":"{case}. {candidate}: calculated {sum}; required {target}. {verdict}."}}
+  caption={"The filled marker gives the sum; the ring gives the required exponent. Matching dimensions leaves the coefficient, omitted variables and physical assumptions to be checked separately."}
+  className={"not-prose"}
+/>
+
+<MatchConcepts client:visible
+  question={"Match each item to the role it performs."}
+  pairs={[{"term":"Net flow","definition":"Volume entering minus volume leaving per unit time."},{"term":"Duration","definition":"The interval over which the specified flow acts."},{"term":"Cross-sectional area","definition":"The geometric quantity connecting volume and height."},{"term":"Dimensional target","definition":"Length, before numerical substitution."}]}
+  explanation={"A complete account specifies the boundary, clock and geometry. The dimension check cannot supply missing flow or starting-state information."}
+  checkLabel={"Check"}
+  retryLabel={"Try again"}
+  instructions={"Select a term, then its definition."}
+  allCorrectLabel={"✓ All matched"}
+  partialResultWord={"correct"}
+  pickDefinitionHint={"Choose a definition"}
+  notLinkedHint={"Not linked yet"}
+  termsLabel={"Terms"}
+  definitionsLabel={"Definitions"}
+  className={"not-prose"}
+/>
+
+### When to stop and ask for an input
+
+Stop if the claim gives an inlet flow but silently needs net flow, or if it substitutes a surface area for cross-sectional area. Those quantities may share an area unit while answering different questions. Resolve the definition before interpreting a compatible equation.
+
+## Convert the inputs, then calculate
+
+Fifteen litres per minute is 0.015 cubic metres per minute. Over twenty minutes, net volume is 0.300 cubic metre. Dividing by 0.30 square metre gives one metre of height increase:
+
+$$
+h=\frac{(0.015\,\mathrm{m^3/min})(20\,\mathrm{min})}{0.30\,\mathrm{m^2}}=1\,\mathrm m.
+$$
+
+As an independent unit representation, the flow is 0.00025 cubic metres per second and the duration 1200 seconds. Their product is again 0.300 cubic metre. Keeping the flow number fifteen but writing litres per second would change the physical input.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700" role="region" tabIndex={0} aria-label={"Two representations reconstruct the same accumulated volume"}>
+<table className="w-full text-left text-sm" style={{ minWidth: "36rem", display: "table", overflow: "visible", margin: 0 }}>
+<caption className="mb-2 text-left font-semibold">Two representations reconstruct the same accumulated volume</caption>
+<thead><tr><th scope="col" className="p-3">Representation</th><th scope="col" className="p-3">Net flow</th><th scope="col" className="p-3">Duration</th><th scope="col" className="p-3">Volume</th><th scope="col" className="p-3">Height increase</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">Minutes</th><td className="p-3">0.015 m³/min</td><td className="p-3">20 min</td><td className="p-3">0.300 m³</td><td className="p-3">1 m</td></tr>
+<tr><th scope="row" className="p-3">Seconds</th><td className="p-3">0.00025 m³/s</td><td className="p-3">1200 s</td><td className="p-3">0.300 m³</td><td className="p-3">1 m</td></tr>
+</tbody>
+</table>
+</div>
+
+<MCQ client:visible
+  question={"The expression twice qt/A also passes the dimensional filter. Why does the complete stated model give qt/A instead?"}
+  options={[{"text":"Because a coefficient two can never appear in a physical formula.","correct":false},{"text":"Because the given flow account and constant-area geometry fix this relation.","correct":true},{"text":"Because metres are more accurate than litres.","correct":false},{"text":"Because dimensionless coefficients always equal one.","correct":false}]}
+  explanation={"From the declared empty start, volume equals net flow times duration; from the stated geometry, height equals volume divided by area. These premises supply the relation that dimensions alone could not select."}
+  checkLabel={"Check"}
+  retryLabel={"Try again"}
+  correctLabel={"Correct!"}
+  incorrectLabel={"Not quite."}
+  correctAnswerLabel={"Correct answer"}
+  explanationLabel={"Explanation"}
+  pretestLabel={"Before reading, make a prediction"}
+  pretest={false}
+  className={"not-prose"}
+/>
+
+### When a numerical match is only part of the audit
+
+A recorded height of one metre would be consistent with this case. One agreement would not prove that every later case has the same area, flow or omitted losses. Preserve the declared conditions when carrying the calculation forward.
+
+## Change one condition and recompute the account
+
+Keep the inflow, duration, constant cross-section and empty start. Change only the outflow from zero to a constant three litres per minute. Predict the height increase before opening the account.
+
+<MCQ client:visible
+  question={"With the stated outflow added, what is the height increase after twenty minutes?"}
+  options={[{"text":"One metre.","correct":false},{"text":"Eight metres.","correct":false},{"text":"One point two metres.","correct":false},{"text":"Zero point eight metre.","correct":true}]}
+  explanation={"Net flow is fifteen minus three, or twelve litres per minute. Twenty minutes add 240 litres = 0.240 m³; dividing by 0.30 m² gives 0.8 m."}
+  checkLabel={"Check"}
+  retryLabel={"Try again"}
+  correctLabel={"Correct!"}
+  incorrectLabel={"Not quite."}
+  correctAnswerLabel={"Correct answer"}
+  explanationLabel={"Explanation"}
+  pretestLabel={"Before reading, make a prediction"}
+  pretest={true}
+  className={"not-prose"}
+/>
+
+<details>
+<summary>Reconstruct the changed flow boundary</summary>
+
+The new net flow is twelve litres per minute. Accumulated volume is 240 litres, or 0.240 cubic metre, and height increase is $0.240/0.30=0.8$ metre. The height expression still uses **net** flow; the input representing it has changed.
+
+<ConsequenceTree client:visible
+  title={"Follow the changed boundary"}
+  eyebrow={""}
+  instructions={"Open a step to inspect the prepared calculation. Opening a branch reveals its stated reasoning."}
+  decision={{"label":"Same tank, added outflow","note":"Inflow fifteen L/min; outflow three L/min; twenty minutes; area 0.30 m².","children":[{"label":"Net twelve L/min","note":"Subtract the constant outflow from the constant inflow.","children":[{"label":"Accumulate 240 L","note":"Twelve L/min times twenty minutes is 240 L = 0.240 m³.","children":[{"label":"Height 0.8 m","note":"Divide 0.240 m³ by the unchanged 0.30 m² cross-section.","valence":"neutral"}],"valence":"neutral"}],"valence":"neutral"}],"valence":"neutral"}}
+  decisionLabel={"Starting quantity"}
+  orderLabels={["First step","Second step","Third step"]}
+  promptLabel={"Show the next step"}
+  expandAllLabel={"Show every step"}
+  collapseLabel={"Collapse the trace"}
+  valenceLabels={{"good":"Declared step","bad":"Declared step","mixed":"Declared step","neutral":"Declared step"}}
+  caption={"This is a prepared net-flow account for the declared change. It does not estimate an unknown leak."}
+  className={"not-prose"}
+/>
+
+Writing a new fitted coefficient of 0.8 in front of the **inflow** formula could reproduce this single result, but it would hide which condition changed. A recorded outflow and an explicit net-flow calculation carry more information than a coefficient chosen to match one endpoint.
+
+</details>
+
+### When the transferred quantity keeps its name
+
+Check its definition again. “Flow” can name an inlet or a net rate; “height” can name a change or a final level. A preserved variable letter does not guarantee a preserved quantity.
+
+## Reject a single-power extrapolation of a mixed outcome
+
+Return to the cost model with a fixed ten-credit term, three credits per square metre and two per cubic metre. For a three-metre closed cube, area is fifty-four square metres and volume twenty-seven cubic metres. The full model gives
+
+$$
+K=\bigl(10+3(54)+2(27)\bigr)\,\mathrm{cr}=226\,\mathrm{cr}.
+$$
+
+Scaling the one-metre total of thirty credits by the area factor nine would give 270 credits. Include the actual terms to see where the difference comes from. Credits denote a separate cost quantity; every term carries that same cost unit.
+
+<FirstPrinciplesBuilder client:visible
+  locale={"en"}
+  title={"Audit the three-metre cost extrapolation"}
+  eyebrow={""}
+  caption={"These are contributions to one stipulated total. Including a term reveals its amount; it does not select a design or estimate an unknown coefficient."}
+  analogyValue={270}
+  analogyLabel={"Area-only extrapolation"}
+  analogyNote={"Nine times the one-metre total of thirty credits."}
+  parts={[{"label":"Fixed term","value":10,"note":"Same ten credits."},{"label":"Area term","value":162,"note":"Three credits per square metre times fifty-four square metres."},{"label":"Volume term","value":54,"note":"Two credits per cubic metre times twenty-seven cubic metres."}]}
+  rebuiltLabel={"Sum of included model terms"}
+  instructions={"Include every term to reconstruct the full mixed cost. Compare that sum with the stated extrapolation."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Include every term"}
+  resetLabel={"Clear the included terms"}
+  verdictTemplate={"The full model total is {total}, or {ratio} of the area-only reference."}
+  className={"not-prose"}
+/>
+
+<Categorize client:visible
+  question={"Choose the audit step supported by each statement."}
+  buckets={["Supported by the declared account","Unsupported extension"]}
+  items={[{"text":"Convert every input before dividing volume by area.","bucket":"Supported by the declared account"},{"text":"Units select the coefficient of any compatible formula.","bucket":"Unsupported extension"},{"text":"Recompute net flow when an outflow is introduced.","bucket":"Supported by the declared account"},{"text":"A mixed fixed/area/volume total always scales with area.","bucket":"Unsupported extension"},{"text":"One agreeing endpoint proves the variable list complete.","bucket":"Unsupported extension"}]}
+  explanation={"The complete account needs definitions, units, model premises and the changed conditions. Compatibility and a fitted endpoint do not provide all of them."}
+  instructions={"Choose a category for every statement."}
+  checkLabel={"Check"}
+  retryLabel={"Try again"}
+  explanationLabel={"Explanation"}
+  allCorrectLabel={"✓ All sorted"}
+  partialResultWord={"correct"}
+  className={"not-prose"}
+/>
+
+### When the audit is ready to use
+
+You can now state the accepted result and its reach together: under the initial constant-flow and constant-area card, height increases one metre; with the declared outflow, it increases 0.8 metre; under the three-term cube-cost model, the three-metre total is 226 credits.
+
+For another system, list the inputs and conditions again. The method transfers even when the numerical coefficient, variables or geometry do not.
+
+## Reconstruct the method
+
+<MindMap client:visible
+  title={"Recall the connections"}
+  eyebrow={""}
+  caption={"Explain one link aloud before opening the outline."}
+  outlineLabel={"Read the map as an outline"}
+  root={{"label":"Reconstruct a scaling claim","children":[{"label":"Define","children":[{"label":"Quantity and boundary"},{"label":"Unit and target dimension"}]},{"label":"Calculate","children":[{"label":"Convert complete inputs"},{"label":"Use the full declared model"}]},{"label":"Transfer","children":[{"label":"Change the correct input"},{"label":"Check coefficients and missing terms"}]}]}}
+  className={"not-prose"}
+/>
+
+<Quiz client:visible
+  title={"Apply and recall"}
+  questions={[{"question":"The target is height. Net flow divided by area has which dimension?","options":[{"text":"Length.","correct":false},{"text":"Volume.","correct":false},{"text":"Length per time.","correct":true},{"text":"Dimension one.","correct":false}],"explanation":"(L³/T)/L² is L/T. A duration factor is needed for the height dimension."},{"question":"What changes in the leak transfer while inlet flow stays fifteen litres per minute?","options":[{"text":"The net flow entering the volume account.","correct":true},{"text":"The meaning of a metre.","correct":false},{"text":"The number of cube faces.","correct":false},{"text":"The requirement that an equation be homogeneous.","correct":false}],"explanation":"The new outflow reduces net flow from fifteen to twelve litres per minute."},{"question":"What is the three-metre mixed-model cost?","options":[{"text":"270 credits.","correct":false},{"text":"810 credits.","correct":false},{"text":"98 credits.","correct":false},{"text":"226 credits.","correct":true}],"explanation":"Ten fixed plus 162 from area and 54 from volume equals 226 credits."},{"question":"Which two checks are needed before extending a compatible formula?","options":[{"text":"Assume every omitted variable is irrelevant.","correct":false},{"text":"Review the variable definitions and boundary.","correct":true},{"text":"Check the coefficient and regime premises.","correct":true},{"text":"Treat one fitted endpoint as proof for all scales.","correct":false}],"explanation":"The audit carries both definitions and physical/model conditions. Dimensions and one matching result cannot certify an unrestricted extrapolation.","allowMultiple":true}]}
+  questionLabel={"Question"}
+  ofLabel={"of"}
+  correctCountLabel={"correct"}
+  completeLabel={"Complete"}
+  completeTitleLabel={"Quiz complete"}
+  perfectMessage={"All correct. Explain one of the conditions without looking."}
+  goodMessage={"Review the explanations for the questions you missed."}
+  keepPracticingMessage={"Revisit the worked examples, then try again."}
+  gateLabel={"Check your answer to continue."}
+  nextLabel={"Next"}
+  seeResultsLabel={"See results"}
+  backLabel={"Back"}
+  scoreLabel={"Your score"}
+  restartLabel={"Restart"}
+  checkLabel={"Check"}
+  retryLabel={"Try again"}
+  correctLabel={"Correct!"}
+  incorrectLabel={"Not quite."}
+  correctAnswerLabel={"Correct answer"}
+  explanationLabel={"Explanation"}
+  className={"not-prose"}
+/>
+
+[Continue: Final Exam: Dimensions and Scaling](/dimensional-analysis-and-scaling/final-exam).
