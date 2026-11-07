@@ -329,3 +329,6 @@ export { NetworkThresholdTrace } from '@/components/react/NetworkThresholdTrace'
 export type { ThresholdTeam, NetworkThresholdTraceProps } from '@/components/react/NetworkThresholdTrace';
 
 export { SwitchingPlanLedger } from "@/components/react/SwitchingPlanLedger";
+
+export { BranchingDistribution, getBranchingDistribution } from '@/components/react/BranchingDistribution';
+export type { BranchingDistributionProps, BranchingDistributionLabels, BranchingLaw, BranchingQuarter } from '@/components/react/BranchingDistribution';
