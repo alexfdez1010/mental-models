@@ -344,3 +344,5 @@ export type { MixedStrategyAuditProps, MixedStrategyAuditLabels, MixedStrategyAu
 
 export { FactorChainTrace, calculateFactorChain, formatFactorChainValue } from '@/components/react/FactorChainTrace';
 export type { FactorChain, FactorChainScenario, FactorChainLabels, FactorChainTraceProps, FactorChainValue, FactorChainCalculation } from '@/components/react/FactorChainTrace';
+
+export { PolicyCostComparison } from '@/components/react/PolicyCostComparison';

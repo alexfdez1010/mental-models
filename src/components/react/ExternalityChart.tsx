@@ -45,6 +45,10 @@ export interface ExternalityChartProps {
   dwlBandLabel?: string;
   /** Symbol printed before money numbers (e.g. `'$'`). Defaults to `'$'`. */
   pricePrefix?: string;
+  /** Text number formatting; English preserves the original representation. */
+  locale?: 'en' | 'es';
+  /** Unit word after the corrective payment slash. */
+  perUnitLabel?: string;
   /**
    * Starting position of the external-effect slider (signed, clamped to
    * ±4). Negative = a cost (the chart opens on the over-production case);
@@ -138,6 +142,8 @@ export function ExternalityChart({
   subsidyWord = 'subsidy',
   dwlBandLabel = 'Deadweight loss',
   pricePrefix = '$',
+  locale = 'en',
+  perUnitLabel = 'unit',
   initialExternal = -3,
   readoutNeutral = 'No spillover: the market lands at {qm} units — exactly the social optimum. Private cost equals social cost, so the price tells the truth and nothing is wasted.',
   readoutNegative = 'A {ext} external cost per unit lifts true social cost above private cost. The market makes {qm} units but only {qs} is optimal — it over-produces by {gap}, destroying {dwl} of welfare (the shaded triangle).',
@@ -171,8 +177,12 @@ export function ExternalityChart({
 
   const { e, mag, qMarket, pMarket, qSocial, gap, dwl } = model;
 
-  const money = (n: number) => `${pricePrefix}${round1(n)}`;
-  const num = (n: number) => String(round1(n));
+  const num = (n: number) => {
+    if (locale === 'en') return String(round1(n));
+    const rounded = round1(n);
+    return String(Object.is(rounded, -0) ? 0 : rounded).replace('.', ',');
+  };
+  const money = (n: number) => `${pricePrefix}${locale === 'en' ? round1(n) : num(n)}`;
 
   // Curve endpoints (private demand & supply) across the visible domain.
   const demandP0 = A;
@@ -445,7 +455,7 @@ export function ExternalityChart({
             {correctionLabel}
             {showSocial ? (
               <span className="ml-1 font-mono text-xs font-medium text-ink-500">
-                ({isNeg ? taxWord : subsidyWord} {money(mag)}/unit)
+                ({isNeg ? taxWord : subsidyWord} {money(mag)}/{perUnitLabel})
               </span>
             ) : null}
           </span>
