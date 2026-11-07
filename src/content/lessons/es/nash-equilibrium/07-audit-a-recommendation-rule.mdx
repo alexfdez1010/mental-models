@@ -1,0 +1,417 @@
+---
+title: "Comprueba una regla de recomendaciones privadas"
+description: "Comprueba probabilidades conjuntas, consejos privados y desviaciones en un juego completo; repite la auditoría tras cambiar un pago."
+topic: "es/nash-equilibrium"
+order: 8
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, MatchConcepts, FillBlank, Categorize, PayoffMatrix, RateComparison, ExpectedValueCalculator, ConsequenceTree, MindMap, Quiz } from '@/components/react';
+
+Dos equipos de un archivo comparten un escáner. Un dispositivo envía a cada uno un mensaje privado: **Solicitar** o **Aplazar**. Nadie está obligado a cumplirlo. Hay que decidir si cada equipo puede mejorar ignorando su mensaje mientras el otro lo sigue.
+
+Ya sabes comprobar una casilla de pagos. Este taller añade otra condición: *¿qué puedo deducir sobre el otro equipo tras ver mi recomendación?* Ambos mensajes proceden del mismo sorteo, aunque se reciban en privado.
+
+## Especifica el juego antes de confiar en el consejo
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  pretest={true}
+  question="Dos dispositivos recomiendan Solicitar a cada equipo con la misma frecuencia. ¿Deben crear los mismos incentivos?"
+  options={[{"text":"Sí: la frecuencia marginal de cada equipo determina toda la ley conjunta."},{"text":"No: pueden diferir la ley conjunta y lo que revela cada mensaje.","correct":true},{"text":"Sí: una recomendación aleatoria elimina toda desviación provechosa."},{"text":"No: solo una recomendación obligatoria tiene una ley de probabilidades."}]}
+  explanation="Una marginal describe por separado las recomendaciones de un equipo. No determina qué parejas aparecen juntas ni qué revela tu mensaje sobre el otro equipo. Los casos resueltos mantienen las marginales y cambian esas parejas."
+/>
+
+Este es un juego construido que se juega una sola vez. Cada equipo elige Solicitar o Aplazar simultáneamente, después de recibir su mensaje. Un **pago** es un valor en puntos: cuanto mayor, mejor. Los equipos valoran los resultados inciertos mediante su pago esperado, la media ponderada por sus probabilidades. Los puntos incluyen todas las consecuencias del modelo; no hay otra tarifa, coste de esfuerzo, encuentro futuro, represalia ni cumplimiento forzoso. Son preferencias estipuladas, no una medida del rendimiento del escáner.
+
+<PayoffMatrix client:visible
+  className="not-prose"
+  editable={false}
+  min={-6}
+  max={3}
+  unit=""
+  eyebrow=""
+  title="El juego final en puntos de pago"
+  instructions="Compara un cambio unilateral manteniendo fija la otra acción. Los círculos comprueban casillas de Nash puras, no la ley de recomendaciones privadas."
+  rowPlayer="Equipo A"
+  colPlayer="Equipo B"
+  rowStrategies={["Solicitar","Aplazar"]}
+  colStrategies={["Solicitar","Aplazar"]}
+  payoffs={[[{"row":-6,"col":-6},{"row":3,"col":0}],[{"row":0,"col":3},{"row":1,"col":1}]]}
+  analysisLabel="Mejores respuestas entre acciones puras"
+  dominantLineTemplate="{player}: acción estrictamente dominante {strategy}"
+  noneLabel="ninguna"
+  nashLabel="Casillas de Nash puras:"
+  noNashLabel="ninguna"
+  bestResponseLegend="Un círculo marca una mejor respuesta a la otra acción fija. Dos círculos identifican una casilla de Nash pura."
+  nashBadge="NE"
+  resetLabel="Restablecer pagos"
+  increaseLabel="aumentar"
+  decreaseLabel="reducir"
+  tableCaptionTemplate="{rowPlayer} elige una fila; {colPlayer} elige una columna. Cada casilla da primero el pago de A y después el de B."
+  caption="Solicitar/Aplazar y Aplazar/Solicitar son casillas de Nash puras. Ningún equipo tiene una acción dominante."
+/>
+
+Lee el posible cambio de A. Frente a Solicitar de B, A prefiere Aplazar: cero supera a menos seis. Frente a Aplazar de B, A prefiere Solicitar: tres supera a uno. B tiene la misma comparación con sus propios pagos. Por tanto, Solicitar/Aplazar y Aplazar/Solicitar son las dos casillas de Nash puras; Aplazar/Aplazar no lo es.
+
+Se confía en que el dispositivo sortee según una **ley conjunta conocida**, las probabilidades de los dos mensajes juntos. Cada equipo solo ve su mensaje: no el número de papeleta, el mensaje ajeno ni un canal adicional. Imagina dos sobres cerrados procedentes de un mismo sorteo: al abrir el tuyo puedes averiguar algo sobre el otro. El límite de la analogía importa: el sobre contiene un consejo, no una asignación obligatoria.
+
+Una **desviación** cambia la respuesta de un equipo a lo que observa. Durante toda la auditoría, el otro sigue su recomendación. Comprobamos un plan concreto con una estructura de información concreta; no predecimos que unos equipos reales vayan a utilizarlo.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un concepto y después su definición."
+  allCorrectLabel="Todo relacionado"
+  partialResultWord="correctas"
+  pickDefinitionHint="elige ahora una definición"
+  notLinkedHint="sin relacionar"
+  termsLabel="Conceptos"
+  definitionsLabel="Definiciones"
+  question="Distingue los ingredientes del modelo."
+  pairs={[{"term":"Pago final","definition":"El valor de una pareja de acciones una vez que los equipos han elegido."},{"term":"Ley de recomendaciones","definition":"Las probabilidades conocidas de las parejas de mensajes privados."},{"term":"Observación","definition":"La información que un equipo tiene antes de elegir una acción."},{"term":"Desviación unilateral","definition":"Un equipo cambia su respuesta mientras el otro sigue su mensaje."}]}
+  explanation="La tabla de pagos no especifica qué observa un equipo. Una recomendación es un consejo, así que hay que permitir que el equipo lo rechace al comparar los incentivos."
+/>
+
+### Cuándo usar esta especificación
+
+Antes de evaluar un sistema de recomendaciones, anota las opciones, los pagos, la ley del sorteo, la secuencia y las observaciones. Una observación omitida puede cambiar la mejor respuesta aunque todos los pagos permanezcan iguales.
+
+## Las probabilidades conjuntas van más allá de las frecuencias marginales
+
+La regla privada sortea una de cuatro **papeletas identificadas e igual de probables**. Dos papeletas distintas contienen Aplazar/Aplazar; siguen siendo dos copias diferentes. Esto describe una ley de probabilidades, no promete que cuatro días reales contengan cada papeleta una vez.
+
+| Mensaje de A | Mensaje de B | Copias de la regla privada | Copias de la regla independiente |
+|---|---|---:|---:|
+| Solicitar | Solicitar | 0 | 1 |
+| Solicitar | Aplazar | 1 | 3 |
+| Aplazar | Solicitar | 1 | 3 |
+| Aplazar | Aplazar | 2 | 9 |
+| Total | | 4 | 16 |
+
+Una **probabilidad marginal** deja de lado el otro componente: suma las casillas donde A recibe Solicitar. La regla privada da Solicitar a A con probabilidad $1/4$; la marginal de B también es $1/4$. La regla independiente da Solicitar a cada equipo con probabilidad $4/16=1/4$, pero las probabilidades de las parejas son productos de esas marginales. Por ejemplo, Solicitar/Solicitar tiene probabilidad $1/4\times1/4=1/16$, en lugar de cero.
+
+<RateComparison client:visible
+  locale="es"
+  scenarioLabel="Cantidad que comparar"
+  countsLabel="Papeletas del total compatible"
+  differenceLabel="Primera proporción menos segunda"
+  pointLabel="punto porcentual"
+  pointsLabel="puntos porcentuales"
+  title="Mismas marginales, distintos resultados conjuntos"
+  scenarios={[{"label":"A recibe Solicitar","groups":[{"label":"Regla privada","events":1,"total":4},{"label":"Regla independiente","events":4,"total":16}]},{"label":"Ambos reciben Solicitar","groups":[{"label":"Regla privada","events":0,"total":4},{"label":"Regla independiente","events":1,"total":16}]},{"label":"B recibe Solicitar bajo la regla privada","groups":[{"label":"Si A recibe Aplazar","events":1,"total":3},{"label":"Antes de que A vea un mensaje","events":1,"total":4}]}]}
+/>
+
+El gráfico cuenta copias de papeletas estipuladas. Sus porcentajes redondeados no sustituyen las fracciones exactas. La última comparación condiciona al mensaje Aplazar de A: descarta la papeleta incompatible Solicitar/Aplazar. De las tres copias restantes, una dice Solicitar a B y dos le dicen Aplazar. **Condicionar** consiste en conservar los casos compatibles con la observación y dividir entre su peso total.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="A ve Aplazar bajo la regla privada. ¿Cuál es la probabilidad de que B haya recibido Solicitar?"
+  options={[{"text":"Un cuarto"},{"text":"Un medio"},{"text":"Un tercio","correct":true},{"text":"Dos tercios"}]}
+  explanation="Hay tres papeletas compatibles con el mensaje de A: una Aplazar/Solicitar y dos Aplazar/Aplazar. Solo una de esas tres da Solicitar a B. Usar las cuatro ignoraría la observación."
+/>
+
+El error habitual es reutilizar la marginal $1/4$ después de recibir un mensaje informativo. Antes de ver nada, las cuatro copias son posibles; cuando A ve Aplazar, solo quedan tres. Usa este filtro cuando los consejos estén correlacionados. Con recomendaciones independientes, la marginal de B no cambiaría al abrir A su sobre.
+
+## Compara seguir con cada cambio unilateral
+
+La esperanza relevante está ahora condicionada a **tu mensaje**. Cuando A ve Solicitar, B debe tener Aplazar. Seguir da tres a A; cambiar a Aplazar da uno. Cuando A ve Aplazar, las copias compatibles tienen Solicitar de B una vez y Aplazar de B dos veces:
+
+$$u_F=(0+1+1)/3=2/3,\qquad u_S=(-6+3+3)/3=0.$$
+
+En la fórmula, $u_F$ es el pago condicionado de seguir y $u_S$ el de cambiar. Esta es la auditoría completa, incluida la de B en vez de esconder media prueba detrás de la simetría.
+
+| Equipo | Consejo propio | Peso de Solicitar del otro | Peso de Aplazar del otro | Total compatible | Seguir | Cambiar |
+|---|---|---:|---:|---:|---:|---:|
+| A | Solicitar | 0 | 1 | 1 | 3 | 1 |
+| A | Aplazar | 1 | 2 | 3 | 2/3 | 0 |
+| B | Solicitar | 0 | 1 | 1 | 3 | 1 |
+| B | Aplazar | 1 | 2 | 3 | 2/3 | 0 |
+
+Seguir gana en todas las comparaciones. Esta ley conjunta es un **equilibrio correlacionado (correlated equilibrium)**: con la ley conocida y observando solo la recomendación propia, ningún equipo gana cambiando unilateralmente su respuesta, suponiendo que el otro sigue. Cumplir la recomendación es voluntario. No hemos introducido un árbitro ni una penalización en el juego.
+
+¿Por qué bastan estas comprobaciones? Con dos acciones, tras cada mensaje posible la única alternativa es la otra acción. Un plan que ignore, invierta o siga solo algunos mensajes se compone de estas mismas comparaciones. Sortear entre seguir y cambiar promedia sus pagos; no puede superar su máximo. Comprueba cada equipo y cada mensaje de probabilidad positiva. Si un mensaje tiene probabilidad cero, su total compatible es cero y esta ley no proporciona una distribución condicionada para él; no inventes una.
+
+<FillBlank client:visible
+  className="not-prose"
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="correctas"
+  question="Reconstruye la comprobación de incentivos."
+  text="Cuando A ve Aplazar, seguir da {{dos tercios|un cuarto|un tercio}} en esperanza; cambiar da {{cero|dos tercios|uno}}. El denominador cuenta {{papeletas compatibles|todas las acciones|solo sorteos favorables}}."
+  explanation="Seguir da cero en la papeleta donde el otro solicita y uno en cada una donde aplaza. Cambiar da menos seis en la primera y tres en cada una de las otras dos. Compara esas medias condicionadas manteniendo fija la respuesta de B."
+/>
+
+La definición se refiere a una **ley de recomendaciones**, no a cada casilla realizada y examinada a posteriori. Aplazar/Aplazar aparece con probabilidad $1/2$, aunque no sea una casilla de Nash pura del juego original. Un equipo que recibe Aplazar no distingue ese caso del que contiene Solicitar para su compañero. Esa incertidumbre cambia el cálculo de incentivos disponible.
+
+## Cambia lo que se revela y repite la prueba
+
+Mantén ahora los pagos y la regla privada, pero publica **la pareja completa de mensajes antes de actuar**. Si es Aplazar/Aplazar, cada equipo sabe que el otro ha recibido Aplazar. Seguir da uno; cambiar a Solicitar da tres. Hay una desviación provechosa. La media condicionada anterior ya no es la comparación adecuada, porque el equipo sabe cuál de los casos antes compatibles se ha producido.
+
+<ConsequenceTree client:visible
+  title="¿Qué se sabe antes de elegir?"
+  eyebrow=""
+  instructions="Abre las dos políticas de comunicación. Son pasos de información, no ramas de probabilidad; las tablas dan los recuentos compatibles exactos."
+  decisionLabel="Política de comunicación"
+  orderLabels={["Mensaje mostrado","Situación compatible","Comparación de incentivos"]}
+  promptLabel="Mostrar el siguiente paso"
+  expandAllLabel="Mostrar ambas políticas"
+  collapseLabel="Cerrar la comparación"
+  valenceLabels={{"neutral":"Paso de información","good":"Favorable","bad":"Desfavorable","mixed":"Mixto"}}
+  decision={{"label":"Mantén la misma regla privada y los mismos pagos","valence":"neutral","children":[{"label":"A solo conoce su mensaje Aplazar","valence":"neutral","children":[{"label":"B puede haber recibido Solicitar o Aplazar","valence":"neutral","children":[{"label":"Usa la media ponderada condicionada","valence":"neutral"}]}]},{"label":"Ambos conocen la pareja completa Aplazar/Aplazar","valence":"neutral","children":[{"label":"A sabe que B ha recibido Aplazar","valence":"neutral","children":[{"label":"A compara directamente los dos pagos frente a Aplazar","valence":"neutral"}]}]}]}}
+/>
+
+Publicar la pareja rompe este acuerdo de recomendaciones concreto. No demuestra que el secreto sea valioso en general, que la información pública siempre perjudique la coordinación ni que haga falta engañar. La ley del dispositivo era pública desde el principio; **conocer una distribución y observar el resultado concreto de su sorteo son informaciones distintas**.
+
+Puede aparecer otro fallo sin publicar nada. Prueba una regla privada uniforme con una papeleta de cada pareja de mensajes. Tras recibir Solicitar, el otro equipo tiene la misma probabilidad de haber recibido Solicitar que Aplazar. Seguir da $(-6+3)/2=-3/2$; cambiar da $(0+1)/2=1/2$. Cambiar gana dos puntos. Un consejo aleatorio no certifica por sí solo que los incentivos sean compatibles.
+
+<Categorize client:visible
+  className="not-prose"
+  instructions="Asigna cada afirmación a su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="Todo clasificado"
+  partialResultWord="correctas"
+  question="¿Qué parte del juego especificado cambia?"
+  buckets={["Cambia la información","Cambian los pagos finales"]}
+  items={[{"text":"El dispositivo revela ambas recomendaciones antes de actuar.","bucket":"Cambia la información"},{"text":"Cada equipo también ve qué papeleta se ha sorteado.","bucket":"Cambia la información"},{"text":"El pago del conflicto se vuelve menos negativo.","bucket":"Cambian los pagos finales"},{"text":"Se resta una penalización de una casilla final.","bucket":"Cambian los pagos finales"}]}
+  explanation="La información adicional cambia qué situaciones puede distinguir un jugador antes de elegir. Modificar un valor final cambia la recompensa. Ambas modificaciones exigen comprobar los incentivos de nuevo."
+/>
+
+### Cuándo repetir la auditoría
+
+Repítela tras un nuevo canal de información, un mensaje adicional, la revelación del número de papeleta o un cambio de pagos. Una certificación para una política de información no se traslada a otra solo porque las acciones conserven sus nombres.
+
+## Separa los incentivos de la media y de la garantía
+
+Antes de recibir ningún mensaje, el pago esperado de A bajo la regla privada es:
+
+$$0(-6)+(1/4)3+(1/4)0+(2/4)1=5/4.$$
+
+<ExpectedValueCalculator client:visible
+  locale="es"
+  eyebrow=""
+  instructions="La ley inicial está en la tabla contigua. Al cambiar las probabilidades exploras otra ley; recupera el total completo antes de interpretar el resultado como una esperanza. Esta figura no comprueba incentivos."
+  probabilityLabel="Probabilidad"
+  payoffLabel="Pago de A en puntos"
+  contributionLabel="Contribución a la media"
+  totalProbLabel="Suma de probabilidades"
+  normalizeHint="Las probabilidades suman {sum}. Sin un total completo es una suma ponderada, no un pago esperado."
+  evLabel="Pago esperado de A en puntos"
+  evHint="media ponderada antes de observar el mensaje"
+  costLabel="Coste de comparación"
+  netLabel="Diferencia tras el coste"
+  worthVerdict="La diferencia es positiva."
+  notWorthVerdict="La diferencia es negativa."
+  breakEvenVerdict="La diferencia es aproximadamente nula."
+  resetLabel="Restablecer la ley dada"
+  className="not-prose"
+  title="Pondera los pagos finales de A"
+  scenario={{"prompt":"¿Cuál es el pago esperado de A antes de recibir el mensaje?","unit":"","outcomes":[{"label":"Solicitar / Solicitar","payoff":-6,"prob":0},{"label":"Solicitar / Aplazar","payoff":3,"prob":25},{"label":"Aplazar / Solicitar","payoff":0,"prob":25},{"label":"Aplazar / Aplazar","payoff":1,"prob":50}]}}
+  caption="Las barras comparan cada contribución con la mayor del estado actual. La ley requiere, además, comprobaciones de incentivos condicionadas a cada mensaje."
+/>
+
+Con recomendaciones independientes de las mismas marginales, A obtiene:
+
+$$(-6+9+0+9)/16=3/4.$$
+
+La regla independiente también supera aquí sus pruebas de incentivos: tras cualquiera de los mensajes, el otro equipo sigue solicitando con probabilidad $1/4$. Solicitar da $(-6)/4+3(3/4)=3/4$ y Aplazar da $0/4+1(3/4)=3/4$. Este es el perfil de Nash mixto e independiente del juego original, con cada equipo solicitando con probabilidad $1/4$. Las mismas marginales no garantizan los mismos resultados ni implican que una de las propuestas deba fallar.
+
+Una **garantía maximin** responde a otra prueba: elegir una estrategia por su peor pago frente a las posibles estrategias rivales. La misma probabilidad independiente de solicitar de A, $1/4$, da $(-6)/4+0(3/4)=-3/2$ frente a B solicitando siempre. Su pago de Nash, $3/4$, estaba condicionado a la mezcla de equilibrio de B; no era un suelo asegurado frente a cualquier rival. Los ejemplos particulares de suma cero o constante de la lección 05 sostienen su propia garantía maximin; no la extiendas a todo perfil de Nash de suma general.
+
+La regla privada tampoco es la mejor posible. Una lotería pública y equitativa entre Solicitar/Aplazar y Aplazar/Solicitar usa los pesos **[0,1,1,0]**. Cada pareja anunciada ya es una casilla de Nash pura, así que revelarla completa deja a ambos equipos dando su mejor respuesta. Cada equipo obtiene $3/2$, por encima del $5/4$ de la regla privada. Hemos comprobado propuestas dadas, no optimizado todos los dispositivos posibles.
+
+| Ley en el juego original | Pesos por filas | Pago esperado de A | Pago esperado de B | Incentivos con mensajes privados |
+|---|---|---:|---:|---|
+| Regla privada | [0,1,1,2] | 5/4 | 5/4 | Compatible |
+| Independiente con las mismas marginales | [1,3,3,9] | 3/4 | 3/4 | Compatible con empates |
+| Regla uniforme | [1,1,1,1] | -1/2 | -1/2 | Falla |
+| Lotería entre las casillas de Nash puras | [0,1,1,0] | 3/2 | 3/2 | Compatible, también al revelar la pareja |
+
+«Supera la prueba de incentivos», «tiene una media mayor en esta comparación», «es un óptimo global» y «la utilizará la gente» son afirmaciones distintas. Una media sin condicionar no sustituye la comparación de desviaciones mensaje a mensaje.
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  allowMultiple={true}
+  question="La regla privada supera todas las comparaciones condicionadas. Selecciona todas las conclusiones que se deducen."
+  options={[{"text":"Seguir es una mejor respuesta si el otro equipo sigue bajo la información indicada.","correct":true},{"text":"La regla debe maximizar los pagos de ambos entre todos los dispositivos posibles."},{"text":"La ley puede ser pública y cada mensaje individual puede seguir siendo privado.","correct":true},{"text":"Cada pareja de acciones realizada debe ser por sí misma una casilla de Nash pura."}]}
+  explanation="Las comparaciones establecen mejores respuestas condicionadas para esta estructura de información. No prueban un óptimo global de bienestar ni que las personas vayan a seguir las recomendaciones. Aplazar/Aplazar ya refuta que toda pareja realizada deba ser una casilla de Nash pura."
+/>
+
+## Transfiere la prueba a una pérdida por conflicto menor
+
+Aquí tienes un caso nuevo y completo. Cambia **solo** los pagos de Solicitar/Solicitar, de menos seis a **menos uno para cada equipo**. Mantén las decisiones simultáneas, la ley conocida, los consejos individuales privados, las respuestas voluntarias y la ausencia de otros costes. Comprueba primero la regla antigua y después la reparación propuesta. Las dos leyes aparecen antes de las preguntas.
+
+<PayoffMatrix client:visible
+  className="not-prose"
+  editable={false}
+  min={-6}
+  max={3}
+  unit=""
+  eyebrow=""
+  title="El juego final en puntos de pago"
+  instructions="Compara un cambio unilateral manteniendo fija la otra acción. Los círculos comprueban casillas de Nash puras, no la ley de recomendaciones privadas."
+  rowPlayer="Equipo A"
+  colPlayer="Equipo B"
+  rowStrategies={["Solicitar","Aplazar"]}
+  colStrategies={["Solicitar","Aplazar"]}
+  payoffs={[[{"row":-1,"col":-1},{"row":3,"col":0}],[{"row":0,"col":3},{"row":1,"col":1}]]}
+  analysisLabel="Mejores respuestas entre acciones puras"
+  dominantLineTemplate="{player}: acción estrictamente dominante {strategy}"
+  noneLabel="ninguna"
+  nashLabel="Casillas de Nash puras:"
+  noNashLabel="ninguna"
+  bestResponseLegend="Un círculo marca una mejor respuesta a la otra acción fija. Dos círculos identifican una casilla de Nash pura."
+  nashBadge="NE"
+  resetLabel="Restablecer pagos"
+  increaseLabel="aumentar"
+  decreaseLabel="reducir"
+  tableCaptionTemplate="{rowPlayer} elige una fila; {colPlayer} elige una columna. Cada casilla da primero el pago de A y después el de B."
+  caption="Solicitar/Aplazar y Aplazar/Solicitar son casillas de Nash puras. Ningún equipo tiene una acción dominante."
+/>
+
+| Mensaje de A | Mensaje de B | Copias de la regla antigua | Copias de la reparación propuesta |
+|---|---|---:|---:|
+| Solicitar | Solicitar | 0 | 0 |
+| Solicitar | Aplazar | 1 | 2 |
+| Aplazar | Solicitar | 1 | 2 |
+| Aplazar | Aplazar | 2 | 1 |
+| Total | | 4 | 5 |
+
+<FillBlank client:visible
+  className="not-prose"
+  instructions="Elige una opción en cada hueco."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="Todo correcto"
+  partialResultWord="correctas"
+  question="Calcula la comparación condicionada de A con la regla antigua en el juego modificado."
+  text="Tras Aplazar, seguir da {{dos tercios|un tercio|cinco tercios}}; cambiar da {{cinco tercios|dos tercios|un tercio}}. Por tanto, cambiar gana {{un punto|dos puntos|cero puntos}}."
+  explanation="Las papeletas compatibles siguen teniendo pesos uno y dos. Seguir da dos tercios; cambiar ahora da cinco tercios porque la pérdida del conflicto es menor. La ganancia es un punto, así que la antigua regla falla."
+/>
+
+<MCQ client:visible
+  className="not-prose"
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  question="Comprueba la reparación propuesta antes de abrir la solución. Tras recibir Aplazar, ¿qué comparación es correcta?"
+  options={[{"text":"Seguir es estrictamente mejor porque el otro equipo suele solicitar."},{"text":"Cambiar es estrictamente mejor porque el conflicto cuesta menos."},{"text":"Seguir y cambiar dan un tercio, así que hay un empate exacto.","correct":true},{"text":"Ninguna esperanza está definida porque el conflicto tiene peso cero."}]}
+  explanation="De las tres copias compatibles, dos dicen Solicitar al otro equipo y una le dice Aplazar. Seguir da un tercio. Cambiar da dos pérdidas de uno más una ganancia de tres, dividido entre tres: también un tercio. Que la pareja de mensajes de conflicto tenga peso cero no elimina el mensaje Aplazar, que sí tiene probabilidad positiva."
+/>
+
+<details>
+<summary>Comprueba la solución completa de la transferencia</summary>
+
+Con la regla antigua, Aplazar sigue dejando tres copias compatibles. Seguir da $2/3$; cambiar da $(-1+3+3)/3=5/3$. La ganancia es un punto. Las casillas de Nash puras del juego final no han cambiado, pero la antigua ley de recomendaciones falla.
+
+Para la reparación, recorre las cuatro comparaciones:
+
+| Equipo | Consejo propio | Peso de Solicitar del otro | Peso de Aplazar del otro | Total compatible | Seguir | Cambiar |
+|---|---|---:|---:|---:|---:|---:|
+| A | Solicitar | 0 | 2 | 2 | 3 | 1 |
+| A | Aplazar | 2 | 1 | 3 | 1/3 | 1/3 |
+| B | Solicitar | 0 | 2 | 2 | 3 | 1 |
+| B | Aplazar | 2 | 1 | 3 | 1/3 | 1/3 |
+
+Tras Aplazar, seguir da $(2(0)+1)/3=1/3$; cambiar da $(2(-1)+3)/3=1/3$. El empate exacto basta para una compatibilidad **débil**: seguir es una mejor respuesta, pero cambiar también lo es. Acordar seguir en caso de empate es compatible con el modelo; la aritmética no lo impone. El pago de la reparación antes de recibir el mensaje es $(2(3)+2(0)+1)/5=7/5$ para cada equipo.
+
+</details>
+
+<ExpectedValueCalculator client:visible
+  locale="es"
+  eyebrow=""
+  instructions="La ley inicial está en la tabla contigua. Al cambiar las probabilidades exploras otra ley; recupera el total completo antes de interpretar el resultado como una esperanza. Esta figura no comprueba incentivos."
+  probabilityLabel="Probabilidad"
+  payoffLabel="Pago de A en puntos"
+  contributionLabel="Contribución a la media"
+  totalProbLabel="Suma de probabilidades"
+  normalizeHint="Las probabilidades suman {sum}. Sin un total completo es una suma ponderada, no un pago esperado."
+  evLabel="Pago esperado de A en puntos"
+  evHint="media ponderada antes de observar el mensaje"
+  costLabel="Coste de comparación"
+  netLabel="Diferencia tras el coste"
+  worthVerdict="La diferencia es positiva."
+  notWorthVerdict="La diferencia es negativa."
+  breakEvenVerdict="La diferencia es aproximadamente nula."
+  resetLabel="Restablecer la ley dada"
+  className="not-prose"
+  title="Pondera los pagos finales de A"
+  scenario={{"prompt":"¿Cuál es el pago esperado de A antes de recibir el mensaje?","unit":"","outcomes":[{"label":"Solicitar / Solicitar","payoff":-1,"prob":0},{"label":"Solicitar / Aplazar","payoff":3,"prob":40},{"label":"Aplazar / Solicitar","payoff":0,"prob":40},{"label":"Aplazar / Aplazar","payoff":1,"prob":20}]}}
+  caption="Las barras comparan cada contribución con la mayor del estado actual. La ley requiere, además, comprobaciones de incentivos condicionadas a cada mensaje."
+/>
+
+La figura calcula la media de la regla reparada antes de ver un mensaje. No convierte el empate en una preferencia estricta. Usa esta auditoría para elegir entre reglas de consejo especificadas; vuelve a comprobar sus supuestos de pagos y observaciones antes de trasladarla a otro contexto.
+
+## Reconstruye la auditoría sin los sobres
+
+<MindMap client:visible
+  eyebrow=""
+  outlineLabel="Esquema de texto"
+  title="Reconstruye la auditoría de recomendaciones"
+  root={{"label":"Comprueba una regla de consejo","children":[{"label":"Especifica el juego","children":[{"label":"Acciones pagos secuencia observaciones"}]},{"label":"Lee la ley conjunta","children":[{"label":"Las marginales no determinan las parejas"}]},{"label":"Condiciona a tu mensaje","children":[{"label":"Conserva las papeletas compatibles y renormaliza"}]},{"label":"Compara seguir y cambiar","children":[{"label":"Cada jugador y cada mensaje posible"}]},{"label":"Repite tras un cambio","children":[{"label":"Revelar la pareja o cambiar un pago puede romper los incentivos"}]},{"label":"Expresa los límites","children":[{"label":"Los empates permiten seguir sin garantizarlo"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario completado"
+  perfectMessage="Has acertado todas las preguntas."
+  goodMessage="Revisa las explicaciones de tus errores."
+  keepPracticingMessage="Vuelve a los ejemplos y prueba otra vez."
+  gateLabel="Comprueba tu respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Has acertado"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+  title="Aplica la auditoría completa"
+  questions={[{"question":"Recupera la distinción: ¿qué deja sin especificar una marginal?","options":[{"text":"El pago de una pareja de acciones."},{"text":"Qué mensajes aparecen juntos.","correct":true},{"text":"Si una acción se llama Solicitar."},{"text":"Cuántos jugadores tiene el juego."}],"explanation":"Una marginal recoge un componente por separado. No permite recuperar cómo se emparejan ambos mensajes."},{"question":"Compara la regla privada dada con los sorteos independientes. ¿Qué pareja de pagos esperados de A es correcta?","options":[{"text":"Privada tres cuartos; independiente cinco cuartos."},{"text":"Ambas dan cinco cuartos porque las marginales coinciden."},{"text":"Privada cinco cuartos; independiente tres cuartos.","correct":true},{"text":"Ambas dan tres medios porque el conflicto es imposible."}],"explanation":"Pondera cada pago final por la probabilidad conjunta de su casilla. Las mismas marginales no conservan ni la probabilidad de conflicto ni la media."},{"question":"Una recomendación tiene probabilidad cero bajo la ley indicada. ¿Qué debe decir su comparación condicionada?","options":[{"text":"Asigna la misma probabilidad condicionada a cada respuesta."},{"text":"Usa la media de todos los pagos finales sin condicionar."},{"text":"Trátala como un pago garantizado de cero."},{"text":"Ese mensaje no define una ley condicionada.","correct":true}],"explanation":"Condicionar exige un denominador positivo. La prueba de incentivos se aplica a los mensajes que el dispositivo puede enviar; un mensaje de probabilidad cero no crea una distribución posterior inventada."},{"question":"¿Qué información necesitas para repetir la auditoría? Selecciona todos los ingredientes necesarios.","allowMultiple":true,"options":[{"text":"La ley conjunta de recomendaciones.","correct":true},{"text":"Solo la frecuencia marginal de cada equipo."},{"text":"Los pagos finales y las acciones disponibles.","correct":true},{"text":"Qué ve cada equipo antes de elegir.","correct":true}],"explanation":"Los pagos, la ley conjunta y las observaciones determinan las comparaciones condicionadas de desviación. Las marginales por sí solas no las reconstruyen."},{"question":"Una regla reparada supera la prueba con un empate exacto tras Aplazar. ¿Qué se ha demostrado?","options":[{"text":"Seguir es una mejor respuesta, aunque cambiar también lo es.","correct":true},{"text":"Seguir es el único óptimo, así que desviarse es irracional."},{"text":"La regla maximiza el bienestar entre todas las políticas de información."},{"text":"El dispositivo obliga ahora a cumplir la recomendación."}],"explanation":"La compatibilidad débil admite igualdad. El cálculo certifica que no hay una desviación estrictamente provechosa bajo los supuestos; no prueba una acción única ni predice el cumplimiento real."}]}
+/>
+
+### Fuentes y alcance
+
+La distinción entre informaciones privadas se apoya en [Subjectivity and Correlation in Randomized Strategies](https://ma.huji.ac.il/~raumann/pdf/Subjectivity%20and%20Correlation.pdf), de Robert J. Aumann, publicado originalmente en 1974; el archivo enlazado es una reimpresión alojada por el autor. La [lección de MIT sobre equilibrio correlacionado](https://www.mit.edu/~6.7980/correlated.html) presenta el mediador voluntario y separa los resultados maximin de suma cero del análisis de Nash de suma general. Todos los pagos y las leyes de papeletas del escáner son construidos. Estos cálculos establecen comparaciones de incentivos condicionadas bajo los supuestos indicados; no demuestran cumplimiento real, convergencia, una política de privacidad ni un mecanismo globalmente óptimo.
+
+Después viene el [Examen final](/es/nash-equilibrium/final-exam). Sus respuestas se bloquean al enviarlas; el resultado aparece al final.

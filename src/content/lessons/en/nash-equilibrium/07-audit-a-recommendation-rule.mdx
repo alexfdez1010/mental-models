@@ -1,0 +1,332 @@
+---
+title: "Audit a Private Recommendation Rule"
+description: "Check joint probabilities, private advice and unilateral deviations in a complete game, then repeat the audit after a payoff change."
+topic: "en/nash-equilibrium"
+order: 8
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MCQ, MatchConcepts, FillBlank, Categorize, PayoffMatrix, RateComparison, ExpectedValueCalculator, ConsequenceTree, MindMap, Quiz } from '@/components/react';
+
+Two archive teams share a scanner. A device sends each a private message: **Request** or **Defer**. Nobody has to obey. The decision is whether each team can improve by ignoring its message while the other follows.
+
+You already know how to check a payoff cell. This workshop adds a different condition: *what can I infer about the other team after seeing my own recommendation?* The device's random draw is shared, even though the messages are private.
+
+## Specify the game before trusting the advice
+
+<MCQ client:visible
+  className="not-prose"
+  pretest={true}
+  question="Two devices recommend Request to each team equally often. Must they create the same incentives?"
+  options={[{"text":"Yes: each team’s marginal frequency determines the entire joint law."},{"text":"No: the joint law and what each message reveals can differ.","correct":true},{"text":"Yes: a random recommendation removes every profitable deviation."},{"text":"No: only an enforceable recommendation has a probability law."}]}
+  explanation="A marginal describes one team’s advice alone. It leaves open which pairs occur together and what learning your own message tells you about the other team. The worked cases keep the marginals fixed while changing those pairs."
+/>
+
+This is a constructed, one-encounter game. Each team chooses Request or Defer simultaneously, after receiving its message. A **payoff** is a value in points: higher is better. The teams evaluate uncertain outcomes by their expected payoff, the probability-weighted mean. Points already include every consequence modeled here; there is no further fee, effort cost, future encounter, retaliation or enforcement. These are stipulated preferences, not measured scanner throughput.
+
+<PayoffMatrix client:visible
+  className="not-prose"
+  editable={false}
+  min={-6}
+  max={3}
+  unit=""
+  eyebrow=""
+  title="The terminal game in payoff points"
+  instructions="Compare a unilateral switch while holding the other action fixed. These rings test pure Nash cells, not the private recommendation law."
+  rowPlayer="Team A"
+  colPlayer="Team B"
+  rowStrategies={["Request","Defer"]}
+  colStrategies={["Request","Defer"]}
+  payoffs={[[{"row":-6,"col":-6},{"row":3,"col":0}],[{"row":0,"col":3},{"row":1,"col":1}]]}
+  analysisLabel="Pure-action best responses"
+  dominantLineTemplate="{player}: strictly dominant action {strategy}"
+  noneLabel="none"
+  nashLabel="Pure Nash cells:"
+  noNashLabel="none"
+  bestResponseLegend="A ring marks a best response to the other fixed action. Both rings identify a pure Nash cell."
+  nashBadge="NE"
+  resetLabel="Reset payoffs"
+  increaseLabel="increase"
+  decreaseLabel="decrease"
+  tableCaptionTemplate="{rowPlayer} chooses a row; {colPlayer} chooses a column. Each cell gives A’s payoff then B’s payoff."
+  caption="Request/Defer and Defer/Request are pure Nash cells. Neither team has a dominant action."
+/>
+
+Read A's possible switch. Against B's Request, A prefers Defer: zero beats minus six. Against B's Defer, A prefers Request: three beats one. B has the same comparison with its own payoffs. Thus Request/Defer and Defer/Request are the two pure Nash cells; Defer/Defer is not one.
+
+The device is trusted to draw from a **known joint law**, the probabilities of the two messages together. Each team sees only its own message, not the ticket number, the other message or a side channel. Think of two sealed envelopes from one draw: opening yours can reveal something about what is in the other. The limit of the analogy matters: an envelope is advice, not an enforceable assignment.
+
+A **deviation** changes one team's response to what it sees. Throughout the audit, the other team still follows its recommendation. We are testing a specified plan under a specified information structure, not predicting that actual teams will use it.
+
+<MatchConcepts client:visible
+  className="not-prose"
+  question="Keep the ingredients of the model separate."
+  pairs={[{"term":"Terminal payoff","definition":"The value of an action pair once the teams have chosen."},{"term":"Recommendation law","definition":"The known probabilities of the pairs of private messages."},{"term":"Observation","definition":"The information a team actually has before choosing an action."},{"term":"Unilateral deviation","definition":"One team changes its response while the other follows its message."}]}
+  explanation="The payoff table does not specify what a team observes. A recommendation is advice, so the incentive comparison must allow refusing it."
+/>
+
+### When to use this specification
+
+Before evaluating a recommendation system, write down the choices, payoffs, draw law, timing and observations. A missing observation can change the best response even when every payoff stays fixed.
+
+## Joint probabilities are more than matching frequencies
+
+The private rule draws one of four **equally likely labelled tickets**. Two different tickets carry Defer/Defer; they remain distinct copies. This describes a probability law, not a promise that four actual days will contain every ticket once.
+
+| A's message | B's message | Private ticket copies | Independent ticket copies |
+|---|---|---:|---:|
+| Request | Request | 0 | 1 |
+| Request | Defer | 1 | 3 |
+| Defer | Request | 1 | 3 |
+| Defer | Defer | 2 | 9 |
+| Total | | 4 | 16 |
+
+A **marginal probability** ignores the other component: add every cell where A receives Request. The private rule gives A Request with probability $1/4$; B's marginal is also $1/4$. The independent rule gives each team Request with probability $4/16=1/4$, but its pair probabilities are the products of those marginals. For example, Request/Request has probability $1/4\times1/4=1/16$, rather than zero.
+
+<RateComparison client:visible
+  locale="en"
+  title="Same marginals, different joint outcomes"
+  scenarioLabel="Quantity to compare"
+  countsLabel="Labelled tickets out of eligible tickets"
+  differenceLabel="First proportion minus second"
+  pointLabel="percentage point"
+  pointsLabel="percentage points"
+  scenarios={[{"label":"A receives Request","groups":[{"label":"Private rule","events":1,"total":4},{"label":"Independent rule","events":4,"total":16}]},{"label":"Both receive Request","groups":[{"label":"Private rule","events":0,"total":4},{"label":"Independent rule","events":1,"total":16}]},{"label":"B receives Request under the private rule","groups":[{"label":"Given A receives Defer","events":1,"total":3},{"label":"Before A sees any message","events":1,"total":4}]}]}
+/>
+
+The chart counts stipulated ticket copies. Its rounded percentage readouts do not replace the exact fractions. The final comparison conditions on A's Defer message: discard the incompatible Request/Defer ticket. Of the remaining three copies, one tells B Request and two tell B Defer. **Conditioning** means keeping the cases compatible with your observation and dividing by their total weight.
+
+<MCQ client:visible
+  className="not-prose"
+  question="A sees Defer under the private rule. What is the probability that B was told Request?"
+  options={[{"text":"One quarter"},{"text":"One half"},{"text":"One third","correct":true},{"text":"Two thirds"}]}
+  explanation="Three labelled tickets are compatible with A’s message: one Defer/Request and two Defer/Defer. Only one of those three gives B Request. Using all four tickets would ignore the observation."
+/>
+
+The common error is to reuse the marginal $1/4$ after receiving an informative message. Before seeing anything, all four copies are possible; after A sees Defer, only three are. Use this filter whenever advice is correlated. Independent advice would not change B's marginal when A opens its envelope.
+
+## Check following against every unilateral switch
+
+The relevant expectation is now conditional on **your message**. When A sees Request, B must have Defer. Following gives A three; switching to Defer gives one. When A sees Defer, the compatible copies have B Request once and B Defer twice:
+
+$$u_F=(0+1+1)/3=2/3,\qquad u_S=(-6+3+3)/3=0.$$
+
+Here $u_F$ means the conditional payoff from following and $u_S$ from switching. The complete audit includes B rather than hiding half the test behind symmetry.
+
+| Team | Own advice | Other Request weight | Other Defer weight | Compatible total | Follow | Switch |
+|---|---|---:|---:|---:|---:|---:|
+| A | Request | 0 | 1 | 1 | 3 | 1 |
+| A | Defer | 1 | 2 | 3 | 2/3 | 0 |
+| B | Request | 0 | 1 | 1 | 3 | 1 |
+| B | Defer | 1 | 2 | 3 | 2/3 | 0 |
+
+Following wins every comparison. This joint law is a **correlated equilibrium**: with the law known and only one's own recommendation observed, no team gains by unilaterally changing its response, assuming the other follows. The recommendation is voluntary. Neither a referee nor a penalty has been slipped into the game.
+
+Why are these checks sufficient? With two actions, after each possible message the only alternative is the other action. A plan to ignore, flip or selectively follow messages consists of these same comparisons. Randomizing between following and switching averages their payoffs; it cannot exceed their maximum. Check every team and every positive-probability message. If a message has zero probability, its compatible total is zero and this law supplies no conditional distribution for it; do not manufacture one.
+
+<FillBlank client:visible
+  className="not-prose"
+  question="Reconstruct the obedience test."
+  text="After A sees Defer, following earns {{two thirds|one quarter|one third}} in expectation; switching earns {{zero|two thirds|one}}. The denominator counts {{compatible tickets|all possible actions|only successful draws}}."
+  explanation="Following pays zero on the other-Request ticket and one on each other-Defer ticket. Switching pays minus six on the first and three on each of the other two. Compare those conditional means, holding B’s response fixed."
+/>
+
+This definition concerns a **law of advice**, not each realized cell viewed with hindsight. Defer/Defer occurs with probability $1/2$ even though it is not a pure Nash cell of the original game. A team told Defer cannot distinguish that case from the one where its partner was told Request. That uncertainty changes the available incentive calculation.
+
+## Change the disclosure and repeat the test
+
+Now keep the payoffs and private rule, but publish the **whole message pair before acting**. If it is Defer/Defer, each team knows the other was told Defer. Following pays one; switching to Request pays three. There is a profitable deviation. The earlier conditional average is no longer the right comparison because the team knows which of its previously compatible cases occurred.
+
+<ConsequenceTree client:visible
+  title="What becomes known before choosing?"
+  eyebrow=""
+  instructions="Open the two disclosure policies. These are information steps, not probability branches; exact compatible counts are in the tables."
+  decisionLabel="Disclosure policy"
+  orderLabels={["Message shown","Compatible situation","Incentive comparison"]}
+  promptLabel="Show the next step"
+  expandAllLabel="Show both policies"
+  collapseLabel="Close the comparison"
+  valenceLabels={{"neutral":"Information step","good":"Favourable","bad":"Unfavourable","mixed":"Mixed"}}
+  decision={{"label":"Keep the same private rule and payoffs","valence":"neutral","children":[{"label":"A learns only its own Defer message","valence":"neutral","children":[{"label":"B may have Request or Defer","valence":"neutral","children":[{"label":"Use the conditional weighted mean","valence":"neutral"}]}]},{"label":"Both learn the full Defer/Defer pair","valence":"neutral","children":[{"label":"A knows that B was told Defer","valence":"neutral","children":[{"label":"A can compare the two payoffs against Defer directly","valence":"neutral"}]}]}]}}
+/>
+
+Publication breaks this particular recommendation arrangement. It does not establish that secrecy is generally valuable, that public information always harms coordination or that deception is required. The device's law was public all along; **knowing a distribution and observing its realized draw are different information**.
+
+A different failure can occur without publishing anything. Try a uniform private rule with one ticket for each of the four message pairs. After Request, the other team is equally likely to have Request or Defer. Following yields $(-6+3)/2=-3/2$; switching yields $(0+1)/2=1/2$. Switching gains two points. Random advice alone is no certificate of incentive compatibility.
+
+<Categorize client:visible
+  className="not-prose"
+  question="Which part of the specified game changes?"
+  buckets={["Information changes","Terminal payoffs change"]}
+  items={[{"text":"The device reveals both recommendations before actions.","bucket":"Information changes"},{"text":"Each team also sees the labelled ticket drawn.","bucket":"Information changes"},{"text":"The conflict payoff is made less negative.","bucket":"Terminal payoffs change"},{"text":"A penalty is subtracted from one terminal cell.","bucket":"Terminal payoffs change"}]}
+  explanation="Extra information changes the situations a player can distinguish before choosing. Editing a terminal value changes the reward itself. Either change requires a new incentive audit."
+/>
+
+### When to repeat the audit
+
+Repeat it after a new side channel, an extra message, a disclosed draw index or a payoff change. A certificate for one information policy does not carry over just because the action labels remain the same.
+
+## Separate obedience from average payoff and insurance
+
+Before receiving any message, A's expected payoff under the private rule is:
+
+$$0(-6)+(1/4)3+(1/4)0+(2/4)1=5/4.$$
+
+<ExpectedValueCalculator client:visible
+  className="not-prose"
+  locale="en"
+  eyebrow=""
+  title="Weight A’s terminal payoffs"
+  scenario={{"prompt":"What is A’s unconditional expected payoff?","unit":"","outcomes":[{"label":"Request / Request","payoff":-6,"prob":0},{"label":"Request / Defer","payoff":3,"prob":25},{"label":"Defer / Request","payoff":0,"prob":25},{"label":"Defer / Defer","payoff":1,"prob":50}]}}
+  instructions="The initial law is specified in the adjacent table. Editing probabilities explores a different law; restore a full total before calling the result an expectation. This figure does not check obedience."
+  probabilityLabel="Probability"
+  payoffLabel="A’s payoff in points"
+  contributionLabel="Contribution to the mean"
+  totalProbLabel="Probability total"
+  normalizeHint="The probabilities total {sum}. Without a complete total this is a weighted sum, not an expected payoff."
+  evLabel="A’s expected payoff in points"
+  evHint="the unconditional weighted mean"
+  resetLabel="Restore the given law"
+  caption="Bars show each contribution relative to the largest contribution in the current state. The law must also pass separate conditional incentive checks."
+/>
+
+Under independent recommendations with the same marginals, A instead gets:
+
+$$(-6+9+0+9)/16=3/4.$$
+
+The independent rule also passes its obedience checks here: after either message, the other team still requests with probability $1/4$. Request gives $(-6)/4+3(3/4)=3/4$ and Defer gives $0/4+1(3/4)=3/4$. This is the original game's independent mixed Nash profile, with each team requesting with probability $1/4$. Equal marginals neither guarantee equal outcomes nor imply that one candidate must fail.
+
+A **maximin guarantee** is a different test: choose a strategy for its worst payoff against arbitrary opposing strategies. A's same independent request probability $1/4$ gives $(-6)/4+0(3/4)=-3/2$ against B always Request. Its Nash payoff $3/4$ was conditional on B's equilibrium mix, not an insurance floor against every opponent. The special zero/constant-sum examples in lesson 05 support their own maximin guarantee; do not extend it to every general-sum Nash profile.
+
+Nor is the private rule globally best. A public fair lottery between Request/Defer and Defer/Request uses weights **[0,1,1,0]**. Each announced pair is already a pure Nash cell, so full disclosure leaves both teams best-responding. Each team gets $3/2$, above the private rule's $5/4$. We have audited given proposals, not optimized every possible device.
+
+| Law in the original game | Row-major weights | A's expected payoff | B's expected payoff | Private obedience |
+|---|---|---:|---:|---|
+| Private rule | [0,1,1,2] | 5/4 | 5/4 | Passes |
+| Same-marginal independent rule | [1,3,3,9] | 3/4 | 3/4 | Passes with ties |
+| Uniform rule | [1,1,1,1] | -1/2 | -1/2 | Fails |
+| Lottery over the pure Nash cells | [0,1,1,0] | 3/2 | 3/2 | Passes, also after full disclosure |
+
+“Passes the incentive test”, “has a higher mean in this comparison”, “is globally optimal” and “will be used by people” are separate claims. An unconditional average cannot replace the message-by-message deviation test.
+
+<MCQ client:visible
+  className="not-prose"
+  allowMultiple={true}
+  question="The private rule passes all the conditional comparisons. Select every conclusion that follows."
+  options={[{"text":"Following is a best response if the other team follows under the stated information.","correct":true},{"text":"The rule must maximize both teams’ payoffs over every possible device."},{"text":"A public description of the law is compatible with private individual messages.","correct":true},{"text":"Every realized action pair must itself be a pure Nash cell."}]}
+  explanation="The comparisons establish conditional best responses for this information structure. They establish neither global welfare optimality nor obedience by real people. Defer/Defer already disproves the claim that every realized pair must be a pure Nash cell."
+/>
+
+## Transfer to a smaller conflict loss
+
+Here is a new complete case. Change **only** the Request/Request payoffs from minus six to **minus one each**. Keep the simultaneous choices, known law, private individual advice, voluntary responses and absence of other costs. First audit the old rule; then consider the proposed repair. Both candidate laws are given before the questions.
+
+<PayoffMatrix client:visible
+  className="not-prose"
+  editable={false}
+  min={-6}
+  max={3}
+  unit=""
+  eyebrow=""
+  title="The terminal game in payoff points"
+  instructions="Compare a unilateral switch while holding the other action fixed. These rings test pure Nash cells, not the private recommendation law."
+  rowPlayer="Team A"
+  colPlayer="Team B"
+  rowStrategies={["Request","Defer"]}
+  colStrategies={["Request","Defer"]}
+  payoffs={[[{"row":-1,"col":-1},{"row":3,"col":0}],[{"row":0,"col":3},{"row":1,"col":1}]]}
+  analysisLabel="Pure-action best responses"
+  dominantLineTemplate="{player}: strictly dominant action {strategy}"
+  noneLabel="none"
+  nashLabel="Pure Nash cells:"
+  noNashLabel="none"
+  bestResponseLegend="A ring marks a best response to the other fixed action. Both rings identify a pure Nash cell."
+  nashBadge="NE"
+  resetLabel="Reset payoffs"
+  increaseLabel="increase"
+  decreaseLabel="decrease"
+  tableCaptionTemplate="{rowPlayer} chooses a row; {colPlayer} chooses a column. Each cell gives A’s payoff then B’s payoff."
+  caption="Request/Defer and Defer/Request are pure Nash cells. Neither team has a dominant action."
+/>
+
+| A's message | B's message | Old rule copies | Proposed repair copies |
+|---|---|---:|---:|
+| Request | Request | 0 | 0 |
+| Request | Defer | 1 | 2 |
+| Defer | Request | 1 | 2 |
+| Defer | Defer | 2 | 1 |
+| Total | | 4 | 5 |
+
+<FillBlank client:visible
+  className="not-prose"
+  question="Compute A’s conditional comparison under the old rule in the changed game."
+  text="After Defer, following gives {{two thirds|one third|five thirds}}; switching gives {{five thirds|two thirds|one third}}. Switching therefore gains {{one point|two points|zero points}}."
+  explanation="The compatible tickets still have weights one and two. Following gives two thirds; switching now gives five thirds because the conflict loss is smaller. The gain is one point, so the old rule fails."
+/>
+
+<MCQ client:visible
+  className="not-prose"
+  question="Audit the proposed repair before opening the solution. After Defer advice, which comparison is correct?"
+  options={[{"text":"Following is strictly better because the other team usually requests."},{"text":"Switching is strictly better because the conflict has become cheaper."},{"text":"Following and switching both give one third, so there is an exact tie.","correct":true},{"text":"Neither expectation is defined because a conflict ticket has zero weight."}]}
+  explanation="Of the three compatible ticket copies, two tell the other team Request and one tells it Defer. Following gives one third. Switching gives two losses of one plus a gain of three, divided by three: also one third. A zero-weight conflict message pair does not erase the positive-probability Defer message."
+/>
+
+<details>
+<summary>Check the complete transfer solution</summary>
+
+Under the old rule, Defer still leaves three compatible copies. Following earns $2/3$; switching earns $(-1+3+3)/3=5/3$. The gain is one point. The pure Nash cells of the terminal game have not changed, but the old recommendation law fails.
+
+For the repair, work through all four checks:
+
+| Team | Own advice | Other Request weight | Other Defer weight | Compatible total | Follow | Switch |
+|---|---|---:|---:|---:|---:|---:|
+| A | Request | 0 | 2 | 2 | 3 | 1 |
+| A | Defer | 2 | 1 | 3 | 1/3 | 1/3 |
+| B | Request | 0 | 2 | 2 | 3 | 1 |
+| B | Defer | 2 | 1 | 3 | 1/3 | 1/3 |
+
+After Defer, following gives $(2(0)+1)/3=1/3$; switching gives $(2(-1)+3)/3=1/3$. The exact tie is enough for **weak** obedience: following is a best response, but switching is another best response. A convention to follow when tied is compatible with the model; the arithmetic does not force it. The repair's unconditional payoff is $(2(3)+2(0)+1)/5=7/5$ for each team.
+
+</details>
+
+<ExpectedValueCalculator client:visible
+  className="not-prose"
+  locale="en"
+  eyebrow=""
+  title="Weight A’s terminal payoffs"
+  scenario={{"prompt":"What is A’s unconditional expected payoff?","unit":"","outcomes":[{"label":"Request / Request","payoff":-1,"prob":0},{"label":"Request / Defer","payoff":3,"prob":40},{"label":"Defer / Request","payoff":0,"prob":40},{"label":"Defer / Defer","payoff":1,"prob":20}]}}
+  instructions="The initial law is specified in the adjacent table. Editing probabilities explores a different law; restore a full total before calling the result an expectation. This figure does not check obedience."
+  probabilityLabel="Probability"
+  payoffLabel="A’s payoff in points"
+  contributionLabel="Contribution to the mean"
+  totalProbLabel="Probability total"
+  normalizeHint="The probabilities total {sum}. Without a complete total this is a weighted sum, not an expected payoff."
+  evLabel="A’s expected payoff in points"
+  evHint="the unconditional weighted mean"
+  resetLabel="Restore the given law"
+  caption="Bars show each contribution relative to the largest contribution in the current state. The law must also pass separate conditional incentive checks."
+/>
+
+The mean figure concerns the repaired law before a message is seen. It does not turn the tie into strict preference. Use this audit when choosing among specified advice rules; test its payoff and observation assumptions again before applying it to a different setting.
+
+## Reconstruct the audit without the envelopes
+
+<MindMap client:visible
+  title="Rebuild the recommendation audit"
+  eyebrow=""
+  outlineLabel="Text outline"
+  root={{"label":"Audit an advice rule","children":[{"label":"Specify the game","children":[{"label":"Actions payoffs timing observations"}]},{"label":"Read the joint law","children":[{"label":"Marginals leave pairings undetermined"}]},{"label":"Condition on own advice","children":[{"label":"Keep compatible tickets and renormalize"}]},{"label":"Compare follow and switch","children":[{"label":"Every player and every possible message"}]},{"label":"Repeat after a change","children":[{"label":"Public disclosure or new payoff can break obedience"}]},{"label":"State the limits","children":[{"label":"Weak ties permit following without guaranteeing it"}]}]}}
+/>
+
+<Quiz client:visible
+  className="not-prose"
+  title="Use the whole audit"
+  questions={[{"question":"Retrieve the distinction: what does a marginal leave unspecified?","options":[{"text":"The payoff of an action pair."},{"text":"Which messages occur together.","correct":true},{"text":"Whether an action is labelled Request."},{"text":"How many players the game contains."}],"explanation":"A marginal records one component alone. It cannot recover the coupling between both messages."},{"question":"Compare the given private rule with independent draws. Which expected-payoff pair is correct for A?","options":[{"text":"Private three quarters; independent five quarters."},{"text":"Both give five quarters because the marginals match."},{"text":"Private five quarters; independent three quarters.","correct":true},{"text":"Both give three halves because conflict is impossible."}],"explanation":"Weight each terminal payoff by the joint cell probability. Equal marginals do not preserve conflict probability or the mean."},{"question":"A recommendation has zero probability under a specified law. What should its conditional comparison report?","options":[{"text":"Assign every possible reply equal conditional probability."},{"text":"Give it the unconditional mean of all terminal payoffs."},{"text":"Treat it as a guaranteed payoff of zero."},{"text":"No conditional law is defined by that message.","correct":true}],"explanation":"Conditioning requires a positive denominator. The obedience test applies to messages that the device can actually send; a zero-probability message does not create an invented posterior."},{"question":"Which information is needed to repeat the audit? Select every necessary ingredient.","allowMultiple":true,"options":[{"text":"The joint law of recommendations.","correct":true},{"text":"Only each team’s marginal action frequency."},{"text":"The terminal payoffs and available actions.","correct":true},{"text":"What each team sees before choosing.","correct":true}],"explanation":"Payoffs, the joint law and observations determine the conditional deviation comparisons. Marginals alone cannot reconstruct them."},{"question":"A repaired rule passes with an exact tie after Defer. What has been established?","options":[{"text":"Following is a best response, though switching is also a best response.","correct":true},{"text":"Following is uniquely optimal, so deviations are irrational."},{"text":"The rule maximizes welfare over every information policy."},{"text":"The device now enforces the recommendation as a binding choice."}],"explanation":"Weak obedience allows equality. The calculation certifies absence of a strictly profitable deviation under the assumptions, not a unique action or a forecast of real compliance."}]}
+/>
+
+### Sources and scope
+
+The private-information distinction builds on Robert J. Aumann's [Subjectivity and Correlation in Randomized Strategies](https://ma.huji.ac.il/~raumann/pdf/Subjectivity%20and%20Correlation.pdf), originally published in 1974; the linked file is an author-hosted reprint. MIT's [lecture on correlated equilibrium](https://www.mit.edu/~6.7980/correlated.html) gives the voluntary-mediator interpretation and separates zero-sum maximin results from general-sum Nash analysis. Every scanner payoff and ticket law here is constructed. These calculations establish conditional incentive comparisons under the stated assumptions, not real compliance, convergence, privacy policy or a globally optimal mechanism.
+
+The [Final Exam](/nash-equilibrium/final-exam) follows this workshop. Its answers lock on submission; the result appears at the end.
