@@ -1,0 +1,321 @@
+---
+title: "Qué supone el modelo M/M/1"
+description: "Deduce la ley estacionaria y sus medias tras definir llegadas y servicios."
+topic: "es/queueing-theory-and-waiting"
+order: 5
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MM1QueueExplorer, MCQ, MatchConcepts, ConsequenceTree, FillBlank, MindMap, Quiz } from '@/components/react';
+
+Una lista completa de trabajos futuros permitió calcular una secuencia finita. A menudo esas entradas futuras se desconocen. Un modelo estocástico de colas les asigna distribuciones y pregunta qué se deduce si se cumplen sus supuestos.
+
+**M/M/1** es uno de esos modelos. Las dos M aluden a distribuciones sin memoria de los tiempos entre llegadas y de servicio; el 1 significa un servidor. El código no es un diagnóstico empírico. Hay que declarar el modelo completo antes de usar sus resultados.
+
+## Especifica las entradas inciertas
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"¿Qué convierte dos tasas medias en todos los supuestos M/M/1?"}
+  options={[{"text":"No hace falta nada más."},{"text":"Una cola corta observada una vez."},{"text":"Llegadas de Poisson, servicios exponenciales independientes y las condiciones de servidor, frontera y régimen estipuladas.","correct":true}]}
+  explanation={"Las tasas solo son parámetros del modelo especificado."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Un **proceso homogéneo de llegadas de Poisson (homogeneous Poisson arrival process)** tiene tasa constante $\lambda$, recuentos independientes en intervalos disjuntos y la siguiente ley. Durante un intervalo de duración $t$, el número de llegadas $K$ cumple:
+
+$$
+P(K=k)=e^{-\lambda t}\frac{(\lambda t)^k}{k!},\qquad k=0,1,2,\ldots
+$$
+
+$k!$ es el producto de 1 a $k$, con $0!=1$; $e$ es la constante aproximadamente igual a 2,71828. El recuento esperado es $\lambda t$. Tasa y duración deben usar unidades temporales compatibles.
+
+Con $\lambda=6$ trabajos por hora y $t=10$ minutos $=1/6$ de hora, el recuento esperado es 1. La probabilidad de cero llegadas es $e^{-1}\approx0{,}3679$; la de al menos una, aproximadamente 0,6321. Un recuento esperado de uno no hace segura una única llegada.
+
+Una **duración de servicio exponencial (exponential service duration)** de tasa $\mu$ tiene probabilidad de cola:
+
+$$
+P(S>s)=e^{-\mu s},\qquad s\ge0.
+$$
+
+Su duración media es $1/\mu$. Si $\mu=10$ por hora, la media es 0,1 horas: seis minutos. Los servicios individuales no tienen por qué durar seis minutos.
+
+Los servicios son independientes entre sí, tienen la misma ley exponencial y son independientes del proceso de llegadas. El modelo supone además un servidor FCFS sin ociosidad voluntaria, espacio ilimitado de espera, tasas constantes, sin rechazo, abandono ni reproceso. La probabilidad de llegadas exactamente simultáneas es cero en el modelo de Poisson; la secuencia finita sí necesitaba un desempate.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Interpreta las entradas del modelo."}
+  pairs={[{"term":"λ","definition":"Recuento medio de llegadas por unidad temporal"},{"term":"μ","definition":"Tasa exponencial de servicio; servicio medio 1/μ"},{"term":"Recuentos independientes en intervalos disjuntos","definition":"En el proceso supuesto, los recuentos de intervalos no solapados no predicen otros recuentos"}]}
+  explanation={"Una tasa no es una duración fija ni un recuento realizado en cada intervalo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"✓ Todo relacionado"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"→ elige ahora una definición"}
+  notLinkedHint={"sin relacionar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+
+### Cuándo considerar este modelo
+
+Examina cómo se admiten solicitudes, cuándo está disponible el trabajo, si los servicios se solapan y si cambian las condiciones según hora o clase. Dos tasas medias no establecen independencia, una ley exponencial de servicio ni los demás supuestos.
+
+## Entiende qué significa «sin memoria»
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Con servicio exponencial, ¿superar seis minutos obliga a terminar en los seis siguientes?"}
+  options={[{"text":"No; la ley condicionada del tiempo restante conserva la misma cola.","correct":true},{"text":"Sí; doce minutos es el máximo."},{"text":"Sí; el servicio medio es un plazo máximo."}]}
+  explanation={"Las duraciones exponenciales no tienen un tope superior finito."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Con servicio medio de seis minutos, la probabilidad de que dure más de seis es $e^{-1}\approx0{,}3679$. La de que dure más de doce es $e^{-2}\approx0{,}1353$.
+
+Dado que ya ha superado seis minutos, la probabilidad de necesitar más de otros seis es:
+
+$$
+P(S>12\mid S>6)=\frac{e^{-2}}{e^{-1}}=e^{-1}\approx0{,}3679.
+$$
+
+Es la **propiedad sin memoria (memoryless property)** de la distribución estipulada. No dice que una máquina real olvide sus reparaciones ni que a todos los trabajos largos les quede el mismo servicio.
+
+<ConsequenceTree
+  client:visible
+  title={"Colas condicionadas del tiempo de servicio"}
+  eyebrow={""}
+  decision={{"label":"Empieza el servicio","note":"μ=10/h; cada bloque dura seis minutos","valence":"neutral","children":[{"label":"El servicio supera 6 min","note":"Probabilidad desde el inicio: e⁻¹","valence":"neutral","children":[{"label":"El servicio supera 12 min","note":"Condicionada a superar 6: e⁻¹; ruta completa: e⁻²","valence":"neutral"}]},{"label":"El servicio termina antes de 6 min o en ese instante","note":"Probabilidad desde el inicio: 1−e⁻¹","valence":"neutral"}]}}
+  orderLabels={["Primeros seis minutos","Seis minutos siguientes"]}
+  instructions={"Abre las ramas para distinguir una probabilidad condicionada de la probabilidad de toda la ruta."}
+  caption={"El árbol representa la ley exponencial estipulada, no una muestra medida."}
+  decisionLabel={"Condición inicial"}
+  promptLabel={"Abre los siguientes eventos"}
+  expandAllLabel={"Mostrar todos los eventos"}
+  collapseLabel={"Contraer"}
+  valenceLabels={{"good":"Favorable","bad":"Desfavorable","mixed":"Mixto","neutral":"Evento declarado"}}
+/>
+
+
+La rama condicionada y el evento conjunto tienen probabilidades distintas. La ruta desde el inicio hasta superar doce minutos multiplica dos factores condicionados; no reutiliza la probabilidad condicionada como probabilidad de la ruta completa.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"P(S>12)=e⁻² y P(S>6)=e⁻¹. ¿Cuánto vale P(S>12 | S>6)?"}
+  options={[{"text":"e⁻²"},{"text":"e⁻¹","correct":true},{"text":"1−e⁻¹"}]}
+  explanation={"Divide la probabilidad del evento anidado entre la del condicionante: e⁻²/e⁻¹=e⁻¹."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+## Deduce una ley estacionaria de ocupación
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"¿Una distribución estacionaria implica que el número de trabajos nunca cambia?"}
+  options={[{"text":"Sí, todos los recuentos quedan congelados."},{"text":"Sí, deben cesar todas las llegadas."},{"text":"No; su distribución no cambia con el instante observado.","correct":true}]}
+  explanation={"Un recuento aleatorio estacionario puede subir y bajar en una realización."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Una **distribución estacionaria (stationary distribution)** es una distribución de probabilidad del número presente que no cambia con el instante de observación. El recuento sigue cambiando al llegar y salir trabajos.
+
+Empezar con el sistema vacío en 0 da $N(0)=0$. Ese arranque determinista no es la distribución estacionaria que vamos a deducir. Calculamos un régimen del modelo, sin elegir un periodo universal de calentamiento ni simular sus primeros minutos.
+
+Sea $\pi_n$ la probabilidad estacionaria de que haya $n$ trabajos en el sistema, incluido el servicio. En este M/M/1, el balance entre estados vecinos da:
+
+$$
+\lambda\pi_n=\mu\pi_{n+1},\qquad n\ge0.
+$$
+
+Las llegadas aumentan el recuento; una terminación, si el sistema no está vacío, lo reduce. Con $\rho=\lambda/\mu$, la recurrencia da $\pi_n=\pi_0\rho^n$.
+
+Para $0<\rho<1$, la suma geométrica es $1+\rho+\rho^2+\cdots=1/(1-\rho)$. Al normalizar la probabilidad total a uno:
+
+$$
+\pi_0=1-\rho,\qquad \pi_n=(1-\rho)\rho^n.
+$$
+
+Puedes comprobar la suma infinita mediante partes finitas: las probabilidades de 0 a $m$ suman $1-\rho^{m+1}$, y la cola restante es $\rho^{m+1}$. Al crecer $m$, esa cola tiende a cero.
+
+Si $\rho\ge1$, la secuencia de balance no se puede normalizar: un $\pi_0$ positivo hace divergir la suma y $\pi_0=0$ deja probabilidad total cero. Este M/M/1 no tiene entonces distribución estacionaria. Eso no convierte una secuencia finita individual en una cola infinita en un instante finito.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Normaliza solo dentro del dominio estable."}
+  text={"Con ρ=3/5, π₀={{2/5|3/5|1}} y P(N≥2)={{9/25|6/25|2/5}}."}
+  explanation={"π₀=1−ρ; la cola geométrica es ρ²."}
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+/>
+
+
+### Cuándo usar la ley
+
+Úsala para el modelo declarado, en régimen estacionario y dominio estable $0<\lambda<\mu$. Las barras de probabilidad no son observaciones de una cohorte finita. Sin llegadas no hay un trabajo admitido típico cuya permanencia promediar; nuestras fórmulas para tiempos de clientes usan $\lambda>0$.
+
+## Obtén las medias sin restar el cliente equivocado
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"En el modelo estable de un servidor, ¿qué restas de L para obtener Lq?"}
+  options={[{"text":"La fracción estacionaria de tiempo ocupado ρ.","correct":true},{"text":"Siempre uno."},{"text":"La tasa de llegadas λ en trabajos/h."}]}
+  explanation={"El número medio en servicio es ρ: no uno ni una tasa."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Puedes contar un entero no negativo por capas: una unidad si $N\ge1$, otra si $N\ge2$, etcétera. Para un tope finito $m$:
+
+$$
+E[\min(N,m)]=\sum_{j=1}^{m}P(N\ge j).
+$$
+
+Bajo la ley geométrica, $P(N\ge j)=\rho^j$. Al aumentar el tope, converge la suma geométrica:
+
+$$
+L=E[N]=\frac{\rho}{1-\rho}=\frac{\lambda}{\mu-\lambda}.
+$$
+
+El servidor está ocupado exactamente cuando $N>0$. Su fracción estacionaria de tiempo ocupado es $1-\pi_0=\rho$. Por tanto, el número medio de trabajos esperando es:
+
+$$
+L_q=L-\rho=\frac{\rho^2}{1-\rho}.
+$$
+
+Restar uno fingiría que el servidor siempre está ocupado. Una cola estable tiene probabilidad positiva de estar vacía.
+
+La ley de Little relaciona ahora estas medidas estacionarias con tiempos de clientes. Con tasas por hora:
+
+$$
+T=\frac{L}{\lambda}=\frac1{\mu-\lambda}\ \text{horas},
+$$
+
+$$
+T_q=T-\frac1\mu=\frac{\lambda}{\mu(\mu-\lambda)}\ \text{horas}.
+$$
+
+Con $\lambda=6,\mu=10$, la carga es $3/5$. Obtenemos $L=3/2$ trabajos, $L_q=9/10$ trabajo, permanencia $1/4$ de hora=15 minutos y espera $3/20$ de hora=9 minutos. El servicio medio son seis minutos: $15=9+6$.
+
+<MM1QueueExplorer
+  client:visible
+  initialArrival={6}
+  initialService={10}
+  labels={{"title":"Deduce e inspecciona las medidas estacionarias","assumptions":"Modelo supuesto: llegadas de Poisson de tasa constante, servicios exponenciales independientes, un servidor FCFS sin ociosidad voluntaria, espera ilimitada y régimen estacionario.","arrival":"Tasa de llegadas λ","service":"Tasa de servicio μ","reset":"Restablecer tasas","load":"Carga ofrecida λ/μ","busyFraction":"Fracción estacionaria de tiempo ocupado","meanSystem":"Media en el sistema L (trabajos)","meanWaiting":"Media en espera Lq (trabajos)","meanStay":"Permanencia media T (min)","meanWait":"Espera media Tq (min)","nonstationary":"Con λ≥μ, este M/M/1 no tiene distribución estacionaria ni proporciona aquí una media estacionaria finita.","curve":"Permanencia media para la tasa de servicio elegida","curveDescription":"El rojo marca la tasa de llegadas seleccionada. La frontera vertical discontinua, si es visible, es λ=μ; el gris queda fuera del dominio estacionario.","arrivalAxis":"Tasa de llegadas λ (trabajos/h)","timeAxis":"Permanencia media T (min)","offscale":"Por encima de la flecha, la media analítica supera 60 min aunque λ sigue por debajo de μ.","distribution":"Probabilidades estacionarias en una escala común 0–1","probability":"Probabilidad","tail":"N ≥ 5, agrupado","rateUnit":"trabajos/h"}}
+  locale={"es"}
+/>
+
+
+El panel muestra $N=0,1,2,3,4$ y una cola agrupada $N\ge5$. Esas seis masas suman uno. La última fila agrupa muchos recuentos posibles; tratar toda su masa como exactamente cinco trabajos infravaloraría la media. La suma por capas usa toda la distribución.
+
+Los controles usan tasas enteras. La curva analítica continua entre ellas puede superar los 60 minutos representados antes de llegar a $\lambda=\mu$; la flecha señala esa continuación. En esa frontera o más allá no hay medias estacionarias en este modelo; no hay tiempos de espera negativos ni una cola real situada en el infinito.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Con λ=6/h y μ=10/h, T=15 min y servicio medio=6 min. ¿Cuánto vale Tq?"}
+  options={[{"text":"21 min"},{"text":"6 min"},{"text":"9 min","correct":true}]}
+  explanation={"Tq=T−1/μ=15−6=9 minutos."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+### Cuándo una respuesta numérica sigue siendo condicional
+
+Evaluar bien la fórmula no valida sus entradas. La [hoja M/M/1 del MIT](https://ocw.mit.edu/courses/2-854-introduction-to-manufacturing-systems-fall-2016/927056a1af54772a587fd84ad4951e71_MIT2_854F16_Mm1Queue.pdf) distingue medidas de sistema, espera y servicio. Las [lecciones de colas](https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/a9235f5e4e0aee12a55778e5beaf0ddb_lec5.pdf) declaran el marco del modelo. Ninguna convierte un servicio observado cualquiera en M/M/1 porque sus tasas quepan en los controles.
+
+<MindMap
+  client:visible
+  title={"El cálculo M/M/1 tiene un dominio"}
+  eyebrow={""}
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Modelo estocástico declarado","children":[{"label":"Entradas","children":[{"label":"Llegadas de Poisson a tasa λ"},{"label":"Servicios exponenciales independientes a tasa μ"}]},{"label":"Ley estacionaria","children":[{"label":"Exige 0<λ<μ"},{"label":"πn=(1−ρ)ρⁿ"}]},{"label":"Medias","children":[{"label":"L=ρ/(1−ρ)"},{"label":"Lq=L−ρ; los tiempos usan unidades compatibles"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Comprueba probabilidad y reloj"}
+  questions={[{"question":"La tasa de Poisson es 6/h. En diez minutos, ¿cuánto vale λt?","options":[{"text":"60"},{"text":"1","correct":true},{"text":"1/10"}],"explanation":"Diez minutos son un sexto de hora; 6×1/6=1."},{"question":"Con λ=μ, ¿qué salida está justificada para este M/M/1?","options":[{"text":"No hay distribución estacionaria de probabilidad.","correct":true},{"text":"Hay una demora media estacionaria negativa."},{"text":"Hay infinitos trabajos en todo instante finito."}],"explanation":"Los pesos de balance no se pueden normalizar; no es una realización infinita instantánea."},{"question":"La última barra es N≥5. ¿Puede tratarse toda su masa como N=5 al calcular E[N]?","options":[{"text":"Sí, porque ahí termina el eje."},{"text":"Sí, porque los recuentos mayores son imposibles."},{"text":"No; agrupa recuentos mayores distintos.","correct":true}],"explanation":"La probabilidad de una cola agrupada no aporta a la media exactamente cinco veces su masa."}]}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso terminado"}
+  perfectMessage={"Has acertado todas las preguntas de este repaso."}
+  goodMessage={"Revisa las explicaciones de las preguntas falladas."}
+  keepPracticingMessage={"Revisa los ejemplos antes de volver a practicar."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar repaso"}
+/>
+
+
+A continuación, [Holgura de capacidad y demora no lineal](/es/queueing-theory-and-waiting/05-capacity-slack-and-delay) compara cambios dentro del modelo, distinguiendo espera media, permanencia media y criterio de decisión.

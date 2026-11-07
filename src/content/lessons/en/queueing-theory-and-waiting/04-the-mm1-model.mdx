@@ -1,0 +1,244 @@
+---
+title: "What the M/M/1 Model Assumes"
+description: "Derive the stationary law and means from explicitly taught arrival and service assumptions."
+topic: "en/queueing-theory-and-waiting"
+order: 5
+minutes: 32
+updated: 2026-11-07
+---
+
+import { MM1QueueExplorer, MCQ, MatchConcepts, ConsequenceTree, FillBlank, MindMap, Quiz } from '@/components/react';
+
+A complete list of future jobs let us calculate a finite trace. Often those future inputs are unknown. A stochastic queueing model supplies distributions for them, then asks what follows if the assumptions hold.
+
+**M/M/1** names one such model. The two M symbols refer to memoryless interarrival and service distributions; the 1 means one server. The code is not an empirical diagnosis. We must state the full model before using its results.
+
+## Specify the uncertain inputs
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Which addition turns two average rates into the full M/M/1 assumptions?"}
+  options={[{"text":"Nothing else is needed."},{"text":"A short line observed once."},{"text":"The stipulated Poisson arrivals, independent exponential services and server/boundary/regime conditions.","correct":true}]}
+  explanation={"Rates are only parameters inside the specified model."}
+/>
+
+
+A **homogeneous Poisson arrival process** has a constant rate $\lambda$, independent arrival counts in disjoint time intervals and the following count law. Over a duration $t$, the number of arrivals $K$ satisfies:
+
+$$
+P(K=k)=e^{-\lambda t}\frac{(\lambda t)^k}{k!},\qquad k=0,1,2,\ldots
+$$
+
+Here $k!$ means the product from 1 through $k$, with $0!=1$; $e$ is the constant approximately 2.71828. The expected count is $\lambda t$. Rate and duration must use matching time units.
+
+With $\lambda=6$ jobs per hour and $t=10$ minutes $=1/6$ hour, the expected count is 1. The chance of no arrivals is $e^{-1}\approx0.3679$; the chance of at least one is about 0.6321. An expected count of one does not mean exactly one arrival is certain.
+
+An **exponential service duration** with rate $\mu$ has tail probability:
+
+$$
+P(S>s)=e^{-\mu s},\qquad s\ge0.
+$$
+
+Its mean service duration is $1/\mu$. At $\mu=10$ per hour, that mean is 0.1 hour, or six minutes. Individual services need not take six minutes.
+
+Services are independent of one another, have the same exponential law and are independent of the arrival process. The model also assumes one work-conserving FCFS server, unlimited waiting room, constant rates, no rejection, no abandonment and no rework. Equal-time arrival probability is zero in the Poisson model; our finite trace still needed a tie convention.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Read the model inputs."}
+  pairs={[{"term":"λ","definition":"Mean arrival count per time unit"},{"term":"μ","definition":"Exponential service rate; mean service is 1/μ"},{"term":"Independent disjoint arrival counts","definition":"Counts in non-overlapping intervals do not predict one another under the assumed process"}]}
+  explanation={"A rate is not a fixed duration or a realized count in every interval."}
+/>
+
+
+### When the model is a candidate
+
+Inspect how requests are admitted, when work is available, whether services overlap and whether the conditions change by time or job class. A pair of average rates alone does not establish independence, an exponential service law or any of the other assumptions.
+
+## Understand what memoryless means
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Under exponential service, does surviving the first six minutes force service to end in the next six?"}
+  options={[{"text":"No; the conditional remaining-time law has the same tail.","correct":true},{"text":"Yes; twelve minutes is the maximum."},{"text":"Yes; mean service is a deadline."}]}
+  explanation={"Exponential durations have no finite upper cap."}
+/>
+
+
+For the six-minute mean service example, the probability that service exceeds six minutes is $e^{-1}\approx0.3679$. The probability that it exceeds twelve minutes is $e^{-2}\approx0.1353$.
+
+Given that it has already exceeded six minutes, the chance of needing more than another six is:
+
+$$
+P(S>12\mid S>6)=\frac{e^{-2}}{e^{-1}}=e^{-1}\approx0.3679.
+$$
+
+That is the memoryless property. It concerns the stipulated duration distribution. It does not say that a real machine forgets repairs or that all long jobs have the same remaining work.
+
+<ConsequenceTree
+  client:visible
+  title={"Conditional service tails"}
+  eyebrow={""}
+  decision={{"label":"Service begins","note":"μ=10/h; each block below lasts six minutes","valence":"neutral","children":[{"label":"Service exceeds 6 min","note":"Chance from start: e⁻¹","valence":"neutral","children":[{"label":"Service exceeds 12 min","note":"Conditional on exceeding 6: e⁻¹; full path: e⁻²","valence":"neutral"}]},{"label":"Service finishes by 6 min","note":"Chance from start: 1−e⁻¹","valence":"neutral"}]}}
+  orderLabels={["First six minutes","Next six minutes"]}
+  instructions={"Open branches to distinguish a conditional chance from a full-path probability."}
+  caption={"The tree represents the stipulated exponential law, not a measured sample."}
+  decisionLabel={"Initial condition"}
+  promptLabel={"Open next events"}
+  expandAllLabel={"Show all events"}
+  collapseLabel={"Collapse"}
+  valenceLabels={{"good":"Favourable","bad":"Unfavourable","mixed":"Mixed","neutral":"Declared event"}}
+/>
+
+
+The conditional branch and the joint event have different probabilities. The path from the start to service exceeding twelve minutes multiplies two conditional factors; it does not reuse the conditional factor as the complete path probability.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"P(S>12)=e⁻² and P(S>6)=e⁻¹. What is P(S>12 | S>6)?"}
+  options={[{"text":"e⁻²"},{"text":"e⁻¹","correct":true},{"text":"1−e⁻¹"}]}
+  explanation={"Divide the joint nested event by the conditioning probability: e⁻²/e⁻¹=e⁻¹."}
+/>
+
+
+## Derive a stationary occupancy law
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Does a stationary occupancy distribution mean the job count never changes?"}
+  options={[{"text":"Yes, every count is frozen."},{"text":"Yes, all arrivals must stop."},{"text":"No; its distribution is unchanged with observation time.","correct":true}]}
+  explanation={"A stationary random count can still move up and down along a realization."}
+/>
+
+
+A **stationary distribution** is a probability distribution for the number present that does not change with the observation time. The count itself still changes as jobs arrive and depart.
+
+Starting an empty system at time 0 gives $N(0)=0$. That deterministic startup is not the stationary distribution derived below. We are calculating a regime under the model, not choosing a universal warm-up period or simulating its first few minutes.
+
+Let $\pi_n$ be the stationary probability of $n$ jobs in the system, including service. For this M/M/1, balance between neighbouring states gives:
+
+$$
+\lambda\pi_n=\mu\pi_{n+1},\qquad n\ge0.
+$$
+
+Arrivals move the count up; a completion when the system is nonempty moves it down. Writing $\rho=\lambda/\mu$, the balance recursion gives $\pi_n=\pi_0\rho^n$.
+
+For $0<\rho<1$, the geometric sum is $1+\rho+\rho^2+\cdots=1/(1-\rho)$. Normalizing total probability to one gives:
+
+$$
+\pi_0=1-\rho,\qquad \pi_n=(1-\rho)\rho^n.
+$$
+
+You can check the infinite sum through finite pieces: probabilities from 0 through $m$ add to $1-\rho^{m+1}$, and the remaining tail is $\rho^{m+1}$. As $m$ grows, that tail tends to zero.
+
+If $\rho\ge1$, the balance sequence cannot be normalized: a positive $\pi_0$ makes the sum diverge, while $\pi_0=0$ leaves total probability zero. This M/M/1 then has no stationary probability distribution. That statement does not make an individual finite trace infinitely long at a finite time.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Normalize only inside the stable domain."}
+  text={"For ρ=3/5, π₀ is {{2/5|3/5|1}} and P(N≥2) is {{9/25|6/25|2/5}}."}
+  explanation={"π₀=1−ρ; the geometric tail is ρ²."}
+/>
+
+
+### When to use the law
+
+Use it for the stated model in its stationary regime and stable domain $0<\lambda<\mu$. Do not treat the probability bars as observations from one finite cohort. With no arrivals, there is no typical admitted job whose stay can be averaged; our client-time formulas use $\lambda>0$.
+
+## Obtain the means without subtracting the wrong customer
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"For a stable one-server model, which quantity should be subtracted from L to obtain Lq?"}
+  options={[{"text":"The stationary busy fraction ρ.","correct":true},{"text":"Always one."},{"text":"The arrival rate λ in jobs/h."}]}
+  explanation={"Mean number in service is ρ, not one and not a rate."}
+/>
+
+
+For a nonnegative integer count, you can count its value in layers: one unit if $N\ge1$, another if $N\ge2$, and so on. For a finite cap $m$:
+
+$$
+E[\min(N,m)]=\sum_{j=1}^{m}P(N\ge j).
+$$
+
+Under the geometric law, $P(N\ge j)=\rho^j$. Let the cap grow; the geometric sum converges, so:
+
+$$
+L=E[N]=\frac{\rho}{1-\rho}=\frac{\lambda}{\mu-\lambda}.
+$$
+
+The server is busy exactly when $N>0$. Its stationary busy fraction is $1-\pi_0=\rho$. Thus the mean number waiting is:
+
+$$
+L_q=L-\rho=\frac{\rho^2}{1-\rho}.
+$$
+
+Subtracting one would incorrectly pretend that the server is always busy. A stable queue has positive probability of being empty.
+
+Little's law now connects these stationary measures to client times. With rates per hour:
+
+$$
+T=\frac{L}{\lambda}=\frac1{\mu-\lambda}\ \text{hours},
+$$
+
+$$
+T_q=T-\frac1\mu=\frac{\lambda}{\mu(\mu-\lambda)}\ \text{hours}.
+$$
+
+At $\lambda=6,\mu=10$, load is $3/5$. We get $L=3/2$ jobs, $L_q=9/10$ job, total stay $1/4$ hour=15 minutes and waiting $3/20$ hour=9 minutes. Mean service is six minutes, and $15=9+6$.
+
+<MM1QueueExplorer
+  client:visible
+  initialArrival={6}
+  initialService={10}
+  labels={{"title":"Derive and inspect the stationary measures","assumptions":"Assumed model: constant-rate Poisson arrivals, independent exponential services, one work-conserving FCFS server, unlimited waiting and a stationary regime.","arrival":"Arrival rate λ","service":"Service rate μ","reset":"Reset rates","load":"Offered load λ/μ","busyFraction":"Stationary busy fraction","meanSystem":"Mean in system L (jobs)","meanWaiting":"Mean in queue Lq (jobs)","meanStay":"Mean total stay T (min)","meanWait":"Mean waiting time Tq (min)","nonstationary":"For λ≥μ this M/M/1 has no stationary distribution and supplies no finite stationary mean here.","curve":"Mean total stay for the selected service rate","curveDescription":"Red marks the selected arrival rate. The dashed vertical boundary, when visible, is λ=μ; grey lies outside the stationary domain.","arrivalAxis":"Arrival rate λ (jobs/h)","timeAxis":"Mean total stay T (min)","offscale":"Above the arrow, the analytical mean exceeds 60 min while λ remains below μ.","distribution":"Stationary probabilities on a common 0–1 scale","probability":"Probability","tail":"N ≥ 5, grouped","rateUnit":"jobs/h"}}
+  locale={"en"}
+/>
+
+
+The probability panel displays $N=0,1,2,3,4$ and one grouped tail $N\ge5$. Those six masses sum to one. The last row groups many possible counts; treating its entire mass as exactly five jobs would underestimate the mean. The layer sum above uses the whole distribution.
+
+The controls use integer rates. The continuous analytic curve between them can exceed the plotted 60-minute range before reaching $\lambda=\mu$; the arrow marks that continuation. Rates on or beyond that boundary have no stationary means in this model, rather than negative waiting times or an actual queue at infinity.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"At λ=6/h and μ=10/h, T=15 min and mean service=6 min. What is Tq?"}
+  options={[{"text":"21 min"},{"text":"6 min"},{"text":"9 min","correct":true}]}
+  explanation={"Tq=T−1/μ=15−6=9 minutes."}
+/>
+
+
+### When a numerical answer is still conditional
+
+A correct evaluation of the formula does not validate its inputs. [MIT's M/M/1 handout](https://ocw.mit.edu/courses/2-854-introduction-to-manufacturing-systems-fall-2016/927056a1af54772a587fd84ad4951e71_MIT2_854F16_Mm1Queue.pdf) distinguishes system, queue and service measures. The [queueing lectures](https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/a9235f5e4e0aee12a55778e5beaf0ddb_lec5.pdf) state the model framework. None makes an arbitrary observed service an M/M/1 merely because its rates fit on the sliders.
+
+<MindMap
+  client:visible
+  title={"The M/M/1 calculation has a domain"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Stated stochastic model","children":[{"label":"Inputs","children":[{"label":"Poisson arrivals at λ"},{"label":"Independent exponential services at μ"}]},{"label":"Stationary law","children":[{"label":"Require 0<λ<μ"},{"label":"πn=(1−ρ)ρⁿ"}]},{"label":"Means","children":[{"label":"L=ρ/(1−ρ)"},{"label":"Lq=L−ρ; times use compatible units"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Check the probability and clock"}
+  questions={[{"question":"Poisson rate is 6/h. For ten minutes, what is λt?","options":[{"text":"60"},{"text":"1","correct":true},{"text":"1/10"}],"explanation":"Ten minutes is one sixth hour; 6×1/6=1."},{"question":"At λ=μ, which output is justified for this M/M/1?","options":[{"text":"No stationary probability distribution.","correct":true},{"text":"A stationary negative mean delay."},{"text":"An infinite number of jobs at every finite time."}],"explanation":"The balance weights cannot be normalized; this is not an instantaneous infinite realization."},{"question":"The last probability bar is labelled N≥5. Can its entire mass be treated as N=5 when calculating E[N]?","options":[{"text":"Yes, because the axis ends there."},{"text":"Yes, because all larger counts are impossible."},{"text":"No; it groups distinct larger counts.","correct":true}],"explanation":"A grouped tail probability does not give its entire contribution to the mean as five times its mass."}]}
+/>
+
+
+Next, [Capacity Slack and Nonlinear Delay](/queueing-theory-and-waiting/05-capacity-slack-and-delay) compares changes within the model while keeping mean waiting, total stay and an actual decision criterion separate.

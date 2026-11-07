@@ -1,0 +1,201 @@
+---
+title: "Una cola vacía también puede hacerte esperar"
+description: "Distingue secuencias proporcionadas, medias compatibles y modelos estocásticos condicionales."
+topic: "es/queueing-theory-and-waiting"
+order: 1
+minutes: 14
+updated: 2026-11-07
+---
+
+import { MCQ, ConsequenceTree, FillBlank, MatchConcepts, MindMap, Quiz } from '@/components/react';
+
+Una cola vacía parece una buena noticia. Hasta que descubres que la única máquina está a mitad de un trabajo largo. Contar a quienes tienes delante era la parte fácil; también importa qué está haciendo el servidor.
+
+La **teoría de colas (queueing theory)** estudia llegadas, esperas y servicio. Procede de la investigación operativa. Aquí la usaremos como modelo mental para revisar afirmaciones sobre demoras: qué entra, qué se atiende, qué queda sin terminar y qué supuestos justifican una media.
+
+Los datos del curso son construidos. Primero seguiremos trabajos individuales en un reloj conocido. Después deduciremos un modelo estocástico, es decir, con entradas aleatorias descritas mediante distribuciones explícitas. Distinguir esos objetos forma parte del aprendizaje.
+
+## Empieza por el trabajo que ya está en servicio
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Una nueva llegada no ve a nadie esperando. ¿Qué más puede impedir que empiece de inmediato?"}
+  options={[{"text":"El servidor puede estar atendiendo otro trabajo.","correct":true},{"text":"Una cola de espera vacía demuestra que el servidor está libre."},{"text":"Solo importa el número de llegadas posteriores."}]}
+  explanation={"El recuento de espera excluye el trabajo que ya está en servicio."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Una máquina empieza el trabajo A en el minuto 0. A requiere diez minutos de servicio ininterrumpido. B llega en el minuto 1 y necesita un minuto. La máquina atiende por orden de llegada y no interrumpe el trabajo iniciado.
+
+Cuando llega B, nadie más está esperando. A ya está en servicio y le quedan nueve minutos. B empieza en el minuto 10: su **tiempo de espera** es 10−1=9 minutos. Sale en el minuto 11. Su **tiempo total en el sistema**, o **permanencia**, es 11−1=10 minutos.
+
+La cola de espera excluye el trabajo que está siendo atendido. El sistema lo incluye. Por tanto, que no haya nadie esperando no implica que una nueva llegada pueda empezar de inmediato.
+
+<ConsequenceTree
+  client:visible
+  title={"Los dos trabajos en su reloj declarado"}
+  eyebrow={""}
+  decision={{"label":"Vacío antes del minuto 0","note":"Un servidor FCFS no interrumpible","valence":"neutral","children":[{"label":"A empieza en 0","note":"Diez minutos de servicio","valence":"neutral","children":[{"label":"B llega en 1","note":"A necesita nueve minutos más","valence":"neutral","children":[{"label":"B empieza en 10","note":"Espera: nueve minutos","valence":"neutral","children":[{"label":"B sale en 11","note":"Permanencia: diez minutos","valence":"neutral"}]}]}]}]}}
+  orderLabels={["Instante 0","Instante 1","Instante 10","Instante 11"]}
+  instructions={"Abre los eventos proporcionados en orden temporal. Las notas indican tiempos conocidos."}
+  caption={"Horario finito con servicios conocidos; no se asignan probabilidades."}
+  decisionLabel={"Condición inicial"}
+  promptLabel={"Abre los siguientes eventos"}
+  expandAllLabel={"Mostrar todos los eventos"}
+  collapseLabel={"Contraer"}
+  valenceLabels={{"good":"Favorable","bad":"Desfavorable","mixed":"Mixto","neutral":"Evento declarado"}}
+/>
+
+
+Son tiempos de eventos proporcionados, no una predicción obtenida de una fotografía de la cola. Para estimar una espera real harían falta el servicio restante, la regla de prioridad y cualquier otro trabajo que pueda adelantarse según esa regla.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Separa las dos duraciones."}
+  text={"B espera {{9|10|11}} minutos antes del servicio y permanece {{10|9|1}} minutos en el sistema."}
+  explanation={"Inicio menos llegada da nueve; salida menos llegada da diez."}
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+/>
+
+
+### Cuándo sirve una instantánea
+
+Úsala para identificar el estado actual. Para deducir una espera también necesitas el proceso de servicio y la regla que determina a quién le toca. Un mismo número de personas esperando puede acompañar a servicios de duraciones muy distintas.
+
+## Decide qué media necesitas
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"¿Qué magnitud pondera tiempo en vez de dar una observación a cada trabajo terminado?"}
+  options={[{"text":"Permanencia completa media de los cuatro trabajos."},{"text":"Número medio presente durante una ventana de observación.","correct":true},{"text":"Servicio medio requerido por los trabajos admitidos."}]}
+  explanation={"La ocupación se promedia en el tiempo; las permanencias, entre trabajos."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Hay dos relojes que observar. Cada trabajo tiene una llegada, un inicio de servicio y una salida. El sistema tiene una ventana de observación durante la cual sube y baja su ocupación.
+
+La permanencia media pondera trabajos. El número medio de trabajos presentes pondera tiempo. Responden a preguntas distintas. Dos permanencias completas de tres minutos aportan seis trabajo·minutos: un trabajo de media en una ventana de seis minutos que contenga ambas, o tres quintos en una ventana de diez minutos que contenga ambas.
+
+El curso de stocks y flujos enseñó a fijar una frontera y contar sus movimientos. Aquí mediremos además cuánto tiempo pasa cada trabajo dentro de ella. Un trabajo en proceso pertenece al sistema; no pertenece al recuento de quienes solo están esperando.
+
+La ley de Little relaciona medias compatibles. No convierte una longitud de cola instantánea en una predicción automática. Antes de usarla construiremos una secuencia completa y calcularemos sus áreas.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Relaciona cada medida con su denominador."}
+  pairs={[{"term":"Permanencia media","definition":"Número de trabajos incluidos"},{"term":"Ocupación media","definition":"Duración de la ventana observada"},{"term":"Tasa de llegadas","definition":"Tiempo durante el que se cuentan las admisiones"}]}
+  explanation={"Un recuento, una duración individual y un recuento medio temporal usan denominadores distintos."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"✓ Todo relacionado"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"→ elige ahora una definición"}
+  notLinkedHint={"sin relacionar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+
+### Cuándo importa la distinción
+
+Un panel puede mostrar el número de trabajos abiertos al mediodía, la permanencia media de los terminados hoy y una tasa de llegadas del mes pasado. Cada cifra puede estar bien calculada y, aun así, su combinación carecer de sentido. Comprueba población, frontera y ventana temporal antes de multiplicar.
+
+## Sigue el recorrido del curso
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Una lista contiene todas las llegadas futuras y los servicios exactos. ¿Qué permite bajo una regla declarada?"}
+  options={[{"text":"Una distribución estacionaria para cualquier cola real."},{"text":"El efecto causal de mejorar una máquina real."},{"text":"Un horario finito reproducible de esos trabajos.","correct":true}]}
+  explanation={"La secuencia finita se deduce de sus entradas. Las afirmaciones distributivas y causales necesitan más supuestos."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Las tres primeras lecciones usan entradas finitas conocidas. Determinan qué se deduce de ellas bajo una regla de servicio declarada. Las dos siguientes introducen M/M/1: un modelo con un servidor, llegadas de Poisson, servicios exponenciales independientes y un régimen estacionario. Explicaremos el nombre antes de usar sus fórmulas.
+
+El taller final pide revisar una afirmación sobre tiempos de espera y resolver una nueva secuencia. Algunas preguntas exigen calcular; otras, decidir qué conclusión permite el cálculo.
+
+1. [Construye la secuencia antes de calcular la media](/es/queueing-theory-and-waiting/01-build-the-timeline) sigue los trabajos uno a uno.
+2. [La ley de Little necesita una misma frontera](/es/queueing-theory-and-waiting/02-littles-law-and-boundaries) relaciona duraciones y áreas, y recorta las observaciones incompletas.
+3. [La misma carga puede producir esperas distintas](/es/queueing-theory-and-waiting/03-same-load-different-wait) compara patrones de llegada y desempates.
+4. [Qué supone el modelo M/M/1](/es/queueing-theory-and-waiting/04-the-mm1-model) deduce una distribución estacionaria y sus medidas.
+5. [Holgura de capacidad y demora no lineal](/es/queueing-theory-and-waiting/05-capacity-slack-and-delay) comprueba un requisito de tiempo medio con distintas tasas.
+6. [Revisa una afirmación sobre tiempos de espera](/es/queueing-theory-and-waiting/06-audit-a-waiting-time-claim) cambia la frontera y pone a prueba la transferencia.
+7. El [examen final](/es/queueing-theory-and-waiting/final-exam) contiene 28 preguntas. Cada envío bloquea la respuesta; la puntuación aparece al terminar.
+
+Los requisitos previos son [Stocks y flujos](/es/stocks-and-flows), [Cuellos de botella y restricciones](/es/bottlenecks-and-constraints) y [Pensar en probabilidades](/es/thinking-in-probabilities). El curso define las distribuciones adicionales y la estacionariedad que necesita.
+
+Capacidad, producción por unidad de tiempo y demora siguen siendo magnitudes distintas. La capacidad media sobrante puede coexistir con una cola temporal cuando las llegadas se agrupan. Un modelo puede aclarar esa relación sin identificar las causas de las demoras de un servicio real.
+
+<MindMap
+  client:visible
+  title={"Tres objetos que conviene distinguir"}
+  eyebrow={""}
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Revisión de tiempos de espera","children":[{"label":"Secuencia proporcionada","children":[{"label":"Se conocen llegadas y servicios"},{"label":"Calcula inicios, salidas y presencia observada"}]},{"label":"Medias compatibles","children":[{"label":"Duraciones ponderadas por trabajos"},{"label":"Ocupación ponderada por tiempo"}]},{"label":"Modelo estocástico","children":[{"label":"Declara distribuciones y frontera"},{"label":"Usa medidas estacionarias solo en su dominio"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Comprueba las distinciones iniciales"}
+  questions={[{"question":"A empieza en 0 y necesita diez minutos. B llega en 1 y necesita uno. Con FCFS no interrumpible, ¿cuándo sale B?","options":[{"text":"En 2"},{"text":"En 10"},{"text":"En 11","correct":true}],"explanation":"B empieza después de A en 10 y recibe un minuto de servicio."},{"question":"Un informe combina una instantánea del mediodía con la tasa del mes pasado. ¿Qué debes comprobar primero?","options":[{"text":"Que población, frontera y relojes sean compatibles.","correct":true},{"text":"Que ambas cifras tengan suficientes decimales."},{"text":"Que el recuento instantáneo supere la media."}],"explanation":"Una fórmula no hace que mediciones incompatibles describan un mismo objeto."},{"question":"¿Qué establece por sí sola la capacidad media sobrante?","options":[{"text":"Ningún trabajo puede esperar."},{"text":"El servidor está libre en cada llegada."},{"text":"No determina la espera de una llegada concreta.","correct":true}],"explanation":"La agrupación y el trabajo ya en servicio pueden generar espera aunque sobre capacidad media."}]}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso terminado"}
+  perfectMessage={"Has acertado todas las preguntas de este repaso."}
+  goodMessage={"Revisa las explicaciones de las preguntas falladas."}
+  keepPracticingMessage={"Revisa los ejemplos antes de volver a practicar."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar repaso"}
+/>
+
+
+Las fuentes tienen un alcance explícito. Los [apuntes de colas del MIT](https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/a9235f5e4e0aee12a55778e5beaf0ddb_lec5.pdf) aportan terminología y distinciones entre modelos. Las [notas de Sigman sobre la ley de Little](https://www.columbia.edu/~ks20/4106-18-Fall/Notes-LL.pdf) explican la contabilidad sobre una trayectoria. Nuestros pequeños registros de trabajos son ejemplos construidos.

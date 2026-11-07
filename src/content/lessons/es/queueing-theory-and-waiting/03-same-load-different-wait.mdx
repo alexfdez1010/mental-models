@@ -1,0 +1,287 @@
+---
+title: "La misma carga puede producir esperas distintas"
+description: "Compara secuencias de igual trabajo cambiando llegadas y desempates."
+topic: "es/queueing-theory-and-waiting"
+order: 4
+minutes: 22
+updated: 2026-11-07
+---
+
+import { MCQ, QueueTimelineAudit, FillBlank, MatchConcepts, MindMap, Quiz } from '@/components/react';
+
+Dos secuencias con una máquina contienen cuatro trabajos, dos minutos de servicio por trabajo y diez minutos de observación. Terminan el mismo número de trabajos y consumen los mismos ocho minutos de servicio. Sus esperas son distintas.
+
+La comparación está construida para aislar los tiempos de llegada. No es una muestra que pruebe que cualquier aumento de una «variabilidad» sin definir empeora cualquier cola.
+
+## Mantén el trabajo fijo y cambia las llegadas
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Dos secuencias tienen iguales trabajos, servicio total y duración observada. ¿Deben coincidir sus esperas medias?"}
+  options={[{"text":"Sí, esos totales determinan toda la espera."},{"text":"No; los tiempos de llegada pueden cambiar el horario.","correct":true},{"text":"Sí, si todos los servicios duran dos minutos."}]}
+  explanation={"Importa cuándo se solapa la demanda aunque coincidan los totales."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+En la secuencia espaciada, las llegadas son 0,2,4,6. Cada trabajo empieza inmediatamente y termina dos minutos después. En el lote, los cuatro llegan en 0, en orden A/B/C/D.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Mismo servicio, distintos tiempos"}>
+<table data-audit-table="arrival-patterns" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"48rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Mismo servicio, distintos tiempos"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Secuencia"}</th><th scope="col" className="p-3 align-bottom">{"Llegadas (min)"}</th><th scope="col" className="p-3 align-bottom">{"Inicios (min)"}</th><th scope="col" className="p-3 align-bottom">{"Esperas (min)"}</th><th scope="col" className="p-3 align-bottom">{"Espera media (min)"}</th><th scope="col" className="p-3 align-bottom">{"Permanencia media (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"Espaciada"}</th><td className="p-3">{"0, 2, 4, 6"}</td><td className="p-3">{"0, 2, 4, 6"}</td><td className="p-3">{"0, 0, 0, 0"}</td><td className="p-3">{"0"}</td><td className="p-3">{"2"}</td></tr>
+<tr><th scope="row" className="p-3">{"Lote"}</th><td className="p-3">{"0, 0, 0, 0"}</td><td className="p-3">{"0, 2, 4, 6"}</td><td className="p-3">{"0, 2, 4, 6"}</td><td className="p-3">{"3"}</td><td className="p-3">{"5"}</td></tr>
+</tbody></table>
+</div>
+
+
+En el lote, A empieza en 0, B en 2, C en 4 y D en 6. Las esperas son 0,2,4,6: suman doce minutos. Entre cuatro trabajos dan tres minutos de espera media. La permanencia media añade los dos minutos de servicio: cinco minutos.
+
+La secuencia espaciada tiene espera cero y permanencia media de dos minutos. Ambas terminan los cuatro trabajos en el minuto 8. Agrupar las llegadas cambia quién espera detrás de un servidor ocupado; no modifica ningún servicio requerido.
+
+<QueueTimelineAudit
+  client:visible
+  scenarios={[{"id":"spaced","label":"Llegadas espaciadas","jobs":[{"id":"A","arrival":0,"service":2},{"id":"B","arrival":2,"service":2},{"id":"C","arrival":4,"service":2},{"id":"D","arrival":6,"service":2}],"windows":[{"id":"full","label":"Observar 0–10 min","from":0,"to":10},{"id":"busy","label":"Observar 0–8 min","from":0,"to":8}]},{"id":"batch","label":"Los cuatro llegan en 0","jobs":[{"id":"A","arrival":0,"service":2},{"id":"B","arrival":0,"service":2},{"id":"C","arrival":0,"service":2},{"id":"D","arrival":0,"service":2}],"windows":[{"id":"full","label":"Observar 0–10 min","from":0,"to":10},{"id":"busy","label":"Observar 0–8 min","from":0,"to":8}]}]}
+  axisEnd={10}
+  labels={{"title":"Mantén el trabajo fijo e inspecciona los tiempos","instructions":"Mueve el cursor por la secuencia. El sombreado marca la ventana. N cuenta trabajos presentes y Nq los que esperan; la tabla distingue tiempos completos y duraciones observadas.","scenario":"Secuencia proporcionada","window":"Ventana de observación","cursor":"Instante del cursor (min)","reset":"Restablecer diagrama","chart":"Espera, servicio y ocupación en un reloj","chartDescription":"Las filas superiores muestran esperas discontinuas y servicios sólidos. Abajo, N cuenta los presentes y Nq, discontinuo, los que esperan. Las instantáneas son posteriores a los eventos del cursor.","timeAxis":"Tiempo (min)","waitingLegend":"Barras discontinuas: espera","serviceLegend":"Barras sólidas: servicio","windowLegend":"Intervalo observado sombreado","system":"En el sistema N","waiting":"Esperando Nq","inService":"En servicio","duration":"Duración de la ventana (min)","systemArea":"Área del sistema (trabajo·min)","waitingArea":"Área de espera (trabajo·min)","serviceArea":"Área de servicio (trabajo·min)","meanSystem":"Media en el sistema (trabajos)","meanWaiting":"Media en espera (trabajos)","busyFraction":"Fracción de tiempo ocupado","table":"Tiempos completos y exposiciones observadas","job":"Trabajo","arrival":"Llegada (min)","service":"Servicio (min)","start":"Inicio de servicio (min)","departure":"Salida (min)","wait":"Espera completa (min)","stay":"Permanencia completa (min)","observedStay":"Permanencia observada (min)","observedWait":"Espera observada (min)","observedService":"Servicio observado (min)"}}
+  locale={"es"}
+/>
+
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Las esperas del lote son 0,2,4,6 min. ¿Cuál es la media de todos los trabajos?"}
+  options={[{"text":"12 min"},{"text":"5 min"},{"text":"3 min","correct":true}]}
+  explanation={"El total es doce; divide entre cuatro trabajos."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+### Cuándo una tasa oculta los tiempos
+
+Usa esta comparación si alguien deduce espera cero de la capacidad media sobrante. En 0–10, ambas secuencias usan el 80% del tiempo disponible para servicio. Una tiene una cola considerable al principio.
+
+## Compara medias compatibles
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"El lote tiene permanencia media 5 min y tasa 4/10 trabajos/min. Su ocupación media es…"}
+  options={[{"text":"2 trabajos","correct":true},{"text":"5 trabajos"},{"text":"4/5 trabajo"}]}
+  explanation={"(4/10)×5=2, con la cohorte completa."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+El número medio presente es $8/10=4/5$ trabajo en la secuencia espaciada y $20/10=2$ trabajos en el lote. La tasa de admisión es $4/10=2/5$ trabajos por minuto en ambas.
+
+En la espaciada, $(2/5)\times2=4/5$. En el lote, $(2/5)\times5=2$. La contabilidad de cohorte completa de Little sigue funcionando. Los resultados difieren porque difieren las permanencias medias, no porque falle una identidad contable.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Compara áreas en la ventana completa 0–10"}>
+<table data-audit-table="equal-workload" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Compara áreas en la ventana completa 0–10"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Secuencia"}</th><th scope="col" className="p-3 align-bottom">{"Área del sistema (trabajo·min)"}</th><th scope="col" className="p-3 align-bottom">{"Área de espera (trabajo·min)"}</th><th scope="col" className="p-3 align-bottom">{"Área de servicio (trabajo·min)"}</th><th scope="col" className="p-3 align-bottom">{"Fracción de tiempo ocupado"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"Espaciada"}</th><td className="p-3">{"8"}</td><td className="p-3">{"0"}</td><td className="p-3">{"8"}</td><td className="p-3">{"4/5"}</td></tr>
+<tr><th scope="row" className="p-3">{"Lote"}</th><td className="p-3">{"20"}</td><td className="p-3">{"12"}</td><td className="p-3">{"8"}</td><td className="p-3">{"4/5"}</td></tr>
+</tbody></table>
+</div>
+
+
+La **fracción de tiempo ocupado (busy fraction)** finita es el tiempo realmente dedicado a servir dividido entre el tiempo de observación disponible. No es el número de trabajos que esperan ahora. Un servidor puede trabajar todo un intervalo sin que nadie espere si cada llegada coincide exactamente con el final del servicio anterior.
+
+Selecciona la ventana 0–8. En la secuencia espaciada, la fracción ocupada es uno y la espera sigue siendo cero. Prolongar indefinidamente ese patrón determinista perfectamente sincronizado conserva el resultado. No describe llegadas y servicios M/M/1.
+
+El modelo estocástico posterior tiene su propia frontera estacionaria en $\lambda<\mu$. No apliques su fórmula de demora próxima a la frontera a cualquier secuencia con una fracción ocupada cercana a uno.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"¿Qué conclusión establece la secuencia espaciada?"}
+  options={[{"text":"Toda cola aleatoria es estable con carga uno."},{"text":"Un intervalo finito completamente ocupado puede tener espera cero bajo los tiempos sincronizados proporcionados.","correct":true},{"text":"Agrupar en lotes es perjudicial bajo cualquier objetivo."}]}
+  explanation={"En 0–8 el servidor espaciado trabaja continuamente y cada llegada empieza de inmediato."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+### Cuándo no bastan medias iguales
+
+Compara el orden, la agrupación y la dependencia que omiten las medias. Aquí conocemos todas las entradas: podemos identificar el efecto de cambiar las llegadas proporcionadas en este cálculo determinista. Una afirmación causal real necesita pruebas de que las demás condiciones relevantes siguieron siendo comparables.
+
+## Declara qué ocurre si coinciden las llegadas
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Z y A llegan juntos. Si los identificadores son etiquetas, ¿qué determina su orden aquí?"}
+  options={[{"text":"El orden alfabético de sus identificadores."},{"text":"El mayor servicio requerido."},{"text":"El orden de entrada declarado.","correct":true}]}
+  explanation={"La convención FCFS finita conserva el orden de entrada si coinciden las llegadas."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Nuestra convención FCFS conserva el orden de entrada si coinciden las llegadas. Z y A llegan en 0: Z necesita tres minutos y A uno. B llega en 3 y necesita dos.
+
+Con orden Z/A/B, Z se atiende en 0–3, A en 3–4 y B en 4–6. La espera total es $0+3+1=4$ minutos. Cuando B llega en 3, A lleva esperando desde 0: la nueva llegada no se adelanta.
+
+Cambia ahora el orden de las llegadas simultáneas a A/Z/B. A se atiende en 0–1, Z en 1–4 y B en 4–6. La espera total es $0+1+1=2$ minutos. No han cambiado los nombres ni los servicios requeridos; sí la prioridad declarada en el empate.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Cambia solo la prioridad del empate inicial"}>
+<table data-audit-table="tie-orders" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Cambia solo la prioridad del empate inicial"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Orden de entrada"}</th><th scope="col" className="p-3 align-bottom">{"Inicios (min)"}</th><th scope="col" className="p-3 align-bottom">{"Esperas (min)"}</th><th scope="col" className="p-3 align-bottom">{"Espera total (min)"}</th><th scope="col" className="p-3 align-bottom">{"Permanencia total (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"Z, A, B"}</th><td className="p-3">{"0, 3, 4"}</td><td className="p-3">{"0, 3, 1"}</td><td className="p-3">{"4"}</td><td className="p-3">{"10"}</td></tr>
+<tr><th scope="row" className="p-3">{"A, Z, B"}</th><td className="p-3">{"0, 1, 4"}</td><td className="p-3">{"0, 1, 1"}</td><td className="p-3">{"2"}</td><td className="p-3">{"8"}</td></tr>
+</tbody></table>
+</div>
+
+
+<QueueTimelineAudit
+  client:visible
+  scenarios={[{"id":"za","label":"En el empate, Z antes de A","jobs":[{"id":"Z","arrival":0,"service":3},{"id":"A","arrival":0,"service":1},{"id":"B","arrival":3,"service":2}],"windows":[{"id":"all","label":"Observar 0–6 min","from":0,"to":6}]},{"id":"az","label":"En el empate, A antes de Z","jobs":[{"id":"A","arrival":0,"service":1},{"id":"Z","arrival":0,"service":3},{"id":"B","arrival":3,"service":2}],"windows":[{"id":"all","label":"Observar 0–6 min","from":0,"to":6}]}]}
+  axisEnd={6}
+  labels={{"title":"Inspecciona el desempate declarado","instructions":"Mueve el cursor por la secuencia. El sombreado marca la ventana. N cuenta trabajos presentes y Nq los que esperan; la tabla distingue tiempos completos y duraciones observadas.","scenario":"Secuencia proporcionada","window":"Ventana de observación","cursor":"Instante del cursor (min)","reset":"Restablecer diagrama","chart":"Espera, servicio y ocupación en un reloj","chartDescription":"Las filas superiores muestran esperas discontinuas y servicios sólidos. Abajo, N cuenta los presentes y Nq, discontinuo, los que esperan. Las instantáneas son posteriores a los eventos del cursor.","timeAxis":"Tiempo (min)","waitingLegend":"Barras discontinuas: espera","serviceLegend":"Barras sólidas: servicio","windowLegend":"Intervalo observado sombreado","system":"En el sistema N","waiting":"Esperando Nq","inService":"En servicio","duration":"Duración de la ventana (min)","systemArea":"Área del sistema (trabajo·min)","waitingArea":"Área de espera (trabajo·min)","serviceArea":"Área de servicio (trabajo·min)","meanSystem":"Media en el sistema (trabajos)","meanWaiting":"Media en espera (trabajos)","busyFraction":"Fracción de tiempo ocupado","table":"Tiempos completos y exposiciones observadas","job":"Trabajo","arrival":"Llegada (min)","service":"Servicio (min)","start":"Inicio de servicio (min)","departure":"Salida (min)","wait":"Espera completa (min)","stay":"Permanencia completa (min)","observedStay":"Permanencia observada (min)","observedWait":"Espera observada (min)","observedService":"Servicio observado (min)"}}
+  locale={"es"}
+/>
+
+
+La diferencia no establece una política de programación universalmente óptima. Hemos cambiado una regla en un catálogo finito sin modelar requisitos de equidad, plazos, valores de los trabajos ni costes de reordenarlos. La propia regla FCFS necesita un desempate para determinar una secuencia única.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"La nueva llegada no adelanta a quien ya espera."}
+  text={"Con orden Z/A/B, B llega en 3 y empieza en {{4|3|5}} porque {{A|Z|nadie}} ya tiene prioridad."}
+  explanation={"A espera desde 0 y empieza cuando Z termina en 3."}
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+/>
+
+
+### Cuándo ese detalle afecta a una revisión
+
+Los registros pueden asignar la misma marca temporal a varias llegadas por falta de precisión. Antes de tratar su orden de fila como prioridad real, averigua qué regla usó el servicio. Inventar el orden puede inventar una espera aunque todas las duraciones estén bien copiadas.
+
+## Transfiere la comparación sin inventar una distribución
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"¿Qué secuencias completas revelan dos tasas mensuales medias iguales de llegada y servicio?"}
+  options={[{"text":"Exactamente un par de secuencias."},{"text":"No identifican las secuencias completas ni su dependencia.","correct":true},{"text":"Solo la secuencia con menor espera."}]}
+  explanation={"Muchos patrones temporales comparten esos resúmenes."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Un informe dice que dos meses tuvieron el mismo recuento medio de llegadas y la misma duración media de servicio. Esos dos resúmenes no especifican las secuencias completas, una ley de probabilidad ni la dependencia entre trabajos.
+
+Los ejemplos establecen resultados para sus secuencias declaradas. No identifican una medida de «variabilidad» universalmente suficiente, no prueban que cualquier lote sea perjudicial bajo cualquier objetivo ni indican cuán probable es cada secuencia en otro servicio.
+
+El siguiente paso exige un modelo de las entradas inciertas. El [marco de modelos de colas del MIT](https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/a9235f5e4e0aee12a55778e5beaf0ddb_lec5.pdf) distingue proceso de llegadas, proceso de servicio, número de servidores y disciplina. La próxima lección los declarará antes de calcular medidas estacionarias.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Relaciona cada descripción con lo que aporta."}
+  pairs={[{"term":"Secuencia finita","definition":"Llegadas y servicios exactos listados"},{"term":"Modelo de probabilidad","definition":"Una ley para entradas inciertas"},{"term":"Medias mensuales observadas","definition":"Dos resúmenes sin un orden completo"}]}
+  explanation={"No rellenes tiempos desconocidos con una ley de probabilidad conveniente."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"✓ Todo relacionado"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"→ elige ahora una definición"}
+  notLinkedHint={"sin relacionar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+
+<MindMap
+  client:visible
+  title={"Mismo trabajo no implica misma demora"}
+  eyebrow={""}
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Tiempos y orden","children":[{"label":"Se mantiene fijo","children":[{"label":"Cuatro servicios de dos minutos"},{"label":"Ocho minutos de servicio efectivo"}]},{"label":"Se cambia","children":[{"label":"Agrupación de llegadas"},{"label":"Prioridad entre llegadas simultáneas"}]},{"label":"Alcance","children":[{"label":"Consecuencias finitas exactas"},{"label":"Sin causalidad real ni optimalidad universal automáticas"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Compara los detalles omitidos"}
+  questions={[{"question":"¿Qué magnitud vale 4/5 en las dos secuencias completas 0–10?","options":[{"text":"Espera media."},{"text":"Ocupación media del sistema."},{"text":"Fracción finita de tiempo ocupado.","correct":true}],"explanation":"Ambas dedican al servicio ocho de los diez minutos disponibles."},{"question":"El lote tiene área del sistema 20 y de espera 12 trabajo·min. ¿Cuál es el área de servicio?","options":[{"text":"8 trabajo·min","correct":true},{"text":"32 trabajo·min"},{"text":"12 trabajo·min"}],"explanation":"Área del sistema=área de espera+área de servicio."},{"question":"Cambiar el nombre Z por Y sin alterar filas ni datos numéricos modifica…","options":[{"text":"Automáticamente su prioridad FCFS."},{"text":"Ninguna parte de este horario declarado.","correct":true},{"text":"Su servicio requerido."}],"explanation":"Los identificadores etiquetan trabajos; la posición resuelve empates."}]}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso terminado"}
+  perfectMessage={"Has acertado todas las preguntas de este repaso."}
+  goodMessage={"Revisa las explicaciones de las preguntas falladas."}
+  keepPracticingMessage={"Revisa los ejemplos antes de volver a practicar."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar repaso"}
+/>
+
+
+Continúa con [Qué supone el modelo M/M/1](/es/queueing-theory-and-waiting/04-the-mm1-model). Una secuencia finita, una distribución de entradas y una distribución estacionaria de ocupación conservarán sus significados distintos.

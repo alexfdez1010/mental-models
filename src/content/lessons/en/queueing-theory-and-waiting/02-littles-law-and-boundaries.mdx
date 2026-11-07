@@ -1,0 +1,272 @@
+---
+title: "Little’s Law Needs One Boundary"
+description: "Add presence areas, pair compatible cohorts and clip open observation windows."
+topic: "en/queueing-theory-and-waiting"
+order: 3
+minutes: 25
+updated: 2026-11-07
+---
+
+import { MCQ, FirstPrinciplesBuilder, FillBlank, QueueTimelineAudit, Categorize, MindMap, Quiz } from '@/components/react';
+
+A queue length is a stock at an instant. A stay is a duration for a job. The bridge between them is an area: every minute that a job is present contributes one job·minute to the system's occupancy.
+
+We will add the individual rectangles first. That makes it easier to see which boundary a later formula is actually describing.
+
+## Add the same presence in two directions
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Four stays sum to 13 minutes. Which area do their one-job rectangles contribute if fully inside the window?"}
+  options={[{"text":"13 job·min","correct":true},{"text":"13 jobs/min"},{"text":"13 minutes per job"}]}
+  explanation={"Each rectangle has height one job and width its stay."}
+/>
+
+
+Use the complete trace from the previous lesson. The arrivals are 0,1,2,6; services are 3,2,1,2; starts are 0,3,5,6; departures are 3,5,6,8. The observation window is 0–10 minutes.
+
+Job A is present for three minutes, B for four, C for four and D for two. Add those four one-job rectangles:
+
+$$
+A_{\mathrm{system}}=3+4+4+2=13\ \text{job·min}.
+$$
+
+You get the same total by following the occupancy steps:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Occupancy steps over 0–10 minutes"}>
+<table data-audit-table="occupancy-areas" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Occupancy steps over 0–10 minutes"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Interval (min)"}</th><th scope="col" className="p-3 align-bottom">{"Jobs present"}</th><th scope="col" className="p-3 align-bottom">{"Area (job·min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"0–1"}</th><td className="p-3">{"1"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"1–2"}</th><td className="p-3">{"2"}</td><td className="p-3">{"2"}</td></tr>
+<tr><th scope="row" className="p-3">{"2–3"}</th><td className="p-3">{"3"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"3–5"}</th><td className="p-3">{"2"}</td><td className="p-3">{"4"}</td></tr>
+<tr><th scope="row" className="p-3">{"5–6"}</th><td className="p-3">{"1"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"6–8"}</th><td className="p-3">{"1"}</td><td className="p-3">{"2"}</td></tr>
+<tr><th scope="row" className="p-3">{"8–10"}</th><td className="p-3">{"0"}</td><td className="p-3">{"0"}</td></tr>
+<tr><th scope="row" className="p-3">{"Total"}</th><td className="p-3">{""}</td><td className="p-3">{"13"}</td></tr>
+</tbody></table>
+</div>
+
+
+For example, during minutes 2–3, A is in service and B/C are waiting. Three jobs for one minute contribute three job·minutes. After minute 8 the system is empty; the final two minutes contribute zero.
+
+This equality is accounting. It does not need a random-arrival assumption or a claim that the server is FCFS. FCFS produced these particular intervals; counting the same intervals by row or by time gives the same area.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title={"Add the four presence rectangles"}
+  eyebrow={""}
+  locale={"en"}
+  analogyValue={13}
+  analogyLabel={"Area from occupancy steps"}
+  analogyNote={"The same 0–10-minute trace."}
+  parts={[{"label":"A","value":3,"note":"Three minutes present."},{"label":"B","value":4,"note":"Four minutes present."},{"label":"C","value":4,"note":"Four minutes present."},{"label":"D","value":2,"note":"Two minutes present."}]}
+  rebuiltLabel={"Selected presence area"}
+  instructions={"Add each job’s complete rectangle. All four stays lie inside this window."}
+  valuePrefix={""}
+  valueSuffix={" job·min"}
+  revealAllLabel={"Add all jobs"}
+  resetLabel={"Clear selection"}
+  verdictTemplate={"The rectangles contribute {total}."}
+/>
+
+
+A **time-average occupancy** divides the area by the observation duration:
+
+$$
+L_{[0,10)}=\frac{13}{10}=1.3\ \text{jobs}.
+$$
+
+A fractional mean does not mean that the system contains 1.3 jobs at one instant. Its instantaneous counts are whole numbers; the average combines the time spent at each level.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Divide 13 job·min by 10 min. What is the resulting measure?"}
+  options={[{"text":"1.3 minutes per job."},{"text":"1.3 jobs, a time-average occupancy.","correct":true},{"text":"1.3 jobs per minute."}]}
+  explanation={"The time units cancel, leaving an average number of jobs."}
+/>
+
+
+### When the area is useful
+
+Use it when a dashboard's time-weighted mean and a list of individual durations seem inconsistent. Compare the same intervals before deciding which measurement is wrong.
+
+## Close the cohort before using full stays
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"When can all full stays be used directly for this finite window’s area?"}
+  options={[{"text":"Whenever at least one job has completed."},{"text":"Whenever arrivals are Poisson."},{"text":"When the included complete presence intervals exactly cover the observed cohort’s presence, with no omitted earlier/open pieces.","correct":true}]}
+  explanation={"A closed cohort supplies the finite cancellation; Poisson assumptions are not required."}
+/>
+
+
+Here the system had no earlier jobs, and all four supplied jobs leave inside the observation window. The four full stays therefore contribute exactly the entire observed area.
+
+The **cohort** is the set of jobs included in the calculation. For these four jobs:
+
+$$
+\overline{T}=\frac{3+4+4+2}{4}=\frac{13}{4}=3.25\ \text{min}.
+$$
+
+The finite admission rate is $\lambda_{[0,10)}=4/10$ jobs per minute. Multiplication cancels the cohort size:
+
+$$
+\lambda_{[0,10)}\overline{T}
+=\frac4{10}\times\frac{13}{4}
+=\frac{13}{10}
+=L_{[0,10)}.
+$$
+
+This is the complete-cohort finite identity on this trace. The observation duration belongs in the rate denominator; the number of jobs belongs in the stay mean denominator.
+
+**Little's law** gives a corresponding long-run relationship when the relevant finite limits exist. Sigman's [sample-path notes](https://www.columbia.edu/~ks20/4106-18-Fall/Notes-LL.pdf) state those conditions and account for partial stays at an open boundary. The long-run result does not require Poisson arrivals or FCFS. It also does not make arbitrary short-window averages interchangeable.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Cancel the same cohort size."}
+  text={"(4 jobs / 10 min) × (13 min / 4 jobs) = {{13/10|13/4|4/10}} jobs."}
+  explanation={"The four-job factor cancels; the observation duration remains ten minutes."}
+/>
+
+
+### When to multiply
+
+Name the population, boundary and clocks first. For a finite complete cohort, cancellation proves the product directly. For a long-run claim, check that the quantities are the compatible limits whose existence and finiteness the result requires. A neat numerical match alone does not establish a process model.
+
+## Separate waiting from service
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"To turn mean system occupancy into mean waiting occupancy, what must be removed?"}
+  options={[{"text":"The mean number in service.","correct":true},{"text":"Exactly one job under every condition."},{"text":"The arrival rate."}]}
+  explanation={"For one server the mean number in service is its busy fraction, which need not equal one."}
+/>
+
+
+The four waits are 0,2,3,0 minutes. Waiting area is five job·minutes, so mean waiting occupancy is $5/10=1/2$ job. Service area is eight job·minutes, so the machine is occupied for $8/10=4/5$ of the window.
+
+The averages preserve the same decomposition as the snapshots:
+
+$$
+L=L_q+\overline{B}=\frac12+\frac45=\frac{13}{10}.
+$$
+
+The complete-cohort mean wait includes both zero waits:
+
+$$
+\overline{w}=\frac{0+2+3+0}{4}=\frac54\ \text{min}.
+$$
+
+Using the all-admission rate gives $(4/10)(5/4)=1/2$. You can instead condition on the two jobs that actually wait: their rate is $2/10$, their mean wait is $5/2$, and the product is again $1/2$. Mixing the rate of all four with the positive-only mean gives 1, which is the wrong population pairing.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Only B/C wait: their total wait is 5 min. Which pair reproduces queue area / 10 min?"}
+  options={[{"text":"All-job rate 4/10 × positive-only mean 5/2."},{"text":"Positive-wait rate 2/10 × positive-only mean 5/2.","correct":true},{"text":"All-job rate 4/10 × service mean 2."}]}
+  explanation={"(2/10)(5/2)=1/2. Alternatively (4/10)(5/4)=1/2; mix neither population."}
+/>
+
+
+For each job, stay equals wait plus service. Across this complete cohort, the means are $13/4=5/4+2$. The mean number in service is $4/5$, not automatically one: the machine is idle after minute 8.
+
+### When the boundary changes
+
+“Queue” sometimes means only waiting jobs and sometimes includes service. Write the definition rather than trusting the word. Keep zero-duration waits in an all-admission cohort, or change both the rate and the conditional mean together.
+
+## Stop the clock while jobs remain open
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Observation ends at 4 while B/C remain present. Should their presence before 4 be dropped?"}
+  options={[{"text":"Yes, because their complete stays are unknown in a live log."},{"text":"Yes, because only departures create area."},{"text":"No; their observed intervals still contribute area.","correct":true}]}
+  explanation={"Presence is counted while it occurs, including an open job’s observed piece."}
+/>
+
+
+Now end observation at minute 4. A contributes its complete three-minute stay. B contributes only minutes 1–4, three minutes; C contributes minutes 2–4, two minutes. D has not arrived. The observed system area is therefore 8 job·minutes, giving $L_{[0,4)}=8/4=2$ jobs.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Observed pieces inside 0–4 minutes"}>
+<table data-audit-table="clipped-main" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Observed pieces inside 0–4 minutes"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Job"}</th><th scope="col" className="p-3 align-bottom">{"Observed stay (min)"}</th><th scope="col" className="p-3 align-bottom">{"Observed wait (min)"}</th><th scope="col" className="p-3 align-bottom">{"Observed service (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"A"}</th><td className="p-3">{"3"}</td><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"B"}</th><td className="p-3">{"3"}</td><td className="p-3">{"2"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"C"}</th><td className="p-3">{"2"}</td><td className="p-3">{"2"}</td><td className="p-3">{"0"}</td></tr>
+<tr><th scope="row" className="p-3">{"D"}</th><td className="p-3">{"0"}</td><td className="p-3">{"0"}</td><td className="p-3">{"0"}</td></tr>
+<tr><th scope="row" className="p-3">{"Total"}</th><td className="p-3">{"8"}</td><td className="p-3">{"4"}</td><td className="p-3">{"4"}</td></tr>
+</tbody></table>
+</div>
+
+
+Only A has departed before that endpoint. Its full stay times the departure count, divided by four minutes, gives $3/4$. That misses B/C's observed pieces. Adding their entire future stays would make the opposite mistake: it would treat unobserved later time as if it had occurred inside the window.
+
+For any individual presence interval $[a_i,d_i)$ and observation window $[l,r)$, the overlap duration is:
+
+$$
+c_i=\max\bigl(0,\min(r,d_i)-\max(l,a_i)\bigr).
+$$
+
+The outer maximum turns a non-overlap into zero. Summing these clipped durations gives the window's area. The same operation applies to waiting and service intervals.
+
+<QueueTimelineAudit
+  client:visible
+  scenarios={[{"id":"main","label":"Declared arrivals and services","jobs":[{"id":"A","arrival":0,"service":3},{"id":"B","arrival":1,"service":2},{"id":"C","arrival":2,"service":1},{"id":"D","arrival":6,"service":2}],"windows":[{"id":"short","label":"Observe 0–4 min","from":0,"to":4},{"id":"middle","label":"Observe 2–5 min","from":2,"to":5},{"id":"full","label":"Observe 0–10 min","from":0,"to":10}]}]}
+  axisEnd={10}
+  labels={{"title":"Clip the same supplied intervals to each window","instructions":"Move the cursor along the supplied trace. Shading marks the observation window. N counts jobs present and Nq jobs waiting; the table separates complete times from observed durations.","scenario":"Supplied trace","window":"Observation window","cursor":"Cursor time (min)","reset":"Reset diagram","chart":"Waiting, service and occupancy on one clock","chartDescription":"Upper rows show dashed waiting intervals and solid service intervals. Below, the solid N line counts jobs present and the dashed Nq line counts jobs waiting. Snapshots are after events at the cursor.","timeAxis":"Time (min)","waitingLegend":"Dashed bars: waiting","serviceLegend":"Solid bars: service","windowLegend":"Shaded observation interval","system":"In system N","waiting":"Waiting Nq","inService":"In service","duration":"Window duration (min)","systemArea":"System area (job·min)","waitingArea":"Waiting area (job·min)","serviceArea":"Service area (job·min)","meanSystem":"Mean in system (jobs)","meanWaiting":"Mean waiting (jobs)","busyFraction":"Busy fraction","table":"Complete job times and observed exposures","job":"Job","arrival":"Arrival (min)","service":"Service (min)","start":"Service start (min)","departure":"Departure (min)","wait":"Complete wait (min)","stay":"Complete stay (min)","observedStay":"Observed stay (min)","observedWait":"Observed wait (min)","observedService":"Observed service (min)"}}
+  locale={"en"}
+/>
+
+
+Try the third window, 2–5 minutes. A contributes 1 minute, B contributes 3 and C contributes 3, giving 7 job·minutes in a three-minute observation. Its mean occupancy is $7/3$, while the complete stays of all four jobs remain unchanged.
+
+The cursor is a snapshot after events at its timestamp. An arrival exactly at a window's right endpoint has zero exposure before that endpoint, although it can appear in the cursor's after-event count. A departure exactly at that endpoint can have a fully observed stay. A single instant has no duration, so these conventions do not change an area.
+
+The full trace is supplied to make this audit reproducible. In a live observation, an open job's eventual departure may be unknown. Clipping its observed presence does not require pretending that the unknown remainder is zero or forecasting it from this diagram.
+
+<Categorize
+  client:visible
+  className={"not-prose"}
+  question={"Separate observations from unsupported extensions."}
+  buckets={["Observed accounting","Needs an additional estimation method"]}
+  items={[{"text":"Count B’s presence from 1 to 4.","bucket":"Observed accounting"},{"text":"Estimate B’s eventual stay from a log ending at 4.","bucket":"Needs an additional estimation method"},{"text":"Count zero exposure for an arrival exactly at the right endpoint.","bucket":"Observed accounting"},{"text":"Assign every open job its eventual population mean.","bucket":"Needs an additional estimation method"}]}
+  explanation={"The overlap calculation uses observed duration. It does not estimate the unobserved remainder."}
+/>
+
+
+### When a short window is all you have
+
+Report the window occupancy and the duration actually observed. Keep open jobs visible. To estimate complete-stay behavior beyond the window, you need a separately justified method and its assumptions; the area identity supplies no missing future.
+
+<MindMap
+  client:visible
+  title={"One area, two ways of adding"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Compatible boundaries","children":[{"label":"Finite area","children":[{"label":"Sum job overlaps"},{"label":"Or add occupancy steps"}]},{"label":"Compatible product","children":[{"label":"Admission rate and all-job stay mean"},{"label":"Or positive-wait rate and positive-only wait mean"}]},{"label":"Open observations","children":[{"label":"Clip intervals to the window"},{"label":"Do not manufacture missing future time"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Audit the denominator"}
+  questions={[{"question":"The system area is 7 job·min over [2,5). What is mean occupancy?","options":[{"text":"7/3 jobs","correct":true},{"text":"7/5 jobs"},{"text":"3/7 jobs"}],"explanation":"The window lasts three minutes, so divide by three."},{"question":"At [0,4), only A has completed with stay 3. Why is (1/4)×3 not the occupancy mean 2?","options":[{"text":"A’s service should count twice."},{"text":"It omits the observed presence of B/C.","correct":true},{"text":"Little’s law requires every system to be empty forever."}],"explanation":"B contributes three and C two observed minutes, in addition to A’s three."},{"question":"Which statement is supported by the accounting identity alone?","options":[{"text":"The arrival process is Poisson."},{"text":"The observed policy is causally optimal."},{"text":"Summing the same clipped intervals by row or clock gives the same area.","correct":true}],"explanation":"That equality counts the same presence in two directions."}]}
+/>
+
+
+Next, [The Same Load Can Produce Different Waits](/queueing-theory-and-waiting/03-same-load-different-wait) changes the timing while holding the amount of required service fixed.

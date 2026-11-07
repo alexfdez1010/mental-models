@@ -1,0 +1,346 @@
+---
+title: "La ley de Little necesita una misma frontera"
+description: "Suma áreas de presencia, relaciona cohortes compatibles y recorta ventanas abiertas."
+topic: "es/queueing-theory-and-waiting"
+order: 3
+minutes: 25
+updated: 2026-11-07
+---
+
+import { MCQ, FirstPrinciplesBuilder, FillBlank, QueueTimelineAudit, Categorize, MindMap, Quiz } from '@/components/react';
+
+La longitud de una cola es un stock en un instante. La permanencia es una duración de un trabajo. Las relaciona un área: cada minuto que un trabajo está presente aporta un trabajo·minuto a la ocupación del sistema.
+
+Primero sumaremos los rectángulos individuales. Así resulta más fácil ver qué frontera describe una fórmula posterior.
+
+## Suma la misma presencia en dos direcciones
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Cuatro permanencias suman trece minutos. ¿Qué área aportan sus rectángulos de altura uno dentro de la ventana?"}
+  options={[{"text":"13 trabajo·min","correct":true},{"text":"13 trabajos/min"},{"text":"13 minutos por trabajo"}]}
+  explanation={"Cada rectángulo tiene altura un trabajo y anchura igual a su permanencia."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Usa la secuencia completa anterior. Llegadas: 0,1,2,6; servicios: 3,2,1,2; inicios: 0,3,5,6; salidas: 3,5,6,8. La ventana es 0–10 minutos.
+
+A permanece tres minutos, B cuatro, C cuatro y D dos. Suma los cuatro rectángulos de altura un trabajo:
+
+$$
+A_{\mathrm{system}}=3+4+4+2=13\ \text{trabajo·min}.
+$$
+
+Obtienes el mismo total siguiendo los escalones de ocupación:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Escalones de ocupación en 0–10 minutos"}>
+<table data-audit-table="occupancy-areas" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Escalones de ocupación en 0–10 minutos"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Intervalo (min)"}</th><th scope="col" className="p-3 align-bottom">{"Trabajos presentes"}</th><th scope="col" className="p-3 align-bottom">{"Área (trabajo·min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"0–1"}</th><td className="p-3">{"1"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"1–2"}</th><td className="p-3">{"2"}</td><td className="p-3">{"2"}</td></tr>
+<tr><th scope="row" className="p-3">{"2–3"}</th><td className="p-3">{"3"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"3–5"}</th><td className="p-3">{"2"}</td><td className="p-3">{"4"}</td></tr>
+<tr><th scope="row" className="p-3">{"5–6"}</th><td className="p-3">{"1"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"6–8"}</th><td className="p-3">{"1"}</td><td className="p-3">{"2"}</td></tr>
+<tr><th scope="row" className="p-3">{"8–10"}</th><td className="p-3">{"0"}</td><td className="p-3">{"0"}</td></tr>
+<tr><th scope="row" className="p-3">{"Total"}</th><td className="p-3">{""}</td><td className="p-3">{"13"}</td></tr>
+</tbody></table>
+</div>
+
+
+Durante 2–3, por ejemplo, A está en servicio y B/C esperan. Tres trabajos durante un minuto aportan tres trabajo·minutos. Después del minuto 8 el sistema queda vacío: los dos minutos finales aportan cero.
+
+Esta igualdad es contabilidad. No necesita llegadas aleatorias ni que el servidor sea FCFS. FCFS produjo estos intervalos concretos; contar los mismos intervalos por filas o por tiempo da la misma área.
+
+<FirstPrinciplesBuilder
+  client:visible
+  title={"Suma los cuatro rectángulos de presencia"}
+  eyebrow={""}
+  locale={"es"}
+  analogyValue={13}
+  analogyLabel={"Área obtenida de los escalones de ocupación"}
+  analogyNote={"La misma secuencia 0–10."}
+  parts={[{"label":"A","value":3,"note":"Tres minutos presente."},{"label":"B","value":4,"note":"Cuatro minutos presente."},{"label":"C","value":4,"note":"Cuatro minutos presente."},{"label":"D","value":2,"note":"Dos minutos presente."}]}
+  rebuiltLabel={"Área de presencia seleccionada"}
+  instructions={"Añade el rectángulo completo de cada trabajo. Las cuatro permanencias caben en la ventana."}
+  valuePrefix={""}
+  valueSuffix={" trabajo·min"}
+  revealAllLabel={"Añadir todos los trabajos"}
+  resetLabel={"Vaciar selección"}
+  verdictTemplate={"Los rectángulos aportan {total}."}
+/>
+
+
+La **ocupación media temporal** divide el área entre la duración observada:
+
+$$
+L_{[0,10)}=\frac{13}{10}=1{,}3\ \text{trabajos}.
+$$
+
+Una media fraccionaria no implica que haya 1,3 trabajos en un instante. Los recuentos instantáneos son enteros; la media combina el tiempo que se pasa en cada nivel.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Divide 13 trabajo·min entre 10 min. ¿Qué medida obtienes?"}
+  options={[{"text":"1,3 minutos por trabajo."},{"text":"1,3 trabajos: ocupación media temporal.","correct":true},{"text":"1,3 trabajos por minuto."}]}
+  explanation={"Se cancelan las unidades de tiempo y queda un número medio de trabajos."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+### Cuándo sirve el área
+
+Úsala si la media temporal de un panel parece incompatible con una lista de duraciones individuales. Compara los mismos intervalos antes de decidir qué medición está mal.
+
+## Cierra la cohorte antes de usar permanencias completas
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"¿Cuándo pueden usarse directamente todas las permanencias completas para el área de esta ventana?"}
+  options={[{"text":"Siempre que haya terminado al menos un trabajo."},{"text":"Siempre que las llegadas sean de Poisson."},{"text":"Cuando las presencias completas incluidas cubren exactamente la presencia observada de la cohorte, sin omitir partes anteriores ni abiertas.","correct":true}]}
+  explanation={"La cohorte cerrada permite la cancelación finita; no se necesitan supuestos de Poisson."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Aquí no había trabajos anteriores y los cuatro salen dentro de la ventana. Sus permanencias completas aportan exactamente toda el área observada.
+
+La **cohorte** es el conjunto de trabajos incluidos en el cálculo. Para estos cuatro:
+
+$$
+\overline{T}=\frac{3+4+4+2}{4}=\frac{13}{4}=3{,}25\ \text{min}.
+$$
+
+La tasa finita de admisión es $\lambda_{[0,10)}=4/10$ trabajos por minuto. Al multiplicar se cancela el tamaño de la cohorte:
+
+$$
+\lambda_{[0,10)}\overline{T}
+=\frac4{10}\times\frac{13}{4}
+=\frac{13}{10}
+=L_{[0,10)}.
+$$
+
+Es la identidad finita de cohorte completa de esta secuencia. La duración observada va en el denominador de la tasa; el número de trabajos, en el de la permanencia media.
+
+La **ley de Little (Little’s law)** da una relación correspondiente a largo plazo cuando existen los límites finitos pertinentes. Las [notas de Sigman](https://www.columbia.edu/~ks20/4106-18-Fall/Notes-LL.pdf) explicitan esas condiciones y contabilizan las permanencias parciales en fronteras abiertas. El resultado a largo plazo no exige llegadas de Poisson ni FCFS. Tampoco hace intercambiables medias de ventanas cortas cualesquiera.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Cancela el mismo tamaño de cohorte."}
+  text={"(4 trabajos / 10 min) × (13 min / 4 trabajos) = {{13/10|13/4|4/10}} trabajos."}
+  explanation={"Se cancela el factor de cuatro trabajos; la duración observada sigue siendo diez minutos."}
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+/>
+
+
+### Cuándo multiplicar
+
+Nombra primero población, frontera y relojes. En una cohorte finita completa, la cancelación prueba el producto directamente. Para una afirmación a largo plazo, comprueba que las magnitudes sean los límites compatibles cuya existencia y finitud exige el resultado. Una coincidencia numérica no establece un modelo del proceso.
+
+## Separa espera y servicio
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"¿Qué se resta a la ocupación media del sistema para obtener la ocupación media en espera?"}
+  options={[{"text":"El número medio en servicio.","correct":true},{"text":"Exactamente un trabajo en cualquier condición."},{"text":"La tasa de llegadas."}]}
+  explanation={"Con un servidor, el número medio en servicio es su fracción de tiempo ocupado, que no tiene por qué ser uno."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Las cuatro esperas son 0,2,3,0 minutos. El área de espera es cinco trabajo·minutos: la ocupación media en espera es $5/10=1/2$ trabajo. El área de servicio es ocho trabajo·minutos: la máquina está ocupada durante $8/10=4/5$ de la ventana.
+
+Las medias conservan la descomposición de las instantáneas:
+
+$$
+L=L_q+\overline{B}=\frac12+\frac45=\frac{13}{10}.
+$$
+
+La espera media de la cohorte completa incluye las dos esperas nulas:
+
+$$
+\overline{w}=\frac{0+2+3+0}{4}=\frac54\ \text{min}.
+$$
+
+La tasa de todas las admisiones da $(4/10)(5/4)=1/2$. También puedes condicionar a los dos trabajos que esperan: su tasa es $2/10$, su espera media $5/2$ y el producto vuelve a ser $1/2$. Mezclar la tasa de los cuatro con la media solo de esperas positivas da 1: has emparejado poblaciones distintas.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Solo B/C esperan y suman cinco minutos. ¿Qué pareja reproduce área de espera / 10 min?"}
+  options={[{"text":"Tasa de todos 4/10 × media solo de esperas positivas 5/2."},{"text":"Tasa de esperas positivas 2/10 × media solo de esperas positivas 5/2.","correct":true},{"text":"Tasa de todos 4/10 × servicio medio 2."}]}
+  explanation={"(2/10)(5/2)=1/2. También (4/10)(5/4)=1/2; no mezcles las poblaciones."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Para cada trabajo, permanencia=espera+servicio. En esta cohorte completa, las medias son $13/4=5/4+2$. El número medio en servicio es $4/5$, no necesariamente uno: la máquina queda libre después del minuto 8.
+
+### Cuándo cambia la frontera
+
+«Cola» a veces incluye solo trabajos esperando y a veces también el servicio. Escribe la definición. Conserva las esperas nulas en la cohorte de todas las admisiones, o cambia a la vez la tasa y la media condicionada.
+
+## Detén el reloj con trabajos todavía abiertos
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"La observación acaba en 4 y B/C siguen presentes. ¿Debes eliminar su presencia anterior a 4?"}
+  options={[{"text":"Sí, porque en un registro en vivo se desconocen sus permanencias completas."},{"text":"Sí, porque solo las salidas crean área."},{"text":"No; sus intervalos observados siguen aportando área.","correct":true}]}
+  explanation={"La presencia cuenta mientras ocurre, incluida la parte observada de un trabajo abierto."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Termina ahora la observación en el minuto 4. A aporta sus tres minutos completos. B aporta solo 1–4, tres minutos; C aporta 2–4, dos minutos. D no ha llegado. El área observada es ocho trabajo·minutos: $L_{[0,4)}=8/4=2$ trabajos.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Partes observadas dentro de 0–4 minutos"}>
+<table data-audit-table="clipped-main" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Partes observadas dentro de 0–4 minutos"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Trabajo"}</th><th scope="col" className="p-3 align-bottom">{"Permanencia observada (min)"}</th><th scope="col" className="p-3 align-bottom">{"Espera observada (min)"}</th><th scope="col" className="p-3 align-bottom">{"Servicio observado (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"A"}</th><td className="p-3">{"3"}</td><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"B"}</th><td className="p-3">{"3"}</td><td className="p-3">{"2"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"C"}</th><td className="p-3">{"2"}</td><td className="p-3">{"2"}</td><td className="p-3">{"0"}</td></tr>
+<tr><th scope="row" className="p-3">{"D"}</th><td className="p-3">{"0"}</td><td className="p-3">{"0"}</td><td className="p-3">{"0"}</td></tr>
+<tr><th scope="row" className="p-3">{"Total"}</th><td className="p-3">{"8"}</td><td className="p-3">{"4"}</td><td className="p-3">{"4"}</td></tr>
+</tbody></table>
+</div>
+
+
+Solo A ha salido antes del extremo. Su permanencia completa por el número de salidas, dividido entre cuatro minutos, da $3/4$. Faltan las partes observadas de B/C. Sumar sus permanencias futuras completas cometería el error contrario: tratar tiempo posterior no observado como si perteneciera a la ventana.
+
+Para un intervalo individual $[a_i,d_i)$ y una ventana $[l,r)$, la duración del solapamiento es:
+
+$$
+c_i=\max\bigl(0,\min(r,d_i)-\max(l,a_i)\bigr).
+$$
+
+El máximo exterior convierte un no solapamiento en cero. La suma de estas duraciones recortadas da el área de la ventana. La misma operación se aplica a espera y servicio.
+
+<QueueTimelineAudit
+  client:visible
+  scenarios={[{"id":"main","label":"Llegadas y servicios declarados","jobs":[{"id":"A","arrival":0,"service":3},{"id":"B","arrival":1,"service":2},{"id":"C","arrival":2,"service":1},{"id":"D","arrival":6,"service":2}],"windows":[{"id":"short","label":"Observar 0–4 min","from":0,"to":4},{"id":"middle","label":"Observar 2–5 min","from":2,"to":5},{"id":"full","label":"Observar 0–10 min","from":0,"to":10}]}]}
+  axisEnd={10}
+  labels={{"title":"Recorta los mismos intervalos a cada ventana","instructions":"Mueve el cursor por la secuencia. El sombreado marca la ventana. N cuenta trabajos presentes y Nq los que esperan; la tabla distingue tiempos completos y duraciones observadas.","scenario":"Secuencia proporcionada","window":"Ventana de observación","cursor":"Instante del cursor (min)","reset":"Restablecer diagrama","chart":"Espera, servicio y ocupación en un reloj","chartDescription":"Las filas superiores muestran esperas discontinuas y servicios sólidos. Abajo, N cuenta los presentes y Nq, discontinuo, los que esperan. Las instantáneas son posteriores a los eventos del cursor.","timeAxis":"Tiempo (min)","waitingLegend":"Barras discontinuas: espera","serviceLegend":"Barras sólidas: servicio","windowLegend":"Intervalo observado sombreado","system":"En el sistema N","waiting":"Esperando Nq","inService":"En servicio","duration":"Duración de la ventana (min)","systemArea":"Área del sistema (trabajo·min)","waitingArea":"Área de espera (trabajo·min)","serviceArea":"Área de servicio (trabajo·min)","meanSystem":"Media en el sistema (trabajos)","meanWaiting":"Media en espera (trabajos)","busyFraction":"Fracción de tiempo ocupado","table":"Tiempos completos y exposiciones observadas","job":"Trabajo","arrival":"Llegada (min)","service":"Servicio (min)","start":"Inicio de servicio (min)","departure":"Salida (min)","wait":"Espera completa (min)","stay":"Permanencia completa (min)","observedStay":"Permanencia observada (min)","observedWait":"Espera observada (min)","observedService":"Servicio observado (min)"}}
+  locale={"es"}
+/>
+
+
+Prueba la tercera ventana, 2–5 minutos. A aporta uno, B tres y C tres: siete trabajo·minutos en tres minutos de observación. Su ocupación media es $7/3$; las permanencias completas de los cuatro no cambian.
+
+El cursor muestra una instantánea después de los eventos del instante. Una llegada justo en el extremo derecho tiene exposición nula antes de ese extremo, aunque aparezca en el recuento posterior del cursor. Una salida justo en ese extremo puede tener toda su permanencia observada. Un instante aislado no tiene duración: estas convenciones no cambian el área.
+
+La secuencia completa permite reproducir esta revisión. En una observación en vivo puede desconocerse la salida futura de un trabajo abierto. Recortar su presencia observada no exige fingir que lo restante vale cero ni predecirlo desde este diagrama.
+
+<Categorize
+  client:visible
+  className={"not-prose"}
+  question={"Separa observaciones y extensiones sin justificar."}
+  buckets={["Contabilidad observada","Necesita otro método de estimación"]}
+  items={[{"text":"Contar la presencia de B entre 1 y 4.","bucket":"Contabilidad observada"},{"text":"Estimar la permanencia futura completa de B con un registro que termina en 4.","bucket":"Necesita otro método de estimación"},{"text":"Contar exposición cero para una llegada justo en el extremo derecho.","bucket":"Contabilidad observada"},{"text":"Asignar a todo trabajo abierto su futura media poblacional.","bucket":"Necesita otro método de estimación"}]}
+  explanation={"El solapamiento usa duración observada. No estima la parte que falta."}
+  instructions={"Coloca cada elemento en su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todo clasificado"}
+  partialResultWord={"bien"}
+/>
+
+
+### Cuándo solo tienes una ventana corta
+
+Informa de la ocupación de la ventana y de la duración realmente observada. Mantén visibles los trabajos abiertos. Para estimar permanencias completas más allá de ella necesitas un método y sus supuestos; la identidad del área no proporciona el futuro que falta.
+
+<MindMap
+  client:visible
+  title={"Un área, dos formas de sumar"}
+  eyebrow={""}
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Fronteras compatibles","children":[{"label":"Área finita","children":[{"label":"Suma solapamientos individuales"},{"label":"O suma escalones de ocupación"}]},{"label":"Producto compatible","children":[{"label":"Tasa de admisión y permanencia media de todos"},{"label":"O tasa de esperas positivas y su media condicionada"}]},{"label":"Observaciones abiertas","children":[{"label":"Recorta intervalos a la ventana"},{"label":"No inventes el tiempo futuro que falta"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Revisa el denominador"}
+  questions={[{"question":"El área del sistema es 7 trabajo·min en [2,5). ¿Cuál es la ocupación media?","options":[{"text":"7/3 trabajos","correct":true},{"text":"7/5 trabajos"},{"text":"3/7 trabajos"}],"explanation":"La ventana dura tres minutos: divide entre tres."},{"question":"En [0,4) solo A ha terminado con permanencia 3. ¿Por qué (1/4)×3 no da la ocupación media 2?","options":[{"text":"El servicio de A debe contar dos veces."},{"text":"Omite la presencia observada de B/C.","correct":true},{"text":"La ley de Little exige que todo sistema esté vacío para siempre."}],"explanation":"B aporta tres minutos y C dos, además de los tres de A."},{"question":"¿Qué afirmación permite por sí sola la identidad contable?","options":[{"text":"El proceso de llegadas es de Poisson."},{"text":"La política observada es causalmente óptima."},{"text":"Sumar los mismos intervalos recortados por filas o por reloj da la misma área.","correct":true}],"explanation":"La igualdad cuenta la misma presencia en dos direcciones."}]}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso terminado"}
+  perfectMessage={"Has acertado todas las preguntas de este repaso."}
+  goodMessage={"Revisa las explicaciones de las preguntas falladas."}
+  keepPracticingMessage={"Revisa los ejemplos antes de volver a practicar."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar repaso"}
+/>
+
+
+A continuación, [La misma carga puede producir esperas distintas](/es/queueing-theory-and-waiting/03-same-load-different-wait) cambia los tiempos de llegada manteniendo fijo el servicio requerido.

@@ -1,0 +1,145 @@
+---
+title: "An Empty Line Can Still Mean a Wait"
+description: "Separate a supplied trace, compatible averages and a conditional stochastic model."
+topic: "en/queueing-theory-and-waiting"
+order: 1
+minutes: 14
+updated: 2026-11-07
+---
+
+import { MCQ, ConsequenceTree, FillBlank, MatchConcepts, MindMap, Quiz } from '@/components/react';
+
+An empty waiting line looks promising. Then you discover that the only machine is halfway through a long job. Counting the people ahead of you was the easy part; finding out what the server is doing matters too.
+
+**Queueing theory** studies arrivals, waiting and service. Its home discipline is operations research. We will use it as a mental model for checking claims about delay: what enters, what gets served, what remains unfinished, and which assumptions justify an average.
+
+This course uses constructed data. First we will follow individual jobs on a known clock. Later we will derive a stochastic model with explicit arrival and service distributions. Keeping those objects separate is part of the skill.
+
+## Start with the work already in service
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"A newcomer sees nobody waiting. What else can prevent an immediate start?"}
+  options={[{"text":"The server may already be processing another job.","correct":true},{"text":"An empty waiting line proves the server is free."},{"text":"Only the number of later arrivals matters."}]}
+  explanation={"The waiting-only count excludes work already in service."}
+/>
+
+
+Suppose one machine starts job A at minute 0. A needs 10 minutes of uninterrupted service. Job B arrives at minute 1 and needs one minute. The machine serves jobs in arrival order and never interrupts the job it has started.
+
+At B's arrival, nobody else is waiting. A is already in service, with nine minutes left. B starts at minute 10, so its **waiting time** is 10−1=9 minutes. It departs at minute 11. Its **total time in the system**, or **stay**, is 11−1=10 minutes.
+
+The waiting line excludes the job being served. The system includes it. A count of zero in the waiting line therefore does not imply that a new arrival can start immediately.
+
+<ConsequenceTree
+  client:visible
+  title={"The two jobs on their declared clock"}
+  eyebrow={""}
+  decision={{"label":"Empty before minute 0","note":"One nonpreemptive FCFS server","valence":"neutral","children":[{"label":"A starts at 0","note":"Ten minutes of service","valence":"neutral","children":[{"label":"B arrives at 1","note":"A has nine minutes remaining","valence":"neutral","children":[{"label":"B starts at 10","note":"Wait: nine minutes","valence":"neutral","children":[{"label":"B departs at 11","note":"Stay: ten minutes","valence":"neutral"}]}]}]}]}}
+  orderLabels={["Time 0","Time 1","Time 10","Time 11"]}
+  instructions={"Open the supplied events in clock order. The notes state known times."}
+  caption={"A finite schedule with known service requirements; no probabilities are assigned."}
+  decisionLabel={"Initial condition"}
+  promptLabel={"Open next events"}
+  expandAllLabel={"Show all events"}
+  collapseLabel={"Collapse"}
+  valenceLabels={{"good":"Favourable","bad":"Unfavourable","mixed":"Mixed","neutral":"Declared event"}}
+/>
+
+
+These are supplied event times, not a prediction made from a photograph of a line. A real estimate would need the remaining service, the ordering rule and any other work that can arrive before you are served.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Separate the two durations."}
+  text={"B waits {{9|10|11}} minutes before service and spends {{10|9|1}} minutes in the system."}
+  explanation={"Start minus arrival gives nine; departure minus arrival gives ten."}
+/>
+
+
+### When a snapshot is useful
+
+Use it to identify the state now. To infer a wait from that state, you also need the service process and the rule determining who goes next. The same number waiting can accompany very different service durations.
+
+## Decide which average you mean
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Which quantity weights time rather than giving each completed job one observation?"}
+  options={[{"text":"Mean complete stay of the four jobs."},{"text":"Mean number present during an observation window.","correct":true},{"text":"Mean service requirement of admitted jobs."}]}
+  explanation={"Occupancy is averaged over time; stays are averaged over jobs."}
+/>
+
+
+There are two clocks to watch. A job has an arrival, a service start and a departure. The system has an observation window across which its occupancy rises and falls.
+
+An average stay weights jobs. An average number present weights time. They answer different questions. Two complete three-minute stays contribute six job·minutes: one job on average over a six-minute window containing both, or three fifths over a ten-minute window containing both.
+
+The stocks-and-flows course taught you to fix a boundary and count its movements. Here we will also measure the time each job spends inside that boundary. A job being processed belongs to the system; it does not belong to the waiting-only count.
+
+Little's law connects compatible averages. It does not turn an instantaneous queue length into an automatic forecast. Before using it, we will build a complete trace and calculate its areas.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Match each measure to its denominator."}
+  pairs={[{"term":"Mean stay","definition":"Number of included jobs"},{"term":"Mean occupancy","definition":"Duration of the observation window"},{"term":"Arrival rate","definition":"Time across which admissions are counted"}]}
+  explanation={"A count, a job duration and a time-average count use different denominators."}
+/>
+
+
+### When the distinction matters
+
+A dashboard might report the number open at noon, the mean stay of jobs completed today and an arrival rate from last month. Each may be correctly computed while the proposed combination is meaningless. Check the population, boundary and time window before multiplying.
+
+## Follow the course ladder
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"A list contains all future arrivals and exact services. What can it directly support under a declared service rule?"}
+  options={[{"text":"A stationary distribution for any real queue."},{"text":"The causal effect of upgrading a real machine."},{"text":"A reproducible finite schedule for those supplied jobs.","correct":true}]}
+  explanation={"A finite trace follows from its inputs. Distributional and causal claims require additional assumptions."}
+/>
+
+
+The first three lessons use known finite inputs. They answer what follows from those inputs under one declared service rule. The next two introduce M/M/1: a single-server model with Poisson arrivals, independent exponential services and a stationary regime. Its name will be unpacked before its formulas are used.
+
+The final workshop asks you to audit a waiting-time claim and solve a new trace. Some questions require arithmetic; others ask which conclusion the arithmetic can support.
+
+1. [Build the Timeline Before the Average](/queueing-theory-and-waiting/01-build-the-timeline) works one job at a time.
+2. [Little's Law Needs One Boundary](/queueing-theory-and-waiting/02-littles-law-and-boundaries) connects durations with areas and handles clipped observations.
+3. [The Same Load Can Produce Different Waits](/queueing-theory-and-waiting/03-same-load-different-wait) compares arrival patterns and tie rules.
+4. [What the M M 1 Model Assumes](/queueing-theory-and-waiting/04-the-mm1-model) derives a stationary distribution and its measures.
+5. [Capacity Slack and Nonlinear Delay](/queueing-theory-and-waiting/05-capacity-slack-and-delay) checks a mean-time requirement under different rates.
+6. [Audit a Waiting Time Claim](/queueing-theory-and-waiting/06-audit-a-waiting-time-claim) changes the boundary and tests transfer.
+7. The [final exam](/queueing-theory-and-waiting/final-exam) contains 28 questions. Submission locks each answer; the score appears at the end.
+
+The prerequisites are [Stocks and Flows](/stocks-and-flows), [Bottlenecks and Constraints](/bottlenecks-and-constraints) and [Thinking in Probabilities](/thinking-in-probabilities). We will define the additional probability distributions and stationarity inside this course.
+
+Capacity, throughput and delay remain distinct quantities. Spare average capacity can coexist with a temporary queue when arrivals cluster. A model can clarify that relationship without identifying the causes of a real service's delays.
+
+<MindMap
+  client:visible
+  title={"Three objects to keep separate"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Waiting-time audit","children":[{"label":"Supplied trace","children":[{"label":"Arrivals and services are known"},{"label":"Compute starts, departures and observed presence"}]},{"label":"Compatible averages","children":[{"label":"Job-weighted durations"},{"label":"Time-weighted occupancy"}]},{"label":"Stochastic model","children":[{"label":"State the distributions and boundary"},{"label":"Use stationary measures only in their domain"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Check the starting distinctions"}
+  questions={[{"question":"A starts at 0 and needs 10 minutes. B arrives at 1 and needs 1. Under nonpreemptive FCFS, when does B depart?","options":[{"text":"At 2"},{"text":"At 10"},{"text":"At 11","correct":true}],"explanation":"B starts after A at 10, then receives one minute of service."},{"question":"A report combines a noon snapshot with last month’s rate. What should you check first?","options":[{"text":"Whether population, boundary and clocks are compatible.","correct":true},{"text":"Whether both numbers have enough decimal places."},{"text":"Whether the snapshot count is above the mean."}],"explanation":"A formula cannot make incompatible measurements describe the same object."},{"question":"What does spare average capacity establish by itself?","options":[{"text":"No job can wait."},{"text":"The server is free at every arrival."},{"text":"It does not determine a particular arrival’s waiting time.","correct":true}],"explanation":"Clustering and work already in service can produce waiting despite spare average capacity."}]}
+/>
+
+
+The source boundary is explicit throughout. [MIT's queueing notes](https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/a9235f5e4e0aee12a55778e5beaf0ddb_lec5.pdf) supply terminology and model distinctions. [Sigman's notes on Little's law](https://www.columbia.edu/~ks20/4106-18-Fall/Notes-LL.pdf) explain the sample-path accounting. Our small job records are constructed examples.

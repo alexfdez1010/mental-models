@@ -1,0 +1,241 @@
+---
+title: "Build the Timeline Before the Average"
+description: "Reconstruct FCFS starts, departures, waiting and presence from declared inputs."
+topic: "en/queueing-theory-and-waiting"
+order: 2
+minutes: 22
+updated: 2026-11-07
+---
+
+import { MCQ, MatchConcepts, ConsequenceTree, FillBlank, Categorize, QueueTimelineAudit, MindMap, Quiz } from '@/components/react';
+
+Four jobs share one machine. Someone adds their service times, divides by the number of jobs and calls the result “the average wait.” That calculation gives an average service requirement. It has not yet accounted for who arrives while another job is occupying the machine.
+
+We will reconstruct the missing clock. The inputs are fixed teaching data, and every job is admitted. Nothing is being estimated from a real workshop.
+
+## Name the inputs and the service rule
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Which input is still needed if arrivals and required services are known?"}
+  options={[{"text":"The service-order rule and initial server state.","correct":true},{"text":"A stationary probability law is always compulsory."},{"text":"A monetary value for every job."}]}
+  explanation={"The finite schedule needs initial availability and a discipline, not a stochastic law."}
+/>
+
+
+A **job** is one visit to this system, from admission to departure. Each job below has an identifier, arrival time and required service time. Service means time using the machine; it excludes time waiting to start.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Declared inputs for one FCFS server"}>
+<table data-audit-table="main-input" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Declared inputs for one FCFS server"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Job"}</th><th scope="col" className="p-3 align-bottom">{"Arrival (min)"}</th><th scope="col" className="p-3 align-bottom">{"Service (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"A"}</th><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"B"}</th><td className="p-3">{"1"}</td><td className="p-3">{"2"}</td></tr>
+<tr><th scope="row" className="p-3">{"C"}</th><td className="p-3">{"2"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"D"}</th><td className="p-3">{"6"}</td><td className="p-3">{"2"}</td></tr>
+</tbody></table>
+</div>
+
+
+All times are minutes from the same origin. The server is available and the system is empty just before time 0. There are no breakdowns, pauses, rework, cancellations or unlisted jobs.
+
+**First-come, first-served**, abbreviated **FCFS**, gives earlier arrivals priority. Tied arrivals retain their order in the input table. The identifier is a label, so changing a name does not move that job forward. Once a job starts, its service is **nonpreemptive**: a later arrival cannot interrupt it.
+
+A **work-conserving** server starts the next available job whenever it is free. It may be idle when no admitted job is available; it does not insert a voluntary break while work waits.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Read the scheduling terms."}
+  pairs={[{"term":"FCFS","definition":"Earlier arrivals receive priority"},{"term":"Nonpreemptive","definition":"A started job is not interrupted"},{"term":"Work-conserving","definition":"The free server starts an available waiting job"}]}
+  explanation={"These are separate conditions; each restricts the schedule."}
+/>
+
+
+### When these inputs are enough
+
+They determine this constructed trace because the service durations and future arrivals are supplied. In practice, knowing past arrivals does not reveal future arrivals or unknown remaining service. A computed trace inherits the information in its inputs.
+
+## Work one row before completing the table
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"B arrives at minute 1; the preceding job departs at 3. What sets B’s earliest start?"}
+  options={[{"text":"1+3"},{"text":"The larger of 1 and 3","correct":true},{"text":"The smaller of 1 and 3"}]}
+  explanation={"B needs both arrival and server availability."}
+/>
+
+
+For job B, arrival is minute 1. Job A occupies the machine from 0 to 3. B cannot start before either its own arrival or the previous departure, so:
+
+$$
+b_B=\max(1,3)=3.
+$$
+
+Here $b$ denotes service start. Add B's two minutes of service:
+
+$$
+d_B=3+2=5.
+$$
+
+Waiting time is start minus arrival: $3-1=2$ minutes. Total stay is departure minus arrival: $5-1=4$ minutes. B's stay contains both its wait and its service.
+
+For jobs in FCFS order, write $a_i$ for arrival, $s_i$ for required service, $b_i$ for start and $d_i$ for departure. With the previous departure initially 0:
+
+$$
+b_i=\max(a_i,d_{i-1}),\qquad d_i=b_i+s_i.
+$$
+
+$$
+w_i=b_i-a_i,\qquad T_i=d_i-a_i=w_i+s_i.
+$$
+
+The maximum is important. If the next job arrives after the previous one has left, the machine must wait for that arrival. A future job cannot be served early merely to keep the server busy.
+
+<ConsequenceTree
+  client:visible
+  title={"Work job B’s row"}
+  eyebrow={""}
+  decision={{"label":"B arrives at 1","note":"Previous departure: 3","valence":"neutral","children":[{"label":"Start = max(1,3) = 3","note":"Service requirement: 2","valence":"neutral","children":[{"label":"Departure = 3+2 = 5","note":"Wait: 3−1=2; stay: 5−1=4","valence":"neutral"}]}]}}
+  orderLabels={["Start","Departure"]}
+  instructions={"Follow the arithmetic; each node uses supplied minutes."}
+  caption={"A calculation of B’s row, not a causal explanation of a real delay."}
+  decisionLabel={"Initial condition"}
+  promptLabel={"Open next events"}
+  expandAllLabel={"Show all events"}
+  collapseLabel={"Collapse"}
+  valenceLabels={{"good":"Favourable","bad":"Unfavourable","mixed":"Mixed","neutral":"Declared event"}}
+/>
+
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"If the previous job departs at 5 and the next arrives at 8 with service 2, its departure is…"}
+  options={[{"text":"7"},{"text":"10","correct":true},{"text":"8"}]}
+  explanation={"Start=max(8,5)=8; departure=8+2=10."}
+/>
+
+
+Applying the same operations gives the complete table:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Complete FCFS trace"}>
+<table data-audit-table="main-complete" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"48rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Complete FCFS trace"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Job"}</th><th scope="col" className="p-3 align-bottom">{"Arrival (min)"}</th><th scope="col" className="p-3 align-bottom">{"Service (min)"}</th><th scope="col" className="p-3 align-bottom">{"Start (min)"}</th><th scope="col" className="p-3 align-bottom">{"Departure (min)"}</th><th scope="col" className="p-3 align-bottom">{"Wait (min)"}</th><th scope="col" className="p-3 align-bottom">{"Stay (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"A"}</th><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"B"}</th><td className="p-3">{"1"}</td><td className="p-3">{"2"}</td><td className="p-3">{"3"}</td><td className="p-3">{"5"}</td><td className="p-3">{"2"}</td><td className="p-3">{"4"}</td></tr>
+<tr><th scope="row" className="p-3">{"C"}</th><td className="p-3">{"2"}</td><td className="p-3">{"1"}</td><td className="p-3">{"5"}</td><td className="p-3">{"6"}</td><td className="p-3">{"3"}</td><td className="p-3">{"4"}</td></tr>
+<tr><th scope="row" className="p-3">{"D"}</th><td className="p-3">{"6"}</td><td className="p-3">{"2"}</td><td className="p-3">{"6"}</td><td className="p-3">{"8"}</td><td className="p-3">{"0"}</td><td className="p-3">{"2"}</td></tr>
+</tbody></table>
+</div>
+
+
+C arrives at 2 but starts at 5, so it waits three minutes. D arrives exactly when C leaves at 6. D starts immediately and has zero wait. Zero waiting is a valid result; it does not mean zero service or zero stay.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Complete D’s timing."}
+  text={"D arrives at 6 as C departs at 6. D’s wait is {{0|2|6}} minutes and its stay is {{2|0|8}} minutes."}
+  explanation={"D starts immediately, then receives two minutes of service."}
+/>
+
+
+### When to check a surprising delay
+
+Locate its arrival, previous departure and start. A long stay can include waiting, long service or both. Their remedies need not be the same, and this trace alone supplies no costs for choosing one.
+
+## Read a state after its events
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"At the instant a job departs and the next starts, can both be counted as occupying this one server after events?"}
+  options={[{"text":"Yes, because their intervals share an endpoint."},{"text":"No; the departed job is excluded and the new service is included.","correct":true},{"text":"Only if their IDs are in alphabetical order."}]}
+  explanation={"Half-open intervals give one after-event state."}
+/>
+
+
+Define $N(t)$ as jobs present in the **system** at time $t$, including service. Define $N_q(t)$ as jobs waiting to start. Let $B(t)$ be one when the server is busy and zero otherwise.
+
+A job is present from arrival up to, but excluding, departure: $[a_i,d_i)$. It waits on $[a_i,b_i)$ and uses the server on $[b_i,d_i)$. The notation $[x,y)$ includes $x$ and excludes $y$.
+
+We report the state after events at the timestamp. At time 3, A has departed and B has started; C is waiting. Thus $N(3)=2$, $N_q(3)=1$ and $B(3)=1$. At time 6, C departs and D starts, so the system contains only D.
+
+For this single-server trace:
+
+$$
+N(t)=N_q(t)+B(t).
+$$
+
+The identity separates waiting from service. Work conservation adds another condition: if any job waits, the server must be busy. A made-up schedule could satisfy the identity while leaving a waiting job beside an idle machine; it would violate the service rule.
+
+<Categorize
+  client:visible
+  className={"not-prose"}
+  question={"Classify the state at time 3 after events."}
+  buckets={["Departed","In service","Waiting"]}
+  items={[{"text":"A","bucket":"Departed"},{"text":"B","bucket":"In service"},{"text":"C","bucket":"Waiting"}]}
+  explanation={"A departs at 3; B starts at 3; C will start at 5."}
+/>
+
+
+### When simultaneous events occur
+
+Release the completed job, admit the new arrivals and then start the earliest waiting job. A fresh arrival does not jump ahead of someone who was already waiting. If several arrive together, use their declared input order.
+
+## Check the supplied trace on one clock
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"One job present for three minutes contributes what presence area?"}
+  options={[{"text":"Three jobs per minute."},{"text":"One third of a job."},{"text":"Three job·minutes.","correct":true}]}
+  explanation={"Area multiplies the number present by duration."}
+/>
+
+
+The diagram lets you inspect the same inputs at different times. Its shaded interval is the observation window. The full bars still show the complete supplied trace; they are not a forecast of a job whose future service is unknown.
+
+It also reports **presence area**. One job present for three minutes contributes three job·minutes. Summing these durations gives the area beneath the system's occupancy steps. Waiting area uses only waiting intervals; service area uses only service intervals. Dividing an area by the window's duration gives an average number present, rather than a typical job's duration. The next lesson develops that connection carefully.
+
+<QueueTimelineAudit
+  client:visible
+  scenarios={[{"id":"main","label":"Declared arrivals and services","jobs":[{"id":"A","arrival":0,"service":3},{"id":"B","arrival":1,"service":2},{"id":"C","arrival":2,"service":1},{"id":"D","arrival":6,"service":2}],"windows":[{"id":"full","label":"Full interval 0–10 min","from":0,"to":10},{"id":"short","label":"Short interval 0–4 min","from":0,"to":4}]}]}
+  axisEnd={10}
+  labels={{"title":"Inspect the complete four-job schedule","instructions":"Move the cursor along the supplied trace. Shading marks the observation window. N counts jobs present and Nq jobs waiting; the table separates complete times from observed durations.","scenario":"Supplied trace","window":"Observation window","cursor":"Cursor time (min)","reset":"Reset diagram","chart":"Waiting, service and occupancy on one clock","chartDescription":"Upper rows show dashed waiting intervals and solid service intervals. Below, the solid N line counts jobs present and the dashed Nq line counts jobs waiting. Snapshots are after events at the cursor.","timeAxis":"Time (min)","waitingLegend":"Dashed bars: waiting","serviceLegend":"Solid bars: service","windowLegend":"Shaded observation interval","system":"In system N","waiting":"Waiting Nq","inService":"In service","duration":"Window duration (min)","systemArea":"System area (job·min)","waitingArea":"Waiting area (job·min)","serviceArea":"Service area (job·min)","meanSystem":"Mean in system (jobs)","meanWaiting":"Mean waiting (jobs)","busyFraction":"Busy fraction","table":"Complete job times and observed exposures","job":"Job","arrival":"Arrival (min)","service":"Service (min)","start":"Service start (min)","departure":"Departure (min)","wait":"Complete wait (min)","stay":"Complete stay (min)","observedStay":"Observed stay (min)","observedWait":"Observed wait (min)","observedService":"Observed service (min)"}}
+  locale={"en"}
+/>
+
+
+For the full 0–10-minute window, the machine works eight minutes and is idle for two. All four jobs depart by minute 8. Changing the cursor changes the snapshot; it does not change the inputs, schedule or window totals.
+
+The exact recurrence is a property of this single FCFS server. Another discipline, a second server or a pause would require a different schedule. [MIT's terminology](https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/a9235f5e4e0aee12a55778e5beaf0ddb_lec5.pdf) distinguishes those model choices; it does not turn this finite dataset into a distribution of real waits.
+
+<MindMap
+  client:visible
+  title={"Build a trace before an average"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"One FCFS server","children":[{"label":"Inputs","children":[{"label":"Common time origin"},{"label":"Known arrivals and required services"}]},{"label":"Recurrence","children":[{"label":"Start=max(arrival, previous departure)"},{"label":"Departure = start + service"}]},{"label":"States","children":[{"label":"System=waiting+in service"},{"label":"After-event half-open intervals"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Reconstruct rather than guess"}
+  questions={[{"question":"C arrives at 2 and starts at 5. What is its wait?","options":[{"text":"2 min"},{"text":"3 min","correct":true},{"text":"5 min"}],"explanation":"Wait is start−arrival=5−2=3."},{"question":"At time 6 after events, which state follows from the complete table?","options":[{"text":"C and D are both in service."},{"text":"The system is empty."},{"text":"Only D is present, in service.","correct":true}],"explanation":"C departs at 6 and D starts at 6."},{"question":"A free server inserts a break while an admitted job waits. Which declared condition fails?","options":[{"text":"Work conservation.","correct":true},{"text":"The job identifier rule."},{"text":"The use of minutes."}],"explanation":"A work-conserving server does not idle when an eligible job is waiting."}]}
+/>
+
+
+Next, [Little's Law Needs One Boundary](/queueing-theory-and-waiting/02-littles-law-and-boundaries) adds the individual presence rectangles and checks what happens when the observation ends before the jobs do.

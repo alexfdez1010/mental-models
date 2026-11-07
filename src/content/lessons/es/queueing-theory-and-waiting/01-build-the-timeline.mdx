@@ -1,0 +1,317 @@
+---
+title: "Construye la secuencia antes de calcular la media"
+description: "Reconstruye inicios FCFS, salidas, esperas y presencia a partir de entradas declaradas."
+topic: "es/queueing-theory-and-waiting"
+order: 2
+minutes: 22
+updated: 2026-11-07
+---
+
+import { MCQ, MatchConcepts, ConsequenceTree, FillBlank, Categorize, QueueTimelineAudit, MindMap, Quiz } from '@/components/react';
+
+Cuatro trabajos comparten una máquina. Alguien suma sus tiempos de servicio, divide entre cuatro y llama al resultado «espera media». Ha calculado el servicio medio requerido. Todavía falta saber quién llega mientras otro trabajo ocupa la máquina.
+
+Vamos a reconstruir ese reloj. Las entradas son datos didácticos fijos y todos los trabajos se admiten. No estamos estimando el comportamiento de un taller real.
+
+## Nombra las entradas y la regla de servicio
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"¿Qué entrada falta si conoces las llegadas y los servicios requeridos?"}
+  options={[{"text":"La regla de orden y el estado inicial del servidor.","correct":true},{"text":"Siempre es obligatoria una ley estacionaria de probabilidad."},{"text":"El valor monetario de cada trabajo."}]}
+  explanation={"El horario finito necesita disponibilidad inicial y disciplina, no una ley estocástica."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Un **trabajo** es una visita a este sistema, desde su admisión hasta su salida. Cada trabajo tiene identificador, instante de llegada y tiempo de servicio requerido. El servicio es el tiempo que usa la máquina; excluye la espera previa.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Entradas declaradas para un servidor FCFS"}>
+<table data-audit-table="main-input" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Entradas declaradas para un servidor FCFS"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Trabajo"}</th><th scope="col" className="p-3 align-bottom">{"Llegada (min)"}</th><th scope="col" className="p-3 align-bottom">{"Servicio (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"A"}</th><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"B"}</th><td className="p-3">{"1"}</td><td className="p-3">{"2"}</td></tr>
+<tr><th scope="row" className="p-3">{"C"}</th><td className="p-3">{"2"}</td><td className="p-3">{"1"}</td></tr>
+<tr><th scope="row" className="p-3">{"D"}</th><td className="p-3">{"6"}</td><td className="p-3">{"2"}</td></tr>
+</tbody></table>
+</div>
+
+
+Todos los tiempos son minutos desde un mismo origen. El servidor está disponible y el sistema está vacío justo antes del instante 0. No hay averías, pausas, reprocesos, cancelaciones ni trabajos sin listar.
+
+**Primero en llegar, primero en ser atendido (first-come, first-served)**, abreviado **FCFS**, da prioridad a las llegadas anteriores. Si coinciden, se conserva el orden de la tabla de entrada. El identificador es una etiqueta: cambiar el nombre no adelanta el trabajo. El servicio es **no interrumpible (nonpreemptive)**: una llegada posterior no puede interrumpir el trabajo iniciado.
+
+Un servidor **sin ociosidad voluntaria (work-conserving)** empieza el siguiente trabajo disponible en cuanto queda libre. Puede estar inactivo si no hay trabajo admitido disponible; no introduce un descanso voluntario mientras alguien espera.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Interpreta las reglas de programación."}
+  pairs={[{"term":"FCFS","definition":"Las llegadas anteriores tienen prioridad"},{"term":"No interrumpible","definition":"Un trabajo iniciado no se interrumpe"},{"term":"Sin ociosidad voluntaria","definition":"El servidor libre empieza un trabajo disponible que espera"}]}
+  explanation={"Son condiciones distintas; cada una restringe el horario."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"✓ Todo relacionado"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"→ elige ahora una definición"}
+  notLinkedHint={"sin relacionar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+/>
+
+
+### Cuándo bastan estas entradas
+
+Determinan esta secuencia construida porque conocemos las duraciones y las llegadas futuras. En la práctica, las llegadas pasadas no revelan las futuras ni el servicio restante desconocido. La secuencia calculada hereda la información de sus entradas.
+
+## Resuelve una fila antes de completar la tabla
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"B llega en el minuto 1 y el trabajo anterior sale en 3. ¿Qué fija su inicio más temprano?"}
+  options={[{"text":"1+3"},{"text":"El mayor entre 1 y 3","correct":true},{"text":"El menor entre 1 y 3"}]}
+  explanation={"B necesita haber llegado y que el servidor esté disponible."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+B llega en el minuto 1. A ocupa la máquina de 0 a 3. B no puede empezar antes de su llegada ni antes de la salida anterior:
+
+$$
+b_B=\max(1,3)=3.
+$$
+
+Aquí $b$ representa el inicio del servicio. Añade los dos minutos de servicio de B:
+
+$$
+d_B=3+2=5.
+$$
+
+La espera es inicio menos llegada: $3-1=2$ minutos. La permanencia es salida menos llegada: $5-1=4$ minutos. La permanencia de B contiene espera y servicio.
+
+Para los trabajos en orden FCFS, $a_i$ es la llegada, $s_i$ el servicio requerido, $b_i$ el inicio y $d_i$ la salida. La salida anterior empieza en 0:
+
+$$
+b_i=\max(a_i,d_{i-1}),\qquad d_i=b_i+s_i.
+$$
+
+$$
+w_i=b_i-a_i,\qquad T_i=d_i-a_i=w_i+s_i.
+$$
+
+El máximo importa. Si el siguiente trabajo llega después de la salida anterior, la máquina debe esperar a que llegue. No puede atenderlo antes para mantenerse ocupada.
+
+<ConsequenceTree
+  client:visible
+  title={"Resuelve la fila de B"}
+  eyebrow={""}
+  decision={{"label":"B llega en 1","note":"Salida anterior: 3","valence":"neutral","children":[{"label":"Inicio = max(1,3) = 3","note":"Servicio requerido: 2","valence":"neutral","children":[{"label":"Salida = 3+2 = 5","note":"Espera: 3−1=2; permanencia: 5−1=4","valence":"neutral"}]}]}}
+  orderLabels={["Inicio","Salida"]}
+  instructions={"Sigue las operaciones; cada nodo usa los minutos proporcionados."}
+  caption={"Cálculo de la fila de B, no explicación causal de una demora real."}
+  decisionLabel={"Condición inicial"}
+  promptLabel={"Abre los siguientes eventos"}
+  expandAllLabel={"Mostrar todos los eventos"}
+  collapseLabel={"Contraer"}
+  valenceLabels={{"good":"Favorable","bad":"Desfavorable","mixed":"Mixto","neutral":"Evento declarado"}}
+/>
+
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"El trabajo anterior sale en 5; el siguiente llega en 8 y necesita dos minutos. Su salida es…"}
+  options={[{"text":"7"},{"text":"10","correct":true},{"text":"8"}]}
+  explanation={"Inicio=max(8,5)=8; salida=8+2=10."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+Aplicando las mismas operaciones obtenemos la tabla completa:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Secuencia FCFS completa"}>
+<table data-audit-table="main-complete" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"48rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Secuencia FCFS completa"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Trabajo"}</th><th scope="col" className="p-3 align-bottom">{"Llegada (min)"}</th><th scope="col" className="p-3 align-bottom">{"Servicio (min)"}</th><th scope="col" className="p-3 align-bottom">{"Inicio (min)"}</th><th scope="col" className="p-3 align-bottom">{"Salida (min)"}</th><th scope="col" className="p-3 align-bottom">{"Espera (min)"}</th><th scope="col" className="p-3 align-bottom">{"Permanencia (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"A"}</th><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td><td className="p-3">{"0"}</td><td className="p-3">{"3"}</td></tr>
+<tr><th scope="row" className="p-3">{"B"}</th><td className="p-3">{"1"}</td><td className="p-3">{"2"}</td><td className="p-3">{"3"}</td><td className="p-3">{"5"}</td><td className="p-3">{"2"}</td><td className="p-3">{"4"}</td></tr>
+<tr><th scope="row" className="p-3">{"C"}</th><td className="p-3">{"2"}</td><td className="p-3">{"1"}</td><td className="p-3">{"5"}</td><td className="p-3">{"6"}</td><td className="p-3">{"3"}</td><td className="p-3">{"4"}</td></tr>
+<tr><th scope="row" className="p-3">{"D"}</th><td className="p-3">{"6"}</td><td className="p-3">{"2"}</td><td className="p-3">{"6"}</td><td className="p-3">{"8"}</td><td className="p-3">{"0"}</td><td className="p-3">{"2"}</td></tr>
+</tbody></table>
+</div>
+
+
+C llega en 2 y empieza en 5: espera tres minutos. D llega justo cuando C sale, en 6. Empieza inmediatamente y su espera es cero. Una espera nula es válida; no significa servicio ni permanencia nulos.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Completa los tiempos de D."}
+  text={"D llega en 6 cuando C sale en 6. Espera {{0|2|6}} minutos y permanece {{2|0|8}} minutos."}
+  explanation={"D empieza inmediatamente y recibe dos minutos de servicio."}
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"bien"}
+/>
+
+
+### Cuándo revisar una demora inesperada
+
+Localiza llegada, salida anterior e inicio. Una permanencia larga puede contener espera, servicio largo o ambos. Sus soluciones pueden ser distintas, y esta secuencia no aporta costes para elegir entre ellas.
+
+## Lee el estado después de sus eventos
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Cuando sale un trabajo y empieza otro, ¿se cuentan ambos ocupando este servidor después de los eventos?"}
+  options={[{"text":"Sí, porque sus intervalos comparten un extremo."},{"text":"No; se excluye al que salió y se incluye al que empieza.","correct":true},{"text":"Solo si sus identificadores están ordenados alfabéticamente."}]}
+  explanation={"Los intervalos semiabiertos dan un único estado posterior a los eventos."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+$N(t)$ cuenta los trabajos presentes en el **sistema** en el instante $t$, incluido el servicio. $N_q(t)$ cuenta los que esperan para empezar. $B(t)$ vale uno si el servidor está ocupado y cero si no.
+
+Un trabajo está presente desde su llegada hasta su salida, sin incluir esta última: $[a_i,d_i)$. Espera en $[a_i,b_i)$ y usa el servidor en $[b_i,d_i)$. La notación $[x,y)$ incluye $x$ y excluye $y$.
+
+Mostramos el estado después de los eventos de ese instante. En el minuto 3, A ha salido y B ha empezado; C espera. Por tanto, $N(3)=2$, $N_q(3)=1$ y $B(3)=1$. En el minuto 6 sale C y empieza D: solo D permanece en el sistema.
+
+Para esta secuencia con un servidor:
+
+$$
+N(t)=N_q(t)+B(t).
+$$
+
+La identidad separa espera y servicio. La ausencia de ociosidad voluntaria añade otra condición: si un trabajo espera, el servidor debe estar ocupado. Un horario inventado podría cumplir la identidad mientras deja un trabajo esperando junto a una máquina libre; incumpliría la regla de servicio.
+
+<Categorize
+  client:visible
+  className={"not-prose"}
+  question={"Clasifica el estado en 3 después de los eventos."}
+  buckets={["Ha salido","En servicio","Esperando"]}
+  items={[{"text":"A","bucket":"Ha salido"},{"text":"B","bucket":"En servicio"},{"text":"C","bucket":"Esperando"}]}
+  explanation={"A sale en 3; B empieza en 3; C empezará en 5."}
+  instructions={"Coloca cada elemento en su grupo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"✓ Todo clasificado"}
+  partialResultWord={"bien"}
+/>
+
+
+### Cuándo coinciden varios eventos
+
+Da salida al trabajo terminado, admite las nuevas llegadas y empieza con quien lleve más tiempo esperando. Una llegada nueva no se adelanta a alguien que ya esperaba. Si varias llegan juntas, aplica su orden de entrada declarado.
+
+## Comprueba la secuencia con un mismo reloj
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Un trabajo presente durante tres minutos aporta ¿qué área?"}
+  options={[{"text":"Tres trabajos por minuto."},{"text":"Un tercio de trabajo."},{"text":"Tres trabajo·minutos.","correct":true}]}
+  explanation={"El área multiplica el número presente por la duración."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer, intenta responder"}
+/>
+
+
+El diagrama permite inspeccionar las mismas entradas en distintos instantes. La franja sombreada es la ventana de observación. Las barras completas muestran la secuencia proporcionada; no predicen el futuro de un trabajo cuyo servicio restante se desconoce.
+
+También muestra el **área de presencia**. Un trabajo presente durante tres minutos aporta tres trabajo·minutos. La suma de estas duraciones es el área bajo los escalones de ocupación del sistema. El área de espera usa solo los intervalos de espera; la de servicio, solo los de servicio. Dividir un área entre la duración de la ventana da un número medio de trabajos presentes, no la duración de un trabajo típico. La siguiente lección desarrolla esa relación.
+
+<QueueTimelineAudit
+  client:visible
+  scenarios={[{"id":"main","label":"Llegadas y servicios declarados","jobs":[{"id":"A","arrival":0,"service":3},{"id":"B","arrival":1,"service":2},{"id":"C","arrival":2,"service":1},{"id":"D","arrival":6,"service":2}],"windows":[{"id":"full","label":"Intervalo completo 0–10 min","from":0,"to":10},{"id":"short","label":"Intervalo corto 0–4 min","from":0,"to":4}]}]}
+  axisEnd={10}
+  labels={{"title":"Inspecciona el horario completo de cuatro trabajos","instructions":"Mueve el cursor por la secuencia. El sombreado marca la ventana. N cuenta trabajos presentes y Nq los que esperan; la tabla distingue tiempos completos y duraciones observadas.","scenario":"Secuencia proporcionada","window":"Ventana de observación","cursor":"Instante del cursor (min)","reset":"Restablecer diagrama","chart":"Espera, servicio y ocupación en un reloj","chartDescription":"Las filas superiores muestran esperas discontinuas y servicios sólidos. Abajo, N cuenta los presentes y Nq, discontinuo, los que esperan. Las instantáneas son posteriores a los eventos del cursor.","timeAxis":"Tiempo (min)","waitingLegend":"Barras discontinuas: espera","serviceLegend":"Barras sólidas: servicio","windowLegend":"Intervalo observado sombreado","system":"En el sistema N","waiting":"Esperando Nq","inService":"En servicio","duration":"Duración de la ventana (min)","systemArea":"Área del sistema (trabajo·min)","waitingArea":"Área de espera (trabajo·min)","serviceArea":"Área de servicio (trabajo·min)","meanSystem":"Media en el sistema (trabajos)","meanWaiting":"Media en espera (trabajos)","busyFraction":"Fracción de tiempo ocupado","table":"Tiempos completos y exposiciones observadas","job":"Trabajo","arrival":"Llegada (min)","service":"Servicio (min)","start":"Inicio de servicio (min)","departure":"Salida (min)","wait":"Espera completa (min)","stay":"Permanencia completa (min)","observedStay":"Permanencia observada (min)","observedWait":"Espera observada (min)","observedService":"Servicio observado (min)"}}
+  locale={"es"}
+/>
+
+
+En la ventana completa 0–10, la máquina trabaja ocho minutos y queda libre dos. Los cuatro trabajos han salido en el minuto 8. Mover el cursor cambia la instantánea; no cambia las entradas, el horario ni los totales de la ventana.
+
+La recurrencia exacta pertenece a este servidor FCFS único. Otra disciplina, un segundo servidor o una pausa exigirían un horario distinto. La [terminología del MIT](https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/a9235f5e4e0aee12a55778e5beaf0ddb_lec5.pdf) distingue esas elecciones; no convierte estos datos finitos en una distribución de esperas reales.
+
+<MindMap
+  client:visible
+  title={"Construye la secuencia antes de la media"}
+  eyebrow={""}
+  outlineLabel={"Esquema en texto"}
+  root={{"label":"Un servidor FCFS","children":[{"label":"Entradas","children":[{"label":"Origen temporal común"},{"label":"Llegadas y servicios requeridos conocidos"}]},{"label":"Recurrencia","children":[{"label":"Inicio=max(llegada, salida anterior)"},{"label":"Salida=inicio+servicio"}]},{"label":"Estados","children":[{"label":"Sistema = espera + servicio"},{"label":"Intervalos semiabiertos y estado posterior a los eventos"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Reconstruye los tiempos"}
+  questions={[{"question":"C llega en 2 y empieza en 5. ¿Cuánto espera?","options":[{"text":"2 min"},{"text":"3 min","correct":true},{"text":"5 min"}],"explanation":"Espera=inicio−llegada=5−2=3."},{"question":"En 6, después de los eventos, ¿qué estado se deduce de la tabla?","options":[{"text":"C y D están ambos en servicio."},{"text":"El sistema está vacío."},{"text":"Solo D está presente, en servicio.","correct":true}],"explanation":"C sale en 6 y D empieza en 6."},{"question":"Un servidor libre hace una pausa mientras un trabajo admitido está disponible y espera su turno. ¿Qué condición incumple?","options":[{"text":"La ausencia de ociosidad voluntaria.","correct":true},{"text":"La regla de identificadores."},{"text":"El uso de minutos."}],"explanation":"El servidor no queda voluntariamente ocioso cuando ya hay un trabajo disponible esperando."}]}
+  checkLabel={"Comprobar"}
+  retryLabel={"Volver a intentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No es correcto"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Repaso terminado"}
+  perfectMessage={"Has acertado todas las preguntas de este repaso."}
+  goodMessage={"Revisa las explicaciones de las preguntas falladas."}
+  keepPracticingMessage={"Revisa los ejemplos antes de volver a practicar."}
+  gateLabel={"Comprueba la respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Anterior"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar repaso"}
+/>
+
+
+A continuación, [La ley de Little necesita una misma frontera](/es/queueing-theory-and-waiting/02-littles-law-and-boundaries) suma los rectángulos de presencia y comprueba qué ocurre si la observación termina antes que los trabajos.

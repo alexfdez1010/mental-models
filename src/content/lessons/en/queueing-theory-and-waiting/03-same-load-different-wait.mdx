@@ -1,0 +1,210 @@
+---
+title: "The Same Load Can Produce Different Waits"
+description: "Compare equal-workload traces while changing arrivals and tie ordering."
+topic: "en/queueing-theory-and-waiting"
+order: 4
+minutes: 22
+updated: 2026-11-07
+---
+
+import { MCQ, QueueTimelineAudit, FillBlank, MatchConcepts, MindMap, Quiz } from '@/components/react';
+
+Two one-machine traces each contain four jobs, two minutes of service per job and a ten-minute observation window. They finish the same number of jobs and consume the same eight minutes of service. Their waiting times still differ.
+
+This comparison is constructed to isolate timing. It is not a sample proving that any increase in an unspecified “variability” measure worsens every possible queue.
+
+## Keep the workload fixed and change the arrivals
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Two traces have the same jobs, total service and observation duration. Must their mean waits match?"}
+  options={[{"text":"Yes, those totals determine all waiting."},{"text":"No; the arrival timing can change the schedule.","correct":true},{"text":"Yes, provided every service is two minutes."}]}
+  explanation={"The timing of overlapping demand matters even when totals agree."}
+/>
+
+
+In the spaced trace, jobs arrive at 0,2,4,6. Each starts immediately and finishes two minutes later. In the batch trace, all four arrive at time 0, in the input order A/B/C/D.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Same service, different timing"}>
+<table data-audit-table="arrival-patterns" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"48rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Same service, different timing"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Trace"}</th><th scope="col" className="p-3 align-bottom">{"Arrivals (min)"}</th><th scope="col" className="p-3 align-bottom">{"Starts (min)"}</th><th scope="col" className="p-3 align-bottom">{"Waits (min)"}</th><th scope="col" className="p-3 align-bottom">{"Mean wait (min)"}</th><th scope="col" className="p-3 align-bottom">{"Mean stay (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"Spaced"}</th><td className="p-3">{"0, 2, 4, 6"}</td><td className="p-3">{"0, 2, 4, 6"}</td><td className="p-3">{"0, 0, 0, 0"}</td><td className="p-3">{"0"}</td><td className="p-3">{"2"}</td></tr>
+<tr><th scope="row" className="p-3">{"Batch"}</th><td className="p-3">{"0, 0, 0, 0"}</td><td className="p-3">{"0, 2, 4, 6"}</td><td className="p-3">{"0, 2, 4, 6"}</td><td className="p-3">{"3"}</td><td className="p-3">{"5"}</td></tr>
+</tbody></table>
+</div>
+
+
+In the batch, A starts at 0, B at 2, C at 4 and D at 6. The waits are 0,2,4,6, adding to 12 minutes. Dividing by four jobs gives a mean wait of three minutes. Mean stay includes the two service minutes, so it is five minutes.
+
+The spaced trace has zero wait and a two-minute mean stay. Both finish all four jobs by minute 8. Moving arrivals together changes who has to wait behind an occupied server; it does not change any required service duration.
+
+<QueueTimelineAudit
+  client:visible
+  scenarios={[{"id":"spaced","label":"Spaced arrivals","jobs":[{"id":"A","arrival":0,"service":2},{"id":"B","arrival":2,"service":2},{"id":"C","arrival":4,"service":2},{"id":"D","arrival":6,"service":2}],"windows":[{"id":"full","label":"Observe 0–10 min","from":0,"to":10},{"id":"busy","label":"Observe 0–8 min","from":0,"to":8}]},{"id":"batch","label":"All four arrive at 0","jobs":[{"id":"A","arrival":0,"service":2},{"id":"B","arrival":0,"service":2},{"id":"C","arrival":0,"service":2},{"id":"D","arrival":0,"service":2}],"windows":[{"id":"full","label":"Observe 0–10 min","from":0,"to":10},{"id":"busy","label":"Observe 0–8 min","from":0,"to":8}]}]}
+  axisEnd={10}
+  labels={{"title":"Hold the workload fixed and inspect timing","instructions":"Move the cursor along the supplied trace. Shading marks the observation window. N counts jobs present and Nq jobs waiting; the table separates complete times from observed durations.","scenario":"Supplied trace","window":"Observation window","cursor":"Cursor time (min)","reset":"Reset diagram","chart":"Waiting, service and occupancy on one clock","chartDescription":"Upper rows show dashed waiting intervals and solid service intervals. Below, the solid N line counts jobs present and the dashed Nq line counts jobs waiting. Snapshots are after events at the cursor.","timeAxis":"Time (min)","waitingLegend":"Dashed bars: waiting","serviceLegend":"Solid bars: service","windowLegend":"Shaded observation interval","system":"In system N","waiting":"Waiting Nq","inService":"In service","duration":"Window duration (min)","systemArea":"System area (job·min)","waitingArea":"Waiting area (job·min)","serviceArea":"Service area (job·min)","meanSystem":"Mean in system (jobs)","meanWaiting":"Mean waiting (jobs)","busyFraction":"Busy fraction","table":"Complete job times and observed exposures","job":"Job","arrival":"Arrival (min)","service":"Service (min)","start":"Service start (min)","departure":"Departure (min)","wait":"Complete wait (min)","stay":"Complete stay (min)","observedStay":"Observed stay (min)","observedWait":"Observed wait (min)","observedService":"Observed service (min)"}}
+  locale={"en"}
+/>
+
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Four batch waits are 0,2,4,6 min. What is their all-job mean wait?"}
+  options={[{"text":"12 min"},{"text":"5 min"},{"text":"3 min","correct":true}]}
+  explanation={"The total is twelve; divide by four jobs."}
+/>
+
+
+### When a rate hides timing
+
+Use this comparison when someone infers zero waiting from spare average capacity. Across 0–10 minutes, both traces use 80% of the available server time. One still has a substantial waiting line early in the window.
+
+## Compare like-for-like averages
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"The batch has mean stay 5 min and admission rate 4/10 jobs/min. Its mean system occupancy is…"}
+  options={[{"text":"2 jobs","correct":true},{"text":"5 jobs"},{"text":"4/5 job"}]}
+  explanation={"(4/10)×5=2, using the complete cohort."}
+/>
+
+
+The time-average number present is $8/10=4/5$ job in the spaced trace and $20/10=2$ jobs in the batch trace. The admission rate is $4/10=2/5$ jobs per minute in both.
+
+For the spaced trace, $(2/5)\times2=4/5$. For the batch trace, $(2/5)\times5=2$. Little's complete-cohort accounting still works. The two outcomes differ because mean stays differ, rather than because an accounting identity failed.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Compare areas on the full 0–10-minute window"}>
+<table data-audit-table="equal-workload" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Compare areas on the full 0–10-minute window"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Trace"}</th><th scope="col" className="p-3 align-bottom">{"System area (job·min)"}</th><th scope="col" className="p-3 align-bottom">{"Waiting area (job·min)"}</th><th scope="col" className="p-3 align-bottom">{"Service area (job·min)"}</th><th scope="col" className="p-3 align-bottom">{"Busy fraction"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"Spaced"}</th><td className="p-3">{"8"}</td><td className="p-3">{"0"}</td><td className="p-3">{"8"}</td><td className="p-3">{"4/5"}</td></tr>
+<tr><th scope="row" className="p-3">{"Batch"}</th><td className="p-3">{"20"}</td><td className="p-3">{"12"}</td><td className="p-3">{"8"}</td><td className="p-3">{"4/5"}</td></tr>
+</tbody></table>
+</div>
+
+
+Finite **busy fraction** is actual time serving divided by available observation time. It is not the same as the number currently waiting. A server can be continuously occupied during an interval while nobody waits, if each new job arrives exactly when the previous service ends.
+
+Select the 0–8-minute window in the diagram. In the spaced trace the busy fraction is one and waiting remains zero. Extending that perfectly synchronized deterministic pattern keeps that result. It does not describe M/M/1 arrivals and services.
+
+The later stochastic model has its own stationary boundary at $\lambda<\mu$. Do not apply its near-boundary delay formula to every timeline with a busy fraction near one.
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  question={"Which conclusion does the spaced trace establish?"}
+  options={[{"text":"Every random queue is stable at load one."},{"text":"A fully busy finite interval can coexist with zero waiting under the supplied synchronized timing.","correct":true},{"text":"All batching is harmful under every possible objective."}]}
+  explanation={"During 0–8 the spaced server is continuously busy, with each arrival starting immediately."}
+/>
+
+
+### When equal averages are insufficient
+
+Compare the ordering, clustering and dependence that the averages omit. Here every input is known, so we can identify the effect of changing the supplied arrival times in this deterministic calculation. Real causal claims need evidence that the other relevant conditions stayed comparable.
+
+## Declare what happens when arrivals tie
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Z and A arrive together. If IDs are labels, what determines their order here?"}
+  options={[{"text":"Alphabetical sorting of their IDs."},{"text":"Whichever has the largest service requirement."},{"text":"Their declared input order.","correct":true}]}
+  explanation={"The finite FCFS convention preserves input order for equal arrival times."}
+/>
+
+
+Our FCFS convention keeps input order when arrival times tie. Consider Z and A both arriving at 0: Z needs three minutes, A needs one. B arrives at 3 and needs two minutes.
+
+With input order Z/A/B, Z runs 0–3, A runs 3–4 and B runs 4–6. The total wait is $0+3+1=4$ minutes. When B arrives at 3, A has already waited since 0; the newcomer does not jump ahead.
+
+Now supply the tied arrivals in the order A/Z/B. A runs 0–1, Z runs 1–4 and B runs 4–6. The total wait is $0+1+1=2$ minutes. The names and service requirements did not change; the declared priority within the tie did.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label={"Change only the priority within the initial tie"}>
+<table data-audit-table="tie-orders" className="w-full text-left text-sm text-ink-800" style={{display:"table",overflow:"visible",margin:0,minWidth:"36rem"}}>
+<caption className="mb-3 text-left text-sm font-semibold">{"Change only the priority within the initial tie"}</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom">{"Input order"}</th><th scope="col" className="p-3 align-bottom">{"Starts (min)"}</th><th scope="col" className="p-3 align-bottom">{"Waits (min)"}</th><th scope="col" className="p-3 align-bottom">{"Total wait (min)"}</th><th scope="col" className="p-3 align-bottom">{"Total stay (min)"}</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3">{"Z, A, B"}</th><td className="p-3">{"0, 3, 4"}</td><td className="p-3">{"0, 3, 1"}</td><td className="p-3">{"4"}</td><td className="p-3">{"10"}</td></tr>
+<tr><th scope="row" className="p-3">{"A, Z, B"}</th><td className="p-3">{"0, 1, 4"}</td><td className="p-3">{"0, 1, 1"}</td><td className="p-3">{"2"}</td><td className="p-3">{"8"}</td></tr>
+</tbody></table>
+</div>
+
+
+<QueueTimelineAudit
+  client:visible
+  scenarios={[{"id":"za","label":"Tied order Z then A","jobs":[{"id":"Z","arrival":0,"service":3},{"id":"A","arrival":0,"service":1},{"id":"B","arrival":3,"service":2}],"windows":[{"id":"all","label":"Observe 0–6 min","from":0,"to":6}]},{"id":"az","label":"Tied order A then Z","jobs":[{"id":"A","arrival":0,"service":1},{"id":"Z","arrival":0,"service":3},{"id":"B","arrival":3,"service":2}],"windows":[{"id":"all","label":"Observe 0–6 min","from":0,"to":6}]}]}
+  axisEnd={6}
+  labels={{"title":"Inspect the declared tie order","instructions":"Move the cursor along the supplied trace. Shading marks the observation window. N counts jobs present and Nq jobs waiting; the table separates complete times from observed durations.","scenario":"Supplied trace","window":"Observation window","cursor":"Cursor time (min)","reset":"Reset diagram","chart":"Waiting, service and occupancy on one clock","chartDescription":"Upper rows show dashed waiting intervals and solid service intervals. Below, the solid N line counts jobs present and the dashed Nq line counts jobs waiting. Snapshots are after events at the cursor.","timeAxis":"Time (min)","waitingLegend":"Dashed bars: waiting","serviceLegend":"Solid bars: service","windowLegend":"Shaded observation interval","system":"In system N","waiting":"Waiting Nq","inService":"In service","duration":"Window duration (min)","systemArea":"System area (job·min)","waitingArea":"Waiting area (job·min)","serviceArea":"Service area (job·min)","meanSystem":"Mean in system (jobs)","meanWaiting":"Mean waiting (jobs)","busyFraction":"Busy fraction","table":"Complete job times and observed exposures","job":"Job","arrival":"Arrival (min)","service":"Service (min)","start":"Service start (min)","departure":"Departure (min)","wait":"Complete wait (min)","stay":"Complete stay (min)","observedStay":"Observed stay (min)","observedWait":"Observed wait (min)","observedService":"Observed service (min)"}}
+  locale={"en"}
+/>
+
+
+That difference does not establish a universally optimal scheduling policy. We have changed one rule on one finite catalogue without modelling fairness requirements, deadlines, job values or costs of reordering. FCFS itself needs a tie convention before its trace is unique.
+
+<FillBlank
+  client:visible
+  className={"not-prose"}
+  question={"Do not let the newcomer skip an older waiter."}
+  text={"With Z/A/B input order, B arrives at 3 but starts at {{4|3|5}} because {{A|Z|nobody}} already has priority."}
+  explanation={"A has waited since minute 0 and starts when Z finishes at 3."}
+/>
+
+
+### When the detail affects an audit
+
+Logs often record several arrivals at the same coarse timestamp. Before treating their row order as genuine priority, ask what the service actually used. An invented ordering can create an invented wait estimate even when all durations were copied correctly.
+
+## Transfer the comparison without inventing a distribution
+
+<MCQ
+  client:visible
+  className={"not-prose"}
+  pretest={true}
+  question={"Equal monthly mean arrival and service rates reveal which complete sequences occurred?"}
+  options={[{"text":"Exactly one pair of sequences."},{"text":"They do not identify complete sequences or dependence.","correct":true},{"text":"Only the sequence with the shortest waits."}]}
+  explanation={"Many timing patterns can share those summaries."}
+/>
+
+
+A report says two months had the same average arrival count and the same average service duration. Those two summaries do not specify their complete arrival/service sequences, a probability law or the dependence between jobs.
+
+The examples here establish results for their stated sequences. They do not identify a universally sufficient “variability” score, prove every batch harmful under every objective or tell you how likely either trace is in another service.
+
+For that next step, a model must describe the uncertain inputs. [MIT's queueing-model framework](https://ocw.mit.edu/courses/1-203j-logistical-and-transportation-planning-methods-fall-2006/a9235f5e4e0aee12a55778e5beaf0ddb_lec5.pdf) distinguishes the arrival process, service process, number of servers and discipline. The following lesson will state all of them before calculating stationary measures.
+
+<MatchConcepts
+  client:visible
+  className={"not-prose"}
+  question={"Match what each description supplies."}
+  pairs={[{"term":"Finite trace","definition":"Exact listed arrivals and services"},{"term":"Probability model","definition":"A law for uncertain inputs"},{"term":"Observed monthly means","definition":"Two summaries, without a complete ordering"}]}
+  explanation={"Do not fill in unreported timing with a convenient probability law."}
+/>
+
+
+<MindMap
+  client:visible
+  title={"Equal workload is not equal delay"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Timing and ordering","children":[{"label":"Held fixed","children":[{"label":"Four services of two minutes"},{"label":"Eight minutes of actual service"}]},{"label":"Changed","children":[{"label":"Arrival clustering"},{"label":"Priority within a simultaneous arrival"}]},{"label":"Scope","children":[{"label":"Exact finite consequences"},{"label":"No automatic real-world causal or universal optimality claim"}]}]}}
+/>
+
+
+<Quiz
+  client:visible
+  className={"not-prose"}
+  title={"Compare the omitted details"}
+  questions={[{"question":"Which quantity equals 4/5 in both full 0–10-minute traces?","options":[{"text":"Mean waiting time."},{"text":"Mean system occupancy."},{"text":"Finite busy fraction.","correct":true}],"explanation":"Both use eight of the ten available minutes for service."},{"question":"In the batch, system area is 20 and waiting area 12 job·min. What is service area?","options":[{"text":"8 job·min","correct":true},{"text":"32 job·min"},{"text":"12 job·min"}],"explanation":"System area=waiting area+service area."},{"question":"Renaming Z to Y while keeping row order and all numerical inputs fixed changes…","options":[{"text":"Its FCFS priority automatically."},{"text":"No part of this declared schedule.","correct":true},{"text":"Its required service."}],"explanation":"IDs label jobs; input position resolves ties."}]}
+/>
+
+
+Continue to [What the M M 1 Model Assumes](/queueing-theory-and-waiting/04-the-mm1-model). A finite trace, a distribution of inputs and a stationary distribution of occupancy will keep their separate meanings.

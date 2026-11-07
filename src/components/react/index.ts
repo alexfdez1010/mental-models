@@ -374,3 +374,9 @@ export type { SamplingCatalogueProps } from '@/components/react/SamplingCatalogu
 
 export { BinomialCoverageAudit } from '@/components/react/BinomialCoverageAudit';
 export type { BinomialCoverageAuditProps } from '@/components/react/BinomialCoverageAudit';
+
+export { QueueTimelineAudit } from '@/components/react/QueueTimelineAudit';
+export type { QueueTimelineAuditProps } from '@/components/react/QueueTimelineAudit';
+
+export { MM1QueueExplorer } from '@/components/react/MM1QueueExplorer';
+export type { MM1QueueExplorerProps } from '@/components/react/MM1QueueExplorer';
