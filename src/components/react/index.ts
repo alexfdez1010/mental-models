@@ -348,3 +348,5 @@ export type { FactorChain, FactorChainScenario, FactorChainLabels, FactorChainTr
 export { PolicyCostComparison } from '@/components/react/PolicyCostComparison';
 
 export { ScenarioDecisionAudit } from '@/components/react/ScenarioDecisionAudit';
+
+export { MarginalSurplusChart } from '@/components/react/MarginalSurplusChart';
