@@ -321,3 +321,6 @@ export type { StoppingTraceProps, StoppingExample } from '@/components/react/Sto
 
 export { CommonsRuleLedger } from '@/components/react/CommonsRuleLedger';
 export type { CommonsProfile, CommonsRuleModel, CommonsAccounts, CommonsRuleLabels, CommonsRuleLedgerProps } from '@/components/react/CommonsRuleLedger';
+
+export { SearchBudgetComparison } from '@/components/react/SearchBudgetComparison';
+export type { SearchBudgetMethod, SearchBudgetLabels, SearchBudgetComparisonProps } from '@/components/react/SearchBudgetComparison';

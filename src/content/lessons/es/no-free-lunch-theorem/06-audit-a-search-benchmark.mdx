@@ -1,0 +1,398 @@
+---
+title: "Taller: audita una comparación de búsquedas"
+description: "Reconstruye una comparación, distingue la puntuación observada del éxito global y comprueba cómo cambian el resultado los casos, el presupuesto y el coste."
+topic: "es/no-free-lunch-theorem"
+order: 7
+minutes: 28
+updated: 2026-11-07
+---
+
+import { Callout, MCQ, FillBlank, Categorize, MatchConcepts, ConsequenceTree, RateComparison, SearchBudgetComparison, MindMap, Quiz } from '@/components/react';
+
+Un informe anuncia que el método de búsqueda AB supera al AC. Antes de elegir ganador, abre el protocolo de prueba. ¿Qué tareas incluye? ¿Qué peso tiene cada una? ¿Qué observa cada método y cuánta búsqueda se permite?
+
+Un **benchmark** es un conjunto especificado de problemas de prueba y un procedimiento para puntuar los métodos que los resuelven. Este taller audita uno completo y construido. La aritmética es exacta dentro de ese pequeño mundo; no es un resultado medido sobre programas reales ni una promesa sobre cualquier tanda futura de tareas.
+
+## Fija el protocolo antes de leer quién gana
+
+<MCQ client:visible pretest question="Dos informes discrepan sobre el mejor método de búsqueda. ¿Qué debe coincidir para comparar directamente sus puntuaciones?"
+  options={[
+    { text: 'La población de tareas, la puntuación, la información y el presupuesto de evaluaciones.', correct: true },
+    { text: 'Solo los nombres de los métodos, sin importar las tareas o los recursos utilizados.' },
+    { text: 'Solo la puntuación más alta que aparece en el resumen de cada informe.' }
+  ]}
+  explanation="El nombre del método no define la comparación. Cambiar las tareas, la información, la puntuación o las evaluaciones permitidas puede cambiar el significado del resultado."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Imagina una tarea de exportación de vistas previas con tres ajustes disponibles: **A, B y C**. Probar un ajuste devuelve una recompensa de **0 o 1**; preferimos la mayor. Aquí, una **función** es una asignación fija de una recompensa a cada ajuste. Por ejemplo, **001** significa que A devuelve 0, B devuelve 0 y C devuelve 1.
+
+Estas reglas definen el benchmark inicial:
+
+| Campo del protocolo | Regla declarada |
+|---|---|
+| Tareas posibles | Las ocho asignaciones binarias a A, B y C |
+| Pesos de las tareas | Cada asignación tiene un peso de 1/8 |
+| Observaciones | Un método solo conoce las recompensas de los ajustes que ha probado |
+| Pruebas | Sin ruido, recompensas cambiantes ni consultas repetidas |
+| Método AB | Consultar A y después B |
+| Método AC | Consultar A y después C |
+| Presupuesto | Exactamente dos consultas distintas por método, aunque la primera devuelva 1 |
+| Puntuación bruta | La recompensa más alta entre los dos valores observados por ese método |
+
+Una **consulta**, o evaluación, es una prueba que revela la recompensa de un ajuste. Estos métodos siguen órdenes fijos. Ninguno puede leer un valor no consultado de la tabla de auditoría. Su presupuesto es un recuento exacto, no un permiso para parar antes tras un resultado prometedor.
+
+En el modelo estático y finito del resultado de Wolpert y Macready de **1997**, promediar uniformemente sobre todas las funciones objetivo da la misma distribución de secuencias de recompensas observadas para métodos con el mismo número de evaluaciones distintas. Aplicar la misma puntuación a esas secuencias produce, por tanto, medias iguales. Es una afirmación condicionada sobre un modelo de búsqueda, no un teorema sobre cualquier método, tiempo de ejecución o decisión cotidiana. [Artículo primario](https://faculty.cc.gatech.edu/~isbell/reading/papers/nfl-optimization.pdf)
+
+<MatchConcepts client:visible question="Relaciona cada campo de la comparación con su función"
+  pairs={[
+    { term: 'Población de tareas', definition: 'Las funciones comparadas y los pesos que se les asignan.' },
+    { term: 'Presupuesto de consultas', definition: 'El número especificado de evaluaciones distintas permitido o exigido.' },
+    { term: 'Puntuación observada', definition: 'Una cantidad calculada con los valores que el método ha consultado realmente.' },
+    { term: 'Límite de información', definition: 'La distinción entre los valores consultados y el registro completo de auditoría.' }
+  ]}
+  explanation="Estos campos determinan la comparación antes de sumar las puntuaciones. El registro completo no es información adicional disponible para el método mientras busca."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un término y después su definición."
+  allCorrectLabel="✓ Todas las parejas son correctas"
+  partialResultWord="correctas"
+  pickDefinitionHint="→ elige ahora una definición"
+  notLinkedHint="sin enlazar todavía"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+/>
+
+## Reconstruye la puntuación en todas las tareas
+
+<MCQ client:visible pretest question="Un método solo observa recompensas nulas. ¿Ha dejado necesariamente de observar un máximo global?"
+  options={[
+    { text: 'No; si toda la función es cero, un cero observado es un máximo global.', correct: true },
+    { text: 'Sí; cero nunca puede ser el mayor valor de una función finita.' },
+    { text: 'Sí; un valor consultado solo es máximo si se prueban todas las entradas.' }
+  ]}
+  explanation="Un máximo global es el mayor valor de cualquier entrada de esa tarea. Puede valer cero. Encontrar un uno y observar un máximo global son criterios de éxito diferentes."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Cada fila es una función completa. Las últimas columnas son **max(A,B)** y **max(A,C)**: conserva el mayor de los dos valores que consulta cada método.
+
+| Función ABC | A | B | C | Puntuación observada de AB | Puntuación observada de AC |
+|---|---:|---:|---:|---:|---:|
+| 000 | 0 | 0 | 0 | 0 | 0 |
+| 001 | 0 | 0 | 1 | 0 | 1 |
+| 010 | 0 | 1 | 0 | 1 | 0 |
+| 011 | 0 | 1 | 1 | 1 | 1 |
+| 100 | 1 | 0 | 0 | 1 | 1 |
+| 101 | 1 | 0 | 1 | 1 | 1 |
+| 110 | 1 | 1 | 0 | 1 | 1 |
+| 111 | 1 | 1 | 1 | 1 | 1 |
+| Suma de puntuaciones | | | | 6 | 6 |
+
+En **001**, AB observa 0 y 0; AC observa 0 y 1. AC gana esa fila. En **010**, gana AB. Las demás filas empatan. Cada columna suma **6**, de modo que ambas medias ponderadas son **6/8 = 3/4 = 0,75**.
+
+<ConsequenceTree client:visible title="Audita una fila sin dar al método los valores no consultados"
+  eyebrow="El registro posterior es la función cero-cero-uno"
+  instructions="Revela las observaciones de cada protocolo fijado. Las ramas comparan ejecuciones distintas, no decisiones tomadas después de leer una recompensa desconocida."
+  decisionLabel="Protocolo fijado" orderLabels={['Primera consulta', 'Segunda consulta', 'Puntuación']}
+  promptLabel="Mostrar la siguiente observación" expandAllLabel="Mostrar ambos registros" collapseLabel="Contraer los registros"
+  valenceLabels={{ good: 'Favorable', bad: 'Desfavorable', mixed: 'Mixto', neutral: 'Sin clasificar' }}
+  decision={{ label: 'Cada método empieza con su orden declarado', children: [
+    { label: 'Consultar A y observar cero', note: 'Ninguna ejecución ha consultado aún B ni C.', children: [
+      { label: 'AB consulta B y observa cero', note: 'Ya se ha consumido el presupuesto exacto de consultas.', children: [{ label: 'AB recibe una puntuación observada de cero', note: 'AB no ha consultado C, aunque la auditoría pueda mostrarlo.' }] },
+      { label: 'AC consulta C y observa uno', note: 'Ya se ha consumido el presupuesto exacto de consultas.', children: [{ label: 'AC recibe una puntuación observada de uno', note: 'AC no ha consultado B.' }] }
+    ] }
+  ] }}
+  caption="Una fila puede favorecer a un método mientras empatan las medias de la población completa declarada. Ningún método cambia de orden después de ver la fila entera."
+/>
+
+Como las puntuaciones solo son 0 o 1, su media también equivale a la probabilidad de **observar al menos un 1** bajo los pesos estipulados. Esa coincidencia numérica depende de cómo hemos definido esta puntuación binaria.
+
+**No** es la probabilidad de observar un máximo global. AB solo deja de observarlo en **001**; AC, solo en **010**. Ambos observan, por tanto, un máximo global en **7/8** de estas funciones, incluida **000**, cuyo máximo global es 0. La media de puntuación bruta sigue siendo **6/8**. Informa de la métrica que has calculado.
+
+Estas son todas las funciones posibles del pequeño mundo definido, no ocho tareas muestreadas. Una tanda futura no tiene por qué contener cada función una vez. La enumeración exacta establece la media ponderada estipulada; no elimina el azar de una secuencia futura ni establece frecuencias de tareas reales.
+
+<FillBlank client:visible question="Comprueba el denominador y qué significa tener éxito"
+  text="Cada columna de puntuaciones brutas suma {{seis|siete|ocho}} entre las {{ocho|seis|cuatro}} funciones equiponderadas. Contar el éxito de máximo global también incluye como satisfactorio el caso {{todo cero|uno no consultado|sin consultas}}."
+  explanation="Seis unos entre ocho dan la media de puntuación bruta. La función todo cero añade un éxito de máximo global sin añadir un punto a esa puntuación."
+  instructions="Elige la opción correcta en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+/>
+
+## Cambia la población antes de elegir método
+
+<MCQ client:visible pretest question="La población futura contiene menos funciones que el conjunto binario completo. ¿Qué se deduce automáticamente?"
+  options={[
+    { text: 'Nada sobre un ganador hasta comparar las tareas, los pesos y los métodos.', correct: true },
+    { text: 'Toda restricción debe dar medias diferentes a los dos métodos.' },
+    { text: 'El método que gana una fila seleccionada debe ganar toda tarea futura.' }
+  ]}
+  explanation="Una restricción puede cambiar la comparación, pero no garantiza una diferencia. Especifica qué funciones quedan y qué probabilidad tiene cada una."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Ahora, un contrato conocido **antes de elegir método** especifica que **C siempre devuelve 0**. Cada una de las cuatro funciones restantes tiene peso **1/4**. AB y AC mantienen sus protocolos fijos de dos consultas; AC gasta una consulta en C aunque su valor ya se conoce por el contrato.
+
+| Función ABC permitida | Peso | Puntuación observada de AB | Puntuación observada de AC |
+|---|---:|---:|---:|
+| 000 | 1/4 | 0 | 0 |
+| 010 | 1/4 | 1 | 0 |
+| 100 | 1/4 | 1 | 1 |
+| 110 | 1/4 | 1 | 1 |
+| Suma de puntuaciones | | 3 | 2 |
+
+La media de AB es **3/4 = 0,75** y la de AC es **2/4 = 0,5**. Misma métrica y mismo número de consultas, distinta ley de tareas. Bajo esa ley, AB tiene ventaja sobre AC. Es una comparación de estos protocolos en esta población, no una prueba de que AB sea óptimo entre todos los métodos posibles.
+
+<RateComparison client:visible locale="es" title="Mantén la población junto a la tasa de unos observados"
+  scenarioLabel="Población de tareas declarada" countsLabel="Funciones con un uno observado respecto al total"
+  differenceLabel="Diferencia de tasas" pointLabel="punto porcentual" pointsLabel="puntos porcentuales"
+  scenarios={[
+    { label: 'Todas las funciones binarias con pesos iguales', groups: [{ label: 'AB', events: 6, total: 8 }, { label: 'AC', events: 6, total: 8 }] },
+    { label: 'C vale cero, cuatro pesos iguales', groups: [{ label: 'AB', events: 3, total: 4 }, { label: 'AC', events: 2, total: 4 }] }
+  ]}
+/>
+
+Tampoco toda restricción crea una ventaja. Si solo son posibles **000 y 111**, cada una con peso **1/2**, cualquier método de dos consultas observa dos ceros o dos unos. Todos esos métodos tienen una puntuación observada media de **1/2**. Esa población restringida sigue dando empate. Puedes comprobarlo sin un teorema mayor: ambas funciones son constantes en A, B y C.
+
+Un subconjunto favorable elegido **después** de ver los resultados no demuestra que las tareas futuras sigan esa ley. Si un informe conserva solo las cuatro filas con C cero para promocionar AB, pide una razón independiente para creer que describen la carga de trabajo prevista. En nuestro caso hipotético, el contrato aporta esa razón; la tabla por sí sola no lo haría.
+
+<Categorize client:visible question="Distingue la ley declarada de una extensión sin justificar"
+  buckets={['Respaldado dentro del modelo', 'Necesita más evidencia']}
+  items={[
+    { text: 'AB tiene mayor media que AC bajo la ley declarada de C cero.', bucket: 'Respaldado dentro del modelo' },
+    { text: 'Todo método de dos consultas empata en las dos funciones constantes equiponderadas.', bucket: 'Respaldado dentro del modelo' },
+    { text: 'El subconjunto de pruebas más favorable describe las tareas futuras de los clientes.', bucket: 'Necesita más evidencia' },
+    { text: 'AB es mejor que cualquier protocolo posible porque supera aquí a AC.', bucket: 'Necesita más evidencia' }
+  ]}
+  explanation="La enumeración establece las comparaciones exactas para las funciones y pesos declarados. La representatividad y la superioridad frente a métodos no probados son afirmaciones distintas."
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo está bien clasificado"
+  partialResultWord="correctas"
+/>
+
+## Añade costes sin cambiar la pregunta a escondidas
+
+<MCQ client:visible pretest question="Un método tiene mayor media de puntuación bruta, pero usa más consultas. ¿Basta para que sea la mejor decisión con costes?"
+  options={[
+    { text: 'No; el objetivo debe decir cómo se valoran la puntuación extra y el coste.', correct: true },
+    { text: 'Sí; los costes no pueden afectar al orden por beneficio neto esperado.' },
+    { text: 'Sí; el teorema con consultas fijas compara todos los presupuestos a la vez.' }
+  ]}
+  explanation="Comparar puntuaciones brutas y comparar beneficios netos son objetivos distintos. Un teorema con un recuento fijo no iguala candidatos que usan recuentos diferentes."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Volvemos a **las ocho funciones con peso 1/8 cada una**. Añadimos una escala ficticia distinta: una puntuación bruta de **1 aporta 10 créditos de planificación (cr)**; una puntuación de **0 aporta 0**. Cada evaluación cuesta **c créditos**. Nuestro objetivo es el mayor **beneficio neto esperado**: la media ponderada del beneficio después de pagar todas las evaluaciones exigidas.
+
+Comparamos solo estos candidatos declarados:
+
+| Candidato | Evaluaciones exigidas | Beneficio bruto esperado antes de los costes |
+|---|---:|---:|
+| AB | 2 | 10 × 6/8 = 7,5 créditos |
+| Solo A | 1 | 10 × 4/8 = 5 créditos |
+| Abstenerse | 0 | Un pago externo especificado por separado de 0 créditos |
+
+Abstenerse es una alternativa externa, no la afirmación de que el máximo de un conjunto vacío de observaciones sea cero. AB sigue haciendo ambas consultas aunque A ya devuelva 1. Solo A siempre hace su única consulta.
+
+Como cada protocolo tiene un número fijo de consultas, su coste total es igual en todas las funciones. El neto esperado de AB es **7,5 − 2c**; el de Solo A, **5 − c**; abstenerse da **0**. Con coste **3**, AB da **1,5**, Solo A da **2** y abstenerse da **0**. La mayor puntuación bruta no gana la comparación neta.
+
+| Coste por evaluación en créditos | Neto de AB | Neto de Solo A | Abstenerse | Mayor entre estos candidatos |
+|---:|---:|---:|---:|---|
+| 1 | 5,5 | 4 | 0 | AB |
+| 2,5 | 2,5 | 2,5 | 0 | Empate de AB y Solo A |
+| 3 | 1,5 | 2 | 0 | Solo A |
+| 5 | −2,5 | 0 | 0 | Empate de Solo A y abstenerse |
+| 6 | −4,5 | −1 | 0 | Abstenerse |
+
+<SearchBudgetComparison client:visible locale="es" title="Compara el beneficio neto tras las consultas exigidas"
+  instructions="Cambia solo el coste por evaluación. La población, los beneficios brutos y los recuentos fijos se mantienen. Lee los valores negativos a la izquierda del cero."
+  caption="Estos beneficios netos esperados comparan solo los tres protocolos de la lista."
+  methods={[{ id: 'AB', label: 'AB: exactamente dos consultas', gross: 7.5, evaluations: 2 }, { id: 'A', label: 'Solo A: exactamente una consulta', gross: 5, evaluations: 1 }, { id: 'outside', label: 'Abstenerse: alternativa externa', gross: 0, evaluations: 0 }]}
+  costs={[0, 1, 2.5, 3, 5, 6]} initialCost={1} unit="cr"
+  labels={{ cost: 'Coste por evaluación', method: 'Candidato', gross: 'Beneficio bruto esperado', evaluations: 'Evaluaciones', totalCost: 'Coste total', net: 'Neto esperado', axis: 'Una escala neta común para todos los costes', zero: 'Cero', tableCaption: 'Cuentas esperadas por protocolo fijo' }}
+/>
+
+Los dos empates significan cosas distintas. **AB − Solo A = 2,5 − c**, así que sus valores netos se encuentran en **c = 2,5**. **Solo A − abstenerse = 5 − c**, de modo que esos se encuentran en **c = 5**. En el segundo empate, AB ya queda por debajo de ambos. Distingue el cruce entre dos candidatos del valor más alto entre todos los de la lista.
+
+Por debajo del coste **2,5**, AB encabeza este conjunto; entre **2,5 y 5**, lo hace Solo A; por encima de **5**, abstenerse. Los puntos frontera mantienen sus empates. Otros protocolos, incluidas las reglas cuyo número de consultas depende de lo observado, necesitan sus propias cuentas. La tabla no ha demostrado que sean inferiores.
+
+Usa esta auditoría cuando un informe compare una búsqueda larga y cara con otra corta, o cambie de puntuación bruta a valor tras costes. Un número de consultas diferente y una escala de utilidad añadida exigen reconstruir la comparación; no violan el empate con consultas fijas.
+
+<MCQ client:visible allowMultiple question="¿Qué afirmaciones se mantienen tras auditar los costes?"
+  options={[
+    { text: 'La comparación entre AB y Solo A cambia el número de evaluaciones.', correct: true },
+    { text: 'El empate de Solo A y abstenerse obliga a que AB empate también.' },
+    { text: 'La conversión de puntuación a créditos añade un supuesto ficticio de objetivo.', correct: true },
+    { text: 'El mejor candidato de la lista es automáticamente óptimo entre todas las reglas adaptativas.' }
+  ]}
+  explanation="Las comparaciones de puntuación con presupuesto igual y las cuentas netas con presupuesto distinto responden a preguntas diferentes. Un empate entre dos no iguala un tercer valor ni demuestra un óptimo global."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Audita otra población de forma independiente
+
+Se especifica una nueva carga de trabajo **antes de elegir**: **B siempre devuelve 0** y las cuatro funciones compatibles tienen el mismo peso. Conserva AB y AC, el presupuesto exacto de dos consultas y el **objetivo de puntuación bruta observada**. Es otra ley de tareas, no la pregunta anterior sobre créditos y costes.
+
+| Nueva función ABC permitida | A | B | C |
+|---|---:|---:|---:|
+| 000 | 0 | 0 | 0 |
+| 001 | 0 | 0 | 1 |
+| 100 | 1 | 0 | 0 |
+| 101 | 1 | 0 | 1 |
+
+Calcula ambas columnas de puntuación. ¿Se mantiene la ventaja anterior de AB? Comprueba también el criterio de máximo global: ¿una puntuación bruta nula cuenta siempre como fracaso en ese criterio?
+
+<MCQ client:visible question="Con las cuatro funciones equiponderadas de la nueva carga B cero, ¿qué comparación bruta se obtiene?"
+  options={[
+    { text: 'AC tiene media de tres cuartos; AB, de un medio.', correct: true },
+    { text: 'AB tiene media de tres cuartos; AC, de un medio.' },
+    { text: 'Ambos deben conservar la media del universo completo de tres cuartos.' }
+  ]}
+  explanation="Usa solo las cuatro funciones de la nueva carga y los dos valores consultados por cada protocolo. La solución distingue esa métrica del éxito de máximo global."
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+<details>
+<summary>Comprueba las columnas nuevas y el alcance del resultado</summary>
+
+| Función | Puntuación observada de AB | Puntuación observada de AC |
+|---|---:|---:|
+| 000 | 0 | 0 |
+| 001 | 0 | 1 |
+| 100 | 1 | 1 |
+| 101 | 1 | 1 |
+| Suma | 2 | 3 |
+
+Con cuatro pesos iguales, la media de AB es **2/4 = 1/2** y la de AC es **3/4**. Cambia el método preferido de esta pareja porque cambia la ley de tareas. La métrica y el número de consultas se mantienen.
+
+<RateComparison client:visible locale="es" title="Comprueba la comparación de población independiente"
+  scenarioLabel="Población declarada" countsLabel="Funciones con un uno observado respecto al total"
+  differenceLabel="Diferencia de tasas" pointLabel="punto porcentual" pointsLabel="puntos porcentuales"
+  scenarios={[{ label: 'B vale cero, cuatro pesos iguales', groups: [{ label: 'AB', events: 2, total: 4 }, { label: 'AC', events: 3, total: 4 }] }]}
+/>
+
+Para el éxito de máximo global, añade la fila todo cero. AB observa un máximo global en **3/4** de estas funciones y AC, en **4/4**. Son cifras distintas de sus tasas de unos observados. Ninguna función desaparece por tener todas las recompensas a cero.
+
+</details>
+
+Un informe defendible nombra la población y sus pesos, la información de cada método, su protocolo de consultas y la métrica. Para extender el resultado a una carga real, consigue evidencia de que la carga y los costes encajan con esos supuestos. Tareas nuevas no usadas para seleccionar el benchmark favorable pueden ayudar a evaluar esa extensión; la enumeración del pequeño mundo no la establece por sí sola.
+
+## Conecta la auditoría de la comparación
+
+<MindMap client:visible title="Qué demuestra realmente una comparación de búsquedas"
+  root={{ label: 'Audita un benchmark', children: [
+    { label: 'Declara la comparación', children: [{ label: 'Tareas y pesos' }, { label: 'Información y consultas fijas' }, { label: 'Puntuación observada' }] },
+    { label: 'Reconstruye cada fila', children: [{ label: 'Consulta solo las entradas declaradas' }, { label: 'Mantén la función todo cero' }, { label: 'Separa el éxito de máximo global' }] },
+    { label: 'Cambia una condición explícitamente', children: [{ label: 'Otra población puede cambiar el ganador' }, { label: 'Algunas restricciones mantienen el empate' }, { label: 'Otro presupuesto exige otra comparación' }] },
+    { label: 'Contabiliza los costes', children: [{ label: 'Define el valor en créditos' }, { label: 'Paga todas las consultas exigidas' }, { label: 'Explicita los empates y la alternativa externa' }] },
+    { label: 'Limita la conclusión', children: [{ label: 'Solo los candidatos y el objetivo declarados' }, { label: 'Sin observaciones futuras ocultas' }, { label: 'La evidencia de una carga real es otra cuestión' }] }
+  ] }}
+  eyebrow="Visión de conjunto"
+  outlineLabel="Esquema"
+/>
+
+<Quiz client:visible title="Comprueba la población, la puntuación y el presupuesto"
+  questions={[
+    { question: 'En el benchmark binario uniforme completo, ¿cuál es la media bruta observada tras las dos consultas declaradas?', options: [
+      { text: 'Tres cuartos tanto para AB como para AC.', correct: true },
+      { text: 'Siete octavos tanto para AB como para AC.' },
+      { text: 'Un medio para AB y uno para AC.' }
+    ], explanation: 'Ambas columnas brutas contienen seis unos entre ocho funciones equiponderadas. Siete octavos responde a la pregunta distinta del éxito de máximo global.' },
+    { question: '¿Por qué se mantiene la función todo cero en el benchmark?', options: [
+      { text: 'Es una función binaria válida y su máximo vale cero.', correct: true },
+      { text: 'Es inválida salvo que un algoritmo cambie una recompensa a escondidas.' },
+      { text: 'Hay que sustituirla por otra tarea para evitar una puntuación baja.' }
+    ], explanation: 'Quitar una función válida cambia la población. Un cero observado puede ser máximo global sin añadir un punto a la puntuación de unos observados.' },
+    { question: 'La ley C cero favorece a AB. ¿Qué se ha establecido exactamente?', options: [
+      { text: 'AB supera a AC en media bajo esa ley y con el mismo número de consultas.', correct: true },
+      { text: 'AB es el mejor método posible para cualquier carga de búsqueda futura.' },
+      { text: 'Toda restricción de funciones debe favorecer a AB frente a AC.' }
+    ], explanation: 'Las filas y pesos respaldan una comparación local. Las funciones constantes mantienen el empate y la ley B cero favorece a AC.' },
+    { question: 'Con tres créditos por evaluación, ¿qué candidato tiene el mayor beneficio neto esperado en el caso de costes del universo completo?', options: [
+      { text: 'Solo A, con dos créditos netos esperados.', correct: true },
+      { text: 'AB, con siete créditos y medio netos.' },
+      { text: 'Abstenerse, con tres créditos netos esperados.' }
+    ], explanation: 'Solo A da cinco menos tres: dos. AB da siete y medio menos seis: uno y medio. Abstenerse es el pago cero definido por separado.' },
+    { question: 'Con cinco créditos por evaluación, ¿qué empate importa entre los candidatos de la lista?', options: [
+      { text: 'Solo A y abstenerse empatan a cero; AB queda por debajo.', correct: true },
+      { text: 'AB y Solo A empatan por encima del pago de abstenerse.' },
+      { text: 'Todos empatan porque el precio de consulta es común.' }
+    ], explanation: 'El precio de evaluación es común, pero los recuentos difieren. Solo A paga cinco; AB, diez; abstenerse no paga nada.' },
+    { question: 'Selecciona los datos necesarios para interpretar una afirmación de benchmark.', allowMultiple: true, options: [
+      { text: 'La población de problemas y sus pesos.', correct: true },
+      { text: 'La puntuación, las observaciones y el protocolo.', correct: true },
+      { text: 'La conversión a valor y los costes si se compara beneficio neto.', correct: true },
+      { text: 'Solo la fila más favorable, elegida tras ver los resultados.' }
+    ], explanation: 'Estos datos identifican la comparación. Una fila favorable no establece una ley futura de tareas ni una ventaja en objetivos no probados.' },
+    { question: '¿Qué se deduce si solo son equiprobables las dos funciones constantes?', options: [
+      { text: 'Todo método de dos consultas tiene media observada de un medio.', correct: true },
+      { text: 'Todo método de dos consultas debe tener una media distinta.' },
+      { text: 'AB debe conservar la misma ventaja que en la clase C cero.' }
+    ], explanation: 'Ambos valores consultados son cero en una función y uno en la otra, sea cual sea la entrada. Una restricción no tiene por qué eliminar el empate.' }
+  ]}
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario terminado"
+  perfectMessage="Todas las respuestas son correctas."
+  goodMessage="Revisa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Vuelve a las secciones que necesites practicar."
+  gateLabel="Comprueba la respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Puntuación"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+Continúa con el [examen final](/es/no-free-lunch-theorem/final-exam), que incluye las comprobaciones de población, métrica y costes del taller.

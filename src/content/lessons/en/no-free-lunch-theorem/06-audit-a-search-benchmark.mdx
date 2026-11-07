@@ -1,0 +1,313 @@
+---
+title: "Workshop: Audit a Search Benchmark"
+description: "Reconstruct a search comparison, separate observed scores from global success, and check how task weights, query budgets and costs change the result."
+topic: "en/no-free-lunch-theorem"
+order: 7
+minutes: 28
+updated: 2026-11-07
+---
+
+import { Callout, MCQ, FillBlank, Categorize, MatchConcepts, ConsequenceTree, RateComparison, SearchBudgetComparison, MindMap, Quiz } from '@/components/react';
+
+A report announces that search method AB beats method AC. Before choosing a winner, open the test protocol. Which tasks were included? How were they weighted? What did each method observe, and how much searching was allowed?
+
+A **benchmark** is a specified set of test problems and a procedure for scoring methods on them. This workshop audits a complete, constructed benchmark. The arithmetic is exact within that small world; it is not a measured result about real software or a promise about an arbitrary future batch of jobs.
+
+## Fix the protocol before reading the winner
+
+<MCQ client:visible pretest question="Two reports disagree about the best search method. What must match before their scores are directly comparable?"
+  options={[
+    { text: 'The task population, scoring rule, information and evaluation budget.', correct: true },
+    { text: 'Only the method names, regardless of the tasks or resources used.' },
+    { text: 'Only the largest score printed in either report’s summary.' }
+  ]}
+  explanation="A method name does not define a comparison. Changing tasks, information, score or allowed evaluations can change what the result means."
+/>
+
+Imagine a preview-export task with three available presets, **A, B and C**. Testing a preset returns a reward of **0 or 1**, with the larger reward preferred. A **function** here is simply a fixed assignment of one reward to each preset. For example, **001** means A returns 0, B returns 0 and C returns 1.
+
+The following rules define the initial benchmark:
+
+| Protocol field | Declared rule |
+|---|---|
+| Possible tasks | All eight binary assignments to A, B and C |
+| Task weights | Each assignment has weight 1/8 |
+| Observations | A method learns only the rewards of presets it has tested |
+| Tests | No noise, changing rewards or repeated queries |
+| Method AB | Query A, then B |
+| Method AC | Query A, then C |
+| Budget | Exactly two distinct queries per method, even if the first returns 1 |
+| Raw score | The highest reward among that method's two observed values |
+
+A **query**, or evaluation, is one test revealing a preset's reward. These methods have fixed orders. Neither can read an unqueried value from the auditor's table. Their budget is an exact count, not permission to stop early after a promising result.
+
+In the static finite setting of Wolpert and Macready's **1997** result, a uniform average over all objective functions gives the same distribution of observed reward sequences for methods using the same number of distinct evaluations. Applying the same score to those sequences therefore gives equal averages. This is a conditional statement about a search model, not a theorem about every kind of method, runtime or everyday choice. [Primary paper](https://faculty.cc.gatech.edu/~isbell/reading/papers/nfl-optimization.pdf)
+
+<MatchConcepts client:visible question="Match each benchmark field to its job"
+  pairs={[
+    { term: 'Task population', definition: 'The functions being compared and the weights assigned to them.' },
+    { term: 'Query budget', definition: 'The specified number of distinct reward evaluations allowed or required.' },
+    { term: 'Observed score', definition: 'A quantity computed from the values the method actually queried.' },
+    { term: 'Information boundary', definition: 'The distinction between queried values and an auditor’s complete record.' }
+  ]}
+  explanation="These fields determine the comparison before anyone adds the scores. The full benchmark record is not extra information available to a method during its search."
+/>
+
+## Reconstruct the score on every task
+
+<MCQ client:visible pretest question="A method observes only zero rewards. Must it have failed to observe a global maximum?"
+  options={[
+    { text: 'No; if the whole function is zero, an observed zero is a global maximum.', correct: true },
+    { text: 'Yes; zero can never be the largest value in a finite function.' },
+    { text: 'Yes; a queried value is a maximum only if every input was tested.' }
+  ]}
+  explanation="A global maximum is the highest value anywhere in that task. Its value can be zero. Finding a one and observing a global maximum are different success criteria."
+/>
+
+Read each row as one complete function. The last columns are **max(A,B)** and **max(A,C)**: keep the larger of the two values each method queried.
+
+| Function ABC | A | B | C | AB observed score | AC observed score |
+|---|---:|---:|---:|---:|---:|
+| 000 | 0 | 0 | 0 | 0 | 0 |
+| 001 | 0 | 0 | 1 | 0 | 1 |
+| 010 | 0 | 1 | 0 | 1 | 0 |
+| 011 | 0 | 1 | 1 | 1 | 1 |
+| 100 | 1 | 0 | 0 | 1 | 1 |
+| 101 | 1 | 0 | 1 | 1 | 1 |
+| 110 | 1 | 1 | 0 | 1 | 1 |
+| 111 | 1 | 1 | 1 | 1 | 1 |
+| Sum of scores | | | | 6 | 6 |
+
+On **001**, AB observes 0 and 0; AC observes 0 and 1. AC wins that row. On **010**, AB wins instead. The remaining rows tie. Each score column sums to **6**, so each weighted mean is **6/8 = 3/4 = 0.75**.
+
+<ConsequenceTree client:visible title="Audit one row without giving the method unseen values"
+  eyebrow="The retrospective record is function zero-zero-one"
+  instructions="Reveal each fixed protocol's observations. The two branches compare separate runs, not choices made after reading an unseen reward."
+  decisionLabel="Protocol fixed" orderLabels={['First query', 'Second query', 'Scoring']}
+  promptLabel="Reveal the next observation" expandAllLabel="Reveal both audit records" collapseLabel="Collapse the records"
+  valenceLabels={{ good: 'Favourable', bad: 'Unfavourable', mixed: 'Mixed', neutral: 'Unclassified' }}
+  decision={{ label: 'Each method begins with its declared order', children: [
+    { label: 'Query A and observe zero', note: 'Neither run has queried B or C yet.', children: [
+      { label: 'AB queries B and observes zero', note: 'The exact query budget is now used.', children: [{ label: 'AB receives an observed score of zero', note: 'C is unqueried by AB, even though the auditor can display it.' }] },
+      { label: 'AC queries C and observes one', note: 'The exact query budget is now used.', children: [{ label: 'AC receives an observed score of one', note: 'B is unqueried by AC.' }] }
+    ] }
+  ] }}
+  caption="An individual row can favour one method while the declared full-population averages tie. No method changed its order after seeing the full row."
+/>
+
+Because our scores are only 0 or 1, their mean also equals the probability of **observing at least one 1** under the stipulated weights. That numerical coincidence depends on this binary score definition.
+
+It is **not** the probability of observing a global maximum. AB misses a global maximum only on **001**; AC misses it only on **010**. Both therefore observe a global maximum on **7/8** of these functions, including **000**, where the global maximum is 0. The raw-score mean remains **6/8**. Report the metric you actually calculated.
+
+These are all possible functions in this defined toy world, not eight sampled jobs. A future batch need not contain each function once. Exact enumeration establishes the stated weighted average; it does not remove randomness from a future sequence or establish real-world task frequencies.
+
+<FillBlank client:visible question="Check the denominator and the meaning of success"
+  text="Each raw-score column sums to {{six|seven|eight}} across the {{eight|six|four}} equally weighted functions. Counting global-maximum success would also count the {{all-zero|unqueried-one|empty-query}} case as successful."
+  explanation="Six ones out of eight gives the raw-score mean. The all-zero function adds one global-maximum success without adding a point to that score."
+/>
+
+## Change the population before choosing a method
+
+<MCQ client:visible pretest question="A future task population is narrower than all binary functions. What follows automatically?"
+  options={[
+    { text: 'Nothing about a winner until the permitted tasks, weights and methods are compared.', correct: true },
+    { text: 'Every restriction must make the two methods have different means.' },
+    { text: 'The method that won one selected row must win every future task.' }
+  ]}
+  explanation="A restriction can change the comparison, but does not guarantee a difference. Specify which functions remain and how likely each is."
+/>
+
+Now a contract known **before method selection** specifies **C always returns 0**. The four remaining functions each have weight **1/4**. AB and AC still follow their fixed two-query protocols; AC uses a query on C even though that value is now known from the contract.
+
+| Permitted function ABC | Weight | AB observed score | AC observed score |
+|---|---:|---:|---:|
+| 000 | 1/4 | 0 | 0 |
+| 010 | 1/4 | 1 | 0 |
+| 100 | 1/4 | 1 | 1 |
+| 110 | 1/4 | 1 | 1 |
+| Sum of scores | | 3 | 2 |
+
+AB's mean is **3/4 = 0.75**, while AC's is **2/4 = 0.5**. Same metric and query count, different task law. Under this law AB has an advantage over AC. That is a comparison of these protocols on this population, not a proof that AB is optimal among all possible methods.
+
+<RateComparison client:visible locale="en" title="Keep the population beside the observed-one rate"
+  scenarioLabel="Declared task population" countsLabel="Functions with an observed one out of all functions"
+  differenceLabel="Rate difference" pointLabel="percentage point" pointsLabel="percentage points"
+  scenarios={[
+    { label: 'All binary functions, equal weights', groups: [{ label: 'AB', events: 6, total: 8 }, { label: 'AC', events: 6, total: 8 }] },
+    { label: 'C is zero, four equal weights', groups: [{ label: 'AB', events: 3, total: 4 }, { label: 'AC', events: 2, total: 4 }] }
+  ]}
+/>
+
+Nor does every restriction create an advantage. If only **000 and 111** are possible, each with weight **1/2**, every two-query method observes either two zeros or two ones. Every such method has mean observed score **1/2**. This restricted population still gives a tie. You can verify it without a larger theorem: both functions are constant across A, B and C.
+
+A flattering subset chosen **after** seeing the results does not show that future tasks follow its law. If a report keeps only the four C-zero rows to advertise AB, ask for an independent reason those rows describe the intended workload. The contract supplied that reason in our hypothetical case; the table alone would not.
+
+<Categorize client:visible question="Separate a declared task law from an unsupported extension"
+  buckets={['Supported within the stated model', 'Needs additional evidence']}
+  items={[
+    { text: 'AB has a higher mean than AC under the declared C-zero law.', bucket: 'Supported within the stated model' },
+    { text: 'Every two-query method ties on the two equally weighted constant functions.', bucket: 'Supported within the stated model' },
+    { text: 'The most flattering benchmark subset describes future customer tasks.', bucket: 'Needs additional evidence' },
+    { text: 'AB is best among every possible protocol because it beats AC here.', bucket: 'Needs additional evidence' }
+  ]}
+  explanation="Enumeration establishes the exact comparisons for the declared functions and weights. Representativeness and superiority over untested methods are different claims."
+/>
+
+## Add costs without changing the question silently
+
+<MCQ client:visible pretest question="One method has a higher raw-score mean but uses more queries. Does that alone make it the better costly decision?"
+  options={[
+    { text: 'No; the objective must say how extra score and evaluation cost are valued.', correct: true },
+    { text: 'Yes; query costs cannot affect a ranking by expected net benefit.' },
+    { text: 'Yes; the fixed-query theorem compares every resource budget at once.' }
+  ]}
+  explanation="A raw-score comparison and a net-benefit comparison have different objectives. A theorem at a fixed query count does not equalise candidates using different counts."
+/>
+
+Return to **all eight functions with weight 1/8 each**. Add a separate, fictional value scale: a raw score of **1 earns 10 planning credits (cr)**; a score of **0 earns 0**. Each evaluation costs **c credits**. Our objective is the highest **expected net benefit**, meaning the weighted average benefit after paying every required evaluation cost.
+
+Compare only these declared candidates:
+
+| Candidate | Required evaluations | Expected gross benefit before evaluation costs |
+|---|---:|---:|
+| AB | 2 | 10 × 6/8 = 7.5 credits |
+| A only | 1 | 10 × 4/8 = 5 credits |
+| Abstain | 0 | A separately specified outside payoff of 0 credits |
+
+Abstention is an outside option, not a claim that the maximum of an empty observation set is zero. AB still performs both queries even when A already returns 1. A only always performs its one query.
+
+Since each protocol's query count is fixed, its total cost is the same on every function. Thus AB's expected net is **7.5 − 2c**; A only gives **5 − c**; abstention gives **0**. At cost **3**, AB gives **1.5**, A only gives **2**, and abstention gives **0**. The larger gross score does not win the net comparison.
+
+| Cost per evaluation in credits | AB net | A only net | Abstain | Highest among these candidates |
+|---:|---:|---:|---:|---|
+| 1 | 5.5 | 4 | 0 | AB |
+| 2.5 | 2.5 | 2.5 | 0 | AB and A only tie |
+| 3 | 1.5 | 2 | 0 | A only |
+| 5 | −2.5 | 0 | 0 | A only and abstention tie |
+| 6 | −4.5 | −1 | 0 | Abstain |
+
+<SearchBudgetComparison client:visible locale="en" title="Compare net benefit after the required queries"
+  instructions="Change only cost per evaluation. Population, gross benefits and fixed query counts remain unchanged. Read negative values to the left of zero."
+  caption="These expected net benefits compare only the three listed protocols."
+  methods={[{ id: 'AB', label: 'AB: exactly two queries', gross: 7.5, evaluations: 2 }, { id: 'A', label: 'A only: exactly one query', gross: 5, evaluations: 1 }, { id: 'outside', label: 'Abstain: outside payoff', gross: 0, evaluations: 0 }]}
+  costs={[0, 1, 2.5, 3, 5, 6]} initialCost={1} unit="cr"
+  labels={{ cost: 'Cost per evaluation', method: 'Candidate', gross: 'Expected gross benefit', evaluations: 'Evaluations', totalCost: 'Total cost', net: 'Expected net', axis: 'A common net-benefit scale across all cost settings', zero: 'Zero', tableCaption: 'Expected credit accounts by fixed protocol' }}
+/>
+
+The two ties have different meanings. **AB − A only = 2.5 − c**, so their net values meet at **c = 2.5**. **A only − abstention = 5 − c**, so those meet at **c = 5**. At that second tie, AB is already below both. Distinguish a pairwise crossing from the highest value among all listed candidates.
+
+Below cost **2.5**, AB leads this set; between **2.5 and 5**, A only leads; above **5**, abstention leads. The boundary points retain the stated ties. Other protocols, including rules whose query counts depend on observed values, require their own accounts. None has been proved inferior by this table.
+
+Use this audit when a report compares a long, expensive search with a short one, or changes from raw score to value after costs. Different query counts and an added utility scale are reasons to rebuild the comparison, not violations of the fixed-query tie.
+
+<MCQ client:visible allowMultiple question="Which statements survive the cost audit?"
+  options={[
+    { text: 'The comparison between AB and A only changes the number of evaluations.', correct: true },
+    { text: 'A tie between A only and abstention means AB must tie them as well.' },
+    { text: 'The credits-per-score conversion is an additional fictional objective assumption.', correct: true },
+    { text: 'The best listed candidate is automatically optimal over every adaptive search rule.' }
+  ]}
+  explanation="Equal-budget score comparisons and unequal-budget net accounts answer different questions. Pairwise equality does not equalise an excluded third value or prove global optimality."
+/>
+
+## Audit a new population independently
+
+A new workload is specified **before selection**: **B always returns 0**, and the four compatible functions have equal weight. Keep the same AB and AC methods, the same exact two-query budget and the **raw observed-score objective**. This is a new task law, not the earlier credit-cost question.
+
+| New permitted function ABC | A | B | C |
+|---|---:|---:|---:|
+| 000 | 0 | 0 | 0 |
+| 001 | 0 | 0 | 1 |
+| 100 | 1 | 0 | 0 |
+| 101 | 1 | 0 | 1 |
+
+Calculate both score columns yourself. Does the earlier AB advantage transfer? Also check the global-maximum criterion: does a raw score of zero always count as a failure there?
+
+<MCQ client:visible question="Under the new equally weighted B-zero workload, which raw-score comparison follows?"
+  options={[
+    { text: 'AC has mean three quarters; AB has mean one half.', correct: true },
+    { text: 'AB has mean three quarters; AC has mean one half.' },
+    { text: 'Both must retain the full-universe mean of three quarters.' }
+  ]}
+  explanation="Use only the four functions in the new workload and the two values each protocol queries. The complete solution below distinguishes its metric from global-maximum success."
+/>
+
+<details>
+<summary>Check the new score columns and the scope of the result</summary>
+
+| Function | AB observed score | AC observed score |
+|---|---:|---:|
+| 000 | 0 | 0 |
+| 001 | 0 | 1 |
+| 100 | 1 | 1 |
+| 101 | 1 | 1 |
+| Sum | 2 | 3 |
+
+With four equal weights, AB's mean is **2/4 = 1/2**; AC's is **3/4**. The preferred method among this pair changes because the task law changed. The metric and query count did not.
+
+<RateComparison client:visible locale="en" title="Verify the independent population comparison"
+  scenarioLabel="Declared population" countsLabel="Functions with an observed one out of all functions"
+  differenceLabel="Rate difference" pointLabel="percentage point" pointsLabel="percentage points"
+  scenarios={[{ label: 'B is zero, four equal weights', groups: [{ label: 'AB', events: 2, total: 4 }, { label: 'AC', events: 3, total: 4 }] }]}
+/>
+
+For global-maximum success, add the all-zero row. AB observes a global maximum on **3/4** of these functions and AC on **4/4**. Those are different numbers from their observed-one rates. No function disappeared merely because all its rewards were zero.
+
+</details>
+
+A defensible report names the population and its weights, the information each method had, its query protocol and the metric. To extend a benchmark result to a real workload, obtain evidence that the workload and costs match those assumptions. Fresh tasks not used to select the favourable benchmark can help assess that extension; the toy enumeration alone cannot establish it.
+
+## Connect the benchmark audit
+
+<MindMap client:visible title="What a search comparison actually establishes"
+  root={{ label: 'Audit a benchmark', children: [
+    { label: 'Declare the comparison', children: [{ label: 'Tasks and weights' }, { label: 'Information and fixed queries' }, { label: 'Observed score' }] },
+    { label: 'Reconstruct every row', children: [{ label: 'Query only the declared inputs' }, { label: 'Keep the all-zero function' }, { label: 'Separate global-maximum success' }] },
+    { label: 'Change one condition explicitly', children: [{ label: 'A new population can change the winner' }, { label: 'Some restrictions retain a tie' }, { label: 'Different budgets need a new comparison' }] },
+    { label: 'Account for costs', children: [{ label: 'Define credit value' }, { label: 'Pay all required queries' }, { label: 'Keep ties and outside payoff explicit' }] },
+    { label: 'Limit the conclusion', children: [{ label: 'Only declared candidates and objective' }, { label: 'No hidden future observations' }, { label: 'Evidence for a real workload is separate' }] }
+  ] }}
+/>
+
+<Quiz client:visible title="Check the population, score and budget"
+  questions={[
+    { question: 'Under the complete uniform binary benchmark, what is the mean raw observed score after the two declared queries?', options: [
+      { text: 'Three quarters for each of AB and AC.', correct: true },
+      { text: 'Seven eighths for each of AB and AC.' },
+      { text: 'One half for AB and one for AC.' }
+    ], explanation: 'Both raw-score columns contain six ones across eight equal-weight functions. Seven eighths answers the different global-maximum success question.' },
+    { question: 'Why does the all-zero function remain in the benchmark?', options: [
+      { text: 'It is a valid binary function and its maximum value is zero.', correct: true },
+      { text: 'It is invalid unless one algorithm secretly changes a reward.' },
+      { text: 'It must be replaced by another task to avoid a low score.' }
+    ], explanation: 'Removing a valid function changes the population. An observed zero can be a global maximum without adding a point to the raw observed-one score.' },
+    { question: 'The C-zero law favours AB. What exactly has been established?', options: [
+      { text: 'AB beats AC in mean score under that law and equal query count.', correct: true },
+      { text: 'AB is the best possible method for every future search workload.' },
+      { text: 'Every restriction of the function set must favour AB over AC.' }
+    ], explanation: 'The rows and weights support a local comparison. The constant-function restriction retains a tie, and the B-zero law favours AC.' },
+    { question: 'At three credits per evaluation, which listed candidate has the highest expected net benefit in the full-universe cost case?', options: [
+      { text: 'A only, with two expected net credits.', correct: true },
+      { text: 'AB, with seven and a half net credits.' },
+      { text: 'Abstention, with three expected net credits.' }
+    ], explanation: 'A only gives five minus three, or two. AB gives seven and a half minus six, or one and a half. Abstention is the separately defined zero payoff.' },
+    { question: 'At five credits per evaluation, which tie matters among the listed candidates?', options: [
+      { text: 'A only and abstention tie at zero; AB is lower.', correct: true },
+      { text: 'AB and A only tie above the abstention payoff.' },
+      { text: 'Every candidate ties because all query costs are equal.' }
+    ], explanation: 'Evaluation price is common, but counts differ. A only pays five, AB pays ten, and abstention pays nothing.' },
+    { question: 'Select facts needed to interpret a benchmark claim.', allowMultiple: true, options: [
+      { text: 'The problem population and task weights.', correct: true },
+      { text: 'The score, observations and evaluation protocol.', correct: true },
+      { text: 'The value conversion and costs if net benefit is compared.', correct: true },
+      { text: 'Only the best-looking row, selected after seeing results.' }
+    ], explanation: 'These facts identify the comparison. A favourable row does not establish a future task law or an advantage on untested objectives.' },
+    { question: 'What follows if only the two constant functions are equally likely?', options: [
+      { text: 'Every two-query method has mean observed score one half.', correct: true },
+      { text: 'Every two-query method must have a different mean score.' },
+      { text: 'AB must have the same advantage as in the C-zero class.' }
+    ], explanation: 'Both queried values are zero in one function and one in the other, regardless of the chosen inputs. A restriction need not remove a tie.' }
+  ]}
+/>
+
+Continue to the [final exam](/no-free-lunch-theorem/final-exam), including the population, metric and cost checks from this workshop.
