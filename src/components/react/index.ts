@@ -303,3 +303,6 @@ export type { RateComparisonProps, RateComparisonGroup, RateComparisonScenario }
 
 export { PackingDiagram, default as PackingDiagramDefault } from '@/components/react/PackingDiagram';
 export type { PackingDiagramProps, PackingBox, PackingItem, PackingSpan, PackingView } from '@/components/react/PackingDiagram';
+
+export { KnowledgeWorlds, default as KnowledgeWorldsDefault } from '@/components/react/KnowledgeWorlds';
+export type { KnowledgeWorldsProps, KnowledgeWorldsLabels, KnowledgeWorld } from '@/components/react/KnowledgeWorlds';

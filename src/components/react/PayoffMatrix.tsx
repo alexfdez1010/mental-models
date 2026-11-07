@@ -67,6 +67,8 @@ export interface PayoffMatrixProps {
   increaseLabel?: string;
   /** Accessible verb for the “decrease” stepper. Defaults to `'decrease'`. */
   decreaseLabel?: string;
+  /** Accessible table description; replaces {rowPlayer} and {colPlayer}. */
+  tableCaptionTemplate?: string;
   /** Extra classes merged onto the root element. */
   className?: string;
 }
@@ -157,6 +159,7 @@ export function PayoffMatrix({
   resetLabel = 'Reset payoffs',
   increaseLabel = 'increase',
   decreaseLabel = 'decrease',
+  tableCaptionTemplate = '{rowPlayer} chooses a row; {colPlayer} chooses a column. Each cell lists the row payoff then the column payoff.',
   className,
 }: PayoffMatrixProps) {
   const reactId = useId();
@@ -281,8 +284,7 @@ export function PayoffMatrix({
       <div className="mt-4 overflow-x-auto">
         <table className="w-full border-collapse text-center">
           <caption className="sr-only">
-            {rowPlayer} chooses a row; {colPlayer} chooses a column. Each cell lists the
-            row payoff then the column payoff.
+            {tableCaptionTemplate.replaceAll('{rowPlayer}', rowPlayer).replaceAll('{colPlayer}', colPlayer)}
           </caption>
           <thead>
             <tr>
