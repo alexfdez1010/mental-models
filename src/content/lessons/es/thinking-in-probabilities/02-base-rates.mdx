@@ -1,245 +1,625 @@
 ---
 title: "Tasas base: empieza por la multitud"
-description: "Antes de juzgar un caso concreto, pregúntate con qué frecuencia las cosas como esa acaban de una determinada manera — porque la multitud a la que pertenece suele predecir mejor que la historia vívida que tienes delante."
+description: "Cuenta la población inicial y el grupo filtrado para combinar tasas base y datos, elegir una clase de referencia y detectar información ausente."
 topic: "es/thinking-in-probabilities"
 order: 3
-minutes: 8
-updated: 2026-06-22
+minutes: 20
+updated: 2026-11-07
 ---
 
-import { MCQ, Quiz, Callout, BaseRateGrid } from '@/components/react';
+import { MCQ, Quiz, Callout, FillBlank, MatchConcepts, MindMap, BaseRateGrid, RateComparison } from '@/components/react';
 
-Imagina una cafetería por la que pasas cada mañana: luz cálida, una cola que sale por la puerta, un barista que conoce a los clientes habituales por su nombre. Alguien te pregunta: «¿Seguirá abierto este sitio dentro de cinco años?». La historia que tienes delante grita *sí* — es claramente encantadora, claramente concurrida, claramente llevada por gente que se preocupa. Pero esa historia es una sola cafetería. El pronóstico honesto empieza en un punto mucho menos romántico: de cada cafetería nueva que abre, solo una minoría sobrevive cinco años. Ese número aburrido, a nivel de multitud, es tu ancla — e ignorarlo por la luz cálida del escaparate es uno de los errores de pensamiento más comunes y más caros que existen.
+El detector de un archivo señala una carpeta. ¿Lleva la marca oculta que busca? «El detector acierta mucho» suena tranquilizador. «La marca es poco frecuente» invita a la cautela. Ninguna de las dos frases te dice cuántas carpetas marcadas y sin marcar acaban en el grupo con alerta.
 
-Esta lección trata sobre esa ancla: de dónde viene, cómo encontrar la correcta y por qué tu cerebro está programado para tirarla justo cuando aparece un caso vívido.
+Vamos a construir ese grupo y contarlo. El mismo método servirá para reconocer cuándo la información disponible no permite responder.
 
 <MCQ
   client:visible
-  pretest
-  pretestLabel="Antes de leer — adivina"
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="Un antiguo vecino describe a Steve: tímido, retraído, meticuloso, con una necesidad de orden y una pasión por el detalle; poco interés por la gente. ¿Es más probable que Steve sea bibliotecario o agricultor?"
+  pretestLabel={"Antes de leer"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretest={true}
+  question={"Solo una pequeña minoría de las carpetas de un archivo lleva una marca oculta. Un detector señala una carpeta, pero no sabes con qué frecuencia señala cada tipo. ¿Qué puedes concluir?"}
   options={[
-    { text: 'Agricultor — porque hay muchísimos más agricultores que bibliotecarios, así que incluso una descripción que «encaja» con un bibliotecario es más probable que pertenezca a alguien de la multitud, mucho mayor, de agricultores', correct: true },
-    { text: 'Bibliotecario — la descripción encaja con el estereotipo del bibliotecario casi a la perfección' },
-    { text: 'Igual de probable en ambos casos; la descripción es lo único que tenemos' },
-    { text: 'Imposible saberlo sin conocer a Steve en persona' },
-  ]}
-  explanation="En un pretest no hay nota — esta es la trampa clásica, de Kahneman y Tversky. La descripción está construida para coincidir con el estereotipo del bibliotecario, y tu instinto la agarra. Pero los estereotipos no son probabilidades. En muchos países hay 20 o más agricultores varones por cada bibliotecario varón. Aunque un hombre ordenado y pulcro sea, pongamos, tres veces más propenso a ser bibliotecario que un hombre cualquiera, tres veces un número diminuto sigue siendo menor que la enorme base de agricultores. Los tamaños de las multitudes — las tasas base — pesan más que el encaje vívido. Esa es toda la lección."
+  {
+    "text": "La carpeta señalada probablemente tiene la marca, porque una alerta la identifica."
+  },
+  {
+    "text": "La carpeta señalada probablemente no tiene la marca, porque las marcadas son raras."
+  },
+  {
+    "text": "La información disponible no determina qué tipo es más probable tras la alerta.",
+    "correct": true
+  },
+  {
+    "text": "Los dos tipos pasan a ser igual de probables siempre que el detector da una alerta."
+  }
+]}
+  explanation={"Importa la frecuencia inicial, pero también con qué frecuencia genera una alerta cada tipo. La señal podría ser muy informativa, poco informativa o no guardar relación con la marca. No falta conocer la carpeta en persona: faltan las tasas condicionales del detector."}
 />
 
-## La visión exterior (outside view): empieza por la multitud
+## Parte de una población definida
 
-Antes de estudiar qué tiene de especial un caso, mira la multitud a la que pertenece. Una **tasa base (base rate)** es lo común que es algo en la clase de referencia relevante — la frecuencia llana de un resultado entre todos los casos como el tuyo — *antes* de que mires ninguna de las particularidades de tu caso concreto. Es la respuesta a «¿qué suele pasarles a las cosas como esta?».
+Una **tasa base (base rate)** es la frecuencia de una condición en una población inicial pertinente, antes de incorporar la señal nueva. La **clase de referencia** es esa población: los casos cuya frecuencia quieres utilizar. «Poco frecuente» necesita un denominador. Algo poco frecuente entre todas las carpetas fabricadas no tiene por qué serlo en este archivo.
 
-La idea viene directamente del trabajo de los psicólogos **Daniel Kahneman y Amos Tversky**, que demostraron a lo largo de docenas de experimentos que la gente ignora sistemáticamente estas frecuencias de fondo en favor de la historia vívida. La abreviatura de Kahneman para esta disciplina es la **visión exterior (outside view)**: en lugar de preguntar «¿cómo irá *mi* proyecto?» (la visión interior, que vive dentro de los detalles de tu plan concreto), preguntas «¿cómo van, de media, los proyectos de este tipo?» y empiezas tu estimación ahí.
+Este es nuestro modelo construido. La marca oculta se puede comprobar abriendo la carpeta; el detector da una alerta sin abrirla. Hay exactamente **1.000 carpetas: 50 marcadas y 950 sin marcar**. Imagina primero que eliges uniformemente entre todas: cada carpeta tiene la misma probabilidad de ser elegida. La probabilidad de encontrar una marca es:
 
-¿Por qué empezar ahí? Porque la tasa base ya contiene los resultados acumulados de miles de casos que parecían, a sus dueños, tan especiales como el tuyo te parece a ti. El dueño de la cafetería que está a punto de quebrar también contempla luz cálida y una cola. La multitud ya ha realizado el experimento que tú estás a punto de hacer, muchas veces, y ha apuntado la respuesta.
+$$P(\text{marcada})=\frac{50}{1000}=5\%$$
 
-**Ejemplo resuelto.** Un amigo te presenta una startup: fundador brillante, mercado caliente, ingresos reales. ¿Deberías esperar que se convierta en un «unicornio» de mil millones de dólares? La visión interior amontona las particularidades impresionantes y sienta de maravilla. La visión exterior pregunta primero: de todas las startups con financiación de capital riesgo, ¿qué fracción alcanza una valoración de mil millones de dólares? Está muy por debajo del 1 % — del orden de 1 entre 100 o más raro aún, según cómo lo cuentes. Ese número es tu estimación de partida. El fundador brillante y el mercado caliente quizá la suban un poco, pero parten de *menos de un por ciento*, no de cero-a-lo-que-sea.
+Ahora elige uniformemente **solo entre las carpetas con alerta**. La población ha cambiado. Para calcular la proporción de marcadas en ella, necesitamos saber cuántas carpetas de cada tipo han generado una alerta.
 
-Arrastra la cuadrícula de abajo para sentir lo pequeña que es de verdad una tasa base de «1 entre 100» — y cómo el único caso vívido que tienes delante no es más que uno de esos puntos.
+Son catálogos completos definidos para el ejemplo, no muestras observadas ni pronósticos sobre un detector real. Cada protocolo posterior describe un catálogo alternativo. No aplicaremos dos protocolos sucesivos ni supondremos que sus señales son independientes.
+
+Se llama **olvido de la tasa base** a un patrón de juicios que da un peso insuficiente a las frecuencias iniciales pertinentes. Tversky y Kahneman lo estudiaron en tareas con descripciones de personas y frecuencias de categorías. Un parecido llamativo no proporciona una tasa condicional. Del mismo modo, la frecuencia inicial por sí sola no determina qué implica una señal informativa.
+
+### Cuándo usar este punto de partida
+
+Usa una tasa base cuando describa cómo se ha seleccionado el caso actual o haya una razón defendible para trasladarla a él. Pregunta qué casos se contaron, qué significa la condición y si el caso nuevo pertenece a esa población. Una media histórica necesita esas comprobaciones antes de convertirse en pronóstico.
+
+## Filtra los dos posibles orígenes de una alerta
+
+El protocolo A tiene esta tabla completa. Una **falsa alarma** es una alerta sobre una carpeta sin marcar; por tanto, una alerta no equivale a una marca confirmada.
+
+| Estado real | Con alerta | Sin alerta | Total |
+| --- | ---: | ---: | ---: |
+| Marcada | 20 | 30 | 50 |
+| Sin marcar | 95 | 855 | 950 |
+| Total | 115 | 885 | 1.000 |
+
+Sigue la selección paso a paso:
+
+1. Conserva las 20 carpetas marcadas con alerta.
+2. Conserva también las 95 sin marcar con alerta. También cumplen la regla de selección.
+3. Quedan 115 carpetas elegibles, de las cuales 20 están marcadas.
+
+La probabilidad de que una carpeta esté marcada **dada una alerta**, es decir, dentro del grupo con alerta, es:
+
+$$P(\text{marcada}\mid\text{alerta})=\frac{20}{20+95}=\frac{4}{23}\approx17{,}39\%$$
+
+Es una **probabilidad posterior**: la probabilidad después de incorporar la señal. Supera el 5 % inicial, aunque sigue por debajo de la mitad. La alerta ha cambiado la estimación; no ha identificado el estado con certeza.
 
 <BaseRateGrid
   client:visible
-  total={100}
+  total={115}
   columns={10}
-  initialCount={1}
-  eyebrow="Tasa base"
-  sliderLabel="Resaltados"
-  readoutTemplate="{count} de {total} — {pct}% — son {group}."
-  groupLabel="startups que se convierten en un «unicornio» de mil millones de dólares"
-  populationLabel="startups con financiación de capital riesgo"
-  title="Aproximadamente 1 de cada 100"
-  instructions="Arrastra el control. Cada punto es una startup financiada. Ilumina cuántas crees que se convierten en unicornios — y luego compáralo con la realidad."
-  caption="Los puntos iluminados son los raros ganadores. Fíjate en lo fina que se mantiene la banda resaltada: una presentación vívida y emocionante sigue siendo solo un punto en un mar de puntos apagados. La tasa base es tu línea de salida, no el carisma del fundador."
+  initialCount={20}
+  readOnly={true}
+  eyebrow={""}
+  className={"not-prose"}
+  title={"Protocolo A: el grupo con alerta"}
+  groupLabel={"carpetas marcadas"}
+  populationLabel={"carpetas con alerta"}
+  instructions={"Cada punto es una carpeta con alerta. Los puntos resaltados corresponden a las marcadas; los demás, a las no marcadas."}
+  readoutTemplate={"{count} de {total} carpetas con alerta están marcadas."}
+  sliderLabel={"Carpetas resaltadas"}
 />
 
-<Callout variant="tip" title="El hábito de una sola frase">
-Antes de juzgar cualquier caso concreto, termina primero esta frase: **«Las cosas como esta suelen acabar ___».** Ese hueco es la tasa base, y es tu estimación de partida — todo lo específico del caso es un *ajuste* a ella, no un reemplazo.
-</Callout>
+Cuidado al invertir la pregunta. El detector señala **20 de las 50 carpetas marcadas**: una tasa de detección del 40 % entre las marcadas, también llamada sensibilidad. Sin embargo, están marcadas **20 de las 115 carpetas con alerta**. Ambas expresiones cuentan las mismas 20 carpetas en el numerador y grupos distintos en el denominador.
 
-## La falacia de la tasa base (base-rate fallacy): cuando gana la historia vívida
-
-Este es el modo de fallo que hace que las tasas base merezcan una lección entera. La **falacia de la tasa base (base-rate fallacy)** (también llamada **olvido de la tasa base** o **base-rate neglect**) es la tendencia a ignorar la frecuencia de fondo de un resultado cuando te ponen delante una descripción específica, vívida y representativa. La descripción parece mejor información porque es concreta y detallada — así que la agarras y descartas en silencio el número, a nivel de multitud, que debería haberte anclado.
-
-Kahneman y Tversky rastrearon esto hasta un atajo mental que bautizaron como **representatividad (representativeness)**: juzgamos lo probable que es algo por cuánto se *parece* a nuestro prototipo mental, en lugar de por lo *común* que es. Un hombre pulcro y obsesionado con el detalle se parece al prototipo de «bibliotecario», así que lo llamamos bibliotecario — sin pararnos nunca a contar lo pocos que hay.
-
-**Números resueltos (el problema del bibliotecario).** Los agricultores superan con mucho a los bibliotecarios — pongamos 1 bibliotecario por cada 19 agricultores entre los hombres relevantes. Coge 1.000 hombres: unos 950 agricultores y 50 bibliotecarios (ya generoso con los bibliotecarios). Ahora concede al estereotipo verdadera fuerza: un hombre meticuloso y ordenado es *cuatro veces* más propenso a ser bibliotecario que un hombre cualquiera. Así que entre los bibliotecarios, quizá un 40 % encaja con la descripción → 20 hombres; entre los agricultores, quizá un 10 % encaja → 95 hombres. De los hombres que coinciden con «tímido y pulcro», 20 son bibliotecarios y 95 son agricultores — así que el hombre que coincide sigue siendo **más de cuatro veces más probable que sea agricultor**. El estereotipo «ganó» en parecido y perdió en aritmética, porque la multitud de agricultores es mucho mayor.
-
-Un segundo caso, más afilado — la **revisión de amenazas en el aeropuerto**. Un escáner marca a un viajero que «encaja con el perfil» de una amenaza. Incluso un sistema muy preciso choca con una tasa base brutal: de los millones de viajeros al día, las amenazas genuinas son rarísimas — quizá un puñado entre decenas de millones. Cuando la tasa base de aquello que buscas es uno entre un millón, una «coincidencia de perfil» o una alarma de máquina es, abrumadoramente, una falsa alarma. La sensación vívida («este parece peligroso») no es rival para lo astronómicamente rara que es la cosa real.
-
-<MCQ
+<FillBlank
   client:visible
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="Una prueba para una enfermedad rara tiene un 99 % de precisión. La enfermedad afecta a 1 de cada 1.000 personas. Alguien a quien no conoces da positivo. ¿Más o menos qué probabilidad hay de que realmente tenga la enfermedad?"
-  options={[
-    { text: 'Alrededor del 9 % — la mayoría de los positivos son falsas alarmas, porque las personas sanas superan con mucho a las enfermas', correct: true },
-    { text: 'Alrededor del 99 % — la prueba tiene un 99 % de precisión, así que un positivo es fiable al 99 %' },
-    { text: 'Alrededor del 50 % — podría ir en cualquier dirección' },
-    { text: 'Alrededor del 90 % — cerca de la precisión de la prueba, menos un pequeño margen' },
-  ]}
-  explanation="Coge 100.000 personas. Unas 100 tienen la enfermedad (1 de cada 1.000); ~99 de ellas dan positivo. Las otras 99.900 están sanas, pero una prueba con un 99 % de precisión sigue marcando erróneamente al 1 % de ellas → ~999 falsos positivos. Así que de ~1.098 positivos, solo ~99 son reales: alrededor del 9 %. La tasa base (la enfermedad es rara) aplasta la precisión de la prueba. Leer «99 % de precisión» como «99 % de probabilidad de estar enfermo» es el olvido de la tasa base en su forma más pura."
+  instructions={"Elige una opción para cada hueco y comprueba la respuesta."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"correctas"}
+  question={"Reconstruye el grupo filtrado del protocolo A."}
+  text={"Para responder «marcada, dada una alerta», el denominador es {{todas las carpetas con alerta|todas las carpetas marcadas|todas las carpetas sin marcar}}. Su tamaño es {{ciento quince|mil|noventa y cinco}}."}
+  explanation={"Suma las veinte carpetas marcadas con alerta y las noventa y cinco sin marcar con alerta. Las cincuenta marcadas sirven para otra pregunta: con qué frecuencia aparece una alerta entre las carpetas marcadas."}
 />
 
-## Clases de referencia: elegir la multitud correcta
+### Odds y fuerza de la señal
 
-La tasa base es tan buena como la multitud que cuentas. Una **clase de referencia (reference class)** es el conjunto de casos que tratas como «iguales a este» — el grupo cuyas frecuencias tomas prestadas como estimación de partida. Elegirla bien es la mayor parte de la habilidad, porque el mismo caso puede situarse en muchas multitudes con tasas base muy distintas.
+Las **odds** comparan la cantidad que cumple una condición con la que no la cumple, en lugar de compararla con el total. Las odds iniciales de marcada frente a no marcada son 50:950, o 1:19. Después del filtro son 20:95, o 4:19.
 
-Esta es la tensión viva entre dos visiones que Kahneman bautizó. La **visión interior (inside view)** mira los detalles únicos de tu caso concreto y construye una estimación a partir de ellos («nuestro equipo es genial, nuestro plan es sólido, así que terminaremos en tres meses»). La **visión exterior (outside view)** ignora los detalles al principio, encuentra la clase de referencia correcta y lee su tasa base («los proyectos de reforma como el nuestro terminan, de media, con un 40 % de retraso, así que presupuéstalo»). La visión interior parece más informada y suele estar más equivocada, porque no tiene forma de tener en cuenta los desconocidos desconocidos que la tasa base ya ha absorbido de la historia real.
+La **razón de verosimilitud** de una alerta compara con qué frecuencia aparece en los dos estados:
 
-La víctima clásica es la **falacia de la planificación (planning fallacy)**: la gente predice que sus propios proyectos irán más rápido y más baratos de lo que fueron proyectos pasados casi idénticos, porque razona desde la visión interior, color de rosa, de *este* plan en lugar de desde el historial de *todos los planes así*. El arreglo es mecánico — encuentra una clase de referencia de proyectos similares ya terminados, toma sus plazos reales como ancla y solo entonces ajusta.
+$$\frac{P(\text{alerta}\mid\text{marcada})}{P(\text{alerta}\mid\text{sin marcar})}=\frac{20/50}{95/950}=\frac{0{,}4}{0{,}1}=4$$
 
-**Ejemplo resuelto.** Estás estimando una reforma de cocina. Visión interior: «Tres semanas — lo dijo el contratista, el diseño es sencillo». Visión exterior: tira de la clase de referencia «reformas de cocina como la mía» y encontrarás una fuerte tendencia a excederse. Si trabajos similares tardaron cinco semanas de media, *cinco semanas es tu ancla*, y «pero la nuestra es más sencilla» es un pequeño empujón a la baja — no una licencia para creerte la historia de las tres semanas. La clase de referencia hizo el pronóstico; tu optimismo solo edita los márgenes.
+La alerta es cuatro veces más frecuente entre las marcadas que entre las no marcadas. Esta razón multiplica las **odds**: 1:19 pasa a 4:19. Para volver a una probabilidad, divide la primera parte entre la suma de ambas: 4/(4 + 19) = 4/23. Multiplicar directamente el 5 % inicial por cuatro daría un 20 %, una respuesta distinta e incorrecta.
 
-El truco: elige una clase demasiado estrecha y no tendrás datos («reformas de *mi cocina exacta*» es una muestra de uno); demasiado amplia y el número no significa nada («todos los proyectos del hogar de la historia»). Apunta a la clase más estrecha que aún tenga suficientes casos reales para dar una frecuencia estable.
+La tabla de recuentos basta para resolver el caso. Las odds permiten comprobar el mismo resultado; no aportan otra prueba sobre la carpeta.
 
-<MCQ
-  client:visible
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="Quieres una tasa base de cuánto tardará tu proyecto de software concreto. ¿Cuál es la MEJOR clase de referencia como punto de partida?"
-  options={[
-    { text: 'Proyectos pasados de tamaño y tipo similares, construidos por equipos similares', correct: true },
-    { text: 'Este proyecto exacto — es único, así que solo importan sus propios detalles' },
-    { text: 'Todos los proyectos de software jamás intentados, en todo el mundo' },
-    { text: 'La estimación verbal y segura del contratista para este proyecto' },
-  ]}
-  explanation="La mejor clase de referencia es la más estrecha que aún tenga suficientes casos reales y comparables para dar una frecuencia estable: proyectos de tamaño y tipo similares por equipos similares. «Este proyecto exacto» es una muestra de uno (visión interior pura — la falacia de la planificación a punto de ocurrir). «Todos los proyectos de la historia» es demasiado amplio para significar nada. Una única estimación segura es la visión interior con voz."
-/>
+## Una señal más informativa puede invertir la mayoría
 
-## Combinar la tasa base con las particularidades
+Conserva las 50 carpetas marcadas y las 950 sin marcar iniciales. Cambia solo el comportamiento definido del detector. El protocolo B señala el 80 % de las marcadas y el 2 % de las no marcadas:
 
-Empezar por la tasa base no significa *quedarse* ahí. La multitud te da el ancla; las particularidades de tu caso te mueven de ella — hacia arriba si tu evidencia es genuinamente favorable, hacia abajo si es desfavorable. La tasa base es donde empieza la estimación, no donde termina.
+| Estado real | Con alerta | Sin alerta | Total |
+| --- | ---: | ---: | ---: |
+| Marcada | 40 | 10 | 50 |
+| Sin marcar | 19 | 931 | 950 |
+| Total | 59 | 941 | 1.000 |
 
-La disciplina es el orden de las operaciones: **ancla primero, ajusta después.** Un fundador de primera no convierte un tiro de unicornio de 1 entre 100 en cara o cruz, pero podría duplicar tu estimación a 2 entre 100. Una cafetería radiante en un barrio acomodado y mal atendido no garantiza la supervivencia a cinco años, pero podría elevarte por encima de la media desoladora. El error que describe la falacia de la tasa base es saltar directamente a las particularidades y olvidar que alguna vez hubo un ancla.
-
-*Cuánto* deberías moverte de la tasa base ante una determinada pieza de evidencia — esa es una pregunta precisa con una respuesta precisa, y tiene nombre: **actualización bayesiana (Bayesian updating)**, el motor para combinar una a priori (tu tasa base) con nueva evidencia (las particularidades) en una estimación más afinada. Esa maquinaria tiene un curso entero propio más adelante. Por ahora, planta solo la forma de la idea: **empieza en la tasa base, y luego muévete hacia las particularidades en proporción a lo fuerte que sea realmente la evidencia** — la evidencia fuerte te mueve mucho, la evidencia débil o vívida-pero-poco-informativa te mueve apenas nada. La prueba de la enfermedad de arriba es toda la idea en miniatura: un resultado positivo *sí* te movió (del 0,1 % hasta ~9 %), solo que ni de lejos tan lejos como quería tu instinto, porque la tasa base se quedó con la mayor parte del peso.
+De las 59 alertas, 40 corresponden a carpetas marcadas: **40/59 ≈ 67,80 %**. Ahora es más probable que la carpeta esté marcada, aunque las marcadas sigan siendo poco frecuentes en la población inicial.
 
 <BaseRateGrid
   client:visible
-  total={100}
+  total={59}
   columns={10}
-  initialCount={3}
-  eyebrow="Tasa base"
-  sliderLabel="Resaltados"
-  readoutTemplate="{count} de {total} — {pct}% — son {group}."
-  groupLabel="que realmente tienen la enfermedad rara"
-  populationLabel="personas que dieron positivo"
-  title="Incluso tras un positivo"
-  instructions="Imagina 100 personas que dieron positivo para una enfermedad rara. Arrastra para fijar cuántas crees que realmente la tienen."
-  caption="Un resultado positivo sube tu estimación — pero con una enfermedad rara y una prueba imperfecta, solo una pequeña porción de los positivos son reales. La tasa base sigue tirando de la respuesta hacia «probablemente una falsa alarma». Actualizar es ajustar, no reemplazar."
+  initialCount={40}
+  readOnly={true}
+  eyebrow={""}
+  className={"not-prose"}
+  title={"Protocolo B: el grupo con alerta"}
+  groupLabel={"carpetas marcadas"}
+  populationLabel={"carpetas con alerta"}
+  instructions={"Cada punto es una carpeta con alerta. Los puntos resaltados corresponden a las marcadas; los demás, a las no marcadas."}
+  readoutTemplate={"{count} de {total} carpetas con alerta están marcadas."}
+  sliderLabel={"Carpetas resaltadas"}
 />
 
-## Dónde te mienten las tasas base
-
-Las tasas base son poderosas, no infalibles. Tres formas en que la visión exterior puede engañarte — cada una es una razón para *comprobar* el ancla, nunca para abandonarla.
-
-**La clase de referencia equivocada o demasiado amplia.** Si tu multitud no coincide de verdad con tu caso, su frecuencia es solo una irrelevancia con aspecto de seguridad. «Los restaurantes quiebran a un ritmo X» es el ancla equivocada para una institución familiar de 30 años con el edificio pagado; «todos los conductores tienen accidentes a un ritmo Y» es el ancla equivocada para un profesional con un millón de kilómetros sin accidentes. Basura de clase entra, basura de tasa base sale. El arreglo no es soltar la tasa base — es encontrar una clase más estrecha y más verdadera.
-
-**Tasas base que han cambiado de verdad.** Una clase de referencia construida a partir de la historia da por hecho que el mundo no se ha movido. A veces sí lo ha hecho. La tasa base de «cartas perdidas en el correo» no te dice nada sobre el correo electrónico; la tasa de supervivencia de los minoristas anteriores a internet pronostica mal la de uno online. Cuando las condiciones subyacentes cambian estructuralmente, las viejas frecuencias pueden engañar — así que pregúntate si los casos pasados fueron generados por el mismo mundo en el que vive tu caso.
-
-**Eventos verdaderamente únicos sin clase de referencia.** Algunos casos no tienen una multitud honesta: una tecnología genuinamente nunca-vista, un punto de inflexión histórico singular. Aquí la visión exterior se queda sin datos, y te ves forzado a volver hacia un razonamiento cuidadoso de visión interior — pero el peligro es el inverso del olvido de la tasa base: la gente declara su caso «único» precisamente *para escapar* de una tasa base incómoda. El dueño de la cafetería insiste en que su cafetería es especial; el proyecto pasado de presupuesto insiste en que esta vez es diferente. La mayoría de los casos que parecen únicos no lo son.
-
-<Callout variant="warning" title="«Pero este es diferente» es el disfraz favorito de la trampa">
-La forma más común en que la gente inteligente recae en el olvido de la tasa base es declarando su caso **excepcional** — lo bastante especial como para que la frecuencia de la multitud «no se aplique». A veces es genuinamente cierto. Mucho más a menudo es la visión interior hablando, disfrazando el optimismo corriente de razón para ignorar un número incómodo. Haz que el caso se gane la exención: nombra *específicamente* qué lo hace distinto de su clase de referencia, y comprueba que la diferencia es real, no solo halagadora.
-</Callout>
-
-### Cuándo recurrir a ella
-
-Recurre a las tasas base **cada vez que pronostiques o juzgues un caso concreto** — una contratación, una inversión, un diagnóstico, una fecha límite de un proyecto, una relación, una apuesta. El detonante es cualquier momento en que te pilles razonando a partir de una historia vívida y detallada sobre *este* caso en particular. Antes de dejar que la historia conduzca, párate y pregunta: *¿qué suele pasarles a las cosas como esta?* Encuentra la multitud, lee su frecuencia, haz de eso tu ancla — y solo entonces deja que las particularidades la ajusten. Cuesta diez segundos y te salva de forma rutinaria de las respuestas equivocadas más seguras que producirás en tu vida.
+La razón de verosimilitud de B es (40/50)/(19/950) = 0,8/0,02 = 40. Las odds iniciales 1:19 pasan a 40:19; la probabilidad es 40/(40 + 19). En esta población de partida concreta, para protocolos con una tasa positiva de falsas alarmas, una alerta hace que las marcadas sean mayoría cuando su razón de verosimilitud supera 19. Si fuera exactamente 19, empatarían los dos estados. El umbral sale de las odds iniciales; no es un umbral universal para cualquier población.
 
 <MCQ
   client:visible
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  question="¿Cuál de estos es el uso más claro y correcto del pensamiento de tasa base?"
+  pretestLabel={"Antes de leer"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"El protocolo B parte de la misma proporción de carpetas marcadas que A. ¿Qué puede cambiar el estado más probable tras una alerta?"}
   options={[
-    { text: 'Antes de predecir si un restaurante nuevo durará, primero buscas cuánto sobreviven normalmente los restaurantes de ese tipo, y luego ajustas por sus particularidades', correct: true },
-    { text: 'Ignoras las estadísticas de supervivencia porque el dueño es apasionado y la comida es excelente' },
-    { text: 'Das por hecho que tu proyecto terminará a tiempo porque tu equipo tiene un talento inusual', correct: false },
-    { text: 'Concluyes que un positivo significa enfermedad, ya que la prueba es muy precisa' },
-  ]}
-  explanation="El pensamiento de tasa base correcto se ancla primero en la frecuencia de la multitud y luego ajusta por el caso — exactamente lo que hace la respuesta del restaurante. Las otras tres son olvido de la tasa base de manual: fiarse de una historia vívida por encima de los datos de supervivencia, razonar puramente desde la visión interior color de rosa (la falacia de la planificación), y leer la precisión de la prueba como la probabilidad de enfermedad ignorando lo rara que es."
+  {
+    "text": "Una señal más informativa puede hacer que las marcadas sean mayoría entre las alertas.",
+    "correct": true
+  },
+  {
+    "text": "Un grupo inicialmente menor debe seguir siendo minoría en cualquier grupo con alerta."
+  },
+  {
+    "text": "Una mayor tasa de detección determina la respuesta, sea cual sea la de falsas alarmas."
+  },
+  {
+    "text": "Cambiar el detector demuestra que la proporción inicial del archivo también ha cambiado."
+  }
+]}
+  explanation={"B señala cuarenta carpetas marcadas y diecinueve sin marcar. Las marcadas pasan a ser mayoría entre las alertas, aunque la proporción inicial es la misma. Importan ambas tasas condicionales; la tasa de detección por sí sola no proporciona el denominador."}
 />
+
+El gráfico compara la población inicial con el grupo que tiene alerta. En el escenario R, que veremos después, **ambos grupos se restringen a R**. La diferencia en puntos porcentuales describe el cambio de proporción al cambiar el grupo considerado; no es un efecto causal del detector sobre la marca física.
+
+<RateComparison
+  client:visible
+  locale={"es"}
+  title={"Población inicial y población filtrada"}
+  scenarios={[
+  {
+    "label": "Protocolo A — archivo completo",
+    "groups": [
+      {
+        "label": "Marcadas entre las alertas",
+        "events": 20,
+        "total": 115
+      },
+      {
+        "label": "Marcadas antes de la alerta",
+        "events": 50,
+        "total": 1000
+      }
+    ]
+  },
+  {
+    "label": "Protocolo B — archivo completo",
+    "groups": [
+      {
+        "label": "Marcadas entre las alertas",
+        "events": 40,
+        "total": 59
+      },
+      {
+        "label": "Marcadas antes de la alerta",
+        "events": 50,
+        "total": 1000
+      }
+    ]
+  },
+  {
+    "label": "Protocolo A — subgrupo R conocido",
+    "groups": [
+      {
+        "label": "Marcadas entre las alertas de R",
+        "events": 8,
+        "total": 16
+      },
+      {
+        "label": "Marcadas antes de la alerta en R",
+        "events": 20,
+        "total": 100
+      }
+    ]
+  }
+]}
+/>
+
+### Qué descarta este contraste
+
+«Una condición poco frecuente debe seguir siendo improbable después de cualquier alerta» falla en B. «Un positivo te dice la tasa de detección» falla en A. La respuesta depende de la población inicial **y** de las tasas condicionales de la señal. No hay una regla fija que limite la información de un caso a un ajuste pequeño.
+
+## El porcentaje total de aciertos no identifica el grupo con alerta
+
+Si alguien dice «acierta el 99 %», pregunta qué está midiendo. Aquí el **porcentaje total de aciertos** divide las clasificaciones correctas entre todas las carpetas: las marcadas con alerta más las no marcadas sin alerta. En cambio, la **tasa de falsos positivos** divide las alertas de carpetas sin marcar entre todas las carpetas sin marcar. Ninguna de estas definiciones es la proporción de marcadas entre las alertas.
+
+Considera otros dos catálogos alternativos, con las mismas 50 carpetas marcadas y 950 sin marcar iniciales:
+
+| Protocolo | Marcadas con alerta | Marcadas sin alerta | Sin marcar con alerta | Sin marcar sin alerta |
+| --- | ---: | ---: | ---: | ---: |
+| C | 40 | 10 | 0 | 950 |
+| D | 50 | 0 | 10 | 940 |
+
+En C, el porcentaje total de aciertos es (40 + 950)/1.000 = 99 %. En D es (50 + 940)/1.000 = 99 % también. Sin embargo, sus grupos con alerta son distintos:
+
+- C: 40 alertas de carpetas marcadas y ninguna de carpetas sin marcar; por tanto, 40/40 = **100 % de marcadas entre las alertas**.
+- D: 50 alertas de carpetas marcadas y 10 de carpetas sin marcar; por tanto, 50/60 = 5/6 ≈ **83,33 % de marcadas entre las alertas**.
+
+En el gráfico, cambia de «clasificaciones correctas» a «carpetas marcadas entre las carpetas con alerta». **El denominador pasa de todas las carpetas a las que tienen alerta.** Unas barras iguales en la primera pregunta no exigen barras iguales en la segunda.
+
+<RateComparison
+  client:visible
+  locale={"es"}
+  title={"Mismos aciertos globales, distintos grupos con alerta"}
+  scenarios={[
+  {
+    "label": "Clasificaciones correctas entre todas las carpetas",
+    "groups": [
+      {
+        "label": "Protocolo C",
+        "events": 990,
+        "total": 1000
+      },
+      {
+        "label": "Protocolo D",
+        "events": 990,
+        "total": 1000
+      }
+    ]
+  },
+  {
+    "label": "Carpetas marcadas entre las carpetas con alerta",
+    "groups": [
+      {
+        "label": "Protocolo C",
+        "events": 40,
+        "total": 40
+      },
+      {
+        "label": "Protocolo D",
+        "events": 50,
+        "total": 60
+      }
+    ]
+  }
+]}
+/>
+
+<Callout variant="warning" title="Un catálogo cerrado no garantiza un rendimiento futuro" label="Advertencia">
+C no tiene falsas alarmas en el catálogo definido. Eso hace exacta su proporción condicional aquí, pero no demuestra que un detector real nunca dé una falsa alarma en otra población. Si ninguna carpeta generase una alerta, «marcada dada una alerta» carecería de denominador y no estaría definida, en lugar de valer cero.
+</Callout>
+
+<MatchConcepts
+  client:visible
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  instructions={"Elige un concepto y después su definición."}
+  allCorrectLabel={"✓ Todas las parejas son correctas"}
+  partialResultWord={"correctas"}
+  pickDefinitionHint={"→ elige ahora una definición"}
+  notLinkedHint={"sin enlazar"}
+  termsLabel={"Conceptos"}
+  definitionsLabel={"Definiciones"}
+  question={"Relaciona cada cantidad con el grupo que debes contar."}
+  pairs={[
+  {
+    "term": "Tasa de detección entre las marcadas",
+    "definition": "Carpetas marcadas con alerta divididas entre todas las marcadas."
+  },
+  {
+    "term": "Porcentaje total de aciertos",
+    "definition": "Alertas y ausencias de alerta correctas divididas entre todas las carpetas."
+  },
+  {
+    "term": "Marcada dada una alerta",
+    "definition": "Carpetas marcadas con alerta divididas entre todas las que tienen alerta."
+  }
+]}
+  explanation={"Las tres cantidades pueden incluir alertas correctas, pero cada denominador responde a una pregunta distinta. El porcentaje total de aciertos no proporciona las dos celdas del grupo con alerta."}
+/>
+
+### Qué información pedir
+
+Para una población nueva, busca una proporción inicial de marcadas aplicable y las dos tasas condicionales de alerta: entre marcadas y entre no marcadas. Una tabla completa de recuentos aplicables ofrece directamente la misma información. Aclara la selección y el periodo. Una etiqueta de «aciertos» sin definición mezcla varias preguntas distintas.
+
+## Elige la clase de referencia antes de calcular
+
+Supón que el archivo del protocolo A consta de dos grupos conocidos, R y S. La tabla divide el **mismo catálogo A**, sin introducir otro detector:
+
+| Grupo | Marcadas con alerta | Marcadas sin alerta | Sin marcar con alerta | Sin marcar sin alerta | Total |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| R | 8 | 12 | 8 | 72 | 100 |
+| S | 12 | 18 | 87 | 783 | 900 |
+| Archivo A completo | 20 | 30 | 95 | 855 | 1.000 |
+
+Si la selección se hace entre todas las alertas de A y no aporta más información, usa 20/115. Si **ya sabes que la carpeta pertenece a R**, empieza dentro de R. Allí hay 20 carpetas marcadas entre 100. En su grupo con alerta hay ocho marcadas y ocho sin marcar: **8/16 = 50 %**.
+
+Puedes comprobar que el cambio no exige que el detector se comporte de otra manera dentro de R. Sus tasas condicionales de alerta son 8/20 = 40 % entre las marcadas y 8/80 = 10 % entre las no marcadas. En S son 12/30 = 40 % y 87/870 = 10 %. Lo que cambia es la proporción inicial de marcadas. Vuelve al escenario R del gráfico anterior para comparar las dos poblaciones pertinentes.
+
+La pertenencia a R ya está incorporada al utilizar su tabla. No la cuentes otra vez como si fuera una segunda señal independiente. Además, estas tasas por subgrupo solo se han definido para A; la tabla global de B no indica cuáles son las tasas de B dentro de R.
+
+<MCQ
+  client:visible
+  pretestLabel={"Antes de leer"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  question={"Sabes que la carpeta elegida pertenece a R antes de comprobar si tiene alerta. ¿Qué procedimiento incorpora esa información?"}
+  options={[
+  {
+    "text": "Usar todo el archivo, porque la población más grande disponible siempre es la mejor."
+  },
+  {
+    "text": "Partir de R y después condicionar por la alerta usando su propia tabla completa.",
+    "correct": true
+  },
+  {
+    "text": "Usar todo el archivo y contar dos veces la pertenencia a R como pruebas distintas."
+  },
+  {
+    "text": "Elegir el subgrupo que dé la respuesta más tranquilizadora después de ver la alerta."
+  }
+]}
+  explanation={"La pertenencia a R es conocida; no es un subgrupo elegido después de obtener un resultado deseable. Entre sus alertas hay ocho carpetas marcadas y ocho sin marcar. La tabla completa de R justifica el cálculo; un grupo más pequeño sin datos útiles no mejoraría automáticamente una estimación."}
+/>
+
+### Cuándo pueden servir los casos históricos
+
+Para estimar el plazo de un proyecto, la clase de referencia podría incluir proyectos con alcance y recursos comparables y una definición coherente de qué significa terminarlos. Registra cómo entran los casos en la clase, incluidos los fracasos pertinentes y no solo los éxitos convenientes. Un método nuevo o un cambio de recursos pueden importar mucho: explica por qué los resultados anteriores siguen informando sobre el proyecto actual o qué datos justifican otro pronóstico.
+
+No hay una regla automática de «gana la clase más pequeña». Una clase estrecha puede ser más pertinente, pero dejar pocos datos; una grande puede mezclar procesos distintos. Las muestras históricas también introducen incertidumbre de estimación, a diferencia de nuestros catálogos completos definidos. Una media histórica de cinco semanas no implica por sí sola que cada trabajo nuevo dure cinco semanas ni que cualquier ajuste justificado deba ser pequeño.
+
+## Transfiere el método a un catálogo nuevo
+
+Deja a un lado las tasas del detector anterior. En un **catálogo nuevo y completo de 200 carpetas**, 20 están marcadas y 180 no. Su protocolo nuevo señala 15 de las marcadas y nueve de las no marcadas. La selección es uniforme entre las alertas de este catálogo nuevo.
+
+Antes de abrir la solución, rellena las cuatro celdas, calcula la proporción de marcadas entre las alertas y compárala con la proporción inicial. Nombra un supuesto que tendrías que comprobar antes de trasladar la respuesta a otro archivo.
+
+<FillBlank
+  client:visible
+  instructions={"Elige una opción para cada hueco y comprueba la respuesta."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"✓ Correcto"}
+  partialResultWord={"correctas"}
+  question={"Usa el catálogo nuevo, sin reutilizar las tasas del detector anterior."}
+  text={"El grupo con alerta contiene {{veinticuatro|veinte|doscientas}} carpetas. La proporción de marcadas dentro de él es {{cinco octavos|tres cuartos|un décimo}}."}
+  explanation={"Tienen alerta quince carpetas marcadas y nueve sin marcar. Divide quince entre su suma, veinticuatro. Tres cuartos es la tasa de detección entre las veinte marcadas; un décimo es la proporción inicial entre las doscientas carpetas."}
+/>
+
+<details>
+<summary>Abre la solución resuelta y la comprobación de transferencia</summary>
+
+| Estado real | Con alerta | Sin alerta | Total |
+| --- | ---: | ---: | ---: |
+| Marcada | 15 | 5 | 20 |
+| Sin marcar | 9 | 171 | 180 |
+| Total | 24 | 176 | 200 |
+
+El grupo con alerta contiene 15 + 9 = 24 carpetas. Su proporción de marcadas es **15/24 = 5/8 = 62,5 %**, frente al 20/200 = 10 % inicial. La tasa de detección entre las marcadas es 15/20 = 75 %; no es la probabilidad condicional pedida. La tasa de falsos positivos es 9/180 = 5 %.
+
+Como comprobación aparte, la razón de verosimilitud es 0,75/0,05 = 15. Las odds iniciales 1:9 pasan a 15:9, o 5:3, que se convierten en 5/(5 + 3) = 5/8.
+
+Para trasladar la respuesta, comprueba tanto cómo se selecciona la siguiente carpeta como si la población y el detector siguientes tienen las mismas tasas aplicables. Otra pertenencia de grupo, un detector modificado o un registro selectivo de alertas podrían exigir una tabla nueva. Sin esos datos, expresa la limitación en lugar de tratar el 62,5 % como una propiedad de cualquier carpeta con alerta en cualquier lugar.
+
+</details>
+
+### Una regla de revisión aplicable
+
+Anota la condición, la población inicial, la señal y el denominador filtrado. Recalcula cuando la información nueva cambie la población pertinente o cualquiera de las dos tasas condicionales. Si faltan esos datos, indica cuáles faltan. Si son estimaciones y no una tabla completa definida para el caso, expresa también su incertidumbre.
 
 ## Repaso
 
-<Quiz
+Antes de mirar el mapa, intenta explicar por qué una misma tasa inicial puede producir respuestas distintas tras una alerta y por qué un mismo porcentaje total de aciertos puede ocultar grupos con alerta distintos.
+
+<MindMap
   client:visible
-  title="Ponte a prueba: tasas base"
-  questionLabel="Pregunta"
-  ofLabel="de"
-  scoreLabel="Tu puntuación"
-  restartLabel="Reiniciar"
-  nextLabel="Siguiente"
-  backLabel="Atrás"
-  seeResultsLabel="Ver resultados"
-  completeLabel="Completado"
-  completeTitleLabel="Cuestionario completado"
-  correctCountLabel="correctas"
-  gateLabel="Comprueba tu respuesta para continuar."
-  perfectMessage="Puntuación perfecta, ¡bien hecho!"
-  goodMessage="Buen trabajo, repasa las que has fallado."
-  keepPracticingMessage="Sigue practicando, lo tienes."
-  checkLabel="Comprobar"
-  retryLabel="Reintentar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  correctAnswerLabel="Respuesta correcta"
-  explanationLabel="Explicación"
-  questions={[
+  root={{
+  "label": "Una probabilidad con población definida",
+  "children": [
     {
-      question: '¿Qué es una tasa base?',
-      options: [
-        { text: 'Lo común que es un resultado a lo largo de la clase de referencia relevante, antes de mirar las particularidades de un caso', correct: true },
-        { text: 'La precisión de una prueba o medición' },
-        { text: 'La descripción más vívida y detallada que tienes de un caso concreto' },
-        { text: 'Una corazonada sobre cómo acabará un caso concreto' },
-      ],
-      explanation: 'Una tasa base es la frecuencia llana de un resultado entre todos los casos como el tuyo — el ancla de la «visión exterior» desde la que partes antes de ajustar por cualquier particularidad.',
+      "label": "Partir",
+      "children": [
+        {
+          "label": "Condición que contamos"
+        },
+        {
+          "label": "Clase de referencia pertinente"
+        }
+      ]
     },
     {
-      question: 'En el problema del «hombre tímido y pulcro — ¿bibliotecario o agricultor?», ¿por qué es agricultor la mejor apuesta?',
-      options: [
-        { text: 'Hay muchísimos más agricultores que bibliotecarios, así que incluso un hombre que encaja con el estereotipo es más probable que provenga de la multitud, mucho mayor, de agricultores', correct: true },
-        { text: 'Los agricultores suelen ser personas tímidas y pulcras' },
-        { text: 'La descripción estaba secretamente diseñada para apuntar a los agricultores' },
-        { text: 'Los bibliotecarios nunca son meticulosos ni ordenados' },
-      ],
-      explanation: 'La representatividad hace que la descripción «parezca» de bibliotecario, pero las tasas base ganan la aritmética: la multitud de bibliotecarios es diminuta junto a la de agricultores, así que el hombre que coincide sigue siendo probablemente agricultor.',
+      "label": "Filtrar",
+      "children": [
+        {
+          "label": "Alertas de ambos tipos"
+        },
+        {
+          "label": "Nuevo denominador"
+        }
+      ]
     },
     {
-      question: 'La falacia de la planificación se describe mejor como…',
-      options: [
-        { text: 'Predecir tu propio proyecto a partir de los detalles color de rosa de su visión interior en lugar del historial de proyectos pasados similares', correct: true },
-        { text: 'Negarse a hacer cualquier estimación de tiempo en absoluto' },
-        { text: 'Elegir una clase de referencia demasiado amplia para ser útil' },
-        { text: 'Actualizar de forma demasiado agresiva ante evidencia débil' },
-      ],
-      explanation: 'La falacia de la planificación es razonar desde la visión interior — las particularidades de este plan — e ignorar la tasa base de la visión exterior que fijan los proyectos comparables ya terminados, por eso las estimaciones salen optimistas.',
-    },
-  ]}
+      "label": "Comprobar",
+      "children": [
+        {
+          "label": "Tasas condicionales, además de aciertos globales"
+        },
+        {
+          "label": "¿Coinciden la población y el proceso?"
+        }
+      ]
+    }
+  ]
+}}
+  title={"Reconstruye la probabilidad"}
+  eyebrow={""}
+  outlineLabel={"Esquema en texto"}
+  className={"not-prose"}
 />
 
-## Hacia dónde va esto
+<Quiz
+  client:visible
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"correctas"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Cuestionario completado"}
+  perfectMessage={"Has resuelto todas las preguntas de este repaso."}
+  goodMessage={"Revisa las explicaciones de las preguntas que has fallado."}
+  keepPracticingMessage={"Vuelve a las tablas y compara los denominadores."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Atrás"}
+  scoreLabel={"Tu puntuación"}
+  restartLabel={"Reiniciar"}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"¡Correcto!"}
+  incorrectLabel={"No exactamente."}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  title={"Comprueba el denominador"}
+  questions={[
+  {
+    "question": "¿Qué define la tasa base que usas para un caso nuevo?",
+    "options": [
+      {
+        "text": "Con qué frecuencia aparece la señal entre casos que ya sabes que tienen la condición."
+      },
+      {
+        "text": "Lo llamativa que resulta la descripción del caso elegido antes de hacer ningún cálculo."
+      },
+      {
+        "text": "Lo común que es la condición en una población pertinente antes de la señal nueva.",
+        "correct": true
+      },
+      {
+        "text": "Con qué frecuencia acierta el detector al clasificar cualquiera de los dos tipos de caso."
+      }
+    ],
+    "explanation": "La tasa base se refiere a la condición en la población inicial pertinente. La tasa de detección y el porcentaje total de aciertos utilizan otros denominadores."
+  },
+  {
+    "question": "En el protocolo A, ¿qué recuento debe ir debajo del número de alertas marcadas?",
+    "options": [
+      {
+        "text": "Las cincuenta carpetas marcadas, incluidas las que no tienen alerta."
+      },
+      {
+        "text": "Las ciento quince carpetas que han generado alguna alerta.",
+        "correct": true
+      },
+      {
+        "text": "Las novecientas cincuenta carpetas que no llevan una marca oculta."
+      },
+      {
+        "text": "Las mil carpetas que forman el archivo completo de partida."
+      }
+    ],
+    "explanation": "La pregunta selecciona entre las alertas. Siguen siendo elegibles tanto las veinte marcadas con alerta como las noventa y cinco sin marcar con alerta: ciento quince en total."
+  },
+  {
+    "question": "La razón de verosimilitud del protocolo A es cuatro. ¿Qué significa?",
+    "options": [
+      {
+        "text": "La alerta es cuatro veces más frecuente entre marcadas que entre no marcadas.",
+        "correct": true
+      },
+      {
+        "text": "La proporción de marcadas tras la alerta es cuatro veces la proporción inicial."
+      },
+      {
+        "text": "En el archivo hay cuatro alertas marcadas por cada alerta de una carpeta sin marcar."
+      },
+      {
+        "text": "El detector realiza cuatro clasificaciones correctas por cada error de clasificación."
+      }
+    ],
+    "explanation": "La razón compara las dos tasas condicionales de alerta. Multiplica las odds iniciales, no la probabilidad inicial. En A, la probabilidad actualizada es cuatro veintitrésavos, no un quinto."
+  },
+  {
+    "question": "Conoces la proporción inicial de marcadas y solo el porcentaje total de aciertos del detector. ¿Qué tasas adicionales permitirían calcular juntas la proporción de marcadas tras una alerta?",
+    "allowMultiple": true,
+    "options": [
+      {
+        "text": "La tasa de alertas entre las carpetas marcadas.",
+        "correct": true
+      },
+      {
+        "text": "El porcentaje total de aciertos repetido otra vez."
+      },
+      {
+        "text": "La tasa de alertas entre las carpetas sin marcar.",
+        "correct": true
+      },
+      {
+        "text": "La proporción de carpetas con una cubierta azul."
+      }
+    ],
+    "explanation": "Las dos tasas condicionales separan las alertas de carpetas marcadas y sin marcar. Repetir un porcentaje global no aporta esa división; no se ha definido ninguna relación de la cubierta con el detector o la marca. El grupo con alerta debe contener alguna carpeta para que la pregunta condicional esté definida."
+  },
+  {
+    "question": "¿Qué afirmación sobre una clase de referencia está justificada?",
+    "options": [
+      {
+        "text": "La clase con menos miembros siempre ofrece la frecuencia más pertinente."
+      },
+      {
+        "text": "Los datos históricos dejan de servir en cuanto el caso actual tiene un detalle nuevo."
+      },
+      {
+        "text": "Un subgrupo conocido puede aportar otra tasa inicial cuando sus datos son aplicables.",
+        "correct": true
+      },
+      {
+        "text": "Una excepción llamativa demuestra que toda la población ha cambiado para siempre."
+      }
+    ],
+    "explanation": "Una pertenencia conocida puede cambiar la población sobre la que condicionas, como ocurre con R. Importan la pertinencia, la selección y los datos sobre el proceso; ni estrechar la clase ni encontrar un detalle nuevo garantiza que una tasa se pueda trasladar."
+  },
+  {
+    "question": "En el catálogo de transferencia, ¿qué proporción de todas las alertas corresponde a carpetas marcadas?",
+    "options": [
+      {
+        "text": "Un décimo, usando todas las carpetas como denominador."
+      },
+      {
+        "text": "Tres cuartos, usando las carpetas marcadas como denominador."
+      },
+      {
+        "text": "Un veinteavo, usando las carpetas sin marcar como denominador."
+      },
+      {
+        "text": "Cinco octavos, usando las carpetas con alerta como denominador.",
+        "correct": true
+      }
+    ],
+    "explanation": "Hay quince alertas de carpetas marcadas y nueve de carpetas sin marcar. La proporción pedida es quince entre veinticuatro: cinco octavos. Las otras fracciones describen la proporción inicial o las tasas condicionales de alerta."
+  }
+]}
+/>
 
-Ya puedes hacer el movimiento que separa a los pronosticadores calibrados de los adivinos seguros de sí mismos: antes de juzgar cualquier caso concreto, encuentra la multitud a la que pertenece y empieza por la frecuencia con que las cosas como esa acaban de la forma que estás preguntando. Ánclate en la tasa base, y luego deja que las particularidades la ajusten — nunca al revés. A continuación, en **«Valor esperado»**, ponemos números a los propios resultados: una vez que sabes lo *probable* que es cada resultado, el valor esperado te dice lo que vale *de media* una elección, para que las probabilidades dejen de ser anécdotas y empiecen a guiar decisiones.
+## Fuentes y siguiente paso
+
+El [artículo de Tversky y Kahneman de 1974](https://doi.org/10.1126/science.185.4157.1124), en su discusión sobre representatividad y probabilidades previas, aporta el contexto de investigación sobre el olvido de las tasas base. El [estudio de Ayal y Beyth-Marom de 2014](https://doi.org/10.1017/S1930297500005775) examina cómo los pasos de cálculo y la compatibilidad entre datos y preguntas afectan al rendimiento en tareas concretas de razonamiento bayesiano. Una tabla permite mostrar los grupos pertinentes; no garantiza la comprensión ni diagnostica cómo razona una persona.
+
+Todos los recuentos del archivo son datos construidos para enseñar. A continuación, [Valor esperado](/es/thinking-in-probabilities/03-expected-value) combina probabilidades y resultados: saber lo probable que es algo todavía no dice cuánto vale ese resultado para una decisión.
