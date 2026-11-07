@@ -1,0 +1,369 @@
+---
+title: "Audit a Target Rule"
+description: "Solve responses to a public score cutoff, compare classification with acceptance, and test a redesign against changed costs and population composition."
+topic: "en/goodharts-law"
+order: 7
+minutes: 29
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, MatchConcepts, ConsequenceTree, RateComparison, MindMap, Quiz } from '@/components/react';
+
+Every submission passes the format score. The exhibition organiser celebrates. Half the submitted puzzles still have no valid solution.
+
+A higher score could reflect better puzzles, cosmetic changes or a different incoming population. To audit the rule, you need to distinguish those possibilities and calculate what the rule makes worthwhile. This workshop uses a complete, invented model. Its probabilities, editing costs and utility units are teaching inputs, not measured behaviour.
+
+## Write down the decision and what can change
+
+<MCQ client:visible pretest
+  question="The organiser wants to accept valid puzzles and reject invalid ones. Which result directly measures that objective?"
+  options={[
+    { text: 'The share accepted, regardless of genuine validity.' },
+    { text: 'The mean score, regardless of which puzzles work.' },
+    { text: 'The share correctly accepted or rejected against validity.', correct: true }
+  ]}
+  explanation="Accepting an invalid puzzle and rejecting a valid puzzle are both mistakes under this objective. A larger acceptance count or format score does not tell us how many decisions were correct."
+/>
+
+A **classifier** assigns a category to an input. Our organiser uses a format score to accept or reject a puzzle. Genuine validity **G** is 1 when the puzzle has a valid solution and 0 otherwise. The objective is **classification accuracy**: the probability of making the correct accept/reject decision.
+
+Accepting an invalid puzzle is a **false positive** (FP). Rejecting a valid puzzle is a **false negative** (FN). Both errors have equal weight. Acceptance volume, participant effort, fairness and the exhibition's wider value are separate objectives, not silently included in accuracy.
+
+The initial population has four equally probable types:
+
+| Type | Genuine validity G | Original score x | Probability |
+|---|---|---|---|
+| A | 0 | 0 | 1/4 |
+| B | 0 | 1 | 1/4 |
+| C | 1 | 2 | 1/4 |
+| D | 1 | 3 | 1/4 |
+
+This is a probability catalogue, not a prediction that four random arrivals contain one of each type. We use four equally weighted **type slots** to calculate probabilities exactly.
+
+The organiser observes only the **final score**, not the arriving submission's original type, original score or G. The table is the learner's complete audit model. Knowing the population law does not identify which hidden type produced one final score.
+
+The organiser commits to one of six public cutoff rules. Accept when the final score is **at least the cutoff**.
+
+| Rule | Cutoff |
+|---|---|
+| Open | 0 |
+| Low | 1 |
+| Original | 2 |
+| Raised | 3 |
+| High | 4 |
+| Top | 5 |
+
+After seeing the rule, a participant can make **e = 0, 1, 2, 3 or 4** cosmetic edits. Final score is **x + e**, with no clamp: it can reach 7. Edits never change G. Genuine improvement is excluded from this small action menu to isolate proxy manipulation; real authors may have other options.
+
+Acceptance is worth **2.5 private utility units** to each participant; rejection is worth zero. An edit costs **k utility units**. Participants maximise:
+
+**Utility = 2.5 × accepted − k × e**
+
+Accepted is 1 for acceptance and 0 for rejection. No editing always costs zero. The benefit is a value to the participant, not an extra invoice in the organiser's objective. Start with **k = 1**. No other motive, future reward, collusion or alteration of G enters this one-shot game.
+
+### When to use this setup
+
+Define observations, actions, costs and benefits before predicting gaming. [Hardt and colleagues' strategic-classification model](https://arxiv.org/pdf/1506.06980), section 1.1, separates the rule, the response and classification against the original state. Our parameters are a local construction.
+
+<Categorize client:visible
+  question="Separate the organiser's observation from hidden audit information."
+  buckets={['Observed for this arrival', 'Not directly observed by the organiser']}
+  items={[
+    { text: 'The final format score used by the rule', bucket: 'Observed for this arrival' },
+    { text: 'Whether that score crosses the published cutoff', bucket: 'Observed for this arrival' },
+    { text: 'The original hidden type before any edits', bucket: 'Not directly observed by the organiser' },
+    { text: 'Whether the puzzle genuinely has a valid solution', bucket: 'Not directly observed by the organiser' }
+  ]}
+  explanation="The rule sees the final input. The oracle table supplies more information to the learner so we can evaluate the rule; it does not give that information to the organiser for each arrival."
+/>
+
+## Solve the response before judging the score
+
+<MCQ client:visible pretest
+  question="A participant already clears the cutoff. What does another cosmetic edit do under this utility rule?"
+  options={[
+    { text: 'It adds cost without increasing the acceptance benefit.', correct: true },
+    { text: 'It increases the benefit in proportion to the score.' },
+    { text: 'It improves genuine validity whenever the score rises.' }
+  ]}
+  explanation="Acceptance has the same benefit at every qualifying score. An extra edit consumes utility without changing G. The participant has no reason to overshoot."
+/>
+
+A **best response** maximises utility after the organiser commits to its rule. Work through type B under Original: x = 1, cutoff = 2, k = 1.
+
+| Edits e | Final score x + e | Accepted | Editing cost | Net utility |
+|---|---|---|---|---|
+| 0 | 1 | No | 0 | 0 |
+| 1 | 2 | Yes | 1 | 2.5 − 1 = 1.5 |
+| 2 | 3 | Yes | 2 | 2.5 − 2 = 0.5 |
+| 3 | 4 | Yes | 3 | 2.5 − 3 = −0.5 |
+| 4 | 5 | Yes | 4 | 2.5 − 4 = −1.5 |
+
+One edit uniquely wins. It changes acceptance while the puzzle remains invalid. Here **gaming** means strategic input modification without the corresponding genuine improvement. It need not involve dishonesty: cosmetic edits are permitted.
+
+<ConsequenceTree client:visible
+  title="Follow the rule, response and decision"
+  eyebrow="Timing of the game"
+  instructions="Open the paths for the worked type. The table enumerates every edit count; this diagram highlights staying and the best crossing edit."
+  decisionLabel="Organiser commits"
+  orderLabels={['Participant response', 'Classification result']}
+  promptLabel="Show the next stage"
+  expandAllLabel="Show both paths"
+  collapseLabel="Close the paths"
+  valenceLabels={{ good: 'Model path', bad: 'Model path', mixed: 'Model path', neutral: 'Model path' }}
+  decision={{ label: 'The Original cutoff rule is public', children: [
+    { label: 'Type B makes no edit', children: [{ label: 'Below the cutoff: rejection is correct', note: 'The puzzle remains invalid.' }] },
+    { label: 'Type B makes the cheapest crossing edit', children: [{ label: 'At the cutoff: acceptance is incorrect', note: 'The same puzzle remains invalid.' }] }
+  ] }}
+  caption="The organiser sees the terminal score, not the path or hidden type. Score changes do not improve validity in this model."
+/>
+
+Repeat the comparison for every type under Original:
+
+| Type | Best edit e | Final score | Accepted | Correct classification |
+|---|---|---|---|---|
+| A | 2 | 2 | Yes | No |
+| B | 1 | 2 | Yes | No |
+| C | 0 | 2 | Yes | Yes |
+| D | 0 | 3 | Yes | Yes |
+
+Before edits were available, Original rejected A/B and accepted C/D: **4/4 correct**. After responses it accepts **4/4**, but only **2/4** decisions are correct. There are two false positives and no false negatives. G has not declined; it remains **[0, 0, 1, 1]**. Classification using the final score deteriorated.
+
+Edits beyond the cheapest crossing are **dominated**: they cost more for the same benefit. If crossing costs more than 2.5, staying wins. These comparisons simplify the enumeration without removing an action. A half-integer benefit and integer costs make every main/transfer best response unique. With exact equality, a tie convention would need to be stated, not silently assumed.
+
+<FillBlank client:visible
+  question="Keep the changes separate."
+  text="Cosmetic edits change the {{observed score|genuine validity|type probability}}. The rule converts that score into {{an acceptance decision|a quality improvement|a private cost estimate}}. Accuracy compares the decision with {{genuine validity|the acceptance benefit|the largest edit count}}."
+  explanation="An input change can alter a category without improving the puzzle. Evaluating accuracy needs G, available in this audit model but not directly observed by the organiser for each arrival."
+/>
+
+## Compare every permitted cutoff on the actual objective
+
+<MCQ client:visible pretest
+  question="Original now accepts every type. What should the organiser compare next?"
+  options={[
+    { text: 'Acceptance counts, selecting the rule that accepts most.' },
+    { text: 'Accuracy after responses under every permitted rule.', correct: true },
+    { text: 'Cutoff size, selecting the largest because tighter must be better.' }
+  ]}
+  explanation="The objective is correct classification and participants respond to each rule. Neither a pass count nor automatic tightening settles that comparison."
+/>
+
+Each rule creates a new response problem. Under High, cutoff 4, A needs four edits and B three. Their costs exceed the benefit, so both stay and are correctly rejected. C needs two edits, with net utility **2.5 − 2 = 0.5**; D needs one, with net utility **1.5**. Both are correctly accepted.
+
+The complete menu at k = 1 follows. Edit vectors give **A; B; C; D** in order. Accepted and Correct count equal-weight type slots. FP/FN are error counts; Mean cost is the population-weighted private editing cost.
+
+| Rule | Cutoff | Edits A; B; C; D | Accepted | Correct | FP; FN | Mean cost |
+|---|---|---|---|---|---|---|
+| Open | 0 | 0; 0; 0; 0 | 4 | 2 | 2; 0 | 0 |
+| Low | 1 | 1; 0; 0; 0 | 4 | 2 | 2; 0 | 1/4 |
+| Original | 2 | 2; 1; 0; 0 | 4 | 2 | 2; 0 | 3/4 |
+| Raised | 3 | 0; 2; 1; 0 | 3 | 3 | 1; 0 | 3/4 |
+| High | 4 | 0; 0; 2; 1 | 2 | 4 | 0; 0 | 3/4 |
+| Top | 5 | 0; 0; 0; 2 | 1 | 3 | 0; 1 | 1/2 |
+
+High uniquely maximises accuracy in the menu: **4/4 = 100%**. Top falls to **3/4 = 75%**. It does not reject everyone: D can reach score 5 with two edits. No score was clamped to the original range.
+
+<RateComparison client:visible
+  title="Correct classification before and after strategic responses"
+  scenarioLabel="Choose a cutoff rule"
+  countsLabel="Correctly classified type slots in the model"
+  differenceLabel="Change in model accuracy"
+  scenarios={[
+    { label: 'Original rule', groups: [{ label: 'After responses', events: 2, total: 4 }, { label: 'Before edits are available', events: 4, total: 4 }] },
+    { label: 'Raised rule', groups: [{ label: 'After responses', events: 3, total: 4 }, { label: 'Before edits are available', events: 3, total: 4 }] },
+    { label: 'High rule', groups: [{ label: 'After responses', events: 4, total: 4 }, { label: 'Before edits are available', events: 2, total: 4 }] },
+    { label: 'Open rule', groups: [{ label: 'After responses', events: 2, total: 4 }, { label: 'Before edits are available', events: 2, total: 4 }] },
+    { label: 'Low rule', groups: [{ label: 'After responses', events: 2, total: 4 }, { label: 'Before edits are available', events: 3, total: 4 }] },
+    { label: 'Top rule', groups: [{ label: 'After responses', events: 3, total: 4 }, { label: 'Before edits are available', events: 2, total: 4 }] }
+  ]}
+/>
+
+These are exact model probabilities, not trial estimates. A rule that looked poor before adaptation can perform well after its induced responses. Raised has unchanged accuracy, but its error switches from a false negative before edits to a false positive afterwards. Equal accuracy does not preserve every consequence.
+
+High also imposes costs. Across A/B/C/D they are **0, 0, 2 and 1**, totalling **3** over the catalogue. The population mean is **(0 + 0 + 2 + 1)/4 = 3/4 utility unit**. Three is the sum, not the cost per arrival. Giving that burden weight, or weighting FP/FN differently, would change the objective and require another comparison.
+
+### When to use the comparison
+
+Use it before replacing a weak target with a stricter one. Solve responses, evaluate the actual objective and inspect side effects. This proves a best rule among six under known types and costs, not a real screening system's effectiveness or optimality among every possible decision procedure.
+
+<MCQ client:visible
+  question="Which rule maximises accuracy after responses at the initial edit cost?"
+  options={[
+    { text: 'Top' }, { text: 'Original' }, { text: 'Raised' }, { text: 'High', correct: true }
+  ]}
+  explanation="High rejects the invalid types and accepts the valid types after responses. Top rejects a valid type too. The result depends on the benefit, edit cost, type law and menu."
+/>
+
+## Diagnose what identical scores cannot tell you
+
+<MCQ client:visible pretest
+  question="A later population has the same final-score distribution as the strategic population. Does that establish that participants edited their scores?"
+  options={[
+    { text: 'Yes, because identical scores must have identical causes.' },
+    { text: 'No, because a changed intake can produce the same scores.', correct: true },
+    { text: 'Yes, because a higher acceptance rate always proves gaming.' }
+  ]}
+  explanation="Scores do not identify their production process. Separate participant responses from changes in who arrives, then examine genuine outcomes."
+/>
+
+Return to Original, cutoff 2. Compare two specified histories:
+
+| History | Incoming population | Edits | Final-score law | Validity law | Accuracy |
+|---|---|---|---|---|---|
+| Strategic response | A/B/C/D each 1/4 | Best responses at k = 1 | 2, 2, 2, 3 in four equal-weight slots | 0, 0, 1, 1 | 2/4 |
+| Changed population, passive protocol | C weight 3/4, D weight 1/4; A/B zero | None permitted | 2, 2, 2, 3 in four equal-weight slots | 1, 1, 1, 1 | 4/4 |
+
+The second history keeps the **same type definitions** but changes their probabilities. Repeated C slots represent probability weight, not one person appearing repeatedly. These are alternative catalogues, not the original four individuals changing quality.
+
+Exactly matched observables are **the final-score distribution and acceptance under the unchanged rule**. Both histories accept every submission. **G and accuracy are not matched**, and the organiser cannot recover them from the score alone.
+
+<RateComparison client:visible
+  title="Equal proxy observations can hide different genuine results"
+  scenarioLabel="Choose what is compared"
+  countsLabel="Equal-weight model slots satisfying the selected event"
+  differenceLabel="First history minus second history"
+  scenarios={[
+    { label: 'Observable acceptance rate', groups: [{ label: 'Strategic response history', events: 4, total: 4 }, { label: 'Changed passive population', events: 4, total: 4 }] },
+    { label: 'Oracle classification accuracy', groups: [{ label: 'Strategic response history', events: 2, total: 4 }, { label: 'Changed passive population', events: 4, total: 4 }] }
+  ]}
+/>
+
+Keep comparisons separate. Original passive→original strategic changes the opportunity to edit. Original passive→changed passive changes only population weights. Changing both and attributing the whole result to the rule would confound the explanations.
+
+The changed passive history is not itself a Goodhart failure: there is no optimisation causing a loss of decision usefulness, and classification is correct. More generally, a predictive failure is not proof of deliberate gaming. [Manheim and Garrabrant](https://arxiv.org/pdf/1803.04585v4) distinguish selection, intervention and adversarial response; a disappointing number alone does not supply a mechanism.
+
+### What to inspect
+
+Retain the intake frame, scoring version, original/final score and edit logs, and independent validity checks where feasible. Outcomes test the objective; logs and assignment history distinguish explanations. Real checks may be costly or noisy. The oracle makes our reasoning inspectable, not those costs disappear.
+
+<MatchConcepts client:visible
+  question="Match each record to the question it can help answer."
+  pairs={[
+    { term: 'Intake population', definition: 'Did the mix of arriving types change?' },
+    { term: 'Original and final score log', definition: 'Was the scored input changed after publication of the rule?' },
+    { term: 'Independent validity check', definition: 'Did the decision agree with genuine puzzle validity?' },
+    { term: 'Published decision rule', definition: 'Did the same score face a different acceptance condition?' }
+  ]}
+  explanation="The records address different alternatives. An edit log alone does not establish the effect on the objective; a score-only dashboard supplies neither the whole history nor genuine validity."
+/>
+
+## Transfer the audit when editing costs change
+
+<MCQ client:visible pretest
+  question="Editing becomes more costly while the benefit and rules stay fixed. What needs recalculating?"
+  options={[
+    { text: 'Only mean scores, since the old best responses remain fixed.' },
+    { text: 'Only rule names, since accuracy cannot depend on edit costs.' },
+    { text: 'Best responses and accuracy under each candidate rule.', correct: true }
+  ]}
+  explanation="A previously worthwhile crossing can cease to pay. Classification depends on those responses, so the preferred cutoff can change."
+/>
+
+Work independently before opening the solution. Change only the edit cost to **k = 2**. Keep the original equally probable types, benefit 2.5, edits 0–4, score x + e and six cutoff choices.
+
+Calculate responses under **Original, Raised and High**. Then check the other rules before choosing the accuracy maximum. A valid participant may rationally stay below the cutoff when crossing costs more than acceptance is worth.
+
+<details>
+<summary>Check the complete changed-cost comparison</summary>
+
+| Rule | Cutoff | Edits A; B; C; D | Accepted | Correct | FP; FN | Mean cost |
+|---|---|---|---|---|---|---|
+| Open | 0 | 0; 0; 0; 0 | 4 | 2 | 2; 0 | 0 |
+| Low | 1 | 1; 0; 0; 0 | 4 | 2 | 2; 0 | 1/2 |
+| Original | 2 | 0; 1; 0; 0 | 3 | 3 | 1; 0 | 1/2 |
+| Raised | 3 | 0; 0; 1; 0 | 2 | 4 | 0; 0 | 1/2 |
+| High | 4 | 0; 0; 0; 1 | 1 | 3 | 0; 1 | 1/2 |
+| Top | 5 | 0; 0; 0; 0 | 0 | 2 | 0; 2 | 0 |
+
+Raised rejects A/B, lets C spend **2 × 1 = 2** for net utility **0.5**, and accepts D without editing. All classifications are correct. Total private cost over four slots is **2**; mean cost is **2/4 = 1/2**.
+
+High requires two edits from C, costing **4 > 2.5**, so C stays and is incorrectly rejected. D spends 2 to cross. The old preferred rule now makes one error. Raised uniquely wins the whole menu.
+
+</details>
+
+Test the claim that **any rewarded target must lose its usefulness**. Change only the cost again to **k = 3**. Even one edit costs more than the benefit, so no participant edits under any rule:
+
+| Rule | Cutoff | Edits A; B; C; D | Accepted | Correct | FP; FN | Mean cost |
+|---|---|---|---|---|---|---|
+| Open | 0 | 0; 0; 0; 0 | 4 | 2 | 2; 0 | 0 |
+| Low | 1 | 0; 0; 0; 0 | 3 | 3 | 1; 0 | 0 |
+| Original | 2 | 0; 0; 0; 0 | 2 | 4 | 0; 0 | 0 |
+| Raised | 3 | 0; 0; 0; 0 | 1 | 3 | 0; 1 | 0 |
+| High | 4 | 0; 0; 0; 0 | 0 | 2 | 0; 2 | 0 |
+| Top | 5 | 0; 0; 0; 0 | 0 | 2 | 0; 2 | 0 |
+
+Original retains **4/4 accuracy** despite public targeting and a positive benefit. This rejects inevitability, not the need for review. A different benefit, cheaper/different edits, population or objective can overturn it.
+
+<RateComparison client:visible
+  title="Recheck the preferred rule under each editing cost"
+  scenarioLabel="Choose the cost case"
+  countsLabel="Correctly classified type slots in the model"
+  differenceLabel="Reviewed choice minus the previous High rule"
+  scenarios={[
+    { label: 'Changed cost: Raised compared with High', groups: [{ label: 'Raised at changed cost', events: 4, total: 4 }, { label: 'High at changed cost', events: 3, total: 4 }] },
+    { label: 'Initial cost: High remains the choice', groups: [{ label: 'Reviewed High rule', events: 4, total: 4 }, { label: 'Previous High rule', events: 4, total: 4 }] },
+    { label: 'Costly edits: Original compared with High', groups: [{ label: 'Original with costly edits', events: 4, total: 4 }, { label: 'High with costly edits', events: 2, total: 4 }] }
+  ]}
+/>
+
+### When to reopen the choice
+
+Recalculate when evidence changes the benefit, costs, actions, population or error weights. With those fixed, repeating “someone might game it” supplies no new response calculation. A restricted menu of cosmetic edits should not prevent investigating genuine improvement outside that menu.
+
+<MCQ client:visible
+  question="What does the costly-edit case establish?"
+  options={[
+    { text: 'A targeted proxy can remain useful under stated costs and actions.', correct: true },
+    { text: 'The same cutoff must work under every future population and cost.' },
+    { text: 'A positive acceptance benefit always makes cosmetic editing worthwhile.' }
+  ]}
+  explanation="At this cost, no edit pays and Original classifies every type correctly. That is a finite counterexample to inevitability, with explicit limits."
+/>
+
+## Reconstruct the target-rule audit
+
+<MindMap client:visible title="From proxy score to an audited rule"
+  root={{ label: 'Audit a target rule', children: [
+    { label: 'Specify the game', children: [{ label: 'Genuine validity and observed final score' }, { label: 'Allowed edits and private utility' }] },
+    { label: 'Solve responses', children: [{ label: 'Crossing versus no edit' }, { label: 'Overshooting adds cost' }] },
+    { label: 'Evaluate the rule', children: [{ label: 'Both classification error types' }, { label: 'Mean cost versus catalogue total' }] },
+    { label: 'Distinguish histories', children: [{ label: 'Equal scores need not mean equal causes or goals' }, { label: 'Population change versus strategic editing' }] },
+    { label: 'Transfer cautiously', children: [{ label: 'Changed costs can change the best cutoff' }, { label: 'Target failure is not inevitable' }] }
+  ] }}
+/>
+
+<Quiz client:visible title="Audit the decision, then the explanation"
+  questions={[
+    { question: 'What declined after responses to Original at the initial cost?', options: [
+      { text: 'The share of valid types in the original population.' },
+      { text: 'Classification accuracy using the final score.', correct: true },
+      { text: 'The acceptance rate under the public cutoff.' }
+    ], explanation: 'Genuine validity stays fixed. Acceptance rises, but the invalid types can cross, reducing correct classifications.' },
+    { question: 'At the changed edit cost, which rule uniquely maximises accuracy in the menu?', options: [
+      { text: 'High' }, { text: 'Original' }, { text: 'Raised', correct: true }, { text: 'Top' }
+    ], explanation: 'Raised lets valid types qualify without profitable crossings by invalid types. High now rejects a valid type whose crossing is too costly.' },
+    { question: 'How is mean private editing cost obtained from the type catalogue?', options: [
+      { text: 'Weight each cost by its type probability and add.', correct: true },
+      { text: 'Label the catalogue sum as the cost of every arrival.' },
+      { text: 'Divide by the number of types with a positive cost.' }
+    ], explanation: 'The declared type weights include zero-cost types. A catalogue sum and a population mean are different quantities.' },
+    { question: 'The histories have identical final-score laws. Select the supported conclusions.', allowMultiple: true, options: [
+      { text: 'The unchanged cutoff produces the same acceptance rate.', correct: true },
+      { text: 'Those scores can accompany different genuine validity laws.', correct: true },
+      { text: 'Those observations establish cosmetic editing in both populations.' },
+      { text: 'Those observations force classification accuracy to be identical.' }
+    ], explanation: 'The cutoff acts on the score. Accuracy also needs G, which differs between the histories and is not supplied by the score.' },
+    { question: 'Which new finding most directly requires recalculating the responses?', options: [
+      { text: 'The completed calculation has a different heading.' },
+      { text: 'The same type table is printed in a different order.' },
+      { text: 'The cost of reaching an accepted score has changed.', correct: true }
+    ], explanation: 'Crossing depends on its cost relative to acceptance benefit. Reordering or rewording the same calculation does not change that comparison.' }
+  ]}
+/>
+
+### Sources and scope
+
+[Hardt, Megiddo, Papadimitriou and Wootters](https://arxiv.org/pdf/1506.06980), arXiv version 2 from 2015, abstract and sections 1–1.2, supply the strategic-classification framework; the original section 1.1 equations were checked. [Manheim and Garrabrant](https://arxiv.org/pdf/1803.04585v4), version 4 from 2019, distinguish Goodhart mechanisms. The finite types, rules, costs and proofs are our own construction. No general classifier-learning theorem, empirical effectiveness or real screening recommendation is claimed.
+
+Continue to the [final exam](/goodharts-law/final-exam). Submitted answers are locked; the score appears at the end.
