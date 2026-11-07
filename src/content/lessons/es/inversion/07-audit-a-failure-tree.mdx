@@ -1,0 +1,429 @@
+---
+title: "Revisa un árbol de fallos"
+description: "Combina condiciones con Y y O, cuenta los casos que se solapan y compara cuatro planes de preparación con un presupuesto y un objetivo de coste explícitos."
+topic: "es/inversion"
+order: 8
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, MindMap, ConsequenceTree, RateComparison } from '@/components/react';
+
+La copia principal podría llegar tarde. La de reserva podría no estar disponible. El archivo maestro podría contener una imagen equivocada. La lista recoge tres preocupaciones. Aún no dice qué combinaciones dejarían una exposición sin su imagen prevista al abrir.
+
+En este taller convertirás la lista en un **árbol de fallos (fault tree)**: un modelo lógico de cómo puede producirse un resultado no deseado concreto. Comprobarás su lógica, añadirás un modelo de probabilidad y elegirás un plan de preparación. La exposición, las probabilidades, los efectos de las medidas y los créditos son datos didácticos construidos.
+
+## Define qué cuenta como fallo
+
+La copia principal y la de reserva usan el mismo archivo maestro. Si está equivocado, ninguna puede mostrar la imagen prevista. Si es correcto, una copia principal que llegue a tiempo sirve; si llega tarde, puede sustituirla una reserva disponible. Da por hecho que las demás condiciones funcionan, incluidos el acceso, el montaje y la posibilidad de usar la reserva antes de abrir.
+
+<MCQ className="not-prose" client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="El archivo maestro es correcto, la copia principal llega tarde y la reserva está disponible. ¿Lo clasifica el modelo como un fallo en la apertura?"
+  options={[
+    { text: 'Sí, porque cualquier problema nombrado basta para contar como fallo.' },
+    { text: 'No, porque la reserva disponible aún proporciona la imagen prevista.', correct: true },
+    { text: 'No se puede decidir sin asignar una probabilidad al retraso.' }
+  ]}
+  explanation="La regla permite sustituir la copia por la reserva cuando el archivo es correcto. Podemos clasificar este perfil sin saber su probabilidad. Un retraso aislado no basta aquí."
+/>
+
+Una **condición booleana** tiene dos valores: verdadero o falso. Define estas condiciones para una sola apertura:
+
+| Símbolo | Verdadero significa |
+|---|---|
+| A | El archivo maestro común contiene la imagen equivocada |
+| B | La copia principal se entrega después de abrir |
+| C | La copia de reserva no está físicamente disponible antes de abrir |
+| F | No se puede mostrar la imagen prevista al abrir |
+
+La regla completa dentro de este modelo es **F = A O (B Y C)**.
+
+**O** es inclusiva: se cumple al menos una rama, incluido el caso en que se cumplen ambas. **Y** exige todas las condiciones de su rama. Estas palabras establecen una relación lógica. Una conexión Y no afirma por sí misma que sus entradas sean estadísticamente independientes.
+
+<ConsequenceTree client:visible
+  title="Descompón el criterio de fallo"
+  eyebrow="Relaciones lógicas"
+  instructions="Abre el criterio de fallo y después la rama conjunta. Lee los descendientes de O como alternativas y los de Y como entradas necesarias en conjunto."
+  decisionLabel="O inclusiva"
+  orderLabels={['Alternativa en O', 'Entrada en Y']}
+  promptLabel="Mostrar las condiciones"
+  expandAllLabel="Mostrar todo el árbol lógico"
+  collapseLabel="Cerrar el árbol"
+  valenceLabels={{ good: 'Condición lógica', bad: 'Condición lógica', mixed: 'Condición lógica', neutral: 'Condición lógica' }}
+  decision={{ label: 'F — falta la imagen prevista al abrir', note: 'Se cumple al menos una de las siguientes alternativas.', children: [
+    { label: 'A — archivo maestro común equivocado', note: 'Esta condición basta, pase lo que pase con la entrega y la reserva.' },
+    { label: 'Y — copia principal tardía y reserva no disponible', note: 'Ambos descendientes deben ser verdaderos para que se cumpla esta alternativa.', children: [
+      { label: 'B — copia principal entregada después de abrir' },
+      { label: 'C — reserva físicamente no disponible antes de abrir' }
+    ] }
+  ] }}
+  caption="Es una descomposición lógica, no una cronología. El diagrama no afirma que el retraso de una entrega haga desaparecer la reserva."
+/>
+
+Estos son los **ocho perfiles** completos: 1 significa verdadero y 0 falso. La última fila sigue contando como una sola apertura fallida, aunque se cumplan ambas ramas.
+
+| A | B | C | F |
+|---|---|---|---|
+| 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 0 |
+| 0 | 1 | 0 | 0 |
+| 0 | 1 | 1 | 1 |
+| 1 | 0 | 0 | 1 |
+| 1 | 0 | 1 | 1 |
+| 1 | 1 | 0 | 1 |
+| 1 | 1 | 1 | 1 |
+
+Las **combinaciones mínimas de fallo** son A por sí sola y el par B con C. Mínima significa que, al quitar un elemento, esa combinación deja de ser suficiente; otra rama aún podría fallar. No significa más probable ni más barata de corregir. B es necesaria para la rama de entrega y reserva, pero no para todos los fallos: A puede bastar sin B.
+
+### Cuándo usarlo
+
+Usa un árbol de fallos cuando una lista oculte la diferencia entre «basta cualquiera» y «deben darse juntas». Contrasta primero el criterio con el plan real. Si la reserva procediera de un archivo correcto verificado por separado, A por sí sola ya no tendría el significado que hemos estipulado aquí.
+
+<Categorize className="not-prose" client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" allCorrectLabel="Todo clasificado" partialResultWord="correctas" instructions="Coloca cada elemento en su grupo."
+  question="Aplica el criterio a cada descripción completa."
+  buckets={['Se cumple F', 'No se cumple F']}
+  items={[
+    { text: 'Archivo equivocado, copia principal puntual, reserva disponible', bucket: 'Se cumple F' },
+    { text: 'Archivo correcto, copia principal tardía, reserva no disponible', bucket: 'Se cumple F' },
+    { text: 'Archivo correcto, copia principal puntual, reserva no disponible', bucket: 'No se cumple F' },
+    { text: 'Archivo correcto, copia principal tardía, reserva disponible', bucket: 'No se cumple F' }
+  ]}
+  explanation="Un archivo maestro común equivocado basta. Con el archivo correcto se necesitan tanto el retraso como la ausencia de reserva. Nombrar una condición no deseada no la convierte en suficiente."
+/>
+
+## Asigna probabilidades a los perfiles
+
+<MCQ className="not-prose" client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Varias filas de una tabla de verdad completa cuentan como fallos. ¿Qué falta para calcular su probabilidad?"
+  options={[
+    { text: 'El peso de probabilidad de cada perfil.', correct: true },
+    { text: 'El orden en que se han escrito las filas.' },
+    { text: 'La cantidad de palabras del nombre de cada suceso.' }
+  ]}
+  explanation="La tabla de verdad indica qué perfiles cumplen la regla. Sus pesos indican cuánta probabilidad reúnen. Contar filas solo sirve si todas tienen la misma probabilidad."
+/>
+
+Una **probabilidad** expresa el peso que recibe un suceso en un modelo. En un catálogo de casos elementales equiprobables, es el número de casos del suceso dividido entre el total. Los ocho perfiles booleanos anteriores no forman un catálogo con pesos iguales.
+
+Para el modelo de referencia, estipula que A, B y C son **mutuamente independientes**: las probabilidades de sus combinaciones especificadas se obtienen multiplicando las probabilidades individuales. Fija P(A) = 1/10, P(B) = 1/5 y P(C) = 1/4. La letra P significa «probabilidad de».
+
+Puedes reproducir toda la distribución con tres coordenadas enteras independientes y uniformes. Uniforme significa que cada valor del intervalo tiene la misma probabilidad.
+
+| Coordenada | Valores posibles | El suceso se cumple cuando |
+|---|---|---|
+| X_A | Del 1 al 50 | A: X_A ≤ 5 |
+| X_B | Del 1 al 5 | B: X_B ≤ 1 |
+| X_C | Del 1 al 20 | C: X_C ≤ 5 |
+
+Hay **50 × 5 × 20 = 5.000 ternas equiprobables**. Son las posibilidades elementales del modelo, no incidentes medidos ni un pronóstico de que una serie de aperturas vaya a contener exactamente esos resultados.
+
+A se cumple en **5 × 5 × 20 = 500** casos. B Y C se cumple en **50 × 1 × 5 = 250**. Su solapamiento contiene **5 × 1 × 5 = 25** casos. Al sumar 500 y 250 cuentas dos veces esos 25, aunque cada apertura fallida debe aparecer una sola vez en el total.
+
+| A | B Y C | Casos elementales distintos | Casos de fallo |
+|---|---|---|---|
+| Falso | Falso | 4.275 | 0 |
+| Falso | Verdadero | 225 | 225 |
+| Verdadero | Falso | 475 | 475 |
+| Verdadero | Verdadero | 25 | 25 |
+| **Total** | | **5.000** | **725** |
+
+Por tanto, **P(F) = (500 + 250 − 25) / 5.000 = 725 / 5.000 = 29/200 = 14,5%**. Cinco de los ocho perfiles booleanos cumplen F, pero eso **no** convierte su probabilidad en 5/8.
+
+Con notación de probabilidad, el cálculo es:
+
+**P(F) = P(A) + P(B Y C) − P(A Y B Y C)**
+
+Con la independencia mutua especificada, queda **1/10 + (1/5 × 1/4) − (1/10 × 1/5 × 1/4)**. La O inclusiva exige corregir el solapamiento; la independencia justifica estos productos. La sección 6.1 del [manual de NASA sobre lógica booleana y probabilidad](https://s3vi.ndc.nasa.gov/ssri-kb/static/resources/Fault%20Tree%20Handbook_NASA.pdf) distingue ambos pasos.
+
+### Cuándo usar recuentos
+
+Cuenta casos cuando el catálogo y sus pesos estén especificados. Si desconoces las probabilidades individuales o su dependencia, anota qué información falta; un diagrama ordenado no puede aportar pesos numéricos.
+
+<FillBlank className="not-prose" client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" explanationLabel="Explicación" correctResultLabel="Correcto" partialResultWord="correctas" instructions="Elige la opción correcta para cada hueco y comprueba."
+  question="Separa la regla lógica del cálculo de probabilidad."
+  text="Y exige {{todas sus entradas|cualquier entrada|filas equiprobables}}. Multiplicar probabilidades individuales requiere {{un modelo conjunto justificado|sucesos situados en ramas separadas|probabilidades individuales iguales}}. Sumar sucesos que se solapan exige {{restar su solapamiento|contar dos veces lo compartido|ignorar sus casos compartidos}}."
+  explanation="En este catálogo, la independencia aporta el modelo conjunto. En otro modelo, cuenta los casos conjuntos directamente o usa las probabilidades condicionales adecuadas. La regla lógica Y no aporta por sí sola una fórmula de multiplicación."
+/>
+
+## Elige un plan dentro del presupuesto inicial
+
+<MCQ className="not-prose" client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Un plan de preparación da la menor probabilidad de fallo. ¿Qué hay que comprobar antes de elegirlo en esta decisión?"
+  options={[
+    { text: 'Solo si su nombre suena a una medida de protección fiable.' },
+    { text: 'Su viabilidad y su coste total según el objetivo elegido.', correct: true },
+    { text: 'Solo si atiende la mayor cantidad de sucesos nombrados.' }
+  ]}
+  explanation="La decisión incluye un límite de recursos y un objetivo de coste. Una probabilidad menor de fallo no demuestra por sí sola que el plan quepa en el presupuesto o compense después de pagarlo."
+/>
+
+Hay exactamente cuatro planes permitidos. La **revisión del archivo** incluye corregir los errores detectados; en el modelo reduce el umbral de A de 5 a 1. El **plan de reserva** reduce el umbral de C de 5 a 1. Son efectos de intervención estipulados, no conclusiones que permitan los nombres de las acciones. Las coordenadas independientes, el umbral de B y las demás reglas no cambian.
+
+Un **crédito** es la unidad de coste del ejercicio. El coste fijo de preparación se paga en todos los casos, tenga éxito o falle la apertura. El fallo añade **100 créditos una sola vez**, aunque se cumplan ambas ramas de F. La comparación no incluye otros costes ni beneficios.
+
+| Plan | Umbral de A entre 50 | Umbral de C entre 20 | Coste fijo en créditos |
+|---|---|---|---|
+| No actuar | 5 | 5 | 0 |
+| Revisar el archivo | 1 | 5 | 4 |
+| Preparar la reserva | 5 | 1 | 1 |
+| Ambas medidas | 1 | 1 | 5 |
+
+El objetivo es **minimizar el coste total esperado** entre los planes viables. Esperado significa una media ponderada por las probabilidades, no el coste prometido de una apertura concreta:
+
+**Coste total esperado = coste fijo de preparación + 100 × P(F)**
+
+Al revisar el archivo, A aparece en **1 × 5 × 20 = 100** casos, B Y C en 250 y su solapamiento en **1 × 1 × 5 = 5**. El fallo ocupa **100 + 250 − 5 = 345** casos. Su coste total esperado es **4 + 100 × 345/5.000 = 10,90 créditos**.
+
+Aplica el mismo recuento a cada plan permitido:
+
+| Plan | Casos de fallo entre 5.000 | P(F) | Total esperado en créditos | Cabe en el límite inicial |
+|---|---|---|---|---|
+| No actuar | 725 | 0,145 | 14,50 | Sí |
+| Revisar el archivo | 345 | 0,069 | 10,90 | Sí |
+| Preparar la reserva | 545 | 0,109 | 11,90 | Sí |
+| Ambas medidas | 149 | 0,0298 | 7,98 | No |
+
+El **límite inicial de gasto por adelantado es de 4 créditos**. Restringe el gasto fijo de preparación, no la pérdida posterior ni su media. Ambas medidas juntas no caben. Revisar el archivo tiene el menor total esperado entre los planes restantes, por delante de la reserva más barata. Con un **límite ampliado a 5 créditos**, ambas medidas pasan a ser viables y dan el menor total esperado de las cuatro opciones.
+
+Por ejemplo, con ambas medidas el recuento de fallos es **100 + 50 − 1 = 149** y el total esperado es **5 + 100 × 149/5.000 = 7,98**. La probabilidad de fallo restante es positiva. Una apertura correcta sigue costando los 5 créditos fijos; una fallida cuesta 105.
+
+<RateComparison client:visible locale="es"
+  title="Probabilidad de fallo con las intervenciones permitidas"
+  scenarioLabel="Compara un plan con no actuar"
+  countsLabel="Casos de fallo del catálogo del modelo"
+  differenceLabel="Cambio en la probabilidad de fallo"
+  pointLabel="punto porcentual" pointsLabel="puntos porcentuales"
+  scenarios={[
+    { label: 'Revisar el archivo frente a no actuar', groups: [{ label: 'Revisar el archivo', events: 345, total: 5000 }, { label: 'No actuar', events: 725, total: 5000 }] },
+    { label: 'Preparar la reserva frente a no actuar', groups: [{ label: 'Preparar la reserva', events: 545, total: 5000 }, { label: 'No actuar', events: 725, total: 5000 }] },
+    { label: 'Ambas medidas frente a no actuar', groups: [{ label: 'Ambas medidas', events: 149, total: 5000 }, { label: 'No actuar', events: 725, total: 5000 }] }
+  ]}
+/>
+
+El gráfico compara probabilidades de fallo. La viabilidad y los costes de preparación corresponden a la tabla de decisión. Su denominador es el catálogo completo estipulado, no una muestra recogida después de intervenir.
+
+### Cuándo usarlo
+
+Usa esta comparación cuando las acciones permitidas, sus efectos y el objetivo estén suficientemente definidos para calcular. Otra pérdida por fallo, un límite estricto de exposición u otra acción disponible podrían cambiar la elección. Los cuatro planes forman el menú del ejercicio, no una lista exhaustiva de medidas reales.
+
+<MCQ className="not-prose" client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Con el límite inicial de gasto y el objetivo de coste indicado, ¿qué plan debes elegir del menú?"
+  options={[
+    { text: 'No actuar' },
+    { text: 'Preparar la reserva' },
+    { text: 'Revisar el archivo', correct: true },
+    { text: 'Ambas medidas' }
+  ]}
+  explanation="Revisar el archivo cabe en el límite inicial y tiene el menor coste total esperado entre los planes viables. Ambas medidas dan un total aún menor, pero exigen más gasto por adelantado del permitido. Preparar la reserva cuesta menos al principio, pero su mayor pérdida esperada empeora el resultado según este objetivo."
+/>
+
+## Aplica el modelo con otra dependencia
+
+<MCQ className="not-prose" client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Las probabilidades individuales de retraso y de reserva no disponible no cambian. ¿Debe mantenerse también la probabilidad de que coincidan?"
+  options={[
+    { text: 'Sí, porque las probabilidades individuales determinan cualquier combinación.' },
+    { text: 'No, porque esas mismas probabilidades permiten solapamientos distintos.', correct: true },
+    { text: 'Sí, porque la etiqueta Y hace independientes las dos condiciones.' }
+  ]}
+  explanation="Las probabilidades individuales no determinan cuánto coinciden las condiciones. La probabilidad conjunta necesita una distribución conjunta u otra restricción justificada. La regla de verdad puede mantenerse y cambiar su probabilidad."
+/>
+
+Una **distribución conjunta** asigna pesos a combinaciones. Una **probabilidad individual**, también llamada marginal, cuenta un suceso en todas las combinaciones que lo contienen.
+
+Para aplicar el razonamiento por tu cuenta, conserva F y P(A) = 1/10, y mantén A independiente del **par B/C completo**. Cambia solo la distribución conjunta de B y C. La tabla da tres catálogos alternativos, cada uno con **20 posiciones equiprobables del par**. Las columnas nombran perfiles B/C completos; cada entrada cuenta sus posiciones.
+
+| Distribución conjunta | B y C | B sin C | C sin B | Ninguno |
+|---|---|---|---|---|
+| Par independiente | 1 | 3 | 4 | 12 |
+| Retrasos incluidos en la falta de reserva | 4 | 0 | 1 | 15 |
+| Retraso y falta de reserva disjuntos | 0 | 4 | 5 | 11 |
+
+En todas las filas, B ocupa **4/20 = 1/5** de las posiciones y C ocupa **5/20 = 1/4**. En el caso de inclusión, todo retraso coincide con la falta de reserva. En la fila disjunta nunca coinciden. Los recuentos describen posibilidades estipuladas, no registros de entregas observadas.
+
+Antes de abrir la solución, calcula P(F) en cada fila. Cruza sus 20 posiciones del par con **10 posiciones independientes de A**, una de las cuales tiene el archivo equivocado. Obtienes **200 casos equiprobables por distribución**. ¿Cuál tiene la mayor probabilidad de fallo y por qué?
+
+<details>
+<summary>Comprueba los cálculos y compara las distribuciones</summary>
+
+A ocupa **20 casos** en cada catálogo. Cuando A es falsa, las otras nueve posiciones de A multiplican cada posición con B y C. Por tanto, el fallo ocupa **20 + 9 × (posiciones conjuntas)** casos:
+
+| Distribución conjunta | Cálculo | Casos de fallo entre 200 | P(F) |
+|---|---|---|---|
+| Par independiente | 20 + 9 × 1 | 29 | 29/200 = 14,5% |
+| Retrasos incluidos en la falta de reserva | 20 + 9 × 4 | 56 | 56/200 = 28% |
+| Retraso y falta de reserva disjuntos | 20 + 9 × 0 | 20 | 20/200 = 10% |
+
+La distribución con inclusión da la mayor probabilidad porque falta la reserva en todos los casos de retraso. La disjunta elimina esta rama conjunta; permanece la del archivo equivocado. La dependencia puede aumentar o reducir la probabilidad conjunta respecto a la independencia.
+
+De forma equivalente, **P(F) = 1/10 + (9/10) × P(B Y C)**: los nuevos fallos conjuntos que contamos después de A deben tener el archivo correcto. La expresión usa la independencia de A respecto al par B/C; no supone independencia entre B y C.
+
+<RateComparison client:visible locale="es"
+  title="Mismas probabilidades individuales, distinta probabilidad conjunta de fallo"
+  scenarioLabel="Elige otra distribución conjunta"
+  countsLabel="Casos de fallo del catálogo del modelo"
+  differenceLabel="Cambio respecto al par independiente"
+  pointLabel="punto porcentual" pointsLabel="puntos porcentuales"
+  scenarios={[
+    { label: 'Par con inclusión frente al par independiente', groups: [{ label: 'Par con inclusión', events: 56, total: 200 }, { label: 'Par independiente', events: 29, total: 200 }] },
+    { label: 'Par disjunto frente al par independiente', groups: [{ label: 'Par disjunto', events: 20, total: 200 }, { label: 'Par independiente', events: 29, total: 200 }] }
+  ]}
+/>
+
+</details>
+
+### Cuándo comprobar la distribución conjunta
+
+Comprueba la distribución conjunta cuando una opción principal y su reserva puedan compartir condiciones. No copies los resultados de intervención anteriores a estas distribuciones alternativas. Reducir una probabilidad individual no especifica qué casos compartidos desaparecen. Para comparar aquí los planes de preparación, define cómo modifica cada intervención la nueva distribución conjunta y vuelve a calcular.
+
+<MCQ className="not-prose" client:visible allowMultiple
+  checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="¿Qué conclusiones se mantienen al aplicar este cambio? Selecciona todas las correctas."
+  options={[
+    { text: 'El criterio lógico de fallo puede mantenerse mientras cambia su probabilidad.', correct: true },
+    { text: 'Los totales de intervención anteriores necesitan un modelo justificado en cada distribución nueva.', correct: true },
+    { text: 'Conservar las probabilidades individuales conserva todas las probabilidades conjuntas.' },
+    { text: 'Cualquier dependencia debe aumentar la probabilidad de fallo respecto a la independencia.' }
+  ]}
+  explanation="La tabla aporta solapamientos distintos con las mismas probabilidades individuales. No aporta efectos de intervención bajo esas distribuciones. Los casos de inclusión y de sucesos disjuntos muestran además que la dependencia no tiene una dirección universal de aumento."
+/>
+
+## Revisa qué cambiaría la decisión
+
+<MCQ className="not-prose" client:visible pretest
+  pretestLabel="Antes de leer — adivina" checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  question="Un proveedor pasa a crear la reserva desde un archivo correcto verificado por separado. ¿Qué necesita revisión primero?"
+  options={[
+    { text: 'Solo las probabilidades, porque un árbol lógico terminado no puede necesitar revisión tras cambiar de proveedor.' },
+    { text: 'El criterio de fallo, porque un archivo maestro equivocado podría dejar de inutilizar ambas copias con otra reserva.', correct: true },
+    { text: 'Solo los costes fijos, porque cambiar el origen del archivo no puede cambiar qué perfiles cuentan como fallos.' }
+  ]}
+  explanation="El significado original de A dependía de que ambas copias usaran el mismo archivo maestro. Cambiar su origen puede cambiar la relación lógica. Revisa el criterio antes de reutilizar sus probabilidades o su clasificación de las acciones."
+/>
+
+Distingue un cálculo completo de una descripción completa de la realidad. La tabla de verdad cubre todos los perfiles de los tres sucesos estipulados. Una exposición real también puede perder el suministro eléctrico, usar un montaje incompatible o cambiar la hora de apertura. Un árbol adaptado a un resultado no demuestra que se hayan identificado todos los fallos reales relevantes. El [apéndice histórico de NASA sobre árboles de fallos](https://nodis3.gsfc.nasa.gov/displayCA.cfm?Internal_ID=N_PR_8621_0001_&page_name=AppdxI35) señala expresamente ese límite; es una guía obsoleta que usamos como fuente de método.
+
+Usa esta revisión para decidir si puedes apoyarte en el cálculo:
+
+| Parte del modelo | Pregunta que comprobar | Ejemplo que cambiaría el análisis |
+|---|---|---|
+| Criterio | ¿Qué cuenta exactamente como resultado no deseado y en qué plazo? | Una reserva correcta de otro origen puede salvar un archivo principal equivocado |
+| Distribución conjunta | ¿Qué casos coinciden y qué justifica sus pesos? | Las dos vías de impresión comparten ahora proveedor o una interrupción de transporte |
+| Intervención | ¿Qué cambia la acción, incluidos los casos compartidos? | La revisión detecta errores, pero no permite corregirlos antes de imprimir |
+| Coste y restricción | ¿Qué se paga en todos los casos y qué restringe el límite? | Sube el precio fijo o cambia el presupuesto inicial |
+| Objetivo | ¿Qué consecuencias incluye la comparación? | Un límite separado de pérdida inaceptable descarta el plan de menor media |
+
+En el ejemplo del archivo, una revisión real podría detectar la imagen equivocada cuando la impresión ya fuera irreversible. Los nombres de los sucesos no justifican por sí solos la reducción de A que hemos estipulado. Tendrías que investigar el proceso y el tiempo para corregir, y revisar después los efectos o las acciones disponibles. Una historia de fallo más vívida no llena ese vacío de pruebas.
+
+### Cuándo usarlo
+
+Recurre a esta revisión cuando varias medidas parezcan intercambiables en una lista. Define su función lógica y sus costes antes de ordenarlas. Cierra esta ronda cuando la elección actual y sus supuestos sean explícitos; reabre la parte afectada si nuevas pruebas cambian un criterio, la distribución conjunta, una intervención, una restricción o el objetivo. Continúa el trabajo hacia delante de hacer que merezca la pena visitar la exposición.
+
+<MatchConcepts className="not-prose" client:visible
+  checkLabel="Comprobar" retryLabel="Reintentar" instructions="Elige un término y después su definición." allCorrectLabel="Todo relacionado" partialResultWord="correctas" pickDefinitionHint="Ahora elige una definición" notLinkedHint="Sin relacionar" termsLabel="Términos" definitionsLabel="Definiciones"
+  question="Relaciona cada parte de la revisión con su función."
+  pairs={[
+    { term: 'Criterio de fallo', definition: 'Decide si un perfil completo cuenta como el resultado no deseado.' },
+    { term: 'Distribución conjunta', definition: 'Asigna un peso de probabilidad a las combinaciones de condiciones.' },
+    { term: 'Modelo de intervención', definition: 'Especifica qué modifica la acción elegida antes del resultado.' },
+    { term: 'Objetivo de decisión', definition: 'Indica qué se compara entre los planes viables.' }
+  ]}
+  explanation="El criterio aporta la regla de verdad; la distribución aporta los pesos; la intervención cambia el modelo; el objetivo selecciona un plan viable. Nombrar una medida no sustituye ninguna de esas funciones."
+/>
+
+## Reconstruye la revisión
+
+<MindMap className="not-prose" client:visible
+  title="De la lista de fallos a la decisión"
+  eyebrow="Visión de conjunto" outlineLabel="Esquema"
+  root={{ label: 'Revisar un árbol de fallos', children: [
+    { label: 'Concretar el resultado', children: [{ label: 'Plazo y límites' }, { label: 'O inclusiva e Y conjunta' }] },
+    { label: 'Asignar pesos', children: [{ label: 'La lógica no aporta probabilidades' }, { label: 'Distribución conjunta y solapamiento' }] },
+    { label: 'Comparar acciones', children: [{ label: 'Efectos de intervención definidos' }, { label: 'Coste fijo y pérdida por fallo' }, { label: 'Objetivo dentro del límite' }] },
+    { label: 'Revisar cambios', children: [{ label: 'Mismos márgenes pueden ocultar distinto solapamiento' }, { label: 'Las pruebas pueden cambiar el modelo' }] }
+  ] }}
+/>
+
+<Quiz className="not-prose" client:visible title="Comprueba la revisión del árbol de fallos"
+  questionLabel="Pregunta" ofLabel="de" correctCountLabel="correctas" completeLabel="Completado" completeTitleLabel="Práctica terminada"
+  perfectMessage="Has resuelto todos los casos." goodMessage="Revisa las explicaciones de los casos fallados." keepPracticingMessage="Repasa los casos y sus explicaciones antes de repetir."
+  gateLabel="Comprueba la respuesta para continuar." nextLabel="Siguiente" seeResultsLabel="Ver resultados" backLabel="Atrás" scoreLabel="Has acertado" restartLabel="Reiniciar"
+  checkLabel="Comprobar" retryLabel="Reintentar" correctLabel="Correcto" incorrectLabel="No del todo" correctAnswerLabel="Respuesta correcta" explanationLabel="Explicación"
+  questions={[
+    { question: '¿Qué afirmación sobre el retraso de entrega es verdadera en el modelo original?', options: [
+      { text: 'Es necesario para su rama conjunta, pero no para todos los fallos posibles.', correct: true },
+      { text: 'Es necesario para todos los fallos, incluido el archivo maestro equivocado.' },
+      { text: 'Inutiliza la apertura por sí solo cuando la reserva sigue disponible.' }
+    ], explanation: 'La rama conjunta exige tanto el retraso como la ausencia de reserva. La rama separada del archivo equivocado puede producir un fallo con una entrega puntual.' },
+    { question: 'Con el límite ampliado de gasto inicial, ¿qué plan permitido minimiza el coste total esperado?', options: [
+      { text: 'Revisar el archivo' }, { text: 'No actuar' }, { text: 'Ambas medidas', correct: true }, { text: 'Preparar la reserva' }
+    ], explanation: 'El plan combinado pasa a ser viable con el límite ampliado y tiene el menor total esperado de la tabla completa. Su falta de viabilidad impedía elegirlo con el límite inicial.' },
+    { question: 'Se cumplen ambas ramas de fallo en la apertura. ¿Cómo se aplica la regla de coste indicada?', options: [
+      { text: 'Se paga el coste fijo y se cobra la pérdida por fallo una vez.', correct: true },
+      { text: 'Se elimina el coste fijo y se cobra una pérdida por cada rama.' },
+      { text: 'Se cobra la preparación solo si la apertura funciona sin reserva.' }
+    ], explanation: 'La regla asigna un coste a una apertura fallida, no a cada explicación del fallo. La preparación ya se había pagado independientemente del resultado.' },
+    { question: '¿Por qué el caso disjunto conserva cierta probabilidad de fallo?', options: [
+      { text: 'Un archivo equivocado aún inutiliza ambas copias.', correct: true },
+      { text: 'Un retraso y una reserva disjuntos aún deben coincidir.' },
+      { text: 'La etiqueta Y crea un suceso de fallo adicional no listado.' }
+    ], explanation: 'Que los sucesos no puedan coincidir elimina B Y C y deja A. El caso conserva su probabilidad y su independencia respecto al par.' },
+    { question: '¿Qué afirmaciones permite la revisión? Selecciona todas las correctas.', allowMultiple: true, options: [
+      { text: 'Una tabla de verdad completa aún puede omitir sucesos relevantes para un plan real.', correct: true },
+      { text: 'El orden de las acciones puede cambiar si cambia el presupuesto o el objetivo.', correct: true },
+      { text: 'Nombrar una revisión aporta su eficacia sin necesidad de otras pruebas.' },
+      { text: 'El menor coste medio demuestra que la exposición tendrá éxito.' }
+    ], explanation: 'La exhaustividad depende de los sucesos declarados; la elección depende del objetivo y las restricciones. Los efectos reales de intervenir y el objetivo positivo de la exposición necesitan sus propias pruebas.' },
+{
+  "question": "Un plan cuesta cinco créditos en todos los casos y tiene probabilidad de fallo de ciento cuarenta y nueve entre cinco mil. Un fallo añade cien créditos una sola vez. ¿Cuál es su coste total esperado, en créditos?",
+  "options": [
+    {
+      "text": "Siete coma noventa y ocho.",
+      "correct": true
+    },
+    {
+      "text": "Dos coma noventa y ocho."
+    },
+    {
+      "text": "Cinco."
+    },
+    {
+      "text": "Catorce coma cinco."
+    }
+  ],
+  "explanation": "Multiplica cien créditos por la probabilidad de ciento cuarenta y nueve entre cinco mil y suma los cinco créditos fijos: el total es siete coma noventa y ocho. Dos coma noventa y ocho es solo la pérdida esperada por fallo: el coste de preparación se paga igualmente en todos los casos."
+},
+{
+  "question": "Hay fallo si el archivo es incorrecto O coinciden retraso y falta de reserva. La probabilidad de archivo incorrecto es un décimo, independiente del par completo. El par se cumple conjuntamente con probabilidad de un quinto. ¿Cuál es la probabilidad de fallo?",
+  "options": [
+    {
+      "text": "Veintiocho por ciento.",
+      "correct": true
+    },
+    {
+      "text": "Veinte por ciento."
+    },
+    {
+      "text": "Catorce y medio por ciento."
+    },
+    {
+      "text": "Diez por ciento."
+    }
+  ],
+  "explanation": "Suma un décimo y un quinto y resta su intersección de un cincuentavo. Obtienes siete veinticincoavos, o veintiocho por ciento. La intersección usa la independencia del archivo respecto al par completo, no la independencia entre retraso y falta de reserva."
+}
+]}
+/>
+
+### Fuentes y alcance
+
+El [manual de NASA de 2002](https://s3vi.ndc.nasa.gov/ssri-kb/static/resources/Fault%20Tree%20Handbook_NASA.pdf), en particular las secciones 1.2–1.3, 3.3–3.4, 3.8, los pasajes O/Y de 4.1, 5.2 y 6.1, aporta el método y sus supuestos. Ni ese manual ni el apéndice obsoleto se presentan como una norma actual. Los catálogos finitos, precios, pérdida y efectos de intervención son construcciones locales para practicar la inversión, no tasas empíricas ni una evaluación de seguridad de una exposición real.
+
+Continúa al [examen final](/es/inversion/final-exam). Las respuestas enviadas quedan bloqueadas; la puntuación aparece al terminar.

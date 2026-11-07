@@ -1,0 +1,412 @@
+---
+title: "Audit a Failure Tree"
+description: "Combine failure conditions with AND and OR, count overlapping cases, and compare four preparation plans under a budget and an explicit cost objective."
+topic: "en/inversion"
+order: 8
+minutes: 24
+updated: 2026-11-07
+---
+
+import { MCQ, Quiz, FillBlank, Categorize, MatchConcepts, MindMap, ConsequenceTree, RateComparison } from '@/components/react';
+
+The main print might arrive late. The spare might be unavailable. The master file might contain the wrong image. A list gives you three worries. It does not yet say which combinations would leave an exhibition without its intended image at opening.
+
+This workshop turns that list into a **failure tree**: a logical model of how a defined unwanted result can occur. You will check its logic, add a probability model and choose a preparation plan. The exhibition, probabilities, intervention effects and credits are constructed teaching data.
+
+## Define what counts as failure
+
+The main print and the spare both use the same master file. If that file is wrong, neither can show the intended image. If the master is correct, an on-time main print works; a late main print can be replaced by an available spare. Hold every other condition working, including access, mounting and the ability to use the spare before opening.
+
+<MCQ className="not-prose" client:visible pretest
+  question="The master is correct, the main print is late and the spare is available. Does this model classify opening as a failure?"
+  options={[
+    { text: 'Yes, because any named problem is enough to count as failure.' },
+    { text: 'No, because the available spare still supplies the intended image.', correct: true },
+    { text: 'It cannot be decided until a probability is assigned to the delay.' }
+  ]}
+  explanation="The stated rule makes the spare a working substitute when the master is correct. We can classify this profile without knowing how likely it is. A late delivery alone is insufficient here."
+/>
+
+A **Boolean condition** has two values: true or false. Define the conditions for this one opening:
+
+| Symbol | True means |
+|---|---|
+| A | The common master contains the wrong image |
+| B | The main print is delivered after opening |
+| C | The spare is physically unavailable before opening |
+| F | The intended image cannot be shown at opening |
+
+Our complete rule within this model is **F = A OR (B AND C)**.
+
+**OR** is inclusive: at least one branch holds, including the case where both hold. **AND** requires every condition within its branch. These words state a logical relationship. An AND connection does not itself say that its inputs are statistically independent.
+
+<ConsequenceTree client:visible
+  title="Decompose the failure criterion"
+  eyebrow="Logical relationships"
+  instructions="Open the failure criterion, then open the combined branch. Read the children of OR as alternatives and the children of AND as jointly required inputs."
+  decisionLabel="OR inclusive"
+  orderLabels={['Alternative at OR', 'Input at AND']}
+  promptLabel="Show the conditions"
+  expandAllLabel="Show the whole logical tree"
+  collapseLabel="Close the tree"
+  valenceLabels={{ good: 'Logical condition', bad: 'Logical condition', mixed: 'Logical condition', neutral: 'Logical condition' }}
+  decision={{ label: 'F — no intended image at opening', note: 'At least one of the following alternatives holds.', children: [
+    { label: 'A — wrong common master', note: 'This condition alone suffices, whatever happens to delivery and spare.' },
+    { label: 'AND — main print late and spare unavailable', note: 'Both children must be true for this alternative to hold.', children: [
+      { label: 'B — main print delivered after opening' },
+      { label: 'C — spare physically unavailable before opening' }
+    ] }
+  ] }}
+  caption="This is a logical decomposition, not a timeline. The diagram does not claim that a late delivery causes the spare to disappear."
+/>
+
+Here are all **eight profiles**, with 1 meaning true and 0 false. The last row still counts as one failed opening, even though both branches hold.
+
+| A | B | C | F |
+|---|---|---|---|
+| 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 0 |
+| 0 | 1 | 0 | 0 |
+| 0 | 1 | 1 | 1 |
+| 1 | 0 | 0 | 1 |
+| 1 | 0 | 1 | 1 |
+| 1 | 1 | 0 | 1 |
+| 1 | 1 | 1 | 1 |
+
+The **minimal failure combinations** are A alone and the pair B with C. Minimal means that removing a member stops that combination from being sufficient; another branch could still fail. It does not mean most likely or cheapest to fix. B is required for the delivery-and-spare branch, but is not required for every failure: A can suffice without B.
+
+### When to use it
+
+Use a failure tree when an avoid-list hides a distinction between “any one is enough” and “these must occur together”. Check the criterion against the actual plan first. If the spare were made from a separately verified correct file, A alone would no longer have the meaning we stipulated here.
+
+<Categorize className="not-prose" client:visible
+  question="Apply the criterion to each complete description."
+  buckets={['F holds', 'F does not hold']}
+  items={[
+    { text: 'Wrong master, main print on time, spare available', bucket: 'F holds' },
+    { text: 'Correct master, main print late, spare unavailable', bucket: 'F holds' },
+    { text: 'Correct master, main print on time, spare unavailable', bucket: 'F does not hold' },
+    { text: 'Correct master, main print late, spare available', bucket: 'F does not hold' }
+  ]}
+  explanation="A wrong common master suffices. With a correct master, both the late main print and the unavailable spare are needed. Merely listing an unwanted condition does not make it sufficient."
+/>
+
+## Give the profiles probability weights
+
+<MCQ className="not-prose" client:visible pretest
+  question="Several rows of a complete truth table count as failures. What else is needed to calculate their probability?"
+  options={[
+    { text: 'The probability weight of each profile.', correct: true },
+    { text: 'The order in which the rows were written.' },
+    { text: 'The number of words used to name each event.' }
+  ]}
+  explanation="A truth table says which profiles satisfy the rule. Their weights say how much probability those profiles carry. Counting rows works only when the rows are equally probable."
+/>
+
+A **probability** describes how much weight an event receives in a model. In a catalogue of equally probable elementary cases, it is the number of cases in the event divided by the total. Our eight Boolean profiles are not such an equally weighted catalogue.
+
+For the reference model, stipulate that A, B and C are **mutually independent**: probabilities of their specified combinations factor into the individual probabilities. Set P(A) = 1/10, P(B) = 1/5 and P(C) = 1/4. The letter P means “probability of”.
+
+You can reproduce the entire law with three independent, uniformly distributed integer slots. Uniform means every value in a slot's range has equal probability.
+
+| Coordinate | Possible values | Event holds when |
+|---|---|---|
+| X_A | 1 through 50 | A: X_A ≤ 5 |
+| X_B | 1 through 5 | B: X_B ≤ 1 |
+| X_C | 1 through 20 | C: X_C ≤ 5 |
+
+There are **50 × 5 × 20 = 5,000 equally probable triples**. These are the model's elementary possibilities, not measured incidents or a prediction that a batch of openings will contain exactly those outcomes.
+
+A holds in **5 × 5 × 20 = 500** cases. B AND C holds in **50 × 1 × 5 = 250**. Their overlap contains **5 × 1 × 5 = 25** cases. Adding 500 and 250 counts those 25 twice, although each failed opening belongs in the total only once.
+
+| A | B AND C | Distinct elementary cases | Failure cases |
+|---|---|---|---|
+| False | False | 4,275 | 0 |
+| False | True | 225 | 225 |
+| True | False | 475 | 475 |
+| True | True | 25 | 25 |
+| **Total** | | **5,000** | **725** |
+
+So **P(F) = (500 + 250 − 25) / 5,000 = 725 / 5,000 = 29/200 = 14.5%**. Five of the eight Boolean profiles satisfy F, but that does **not** make the probability 5/8.
+
+In probability notation the same calculation is:
+
+**P(F) = P(A) + P(B AND C) − P(A AND B AND C)**
+
+Under the specified mutual independence, this becomes **1/10 + (1/5 × 1/4) − (1/10 × 1/5 × 1/4)**. Inclusive OR requires the overlap correction; independence is what justifies these products. The [NASA handbook's discussion of Boolean logic and probability](https://s3vi.ndc.nasa.gov/ssri-kb/static/resources/Fault%20Tree%20Handbook_NASA.pdf), section 6.1, separates those steps.
+
+### When to use counts
+
+Count cases when the catalogue and its weights are specified. If the individual probabilities or their dependence are unknown, record that missing information; a neat diagram cannot supply numerical weights.
+
+<FillBlank className="not-prose" client:visible
+  question="Keep the logical rule separate from the probability calculation."
+  text="AND requires {{all its inputs|any one input|equal row weights}}. Multiplying individual probabilities needs {{a justified joint model|events on different branches|matching individual probabilities}}. Adding overlapping events requires {{subtracting their overlap|counting their overlap twice|ignoring their shared cases}}."
+  explanation="For this catalogue the independence assumption supplies the joint model. In another model, count joint cases directly or use the appropriate conditional probabilities. The logical AND rule alone supplies no product formula."
+/>
+
+## Choose a plan within the upfront budget
+
+<MCQ className="not-prose" client:visible pretest
+  question="A preparation plan gives the smallest failure probability. What must be checked before selecting it for this decision?"
+  options={[
+    { text: 'Only whether its name sounds like a reliable safeguard.' },
+    { text: 'Its feasibility and total cost under the stated objective.', correct: true },
+    { text: 'Only whether it addresses the largest number of named events.' }
+  ]}
+  explanation="The decision has both a resource cap and a cost objective. A smaller failure probability does not by itself establish that a plan is affordable or preferable after paying for it."
+/>
+
+There are exactly four permitted plans. A **master check** includes correcting detected mistakes; in the model it reduces the A cutoff from 5 to 1. A **spare plan** reduces the C cutoff from 5 to 1. These effects are stipulated interventions, not conclusions we can draw from the action names. The independent slots, B cutoff and all other rules stay fixed.
+
+A **credit** is this exercise's unit of cost. Each fixed preparation cost is paid in every case, whether opening succeeds or fails. Failure adds **100 credits once**, even if both branches of F hold. There are no other costs or benefits in the comparison.
+
+| Plan | A cutoff out of 50 | C cutoff out of 20 | Fixed cost in credits |
+|---|---|---|---|
+| No action | 5 | 5 | 0 |
+| Master check | 1 | 5 | 4 |
+| Spare plan | 5 | 1 | 1 |
+| Both | 1 | 1 | 5 |
+
+The objective is to **minimise expected total cost** among feasible plans. Expected means a probability-weighted average, not the cost promised for one opening:
+
+**Expected total cost = fixed preparation cost + 100 × P(F)**
+
+For the master check, A appears in **1 × 5 × 20 = 100** cases, B AND C in 250, and their overlap in **1 × 1 × 5 = 5**. Failure therefore occupies **100 + 250 − 5 = 345** cases. Its expected total is **4 + 100 × 345/5,000 = 10.90 credits**.
+
+Apply that same count to every permitted plan:
+
+| Plan | Failure cases out of 5,000 | P(F) | Expected total in credits | Fits initial cap |
+|---|---|---|---|---|
+| No action | 725 | 0.145 | 14.50 | Yes |
+| Master check | 345 | 0.069 | 10.90 | Yes |
+| Spare plan | 545 | 0.109 | 11.90 | Yes |
+| Both | 149 | 0.0298 | 7.98 | No |
+
+The **initial upfront cap is 4 credits**. It constrains fixed preparation spending, not the later loss or its average. Both is infeasible at this cap. Master check has the lowest expected total of the remaining plans, beating the cheaper spare plan. With a **raised upfront cap of 5 credits**, both becomes feasible and has the lowest expected total of all four.
+
+For example, under both, the failure count is **100 + 50 − 1 = 149** and the expected total is **5 + 100 × 149/5,000 = 7.98**. The remaining failure probability is positive. A successful opening still costs the fixed 5 credits; a failed one costs 105.
+
+<RateComparison client:visible
+  title="Failure probability under the permitted interventions"
+  scenarioLabel="Compare a plan with no action"
+  countsLabel="Failure cases in the model catalogue"
+  differenceLabel="Change in failure probability"
+  scenarios={[
+    { label: 'Master check compared with no action', groups: [{ label: 'Master check', events: 345, total: 5000 }, { label: 'No action', events: 725, total: 5000 }] },
+    { label: 'Spare plan compared with no action', groups: [{ label: 'Spare plan', events: 545, total: 5000 }, { label: 'No action', events: 725, total: 5000 }] },
+    { label: 'Both compared with no action', groups: [{ label: 'Both', events: 149, total: 5000 }, { label: 'No action', events: 725, total: 5000 }] }
+  ]}
+/>
+
+The chart compares failure probabilities. It leaves affordability and preparation costs to the decision table. Its denominator is the complete stipulated catalogue, rather than a sample collected after an intervention.
+
+### When to use it
+
+Use this comparison when the permitted actions, their effects and the objective are explicit enough to calculate. A different failure loss, a hard limit on exposure or another available action could change the choice. These four plans are the exercise's menu, not an exhaustive list of real safeguards.
+
+<MCQ className="not-prose" client:visible
+  question="Under the initial upfront cap and the stated cost objective, which plan should be selected from the menu?"
+  options={[
+    { text: 'No action' },
+    { text: 'Spare plan' },
+    { text: 'Master check', correct: true },
+    { text: 'Both' }
+  ]}
+  explanation="Master check fits the initial cap and has the smallest expected total among the feasible plans. Both has an even smaller expected total but requires more upfront spending than that cap allows. The spare plan costs less upfront but leaves enough additional failure loss to be worse on this objective."
+/>
+
+## Transfer the model to a different dependence structure
+
+<MCQ className="not-prose" client:visible pretest
+  question="The separate probabilities of delay and spare unavailability stay unchanged. Must the probability of their joint occurrence stay unchanged too?"
+  options={[
+    { text: 'Yes, because equal individual probabilities determine every combination.' },
+    { text: 'No, because the same individual probabilities allow different overlaps.', correct: true },
+    { text: 'Yes, because the AND label makes the two conditions independent.' }
+  ]}
+  explanation="Individual probabilities do not determine how often the conditions coincide. Their joint probability needs a joint law or another justified restriction. The truth rule can remain unchanged while its probability changes."
+/>
+
+A **joint law** assigns weights to combinations. An **individual probability**, also called a marginal probability, counts one event across all the combinations containing it.
+
+To test the reasoning on a changed case, keep F, keep P(A) = 1/10, and keep A independent of the **whole B/C pair**. Change only the joint law of B and C. The table gives three alternative catalogues, each with **20 equally probable pair slots**. Columns name complete B/C profiles; entries are their slot counts.
+
+| Joint law | B and C | B without C | C without B | Neither |
+|---|---|---|---|---|
+| Independent pair | 1 | 3 | 4 | 12 |
+| Delays nested in spare unavailability | 4 | 0 | 1 | 15 |
+| Delay and spare unavailability disjoint | 0 | 4 | 5 | 11 |
+
+In every row, B occupies **4/20 = 1/5** of the slots and C occupies **5/20 = 1/4**. In the nested row every delay coincides with spare unavailability. In the disjoint row they never coincide. All the counts describe stipulated possibilities, not observed delivery records.
+
+Before opening the solution, calculate P(F) for each row. Cross its 20 pair slots with **10 independent A slots**, one of which has a wrong master. You now have **200 equally probable cases per law**. Which law has the greatest failure probability, and why?
+
+<details>
+<summary>Check the transfer calculations and compare the laws</summary>
+
+A occupies **20 cases** in each catalogue. When A is false, the other nine A slots multiply each B-and-C slot. Thus failure occupies **20 + 9 × (joint slots)** cases:
+
+| Joint law | Calculation | Failure cases out of 200 | P(F) |
+|---|---|---|---|
+| Independent pair | 20 + 9 × 1 | 29 | 29/200 = 14.5% |
+| Delays nested in spare unavailability | 20 + 9 × 4 | 56 | 56/200 = 28% |
+| Delay and spare unavailability disjoint | 20 + 9 × 0 | 20 | 20/200 = 10% |
+
+The nested law has the greatest probability because its spare is unavailable in every delay case. The disjoint law removes this combined branch; the wrong-master branch remains. Dependence can raise or lower the joint probability relative to independence.
+
+Equivalently, **P(F) = 1/10 + (9/10) × P(B AND C)**, because the new combined failures counted after A must have a correct master. This expression uses A's independence from the B/C pair; it does not assume B and C are independent.
+
+<RateComparison client:visible
+  title="Same individual probabilities, different joint failure probabilities"
+  scenarioLabel="Choose an alternative joint law"
+  countsLabel="Failure cases in the model catalogue"
+  differenceLabel="Change relative to the independent pair"
+  scenarios={[
+    { label: 'Nested pair compared with the independent pair', groups: [{ label: 'Nested pair', events: 56, total: 200 }, { label: 'Independent pair', events: 29, total: 200 }] },
+    { label: 'Disjoint pair compared with the independent pair', groups: [{ label: 'Disjoint pair', events: 20, total: 200 }, { label: 'Independent pair', events: 29, total: 200 }] }
+  ]}
+/>
+
+</details>
+
+### When to check the joint law
+
+Check the joint law when a main option and its backup may share conditions. Do not copy the earlier intervention results into these alternative laws. Reducing an individual probability does not specify which shared cases disappear. To compare preparation plans here, define how each intervention changes the new joint law, then recalculate.
+
+<MCQ className="not-prose" client:visible allowMultiple
+  question="Which conclusions survive this transfer? Select all that apply."
+  options={[
+    { text: 'The logical failure criterion can stay fixed while its probability changes.', correct: true },
+    { text: 'The earlier intervention totals need a justified model under each new law.', correct: true },
+    { text: 'Unchanged individual probabilities make every joint probability unchanged.' },
+    { text: 'Any dependence must increase the failure probability relative to independence.' }
+  ]}
+  explanation="The table supplies different overlaps under the same individual probabilities. It does not supply intervention effects under those laws. The nested and disjoint cases also show why dependence has no universal upward direction."
+/>
+
+## Audit what would change the decision
+
+<MCQ className="not-prose" client:visible pretest
+  question="A supplier now makes the spare from a separately verified correct file. What needs review first?"
+  options={[
+    { text: 'Only the event probabilities, because a finished logical tree cannot need revising after a supplier change.' },
+    { text: 'The failure criterion, because the wrong master may no longer defeat both copies when the spare has another source.', correct: true },
+    { text: 'Only the fixed action costs, because changing file provenance cannot change which event profiles count as failures.' }
+  ]}
+  explanation="The original meaning of A depended on both copies using the same master. A changed source can change the logical relationship itself. Recheck the criterion before reusing its probabilities or action ranking."
+/>
+
+Separate a complete calculation from a complete account of reality. Our truth table covers every profile of the three stipulated events. An actual exhibition may also lose power, use an incompatible mounting or change its opening time. A tree tailored to one outcome does not establish that every relevant real failure has been identified. The [historical NASA fault-tree appendix](https://nodis3.gsfc.nasa.gov/displayCA.cfm?Internal_ID=N_PR_8621_0001_&page_name=AppdxI35) explicitly names that limit; the page is obsolete guidance, used here as a source of method.
+
+Use the following audit to decide whether to rely on this calculation:
+
+| Model part | Question to check | Example that would change the work |
+|---|---|---|
+| Criterion | What exactly counts as the unwanted result, at which deadline? | A correct separately sourced spare can rescue a wrong main master |
+| Joint law | Which cases coincide, and why are their weights justified? | Both print routes now share a supplier or a transport interruption |
+| Intervention | What does the action change, including shared cases? | Checking the file detects errors but cannot correct them before printing |
+| Cost and constraint | What is paid in every case, and what does the cap constrain? | The fixed action price rises or the upfront cap changes |
+| Objective | Which consequences are included in the comparison? | A separate unacceptable-loss limit rules out a plan with the smallest average |
+
+For the file-check example, a real check might detect a wrong image after printing is irreversible. The event names alone do not support our stipulated reduction of A. You would need to investigate the correction workflow and timing, then revise the effect model or the available actions. Generating a more vivid failure story cannot fill that evidence gap.
+
+### When to use it
+
+Reach for this audit when several safeguards look interchangeable on a list. Define their logical role and their costs before ranking them. Stop this round when the current choice and its assumptions are explicit; reopen the affected part when new evidence changes a criterion, joint law, intervention, constraint or objective. Continue the forward work of making the exhibition worth visiting.
+
+<MatchConcepts className="not-prose" client:visible
+  question="Match each part of the audit to its job."
+  pairs={[
+    { term: 'Failure criterion', definition: 'Decides whether a complete profile counts as the unwanted result.' },
+    { term: 'Joint probability law', definition: 'Assigns probability weight to combinations of conditions.' },
+    { term: 'Intervention model', definition: 'Specifies what the chosen action changes before the outcome.' },
+    { term: 'Decision objective', definition: 'States what is compared among the feasible plans.' }
+  ]}
+  explanation="The criterion supplies the truth rule; the law supplies weights; the intervention changes the model; the objective selects a feasible plan. None of these jobs can be replaced by merely naming a safeguard."
+/>
+
+## Reconstruct the audit
+
+<MindMap className="not-prose" client:visible
+  title="From a failure list to a decision"
+  root={{ label: 'Audit a failure tree', children: [
+    { label: 'Specify the result', children: [{ label: 'Deadline and boundaries' }, { label: 'Inclusive OR and joint AND' }] },
+    { label: 'Assign weights', children: [{ label: 'Logic does not supply probability' }, { label: 'Joint law and overlap' }] },
+    { label: 'Compare actions', children: [{ label: 'Defined intervention effects' }, { label: 'Fixed cost and failure loss' }, { label: 'Objective within the cap' }] },
+    { label: 'Review changes', children: [{ label: 'Same margins can hide different overlap' }, { label: 'Evidence can change the model' }] }
+  ] }}
+/>
+
+<Quiz className="not-prose" client:visible title="Check the failure-tree audit"
+  questions={[
+    { question: 'Which statement about the delivery condition is true in the original model?', options: [
+      { text: 'It is required for its combined branch, but not for every possible failure.', correct: true },
+      { text: 'It is required for all failures, including a wrong common master.' },
+      { text: 'It alone defeats opening whenever the spare is still available.' }
+    ], explanation: 'The joint branch requires both delay and spare unavailability. The separate wrong-master branch can produce failure with an on-time delivery.' },
+    { question: 'Under the raised upfront cap, which permitted plan minimises expected total cost?', options: [
+      { text: 'Master check' }, { text: 'No action' }, { text: 'Both', correct: true }, { text: 'Spare plan' }
+    ], explanation: 'The combined plan becomes feasible at the raised cap and has the smallest expected total in the complete decision table. Feasibility was the reason it could not win under the initial cap.' },
+    { question: 'Both failure branches hold at opening. How is the declared cost rule applied?', options: [
+      { text: 'Pay the fixed preparation cost and charge the failure loss once.', correct: true },
+      { text: 'Waive preparation cost and charge the failure loss per branch.' },
+      { text: 'Charge preparation only if opening succeeds without a spare.' }
+    ], explanation: 'The rule prices a failed opening, rather than each explanation for it. Preparation was already paid regardless of the outcome.' },
+    { question: 'Why does the disjoint transfer still have some failure probability?', options: [
+      { text: 'A wrong master still defeats both prints.', correct: true },
+      { text: 'Disjoint delay and spare events must still coincide.' },
+      { text: 'The AND label creates an extra unlisted failure event.' }
+    ], explanation: 'Disjointness removes B AND C, leaving A. The transfer holds its probability fixed and keeps it independent of the pair.' },
+    { question: 'Which claims does the audit support? Select all that apply.', allowMultiple: true, options: [
+      { text: 'A complete truth table can still omit events relevant to a real plan.', correct: true },
+      { text: 'An action ranking can change when the budget or objective changes.', correct: true },
+      { text: 'A named check supplies its effectiveness without further evidence.' },
+      { text: 'The smallest average cost establishes that the exhibition will succeed.' }
+    ], explanation: 'Completeness is relative to the declared events, and a choice is relative to its objective and constraints. Real intervention effects and the positive exhibition goal require their own evidence.' },
+{
+  "question": "A plan costs five credits in every case and has failure probability one hundred forty-nine over five thousand. A failure adds one hundred credits once. What is its expected total cost, in credits?",
+  "options": [
+    {
+      "text": "Seven point nine eight.",
+      "correct": true
+    },
+    {
+      "text": "Two point nine eight."
+    },
+    {
+      "text": "Five."
+    },
+    {
+      "text": "Fourteen point five."
+    }
+  ],
+  "explanation": "Five plus one hundred times one hundred forty-nine over five thousand equals seven point nine eight. Two point nine eight is only the expected failure loss: the preparation cost is still paid in every case."
+},
+{
+  "question": "Failure means a wrong master OR both delay and spare unavailability. The wrong-master probability is one tenth, independent of the whole pair. The pair is jointly bad with probability one fifth. What is the failure probability?",
+  "options": [
+    {
+      "text": "Twenty-eight percent.",
+      "correct": true
+    },
+    {
+      "text": "Twenty percent."
+    },
+    {
+      "text": "Fourteen and a half percent."
+    },
+    {
+      "text": "Ten percent."
+    }
+  ],
+  "explanation": "Add one tenth and one fifth, then subtract their intersection of one fiftieth. This gives seven twenty-fifths, or twenty-eight percent. The intersection uses the master’s independence from the entire pair, not independence between delay and spare unavailability."
+}
+]}
+/>
+
+### Sources and scope
+
+The [NASA handbook from 2002](https://s3vi.ndc.nasa.gov/ssri-kb/static/resources/Fault%20Tree%20Handbook_NASA.pdf), especially sections 1.2–1.3, 3.3–3.4, 3.8, the OR/AND passages of 4.1, 5.2 and 6.1, supplies the method and its assumptions. Neither that handbook nor the obsolete appendix is presented as a current standard. The finite catalogues, prices, loss and intervention effects above are local constructions for practising inversion, not empirical rates or an assessment of real exhibition safety.
+
+Continue to the [final exam](/inversion/final-exam). Submitted answers are locked; the score appears after the run.
