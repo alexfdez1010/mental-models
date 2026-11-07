@@ -1,0 +1,327 @@
+---
+title: "Audit Who Trades and Who Gains"
+description: Build a market from individual values, separate willing participants from completed trades, and compare payments and gains under explicit allocation rules.
+topic: "en/supply-and-demand"
+order: 7
+minutes: 25
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, MatchConcepts, MarketEligibility, FirstPrinciplesBuilder, MindMap, Quiz } from '@/components/react';
+
+A café hosts a repair session and collects two sign-up sheets: people who want a spare cable and people who might sell one. To confirm trades, you need a record of who handed over a cable and who paid.
+
+This workshop starts with the whole market record. You will check who is willing at a price, specify who actually trades, and reconstruct the gains without counting the same credit twice.
+
+## Read the record before drawing a curve
+
+<MCQ
+  client:visible
+  question={"What does a buyer’s maximum acceptable payment tell you?"}
+  options={[{"text": "The highest price they are willing and able to pay", "correct": true}, {"text": "The exact price they must pay whenever a trade occurs"}, {"text": "The completed payment already recorded by the café"}]}
+  explanation={"A maximum is a threshold for willingness, not a bill or evidence that a transaction happened."}
+  pretest={true}
+/>
+
+There are five buyers and five sellers in one café session. Each seller owns one spare USB cable, and each buyer wants **at most one cable**. All cables are identical. We use invented **credits**, abbreviated **cr**, as the exchange unit. Each buyer has at least 14 cr available, enough for any listed maximum. The records are constructed inputs, not survey findings.
+
+A buyer's **reservation value** is the most they are willing and able to pay for the cable. A seller's **reservation cost** is the smallest receipt they would accept to give it up. That minimum includes **opportunity cost**: what keeping the cable or using their resources elsewhere is worth to them.
+
+| Buyer | Maximum payment in cr | Seller | Minimum receipt in cr |
+|---|---:|---|---:|
+| A | 14 | U | 3 |
+| B | 12 | V | 5 |
+| C | 10 | W | 7 |
+| D | 8 | X | 9 |
+| E | 6 | Y | 11 |
+
+A’s maximum is 14 cr. That is not A's bill: at a posted price of 8.5 cr, A is willing to buy and would pay 8.5 cr if assigned a completed trade. U's minimum is 3 cr, so U is willing to sell at 8.5 cr. Y has a cable too, but will not offer it at that price because Y requires 11 cr.
+
+For this model, the values are truthful and fixed during the session. Everyone is available, and any willing buyer can trade with any willing seller because the cables are identical. All trades use **one common posted price**. There are no fees, waiting costs, quality changes, outside effects or strategic reports. These assumptions let us focus on the record; a real market audit must check them.
+
+<FillBlank
+  client:visible
+  question={"Identify the reservation numbers"}
+  text={"The buyer’s reservation value is a {{maximum acceptable payment|minimum acceptable receipt|completed transaction price}}. A seller’s minimum must include the {{opportunity cost|buyer’s whole budget|total market revenue}} of giving up the cable."}
+  explanation={"The buyer’s maximum and seller’s minimum answer different questions. Opportunity cost belongs in the seller’s threshold; the quoted selling price is not automatically a gain."}
+/>
+
+## Turn willingness into a schedule
+
+<MCQ
+  client:visible
+  question={"The willing counts match. What has the audit established so far?"}
+  options={[{"text": "A complete matching is feasible under the stated assumptions", "correct": true}, {"text": "All willing participants have already exchanged cables and credits"}, {"text": "The organiser has selected a unique price and allocation rule"}]}
+  explanation={"Counts establish compatibility of plans under the model. Actual participant selection and execution still need to be specified or observed."}
+  pretest={true}
+/>
+
+At **8.5 cr per cable**, compare every record with that price. Buyers A, B and C have maxima above it. D and E do not. Sellers U, V and W have minima below it. X and Y do not. So **quantity demanded is 3 cables per session**, and **quantity supplied is 3 cables per session**.
+
+A **schedule** collects these counts at different prices. In this finite market, the counts change in steps when a price passes a participant's reservation threshold. They do not have to change after every small price move.
+
+| Posted price in cr per cable | Willing buyers | Willing sellers | Quantity demanded | Quantity supplied | Maximum feasible pairs |
+|---:|---|---|---:|---:|---:|
+| 6.5 | A, B, C, D | U, V | 4 | 2 | 2 |
+| 8.5 | A, B, C | U, V, W | 3 | 3 | 3 |
+| 9.5 | A, B, C | U, V, W, X | 3 | 4 | 3 |
+
+<MarketEligibility
+  client:visible
+  title={"Who is willing at the posted price?"}
+  instructions={"Choose a comparison price. Compare the price marker with each buyer maximum and seller minimum, then inspect the counts."}
+  caption={"Every person can trade at most one identical cable in this session. The supplied prices avoid indifference; values and costs do not change when you choose another price."}
+  buyers={[{"id": "A", "label": "A", "value": 14}, {"id": "B", "label": "B", "value": 12}, {"id": "C", "label": "C", "value": 10}, {"id": "D", "label": "D", "value": 8}, {"id": "E", "label": "E", "value": 6}]}
+  sellers={[{"id": "U", "label": "U", "cost": 3}, {"id": "V", "label": "V", "cost": 5}, {"id": "W", "label": "W", "cost": 7}, {"id": "X", "label": "X", "cost": 9}, {"id": "Y", "label": "Y", "cost": 11}]}
+  prices={[0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5]}
+  initialPrice={8.5}
+  valueUnit={"cr"}
+  locale={"en"}
+  labels={{"price": "Posted price per cable", "buyers": "Buyers", "sellers": "Sellers", "buyerThreshold": "Bar end: maximum acceptable payment", "sellerThreshold": "Bar end: minimum acceptable receipt", "willing": "Willing at this price", "unwilling": "Outside acceptable price", "buyerCount": "Willing buyers", "sellerCount": "Willing sellers", "maximum": "Maximum feasible matches", "boundHint": "This is a matching-size bound under the stated availability and compatibility assumptions, not a record of completed sales.", "priceMarker": "Selected posted price", "reservationBar": "Reservation threshold"}}
+/>
+
+Every trade needs one willing buyer and one willing seller. It follows that the maximum possible matching size at a price is the **smaller of the two counts**, under our availability and compatibility assumptions. At 6.5 cr, even four willing buyers cannot make two willing sellers provide four cables.
+
+That count is a bound, not a sales record. An **allocation** names the people who receive the available trading opportunities and how they are paired. **Execution** means the cable and payment actually change hands. To work the initial case, stipulate that **A–U, B–V and C–W all complete their trades at 8.5 cr**. This specific record establishes three completed trades.
+
+The price 8.5 cr clears the listed willingness schedules: the two planned quantities agree. It is not a uniquely required price. Any price strictly between **8 and 9 cr** leaves the same three people willing on each side. Our comparison prices avoid equality with reservation numbers; at equality a participant could be indifferent, which would need an explicit convention.
+
+Use this audit when a report confuses requests, offers and sales. A delivery or transaction record is needed to move from “could match” to “did trade”.
+
+<Categorize
+  client:visible
+  question={"Separate the schedule from the completed record"}
+  buckets={["Willingness or feasibility", "Completed execution"]}
+  items={[{"text": "A’s maximum exceeds the posted price", "bucket": "Willingness or feasibility"}, {"text": "The smaller willing count limits the number of pairs", "bucket": "Willingness or feasibility"}, {"text": "The ledger confirms that A paid U and received a cable", "bucket": "Completed execution"}, {"text": "The completed matching names every participating buyer and seller", "bucket": "Completed execution"}]}
+  explanation={"A willingness threshold or matching bound can be computed before anyone trades. A completed record adds evidence about who actually transferred the cable and payment."}
+/>
+
+## Account for transfers and gains separately
+
+<MCQ
+  client:visible
+  question={"Which calculation avoids counting the same payment twice?"}
+  options={[{"text": "Add the buyer’s gain and seller’s gain after their deductions", "correct": true}, {"text": "Add the payment to both the buyer’s gain and seller’s receipt"}, {"text": "Count all seller receipts as gains without deducting their costs"}]}
+  explanation={"Inside this boundary, a payment leaves one participant and reaches another. The net gain comes from the value of the cable exceeding its opportunity cost."}
+  pretest={true}
+/>
+
+For a completed trade, the buyer's **gain** is reservation value minus price. The seller's gain is price minus reservation cost. We measure gains relative to keeping the outside option: buyers retain their credits; sellers retain their cables. These are gains on the declared credit scale, not a claim that cash income and well-being are identical.
+
+Work A–U first. A gains **14 − 8.5 = 5.5 cr**. U gains **8.5 − 3 = 5.5 cr**. Together they gain **11 cr**, exactly **14 − 3**. The payment subtracts from A and adds to U, so it cancels when both sides are inside the account.
+
+Here is the complete initial ledger. Every numeric column is in cr; each row is one completed cable trade.
+
+| Trade | Buyer value | Seller cost | Transfer | Buyer gain | Seller gain | Combined gain |
+|---|---:|---:|---:|---:|---:|---:|
+| A–U | 14 | 3 | 8.5 | 5.5 | 5.5 | 11 |
+| B–V | 12 | 5 | 8.5 | 3.5 | 3.5 | 7 |
+| C–W | 10 | 7 | 8.5 | 1.5 | 1.5 | 3 |
+| Total | 36 | 15 | 25.5 | 10.5 | 10.5 | 21 |
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  title={"Add both sides of the completed ledger"}
+  eyebrow={"Participant gains"}
+  caption={"Each part is one participant’s gain after deducting their payment or opportunity cost. The transfer is already accounted for."}
+  analogyValue={21}
+  analogyLabel={"Reference allocation gain"}
+  analogyNote={"The earlier completed matching at the initial clearing price."}
+  parts={[{"label": "Buyer A", "value": 5.5}, {"label": "Buyer B", "value": 3.5}, {"label": "Buyer C", "value": 1.5}, {"label": "Seller U", "value": 5.5}, {"label": "Seller V", "value": 3.5}, {"label": "Seller W", "value": 1.5}]}
+  rebuiltLabel={"Selected participant gains"}
+  instructions={"Add the gains from the completed ledger. Check the sum against the reference, keeping the same accounting boundary."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Add every gain"}
+  resetLabel={"Clear the sum"}
+  verdictTemplate={"The completed ledger totals {total} of participant gains."}
+/>
+
+Buyer payments equal seller receipts: **3 × 8.5 = 25.5 cr**. That transfer is not an extra 25.5 cr of total gain. The two sides' gains add to **10.5 + 10.5 = 21 cr**, or directly **36 − 15 = 21 cr**.
+
+If the same participants completed trades at another common price between 8 and 9 cr, changing the price would redistribute gains between buyers and sellers. Their combined gain would remain 21 cr because the selected values and costs would be unchanged. Fees, waiting time or outside effects would need additional terms; we excluded them rather than pretending they are always zero.
+
+<MatchConcepts
+  client:visible
+  question={"Match the ledger entry to its meaning"}
+  pairs={[{"term": "Buyer gain", "definition": "Value of the received cable less the buyer’s payment"}, {"term": "Seller gain", "definition": "Receipt less the opportunity cost of giving up the cable"}, {"term": "Internal transfer", "definition": "Payment that leaves the buyer and reaches the seller"}, {"term": "Combined gain", "definition": "Selected buyer values less selected seller opportunity costs"}]}
+  explanation={"The transfer belongs in each side’s account, with opposite signs. It cancels in the combined account; the opportunity costs do not."}
+/>
+
+## Compare two allocations at the same lower price
+
+<MCQ
+  client:visible
+  question={"A maximum-price rule is announced. What else is needed to reconstruct the session’s gains?"}
+  options={[{"text": "The actual posted price and the completed participant allocation", "correct": true}, {"text": "Only the maximum, since it determines the price and every buyer"}, {"text": "Only the physical stock, since every cable must now be offered"}]}
+  explanation={"A maximum restricts allowed prices. It does not specify the actual price, allocation or completion; each matters to the account."}
+  pretest={true}
+/>
+
+The café now introduces a rule: nobody may charge **above 6.5 cr per cable**. This maximum allows lower prices too. Separately, the café **chooses and enforces a posted price of exactly 6.5 cr** for this version of the session. The rule alone would not establish that exact price.
+
+The original records give four willing buyers, A/B/C/D, and two willing sellers, U/V. The difference is **4 − 2 = 2 cables of excess demand** at this price. If both offered units trade, two willing buyers remain unserved. The other sellers' physical cables have not vanished; their holders are unwilling to supply them at this price.
+
+Specify two rules and complete their trades. **Rule P** selects A and B; **Rule Q** selects C and D. Both use U and V. Every participating person has a positive gain, and both rules complete two units at the same price.
+
+### Rule P selects A and B
+
+| Trade | Buyer value | Seller cost | Transfer | Buyer gain | Seller gain | Combined gain |
+|---|---:|---:|---:|---:|---:|---:|
+| A–U | 14 | 3 | 6.5 | 7.5 | 3.5 | 11 |
+| B–V | 12 | 5 | 6.5 | 5.5 | 1.5 | 7 |
+| Total | 26 | 8 | 13 | 13 | 5 | 18 |
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  title={"Account for allocation P"}
+  eyebrow={"Participant gains"}
+  caption={"Each part is one participant’s gain after deducting their payment or opportunity cost. The transfer is already accounted for."}
+  analogyValue={21}
+  analogyLabel={"Reference allocation gain"}
+  analogyNote={"The earlier completed matching at the initial clearing price."}
+  parts={[{"label": "Buyer A", "value": 7.5}, {"label": "Buyer B", "value": 5.5}, {"label": "Seller U", "value": 3.5}, {"label": "Seller V", "value": 1.5}]}
+  rebuiltLabel={"Selected participant gains"}
+  instructions={"Add the gains from the completed ledger. Check the sum against the reference, keeping the same accounting boundary."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Add every gain"}
+  resetLabel={"Clear the sum"}
+  verdictTemplate={"Allocation P totals {total} of participant gains under the declared metric."}
+/>
+
+### Rule Q selects C and D
+
+| Trade | Buyer value | Seller cost | Transfer | Buyer gain | Seller gain | Combined gain |
+|---|---:|---:|---:|---:|---:|---:|
+| C–U | 10 | 3 | 6.5 | 3.5 | 3.5 | 7 |
+| D–V | 8 | 5 | 6.5 | 1.5 | 1.5 | 3 |
+| Total | 18 | 8 | 13 | 5 | 5 | 10 |
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  title={"Account for allocation Q"}
+  eyebrow={"Participant gains"}
+  caption={"Each part is one participant’s gain after deducting their payment or opportunity cost. The transfer is already accounted for."}
+  analogyValue={21}
+  analogyLabel={"Reference allocation gain"}
+  analogyNote={"The earlier completed matching at the initial clearing price."}
+  parts={[{"label": "Buyer C", "value": 3.5}, {"label": "Buyer D", "value": 1.5}, {"label": "Seller U", "value": 3.5}, {"label": "Seller V", "value": 1.5}]}
+  rebuiltLabel={"Selected participant gains"}
+  instructions={"Add the gains from the completed ledger. Check the sum against the reference, keeping the same accounting boundary."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Add every gain"}
+  resetLabel={"Clear the sum"}
+  verdictTemplate={"Allocation Q totals {total} of participant gains under the declared metric."}
+/>
+
+The same two completed units and the same **13 cr** of payments produce total gains of **18 cr under P** and **10 cr under Q**. Against the initial completed allocation's 21 cr, the differences are **3 cr** and **11 cr**. The selection rule matters as well as quantity.
+
+This metric adds one credit of gain with the same weight whoever receives it. P has a higher total than Q by this measure. The records do not tell us who has greater need, who waited longer or which rule the café regards as fair. Those questions require an objective and evidence beyond the total. Nor does the earlier count of three trades claim a universal maximum under every possible pricing mechanism: our worked market uses a common posted price.
+
+When auditing a constrained market, request the completed participant IDs and allocation rule as well as price and quantity. Without them you cannot reconstruct this distribution of gains.
+
+<MCQ
+  client:visible
+  question={"Compare rules P and Q. Which conclusions follow? Select all that apply."}
+  options={[{"text": "The same price and completed quantity can give different total gains", "correct": true}, {"text": "The payment total alone cannot identify which buyers received cables", "correct": true}, {"text": "The larger gain total proves which rule is fair without further evidence"}, {"text": "The lower posted price means the unsupplied physical cables disappeared"}]}
+  explanation={"P and Q complete the same number of trades at the same price, but select different buyer values. The accounting metric is explicit; fairness and physical stock are separate questions."}
+  allowMultiple={true}
+/>
+
+## Try a changed buyer value
+
+Keep every other assumption and reservation number fixed in a new version of the session. Buyer **E now values a cable at 13 cr rather than 6 cr** because of a new use. E's budget was already sufficient; ability to pay, seller costs, stock and quality have not changed.
+
+Before opening the account below, work out the willing sets at the old posted price of **8.5 cr** and at a proposed new posted price of **9.5 cr**. Then ask which change rewrote the schedule and which only selected a different row of it.
+
+<MCQ
+  client:visible
+  question={"After only E’s value changes, which sequence fits the new record?"}
+  options={[{"text": "More willing buyers at the old price; matching willing counts at the proposed new price", "correct": true}, {"text": "Unchanged willingness at the old price; all extra buyers appear only because price rises"}, {"text": "More willing sellers at the old price; buyer willingness stays on its original schedule"}]}
+  explanation={"Recount each side at the unchanged price first. E’s new value changes demand before any posted-price change; sellers’ costs did not change."}
+  pretest={true}
+/>
+
+<MarketEligibility
+  client:visible
+  title={"Recheck the changed record"}
+  instructions={"Choose a comparison price. Compare the price marker with each buyer maximum and seller minimum, then inspect the counts."}
+  caption={"Every person can trade at most one identical cable in this session. The supplied prices avoid indifference; values and costs do not change when you choose another price."}
+  buyers={[{"id": "A", "label": "A", "value": 14}, {"id": "B", "label": "B", "value": 12}, {"id": "C", "label": "C", "value": 10}, {"id": "D", "label": "D", "value": 8}, {"id": "E", "label": "E", "value": 13}]}
+  sellers={[{"id": "U", "label": "U", "cost": 3}, {"id": "V", "label": "V", "cost": 5}, {"id": "W", "label": "W", "cost": 7}, {"id": "X", "label": "X", "cost": 9}, {"id": "Y", "label": "Y", "cost": 11}]}
+  prices={[0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5]}
+  initialPrice={8.5}
+  valueUnit={"cr"}
+  locale={"en"}
+  labels={{"price": "Posted price per cable", "buyers": "Buyers", "sellers": "Sellers", "buyerThreshold": "Bar end: maximum acceptable payment", "sellerThreshold": "Bar end: minimum acceptable receipt", "willing": "Willing at this price", "unwilling": "Outside acceptable price", "buyerCount": "Willing buyers", "sellerCount": "Willing sellers", "maximum": "Maximum feasible matches", "boundHint": "This is a matching-size bound under the stated availability and compatibility assumptions, not a record of completed sales.", "priceMarker": "Selected posted price", "reservationBar": "Reservation threshold"}}
+/>
+
+<details>
+<summary>Check the changed schedule and completed account</summary>
+
+At **8.5 cr**, A, B, C and E are willing buyers, while U, V and W are willing sellers: **4 versus 3**. Demand has changed at a fixed price because E's valuation changed. This is a **shift of demand**, not a movement caused by a new price.
+
+At **9.5 cr**, A/E/B/C and U/V/W/X are willing: **4 versus 4**. Moving from 8.5 to 9.5 cr selects a different row of the **new** schedules. To establish completed trades, now stipulate the matching **A–U, E–V, B–W, C–X** and complete it. The full ledger is:
+
+| Trade | Buyer value | Seller cost | Transfer | Buyer gain | Seller gain | Combined gain |
+|---|---:|---:|---:|---:|---:|---:|
+| A–U | 14 | 3 | 9.5 | 4.5 | 6.5 | 11 |
+| E–V | 13 | 5 | 9.5 | 3.5 | 4.5 | 8 |
+| B–W | 12 | 7 | 9.5 | 2.5 | 2.5 | 5 |
+| C–X | 10 | 9 | 9.5 | 0.5 | 0.5 | 1 |
+| Total | 49 | 24 | 38 | 11 | 14 | 25 |
+
+Buyer gains are **49 − 38 = 11 cr**; seller gains are **38 − 24 = 14 cr**; combined gains are **49 − 24 = 25 cr**. Everyone in this specified matching gains strictly.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"en"}
+  title={"Account for the changed record"}
+  eyebrow={"Participant gains"}
+  caption={"Each part is one participant’s gain after deducting their payment or opportunity cost. The transfer is already accounted for. Preferences and the selected participants changed in this comparison; it is not a price-only effect."}
+  analogyValue={21}
+  analogyLabel={"Reference allocation gain"}
+  analogyNote={"The earlier completed matching at the initial clearing price."}
+  parts={[{"label": "Buyer A", "value": 4.5}, {"label": "Buyer E", "value": 3.5}, {"label": "Buyer B", "value": 2.5}, {"label": "Buyer C", "value": 0.5}, {"label": "Seller U", "value": 6.5}, {"label": "Seller V", "value": 4.5}, {"label": "Seller W", "value": 2.5}, {"label": "Seller X", "value": 0.5}]}
+  rebuiltLabel={"Selected participant gains"}
+  instructions={"Add the gains from the completed ledger. Check the sum against the reference, keeping the same accounting boundary."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Add every gain"}
+  resetLabel={"Clear the sum"}
+  verdictTemplate={"The completed ledger totals {total} of participant gains."}
+/>
+
+The total is 4 cr above the earlier reference, but this is not a price-only policy effect. A valuation and the selected participant sets changed too. Within each fixed ledger the price transfer still cancels. A lone observed price and quantity would not tell you which reservation value changed or how gains were distributed.
+
+</details>
+
+<FillBlank
+  client:visible
+  question={"Keep the two changes separate"}
+  text={"Changing E’s value creates a {{shift|movement|completion}} of demand. Selecting another price on that new schedule is a {{movement|shift|valuation}} along it. Comparing the two completed ledgers is {{not a price-only effect|always a price-only effect|proof of a fairer allocation}}."}
+  explanation={"The valuation change rewrites willingness. Price then picks a row from the new schedule. Both selected participants and a valuation differ across the completed records, so the gain difference is not identified as a pure price effect."}
+/>
+
+## Reconstruct a market audit
+
+<MindMap
+  client:visible
+  title={"From a reservation record to an audited allocation"}
+  root={{"label": "Audit a market allocation", "children": [{"label": "Fix the boundary", "children": [{"label": "One good, session and common price"}, {"label": "Values, opportunity costs and budgets"}]}, {"label": "Count willing participants", "children": [{"label": "Schedules across prices"}, {"label": "Matching bound is not completed sales"}]}, {"label": "Read the completed allocation", "children": [{"label": "Participant IDs and paired units"}, {"label": "Transfers cancel inside the combined account"}]}, {"label": "Interpret the comparison", "children": [{"label": "Same price and quantity can give different gains"}, {"label": "Total gain alone does not settle fairness"}, {"label": "Changed value shifts demand before price moves"}]}]}}
+/>
+
+<Quiz
+  client:visible
+  title={"Check a market claim against its records"}
+  questions={[{"question": "A seller has a cable but their minimum exceeds the posted price. Which count includes it?", "options": [{"text": "Physical stock, but not quantity willingly supplied at that price", "correct": true}, {"text": "Quantity willingly supplied, because possession obliges sale at that price"}, {"text": "Completed sales, because the market already contains the cable"}], "explanation": "Existence, willingness and execution are distinct. The reservation threshold tells us the cable is not offered at that price under the model."}, {"question": "A report gives only price and the number of completed cables. What is missing for the gain calculation?", "options": [{"text": "The selected participants’ values and opportunity costs", "correct": true}, {"text": "Only the total number of people who entered the café"}, {"text": "Only the total amount of payments already received"}], "explanation": "P and Q show why price and quantity do not identify gains: different selected values can produce different totals."}, {"question": "Someone adds payments to combined buyer and seller gains. What error results?", "options": [{"text": "An internal transfer is counted again as an extra gain", "correct": true}, {"text": "An opportunity cost is correctly removed from the record"}, {"text": "The total becomes a complete measure of fairness"}], "explanation": "The buyer deduction and seller receipt already account for the same payment. Add net gains or subtract selected costs from values."}, {"question": "Which claims respect the limits of this audit? Select all that apply.", "options": [{"text": "Completed participant records can support the declared gain metric", "correct": true}, {"text": "A fairness comparison needs criteria beyond the gain total alone", "correct": true}, {"text": "Equal willing counts guarantee completed exchanges without execution"}, {"text": "A higher reference total proves a pure effect of the posted price"}], "explanation": "The ledger supports a specified account. It does not establish unrecorded execution, a fairness objective or a price-only causal comparison.", "allowMultiple": true}, {"question": "A real session adds long waiting costs omitted from the example. What should the auditor do?", "options": [{"text": "Extend the accounting boundary before comparing net gains", "correct": true}, {"text": "Keep the old totals because every cost is already the posted price"}, {"text": "Replace the participant records with the smaller willing count"}], "explanation": "The toy model excluded waiting costs. If they matter in the application, include them consistently rather than treating the original metric as complete."}]}
+/>
+
+Next is the [final exam](/supply-and-demand/final-exam), combining curves, shifts, elasticity and controls with the record-based audit from this workshop.
+
+Sources: [OpenStax on demand and supply schedules](https://openstax.org/books/principles-economics-3e/pages/3-1-demand-supply-and-equilibrium-in-markets-for-goods-and-services), [OpenStax on price limits](https://openstax.org/books/principles-economics-3e/pages/3-4-price-ceilings-and-price-floors), and [David Autor's MIT notes on participant gains and transfers](https://ocw.mit.edu/courses/14-03-microeconomic-theory-and-public-policy-fall-2016/f804a92517d12e1e354415d76191c768_MIT14_03F16_lec8Part1.pdf). The cable records, rules and ledgers are constructed examples.

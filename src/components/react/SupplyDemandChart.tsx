@@ -6,6 +6,8 @@ export type PriceControl = 'none' | 'ceiling' | 'floor';
 
 /** Props for the {@link SupplyDemandChart} island. */
 export interface SupplyDemandChartProps {
+  /** Decimal formatting for visible and accessible labels; geometry is unchanged. */
+  locale?: 'en' | 'es';
   /** Heading above the card. */
   title?: string;
   /** Eyebrow label. Defaults to `'Where the curves cross'`. */
@@ -96,6 +98,12 @@ const sy = (p: number) => PAD_T + PLOT_H - (p / P_MAX) * PLOT_H;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
+/** Preserve the legacy number string, changing only its decimal mark in labels. */
+export function formatSupplyDemandNumber(value: number, locale: 'en' | 'es' = 'en'): string {
+  const text = String(value);
+  return locale === 'es' ? text.replace('.', ',') : text;
+}
+
 /**
  * Interactive **supply & demand** island — the price is where the two curves
  * cross, and pushing either curve moves it in a predictable direction.
@@ -115,6 +123,7 @@ const round1 = (n: number) => Math.round(n * 10) / 10;
  * under `prefers-reduced-motion`.
  */
 export function SupplyDemandChart({
+  locale = 'en',
   title,
   eyebrow = 'Where the curves cross',
   instructions = 'Drag demand and supply. The price settles where the two curves meet — push either one and watch the equilibrium move.',
@@ -173,7 +182,8 @@ export function SupplyDemandChart({
 
   const { qStar, pStar, demandP0, demandP1, supplyP0, supplyP1, qd, qs } = model;
 
-  const priceTxt = (p: number) => `${pricePrefix}${round1(p)}`;
+  const labelNumber = (n: number) => formatSupplyDemandNumber(n, locale);
+  const priceTxt = (p: number) => `${pricePrefix}${labelNumber(round1(p))}`;
 
   // Decide whether the control actually binds and how big the gap is.
   const binding =
@@ -188,23 +198,23 @@ export function SupplyDemandChart({
   if (control === 'none') {
     readout = readoutTemplate
       .replace('{price}', priceTxt(pStar))
-      .replace('{qty}', String(round1(qStar)));
+      .replace('{qty}', labelNumber(round1(qStar)));
   } else if (!binding) {
     readout = notBindingTemplate
       .replace('{price}', priceTxt(pStar))
-      .replace('{qty}', String(round1(qStar)));
+      .replace('{qty}', labelNumber(round1(qStar)));
   } else if (control === 'ceiling') {
     readout = shortageTemplate
       .replace('{price}', priceTxt(controlPrice))
-      .replace('{qd}', String(round1(qd)))
-      .replace('{qs}', String(round1(qs)))
-      .replace('{gap}', String(gap));
+      .replace('{qd}', labelNumber(round1(qd)))
+      .replace('{qs}', labelNumber(round1(qs)))
+      .replace('{gap}', labelNumber(gap));
   } else {
     readout = surplusTemplate
       .replace('{price}', priceTxt(controlPrice))
-      .replace('{qd}', String(round1(qd)))
-      .replace('{qs}', String(round1(qs)))
-      .replace('{gap}', String(gap));
+      .replace('{qd}', labelNumber(round1(qd)))
+      .replace('{qs}', labelNumber(round1(qs)))
+      .replace('{gap}', labelNumber(gap));
   }
 
   // The shaded shortage/surplus band sits along the control-price line,

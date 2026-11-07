@@ -309,3 +309,6 @@ export type { KnowledgeWorldsProps, KnowledgeWorldsLabels, KnowledgeWorld } from
 
 export { BenchmarkTrace, validateBenchmarkTrace } from '@/components/react/BenchmarkTrace';
 export type { BenchmarkObservation, BenchmarkTraceProps } from '@/components/react/BenchmarkTrace';
+
+export { MarketEligibility, marketEligibilityAtPrice } from '@/components/react/MarketEligibility';
+export type { MarketBuyer, MarketSeller, MarketEligibilityLabels, MarketEligibilityProps } from '@/components/react/MarketEligibility';

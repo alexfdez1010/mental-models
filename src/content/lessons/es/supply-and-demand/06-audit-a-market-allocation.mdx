@@ -1,0 +1,418 @@
+---
+title: "Comprueba quién intercambia y quién gana"
+description: Construye un mercado con valores individuales, distingue la disposición a intercambiar de las ventas y compara pagos y ganancias con reglas explícitas.
+topic: "es/supply-and-demand"
+order: 7
+minutes: 25
+updated: 2026-11-07
+---
+
+import { MCQ, FillBlank, Categorize, MatchConcepts, MarketEligibility, FirstPrinciplesBuilder, MindMap, Quiz } from '@/components/react';
+
+Un café organiza una jornada de reparación y recoge dos listas: personas que quieren un cable de repuesto y personas que podrían vender uno. Para confirmar intercambios, necesitas un registro de quién entregó un cable y quién pagó.
+
+Este taller empieza con el registro completo del mercado. Comprobarás quién está dispuesto a intercambiar a un precio, especificarás quién lo hace y reconstruirás las ganancias sin contar dos veces el mismo crédito.
+
+## Lee el registro antes de dibujar una curva
+
+<MCQ
+  client:visible
+  question={"¿Qué indica el pago máximo aceptable de un comprador?"}
+  options={[{"text": "El mayor precio que está dispuesto y puede pagar", "correct": true}, {"text": "El precio exacto que debe pagar siempre que intercambie"}, {"text": "El pago completado que el café ya ha registrado"}]}
+  explanation={"Un máximo es un umbral de disposición a pagar, no una factura ni evidencia de que haya ocurrido una transacción."}
+  pretest={true}
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+En una sesión del café hay cinco compradores y cinco vendedores. Cada vendedor tiene un cable USB de repuesto y cada comprador quiere **como máximo un cable**. Todos los cables son idénticos. Usamos **créditos** inventados, abreviados **cr**, como unidad de intercambio. Cada comprador dispone de al menos 14 cr, suficientes para cualquier máximo del registro. Son datos construidos, no resultados de una encuesta.
+
+El **valor de reserva** de un comprador es lo máximo que está dispuesto y puede pagar por el cable. El **coste de reserva** de un vendedor es el ingreso mínimo que aceptaría para entregarlo. Ese mínimo incluye el **coste de oportunidad (opportunity cost)**: cuánto le aporta conservar el cable o dedicar sus recursos a otra cosa.
+
+| Comprador | Pago máximo en cr | Vendedor | Ingreso mínimo en cr |
+|---|---:|---|---:|
+| A | 14 | U | 3 |
+| B | 12 | V | 5 |
+| C | 10 | W | 7 |
+| D | 8 | X | 9 |
+| E | 6 | Y | 11 |
+
+El máximo de A es 14 cr. No es su factura: a un precio anunciado de 8,5 cr, A está dispuesto a comprar y pagaría 8,5 cr si se le asigna un intercambio que se completa. El mínimo de U es 3 cr, así que está dispuesto a vender a 8,5 cr. Y también tiene un cable, pero no lo ofrece a ese precio porque exige 11 cr.
+
+En este modelo, los valores son veraces y se mantienen fijos durante la sesión. Todos están disponibles y cualquier comprador dispuesto puede intercambiar con cualquier vendedor dispuesto porque los cables son idénticos. Todos los intercambios usan **un mismo precio anunciado**. No hay comisiones, costes de espera, cambios de calidad, efectos externos ni declaraciones estratégicas. Estos supuestos permiten centrarnos en el registro; en una auditoría real hay que comprobarlos.
+
+<FillBlank
+  client:visible
+  question={"Identifica los valores de reserva"}
+  text={"El valor de reserva del comprador es un {{pago máximo aceptable|ingreso mínimo aceptable|precio ya intercambiado}}. El mínimo del vendedor debe incluir el {{coste de oportunidad|presupuesto del comprador|ingreso total del mercado}} de entregar el cable."}
+  explanation={"El máximo del comprador y el mínimo del vendedor responden a preguntas distintas. El coste de oportunidad forma parte del umbral del vendedor; el precio de venta no es automáticamente una ganancia."}
+  instructions="Elige la opción correcta en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+/>
+
+## Convierte la disposición a intercambiar en una tabla
+
+<MCQ
+  client:visible
+  question={"Coinciden los recuentos de personas dispuestas. ¿Qué ha establecido la auditoría hasta ahora?"}
+  options={[{"text": "Un emparejamiento completo es factible bajo los supuestos indicados", "correct": true}, {"text": "Todos los dispuestos ya han intercambiado los cables y los créditos"}, {"text": "La organización ha elegido un precio y una regla de reparto únicos"}]}
+  explanation={"Los recuentos establecen la compatibilidad de los planes en el modelo. Aún hay que especificar u observar la selección de participantes y la ejecución."}
+  pretest={true}
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+A **8,5 cr por cable**, compara cada registro con ese precio. Los máximos de A, B y C lo superan. Los de D y E no. Los mínimos de U, V y W quedan por debajo. Los de X e Y no. Por tanto, la **cantidad demandada es de 3 cables por sesión** y la **cantidad ofrecida es de 3 cables por sesión**.
+
+Una **tabla de demanda u oferta** reúne esos recuentos a distintos precios. En este mercado finito, las cantidades cambian por escalones cuando el precio cruza un valor de reserva. No tienen por qué cambiar tras cada pequeño movimiento del precio.
+
+| Precio anunciado en cr por cable | Compradores dispuestos | Vendedores dispuestos | Cantidad demandada | Cantidad ofrecida | Máximo de parejas factibles |
+|---:|---|---|---:|---:|---:|
+| 6,5 | A, B, C, D | U, V | 4 | 2 | 2 |
+| 8,5 | A, B, C | U, V, W | 3 | 3 | 3 |
+| 9,5 | A, B, C | U, V, W, X | 3 | 4 | 3 |
+
+<MarketEligibility
+  client:visible
+  title={"¿Quién está dispuesto al precio anunciado?"}
+  instructions={"Elige un precio de comparación. Contrasta su marca con el máximo de cada comprador y el mínimo de cada vendedor y comprueba los recuentos."}
+  caption={"Cada persona puede intercambiar como máximo un cable idéntico en esta sesión. Los precios evitan la indiferencia; elegir otro precio no cambia los valores ni los costes."}
+  buyers={[{"id": "A", "label": "A", "value": 14}, {"id": "B", "label": "B", "value": 12}, {"id": "C", "label": "C", "value": 10}, {"id": "D", "label": "D", "value": 8}, {"id": "E", "label": "E", "value": 6}]}
+  sellers={[{"id": "U", "label": "U", "cost": 3}, {"id": "V", "label": "V", "cost": 5}, {"id": "W", "label": "W", "cost": 7}, {"id": "X", "label": "X", "cost": 9}, {"id": "Y", "label": "Y", "cost": 11}]}
+  prices={[0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5]}
+  initialPrice={8.5}
+  valueUnit={"cr"}
+  locale={"es"}
+  labels={{"price": "Precio anunciado por cable", "buyers": "Compradores", "sellers": "Vendedores", "buyerThreshold": "Final de la barra: pago máximo aceptable", "sellerThreshold": "Final de la barra: ingreso mínimo aceptable", "willing": "Dispuesto a este precio", "unwilling": "Fuera del precio aceptable", "buyerCount": "Compradores dispuestos", "sellerCount": "Vendedores dispuestos", "maximum": "Máximo de parejas factibles", "boundHint": "Es un límite de parejas bajo los supuestos de disponibilidad y compatibilidad indicados, no un registro de ventas completadas.", "priceMarker": "Precio anunciado elegido", "reservationBar": "Umbral de reserva"}}
+/>
+
+Cada intercambio necesita un comprador y un vendedor dispuestos. Por eso, el máximo de parejas factibles a un precio es el **menor de los dos recuentos**, bajo nuestros supuestos de disponibilidad y compatibilidad. A 6,5 cr, que haya cuatro compradores dispuestos no hace que dos vendedores dispuestos aporten cuatro cables.
+
+Ese recuento es un límite, no un registro de ventas. Un **reparto o asignación** identifica a las personas que obtienen las oportunidades de intercambio y cómo se emparejan. La **ejecución** consiste en que se entreguen el cable y el pago. Para resolver el caso inicial, estipulamos que **A–U, B–V y C–W completan sus intercambios a 8,5 cr**. Este registro concreto establece tres intercambios completados.
+
+El precio de 8,5 cr iguala los planes de las tablas: las dos cantidades previstas coinciden. No es el único precio que lo permite. Cualquier precio estrictamente entre **8 y 9 cr** deja dispuestas a las mismas tres personas de cada lado. Los precios de comparación evitan la igualdad con valores de reserva; en esos puntos alguien podría ser indiferente y haría falta una convención explícita.
+
+Usa esta auditoría cuando un informe confunda solicitudes, ofertas y ventas. Para pasar de «podrían emparejarse» a «intercambiaron» hace falta un registro de entregas o transacciones.
+
+<Categorize
+  client:visible
+  question={"Separa la tabla del registro completado"}
+  buckets={["Disposición o viabilidad", "Ejecución completada"]}
+  items={[{"text": "El máximo de A supera el precio anunciado", "bucket": "Disposición o viabilidad"}, {"text": "El menor recuento de dispuestos limita el número de parejas", "bucket": "Disposición o viabilidad"}, {"text": "El registro confirma que A pagó a U y recibió un cable", "bucket": "Ejecución completada"}, {"text": "El emparejamiento completado identifica a cada comprador y vendedor", "bucket": "Ejecución completada"}]}
+  explanation={"Un umbral de disposición o un límite de parejas puede calcularse antes de intercambiar. El registro completado añade evidencia sobre quién entregó realmente el cable y el pago."}
+  instructions="Coloca cada elemento en su grupo."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  allCorrectLabel="✓ Todo está bien clasificado"
+  partialResultWord="correctas"
+/>
+
+## Separa las transferencias de las ganancias
+
+<MCQ
+  client:visible
+  question={"¿Qué cálculo evita contar dos veces el mismo pago?"}
+  options={[{"text": "Sumar las ganancias de comprador y vendedor tras sus deducciones", "correct": true}, {"text": "Sumar el pago tanto a la ganancia compradora como al ingreso vendedor"}, {"text": "Contar todos los ingresos vendedores como ganancias sin restar costes"}]}
+  explanation={"Dentro de este ámbito, un pago sale de una persona y llega a otra. La ganancia neta procede de que el valor del cable supere su coste de oportunidad."}
+  pretest={true}
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+En un intercambio completado, la **ganancia** del comprador es su valor de reserva menos el precio. La del vendedor es el precio menos su coste de reserva. Medimos las ganancias respecto a conservar la alternativa: los compradores mantienen sus créditos y los vendedores sus cables. Son ganancias en la escala de créditos definida, no una afirmación de que los ingresos monetarios y el bienestar sean idénticos.
+
+Resuelve primero A–U. A gana **14 − 8,5 = 5,5 cr**. U gana **8,5 − 3 = 5,5 cr**. Juntos ganan **11 cr**, exactamente **14 − 3**. El pago se resta a A y se suma a U, de modo que se cancela cuando ambos están dentro de la cuenta.
+
+Este es el registro inicial completo. Todas las columnas numéricas están en cr; cada fila es un intercambio de cable completado.
+
+| Intercambio | Valor comprador | Coste vendedor | Transferencia | Ganancia comprador | Ganancia vendedor | Ganancia conjunta |
+|---|---:|---:|---:|---:|---:|---:|
+| A–U | 14 | 3 | 8,5 | 5,5 | 5,5 | 11 |
+| B–V | 12 | 5 | 8,5 | 3,5 | 3,5 | 7 |
+| C–W | 10 | 7 | 8,5 | 1,5 | 1,5 | 3 |
+| Total | 36 | 15 | 25,5 | 10,5 | 10,5 | 21 |
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"es"}
+  title={"Suma ambos lados del registro completado"}
+  eyebrow={"Ganancias de los participantes"}
+  caption={"Cada parte es la ganancia de una persona tras descontar su pago o coste de oportunidad. La transferencia ya está contabilizada."}
+  analogyValue={21}
+  analogyLabel={"Ganancia del reparto de referencia"}
+  analogyNote={"El emparejamiento completado al precio inicial que iguala los planes."}
+  parts={[{"label": "Comprador A", "value": 5.5}, {"label": "Comprador B", "value": 3.5}, {"label": "Comprador C", "value": 1.5}, {"label": "Vendedor U", "value": 5.5}, {"label": "Vendedor V", "value": 3.5}, {"label": "Vendedor W", "value": 1.5}]}
+  rebuiltLabel={"Ganancias de las personas seleccionadas"}
+  instructions={"Añade las ganancias del registro completado. Compara la suma con la referencia y conserva el mismo ámbito de la cuenta."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Añadir todas las ganancias"}
+  resetLabel={"Vaciar la suma"}
+  verdictTemplate={"El registro completado suma {total} de ganancias de los participantes."}
+/>
+
+Los pagos de los compradores igualan los ingresos de los vendedores: **3 × 8,5 = 25,5 cr**. Esa transferencia no añade otros 25,5 cr a la ganancia total. Las ganancias de ambos lados suman **10,5 + 10,5 = 21 cr**, o directamente **36 − 15 = 21 cr**.
+
+Si las mismas personas completaran los intercambios a otro precio común entre 8 y 9 cr, el cambio de precio redistribuiría las ganancias entre compradores y vendedores. La ganancia conjunta seguiría siendo 21 cr porque los valores y costes seleccionados no cambiarían. Las comisiones, la espera o los efectos externos requerirían términos adicionales; los hemos excluido, no supuesto que siempre valgan cero.
+
+<MatchConcepts
+  client:visible
+  question={"Relaciona cada entrada con su significado"}
+  pairs={[{"term": "Ganancia compradora", "definition": "Valor del cable recibido menos el pago del comprador"}, {"term": "Ganancia vendedora", "definition": "Ingreso menos el coste de oportunidad de entregar el cable"}, {"term": "Transferencia interna", "definition": "Pago que sale del comprador y llega al vendedor"}, {"term": "Ganancia conjunta", "definition": "Valores compradores elegidos menos costes de oportunidad vendedores elegidos"}]}
+  explanation={"La transferencia aparece en ambas cuentas con signos opuestos. Se cancela en la cuenta conjunta; los costes de oportunidad no."}
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  instructions="Elige un término y después su definición."
+  allCorrectLabel="✓ Todas las parejas son correctas"
+  partialResultWord="correctas"
+  pickDefinitionHint="→ elige ahora una definición"
+  notLinkedHint="sin enlazar todavía"
+  termsLabel="Términos"
+  definitionsLabel="Definiciones"
+/>
+
+## Compara dos repartos al mismo precio menor
+
+<MCQ
+  client:visible
+  question={"Se anuncia una regla de precio máximo. ¿Qué más hace falta para reconstruir las ganancias de la sesión?"}
+  options={[{"text": "El precio anunciado real y el reparto de participantes completado", "correct": true}, {"text": "Solo el máximo, porque determina el precio y todos los compradores"}, {"text": "Solo las existencias físicas, porque ya hay que ofrecer cada cable"}]}
+  explanation={"Un máximo restringe los precios permitidos. No especifica el precio real, el reparto ni la ejecución; cada uno importa para la cuenta."}
+  pretest={true}
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+El café introduce una regla: nadie puede cobrar **más de 6,5 cr por cable**. Ese máximo también permite precios inferiores. Por separado, el café **elige y aplica un precio anunciado de exactamente 6,5 cr** en esta versión de la sesión. La regla por sí sola no establecería ese precio exacto.
+
+Los registros originales dejan cuatro compradores dispuestos, A/B/C/D, y dos vendedores dispuestos, U/V. La diferencia es **4 − 2 = 2 cables de exceso de demanda** a este precio. Si se intercambian las dos unidades ofrecidas, dos compradores dispuestos quedan sin atender. Los cables físicos de los otros vendedores no han desaparecido; sus dueños no están dispuestos a ofrecerlos a ese precio.
+
+Define dos reglas y completa sus intercambios. La **regla P** selecciona a A y B; la **regla Q**, a C y D. Ambas usan U y V. Todas las personas participantes tienen una ganancia positiva y ambas reglas completan dos unidades al mismo precio.
+
+### La regla P selecciona a A y B
+
+| Intercambio | Valor comprador | Coste vendedor | Transferencia | Ganancia comprador | Ganancia vendedor | Ganancia conjunta |
+|---|---:|---:|---:|---:|---:|---:|
+| A–U | 14 | 3 | 6,5 | 7,5 | 3,5 | 11 |
+| B–V | 12 | 5 | 6,5 | 5,5 | 1,5 | 7 |
+| Total | 26 | 8 | 13 | 13 | 5 | 18 |
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"es"}
+  title={"Calcula las ganancias del reparto P"}
+  eyebrow={"Ganancias de los participantes"}
+  caption={"Cada parte es la ganancia de una persona tras descontar su pago o coste de oportunidad. La transferencia ya está contabilizada."}
+  analogyValue={21}
+  analogyLabel={"Ganancia del reparto de referencia"}
+  analogyNote={"El emparejamiento completado al precio inicial que iguala los planes."}
+  parts={[{"label": "Comprador A", "value": 7.5}, {"label": "Comprador B", "value": 5.5}, {"label": "Vendedor U", "value": 3.5}, {"label": "Vendedor V", "value": 1.5}]}
+  rebuiltLabel={"Ganancias de las personas seleccionadas"}
+  instructions={"Añade las ganancias del registro completado. Compara la suma con la referencia y conserva el mismo ámbito de la cuenta."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Añadir todas las ganancias"}
+  resetLabel={"Vaciar la suma"}
+  verdictTemplate={"El reparto P suma {total} de ganancias de los participantes según la métrica definida."}
+/>
+
+### La regla Q selecciona a C y D
+
+| Intercambio | Valor comprador | Coste vendedor | Transferencia | Ganancia comprador | Ganancia vendedor | Ganancia conjunta |
+|---|---:|---:|---:|---:|---:|---:|
+| C–U | 10 | 3 | 6,5 | 3,5 | 3,5 | 7 |
+| D–V | 8 | 5 | 6,5 | 1,5 | 1,5 | 3 |
+| Total | 18 | 8 | 13 | 5 | 5 | 10 |
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"es"}
+  title={"Calcula las ganancias del reparto Q"}
+  eyebrow={"Ganancias de los participantes"}
+  caption={"Cada parte es la ganancia de una persona tras descontar su pago o coste de oportunidad. La transferencia ya está contabilizada."}
+  analogyValue={21}
+  analogyLabel={"Ganancia del reparto de referencia"}
+  analogyNote={"El emparejamiento completado al precio inicial que iguala los planes."}
+  parts={[{"label": "Comprador C", "value": 3.5}, {"label": "Comprador D", "value": 1.5}, {"label": "Vendedor U", "value": 3.5}, {"label": "Vendedor V", "value": 1.5}]}
+  rebuiltLabel={"Ganancias de las personas seleccionadas"}
+  instructions={"Añade las ganancias del registro completado. Compara la suma con la referencia y conserva el mismo ámbito de la cuenta."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Añadir todas las ganancias"}
+  resetLabel={"Vaciar la suma"}
+  verdictTemplate={"El reparto Q suma {total} de ganancias de los participantes según la métrica definida."}
+/>
+
+Las mismas dos unidades completadas y los mismos **13 cr** de pagos producen ganancias totales de **18 cr con P** y **10 cr con Q**. Frente a los 21 cr del reparto inicial completado, las diferencias son **3 cr** y **11 cr**. Importa la regla de selección, además de la cantidad.
+
+Esta métrica suma cada crédito de ganancia con el mismo peso, lo reciba quien lo reciba. P supera a Q según esa medida. Los registros no dicen quién tiene más necesidad, quién esperó más o qué regla considera justa el café. Esas preguntas necesitan un objetivo y evidencia adicional. El recuento anterior de tres intercambios tampoco afirma un máximo universal bajo cualquier mecanismo de precios: nuestro mercado resuelto usa un mismo precio anunciado.
+
+Al auditar un mercado con restricciones, pide las identidades de quienes completaron los intercambios y la regla de reparto, además del precio y la cantidad. Sin ellas no puedes reconstruir esta distribución de ganancias.
+
+<MCQ
+  client:visible
+  question={"Compara las reglas P y Q. ¿Qué conclusiones se deducen? Selecciona todas las correctas."}
+  options={[{"text": "El mismo precio y cantidad completada pueden dar ganancias totales distintas", "correct": true}, {"text": "El total pagado no identifica por sí solo qué compradores recibieron cables", "correct": true}, {"text": "El mayor total de ganancias demuestra qué regla es justa sin más evidencia"}, {"text": "El menor precio anunciado implica que desaparecieron los cables no ofrecidos"}]}
+  explanation={"P y Q completan el mismo número de intercambios al mismo precio, pero eligen valores compradores distintos. La métrica contable es explícita; la justicia y las existencias físicas son cuestiones aparte."}
+  allowMultiple={true}
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+## Prueba un cambio en el valor de un comprador
+
+Conserva los demás supuestos y valores de reserva en una nueva versión de la sesión. El comprador **E ahora valora el cable en 13 cr en vez de 6 cr** porque le ha encontrado otro uso. Su presupuesto ya era suficiente; no cambian la capacidad de pago, los costes de los vendedores, las existencias ni la calidad.
+
+Antes de abrir la cuenta resuelta, calcula los conjuntos dispuestos al precio anterior de **8,5 cr** y a un nuevo precio propuesto de **9,5 cr**. Después pregunta qué cambio reescribió la tabla y cuál solo seleccionó otra fila.
+
+<MCQ
+  client:visible
+  question={"Tras cambiar solo el valor de E, ¿qué secuencia encaja con el registro nuevo?"}
+  options={[{"text": "Más compradores dispuestos al precio anterior; recuentos coincidentes al precio nuevo propuesto", "correct": true}, {"text": "La misma disposición al precio anterior; los compradores adicionales aparecen solo al subirlo"}, {"text": "Más vendedores dispuestos al precio anterior; los compradores conservan su tabla original"}]}
+  explanation={"Recuenta primero ambos lados al precio sin modificar. El valor nuevo de E cambia la demanda antes de cambiar el precio anunciado; los costes vendedores no cambian."}
+  pretest={true}
+  pretestLabel="Antes de empezar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+<MarketEligibility
+  client:visible
+  title={"Comprueba el registro modificado"}
+  instructions={"Elige un precio de comparación. Contrasta su marca con el máximo de cada comprador y el mínimo de cada vendedor y comprueba los recuentos."}
+  caption={"Cada persona puede intercambiar como máximo un cable idéntico en esta sesión. Los precios evitan la indiferencia; elegir otro precio no cambia los valores ni los costes."}
+  buyers={[{"id": "A", "label": "A", "value": 14}, {"id": "B", "label": "B", "value": 12}, {"id": "C", "label": "C", "value": 10}, {"id": "D", "label": "D", "value": 8}, {"id": "E", "label": "E", "value": 13}]}
+  sellers={[{"id": "U", "label": "U", "cost": 3}, {"id": "V", "label": "V", "cost": 5}, {"id": "W", "label": "W", "cost": 7}, {"id": "X", "label": "X", "cost": 9}, {"id": "Y", "label": "Y", "cost": 11}]}
+  prices={[0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5]}
+  initialPrice={8.5}
+  valueUnit={"cr"}
+  locale={"es"}
+  labels={{"price": "Precio anunciado por cable", "buyers": "Compradores", "sellers": "Vendedores", "buyerThreshold": "Final de la barra: pago máximo aceptable", "sellerThreshold": "Final de la barra: ingreso mínimo aceptable", "willing": "Dispuesto a este precio", "unwilling": "Fuera del precio aceptable", "buyerCount": "Compradores dispuestos", "sellerCount": "Vendedores dispuestos", "maximum": "Máximo de parejas factibles", "boundHint": "Es un límite de parejas bajo los supuestos de disponibilidad y compatibilidad indicados, no un registro de ventas completadas.", "priceMarker": "Precio anunciado elegido", "reservationBar": "Umbral de reserva"}}
+/>
+
+<details>
+<summary>Comprueba la tabla modificada y la cuenta completada</summary>
+
+A **8,5 cr**, A, B, C y E están dispuestos a comprar, mientras que U, V y W están dispuestos a vender: **4 frente a 3**. La demanda ha cambiado a un precio fijo porque ha cambiado la valoración de E. Es un **desplazamiento de la demanda**, no un movimiento causado por otro precio.
+
+A **9,5 cr**, están dispuestos A/E/B/C y U/V/W/X: **4 frente a 4**. Pasar de 8,5 a 9,5 cr selecciona otra fila de las tablas **nuevas**. Para establecer intercambios completados, estipula ahora el emparejamiento **A–U, E–V, B–W, C–X** y complétalo. El registro íntegro es:
+
+| Intercambio | Valor comprador | Coste vendedor | Transferencia | Ganancia comprador | Ganancia vendedor | Ganancia conjunta |
+|---|---:|---:|---:|---:|---:|---:|
+| A–U | 14 | 3 | 9,5 | 4,5 | 6,5 | 11 |
+| E–V | 13 | 5 | 9,5 | 3,5 | 4,5 | 8 |
+| B–W | 12 | 7 | 9,5 | 2,5 | 2,5 | 5 |
+| C–X | 10 | 9 | 9,5 | 0,5 | 0,5 | 1 |
+| Total | 49 | 24 | 38 | 11 | 14 | 25 |
+
+Los compradores ganan **49 − 38 = 11 cr**; los vendedores, **38 − 24 = 14 cr**; y el total es **49 − 24 = 25 cr**. Todos ganan estrictamente en este emparejamiento especificado.
+
+<FirstPrinciplesBuilder
+  client:visible
+  locale={"es"}
+  title={"Calcula las ganancias del registro modificado"}
+  eyebrow={"Ganancias de los participantes"}
+  caption={"Cada parte es la ganancia de una persona tras descontar su pago o coste de oportunidad. La transferencia ya está contabilizada. En esta comparación han cambiado las preferencias y los participantes elegidos; no es un efecto exclusivo del precio."}
+  analogyValue={21}
+  analogyLabel={"Ganancia del reparto de referencia"}
+  analogyNote={"El emparejamiento completado al precio inicial que iguala los planes."}
+  parts={[{"label": "Comprador A", "value": 4.5}, {"label": "Comprador E", "value": 3.5}, {"label": "Comprador B", "value": 2.5}, {"label": "Comprador C", "value": 0.5}, {"label": "Vendedor U", "value": 6.5}, {"label": "Vendedor V", "value": 4.5}, {"label": "Vendedor W", "value": 2.5}, {"label": "Vendedor X", "value": 0.5}]}
+  rebuiltLabel={"Ganancias de las personas seleccionadas"}
+  instructions={"Añade las ganancias del registro completado. Compara la suma con la referencia y conserva el mismo ámbito de la cuenta."}
+  valuePrefix={""}
+  valueSuffix={" cr"}
+  revealAllLabel={"Añadir todas las ganancias"}
+  resetLabel={"Vaciar la suma"}
+  verdictTemplate={"El registro completado suma {total} de ganancias de los participantes."}
+/>
+
+El total supera en 4 cr la referencia anterior, pero esto no es un efecto exclusivo de una política de precios. También han cambiado una valoración y los participantes seleccionados. Dentro de cada registro fijo, la transferencia del precio sigue cancelándose. Un precio y una cantidad observados por sí solos no dirían qué valor de reserva cambió ni cómo se distribuyeron las ganancias.
+
+</details>
+
+<FillBlank
+  client:visible
+  question={"Separa los dos cambios"}
+  text={"Cambiar el valor de E crea un {{desplazamiento|movimiento|intercambio}} de la demanda. Elegir otro precio en la tabla nueva es un {{movimiento|desplazamiento|valor}} a lo largo de ella. Comparar los registros completados {{no aísla el efecto del precio|siempre aísla el efecto del precio|demuestra un reparto más justo}}."}
+  explanation={"La valoración reescribe la disposición a intercambiar. Después, el precio elige una fila de la tabla nueva. Entre los registros cambian participantes y una valoración; la diferencia de ganancias no identifica un efecto puro del precio."}
+  instructions="Elige la opción correcta en cada hueco y comprueba."
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  explanationLabel="Explicación"
+  correctResultLabel="✓ Correcto"
+  partialResultWord="correctas"
+/>
+
+## Reconstruye una auditoría de mercado
+
+<MindMap
+  client:visible
+  title={"Del registro de reservas al reparto comprobado"}
+  root={{"label": "Auditar un reparto de mercado", "children": [{"label": "Fijar el ámbito", "children": [{"label": "Un bien, una sesión y un precio común"}, {"label": "Valores, costes de oportunidad y presupuestos"}]}, {"label": "Contar personas dispuestas", "children": [{"label": "Tablas para distintos precios"}, {"label": "El límite de parejas no son ventas completadas"}]}, {"label": "Leer el reparto completado", "children": [{"label": "Identidades y unidades emparejadas"}, {"label": "Las transferencias se cancelan en la cuenta conjunta"}]}, {"label": "Interpretar la comparación", "children": [{"label": "Mismo precio y cantidad pueden dar ganancias distintas"}, {"label": "La ganancia total no resuelve por sí sola la justicia"}, {"label": "Cambiar el valor desplaza la demanda antes del precio"}]}]}}
+  eyebrow="Visión de conjunto"
+  outlineLabel="Esquema"
+/>
+
+<Quiz
+  client:visible
+  title={"Contrasta una afirmación de mercado con sus registros"}
+  questions={[{"question": "Un vendedor tiene un cable, pero su mínimo supera el precio anunciado. ¿Qué recuento lo incluye?", "options": [{"text": "Las existencias físicas, pero no la cantidad ofrecida a ese precio", "correct": true}, {"text": "La cantidad ofrecida, porque poseerlo obliga a vender a ese precio"}, {"text": "Las ventas completadas, porque el cable ya forma parte del mercado"}], "explanation": "Existencia, disposición y ejecución son distintas. El umbral de reserva indica que no se ofrece el cable a ese precio bajo el modelo."}, {"question": "Un informe solo da el precio y los cables intercambiados. ¿Qué falta para calcular las ganancias?", "options": [{"text": "Los valores y costes de oportunidad de las personas seleccionadas", "correct": true}, {"text": "Solo el número total de personas que entraron en el café"}, {"text": "Solo el total de pagos que los vendedores ya recibieron"}], "explanation": "P y Q muestran por qué precio y cantidad no identifican las ganancias: distintos valores elegidos pueden producir totales distintos."}, {"question": "Alguien añade los pagos a las ganancias conjuntas de compradores y vendedores. ¿Qué error comete?", "options": [{"text": "Vuelve a contar una transferencia interna como ganancia adicional", "correct": true}, {"text": "Elimina correctamente un coste de oportunidad del registro"}, {"text": "Convierte el total en una medida completa de justicia"}], "explanation": "La deducción compradora y el ingreso vendedor ya contabilizan el mismo pago. Suma ganancias netas o resta los costes elegidos de los valores."}, {"question": "¿Qué afirmaciones respetan los límites de esta auditoría? Selecciona todas las correctas.", "options": [{"text": "Los registros completados permiten calcular la métrica de ganancias definida", "correct": true}, {"text": "Una comparación de justicia necesita criterios adicionales al total de ganancias", "correct": true}, {"text": "La igualdad de dispuestos garantiza los intercambios sin ejecución"}, {"text": "Un total de referencia mayor demuestra un efecto exclusivo del precio"}], "explanation": "El registro apoya una cuenta especificada. No establece ejecuciones ausentes, un objetivo de justicia ni una comparación causal exclusiva del precio.", "allowMultiple": true}, {"question": "Una sesión real añade costes de espera largos que el ejemplo omite. ¿Qué debería hacer quien audita?", "options": [{"text": "Ampliar el ámbito de la cuenta antes de comparar las ganancias netas", "correct": true}, {"text": "Mantener los totales porque todo coste ya está dentro del precio anunciado"}, {"text": "Sustituir los registros por el menor recuento de personas dispuestas"}], "explanation": "El modelo excluía la espera. Si sus costes importan en la aplicación, inclúyelos de forma coherente en vez de tratar la métrica inicial como completa."}]}
+  questionLabel="Pregunta"
+  ofLabel="de"
+  correctCountLabel="correctas"
+  completeLabel="Completado"
+  completeTitleLabel="Cuestionario terminado"
+  perfectMessage="Todas las respuestas son correctas."
+  goodMessage="Revisa las explicaciones de las preguntas que has fallado."
+  keepPracticingMessage="Vuelve a las secciones que necesites practicar."
+  gateLabel="Comprueba la respuesta para continuar."
+  nextLabel="Siguiente"
+  seeResultsLabel="Ver resultados"
+  backLabel="Anterior"
+  scoreLabel="Puntuación"
+  restartLabel="Reiniciar"
+  checkLabel="Comprobar"
+  retryLabel="Reintentar"
+  correctLabel="Correcto"
+  incorrectLabel="No es correcto"
+  correctAnswerLabel="Respuesta correcta"
+  explanationLabel="Explicación"
+/>
+
+A continuación está el [examen final](/es/supply-and-demand/final-exam), que combina curvas, desplazamientos, elasticidad y controles con la auditoría de registros de este taller.
+
+Fuentes: [OpenStax sobre tablas de demanda y oferta](https://openstax.org/books/principles-economics-3e/pages/3-1-demand-supply-and-equilibrium-in-markets-for-goods-and-services), [OpenStax sobre límites de precios](https://openstax.org/books/principles-economics-3e/pages/3-4-price-ceilings-and-price-floors) y [los apuntes de David Autor en el MIT sobre ganancias y transferencias](https://ocw.mit.edu/courses/14-03-microeconomic-theory-and-public-policy-fall-2016/f804a92517d12e1e354415d76191c768_MIT14_03F16_lec8Part1.pdf). Los registros de cables, las reglas y las cuentas son ejemplos construidos.
