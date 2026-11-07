@@ -1,13 +1,13 @@
 ---
 title: "The Map of Every Possible Design"
-description: "Sewall Wright's picture that reframed improvement itself: lay out every possible version of a thing as a terrain where height means fitness, and a startling fact appears — evolution and every trial-and-error search can only walk uphill. A tour of the whole course in one lesson."
+description: "Read designs as neighbours and performance scores. Trace a strict local search and distinguish a local stop from a global-best claim."
 topic: "en/fitness-landscapes"
 order: 1
 minutes: 10
-updated: 2026-07-03
+updated: 2026-11-07
 ---
 
-import { MCQ, Callout, FitnessLandscape } from '@/components/react';
+import { MCQ, Callout, ConsequenceTree } from '@/components/react';
 
 Here is a picture worth an entire course. Take *every possible version* of some thing — every possible genome for a beetle, every possible shape for a wing, every possible layout for a keyboard, every possible strategy for a business — and spread them all out on a flat map, arranging them so that versions that are *similar* sit close together and wildly different ones sit far apart. That map is already strange to think about (it has as many dimensions as the thing has knobs to turn), but now do one more thing to it: at every point, build a tower whose **height** is how *good* that version is — how well it survives, reproduces, works, or wins. Tall towers are excellent designs; short ones are terrible.
 
@@ -15,40 +15,58 @@ What you've just built is a **fitness landscape**: a rolling terrain of peaks, v
 
 ## The one idea to take away
 
-<Callout variant="tip" title="The one-sentence version">
-**Evolution — and any trial-and-error search — can only walk *uphill*.** It improves by keeping small changes that help and discarding ones that hurt, which means it climbs whatever hill it happens to start on and then *stops at the top* — even when a far taller summit stands across the valley, because the only path there runs downhill first, and "downhill" means *worse*, and a hill-climber won't take a step that makes things worse.
+<Callout variant="tip" title="Name the search rule">
+A **strict hill-climber** accepts only a neighbouring change that improves its present score. It can stop at a locally best design while a higher score exists elsewhere, because reaching that other state may require a move its rule forbids. That is a property of the specified algorithm, not a restriction on every trial-and-error method or on all evolution.
 </Callout>
 
-Sit with why that's such a big deal. A process that only steps uphill has no map and no foresight — it can't see the taller mountain, can't plan a route, can't tolerate getting temporarily worse to end up much better. It just feels around its own feet for the steepest way up and takes it, over and over, until every direction points down. Then it's *done* — marooned on the top of its local hill, which might be a magnificent peak or a pathetic little mound, with something far better clearly "over there" and utterly out of reach. That trapped-on-a-hilltop state has a name we'll use all course: a **local optimum**. It is the reason "good enough" so reliably beats "best" and then refuses to move — in genomes, in gadgets, and in you.
+Consider a constructed line of designs, each linked only to the next one. Higher points are better:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="The seven-state line with fixed scores">
+<table style={{ minWidth: "28rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">The seven-state line with fixed scores</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Design</th><th scope="col" className="p-3 align-bottom font-semibold">Score in points</th><th scope="col" className="p-3 align-bottom font-semibold">Neighbours</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">3</td><td className="p-3 align-top">B</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">5</td><td className="p-3 align-top">A, C</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">6</td><td className="p-3 align-top">B, D</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">4</td><td className="p-3 align-top">C, E</td></tr>
+<tr><th scope="row" className="p-3 align-top">E</th><td className="p-3 align-top">7</td><td className="p-3 align-top">D, F</td></tr>
+<tr><th scope="row" className="p-3 align-top">F</th><td className="p-3 align-top">9</td><td className="p-3 align-top">E, G</td></tr>
+<tr><th scope="row" className="p-3 align-top">G</th><td className="p-3 align-top">8</td><td className="p-3 align-top">F</td></tr>
+</tbody>
+</table>
+</div>
 
 <MCQ
   client:visible
-  pretest
-  question="A population of cave fish is slowly getting better adapted to its dark cave, generation by generation — each generation, the fish that see and smell slightly better in the dark leave more offspring. Somewhere in the space of possible fish, there's a design that would thrive far better than any cave fish: a fast open-ocean predator. Will selection, left alone, move the cave fish toward that far superior ocean design?"
-  options={[
-    { text: 'No — selection only keeps changes that improve fitness *right now, in this cave*. Reaching the ocean design would require many generations of *worse*-adapted, half-transformed fish, and selection won’t take those downhill steps, so the population stays stuck climbing its local cave-hill', correct: true },
-    { text: 'Yes — because the ocean design is objectively superior, selection will eventually find its way there' },
-    { text: 'Yes — evolution always progresses toward the best possible version of an organism given enough time' },
-    { text: 'No — because it is biologically impossible for a cave fish lineage to ever change at all' },
-  ]}
-  explanation="No grade on a pretest — just feel the shape of it. The ocean design might be a towering summit somewhere on the landscape, but selection can't teleport to it. It can only take uphill steps *from where the population currently stands*, and every intermediate step toward 'ocean predator' would make a cave fish *worse* at being a cave fish — less fit, right now, in the dark. Selection refuses those downhill steps, so the lineage climbs its local cave-hill and stops, no matter how much taller a far-off summit is. That's the whole model: uphill-only search gets marooned on local peaks. (The last option overcorrects — the lineage absolutely can change; it just can't cross a fitness valley to reach a distant, better design.)"
+  pretest={true}
+  question={"Run the strict rule from A on the displayed line. Which outcome is supported?"}
+  options={[{"text":"It reaches C and stops, although F has a higher score.","correct":true},{"text":"It reaches F because any improvement rule must find the best."},{"text":"It crosses D because a visible later gain overrides a worse step."},{"text":"It visits every design because all trial-and-error is random."}]}
+  explanation={"A–B–C improves the score at each accepted step. Both neighbours of C are lower, so this strict rule stops. That local condition does not make C globally best or describe every other possible search method."}
+  className={"not-prose"}
 />
 
-That cave fish is going to follow us through the course, because it's the cleanest possible case: a genuinely improving population that is nonetheless *permanently barred* from a far better design, purely because the route there runs downhill. You just predicted that without knowing one fact about fish. That's the landscape doing the work.
+From A the strict rule climbs A→B→C, then stops at 6: both neighbouring scores are lower. F has the higher score 9, but the route from C starts with D at 4. From G, the same rule climbs directly to F. The starting state, neighbourhood and acceptance rule together explain these different results.
 
-## Watch a search climb the nearest hill — and get stuck
+## Trace a declared search
 
-Reading about hill-climbing is one thing; watching a population do it is another. Below is a live fitness landscape. The horizontal axis is **every possible design**, laid out left to right; the height of the terrain is **fitness**. Press **Drop a population** to place one somewhere at random and let selection **climb**. Watch what it does: it walks *uphill* — always uphill — until it reaches the top of whatever hill it landed on, and then it halts.
+The tree shows those two complete traces. Choose which starting case to inspect; its arrows are accepted moves under the stated rule, not generations of a measured population. The full score table lets an auditor compare the endpoints without assuming that a stopped search has found the best design.
 
-The dashed flag marks the **tallest summit** on the whole landscape — the best design there is. Notice how often your climber stops somewhere *lower*, stranded on a local peak with the true summit flagged across a valley it cannot cross. Then try two things. Drag the **ruggedness** slider from smooth (one gentle hill, easy — the climber always finds the top) to rugged (a jagged range full of traps). And when your population is stuck, press **Mutate / big jump** to fling it to a new spot — sometimes it lands on the slope of a taller hill it could never have reached by climbing, and *that's* the escape.
-
-<FitnessLandscape
+<ConsequenceTree
   client:visible
-  title="Drop a population and watch selection climb"
-  caption="The climber only ever moves uphill, so it settles on the nearest peak — often a low one, with the tallest summit (dashed flag) stranded across a valley it won’t descend into. Crank up ruggedness to bury the landscape in traps; fire a mutation to leap to a new hill. That tension — climb what you're on vs. jump to look for better — is the explore-vs-exploit trade-off at the heart of all search."
+  title={"Two initialisations, two complete accepted traces"}
+  eyebrow={""}
+  decision={{"label":"Two declared starts","children":[{"label":"A","note":"Score three.","valence":"neutral","children":[{"label":"B","note":"Score five.","valence":"neutral","children":[{"label":"C","note":"Score six.","valence":"neutral"}]}]},{"label":"G","note":"Score eight.","valence":"neutral","children":[{"label":"F","note":"Score nine.","valence":"neutral"}]}]}}
+  instructions={"Open each case to follow its accepted moves."}
+  decisionLabel={"Cases"}
+  orderLabels={["Starting case","First accepted move","Second accepted move"]}
+  promptLabel={"Open steps"}
+  expandAllLabel={"Open all steps"}
+  collapseLabel={"Collapse"}
+  valenceLabels={{"good":"Favourable","bad":"Unfavourable","mixed":"Mixed","neutral":"Declared step"}}
 />
 
-Two things are worth burning in while you play. First, **the climber never goes downhill** — that single rule is the entire engine, and it's why it gets stuck. Second, **the landscape's shape decides its fate**: on a smooth one-hill landscape, hill-climbing is flawless and always finds the best design; on a rugged, many-peaked one, the *same* process gets trapped almost every time. Same search, wildly different outcomes, purely because the terrain changed. Hold onto that — half of getting good results is about the *shape of the problem*, not the cleverness of the searcher.
+A **local optimum** has no higher-scoring permitted neighbour. It may also be globally best; F is both local and global on this map. C is a **nonglobal local optimum**. Later lessons distinguish this strict rule from ways of accepting other moves. The final workshop will ask the more demanding question: when is a worse-first route feasible and better by a stated deadline?
 
 ## Why this belongs in a latticework
 
@@ -63,18 +81,19 @@ The thread through all of them is a single diagnostic you'll learn to run on sig
 
 ## The map of the course
 
-Five teaching lessons, then one exam you can't undo. The route:
+Six teaching lessons, then one exam you can't undo. The route:
 
 1. **Mapping the Terrain** — how to actually build a fitness landscape: designs as points arranged by similarity, fitness as height, and the vocabulary of peaks, valleys, ridges and neighbours. Wright's 1932 picture, made concrete.
-2. **Hill-Climbing** — the engine in detail: why selection is an *uphill-only, local, foresight-free* search, what "local" really means, and why that one rule is both its power and its prison.
+2. **Hill-Climbing** — an exact strict local search rule: compare permitted neighbours, accept only a better score and check what stopping establishes. Distinguish the algorithm from broader biological processes.
 3. **Trapped on a Low Peak** — the central consequence: **local optima**. Why "good enough" beats "best" and stays there, with the real biological evidence — the blind spot, the recurrent laryngeal nerve — and the idea of lock-in.
 4. **Ruggedness & Crossing Valleys** — what makes a landscape smooth (easy) or rugged (a maze of traps), and the forces that let a search *cross a valley* to a better peak: mutation, drift in small populations, recombination — and the **Red Queen** twist where the terrain itself won't hold still.
 5. **The Model Everywhere** — cashing it out beyond biology: gradient descent in machine learning, engineering and design, business disruption, skill plateaus, and the master trade-off of all search — **explore vs. exploit**.
+6. **[Audit a Search Rule](/fitness-landscapes/06-audit-a-search-rule)** — compare complete finite paths, deadlines, intermediate minimums and terminal scores; change one condition and recheck the recommendation.
 
 Then a **Final Exam** — graded, one question at a time, one-way: once you answer, it locks. No back button, no retries, 70% to pass.
 
 ### How to use this course
 
-One habit does most of the work: whenever you see something improving, ask *what hill is it climbing, and is there a taller one it can't reach?* Treat every exercise like the cave fish — guess the outcome *before* you reveal the answer, because the small sting of being wrong is what makes "uphill-only search gets stuck" finally stick. And play with the landscape above until two patterns feel obvious in your gut: the climber that stops on a low peak, and the mutation-jump that occasionally saves it. A trap you've *watched* a search fall into sticks far better than one you've only read about.
+One habit does most of the work: whenever you see something improving, ask *what hill is it climbing, and is there a taller one it can't reach?* For each exercise, predict the next accepted move before checking the explanation. Open the two trace cases above and compare their endpoints with the complete score table: the search from A stops at C, while the search from G reaches F. These traces establish the specified rule’s behaviour on this map; real biological or business cases require evidence for their own states and transitions.
 
 Next up: lesson 2, where we build the landscape properly — how to turn "every possible design" into an actual terrain you can reason about, and why *neighbours* and *height* are the only two ideas you need.

@@ -1,13 +1,13 @@
 ---
 title: "El Mapa de Todo Diseño Posible"
-description: "La imagen de Sewall Wright que replanteó la mejora misma: extiende cada versión posible de una cosa como un terreno donde la altura es la aptitud, y aparece un hecho asombroso — la evolución y toda búsqueda por ensayo y error solo pueden caminar cuesta arriba. Un recorrido por todo el curso en una lección."
+description: "Lee diseños como vecinos y puntuaciones de rendimiento. Sigue una búsqueda local estricta y distingue una parada local de un máximo global."
 topic: "es/fitness-landscapes"
 order: 1
 minutes: 10
-updated: 2026-07-03
+updated: 2026-11-07
 ---
 
-import { MCQ, Callout, FitnessLandscape } from '@/components/react';
+import { MCQ, Callout, ConsequenceTree } from '@/components/react';
 
 Aquí tienes una imagen que vale un curso entero. Toma *todas las versiones posibles* de algo — cada genoma posible de un escarabajo, cada forma posible de un ala, cada distribución posible de un teclado, cada estrategia posible de una empresa — y extiéndelas todas sobre un mapa plano, colocándolas de modo que las versiones *parecidas* queden cerca y las radicalmente distintas queden lejos. Ese mapa ya es raro de imaginar (tiene tantas dimensiones como mandos que ajustar tenga la cosa), pero ahora hazle una cosa más: en cada punto, levanta una torre cuya **altura** sea lo *bueno* que es esa versión — lo bien que sobrevive, se reproduce, funciona o gana. Las torres altas son diseños excelentes; las bajas, malísimos.
 
@@ -15,64 +15,65 @@ Lo que acabas de construir es un **paisaje adaptativo (fitness landscape)**: un 
 
 ## La única idea que llevarte
 
-<Callout variant="tip" title="La versión de una frase">
-**La evolución — y cualquier búsqueda por ensayo y error — solo puede caminar *cuesta arriba*.** Mejora conservando los pequeños cambios que ayudan y descartando los que perjudican, lo que significa que sube la colina en la que le tocó empezar y luego *se para en la cima* — aun cuando una cima mucho más alta se alce al otro lado del valle, porque el único camino hasta allí baja primero, y "cuesta abajo" significa *peor*, y un escalador de colinas no da un paso que empeore las cosas.
+<Callout variant="tip" title="Nombra la regla de búsqueda" label="Consejo">
+Un **escalador de colinas estricto** solo acepta un cambio a un vecino que mejore su puntuación actual. Puede detenerse en un diseño localmente mejor mientras existe una puntuación mayor en otra parte, porque alcanzar ese estado puede exigir un movimiento que su regla prohíbe. Es una propiedad del algoritmo especificado, no una restricción de todo método de ensayo y error ni de toda la evolución.
 </Callout>
 
-Detente en por qué eso es tan importante. Un proceso que solo da pasos cuesta arriba no tiene mapa ni previsión — no puede ver la montaña más alta, no puede planificar una ruta, no puede tolerar ponerse peor un rato para acabar mucho mejor. Solo palpa el suelo a sus pies buscando la subida más pronunciada y la toma, una y otra vez, hasta que todas las direcciones apuntan hacia abajo. Entonces ha *terminado* — varado en lo alto de su colina local, que puede ser un pico magnífico o un montículo penoso, con algo mucho mejor claramente "por allá" y completamente fuera de alcance. Ese estado de atrapado-en-la-cima tiene un nombre que usaremos todo el curso: un **óptimo local (local optimum)**. Es la razón por la que lo "suficientemente bueno" le gana tan fiablemente a lo "mejor" y luego se niega a moverse — en genomas, en cacharros y en ti.
+Considera una línea construida de diseños, cada uno enlazado solo con el siguiente. Más puntos significa mejor:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="La línea de siete estados con puntuaciones fijas">
+<table style={{ minWidth: "28rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">La línea de siete estados con puntuaciones fijas</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Diseño</th><th scope="col" className="p-3 align-bottom font-semibold">Puntuación en puntos</th><th scope="col" className="p-3 align-bottom font-semibold">Vecinos</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">3</td><td className="p-3 align-top">B</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">5</td><td className="p-3 align-top">A, C</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">6</td><td className="p-3 align-top">B, D</td></tr>
+<tr><th scope="row" className="p-3 align-top">D</th><td className="p-3 align-top">4</td><td className="p-3 align-top">C, E</td></tr>
+<tr><th scope="row" className="p-3 align-top">E</th><td className="p-3 align-top">7</td><td className="p-3 align-top">D, F</td></tr>
+<tr><th scope="row" className="p-3 align-top">F</th><td className="p-3 align-top">9</td><td className="p-3 align-top">E, G</td></tr>
+<tr><th scope="row" className="p-3 align-top">G</th><td className="p-3 align-top">8</td><td className="p-3 align-top">F</td></tr>
+</tbody>
+</table>
+</div>
 
 <MCQ
   client:visible
-  pretest
-  checkLabel="Comprobar"
-  correctLabel="¡Correcto!"
-  incorrectLabel="No exactamente."
-  question="Una población de peces de cueva se va adaptando poco a poco a su cueva oscura, generación tras generación — cada generación, los peces que ven y huelen algo mejor en la oscuridad dejan más descendencia. En algún punto del espacio de peces posibles hay un diseño que prosperaría muchísimo mejor que cualquier pez de cueva: un veloz depredador de mar abierto. ¿Moverá la selección, por sí sola, a los peces de cueva hacia ese diseño oceánico tan superior?"
-  options={[
-    { text: 'No — la selección solo conserva cambios que mejoran la aptitud *ahora mismo, en esta cueva*. Alcanzar el diseño oceánico exigiría muchas generaciones de peces *peor* adaptados, a medio transformar, y la selección no da esos pasos cuesta abajo, así que la población se queda atascada escalando su colina-de-cueva local', correct: true },
-    { text: 'Sí — como el diseño oceánico es objetivamente superior, la selección acabará encontrando el camino hasta él' },
-    { text: 'Sí — con tiempo suficiente, la evolución siempre progresa hacia la mejor versión posible de un organismo' },
-    { text: 'No — porque es biológicamente imposible que un linaje de peces de cueva cambie en absoluto' },
-  ]}
-  explanation="Sin nota en un test previo — solo nota la forma del asunto. El diseño oceánico podría ser una cima altísima en algún lugar del paisaje, pero la selección no puede teletransportarse hasta él. Solo puede dar pasos cuesta arriba *desde donde la población está ahora*, y cada paso intermedio hacia «depredador oceánico» haría a un pez de cueva *peor* como pez de cueva — menos apto, ahora mismo, en la oscuridad. La selección rechaza esos pasos cuesta abajo, así que el linaje sube su colina-de-cueva local y se para, por muchísimo más alta que sea una cima lejana. Ese es el modelo entero: la búsqueda que solo va cuesta arriba queda varada en picos locales. (La última opción se pasa de frenada — el linaje sí puede cambiar; lo que no puede es cruzar un valle de aptitud para alcanzar un diseño lejano y mejor.)"
+  pretest={true}
+  question={"Aplica la regla estricta desde A en la línea mostrada. ¿Qué resultado está respaldado?"}
+  options={[{"text":"Llega a C y se detiene, aunque F tiene mayor puntuación.","correct":true},{"text":"Llega a F porque toda regla de mejora debe encontrar el máximo."},{"text":"Cruza D porque una ganancia posterior anula un paso peor."},{"text":"Visita todo diseño porque todo ensayo y error es aleatorio."}]}
+  explanation={"A–B–C mejora la puntuación en cada paso aceptado. Ambos vecinos de C tienen menos puntos, así que esta regla estricta se detiene. Esa condición local no hace que C sea globalmente mejor ni describe cualquier otro método de búsqueda."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — adivina"}
+  className={"not-prose"}
 />
 
-Ese pez de cueva nos va a acompañar todo el curso, porque es el caso más limpio posible: una población que mejora de verdad y que, aun así, tiene *permanentemente vedado* un diseño mucho mejor, solo porque el camino hasta él baja cuesta abajo. Acabas de predecir eso sin saber un solo dato sobre peces. Eso es el paisaje haciendo el trabajo.
+Desde A, la regla estricta asciende A→B→C y se detiene en 6: ambos vecinos tienen puntuaciones inferiores. F tiene la mayor, 9, pero la ruta desde C empieza por D con 4. Desde G, la misma regla asciende directamente a F. El inicio, el vecindario y la regla de aceptación explican juntos estos resultados distintos.
 
-## Mira cómo una búsqueda sube la colina más cercana — y se atasca
+## Sigue una búsqueda declarada
 
-Leer sobre escalar colinas es una cosa; ver a una población hacerlo es otra. Abajo hay un paisaje adaptativo en vivo. El eje horizontal es **cada diseño posible**, extendido de izquierda a derecha; la altura del terreno es la **aptitud**. Pulsa **Soltar una población** para colocar una en un punto al azar y deja que la selección **escale**. Mira lo que hace: camina *cuesta arriba* — siempre cuesta arriba — hasta llegar a lo alto de la colina en la que aterrizó, y ahí se para.
+El árbol muestra esos dos recorridos completos. Examina el caso inicial que prefieras; sus flechas son movimientos aceptados bajo la regla declarada, no generaciones de una población medida. La tabla completa permite comparar los destinos sin suponer que una búsqueda detenida haya encontrado el mejor diseño.
 
-La bandera de puntos marca la **cima más alta** de todo el paisaje — el mejor diseño que existe. Fíjate en cuántas veces tu escalador se para más *abajo*, varado en un pico local con la verdadera cima señalada al otro lado de un valle que no puede cruzar. Luego prueba dos cosas. Arrastra el control de **escarpadura** de suave (una colina suave, fácil — el escalador siempre encuentra la cima) a escarpado (una sierra dentada llena de trampas). Y cuando tu población esté atascada, pulsa **Mutar / gran salto** para lanzarla a un punto nuevo — a veces cae en la ladera de una colina más alta que jamás habría alcanzado escalando, y *ese* es el escape.
-
-<FitnessLandscape
+<ConsequenceTree
   client:visible
-  title="Suelta una población y mira escalar a la selección"
-  eyebrow="Escalar colinas"
-  instructions="Cada diseño posible se sitúa en el eje inferior; su aptitud — lo bien que funciona — es la altura. Suelta una población y deja que la selección escale: solo da pasos cuesta arriba. Observa dónde se atasca, sube la escarpadura y prueba un gran salto de mutación para escapar."
-  caption="El escalador solo se mueve cuesta arriba, así que se asienta en el pico más cercano — a menudo uno bajo, con la cima más alta (la bandera de puntos) varada al otro lado de un valle al que no bajará. Sube la escarpadura para sembrar el paisaje de trampas; dispara una mutación para saltar a otra colina. Esa tensión — escalar la que tienes vs. saltar a buscar algo mejor — es el dilema explorar-vs-explotar en el corazón de toda búsqueda."
-  designAxisLabel="Cada diseño posible →"
-  fitnessAxisLabel="Aptitud ↑"
-  ruggednessLabel="Escarpadura del paisaje"
-  ruggednessLowLabel="suave — una colina"
-  ruggednessHighLabel="escarpado — muchos picos"
-  dropLabel="Soltar una población"
-  climbLabel="Que escale ▸"
-  pauseLabel="Pausa"
-  stepLabel="Escalar un paso ▸"
-  mutateLabel="Mutar / gran salto"
-  redQueenLabel="Terreno cambiante (Reina Roja)"
-  resetLabel="Reiniciar"
-  summitLabel="cima más alta"
-  statusIdle="Suelta una población en algún punto del paisaje y deja que la selección suba la colina más cercana."
-  statusClimbing="Escalando cuesta arriba — la selección da cada pequeño paso que sube la aptitud, sin previsión."
-  statusTrapped="Atascada en un pico local. Toda dirección desde aquí baja cuesta abajo, y sin embargo una cima más alta se alza {gap} puntos por encima, al otro lado de un valle que la selección no cruzará. Lo «suficientemente bueno» está atrapado por debajo de lo «mejor»."
-  statusGlobal="En el óptimo global — la cima más alta de todo el paisaje. No hay nada más alto."
-  statusSinking="El terreno cambió bajo la población: el pico que conquistó se está hundiendo, así que debe escalar de nuevo. No hay cima final."
-  readout="Aptitud {fitness} de un posible {best}. {status}"
+  title={"Dos inicios y dos recorridos completos de movimientos aceptados"}
+  eyebrow={""}
+  decision={{"label":"Dos inicios declarados","children":[{"label":"A","note":"Puntuación tres.","valence":"neutral","children":[{"label":"B","note":"Puntuación cinco.","valence":"neutral","children":[{"label":"C","note":"Puntuación seis.","valence":"neutral"}]}]},{"label":"G","note":"Puntuación ocho.","valence":"neutral","children":[{"label":"F","note":"Puntuación nueve.","valence":"neutral"}]}]}}
+  instructions={"Abre cada caso para seguir sus movimientos aceptados."}
+  decisionLabel={"Casos"}
+  orderLabels={["Caso inicial","Primer movimiento aceptado","Segundo movimiento aceptado"]}
+  promptLabel={"Abrir pasos"}
+  expandAllLabel={"Abrir todos los pasos"}
+  collapseLabel={"Contraer"}
+  valenceLabels={{"good":"Favorable","bad":"Desfavorable","mixed":"Mixto","neutral":"Paso declarado"}}
 />
 
-Dos cosas merece la pena grabarse a fuego mientras juegas. Primero, **el escalador nunca baja** — esa única regla es el motor entero, y es por lo que se atasca. Segundo, **la forma del paisaje decide su destino**: en un paisaje suave de una sola colina, escalar es impecable y siempre encuentra el mejor diseño; en uno escarpado de muchos picos, el *mismo* proceso queda atrapado casi siempre. La misma búsqueda, resultados radicalmente distintos, solo porque cambió el terreno. Quédate con eso — la mitad de conseguir buenos resultados va sobre la *forma del problema*, no sobre la astucia del buscador.
+Un **óptimo local (local optimum)** no tiene ningún vecino permitido de puntuación mayor. También puede ser globalmente mejor; F es local y global en este mapa. C es un **óptimo local no global**. Las lecciones posteriores distinguen esta regla estricta de formas de aceptar otros movimientos. El último taller plantea una pregunta más exigente: ¿cuándo es factible y mejor una ruta que empeora primero, dentro de un plazo declarado?
 
 ## Por qué esto pertenece a una red de modelos
 
@@ -87,18 +88,19 @@ El hilo que atraviesa todos ellos es un único diagnóstico que aprenderás a ap
 
 ## El mapa del curso
 
-Cinco lecciones de enseñanza y luego un examen que no puedes deshacer. La ruta:
+Seis lecciones de enseñanza y luego un examen que no puedes deshacer. La ruta:
 
 1. **Cartografiar el Terreno** — cómo construir de verdad un paisaje adaptativo: diseños como puntos ordenados por parecido, la aptitud como altura, y el vocabulario de picos, valles, crestas y vecinos. La imagen de 1932 de Wright, hecha concreta.
-2. **Escalar Colinas** — el motor en detalle: por qué la selección es una búsqueda *local, sin previsión y solo cuesta arriba*, qué significa de verdad "local", y por qué esa única regla es a la vez su poder y su prisión.
+2. **Escalar Colinas** — una regla local estricta y exacta: compara vecinos permitidos, acepta solo una puntuación mejor y comprueba qué demuestra detenerse. Distingue el algoritmo de los procesos biológicos más amplios.
 3. **Atrapado en un Pico Bajo** — la consecuencia central: los **óptimos locales**. Por qué lo "suficientemente bueno" le gana a lo "mejor" y se queda ahí, con la prueba biológica real — el punto ciego, el nervio laríngeo recurrente — y la idea de la fijación (lock-in).
 4. **Escarpadura y Cruzar Valles** — qué hace que un paisaje sea suave (fácil) o escarpado (un laberinto de trampas), y las fuerzas que dejan a una búsqueda *cruzar un valle* hacia un pico mejor: mutación, deriva en poblaciones pequeñas, recombinación — y el giro de la **Reina Roja** donde el propio terreno no se queda quieto.
 5. **El Modelo en Todas Partes** — cobrarlo más allá de la biología: el descenso de gradiente en aprendizaje automático, la ingeniería y el diseño, la disrupción empresarial, los estancamientos de habilidad, y el gran dilema de toda búsqueda — **explorar vs. explotar**.
+6. **[Audita una regla de búsqueda](/es/fitness-landscapes/06-audit-a-search-rule)** — compara recorridos finitos completos, plazos, mínimos intermedios y puntuaciones terminales; cambia una condición y comprueba de nuevo la recomendación.
 
 Luego un **Examen Final** — calificado, una pregunta cada vez, sin vuelta atrás: en cuanto respondes, se bloquea. Sin botón de retroceso, sin reintentos, un 70% para aprobar.
 
 ### Cómo usar este curso
 
-Un solo hábito hace casi todo el trabajo: siempre que veas algo mejorar, pregunta *¿qué colina está subiendo, y hay una más alta que no puede alcanzar?* Trata cada ejercicio como al pez de cueva — adivina el resultado *antes* de revelar la respuesta, porque el pequeño escozor de equivocarse es lo que hace que "la búsqueda que solo va cuesta arriba se atasca" por fin se quede. Y juega con el paisaje de arriba hasta que dos patrones te resulten obvios en las tripas: el escalador que se para en un pico bajo, y el salto de mutación que de vez en cuando lo salva. Una trampa en la que has *visto* caer a una búsqueda se queda mucho mejor que una sobre la que solo has leído.
+Un solo hábito hace casi todo el trabajo: siempre que veas algo mejorar, pregunta *¿qué colina está subiendo, y hay una más alta que no puede alcanzar?* En cada ejercicio, predice el siguiente movimiento aceptado antes de consultar la explicación. Abre los dos casos del árbol anterior y compara sus destinos con la tabla completa: la búsqueda desde A se detiene en C, mientras que la búsqueda desde G alcanza F. Estos recorridos establecen cómo se comporta la regla especificada en este mapa; los casos biológicos o empresariales reales necesitan pruebas sobre sus propios estados y transiciones.
 
 Lo siguiente: la lección 2, donde construimos el paisaje como es debido — cómo convertir "cada diseño posible" en un terreno sobre el que razonar, y por qué *vecinos* y *altura* son las dos únicas ideas que necesitas.

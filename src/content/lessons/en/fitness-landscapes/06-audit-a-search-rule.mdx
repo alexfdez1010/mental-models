@@ -1,0 +1,385 @@
+---
+title: "Audit a Search Rule"
+description: "Check a worse-first route against its permitted moves, deadline and minimum score, using a complete four-state model."
+topic: "en/fitness-landscapes"
+order: 7
+minutes: 22
+updated: 2026-11-07
+---
+
+import { MCQ, MatchConcepts, FillBlank, Categorize, ConsequenceTree, RateComparison, MindMap, Quiz } from '@/components/react';
+
+A proposed redesign has a familiar pitch: “The current design is a local peak. Accept a temporary setback and we can reach something better.” The first sentence does not establish the second. You still need a permitted route, enough steps to finish it and intermediate states you can tolerate.
+
+We will audit that proposal on a complete, deliberately small map. The point is to check a recommendation rather than decorate it with a mountain.
+
+## Write the decision card
+
+A fictional test rig has four configurations. Its performance rubric assigns the fixed scores below, in points; higher is better. The table gives **every** state and **every** permitted neighbouring change. A neighbour is a state joined by one declared link. No noise, hidden states or changing environment are included.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Complete map and permitted neighbours">
+<table style={{ minWidth: "28rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Complete map and permitted neighbours</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">State</th><th scope="col" className="p-3 align-bottom font-semibold">Score in points</th><th scope="col" className="p-3 align-bottom font-semibold">Neighbours</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S</th><td className="p-3 align-top">6</td><td className="p-3 align-top">A</td></tr>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">5</td><td className="p-3 align-top">S, B</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">8</td><td className="p-3 align-top">A, C</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">9</td><td className="p-3 align-top">B</td></tr>
+</tbody>
+</table>
+</div>
+
+<figure className="not-prose my-6" data-finite-landscape="">
+<svg viewBox="0 0 380 250" role="img" aria-labelledby="main-map-en-title main-map-en-desc" className="mx-auto h-auto w-full max-w-2xl">
+<title id="main-map-en-title">Four configurations with three permitted links</title>
+<desc id="main-map-en-desc">S scores six and links only to A. A scores five and links to S and B. B scores eight and links to A and C. C scores nine and links only to B. Higher positions mean higher scores.</desc>
+<g stroke="var(--color-brand-600)" stroke-width="3" fill="none"><line x1={50} y1={106} x2={143.33333333333331} y2={123} data-edge="S-A" /><line x1={143.33333333333331} y1={123} x2={236.66666666666666} y2={72} data-edge="A-B" /><line x1={236.66666666666666} y1={72} x2={330} y2={55} data-edge="B-C" /></g>
+<g data-state="S" data-score={6}><circle cx={50} cy={106} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={50} y={112} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">S</text><text x={50} y={81} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">6</text></g>
+<g data-state="A" data-score={5}><circle cx={143.33333333333331} cy={123} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={143.33333333333331} y={129} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">A</text><text x={143.33333333333331} y={98} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">5</text></g>
+<g data-state="B" data-score={8}><circle cx={236.66666666666666} cy={72} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={236.66666666666666} y={78} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">B</text><text x={236.66666666666666} y={47} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">8</text></g>
+<g data-state="C" data-score={9}><circle cx={330} cy={55} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={330} y={61} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">C</text><text x={330} y={30} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">9</text></g>
+</svg>
+<figcaption className="text-sm text-ink-700">Node labels identify configurations; numbers give points. A segment is a permitted change, not a continuum of extra states.</figcaption>
+</figure>
+
+A link permits one change. It does not introduce all the intermediate positions on the drawn line as extra states. You may also **hold** at your current state. Holding is a separate action, not a claim that a state is its own neighbour.
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Start at S on the declared map. Which action uses exactly one permitted neighbouring change?"}
+  options={[{"text":"Move directly from S to C because C is highest."},{"text":"Move from S to A because that link is listed.","correct":true},{"text":"Move from S to B because the gap is small."},{"text":"Call holding at S a link to a new neighbour."}]}
+  explanation={"S has only A as a neighbour. A higher score elsewhere does not create a link. Holding is separately allowed in the planning task, but it is not a neighbouring change."}
+  className={"not-prose"}
+/>
+
+Here is the planning task we will compare with hill-climbing:
+
+| Item | Declared rule |
+| --- | --- |
+| Start | S |
+| Time available | Three decision slots; each permits one adjacent move or a hold |
+| Minimum | Every visited score, including the starting score, must be at least 5 points |
+| Objective | Maximise the score at the final slot |
+| Information | The auditor knows the entire map; the local rule will use only current/neighbour scores |
+| Omitted quantities | No movement or setup costs, intermediate rewards, random outcomes or discovery benefits |
+
+A **decision slot** is one opportunity to act; it is not a measured day or generation. A **minimum** is a condition that must hold along the whole path. The **terminal objective** judges only the final state. This resembles a route with a minimum service level at every stop, but there is no real transport, production or safety claim behind these points. Adding a rebuilding cost or uncertain score would change the problem.
+
+<MatchConcepts
+  client:visible
+  question={"Match each part of the decision card to the job it performs."}
+  pairs={[{"term":"Neighbour link","definition":"Declares a change permitted in one move."},{"term":"Hold action","definition":"Uses a slot while keeping the same state."},{"term":"Minimum score","definition":"Must be met at the start and every later visited state."},{"term":"Terminal objective","definition":"Ranks feasible plans by their final score."}]}
+  explanation={"Permitted changes, constraints and the quantity being maximised perform different jobs. Holding keeps the current state; it does not add a new neighbour."}
+  className={"not-prose"}
+/>
+
+### When to use the card
+
+Write these items before recommending a worse-first change. If two people disagree about the recommendation, they may be maximising different quantities or allowing different moves. A higher endpoint alone does not settle either issue.
+
+## Run the rule that was actually specified
+
+First use **strict steepest ascent**: inspect every immediate neighbour; move to a highest-scoring neighbour only if it strictly improves the current score; otherwise stop. “Strict” rules out an equal-score move as well as a worse one. All scores on this map are distinct, so no tie-break is needed.
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Run strict steepest ascent from A. Which first move follows the rule?"}
+  options={[{"text":"Move to S, the first neighbour that improves the score."},{"text":"Hold at A, because two improving neighbours are ambiguous."},{"text":"Move to B, the highest-scoring improving neighbour.","correct":true},{"text":"Move to C, the highest-scoring state on the whole map."}]}
+  explanation={"A scores five; S scores six and B eight. Strict steepest ascent compares both neighbours and takes B. S improves the score but is not the steepest choice, and C is not A’s neighbour."}
+  className={"not-prose"}
+/>
+
+From S, the only neighbour is A. Its score is 5, below S's 6, so the strict rule stops at S. Giving the operator a picture of C does not change that acceptance rule. Knowledge and permission are separate: this rule refuses the first move even if an auditor knows where it leads.
+
+From A, compare both neighbours: S scores 6 and B scores 8. The rule takes B, the better neighbour, rather than accepting just any improvement. At B, A scores 5 and C scores 9, so it takes C. At C its only neighbour B is lower, so it stops. These are all four starting cases:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Every starting state under strict steepest ascent">
+<table style={{ minWidth: "34rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Every starting state under strict steepest ascent</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Start</th><th scope="col" className="p-3 align-bottom font-semibold">Complete trace</th><th scope="col" className="p-3 align-bottom font-semibold">Stopped endpoint</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S</th><td className="p-3 align-top">S</td><td className="p-3 align-top">S, 6 points</td></tr>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">A → B → C</td><td className="p-3 align-top">C, 9 points</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">B → C</td><td className="p-3 align-top">C, 9 points</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">C</td><td className="p-3 align-top">C, 9 points</td></tr>
+</tbody>
+</table>
+</div>
+
+A **local optimum** has no permitted neighbour with a higher score. A **global optimum** has a highest score across the entire declared map. S is locally optimal but not globally optimal; C is both. We can certify C as global because all four states and scores are known. Merely observing a stopped search would establish less.
+
+The **basin** of an endpoint is the set of declared starts whose traces end there under this particular rule. S's basin contains one start; C's contains three.
+
+<RateComparison
+  client:visible
+  title={"Endpoints across the four declared starts"}
+  locale={"en"}
+  scenarioLabel={"Declared catalogue"}
+  countsLabel={"Starts ending here out of all declared starts"}
+  differenceLabel={"Difference in catalogue proportions"}
+  pointLabel={"percentage point"}
+  pointsLabel={"percentage points"}
+  scenarios={[{"label":"Strict steepest ascent on the main map","groups":[{"label":"Ends at C","events":3,"total":4},{"label":"Ends at S","events":1,"total":4}]}]}
+/>
+
+Those are $1/4=25\%$ and $3/4=75\%$ of a catalogue, a gap of 50 percentage points. They are not probabilities for a restart procedure: we have not supplied a law for choosing the initial state. Nor do they compare the constrained planning task yet.
+
+Each accepted strict move raises the score. On a finite map with $N$ states, a strict trace cannot return to a previous state: doing so would require the same state's fixed score to be higher than itself. It therefore accepts at most $N-1$ moves before stopping. This proves termination in a finite model, not global optimality, a runtime bound in seconds or a theorem about biological evolution.
+
+<Categorize
+  client:visible
+  question={"Which statements follow from the specified strict rule and complete map?"}
+  buckets={["Established here","Not established here"]}
+  items={[{"text":"Starting at A, B is preferred to S by the immediate comparison.","bucket":"Established here"},{"text":"Stopping at S certifies that no state anywhere has a higher score.","bucket":"Not established here"},{"text":"C is both locally and globally optimal on this complete map.","bucket":"Established here"},{"text":"Three of four starts ending at C specifies a restart probability.","bucket":"Not established here"}]}
+  explanation={"The rule compares all immediate neighbours, so A chooses B. C has the greatest of all four known scores and no improving neighbour. A stop at S proves only local optimality; counts of declared starts need a separate starting law before becoming probabilities."}
+  className={"not-prose"}
+/>
+
+## Audit the deadline
+
+Now allow the planning actions on the decision card: hold or move to a neighbour, even if its score is lower. Permission to descend opens routes; it does not rank them. The ranking still comes from the terminal objective and the deadline.
+
+With two slots there are exactly five paths from S:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="All five two-slot paths from S with minimum five">
+<table style={{ minWidth: "38rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">All five two-slot paths from S with minimum five</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Path</th><th scope="col" className="p-3 align-bottom font-semibold">Scores</th><th scope="col" className="p-3 align-bottom font-semibold">Minimum</th><th scope="col" className="p-3 align-bottom font-semibold">Final</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S → S → S</th><td className="p-3 align-top">6 → 6 → 6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → A</th><td className="p-3 align-top">6 → 6 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → S</th><td className="p-3 align-top">6 → 5 → 6</td><td className="p-3 align-top">5</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → A</th><td className="p-3 align-top">6 → 5 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → B</th><td className="p-3 align-top">6 → 5 → 8</td><td className="p-3 align-top">5</td><td className="p-3 align-top">8</td></tr>
+</tbody>
+</table>
+</div>
+
+All five meet the minimum of 5. The best final score is 8, attained by S→A→B. S→A→S ends at 6 even though it also accepts a temporary loss; merely descending was not the useful property. With one slot, the only endpoints are S at 6 and A at 5, so holding is best.
+
+<MCQ
+  client:visible
+  question={"Use the main scores, two decision slots and minimum five. What is the best terminal score?"}
+  options={[{"text":"Nine points, by treating C as immediately reachable."},{"text":"Six points, because every permitted rule must stay at S."},{"text":"Nineteen points, by adding the scores along S–A–B."},{"text":"Eight points, by following S–A–B within the two slots.","correct":true}]}
+  explanation={"The complete two-slot catalogue ends at S, A, S, A or B, with scores six, five, six, five and eight. S–A–B is feasible and ends at eight. Reaching C needs a third adjacent move; adding six, five and eight changes the objective."}
+  className={"not-prose"}
+/>
+
+A third slot makes S→A→B→C available. Its scores are $6\rightarrow5\rightarrow8\rightarrow9$: the minimum visited score is 5 and the terminal score is 9. The sum $6+5+8+9=28$ is not the objective. These scores describe successive configurations, not payments earned along the way.
+
+Open the tree to inspect the complete three-slot action catalogue. A branch is an authored possible next action; the tree does not sample actions, solve the optimisation or assign probabilities. Repeated state names are holds.
+
+<ConsequenceTree
+  client:visible
+  title={"All permitted path prefixes through three slots"}
+  eyebrow={""}
+  decision={{"label":"S","note":"Score six.","valence":"neutral","children":[{"label":"S","note":"Score six.","valence":"neutral","children":[{"label":"S","note":"Score six.","valence":"neutral","children":[{"label":"S","note":"Final six; path minimum six.","valence":"neutral"},{"label":"A","note":"Final five; path minimum five.","valence":"neutral"}]},{"label":"A","note":"Score five.","valence":"neutral","children":[{"label":"S","note":"Final six; path minimum five.","valence":"neutral"},{"label":"A","note":"Final five; path minimum five.","valence":"neutral"},{"label":"B","note":"Final eight; path minimum five.","valence":"neutral"}]}]},{"label":"A","note":"Score five.","valence":"neutral","children":[{"label":"S","note":"Score six.","valence":"neutral","children":[{"label":"S","note":"Final six; path minimum five.","valence":"neutral"},{"label":"A","note":"Final five; path minimum five.","valence":"neutral"}]},{"label":"A","note":"Score five.","valence":"neutral","children":[{"label":"S","note":"Final six; path minimum five.","valence":"neutral"},{"label":"A","note":"Final five; path minimum five.","valence":"neutral"},{"label":"B","note":"Final eight; path minimum five.","valence":"neutral"}]},{"label":"B","note":"Score eight.","valence":"neutral","children":[{"label":"A","note":"Final five; path minimum five.","valence":"neutral"},{"label":"B","note":"Final eight; path minimum five.","valence":"neutral"},{"label":"C","note":"Final nine; path minimum five.","valence":"neutral"}]}]}]}}
+  instructions={"Open the permitted actions at each prefix; repeating a letter means holding that state."}
+  decisionLabel={"Start"}
+  orderLabels={["After one slot","After two slots","After three slots"]}
+  promptLabel={"Open steps"}
+  expandAllLabel={"Open all steps"}
+  collapseLabel={"Collapse"}
+  valenceLabels={{"good":"Favourable","bad":"Unfavourable","mixed":"Mixed","neutral":"Declared step"}}
+/>
+
+<details>
+<summary>Inspect all thirteen three-slot paths</summary>
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Complete three-slot graph catalogue with main scores">
+<table style={{ minWidth: "42rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Complete three-slot graph catalogue with main scores</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Path</th><th scope="col" className="p-3 align-bottom font-semibold">Scores</th><th scope="col" className="p-3 align-bottom font-semibold">Minimum</th><th scope="col" className="p-3 align-bottom font-semibold">Final</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S → S → S → S</th><td className="p-3 align-top">6 → 6 → 6 → 6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → S → A</th><td className="p-3 align-top">6 → 6 → 6 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → A → S</th><td className="p-3 align-top">6 → 6 → 5 → 6</td><td className="p-3 align-top">5</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → A → A</th><td className="p-3 align-top">6 → 6 → 5 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → A → B</th><td className="p-3 align-top">6 → 6 → 5 → 8</td><td className="p-3 align-top">5</td><td className="p-3 align-top">8</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → S → S</th><td className="p-3 align-top">6 → 5 → 6 → 6</td><td className="p-3 align-top">5</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → S → A</th><td className="p-3 align-top">6 → 5 → 6 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → A → S</th><td className="p-3 align-top">6 → 5 → 5 → 6</td><td className="p-3 align-top">5</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → A → A</th><td className="p-3 align-top">6 → 5 → 5 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → A → B</th><td className="p-3 align-top">6 → 5 → 5 → 8</td><td className="p-3 align-top">5</td><td className="p-3 align-top">8</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → B → A</th><td className="p-3 align-top">6 → 5 → 8 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → B → B</th><td className="p-3 align-top">6 → 5 → 8 → 8</td><td className="p-3 align-top">5</td><td className="p-3 align-top">8</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → B → C</th><td className="p-3 align-top">6 → 5 → 8 → 9</td><td className="p-3 align-top">5</td><td className="p-3 align-top">9</td></tr>
+</tbody>
+</table>
+</div>
+
+Every row is obtained by choosing only a hold or a listed neighbour at each slot. The first choice has two options; their next choices produce five prefixes; those prefixes have thirteen extensions. The final column is compared only after checking the path minimum. Exactly one row ends at C.
+
+</details>
+
+<FillBlank
+  client:visible
+  question={"Keep the horizon, constraint and objective separate."}
+  text={"For the main three-slot route S–A–B–C, the minimum visited score is {{five|six|nine}} and the terminal score is {{nine|five|twenty-eight}}. The accumulated sum of the four scores is {{not the objective|the terminal objective|the minimum constraint}}."}
+  explanation={"The scores are six, five, eight and nine. Their minimum is five; the final one is nine. Adding them gives twenty-eight, but no intermediate reward was stipulated."}
+  className={"not-prose"}
+/>
+
+### When the horizon changes
+
+A longer horizon changes which endpoints can be reached. It does not change the four scores or add a direct edge to C. For this map and minimum, the best terminal scores at zero, one, two and three slots are 6, 6, 8 and 9. A fixed number of steps is part of the result, not an inconvenient footnote.
+
+## Check the minimum at every visited state
+
+Keep the same map and start, but raise the minimum to 6. The initial S still qualifies. The first move to A does not: its score is 5. Since every route leaving S starts with A, the only feasible plan is to hold at S throughout.
+
+This is the difference between **feasible** and **attractive at the endpoint**. A feasible path meets every declared constraint. Ending at 9 does not repair an earlier violation. Of the thirteen three-slot graph paths, all thirteen meet minimum 5, while only S→S→S→S meets minimum 6.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Best terminal points after each complete horizon">
+<table style={{ minWidth: "40rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Best terminal points after each complete horizon</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Minimum</th><th scope="col" className="p-3 align-bottom font-semibold">Zero slots</th><th scope="col" className="p-3 align-bottom font-semibold">One slot</th><th scope="col" className="p-3 align-bottom font-semibold">Two slots</th><th scope="col" className="p-3 align-bottom font-semibold">Three slots</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">5</th><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">8</td><td className="p-3 align-top">9</td></tr>
+<tr><th scope="row" className="p-3 align-top">6</th><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td></tr>
+</tbody>
+</table>
+</div>
+
+<figure className="not-prose my-6" data-horizon-comparison="">
+<figcaption className="mb-3 text-sm text-ink-700">Maximum final points at the four declared integer horizons</figcaption>
+<div className="mb-2 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-800"><span>Solid line: minimum five</span><span>Dashed line: minimum six</span></div>
+<svg viewBox="0 0 380 275" role="img" aria-labelledby="horizons-en-title horizons-en-desc" className="mx-auto h-auto w-full max-w-2xl">
+<title id="horizons-en-title">Best final score by horizon and minimum</title><desc id="horizons-en-desc">Minimum five: six, six, eight and nine points at zero, one, two and three slots. Minimum six: six points at every stated horizon. Links only help compare integer horizons.</desc>
+<path d="M 36 26 L 36 220 L 350 220" fill="none" stroke="var(--color-ink-500)" stroke-width="2" />
+<text x="27" y={225} text-anchor="end" font-size="15" fill="var(--color-ink-700)">0</text><text x="27" y={135} text-anchor="end" font-size="15" fill="var(--color-ink-700)">5</text><text x="27" y={45} text-anchor="end" font-size="15" fill="var(--color-ink-700)">10</text>
+<polyline points="60,112 145,112 230,76 315,58" fill="none" stroke="var(--color-brand-700)" stroke-width="3" />
+<polyline points="60,112 145,112 230,112 315,112" fill="none" stroke="var(--color-ink-700)" stroke-width="3" stroke-dasharray="6 4" />
+<circle cx={60} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="2" data-floor={5} data-horizon={0} data-final={6} />
+<circle cx={145} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="2" data-floor={5} data-horizon={1} data-final={6} />
+<circle cx={230} cy={76} r="5" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="2" data-floor={5} data-horizon={2} data-final={8} />
+<circle cx={315} cy={58} r="5" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="2" data-floor={5} data-horizon={3} data-final={9} />
+<circle cx={60} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-ink-700)" stroke-width="2" data-floor={6} data-horizon={0} data-final={6} />
+<circle cx={145} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-ink-700)" stroke-width="2" data-floor={6} data-horizon={1} data-final={6} />
+<circle cx={230} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-ink-700)" stroke-width="2" data-floor={6} data-horizon={2} data-final={6} />
+<circle cx={315} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-ink-700)" stroke-width="2" data-floor={6} data-horizon={3} data-final={6} />
+<text x={60} y="244" text-anchor="middle" font-size="17" fill="var(--color-ink-800)">0</text><text x={145} y="244" text-anchor="middle" font-size="17" fill="var(--color-ink-800)">1</text><text x={230} y="244" text-anchor="middle" font-size="17" fill="var(--color-ink-800)">2</text><text x={315} y="244" text-anchor="middle" font-size="17" fill="var(--color-ink-800)">3</text><text x="192" y="268" text-anchor="middle" font-size="16" fill="var(--color-ink-800)">Decision slots</text>
+</svg>
+</figure>
+
+Both comparisons maximise the same terminal score and use the same links. The constraint changes the admissible paths. If the minimum were above the starting score, even the starting state would fail; “hold” would not rescue an inadmissible initial condition.
+
+<MCQ
+  client:visible
+  allowMultiple={true}
+  question={"Select every plan that meets its stated horizon and minimum on the MAIN map."}
+  options={[{"text":"Three slots, minimum five: S–A–B–C.","correct":true},{"text":"Three slots, minimum six: S–S–S–S.","correct":true},{"text":"Three slots, minimum six: S–A–B–C."},{"text":"One slot, minimum five: S–A–B."}]}
+  explanation={"The first path has three moves, minimum five and final nine. The second holds at six. The third visits A at five below its required six. The fourth uses two moves although only one slot was allowed. Both the path length and every visited score must qualify."}
+  className={"not-prose"}
+/>
+
+### When a worse-first plan is acceptable
+
+Check the low point as well as the endpoint. In this model a one-point loss is acceptable under minimum 5 and forbidden under minimum 6. The size of a later gain does not silently relax the constraint. In a real proposal, you would need evidence for the score estimates and a defensible meaning for that minimum before using this calculation.
+
+## Change one condition and decide again
+
+For an independent check, change only A's score from 5 to 4. All other scores, links, the initial S, the three slots, minimum 5 and terminal objective stay unchanged.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Changed score card">
+<table style={{ minWidth: "26rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Changed score card</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">State</th><th scope="col" className="p-3 align-bottom font-semibold">S</th><th scope="col" className="p-3 align-bottom font-semibold">A</th><th scope="col" className="p-3 align-bottom font-semibold">B</th><th scope="col" className="p-3 align-bottom font-semibold">C</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">Performance points</th><td className="p-3 align-top">6</td><td className="p-3 align-top">4</td><td className="p-3 align-top">8</td><td className="p-3 align-top">9</td></tr>
+</tbody>
+</table>
+</div>
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Use the changed card, start S, three slots and minimum five throughout. Which result is feasible and best?"}
+  options={[{"text":"Reach C with nine points; only the terminal score matters for feasibility."},{"text":"Reach B with eight points; stopping before C avoids the low state."},{"text":"Hold at S with six points; every route leaving it first visits A.","correct":true},{"text":"Hold at A with four points; a minimum only constrains the first state."}]}
+  explanation={"Every move out of S reaches A, now at four, which violates minimum five. Holding at S remains feasible and ends at six. Both routes toward B or C first cross the forbidden state; a high final score cannot erase it."}
+  className={"not-prose"}
+/>
+
+<details>
+<summary>Check the changed route</summary>
+
+<figure className="not-prose my-6" data-finite-landscape="" data-floor={5}>
+<svg viewBox="0 0 380 250" role="img" aria-labelledby="transfer-map-en-title transfer-map-en-desc" className="mx-auto h-auto w-full max-w-2xl">
+<title id="transfer-map-en-title">Transfer map with A below the minimum</title>
+<desc id="transfer-map-en-desc">S scores six, A four, B eight and C nine. Links remain S to A, A to B and B to C. A is below the required minimum of five.</desc>
+<line x1="24" y1={123} x2="356" y2={123} stroke="var(--color-ink-500)" stroke-width="2" stroke-dasharray="5 4" data-minimum-line="" />
+<g stroke="var(--color-brand-600)" stroke-width="3" fill="none"><line x1={50} y1={106} x2={143.33333333333331} y2={140} data-edge="S-A" /><line x1={143.33333333333331} y1={140} x2={236.66666666666666} y2={72} data-edge="A-B" /><line x1={236.66666666666666} y1={72} x2={330} y2={55} data-edge="B-C" /></g>
+<g data-state="S" data-score={6}><circle cx={50} cy={106} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={50} y={112} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">S</text><text x={50} y={81} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">6</text></g>
+<g data-state="A" data-score={4}><circle cx={143.33333333333331} cy={140} r="15" fill="var(--color-surface)" stroke="var(--color-danger)" stroke-width="3" /><text x={143.33333333333331} y={146} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">A</text><text x={143.33333333333331} y={115} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">4</text></g>
+<g data-state="B" data-score={8}><circle cx={236.66666666666666} cy={72} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={236.66666666666666} y={78} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">B</text><text x={236.66666666666666} y={47} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">8</text></g>
+<g data-state="C" data-score={9}><circle cx={330} cy={55} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={330} y={61} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">C</text><text x={330} y={30} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">9</text></g>
+</svg>
+<figcaption className="text-sm text-ink-700">The dashed line marks minimum five. The labelled nodes represent states; each link permits one neighbouring change.</figcaption>
+</figure>
+
+The tempting S→A→B→C still ends at 9, but its score sequence is now $6\rightarrow4\rightarrow8\rightarrow9$. Its minimum is 4, below the required 5. Any path that leaves S must visit A first; there is no bypass edge. Therefore all twelve other paths in the three-slot catalogue fail the minimum, and the only feasible path is S→S→S→S, ending at 6.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="A tempting endpoint versus a feasible complete path">
+<table style={{ minWidth: "42rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">A tempting endpoint versus a feasible complete path</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Path</th><th scope="col" className="p-3 align-bottom font-semibold">Minimum</th><th scope="col" className="p-3 align-bottom font-semibold">Final</th><th scope="col" className="p-3 align-bottom font-semibold">Meets minimum five throughout?</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S → A → B → C</th><td className="p-3 align-top">4</td><td className="p-3 align-top">9</td><td className="p-3 align-top">No</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → S → S</th><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">Yes</td></tr>
+</tbody>
+</table>
+</div>
+
+The unconstrained strict-rule basin counts remain one and three. From A, B is still the best neighbour; from S, A is still worse. Those unchanged counts do not settle this different, constrained problem. A was a legal starting state for the unconstrained trace catalogue; it is not a legal state on a minimum-five planning route now.
+
+</details>
+
+<FillBlank
+  client:visible
+  question={"Recall which part of the model changed in the independent check."}
+  text={"Only {{A’s score|the neighbour graph|the number of slots}} changed. The tempting route fails the {{intermediate minimum|terminal ranking|starting location}}. A high endpoint {{does not repair|automatically repairs|removes the need to check}} that violation."}
+  explanation={"A fell to four while minimum five stayed fixed. Every route out of S first visits A. The feasible hold plan ends at six; the inaccessible higher endpoint cannot override the constraint."}
+  className={"not-prose"}
+/>
+
+## Use the audit with its boundary
+
+The complete map made this proof possible. In a larger problem, a stopped local search does not reveal all unvisited states, and an attractive sketch is not a complete catalogue. Uncertain scores, changing neighbours, setup losses or cumulative rewards require a revised model. None is represented by silently reinterpreting a point score as profit, probability or biological reproductive success.
+
+Exploring unknown alternatives is also a different task from planning on this fully known map. Here there is no information to buy, and no theorem requires a positive exploration share. Under the stricter minimum, holding is optimal for the stated objective and horizon. With missing information, investigation may have value, but that requires specifying what can be learned and what the investigation costs.
+
+The [Berkeley local-search notes](https://inst.eecs.berkeley.edu/~cs188/textbook/csp/local-search.html) distinguish hill-climbing from a method that can accept worsening moves. [Poole and Mackworth's local-search chapter](https://www.cs.ubc.ca/~poole/aibook/3e/html/ArtInt3e.Ch4.S6.html) defines optimality relative to possible successors and distinguishes search variants. Our strict rule and finite counts are stipulated and derived here; they are not measured performance claims from either text.
+
+<MCQ
+  client:visible
+  question={"A real redesign report supplies a promising final score but omits the intermediate states. What would make its worse-first proposal auditable?"}
+  options={[{"text":"A larger final-score claim with the same omitted route."},{"text":"A route, intermediate score evidence, permitted moves and deadline.","correct":true},{"text":"A statement that every successful change must begin with a loss."},{"text":"A basin count treated as a probability without a starting law."}]}
+  explanation={"A complete route and evidence for its intermediate states let you check constraints and timing against the objective. The finite toy proof does not establish those inputs for a real redesign. A higher endpoint, slogan or unspecified probability does not supply the missing route."}
+  className={"not-prose"}
+/>
+
+<MindMap
+  client:visible
+  title={"The finite search audit"}
+  eyebrow={""}
+  outlineLabel={"Text outline"}
+  root={{"label":"Audit a search proposal","children":[{"label":"Specify","children":[{"label":"States, scores and permitted neighbours"},{"label":"Information used by the rule"}]},{"label":"Trace","children":[{"label":"Strict improvement and a local stop"},{"label":"Complete-map evidence for a global claim"}]},{"label":"Compare plans","children":[{"label":"Decision horizon and holds"},{"label":"Minimum at every visited state"},{"label":"Terminal score only"}]},{"label":"Transfer","children":[{"label":"Change one condition and recheck"},{"label":"Catalogue counts need a starting law for probabilities"}]}]}}
+/>
+
+The final practice card adds one new permitted link, S–C, to the main scores. It keeps start S, minimum 5 and one decision slot. Use that changed neighbourhood for the last Quiz question; all other questions refer to their stated cards.
+
+| Practice card | Start | Slots | Minimum | Additional permitted link |
+| --- | --- | --- | --- | --- |
+| Main scores S=6, A=5, B=8, C=9 | S | 1 | 5 | S–C |
+
+<Quiz
+  client:visible
+  title={"Check the rule, route and constraint"}
+  questions={[{"question":"On the complete main map, how should C be classified?","options":[{"text":"Global only, because global points cannot be local."},{"text":"Both local and global, because no declared score is higher.","correct":true},{"text":"Local only, because a neighbour graph excludes global comparisons."},{"text":"Neither, because the starting state was S."}],"explanation":"C scores nine, the greatest of all four known scores, and its only neighbour B scores eight. It meets both definitions."},{"question":"With the main map, one slot and minimum five, what final score is best?","options":[{"text":"Five, by moving to A to prepare a future outside the horizon."},{"text":"Eight, by using two links within one decision slot."},{"text":"Nine, by replacing adjacency with a global jump."},{"text":"Six, by holding at S within the stated horizon.","correct":true}],"explanation":"One slot permits S–S or S–A, ending at six or five. Later opportunities do not count in the declared one-slot objective."},{"question":"The three-slot main path visits scores six, five, eight and nine. Which quantity ranks it under the terminal objective?","options":[{"text":"The last score, nine.","correct":true},{"text":"The smallest score, five."},{"text":"The sum, twenty-eight."},{"text":"The count of states, four."}],"explanation":"Terminal score ranks feasible paths. The minimum checks feasibility; the sum would require a cumulative-reward objective that was not supplied."},{"question":"Select every conclusion supported by the stated model.","allowMultiple":true,"options":[{"text":"A hold uses a slot without changing the current state.","correct":true},{"text":"Every locally optimal state must have a lower score than the global one."},{"text":"A globally highest state is also locally optimal.","correct":true},{"text":"Counting basin starts supplies a probability law by itself."}],"explanation":"Holds are explicit actions and a global maximum has no better neighbour. Local optima may also be global; deterministic basin counts do not choose a starting law."},{"question":"Only A changes to four, while start S, three slots and minimum five remain. Why is the nine-point endpoint not a feasible plan?","options":[{"text":"The global score must fall whenever any other score falls."},{"text":"A strict rule has become a random rule after the change."},{"text":"Every route leaving S first visits A below the minimum.","correct":true},{"text":"Holding is forbidden when a lower-scoring neighbour exists."}],"explanation":"The links did not change. The first departure from S must visit A at four, violating minimum five. C can still score nine while being inaccessible under the constraint."},{"question":"Use the final practice card with the additional S–C link and one slot. What is now the best final score?","options":[{"text":"Six, because changing a link cannot change reachability."},{"text":"Five, because a new link forces a move through A."},{"text":"Eight, because B must precede C under any graph."},{"text":"Nine, because C is now reachable directly from S.","correct":true}],"explanation":"The new edge permits S–C in one slot. C scores nine and meets minimum five. The earlier one-slot bound used the old neighbourhood; it does not survive a changed graph."}]}
+  className={"not-prose"}
+/>
+
+Continue to the [final exam](/fitness-landscapes/final-exam), where the finite audit joins the earlier course material. Each submitted answer locks; the score appears at the end.

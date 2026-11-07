@@ -1,0 +1,471 @@
+---
+title: "Audita una regla de búsqueda"
+description: "Comprueba una ruta que empeora primero frente a sus movimientos permitidos, plazo y mínimo exigido con un modelo completo de cuatro estados."
+topic: "es/fitness-landscapes"
+order: 7
+minutes: 22
+updated: 2026-11-07
+---
+
+import { MCQ, MatchConcepts, FillBlank, Categorize, ConsequenceTree, RateComparison, MindMap, Quiz } from '@/components/react';
+
+Una propuesta de rediseño tiene un argumento conocido: «El diseño actual es un pico local. Aceptemos un retroceso temporal y podremos alcanzar algo mejor». La primera frase no demuestra la segunda. Aún hacen falta una ruta permitida, pasos suficientes para completarla y estados intermedios que puedas tolerar.
+
+Vamos a auditar esa propuesta en un mapa completo y deliberadamente pequeño. La finalidad es comprobar una recomendación, en vez de adornarla con una montaña.
+
+## Escribe la ficha de decisión
+
+Un banco de pruebas ficticio tiene cuatro configuraciones. Su criterio de rendimiento les asigna las puntuaciones fijas de la tabla, en puntos; cuanto más altas, mejor. La tabla incluye **todos** los estados y **todos** los cambios entre vecinos permitidos. Un vecino es un estado unido por un enlace declarado. No hay ruido, estados ocultos ni cambios del entorno.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Mapa completo y vecinos permitidos">
+<table style={{ minWidth: "28rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Mapa completo y vecinos permitidos</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Estado</th><th scope="col" className="p-3 align-bottom font-semibold">Puntuación en puntos</th><th scope="col" className="p-3 align-bottom font-semibold">Vecinos</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S</th><td className="p-3 align-top">6</td><td className="p-3 align-top">A</td></tr>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">5</td><td className="p-3 align-top">S, B</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">8</td><td className="p-3 align-top">A, C</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">9</td><td className="p-3 align-top">B</td></tr>
+</tbody>
+</table>
+</div>
+
+<figure className="not-prose my-6" data-finite-landscape="">
+<svg viewBox="0 0 380 250" role="img" aria-labelledby="main-map-es-title main-map-es-desc" className="mx-auto h-auto w-full max-w-2xl">
+<title id="main-map-es-title">Cuatro configuraciones con tres enlaces permitidos</title>
+<desc id="main-map-es-desc">S tiene seis puntos y solo enlaza con A. A tiene cinco y enlaza con S y B. B tiene ocho y enlaza con A y C. C tiene nueve y solo enlaza con B. Más altura significa mayor puntuación.</desc>
+<g stroke="var(--color-brand-600)" stroke-width="3" fill="none"><line x1={50} y1={106} x2={143.33333333333331} y2={123} data-edge="S-A" /><line x1={143.33333333333331} y1={123} x2={236.66666666666666} y2={72} data-edge="A-B" /><line x1={236.66666666666666} y1={72} x2={330} y2={55} data-edge="B-C" /></g>
+<g data-state="S" data-score={6}><circle cx={50} cy={106} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={50} y={112} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">S</text><text x={50} y={81} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">6</text></g>
+<g data-state="A" data-score={5}><circle cx={143.33333333333331} cy={123} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={143.33333333333331} y={129} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">A</text><text x={143.33333333333331} y={98} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">5</text></g>
+<g data-state="B" data-score={8}><circle cx={236.66666666666666} cy={72} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={236.66666666666666} y={78} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">B</text><text x={236.66666666666666} y={47} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">8</text></g>
+<g data-state="C" data-score={9}><circle cx={330} cy={55} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={330} y={61} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">C</text><text x={330} y={30} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">9</text></g>
+</svg>
+<figcaption className="text-sm text-ink-700">Las letras identifican configuraciones; los números indican puntos. Cada segmento es un cambio permitido, no un continuo de estados adicionales.</figcaption>
+</figure>
+
+Un enlace permite un cambio. No convierte todas las posiciones intermedias de la línea dibujada en estados adicionales. También puedes **permanecer** en tu estado actual. Es una acción aparte, no una afirmación de que un estado sea su propio vecino.
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Empieza en S en el mapa declarado. ¿Qué acción utiliza exactamente un cambio permitido a un vecino?"}
+  options={[{"text":"Pasar directamente de S a C porque C es el más alto."},{"text":"Pasar de S a A porque ese enlace está declarado.","correct":true},{"text":"Pasar de S a B porque la distancia es pequeña."},{"text":"Llamar a permanecer en S un enlace a un vecino nuevo."}]}
+  explanation={"S solo tiene a A como vecino. Una puntuación mayor en otro lugar no crea un enlace. Permanecer se permite por separado en la planificación, pero no es un cambio a un vecino."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — adivina"}
+  className={"not-prose"}
+/>
+
+Esta es la tarea de planificación que compararemos con la escalada de colinas:
+
+| Elemento | Regla declarada |
+| --- | --- |
+| Inicio | S |
+| Tiempo disponible | Tres turnos de decisión; cada uno permite pasar a un vecino o permanecer |
+| Mínimo exigido | Toda puntuación visitada, incluida la inicial, debe alcanzar al menos 5 puntos |
+| Objetivo | Maximizar la puntuación al finalizar el último turno |
+| Información | Quien audita conoce el mapa entero; la regla local solo utiliza las puntuaciones actual y vecinas |
+| Magnitudes omitidas | No hay costes de movimiento o preparación, recompensas intermedias, resultados aleatorios ni beneficios de descubrir información |
+
+Un **turno de decisión** es una oportunidad para actuar; no representa un día o una generación medidos. Un **mínimo exigido** es una condición que debe cumplirse durante todo el recorrido. El **objetivo terminal** solo juzga el estado final. Se parece a una ruta que exige mantener un nivel mínimo de servicio en cada parada, pero estos puntos no sostienen una afirmación real sobre transporte, producción o seguridad. Añadir un coste de reconstrucción o una puntuación incierta cambiaría el problema.
+
+<MatchConcepts
+  client:visible
+  question={"Empareja cada parte de la ficha con su función."}
+  pairs={[{"term":"Enlace entre vecinos","definition":"Declara un cambio permitido en un movimiento."},{"term":"Acción de permanecer","definition":"Utiliza un turno sin cambiar de estado."},{"term":"Mínimo exigido","definition":"Debe cumplirse al inicio y en todo estado visitado después."},{"term":"Objetivo terminal","definition":"Ordena los planes factibles por su puntuación final."}]}
+  explanation={"Los cambios permitidos, las restricciones y la magnitud maximizada tienen funciones distintas. Permanecer mantiene el estado actual; no añade un vecino nuevo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  instructions={"Elige un término y después su definición."}
+  allCorrectLabel={"Todo emparejado"}
+  partialResultWord={"bien"}
+  pickDefinitionHint={"Ahora elige una definición"}
+  notLinkedHint={"Sin enlazar"}
+  termsLabel={"Términos"}
+  definitionsLabel={"Definiciones"}
+  className={"not-prose"}
+/>
+
+### Cuándo usar la ficha
+
+Escribe estos elementos antes de recomendar un cambio que empeore primero. Dos personas pueden discrepar porque maximizan magnitudes distintas o permiten movimientos diferentes. Un destino con más puntuación no resuelve ninguna de esas dos cuestiones por sí solo.
+
+## Ejecuta la regla que se ha especificado
+
+Primero aplica el **ascenso estricto por el mejor vecino (strict steepest ascent)**: examina todos los vecinos inmediatos; pasa a uno de los que tengan la mayor puntuación solo si mejora estrictamente la actual; si no, detente. «Estricto» excluye tanto un movimiento a igual puntuación como uno a peor. En este mapa todas las puntuaciones son distintas, así que no hace falta desempatar.
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Aplica el ascenso estricto por el mejor vecino desde A. ¿Qué primer movimiento cumple la regla?"}
+  options={[{"text":"Pasar a S, el primer vecino que mejora la puntuación."},{"text":"Permanecer en A, porque dos vecinos mejores crean ambigüedad."},{"text":"Pasar a B, el vecino que mejora con la mayor puntuación.","correct":true},{"text":"Pasar a C, el estado de puntuación máxima del mapa entero."}]}
+  explanation={"A tiene cinco; S tiene seis y B ocho. La regla compara ambos vecinos y elige B. S mejora, pero no es la mejor elección inmediata, y C no es vecino de A."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — adivina"}
+  className={"not-prose"}
+/>
+
+Desde S, el único vecino es A. Tiene 5 puntos, por debajo de los 6 de S, así que la regla estricta se detiene en S. Dar al operador una imagen de C no cambia esa regla de aceptación. Conocer y tener permiso son cosas distintas: la regla rechaza el primer movimiento aunque quien audita sepa adónde conduce.
+
+Desde A, compara ambos vecinos: S tiene 6 y B tiene 8. La regla elige B, el mejor vecino, en vez de aceptar cualquier mejora. En B, A tiene 5 y C tiene 9, así que elige C. En C, su único vecino B tiene menos puntos, por lo que se detiene. Estos son los cuatro casos iniciales:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Todos los estados iniciales bajo el ascenso estricto por el mejor vecino">
+<table style={{ minWidth: "34rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Todos los estados iniciales bajo el ascenso estricto por el mejor vecino</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Inicio</th><th scope="col" className="p-3 align-bottom font-semibold">Recorrido completo</th><th scope="col" className="p-3 align-bottom font-semibold">Destino de parada</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S</th><td className="p-3 align-top">S</td><td className="p-3 align-top">S, 6 puntos</td></tr>
+<tr><th scope="row" className="p-3 align-top">A</th><td className="p-3 align-top">A → B → C</td><td className="p-3 align-top">C, 9 puntos</td></tr>
+<tr><th scope="row" className="p-3 align-top">B</th><td className="p-3 align-top">B → C</td><td className="p-3 align-top">C, 9 puntos</td></tr>
+<tr><th scope="row" className="p-3 align-top">C</th><td className="p-3 align-top">C</td><td className="p-3 align-top">C, 9 puntos</td></tr>
+</tbody>
+</table>
+</div>
+
+Un **óptimo local** no tiene ningún vecino permitido con una puntuación mayor. Un **óptimo global** tiene una puntuación máxima en todo el mapa declarado. S es localmente óptimo, pero no globalmente; C es ambas cosas. Podemos certificar que C es global porque conocemos los cuatro estados y sus puntuaciones. Observar que una búsqueda se ha detenido demostraría menos.
+
+La **cuenca de un destino (basin)** es el conjunto de inicios declarados cuyos recorridos terminan allí bajo esta regla concreta. La de S contiene un inicio; la de C, tres.
+
+<RateComparison
+  client:visible
+  title={"Destinos de los cuatro inicios declarados"}
+  locale={"es"}
+  scenarioLabel={"Catálogo declarado"}
+  countsLabel={"Inicios que terminan aquí de todos los inicios declarados"}
+  differenceLabel={"Diferencia entre proporciones del catálogo"}
+  pointLabel={"punto porcentual"}
+  pointsLabel={"puntos porcentuales"}
+  scenarios={[{"label":"Ascenso estricto por el mejor vecino en el mapa principal","groups":[{"label":"Termina en C","events":3,"total":4},{"label":"Termina en S","events":1,"total":4}]}]}
+/>
+
+Son $1/4=25\%$ y $3/4=75\%$ de un catálogo, con una diferencia de 50 puntos porcentuales. No son probabilidades de un procedimiento de reinicio: no hemos dado una ley para elegir el estado inicial. Tampoco comparan todavía la tarea de planificación con restricciones.
+
+Cada movimiento estricto aceptado aumenta la puntuación. En un mapa finito de $N$ estados, un recorrido estricto no puede volver a un estado anterior: eso exigiría que la puntuación fija de ese mismo estado fuera mayor que ella misma. Por tanto, acepta como máximo $N-1$ movimientos antes de detenerse. Esto demuestra la terminación en un modelo finito, no la optimalidad global, un límite de tiempo en segundos ni un teorema sobre evolución biológica.
+
+<Categorize
+  client:visible
+  question={"¿Qué afirmaciones se deducen de la regla estricta y del mapa completo?"}
+  buckets={["Demostrado aquí","No demostrado aquí"]}
+  items={[{"text":"Desde A, la comparación inmediata prefiere B frente a S.","bucket":"Demostrado aquí"},{"text":"Detenerse en S certifica que ningún estado tiene una puntuación mayor.","bucket":"No demostrado aquí"},{"text":"C es local y globalmente óptimo en este mapa completo.","bucket":"Demostrado aquí"},{"text":"Tres inicios de cuatro acabando en C especifican una probabilidad de reinicio.","bucket":"No demostrado aquí"}]}
+  explanation={"La regla compara todos los vecinos inmediatos, por lo que A elige B. C tiene la mayor de las cuatro puntuaciones conocidas y ningún vecino que la mejore. Parar en S solo demuestra optimalidad local; los recuentos necesitan una ley de inicio aparte para convertirse en probabilidades."}
+  instructions={"Elige el grupo que corresponde a cada elemento."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  allCorrectLabel={"Todo clasificado"}
+  partialResultWord={"bien"}
+  className={"not-prose"}
+/>
+
+## Audita el plazo
+
+Ahora permite las acciones de planificación de la ficha: permanecer o pasar a un vecino, aunque tenga menos puntos. El permiso para descender abre rutas; no las ordena de mejor a peor. Eso sigue dependiendo del objetivo terminal y del plazo.
+
+Con dos turnos hay exactamente cinco recorridos desde S:
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Los cinco recorridos de dos turnos desde S con mínimo cinco">
+<table style={{ minWidth: "38rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Los cinco recorridos de dos turnos desde S con mínimo cinco</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Recorrido</th><th scope="col" className="p-3 align-bottom font-semibold">Puntuaciones</th><th scope="col" className="p-3 align-bottom font-semibold">Mínimo visitado</th><th scope="col" className="p-3 align-bottom font-semibold">Final</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S → S → S</th><td className="p-3 align-top">6 → 6 → 6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → A</th><td className="p-3 align-top">6 → 6 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → S</th><td className="p-3 align-top">6 → 5 → 6</td><td className="p-3 align-top">5</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → A</th><td className="p-3 align-top">6 → 5 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → B</th><td className="p-3 align-top">6 → 5 → 8</td><td className="p-3 align-top">5</td><td className="p-3 align-top">8</td></tr>
+</tbody>
+</table>
+</div>
+
+Los cinco cumplen el mínimo de 5. La mejor puntuación final es 8, alcanzada con S→A→B. S→A→S termina en 6 aunque también acepte una pérdida temporal; descender por sí solo no era la propiedad útil. Con un único turno, los únicos destinos son S con 6 y A con 5, así que permanecer es lo mejor.
+
+<MCQ
+  client:visible
+  question={"Utiliza las puntuaciones principales, dos turnos y mínimo cinco. ¿Cuál es la mejor puntuación terminal?"}
+  options={[{"text":"Nueve puntos, tratando C como alcanzable de inmediato."},{"text":"Seis puntos, porque toda regla permitida debe quedarse en S."},{"text":"Diecinueve puntos, sumando las puntuaciones de S–A–B."},{"text":"Ocho puntos, siguiendo S–A–B dentro de los dos turnos.","correct":true}]}
+  explanation={"El catálogo de dos turnos termina en S, A, S, A o B, con seis, cinco, seis, cinco y ocho puntos. S–A–B es factible y termina en ocho. C necesita un tercer movimiento a un vecino; sumar seis, cinco y ocho cambia el objetivo."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  className={"not-prose"}
+/>
+
+Un tercer turno permite S→A→B→C. Sus puntuaciones son $6\rightarrow5\rightarrow8\rightarrow9$: la menor visitada es 5 y la terminal es 9. La suma $6+5+8+9=28$ no es el objetivo. Estas puntuaciones describen configuraciones sucesivas, no pagos cobrados por el camino.
+
+Abre el árbol para examinar el catálogo completo de acciones de tres turnos. Cada rama es una posible acción siguiente declarada; el árbol no sortea acciones, resuelve la optimización ni asigna probabilidades. Repetir una letra significa permanecer.
+
+<ConsequenceTree
+  client:visible
+  title={"Todos los prefijos permitidos hasta tres turnos"}
+  eyebrow={""}
+  decision={{"label":"S","note":"Puntuación seis.","valence":"neutral","children":[{"label":"S","note":"Puntuación seis.","valence":"neutral","children":[{"label":"S","note":"Puntuación seis.","valence":"neutral","children":[{"label":"S","note":"Final seis; mínimo del recorrido seis.","valence":"neutral"},{"label":"A","note":"Final cinco; mínimo del recorrido cinco.","valence":"neutral"}]},{"label":"A","note":"Puntuación cinco.","valence":"neutral","children":[{"label":"S","note":"Final seis; mínimo del recorrido cinco.","valence":"neutral"},{"label":"A","note":"Final cinco; mínimo del recorrido cinco.","valence":"neutral"},{"label":"B","note":"Final ocho; mínimo del recorrido cinco.","valence":"neutral"}]}]},{"label":"A","note":"Puntuación cinco.","valence":"neutral","children":[{"label":"S","note":"Puntuación seis.","valence":"neutral","children":[{"label":"S","note":"Final seis; mínimo del recorrido cinco.","valence":"neutral"},{"label":"A","note":"Final cinco; mínimo del recorrido cinco.","valence":"neutral"}]},{"label":"A","note":"Puntuación cinco.","valence":"neutral","children":[{"label":"S","note":"Final seis; mínimo del recorrido cinco.","valence":"neutral"},{"label":"A","note":"Final cinco; mínimo del recorrido cinco.","valence":"neutral"},{"label":"B","note":"Final ocho; mínimo del recorrido cinco.","valence":"neutral"}]},{"label":"B","note":"Puntuación ocho.","valence":"neutral","children":[{"label":"A","note":"Final cinco; mínimo del recorrido cinco.","valence":"neutral"},{"label":"B","note":"Final ocho; mínimo del recorrido cinco.","valence":"neutral"},{"label":"C","note":"Final nueve; mínimo del recorrido cinco.","valence":"neutral"}]}]}]}}
+  instructions={"Abre las acciones permitidas de cada prefijo; repetir una letra significa permanecer en ese estado."}
+  decisionLabel={"Inicio"}
+  orderLabels={["Tras un turno","Tras dos turnos","Tras tres turnos"]}
+  promptLabel={"Abrir pasos"}
+  expandAllLabel={"Abrir todos los pasos"}
+  collapseLabel={"Contraer"}
+  valenceLabels={{"good":"Favorable","bad":"Desfavorable","mixed":"Mixto","neutral":"Paso declarado"}}
+/>
+
+<details>
+<summary>Examina los trece recorridos de tres turnos</summary>
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Catálogo completo de tres turnos con las puntuaciones principales">
+<table style={{ minWidth: "42rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Catálogo completo de tres turnos con las puntuaciones principales</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Recorrido</th><th scope="col" className="p-3 align-bottom font-semibold">Puntuaciones</th><th scope="col" className="p-3 align-bottom font-semibold">Mínimo visitado</th><th scope="col" className="p-3 align-bottom font-semibold">Final</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S → S → S → S</th><td className="p-3 align-top">6 → 6 → 6 → 6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → S → A</th><td className="p-3 align-top">6 → 6 → 6 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → A → S</th><td className="p-3 align-top">6 → 6 → 5 → 6</td><td className="p-3 align-top">5</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → A → A</th><td className="p-3 align-top">6 → 6 → 5 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → A → B</th><td className="p-3 align-top">6 → 6 → 5 → 8</td><td className="p-3 align-top">5</td><td className="p-3 align-top">8</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → S → S</th><td className="p-3 align-top">6 → 5 → 6 → 6</td><td className="p-3 align-top">5</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → S → A</th><td className="p-3 align-top">6 → 5 → 6 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → A → S</th><td className="p-3 align-top">6 → 5 → 5 → 6</td><td className="p-3 align-top">5</td><td className="p-3 align-top">6</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → A → A</th><td className="p-3 align-top">6 → 5 → 5 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → A → B</th><td className="p-3 align-top">6 → 5 → 5 → 8</td><td className="p-3 align-top">5</td><td className="p-3 align-top">8</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → B → A</th><td className="p-3 align-top">6 → 5 → 8 → 5</td><td className="p-3 align-top">5</td><td className="p-3 align-top">5</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → B → B</th><td className="p-3 align-top">6 → 5 → 8 → 8</td><td className="p-3 align-top">5</td><td className="p-3 align-top">8</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → A → B → C</th><td className="p-3 align-top">6 → 5 → 8 → 9</td><td className="p-3 align-top">5</td><td className="p-3 align-top">9</td></tr>
+</tbody>
+</table>
+</div>
+
+Cada fila se obtiene eligiendo únicamente permanecer o un vecino de la lista en cada turno. La primera decisión tiene dos opciones; las siguientes producen cinco prefijos; esos prefijos admiten trece extensiones. La última columna solo se compara después de comprobar el mínimo del recorrido. Exactamente una fila termina en C.
+
+</details>
+
+<FillBlank
+  client:visible
+  question={"Separa el horizonte, la restricción y el objetivo."}
+  text={"En la ruta principal de tres turnos S–A–B–C, la menor puntuación visitada es {{cinco|seis|nueve}} y la terminal es {{nueve|cinco|veintiocho}}. La suma de las cuatro puntuaciones {{no es el objetivo|es el objetivo terminal|es el mínimo exigido}}."}
+  explanation={"Las puntuaciones son seis, cinco, ocho y nueve. Su mínimo es cinco; la última es nueve. Sumarlas da veintiocho, pero no se estipuló ninguna recompensa intermedia."}
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Todo correcto"}
+  partialResultWord={"bien"}
+  className={"not-prose"}
+/>
+
+### Cuándo cambia el horizonte
+
+Un horizonte más largo cambia qué destinos se pueden alcanzar. No cambia las cuatro puntuaciones ni añade un enlace directo a C. Para este mapa y este mínimo, las mejores puntuaciones terminales con cero, uno, dos y tres turnos son 6, 6, 8 y 9. El número fijo de pasos forma parte del resultado.
+
+## Comprueba el mínimo en cada estado visitado
+
+Mantén el mapa y el inicio, pero eleva el mínimo exigido a 6. El S inicial sigue cumpliéndolo. El primer movimiento a A no: su puntuación es 5. Como toda ruta que sale de S empieza por A, el único plan factible consiste en permanecer en S todo el tiempo.
+
+Esta es la diferencia entre ser **factible** y tener **un destino atractivo**. Un recorrido factible cumple todas las restricciones declaradas. Acabar en 9 no repara un incumplimiento anterior. De los trece recorridos de tres turnos permitidos por el grafo, los trece cumplen un mínimo de 5, pero solo S→S→S→S cumple un mínimo de 6.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Mejores puntos terminales tras cada plazo completo">
+<table style={{ minWidth: "40rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Mejores puntos terminales tras cada plazo completo</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Mínimo exigido</th><th scope="col" className="p-3 align-bottom font-semibold">Cero turnos</th><th scope="col" className="p-3 align-bottom font-semibold">Un turno</th><th scope="col" className="p-3 align-bottom font-semibold">Dos turnos</th><th scope="col" className="p-3 align-bottom font-semibold">Tres turnos</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">5</th><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">8</td><td className="p-3 align-top">9</td></tr>
+<tr><th scope="row" className="p-3 align-top">6</th><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td></tr>
+</tbody>
+</table>
+</div>
+
+<figure className="not-prose my-6" data-horizon-comparison="">
+<figcaption className="mb-3 text-sm text-ink-700">Puntos finales máximos en los cuatro plazos enteros declarados</figcaption>
+<div className="mb-2 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-800"><span>Línea continua: mínimo cinco</span><span>Línea discontinua: mínimo seis</span></div>
+<svg viewBox="0 0 380 275" role="img" aria-labelledby="horizons-es-title horizons-es-desc" className="mx-auto h-auto w-full max-w-2xl">
+<title id="horizons-es-title">Mejor puntuación final según el plazo y el mínimo</title><desc id="horizons-es-desc">Mínimo cinco: seis, seis, ocho y nueve puntos con cero, uno, dos y tres turnos. Mínimo seis: seis puntos en todos esos plazos. Los enlaces entre puntos solo ayudan a comparar horizontes enteros.</desc>
+<path d="M 36 26 L 36 220 L 350 220" fill="none" stroke="var(--color-ink-500)" stroke-width="2" />
+<text x="27" y={225} text-anchor="end" font-size="15" fill="var(--color-ink-700)">0</text><text x="27" y={135} text-anchor="end" font-size="15" fill="var(--color-ink-700)">5</text><text x="27" y={45} text-anchor="end" font-size="15" fill="var(--color-ink-700)">10</text>
+<polyline points="60,112 145,112 230,76 315,58" fill="none" stroke="var(--color-brand-700)" stroke-width="3" />
+<polyline points="60,112 145,112 230,112 315,112" fill="none" stroke="var(--color-ink-700)" stroke-width="3" stroke-dasharray="6 4" />
+<circle cx={60} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="2" data-floor={5} data-horizon={0} data-final={6} />
+<circle cx={145} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="2" data-floor={5} data-horizon={1} data-final={6} />
+<circle cx={230} cy={76} r="5" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="2" data-floor={5} data-horizon={2} data-final={8} />
+<circle cx={315} cy={58} r="5" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="2" data-floor={5} data-horizon={3} data-final={9} />
+<circle cx={60} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-ink-700)" stroke-width="2" data-floor={6} data-horizon={0} data-final={6} />
+<circle cx={145} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-ink-700)" stroke-width="2" data-floor={6} data-horizon={1} data-final={6} />
+<circle cx={230} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-ink-700)" stroke-width="2" data-floor={6} data-horizon={2} data-final={6} />
+<circle cx={315} cy={112} r="5" fill="var(--color-surface)" stroke="var(--color-ink-700)" stroke-width="2" data-floor={6} data-horizon={3} data-final={6} />
+<text x={60} y="244" text-anchor="middle" font-size="17" fill="var(--color-ink-800)">0</text><text x={145} y="244" text-anchor="middle" font-size="17" fill="var(--color-ink-800)">1</text><text x={230} y="244" text-anchor="middle" font-size="17" fill="var(--color-ink-800)">2</text><text x={315} y="244" text-anchor="middle" font-size="17" fill="var(--color-ink-800)">3</text><text x="192" y="268" text-anchor="middle" font-size="16" fill="var(--color-ink-800)">Turnos de decisión</text>
+</svg>
+</figure>
+
+Ambas comparaciones maximizan la misma puntuación terminal y utilizan los mismos enlaces. La restricción cambia los recorridos admisibles. Si el mínimo superara la puntuación inicial, incluso el estado de partida incumpliría la condición; permanecer no rescataría un inicio inadmisible.
+
+<MCQ
+  client:visible
+  allowMultiple={true}
+  question={"Selecciona todos los planes que cumplen su plazo y su mínimo en el mapa PRINCIPAL."}
+  options={[{"text":"Tres turnos, mínimo cinco: S–A–B–C.","correct":true},{"text":"Tres turnos, mínimo seis: S–S–S–S.","correct":true},{"text":"Tres turnos, mínimo seis: S–A–B–C."},{"text":"Un turno, mínimo cinco: S–A–B."}]}
+  explanation={"El primer recorrido tiene tres movimientos, mínimo cinco y final nueve. El segundo permanece en seis. El tercero visita A con cinco, por debajo de sus seis exigidos. El cuarto utiliza dos movimientos cuando solo se permitía un turno. Deben cumplir tanto la longitud como cada puntuación visitada."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  className={"not-prose"}
+/>
+
+### Cuándo es aceptable empeorar primero
+
+Comprueba el punto bajo además del destino. En este modelo, perder un punto es aceptable con mínimo 5 y está prohibido con mínimo 6. La ganancia posterior no relaja la restricción sin decirlo. Para utilizar este cálculo en una propuesta real necesitarías pruebas sobre las puntuaciones estimadas y un significado defendible para ese mínimo.
+
+## Cambia una condición y decide de nuevo
+
+Como comprobación independiente, cambia únicamente la puntuación de A de 5 a 4. Las demás puntuaciones, los enlaces, el inicio en S, los tres turnos, el mínimo de 5 y el objetivo terminal permanecen iguales.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Ficha con la puntuación modificada">
+<table style={{ minWidth: "26rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Ficha con la puntuación modificada</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Estado</th><th scope="col" className="p-3 align-bottom font-semibold">S</th><th scope="col" className="p-3 align-bottom font-semibold">A</th><th scope="col" className="p-3 align-bottom font-semibold">B</th><th scope="col" className="p-3 align-bottom font-semibold">C</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">Puntos de rendimiento</th><td className="p-3 align-top">6</td><td className="p-3 align-top">4</td><td className="p-3 align-top">8</td><td className="p-3 align-top">9</td></tr>
+</tbody>
+</table>
+</div>
+
+<MCQ
+  client:visible
+  pretest={true}
+  question={"Utiliza la ficha modificada, inicio S, tres turnos y mínimo cinco durante todo el recorrido. ¿Qué resultado es factible y mejor?"}
+  options={[{"text":"Llegar a C con nueve; solo el final importa para la factibilidad."},{"text":"Llegar a B con ocho; parar antes de C evita el estado bajo."},{"text":"Permanecer en S con seis; toda salida visita primero A.","correct":true},{"text":"Permanecer en A con cuatro; el mínimo solo limita el inicio."}]}
+  explanation={"Toda salida de S llega a A, que ahora tiene cuatro e incumple el mínimo cinco. Permanecer en S sigue siendo factible y termina en seis. Las rutas hacia B o C pasan primero por el estado prohibido; una puntuación final alta no borra ese paso."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  pretestLabel={"Antes de leer — adivina"}
+  className={"not-prose"}
+/>
+
+<details>
+<summary>Comprueba la ruta modificada</summary>
+
+<figure className="not-prose my-6" data-finite-landscape="" data-floor={5}>
+<svg viewBox="0 0 380 250" role="img" aria-labelledby="transfer-map-es-title transfer-map-es-desc" className="mx-auto h-auto w-full max-w-2xl">
+<title id="transfer-map-es-title">Mapa de transferencia con A por debajo del mínimo</title>
+<desc id="transfer-map-es-desc">S tiene seis puntos, A cuatro, B ocho y C nueve. Se mantienen los enlaces S con A, A con B y B con C. A está por debajo de los cinco puntos exigidos.</desc>
+<line x1="24" y1={123} x2="356" y2={123} stroke="var(--color-ink-500)" stroke-width="2" stroke-dasharray="5 4" data-minimum-line="" />
+<g stroke="var(--color-brand-600)" stroke-width="3" fill="none"><line x1={50} y1={106} x2={143.33333333333331} y2={140} data-edge="S-A" /><line x1={143.33333333333331} y1={140} x2={236.66666666666666} y2={72} data-edge="A-B" /><line x1={236.66666666666666} y1={72} x2={330} y2={55} data-edge="B-C" /></g>
+<g data-state="S" data-score={6}><circle cx={50} cy={106} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={50} y={112} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">S</text><text x={50} y={81} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">6</text></g>
+<g data-state="A" data-score={4}><circle cx={143.33333333333331} cy={140} r="15" fill="var(--color-surface)" stroke="var(--color-danger)" stroke-width="3" /><text x={143.33333333333331} y={146} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">A</text><text x={143.33333333333331} y={115} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">4</text></g>
+<g data-state="B" data-score={8}><circle cx={236.66666666666666} cy={72} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={236.66666666666666} y={78} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">B</text><text x={236.66666666666666} y={47} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">8</text></g>
+<g data-state="C" data-score={9}><circle cx={330} cy={55} r="15" fill="var(--color-surface)" stroke="var(--color-brand-700)" stroke-width="3" /><text x={330} y={61} text-anchor="middle" font-size="18" font-weight="700" fill="var(--color-ink-900)">C</text><text x={330} y={30} text-anchor="middle" font-size="18" fill="var(--color-ink-800)">9</text></g>
+</svg>
+<figcaption className="text-sm text-ink-700">La línea discontinua marca el mínimo cinco. Los nodos identificados representan estados; cada enlace permite un cambio a un vecino.</figcaption>
+</figure>
+
+La tentadora S→A→B→C aún termina en 9, pero su secuencia de puntuaciones es ahora $6\rightarrow4\rightarrow8\rightarrow9$. Su mínimo es 4, inferior a los 5 exigidos. Cualquier recorrido que salga de S debe visitar primero A; no hay un enlace que lo evite. Por tanto, los otros doce recorridos del catálogo de tres turnos incumplen el mínimo y el único factible es S→S→S→S, que termina en 6.
+
+<div className="not-prose my-6 max-w-full overflow-x-auto focus-visible:outline-2 focus-visible:outline-brand-600" role="region" tabIndex={0} aria-label="Un destino tentador frente a un recorrido completo factible">
+<table style={{ minWidth: "42rem", display: "table", overflow: "visible", margin: 0 }} className="w-full text-left text-sm text-ink-800">
+<caption className="mb-2 text-left text-sm text-ink-600">Un destino tentador frente a un recorrido completo factible</caption>
+<thead><tr><th scope="col" className="p-3 align-bottom font-semibold">Recorrido</th><th scope="col" className="p-3 align-bottom font-semibold">Mínimo visitado</th><th scope="col" className="p-3 align-bottom font-semibold">Final</th><th scope="col" className="p-3 align-bottom font-semibold">¿Cumple mínimo cinco en todo momento?</th></tr></thead>
+<tbody>
+<tr><th scope="row" className="p-3 align-top">S → A → B → C</th><td className="p-3 align-top">4</td><td className="p-3 align-top">9</td><td className="p-3 align-top">No</td></tr>
+<tr><th scope="row" className="p-3 align-top">S → S → S → S</th><td className="p-3 align-top">6</td><td className="p-3 align-top">6</td><td className="p-3 align-top">Sí</td></tr>
+</tbody>
+</table>
+</div>
+
+Los recuentos de las cuencas de la regla estricta sin restricciones siguen siendo uno y tres. Desde A, B continúa siendo el mejor vecino; desde S, A continúa siendo peor. Esos recuentos sin cambios no resuelven este problema distinto, sujeto a restricciones. A era un inicio legal del catálogo de recorridos sin restricciones; ahora no es un estado legal de una ruta de planificación con mínimo cinco.
+
+</details>
+
+<FillBlank
+  client:visible
+  question={"Recuerda qué parte del modelo cambió en la comprobación independiente."}
+  text={"Solo cambió {{la puntuación de A|el grafo de vecinos|el número de turnos}}. La ruta tentadora incumple {{el mínimo intermedio|la clasificación terminal|la ubicación inicial}}. Un destino alto {{no repara|repara automáticamente|elimina la necesidad de comprobar}} ese incumplimiento."}
+  explanation={"A cayó a cuatro mientras el mínimo cinco se mantuvo. Toda salida de S visita primero A. El plan factible de permanecer termina en seis; un destino superior inaccesible no anula la restricción."}
+  instructions={"Elige una opción en cada hueco y comprueba."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  explanationLabel={"Explicación"}
+  correctResultLabel={"Todo correcto"}
+  partialResultWord={"bien"}
+  className={"not-prose"}
+/>
+
+## Utiliza la auditoría dentro de sus límites
+
+El mapa completo hizo posible esta demostración. En un problema mayor, una búsqueda local detenida no revela todos los estados sin visitar, y un boceto atractivo no es un catálogo completo. Las puntuaciones inciertas, los vecinos cambiantes, las pérdidas de preparación o las recompensas acumuladas exigen revisar el modelo. No puedes incluirlas reinterpretando sin más una puntuación como beneficio, probabilidad o éxito reproductivo biológico.
+
+Explorar alternativas desconocidas también es una tarea distinta de planificar sobre este mapa conocido por completo. Aquí no hay información que adquirir ni un teorema que exija una cuota positiva de exploración. Con el mínimo más estricto, permanecer es óptimo para el objetivo y el horizonte declarados. Si falta información, investigar puede tener valor, pero eso exige especificar qué se puede aprender y cuánto cuesta hacerlo.
+
+Las [notas de Berkeley sobre búsqueda local](https://inst.eecs.berkeley.edu/~cs188/textbook/csp/local-search.html) distinguen la escalada de colinas de un método que puede aceptar movimientos peores. El [capítulo de búsqueda local de Poole y Mackworth](https://www.cs.ubc.ca/~poole/aibook/3e/html/ArtInt3e.Ch4.S6.html) define la optimalidad respecto a los sucesores posibles y distingue variantes de búsqueda. La regla estricta y los recuentos finitos de esta lección se estipulan y se deducen aquí; no son resultados de rendimiento medidos en esas fuentes.
+
+<MCQ
+  client:visible
+  question={"Un informe real de rediseño aporta una puntuación final prometedora, pero omite los estados intermedios. ¿Qué permitiría auditar su propuesta de empeorar primero?"}
+  options={[{"text":"Una puntuación final prometida mayor, con la misma ruta omitida."},{"text":"Una ruta, pruebas del rendimiento intermedio, movimientos permitidos y plazo.","correct":true},{"text":"Una afirmación de que todo cambio exitoso debe comenzar con una pérdida."},{"text":"Un recuento de cuencas usado como probabilidad sin ley de inicio."}]}
+  explanation={"Una ruta completa y pruebas sobre sus estados intermedios permiten comprobar las restricciones y el tiempo frente al objetivo. La demostración del modelo finito no establece esos datos para un rediseño real. Un destino superior, un lema o una probabilidad sin especificar no aportan la ruta que falta."}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  className={"not-prose"}
+/>
+
+<MindMap
+  client:visible
+  title={"La auditoría finita de una búsqueda"}
+  eyebrow={""}
+  outlineLabel={"Esquema de texto"}
+  root={{"label":"Auditar una propuesta de búsqueda","children":[{"label":"Especificar","children":[{"label":"Estados, puntuaciones y vecinos permitidos"},{"label":"Información que utiliza la regla"}]},{"label":"Seguir el recorrido","children":[{"label":"Mejora estricta y parada local"},{"label":"Mapa completo para una afirmación global"}]},{"label":"Comparar planes","children":[{"label":"Horizonte de decisión y permanencias"},{"label":"Mínimo en cada estado visitado"},{"label":"Solo puntuación terminal"}]},{"label":"Transferir","children":[{"label":"Cambiar una condición y volver a comprobar"},{"label":"Una probabilidad exige una ley de inicio, además del recuento"}]}]}}
+/>
+
+La última ficha de práctica añade un nuevo enlace permitido, S–C, a las puntuaciones principales. Mantiene el inicio en S, mínimo 5 y un turno de decisión. Utiliza ese vecindario modificado en la última pregunta del Quiz; las demás se refieren a sus fichas indicadas.
+
+| Ficha de práctica | Inicio | Turnos | Mínimo | Enlace permitido adicional |
+| --- | --- | --- | --- | --- |
+| Puntuaciones principales S=6, A=5, B=8, C=9 | S | 1 | 5 | S–C |
+
+<Quiz
+  client:visible
+  title={"Comprueba la regla, la ruta y la restricción"}
+  questions={[{"question":"En el mapa principal completo, ¿cómo debe clasificarse C?","options":[{"text":"Solo global, porque los puntos globales no pueden ser locales."},{"text":"Local y global, porque ninguna puntuación declarada lo supera.","correct":true},{"text":"Solo local, porque un grafo impide las comparaciones globales."},{"text":"Ninguna de las dos, porque el estado inicial era S."}],"explanation":"C tiene nueve, la mayor de las cuatro puntuaciones conocidas, y su único vecino B tiene ocho. Cumple ambas definiciones."},{"question":"Con el mapa principal, un turno y mínimo cinco, ¿qué puntuación final es mejor?","options":[{"text":"Cinco, pasando a A para preparar un futuro fuera del plazo."},{"text":"Ocho, utilizando dos enlaces en un turno de decisión."},{"text":"Nueve, sustituyendo la vecindad por un salto global."},{"text":"Seis, permaneciendo en S dentro del horizonte declarado.","correct":true}],"explanation":"Un turno permite S–S o S–A, que terminan en seis o cinco. Las oportunidades posteriores no cuentan en el objetivo declarado de un único turno."},{"question":"La ruta principal de tres turnos visita seis, cinco, ocho y nueve puntos. ¿Qué magnitud la ordena bajo el objetivo terminal?","options":[{"text":"La última puntuación, nueve.","correct":true},{"text":"La menor puntuación, cinco."},{"text":"La suma, veintiocho."},{"text":"El número de estados, cuatro."}],"explanation":"La puntuación terminal ordena los recorridos factibles. El mínimo comprueba la factibilidad; sumar exigiría un objetivo de recompensa acumulada que no se dio."},{"question":"Selecciona todas las conclusiones respaldadas por el modelo declarado.","allowMultiple":true,"options":[{"text":"Permanecer utiliza un turno sin cambiar el estado actual.","correct":true},{"text":"Todo estado localmente óptimo debe puntuar menos que el global."},{"text":"Un estado de puntuación globalmente máxima también es localmente óptimo.","correct":true},{"text":"Contar inicios de cuencas aporta por sí solo una ley de probabilidad."}],"explanation":"Permanecer es una acción explícita y un máximo global no tiene ningún vecino mejor. Los óptimos locales pueden ser globales; los recuentos deterministas no eligen una ley de inicio."},{"question":"Solo A cambia a cuatro, mientras se mantienen inicio S, tres turnos y mínimo cinco. ¿Por qué el destino de nueve puntos no es un plan factible?","options":[{"text":"La puntuación global debe caer cuando cae cualquier otra."},{"text":"La regla estricta se ha vuelto aleatoria tras el cambio."},{"text":"Toda salida de S visita primero A por debajo del mínimo.","correct":true},{"text":"Permanecer está prohibido cuando existe un vecino peor."}],"explanation":"Los enlaces no cambiaron. La primera salida de S debe visitar A con cuatro e incumple mínimo cinco. C puede seguir teniendo nueve y ser inaccesible bajo la restricción."},{"question":"Utiliza la última ficha con el enlace adicional S–C y un turno. ¿Cuál es ahora la mejor puntuación final?","options":[{"text":"Seis, porque cambiar un enlace no cambia lo alcanzable."},{"text":"Cinco, porque un enlace nuevo obliga a pasar por A."},{"text":"Ocho, porque B debe preceder a C en cualquier grafo."},{"text":"Nueve, porque C es ahora directamente alcanzable desde S.","correct":true}],"explanation":"El nuevo enlace permite S–C en un turno. C tiene nueve y cumple mínimo cinco. El límite anterior de un turno utilizaba el viejo vecindario; no sobrevive a un grafo modificado."}]}
+  checkLabel={"Comprobar"}
+  retryLabel={"Reintentar"}
+  correctLabel={"Correcto"}
+  incorrectLabel={"No exactamente"}
+  correctAnswerLabel={"Respuesta correcta"}
+  explanationLabel={"Explicación"}
+  questionLabel={"Pregunta"}
+  ofLabel={"de"}
+  correctCountLabel={"bien"}
+  completeLabel={"Completado"}
+  completeTitleLabel={"Cuestionario completado"}
+  perfectMessage={"Has acertado todas las preguntas."}
+  goodMessage={"Repasa las explicaciones de las respuestas que has fallado."}
+  keepPracticingMessage={"Compara los recorridos y vuelve a comprobar las reglas."}
+  gateLabel={"Comprueba tu respuesta para continuar."}
+  nextLabel={"Siguiente"}
+  seeResultsLabel={"Ver resultados"}
+  backLabel={"Atrás"}
+  scoreLabel={"Has acertado"}
+  restartLabel={"Reiniciar"}
+  className={"not-prose"}
+/>
+
+Continúa con el [examen final](/es/fitness-landscapes/final-exam), donde la auditoría finita se combina con el material anterior. Cada respuesta se bloquea al enviarla y la puntuación aparece al final.
