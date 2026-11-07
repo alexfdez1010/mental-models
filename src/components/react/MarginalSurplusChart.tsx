@@ -7,7 +7,7 @@ export interface MarginalSurplusScenario {
   externalPerUnit: number;
 }
 
-export interface MarginalSurplusLabels {
+interface MarginalSurplusCommonLabels {
   scenario: string;
   quantity: string;
   marginalTitle: string;
@@ -16,10 +16,8 @@ export interface MarginalSurplusLabels {
   quantityUnit: string;
   benefit: string;
   privateCost: string;
-  socialCost: string;
   totalBenefit: string;
   totalResources: string;
-  totalHarm: string;
   privateCombined: string;
   socialNet: string;
   loss: string;
@@ -32,7 +30,18 @@ export interface MarginalSurplusLabels {
   resultTemplate: string;
 }
 
-export interface MarginalSurplusChartProps {
+/** Existing cost labels remain available to unchanged consumers. */
+export interface MarginalSurplusLabels extends MarginalSurplusCommonLabels {
+  socialCost: string;
+  totalHarm: string;
+}
+
+export interface MarginalSurplusBenefitLabels extends MarginalSurplusCommonLabels {
+  socialBenefit: string;
+  totalExternalBenefit: string;
+}
+
+interface MarginalSurplusCommonProps {
   title: string;
   instructions: string;
   locale: 'en' | 'es';
@@ -42,9 +51,14 @@ export interface MarginalSurplusChartProps {
   marginalPrivateCosts: number[];
   scenarios: MarginalSurplusScenario[];
   initialQuantity: number;
-  labels: MarginalSurplusLabels;
   className?: string;
 }
+
+/** Omitted externalEffect preserves the original cost model; benefit adds outside benefits. */
+export type MarginalSurplusChartProps = MarginalSurplusCommonProps & (
+  | { externalEffect?: 'cost'; labels: MarginalSurplusLabels }
+  | { externalEffect: 'benefit'; labels: MarginalSurplusBenefitLabels }
+);
 
 const labelKeys = ['scenario', 'quantity', 'marginalTitle', 'cumulativeTitle', 'marginalUnit', 'quantityUnit', 'benefit', 'privateCost', 'socialCost', 'totalBenefit', 'totalResources', 'totalHarm', 'privateCombined', 'socialNet', 'loss', 'privateMaximizers', 'socialMaximizers', 'fixedScale', 'tableCaption', 'notApplicable', 'resultTemplate'] as const;
 const tokens = ['quantity', 'private', 'social', 'loss', 'privateMaxima', 'socialMaxima'] as const;
@@ -88,7 +102,12 @@ export function auditMarginalSurplusChart(props: MarginalSurplusChartProps) {
   const n = props.marginalBenefits.length;
   if (!own(props, 'initialQuantity') || !Number.isInteger(props.initialQuantity) || props.initialQuantity < 0 || props.initialQuantity > n) throw new Error('MarginalSurplusChart: invalid initialQuantity.');
   if (!own(props, 'labels')) throw new Error('MarginalSurplusChart: labels are required.');
-  for (const key of labelKeys) text(props.labels, key, 'labels');
+  if (props.externalEffect !== undefined && (!own(props, 'externalEffect') || (props.externalEffect !== 'cost' && props.externalEffect !== 'benefit'))) throw new Error('MarginalSurplusChart: externalEffect must be cost or benefit.');
+  const benefitMode = props.externalEffect === 'benefit';
+  for (const key of labelKeys) {
+    const activeKey = benefitMode && key === 'socialCost' ? 'socialBenefit' : benefitMode && key === 'totalHarm' ? 'totalExternalBenefit' : key;
+    text(props.labels, activeKey, 'labels');
+  }
   let remainder = props.labels.resultTemplate;
   for (const token of tokens) {
     const placeholder = `{${token}}`;
@@ -110,13 +129,17 @@ export function auditMarginalSurplusChart(props: MarginalSurplusChartProps) {
   const privateCombined = benefits.map((value, q) => value - resources[q]!);
   const privateMaxima = maxima(privateCombined);
   const cases = props.scenarios.map(scenario => {
-    const harm = benefits.map((_, q) => scenario.externalPerUnit === 0 ? 0 : scenario.externalPerUnit * q);
-    const socialNet = privateCombined.map((value, q) => value - harm[q]!);
+    const externalTotals = benefits.map((_, q) => scenario.externalPerUnit === 0 ? 0 : scenario.externalPerUnit * q);
+    const harm = benefitMode ? benefits.map(() => 0) : externalTotals;
+    const externalBenefit = benefitMode ? externalTotals : benefits.map(() => 0);
+    const socialNet = privateCombined.map((value, q) => benefitMode ? value + externalBenefit[q]! : value - harm[q]!);
     const socialMaxima = maxima(socialNet), best = Math.max(...socialNet);
-    return { harm, socialNet, socialMaxima, loss: socialNet.map(value => best - value) };
+    return { harm, externalBenefit, externalTotals, socialNet, socialMaxima, loss: socialNet.map(value => best - value) };
   });
   // Conservative bounds: all sums stay within ±16000; welfare differences within 24000.
-  const marginalScale = Math.max(1, ...props.marginalBenefits, ...props.scenarios.flatMap(s => props.marginalPrivateCosts.map(cost => cost + s.externalPerUnit)));
+  const marginalScale = benefitMode
+    ? Math.max(1, ...props.marginalPrivateCosts, ...props.scenarios.flatMap(s => props.marginalBenefits.map(value => value + s.externalPerUnit)))
+    : Math.max(1, ...props.marginalBenefits, ...props.scenarios.flatMap(s => props.marginalPrivateCosts.map(cost => cost + s.externalPerUnit)));
   const cumulativeMin = Math.min(0, ...privateCombined, ...cases.flatMap(c => c.socialNet));
   const rawMax = Math.max(0, ...privateCombined, ...cases.flatMap(c => c.socialNet));
   const cumulativeMax = rawMax === cumulativeMin ? rawMax + 1 : rawMax;
@@ -143,10 +166,13 @@ export function MarginalSurplusChart(props: MarginalSurplusChartProps) {
   const marginalY = (value: number) => bottom - value / audit.marginalScale * (bottom - top);
   const cumulativeY = (value: number) => bottom - (value - audit.cumulativeMin) / (audit.cumulativeMax - audit.cumulativeMin) * (bottom - top);
   const zeroY = cumulativeY(0), group = plotWidth / n, totalGroup = plotWidth / (n + 1);
+  const socialMarginalLabel = props.externalEffect === 'benefit' ? props.labels.socialBenefit : props.labels.socialCost;
+  const totalExternalLabel = props.externalEffect === 'benefit' ? props.labels.totalExternalBenefit : props.labels.totalHarm;
+  const socialMarginalValues = (props.externalEffect === 'benefit' ? props.marginalBenefits : props.marginalPrivateCosts).map(value => value + scenario.externalPerUnit);
   const marginalSeries = [
     { label: labels.benefit, values: props.marginalBenefits, color: 'fill-ink-500', swatch: 'bg-ink-500' },
     { label: labels.privateCost, values: props.marginalPrivateCosts, color: 'fill-ink-900', swatch: 'bg-ink-900' },
-    { label: labels.socialCost, values: props.marginalPrivateCosts.map(value => value + scenario.externalPerUnit), color: 'fill-brand-700', swatch: 'bg-brand-700' },
+    { label: socialMarginalLabel, values: socialMarginalValues, color: 'fill-brand-700', swatch: 'bg-brand-700' },
   ];
   const cumulativeSeries = [
     { label: labels.privateCombined, values: audit.privateCombined, color: 'fill-ink-500', swatch: 'bg-ink-500' },
@@ -154,7 +180,7 @@ export function MarginalSurplusChart(props: MarginalSurplusChartProps) {
   ];
   const scrollClass = 'mt-3 max-w-full overflow-x-auto rounded-card border border-ink-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700';
   const selectClass = 'mt-2 min-h-11 w-full rounded-card border border-ink-300 bg-surface px-3 py-2 text-sm text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700';
-  const headers = [labels.quantity, labels.benefit, labels.privateCost, labels.socialCost, labels.totalBenefit, labels.totalResources, labels.totalHarm, labels.privateCombined, labels.socialNet, labels.loss];
+  const headers = [labels.quantity, labels.benefit, labels.privateCost, socialMarginalLabel, labels.totalBenefit, labels.totalResources, totalExternalLabel, labels.privateCombined, labels.socialNet, labels.loss];
   return (
     <figure className={cx('not-prose my-8 min-w-0', className)} aria-labelledby={`${id}-title`}>
       <figcaption id={`${id}-title`} className="font-display text-lg font-semibold text-ink-900">{title}</figcaption>
@@ -221,7 +247,7 @@ export function MarginalSurplusChart(props: MarginalSurplusChartProps) {
           <caption className="px-3 py-3 text-left text-sm text-ink-700">{labels.tableCaption}</caption>
           <thead><tr className="bg-surface-sunken">{headers.map((label, i) => <th key={i} scope="col" className="border-b border-ink-300 px-3 py-3 font-semibold text-ink-800">{label}</th>)}</tr></thead>
           <tbody>{audit.benefits.map((_, row) => {
-            const values = [row === 0 ? null : props.marginalBenefits[row - 1]!, row === 0 ? null : props.marginalPrivateCosts[row - 1]!, row === 0 ? null : props.marginalPrivateCosts[row - 1]! + scenario.externalPerUnit, audit.benefits[row]!, audit.resources[row]!, current.harm[row]!, audit.privateCombined[row]!, current.socialNet[row]!, current.loss[row]!];
+            const values = [row === 0 ? null : props.marginalBenefits[row - 1]!, row === 0 ? null : props.marginalPrivateCosts[row - 1]!, row === 0 ? null : socialMarginalValues[row - 1]!, audit.benefits[row]!, audit.resources[row]!, current.externalTotals[row]!, audit.privateCombined[row]!, current.socialNet[row]!, current.loss[row]!];
             return <tr key={row} className={cx('border-b border-ink-200 last:border-b-0', row === q && 'bg-accent-300/20')} data-surplus-row={row}>
               <th scope="row" className="px-3 py-3 font-mono font-semibold tabular-nums text-ink-900">{number(row)}</th>
               {values.map((value, i) => <td key={i} className="whitespace-nowrap px-3 py-3 font-mono tabular-nums text-ink-800" data-surplus-column={i}>{value === null ? labels.notApplicable : money(value)}</td>)}

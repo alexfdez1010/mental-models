@@ -128,3 +128,97 @@ describe('MarginalSurplusChart', () => {
     for (const change of invalid) { const p = fixture(); change(p); expect(() => MarginalSurplusChart(p)).toThrow('MarginalSurplusChart:'); }
   });
 });
+
+function benefitFixture(): MarginalSurplusChartProps {
+  const cost = fixture() as Extract<MarginalSurplusChartProps, { externalEffect?: 'cost' }>;
+  const { socialCost: _socialCost, totalHarm: _totalHarm, ...common } = cost.labels;
+  return { ...cost, externalEffect: 'benefit',
+    marginalBenefits: [90, 80, 70, 50, 40], marginalPrivateCosts: [40, 50, 60, 70, 80], initialQuantity: 3,
+    scenarios: [{ id: 'thirty', label: 'Benefit thirty', externalPerUnit: 30 }, { id: 'twenty', label: 'Benefit twenty', externalPerUnit: 20 }, { id: 'fifty', label: 'Benefit fifty', externalPerUnit: 50 }],
+    labels: { ...common, socialBenefit: 'Marginal social benefit', totalExternalBenefit: 'Outside benefit' },
+  };
+}
+
+describe('MarginalSurplusChart explicit benefit mode', () => {
+  test('adds outside benefit without relabelling it as harm, retaining global ties and capacity', () => {
+    const a = auditMarginalSurplusChart(benefitFixture());
+    expect(a.benefits).toEqual([0, 90, 170, 240, 290, 330]);
+    expect(a.resources).toEqual([0, 40, 90, 150, 220, 300]);
+    expect(a.privateCombined).toEqual([0, 50, 80, 90, 70, 30]);
+    expect(a.privateMaxima).toEqual([3]);
+    expect(a.cases[0]!.externalBenefit).toEqual([0, 30, 60, 90, 120, 150]);
+    expect(a.cases[0]!.harm).toEqual([0, 0, 0, 0, 0, 0]);
+    expect(a.cases[0]!.socialNet).toEqual([0, 80, 140, 180, 190, 180]);
+    expect(a.cases[0]!.socialMaxima).toEqual([4]);
+    expect(a.cases[0]!.loss[3]).toBe(10);
+    expect(a.cases[1]!.socialNet).toEqual([0, 70, 120, 150, 150, 130]);
+    expect(a.cases[1]!.socialMaxima).toEqual([3, 4]);
+    expect(a.cases[1]!.loss[3]).toBe(0);
+    expect(a.cases[2]!.socialMaxima).toEqual([5]);
+    expect(a.cases[2]!.loss[3]).toBe(40);
+    expect([a.marginalScale, a.cumulativeMin, a.cumulativeMax]).toEqual([140, 0, 280]);
+    const p = benefitFixture(); p.scenarios = [{ id: 'forty', label: 'Benefit forty', externalPerUnit: 40 }];
+    expect(auditMarginalSurplusChart(p).cases[0]!.socialMaxima).toEqual([4, 5]);
+  });
+
+  test('transfer enumerates the full feasible catalogue and a fifteen-credit gap', () => {
+    const p = benefitFixture(); p.marginalBenefits = [100, 70, 45, 20]; p.marginalPrivateCosts = [20, 40, 60, 90];
+    p.scenarios = [{ id: 'new', label: 'New catalogue', externalPerUnit: 30 }]; p.initialQuantity = 2;
+    const a = auditMarginalSurplusChart(p);
+    expect(a.privateMaxima).toEqual([2]);
+    expect(a.cases[0]!.socialNet).toEqual([0, 110, 170, 185, 145]);
+    expect(a.cases[0]!.socialMaxima).toEqual([3]);
+    expect(a.cases[0]!.loss[2]).toBe(15);
+    expect([a.marginalScale, a.cumulativeMin, a.cumulativeMax]).toEqual([130, 0, 185]);
+  });
+
+  test('a separate pairwise oracle checks nonmonotone benefit catalogues', () => {
+    for (let seed = 0; seed < 32; seed++) {
+      const p = benefitFixture(); p.marginalBenefits = [seed % 7, seed * 3 % 11, seed * 5 % 13];
+      p.marginalPrivateCosts = [seed * 7 % 9, seed * 2 % 8, seed % 5]; p.initialQuantity = 0;
+      const a = auditMarginalSurplusChart(p);
+      for (let si = 0; si < p.scenarios.length; si++) {
+        const scores: number[] = [];
+        for (let q = 0; q <= 3; q++) { let score = 0; for (let i = 0; i < q; i++) score += p.marginalBenefits[i]! - p.marginalPrivateCosts[i]! + p.scenarios[si]!.externalPerUnit; scores.push(score); }
+        const winners = scores.flatMap((score, q) => scores.every(other => score >= other) ? [q] : []);
+        expect(a.cases[si]!.socialNet).toEqual(scores); expect(a.cases[si]!.socialMaxima).toEqual(winners);
+        for (let q = 0; q <= 3; q++) expect(a.cases[si]!.loss[q]).toBe(Math.max(...scores.map(other => other - scores[q]!)));
+      }
+    }
+  });
+
+  test('bounded integers, negative totals, zero and every maximum remain exact', () => {
+    const p = benefitFixture(); p.marginalBenefits = Array(8).fill(1000); p.marginalPrivateCosts = Array(8).fill(0); p.initialQuantity = 8;
+    p.scenarios = [{ id: 'max', label: 'Maximum benefit', externalPerUnit: 1000 }];
+    let a = auditMarginalSurplusChart(p); expect(a.cases[0]!.socialNet[8]).toBe(16000); expect(a.cases[0]!.loss[0]).toBe(16000); expect(a.marginalScale).toBe(2000);
+    p.marginalBenefits = Array(8).fill(0); p.marginalPrivateCosts = Array(8).fill(1000); p.scenarios[0]!.externalPerUnit = 0;
+    a = auditMarginalSurplusChart(p); expect(a.cases[0]!.socialNet[8]).toBe(-8000); expect(a.cases[0]!.loss[8]).toBe(8000); expect(a.marginalScale).toBe(1000);
+    p.scenarios[0]!.externalPerUnit = 1000; a = auditMarginalSurplusChart(p); expect(a.cases[0]!.socialMaxima).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    p.marginalPrivateCosts = Array(8).fill(0); p.scenarios[0]!.externalPerUnit = -0; a = auditMarginalSurplusChart(p);
+    expect(a.cases[0]!.socialNet.every(v => v === 0 && !Object.is(v, -0))).toBe(true); expect([a.cumulativeMin, a.cumulativeMax]).toEqual([0, 1]);
+  });
+
+  test('SSR uses social BENEFIT in the third series and one localized result, without harm labels', () => {
+    const p = benefitFixture(); let h = renderToStaticMarkup(createElement(MarginalSurplusChart, p));
+    expect(h).toContain('data-marginal-unit="4" data-marginal-series="2" data-amount="80"');
+    expect(h).toContain('Quantity 3: private 90 cr; complete 180 cr; loss 10 cr. Private maxima 3; complete maxima 4.');
+    expect(h).not.toContain('Marginal social cost'); expect(h).not.toContain('>Harm<'); expect((h.match(/role="status"/g) ?? []).length).toBe(1);
+    p.locale = 'es'; p.labels.resultTemplate = 'Cantidad {quantity}: privada {private}; completa {social}; pérdida {loss}. Máximos privados {privateMaxima}; completos {socialMaxima}.';
+    h = renderToStaticMarkup(createElement(MarginalSurplusChart, p)); expect(h).toContain('Cantidad 3: privada 90 cr; completa 180 cr; pérdida 10 cr. Máximos privados 3; completos 4.'); expect(h).not.toContain('cr cr');
+    p.marginalBenefits = Array(8).fill(1000); p.marginalPrivateCosts = Array(8).fill(0); p.initialQuantity = 8; p.scenarios = [{ id: 'max', label: 'Máximo', externalPerUnit: 1000 }];
+    expect(renderToStaticMarkup(createElement(MarginalSurplusChart, p))).toContain('16.000 cr'); p.locale = 'en'; expect(renderToStaticMarkup(createElement(MarginalSurplusChart, p))).toContain('16,000 cr');
+  });
+
+  test('the active variant and all hidden cases reject invalid data before hooks', () => {
+    const changes: Array<(p: MarginalSurplusChartProps) => void> = [
+      p => { Object.assign(p, { externalEffect: 'other' }); },
+      p => { Object.assign(p.labels, { socialBenefit: ' ' }); },
+      p => { Object.assign(p.labels, { totalExternalBenefit: ' Benefit' }); },
+      p => { p.scenarios[2]!.externalPerUnit = -1; }, p => { p.scenarios[2]!.externalPerUnit = Infinity; },
+      p => { p.marginalPrivateCosts[0] = -1; }, p => { delete p.scenarios[1]; },
+      p => { Object.setPrototypeOf(p, { externalEffect: 'benefit' }); delete (p as { externalEffect?: string }).externalEffect; },
+    ];
+    for (const change of changes) { const p = benefitFixture(); change(p); expect(() => MarginalSurplusChart(p)).toThrow('MarginalSurplusChart:'); }
+    const p = fixture(); Object.assign(p, { externalEffect: 'benefit' }); expect(() => MarginalSurplusChart(p)).toThrow('socialBenefit');
+  });
+});
