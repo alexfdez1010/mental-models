@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { cx } from '@/components/react/cx';
 import {
   exportProgress,
@@ -11,7 +11,11 @@ import {
 
 /** Props for {@link ProgressTransfer}. All user-facing strings come from the caller. */
 export interface ProgressTransferProps {
-  /** Card heading. */
+  /** Button that opens the dialog. */
+  triggerLabel?: string;
+  /** Accessible name of the close button. */
+  closeLabel?: string;
+  /** Dialog heading. */
   title?: string;
   /** Sub-text under the heading explaining what the buttons do. */
   description?: string;
@@ -55,6 +59,8 @@ type Status =
  * `aria-live`, and reduced motion is respected.
  */
 export function ProgressTransfer({
+  triggerLabel = 'Import or export progress',
+  closeLabel = 'Close',
   title = 'Your progress',
   description = 'Moving to another device? Download your progress as a file, then import it there.',
   exportLabel = 'Export progress',
@@ -69,6 +75,22 @@ export function ProgressTransfer({
   const [count, setCount] = useState<number | null>(null);
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const fileRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const dialogId = useId();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    dialog.showModal();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
 
   useEffect(() => {
     const sync = () => setCount(getFinishedLessons().size);
@@ -118,71 +140,103 @@ export function ProgressTransfer({
           : null;
 
   return (
-    <section
-      className={cx(
-        'brutal bg-surface p-5 sm:p-6',
-        className,
-      )}
-    >
-      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-display font-semibold text-ink-900">{title}</p>
-          <p className="mt-0.5 max-w-prose text-sm text-ink-500">{description}</p>
-          <p className="mt-1.5 h-5 text-sm font-medium text-brand-700" aria-live="polite">
+    <div className={className}>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-controls={dialogId}
+        onClick={() => {
+          setStatus({ kind: 'idle' });
+          setOpen(true);
+        }}
+        className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition-colors hover:bg-surface-sunken hover:text-ink-900"
+      >
+        <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M6 3v10m0 0-3-3m3 3 3-3M14 17V7m0 0-3 3m3-3 3 3" />
+        </svg>
+        {triggerLabel}
+      </button>
+
+      <dialog
+        ref={dialogRef}
+        id={dialogId}
+        aria-labelledby={`${dialogId}-title`}
+        aria-describedby={`${dialogId}-description`}
+        onClose={() => setOpen(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) dialogRef.current?.close();
+        }}
+        className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-card border-0 bg-surface p-0 text-ink-900 shadow-pop backdrop:bg-ink-900/40 backdrop:backdrop-blur-sm"
+      >
+        <div className="p-6 sm:p-8">
+          <div className="flex items-center justify-between gap-4">
+            <h2 id={`${dialogId}-title`} className="font-display text-2xl font-semibold tracking-tight">
+              {title}
+            </h2>
+            <button
+              type="button"
+              aria-label={closeLabel}
+              onClick={() => dialogRef.current?.close()}
+              className="-mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-pill text-ink-500 transition-colors hover:bg-surface-sunken hover:text-ink-900"
+            >
+              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" />
+              </svg>
+            </button>
+          </div>
+          <p id={`${dialogId}-description`} className="mt-3 text-sm leading-relaxed text-ink-600">
+            {description}
+          </p>
+          <p className="mt-5 min-h-5 text-sm font-medium text-ink-700" aria-live="polite">
             {count !== null && fill(countLabel, count)}
           </p>
-        </div>
 
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={handleExport}
-            className="brutal-btn inline-flex items-center gap-2 bg-brand-600 px-5 py-2.5 font-display text-sm text-white hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-          >
-            {/* Download arrow into tray. */}
-            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M10 3v9m0 0l-3.2-3.2M10 12l3.2-3.2M4 15.5h12" />
-            </svg>
-            {exportLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="brutal-btn inline-flex items-center gap-2 bg-surface px-5 py-2.5 font-display text-sm text-brand-700 hover:bg-brand-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-          >
-            {/* Upload arrow out of tray. */}
-            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M10 12V3m0 0L6.8 6.2M10 3l3.2 3.2M4 15.5h12" />
-            </svg>
-            {importLabel}
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/json,.json"
-            onChange={handleFile}
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden="true"
-          />
-        </div>
-      </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={handleExport}
+              className="brutal-btn min-h-11 bg-brand-700 px-4 py-3 text-sm text-white hover:bg-brand-800"
+            >
+              <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M10 3v9m0 0l-3.2-3.2M10 12l3.2-3.2M4 15.5h12" />
+              </svg>
+              {exportLabel}
+            </button>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="brutal-btn min-h-11 bg-surface-sunken px-4 py-3 text-sm text-ink-800 hover:bg-ink-200"
+            >
+              <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M10 12V3m0 0L6.8 6.2M10 3l3.2 3.2M4 15.5h12" />
+              </svg>
+              {importLabel}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleFile}
+              hidden
+            />
+          </div>
 
-      {statusText && (
-        <p
-          role="status"
-          aria-live="polite"
-          className={cx(
-            'mt-4 rounded-card px-4 py-2.5 text-sm font-medium',
-            status.kind === 'error'
-              ? 'bg-danger/10 text-danger'
-              : 'bg-brand-50 text-brand-700',
+          {statusText && (
+            <p
+              role="status"
+              className={cx(
+                'mt-5 rounded-card px-4 py-3 text-sm leading-relaxed',
+                status.kind === 'error'
+                  ? 'bg-danger/10 text-danger'
+                  : 'bg-brand-50 text-brand-700',
+              )}
+            >
+              {statusText}
+            </p>
           )}
-        >
-          {statusText}
-        </p>
-      )}
-    </section>
+        </div>
+      </dialog>
+    </div>
   );
 }
 
