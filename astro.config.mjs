@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
+import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import remarkMath from 'remark-math';
@@ -15,6 +16,7 @@ const SITE = process.env.PUBLIC_SITE_URL ?? 'https://mental-models.alejandrofern
 export default defineConfig({
   site: SITE,
   output: 'static',
+  compressHTML: true,
   // Render canonical URLs without trailing slashes; flatten output after rendering.
   trailingSlash: 'never',
   // HTTP redirects are generated into public/_redirects before the build.
@@ -30,11 +32,13 @@ export default defineConfig({
     },
   },
   // LaTeX math in MDX: `$inline$` and `$$block$$` are parsed by remark-math and
-  // rendered to HTML by rehype-katex. MDX inherits these via extendMarkdownConfig.
+  // rendered to HTML by rehype-katex. MDX uses the same unified processor.
   // KaTeX stylesheet is imported globally in src/styles/global.css.
   markdown: {
-    remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex],
+    processor: unified({
+      remarkPlugins: [remarkMath],
+      rehypePlugins: [rehypeKatex],
+    }),
   },
   integrations: [
     react(),

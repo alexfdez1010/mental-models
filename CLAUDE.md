@@ -91,7 +91,7 @@ subagents by default**, in a single message, rather than sequentially.
 
 ## Stack
 
-- **Astro 6** (static output, no hosting adapter) — fast, SEO-friendly rendering.
+- **Astro 7** (static output, no hosting adapter) — fast, SEO-friendly rendering.
 - **React 19** islands for all interactivity/animation (hydrated with `client:visible`).
 - **Tailwind CSS v4** (via `@tailwindcss/vite`) — design tokens in `src/styles/global.css`.
 - **MDX** content collections for lessons/topics.
